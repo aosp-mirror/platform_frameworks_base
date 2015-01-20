@@ -23,6 +23,7 @@
 #include "Rule.h"
 #include "RuleGenerator.h"
 #include "SplitDescription.h"
+#include "SplitSelector.h"
 
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
@@ -36,12 +37,13 @@ namespace split {
 static void usage() {
     fprintf(stderr,
             "split-select --help\n"
-            "split-select --target <config> --split <path/to/apk> [--split <path/to/apk> [...]]\n"
-            "split-select --generate --split <path/to/apk> [--split <path/to/apk> [...]]\n"
+            "split-select --target <config> --base <path/to/apk> [--split <path/to/apk> [...]]\n"
+            "split-select --generate --base <path/to/apk> [--split <path/to/apk> [...]]\n"
             "\n"
             "  --help                   Displays more information about this program.\n"
             "  --target <config>        Performs the Split APK selection on the given configuration.\n"
             "  --generate               Generates the logic for selecting the Split APK, in JSON format.\n"
+            "  --base <path/to/apk>     Specifies the base APK, from which all Split APKs must be based off.\n"
             "  --split <path/to/apk>    Includes a Split APK in the selection process.\n"
             "\n"
             "  Where <config> is an extended AAPT resource qualifier of the form\n"
@@ -61,92 +63,33 @@ static void help() {
             "  via JSON.\n");
 }
 
-class SplitSelector {
-public:
-    SplitSelector();
-    SplitSelector(const Vector<SplitDescription>& splits);
-
-    Vector<SplitDescription> getBestSplits(const SplitDescription& target) const;
-
-    template <typename RuleGenerator>
-    KeyedVector<SplitDescription, sp<Rule> > getRules() const;
-
-private:
-    Vector<SortedVector<SplitDescription> > mGroups;
-};
-
-SplitSelector::SplitSelector() {
-}
-
-SplitSelector::SplitSelector(const Vector<SplitDescription>& splits)
-    : mGroups(groupByMutualExclusivity(splits)) {
-}
-
-static void selectBestFromGroup(const SortedVector<SplitDescription>& splits,
-        const SplitDescription& target, Vector<SplitDescription>& splitsOut) {
-    SplitDescription bestSplit;
-    bool isSet = false;
-    const size_t splitCount = splits.size();
-    for (size_t j = 0; j < splitCount; j++) {
-        const SplitDescription& thisSplit = splits[j];
-        if (!thisSplit.match(target)) {
-            continue;
-        }
-
-        if (!isSet || thisSplit.isBetterThan(bestSplit, target)) {
-            isSet = true;
-            bestSplit = thisSplit;
-        }
-    }
-
-    if (isSet) {
-        splitsOut.add(bestSplit);
-    }
-}
-
-Vector<SplitDescription> SplitSelector::getBestSplits(const SplitDescription& target) const {
-    Vector<SplitDescription> bestSplits;
-    const size_t groupCount = mGroups.size();
-    for (size_t i = 0; i < groupCount; i++) {
-        selectBestFromGroup(mGroups[i], target, bestSplits);
-    }
-    return bestSplits;
-}
-
-template <typename RuleGenerator>
-KeyedVector<SplitDescription, sp<Rule> > SplitSelector::getRules() const {
-    KeyedVector<SplitDescription, sp<Rule> > rules;
-
-    const size_t groupCount = mGroups.size();
-    for (size_t i = 0; i < groupCount; i++) {
-        const SortedVector<SplitDescription>& splits = mGroups[i];
-        const size_t splitCount = splits.size();
-        for (size_t j = 0; j < splitCount; j++) {
-            sp<Rule> rule = Rule::simplify(RuleGenerator::generate(splits, j));
-            if (rule != NULL) {
-                rules.add(splits[j], rule);
-            }
-        }
-    }
-    return rules;
-}
-
 Vector<SplitDescription> select(const SplitDescription& target, const Vector<SplitDescription>& splits) {
     const SplitSelector selector(splits);
     return selector.getBestSplits(target);
 }
 
-void generate(const KeyedVector<String8, Vector<SplitDescription> >& splits) {
+void generate(const KeyedVector<String8, Vector<SplitDescription> >& splits, const String8& base) {
     Vector<SplitDescription> allSplits;
     const size_t apkSplitCount = splits.size();
     for (size_t i = 0; i < apkSplitCount; i++) {
         allSplits.appendVector(splits[i]);
     }
     const SplitSelector selector(allSplits);
-    KeyedVector<SplitDescription, sp<Rule> > rules(selector.getRules<RuleGenerator>());
+    KeyedVector<SplitDescription, sp<Rule> > rules(selector.getRules());
 
+    bool first = true;
     fprintf(stdout, "[\n");
     for (size_t i = 0; i < apkSplitCount; i++) {
+        if (splits.keyAt(i) == base) {
+            // Skip the base.
+            continue;
+        }
+
+        if (!first) {
+            fprintf(stdout, ",\n");
+        }
+        first = false;
+
         sp<Rule> masterRule = new Rule();
         masterRule->op = Rule::OR_SUBRULES;
         const Vector<SplitDescription>& splitDescriptions = splits[i];
@@ -155,12 +98,11 @@ void generate(const KeyedVector<String8, Vector<SplitDescription> >& splits) {
             masterRule->subrules.add(rules.valueFor(splitDescriptions[j]));
         }
         masterRule = Rule::simplify(masterRule);
-        fprintf(stdout, "  {\n    \"path\": \"%s\",\n    \"rules\": %s\n  }%s\n",
+        fprintf(stdout, "  {\n    \"path\": \"%s\",\n    \"rules\": %s\n  }",
                 splits.keyAt(i).string(),
-                masterRule->toJson(2).string(),
-                i < apkSplitCount - 1 ? "," : "");
+                masterRule->toJson(2).string());
     }
-    fprintf(stdout, "]\n");
+    fprintf(stdout, "\n]\n");
 }
 
 static void removeRuntimeQualifiers(ConfigDescription* outConfig) {
@@ -169,6 +111,95 @@ static void removeRuntimeQualifiers(ConfigDescription* outConfig) {
     outConfig->screenWidth = ResTable_config::SCREENWIDTH_ANY;
     outConfig->screenHeight = ResTable_config::SCREENHEIGHT_ANY;
     outConfig->uiMode &= ResTable_config::UI_MODE_NIGHT_ANY;
+}
+
+struct AppInfo {
+    int versionCode;
+    int minSdkVersion;
+    bool multiArch;
+};
+
+static bool getAppInfo(const String8& path, AppInfo& outInfo) {
+    memset(&outInfo, 0, sizeof(outInfo));
+
+    AssetManager assetManager;
+    int32_t cookie = 0;
+    if (!assetManager.addAssetPath(path, &cookie)) {
+        return false;
+    }
+
+    Asset* asset = assetManager.openNonAsset(cookie, "AndroidManifest.xml", Asset::ACCESS_BUFFER);
+    if (asset == NULL) {
+        return false;
+    }
+
+    ResXMLTree xml;
+    if (xml.setTo(asset->getBuffer(true), asset->getLength(), false) != NO_ERROR) {
+        delete asset;
+        return false;
+    }
+
+    const String16 kAndroidNamespace("http://schemas.android.com/apk/res/android");
+    const String16 kManifestTag("manifest");
+    const String16 kApplicationTag("application");
+    const String16 kUsesSdkTag("uses-sdk");
+    const String16 kVersionCodeAttr("versionCode");
+    const String16 kMultiArchAttr("multiArch");
+    const String16 kMinSdkVersionAttr("minSdkVersion");
+
+    ResXMLParser::event_code_t event;
+    while ((event = xml.next()) != ResXMLParser::BAD_DOCUMENT &&
+            event != ResXMLParser::END_DOCUMENT) {
+        if (event != ResXMLParser::START_TAG) {
+            continue;
+        }
+
+        size_t len;
+        const char16_t* name = xml.getElementName(&len);
+        String16 name16(name, len);
+        if (name16 == kManifestTag) {
+            ssize_t idx = xml.indexOfAttribute(
+                    kAndroidNamespace.string(), kAndroidNamespace.size(),
+                    kVersionCodeAttr.string(), kVersionCodeAttr.size());
+            if (idx >= 0) {
+                outInfo.versionCode = xml.getAttributeData(idx);
+            }
+
+        } else if (name16 == kApplicationTag) {
+            ssize_t idx = xml.indexOfAttribute(
+                    kAndroidNamespace.string(), kAndroidNamespace.size(),
+                    kMultiArchAttr.string(), kMultiArchAttr.size());
+            if (idx >= 0) {
+                outInfo.multiArch = xml.getAttributeData(idx) != 0;
+            }
+
+        } else if (name16 == kUsesSdkTag) {
+            ssize_t idx = xml.indexOfAttribute(
+                    kAndroidNamespace.string(), kAndroidNamespace.size(),
+                    kMinSdkVersionAttr.string(), kMinSdkVersionAttr.size());
+            if (idx >= 0) {
+                uint16_t type = xml.getAttributeDataType(idx);
+                if (type >= Res_value::TYPE_FIRST_INT && type <= Res_value::TYPE_LAST_INT) {
+                    outInfo.minSdkVersion = xml.getAttributeData(idx);
+                } else if (type == Res_value::TYPE_STRING) {
+                    String8 minSdk8(xml.getStrings().string8ObjectAt(idx));
+                    char* endPtr;
+                    int minSdk = strtol(minSdk8.string(), &endPtr, 10);
+                    if (endPtr != minSdk8.string() + minSdk8.size()) {
+                        fprintf(stderr, "warning: failed to parse android:minSdkVersion '%s'\n",
+                                minSdk8.string());
+                    } else {
+                        outInfo.minSdkVersion = minSdk;
+                    }
+                } else {
+                    fprintf(stderr, "warning: unrecognized value for android:minSdkVersion.\n");
+                }
+            }
+        }
+    }
+
+    delete asset;
+    return true;
 }
 
 static Vector<SplitDescription> extractSplitDescriptionsFromApk(const String8& path) {
@@ -182,7 +213,7 @@ static Vector<SplitDescription> extractSplitDescriptionsFromApk(const String8& p
     const ResTable& res = assetManager.getResources(false);
     if (res.getError() == NO_ERROR) {
         Vector<ResTable_config> configs;
-        res.getConfigurations(&configs);
+        res.getConfigurations(&configs, true);
         const size_t configCount = configs.size();
         for (size_t i = 0; i < configCount; i++) {
             splits.add();
@@ -214,13 +245,14 @@ static int main(int argc, char** argv) {
     bool generateFlag = false;
     String8 targetConfigStr;
     Vector<String8> splitApkPaths;
+    String8 baseApkPath;
     while (argc > 0) {
         const String8 arg(*argv);
         if (arg == "--target") {
             argc--;
             argv++;
             if (argc < 1) {
-                fprintf(stderr, "Missing parameter for --split.\n");
+                fprintf(stderr, "error: missing parameter for --target.\n");
                 usage();
                 return 1;
             }
@@ -229,18 +261,33 @@ static int main(int argc, char** argv) {
             argc--;
             argv++;
             if (argc < 1) {
-                fprintf(stderr, "Missing parameter for --split.\n");
+                fprintf(stderr, "error: missing parameter for --split.\n");
                 usage();
                 return 1;
             }
             splitApkPaths.add(String8(*argv));
+        } else if (arg == "--base") {
+            argc--;
+            argv++;
+            if (argc < 1) {
+                fprintf(stderr, "error: missing parameter for --base.\n");
+                usage();
+                return 1;
+            }
+
+            if (baseApkPath.size() > 0) {
+                fprintf(stderr, "error: multiple --base flags not allowed.\n");
+                usage();
+                return 1;
+            }
+            baseApkPath.setTo(*argv);
         } else if (arg == "--generate") {
             generateFlag = true;
         } else if (arg == "--help") {
             help();
             return 0;
         } else {
-            fprintf(stderr, "Unknown argument '%s'\n", arg.string());
+            fprintf(stderr, "error: unknown argument '%s'.\n", arg.string());
             usage();
             return 1;
         }
@@ -253,15 +300,23 @@ static int main(int argc, char** argv) {
         return 1;
     }
 
-    if (splitApkPaths.size() == 0) {
+    if (baseApkPath.size() == 0) {
+        fprintf(stderr, "error: missing --base argument.\n");
         usage();
+        return 1;
+    }
+
+    // Find out some details about the base APK.
+    AppInfo baseAppInfo;
+    if (!getAppInfo(baseApkPath, baseAppInfo)) {
+        fprintf(stderr, "error: unable to read base APK: '%s'.\n", baseApkPath.string());
         return 1;
     }
 
     SplitDescription targetSplit;
     if (!generateFlag) {
         if (!SplitDescription::parse(targetConfigStr, &targetSplit)) {
-            fprintf(stderr, "Invalid --target config: '%s'\n",
+            fprintf(stderr, "error: invalid --target config: '%s'.\n",
                     targetConfigStr.string());
             usage();
             return 1;
@@ -272,6 +327,8 @@ static int main(int argc, char** argv) {
         removeRuntimeQualifiers(&targetSplit.config);
     }
 
+    splitApkPaths.add(baseApkPath);
+
     KeyedVector<String8, Vector<SplitDescription> > apkPathSplitMap;
     KeyedVector<SplitDescription, String8> splitApkPathMap;
     Vector<SplitDescription> splitConfigs;
@@ -279,7 +336,7 @@ static int main(int argc, char** argv) {
     for (size_t i = 0; i < splitCount; i++) {
         Vector<SplitDescription> splits = extractSplitDescriptionsFromApk(splitApkPaths[i]);
         if (splits.isEmpty()) {
-            fprintf(stderr, "Invalid --split path: '%s'. No splits found.\n",
+            fprintf(stderr, "error: invalid --split path: '%s'. No splits found.\n",
                     splitApkPaths[i].string());
             usage();
             return 1;
@@ -302,10 +359,12 @@ static int main(int argc, char** argv) {
 
         const size_t matchingSplitApkPathCount = matchingSplitPaths.size();
         for (size_t i = 0; i < matchingSplitApkPathCount; i++) {
-            fprintf(stderr, "%s\n", matchingSplitPaths[i].string());
+            if (matchingSplitPaths[i] != baseApkPath) {
+                fprintf(stdout, "%s\n", matchingSplitPaths[i].string());
+            }
         }
     } else {
-        generate(apkPathSplitMap);
+        generate(apkPathSplitMap, baseApkPath);
     }
     return 0;
 }

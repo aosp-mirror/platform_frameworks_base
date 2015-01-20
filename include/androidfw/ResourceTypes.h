@@ -1779,7 +1779,7 @@ public:
     const DynamicRefTable* getDynamicRefTableForCookie(int32_t cookie) const;
 
     // Return the configurations (ResTable_config) that we know about
-    void getConfigurations(Vector<ResTable_config>* configs) const;
+    void getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap=false) const;
 
     void getLocales(Vector<String8>* locales) const;
 
