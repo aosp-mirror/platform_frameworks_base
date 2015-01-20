@@ -22,4 +22,6 @@ LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.keyguard
 
 include $(BUILD_PACKAGE)
 
-include $(call all-makefiles-under,$(LOCAL_PATH))
+ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
+    include $(call all-makefiles-under,$(LOCAL_PATH))
+endif
