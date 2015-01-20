@@ -17,13 +17,15 @@
 #ifndef ANDROID_GRAPHICS_CANVAS_H
 #define ANDROID_GRAPHICS_CANVAS_H
 
-#include "SkBitmap.h"
-#include "SkCanvas.h"
-#include "SkMatrix.h"
+#include <cutils/compiler.h>
+
+#include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkMatrix.h>
 
 namespace android {
 
-class Canvas {
+class ANDROID_API Canvas {
 public:
     virtual ~Canvas() {};
 

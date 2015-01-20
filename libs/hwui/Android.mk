@@ -4,7 +4,6 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE := libhwui
-LOCAL_MODULE_TAGS := optional
 
 include $(LOCAL_PATH)/Android.common.mk
 
