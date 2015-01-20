@@ -224,6 +224,14 @@ public class TaskStack {
             }
             mDisplayContent.layoutNeeded = true;
         }
+        final int taskId = task.taskId;
+        for (int appNdx = mExitingAppTokens.size() - 1; appNdx >= 0; --appNdx) {
+            final AppWindowToken wtoken = mExitingAppTokens.get(appNdx);
+            if (wtoken.groupId == taskId) {
+                wtoken.mIsExiting = false;
+                mExitingAppTokens.remove(appNdx);
+            }
+        }
     }
 
     void attachDisplayContent(DisplayContent displayContent) {

@@ -329,14 +329,8 @@ class DisplayContent {
                     for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
                         AppWindowToken wtoken = tokens.get(tokenNdx);
                         if (wtoken.mIsExiting) {
-                            stack.mExitingAppTokens.remove(wtoken);
-                            wtoken.mIsExiting = false;
-                            mService.removeAppFromTaskLocked(wtoken);
+                            wtoken.removeAppFromTaskLocked();
                         }
-                    }
-                    if (task.mDeferRemoval) {
-                        task.mDeferRemoval = false;
-                        mService.removeTaskLocked(task);
                     }
                 }
             }
