@@ -175,6 +175,7 @@ public class SecureCameraLaunchManager {
                 public void run() {
                     Intent intent = new Intent();
                     intent.setAction(CLOSE_CAMERA_ACTION_NAME);
+                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
                     mContext.sendBroadcast(intent);
                 }
             });
