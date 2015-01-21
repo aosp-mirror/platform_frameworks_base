@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.ActivityThread;
 import android.os.Build;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -1692,6 +1693,7 @@ public final class ActiveServices {
                 try {
                     bumpServiceExecutingLocked(r, false, "destroy");
                     mDestroyingServices.add(r);
+                    r.destroying = true;
                     mAm.updateOomAdjLocked(r.app);
                     r.app.thread.scheduleStopService(r);
                 } catch (Exception e) {
@@ -1813,7 +1815,7 @@ public final class ActiveServices {
     void serviceDoneExecutingLocked(ServiceRecord r, int type, int startId, int res) {
         boolean inDestroying = mDestroyingServices.contains(r);
         if (r != null) {
-            if (type == 1) {
+            if (type == ActivityThread.SERVICE_DONE_EXECUTING_START) {
                 // This is a call from a service start...  take care of
                 // book-keeping.
                 r.callStart = true;
@@ -1861,6 +1863,20 @@ public final class ActiveServices {
                 }
                 if (res == Service.START_STICKY_COMPATIBILITY) {
                     r.callStart = false;
+                }
+            } else if (type == ActivityThread.SERVICE_DONE_EXECUTING_STOP) {
+                // This is the final call from destroying the service...  we should
+                // actually be getting rid of the service at this point.  Do some
+                // validation of its state, and ensure it will be fully removed.
+                if (!inDestroying) {
+                    // Not sure what else to do with this...  if it is not actually in the
+                    // destroying list, we don't need to make sure to remove it from it.
+                    Slog.wtfStack(TAG, "Service done with onDestroy, but not inDestroying: "
+                            + r);
+                } else if (r.executeNesting != 1) {
+                    Slog.wtfStack(TAG, "Service done with onDestroy, but executeNesting="
+                            + r.executeNesting + ": " + r);
+                    r.executeNesting = 1;
                 }
             }
             final long origId = Binder.clearCallingIdentity();
