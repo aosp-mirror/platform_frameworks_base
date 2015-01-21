@@ -269,8 +269,8 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Acessar o cartão SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Recursos de acessibilidade"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Recursos que a tecnologia assistencial pode solicitar."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar conteúdo da janela"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com a qual você está interagindo."</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar cont. da janela"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecionar o conteúdo da janela com que você está interagindo."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Ativar Explorar por toque"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Itens tocados serão falados em voz alta e a tela poderá ser explorada por meio de gestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Ativar acessibilidade na Web aprimorada"</string>
