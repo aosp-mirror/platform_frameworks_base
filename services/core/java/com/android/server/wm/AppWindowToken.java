@@ -252,6 +252,20 @@ class AppWindowToken extends WindowToken {
         return false;
     }
 
+    void removeAppFromTaskLocked() {
+        mIsExiting = false;
+        removeAllWindows();
+
+        final Task task = service.mTaskIdToTask.get(groupId);
+        if (task != null) {
+            if (!task.removeAppToken(this)) {
+                Slog.e(WindowManagerService.TAG, "removeAppFromTaskLocked: token=" + this
+                        + " not found.");
+            }
+            task.mStack.mExitingAppTokens.remove(this);
+        }
+    }
+
     @Override
     void removeAllWindows() {
         for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
@@ -266,8 +280,10 @@ class AppWindowToken extends WindowToken {
                 Slog.w(WindowManagerService.TAG, "removeAllWindows: removing win=" + win);
             }
 
-            win.mService.removeWindowLocked(win.mSession, win);
+            service.removeWindowLocked(win.mSession, win);
         }
+        allAppWindows.clear();
+        windows.clear();
     }
 
     @Override

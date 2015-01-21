@@ -46,7 +46,6 @@ import android.graphics.Canvas;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.Proxy;
 import android.net.ProxyInfo;
@@ -87,8 +86,6 @@ import android.util.Slog;
 import android.util.SuperNotCalledException;
 import android.view.Display;
 import android.view.HardwareRenderer;
-import android.view.IWindowManager;
-import android.view.IWindowSessionCallback;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
@@ -165,8 +162,8 @@ public final class ActivityThread {
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
-    private static final int LOG_ON_PAUSE_CALLED = 30021;
-    private static final int LOG_ON_RESUME_CALLED = 30022;
+    private static final int LOG_AM_ON_PAUSE_CALLED = 30021;
+    private static final int LOG_AM_ON_RESUME_CALLED = 30022;
 
     /** Type for IActivityManager.serviceDoneExecuting: anonymous operation */
     public static final int SERVICE_DONE_EXECUTING_ANON = 0;
@@ -3000,7 +2997,7 @@ public final class ActivityThread {
                 }
                 r.activity.performResume();
 
-                EventLog.writeEvent(LOG_ON_RESUME_CALLED,
+                EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED,
                         UserHandle.myUserId(), r.activity.getComponentName().getClassName());
 
                 r.paused = false;
@@ -3270,7 +3267,7 @@ public final class ActivityThread {
             // Now we are idle.
             r.activity.mCalled = false;
             mInstrumentation.callActivityOnPause(r.activity);
-            EventLog.writeEvent(LOG_ON_PAUSE_CALLED, UserHandle.myUserId(),
+            EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
                     r.activity.getComponentName().getClassName());
             if (!r.activity.mCalled) {
                 throw new SuperNotCalledException(
@@ -3667,7 +3664,7 @@ public final class ActivityThread {
                 try {
                     r.activity.mCalled = false;
                     mInstrumentation.callActivityOnPause(r.activity);
-                    EventLog.writeEvent(LOG_ON_PAUSE_CALLED, UserHandle.myUserId(),
+                    EventLog.writeEvent(LOG_AM_ON_PAUSE_CALLED, UserHandle.myUserId(),
                             r.activity.getComponentName().getClassName());
                     if (!r.activity.mCalled) {
                         throw new SuperNotCalledException(

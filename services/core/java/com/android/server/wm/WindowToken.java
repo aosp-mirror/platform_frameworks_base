@@ -85,6 +85,7 @@ class WindowToken {
                     "removeAllWindows: removing win=" + win);
             win.mService.removeWindowLocked(win.mSession, win);
         }
+        windows.clear();
     }
 
     void dump(PrintWriter pw, String prefix) {

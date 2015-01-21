@@ -17,9 +17,11 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerService.TAG;
+import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 
 import android.util.EventLog;
 import android.util.Slog;
+import com.android.server.EventLogTags;
 
 class Task {
     TaskStack mStack;
@@ -27,12 +29,14 @@ class Task {
     final int taskId;
     final int mUserId;
     boolean mDeferRemoval = false;
+    final WindowManagerService mService;
 
-    Task(AppWindowToken wtoken, TaskStack stack, int userId) {
+    Task(AppWindowToken wtoken, TaskStack stack, int userId, WindowManagerService service) {
         taskId = wtoken.groupId;
         mAppTokens.add(wtoken);
         mStack = stack;
         mUserId = userId;
+        mService = service;
     }
 
     DisplayContent getDisplayContent() {
@@ -51,11 +55,27 @@ class Task {
         mDeferRemoval = false;
     }
 
+    void removeLocked() {
+        if (!mAppTokens.isEmpty() && mStack.isAnimating()) {
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + taskId);
+            mDeferRemoval = true;
+            return;
+        }
+        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + taskId);
+        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
+        mDeferRemoval = false;
+        mStack.removeTask(this);
+        mService.mTaskIdToTask.delete(taskId);
+    }
+
     boolean removeAppToken(AppWindowToken wtoken) {
         boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {
             EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, taskId,
                     "removeAppToken: last token");
+            if (mDeferRemoval) {
+                removeLocked();
+            }
         }
         return removed;
     }
