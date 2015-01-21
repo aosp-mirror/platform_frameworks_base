@@ -31,6 +31,8 @@ public class AlsaDevicesParser {
     private static final String TAG = "AlsaDevicesParser";
     protected static final boolean DEBUG = false;
 
+    private static final String kDevicesFilePath = "/proc/asound/devices";
+
     private static final int kIndex_CardDeviceField = 5;
     private static final int kStartIndex_CardNum = 6;
     private static final int kEndIndex_CardNum = 8; // one past
@@ -89,51 +91,57 @@ public class AlsaDevicesParser {
                 }
                 String token = line.substring(tokenOffset, delimOffset);
 
-                switch (tokenIndex) {
-                case kToken_LineNum:
-                    // ignore
-                    break;
+                try {
+                    switch (tokenIndex) {
+                    case kToken_LineNum:
+                        // ignore
+                        break;
 
-                case kToken_CardNum:
-                    mCardNum = Integer.parseInt(token);
-                    if (line.charAt(delimOffset) != '-') {
-                        tokenIndex++; // no device # in the token stream
-                    }
-                    break;
+                    case kToken_CardNum:
+                        mCardNum = Integer.parseInt(token);
+                        if (line.charAt(delimOffset) != '-') {
+                            tokenIndex++; // no device # in the token stream
+                        }
+                        break;
 
-                case kToken_DeviceNum:
-                    mDeviceNum = Integer.parseInt(token);
-                    break;
+                    case kToken_DeviceNum:
+                        mDeviceNum = Integer.parseInt(token);
+                        break;
 
-                case kToken_Type0:
-                    if (token.equals("digital")) {
-                        // NOP
-                    } else if (token.equals("control")) {
-                        mDeviceType = kDeviceType_Control;
-                    } else if (token.equals("raw")) {
-                        // NOP
-                    }
-                    break;
+                    case kToken_Type0:
+                        if (token.equals("digital")) {
+                            // NOP
+                        } else if (token.equals("control")) {
+                            mDeviceType = kDeviceType_Control;
+                        } else if (token.equals("raw")) {
+                            // NOP
+                        }
+                        break;
 
-                case kToken_Type1:
-                    if (token.equals("audio")) {
-                        mDeviceType = kDeviceType_Audio;
-                    } else if (token.equals("midi")) {
-                        mDeviceType = kDeviceType_MIDI;
-                        mHasMIDIDevices = true;
-                    }
-                    break;
+                    case kToken_Type1:
+                        if (token.equals("audio")) {
+                            mDeviceType = kDeviceType_Audio;
+                        } else if (token.equals("midi")) {
+                            mDeviceType = kDeviceType_MIDI;
+                            mHasMIDIDevices = true;
+                        }
+                        break;
 
-                case kToken_Type2:
-                    if (token.equals("capture")) {
-                        mDeviceDir = kDeviceDir_Capture;
-                        mHasCaptureDevices = true;
-                    } else if (token.equals("playback")) {
-                        mDeviceDir = kDeviceDir_Playback;
-                        mHasPlaybackDevices = true;
-                    }
-                    break;
-                } // switch (tokenIndex)
+                    case kToken_Type2:
+                        if (token.equals("capture")) {
+                            mDeviceDir = kDeviceDir_Capture;
+                            mHasCaptureDevices = true;
+                        } else if (token.equals("playback")) {
+                            mDeviceDir = kDeviceDir_Playback;
+                            mHasPlaybackDevices = true;
+                        }
+                        break;
+                    } // switch (tokenIndex)
+                } catch (NumberFormatException e) {
+                    Slog.e(TAG, "Failed to parse token " + tokenIndex + " of " + kDevicesFilePath
+                        + " token: " + token);
+                    return false;
+                }
 
                 tokenIndex++;
             } // while (true)
@@ -245,8 +253,7 @@ public class AlsaDevicesParser {
     public void scan() {
         mDeviceRecords.clear();
 
-        final String devicesFilePath = "/proc/asound/devices";
-        File devicesFile = new File(devicesFilePath);
+        File devicesFile = new File(kDevicesFilePath);
         try {
             FileReader reader = new FileReader(devicesFile);
             BufferedReader bufferedReader = new BufferedReader(reader);

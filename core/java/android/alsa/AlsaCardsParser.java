@@ -31,6 +31,8 @@ public class AlsaCardsParser {
     private static final String TAG = "AlsaCardsParser";
     protected static final boolean DEBUG = true;
 
+    private static final String kCardsFilePath = "/proc/asound/cards";
+
     private static LineTokenizer mTokenizer = new LineTokenizer(" :[]");
 
     private ArrayList<AlsaCardRecord> mCardRecords = new ArrayList<AlsaCardRecord>();
@@ -56,8 +58,14 @@ public class AlsaCardsParser {
                 tokenIndex = mTokenizer.nextToken(line, tokenIndex);
                 delimIndex = mTokenizer.nextDelimiter(line, tokenIndex);
 
-                // mCardNum
-                mCardNum = Integer.parseInt(line.substring(tokenIndex, delimIndex));
+                try {
+                    // mCardNum
+                    mCardNum = Integer.parseInt(line.substring(tokenIndex, delimIndex));
+                } catch (NumberFormatException e) {
+                    Slog.e(TAG, "Failed to parse line " + lineIndex + " of " + kCardsFilePath
+                        + ": " + line.substring(tokenIndex, delimIndex));
+                    return false;
+                }
 
                 // mField1
                 tokenIndex = mTokenizer.nextToken(line, delimIndex);
@@ -93,8 +101,7 @@ public class AlsaCardsParser {
         }
         mCardRecords = new ArrayList<AlsaCardRecord>();
 
-        final String cardsFilePath = "/proc/asound/cards";
-        File cardsFile = new File(cardsFilePath);
+        File cardsFile = new File(kCardsFilePath);
         try {
             FileReader reader = new FileReader(cardsFile);
             BufferedReader bufferedReader = new BufferedReader(reader);
