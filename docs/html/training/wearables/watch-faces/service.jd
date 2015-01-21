@@ -64,41 +64,14 @@ Project</a>.</p>
 
 <h3 id="Dependencies">Dependencies</h3>
 
-<p>For the handheld app, edit the <code>build.gradle</code> file in the <code>mobile</code> module
-to add these dependencies:</p>
-
-<pre>
-apply plugin: 'com.android.application'
-
-android { ... }
-
-dependencies {
-    ...
-    wearApp project(':wear')
-    compile 'com.google.android.gms:play-services:6.5.+'
-}
-</pre>
-
-<p>For the wearable app, edit the <code>build.gradle</code> file in the <code>wear</code> module
-to add these dependencies:</p>
-
-<pre>
-apply plugin: 'com.android.application'
-
-android { ... }
-
-dependencies {
-    ...
-    compile 'com.google.android.support:wearable:1.1.+'
-    compile 'com.google.android.gms:play-services-wearable:6.5.+'
-}
-</pre>
-
 <p>The Wearable Support Library provides the necessary classes that you extend to create watch
 face implementations. The Google Play services client libraries (<code>play-services</code> and
 <code>play-services-wearable</code>) are required to sync data items between the companion device
 and the wearable with the <a href="{@docRoot}training/wearables/data-layer/index.html">Wearable
 Data Layer API</a>.</p>
+
+<p>Android Studio automatically adds the required entries in your <code>build.gradle</code>
+files when you create the project in the instructions above.</p>
 
 <h3 id="Reference">Wearable Support Library API Reference</h3>
 
