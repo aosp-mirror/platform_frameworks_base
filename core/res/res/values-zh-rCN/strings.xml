@@ -269,13 +269,13 @@
     <string name="permgrouplab_storage" msgid="1971118770546336966">"存储"</string>
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"访问USB存储设备。"</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"访问SD卡。"</string>
-    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"辅助功能"</string>
+    <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"无障碍功能"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"辅助技术可请求启用的功能。"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"检索窗口内容"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"检查您正与其进行互动的窗口的内容。"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"启用触摸浏览"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"设备可大声读出用户触摸的内容，而用户可以通过手势浏览屏幕。"</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"启用网页辅助增强功能"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"启用网页无障碍增强功能"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"安装脚本以方便访问应用的内容。"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"监测您输入的文字"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"包含个人数据，例如信用卡号和密码。"</string>
@@ -353,8 +353,8 @@
     <string name="permdesc_dump" msgid="1778299088692290329">"允许应用检索系统的内部状态。恶意应用可能会检索一般情况下绝不需要检索的多种私人信息和安全信息。"</string>
     <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"检索屏幕内容"</string>
     <string name="permdesc_retrieve_window_content" msgid="3193269069469700265">"允许应用检索活动窗口的内容。恶意应用可能会检索整个窗口的内容，并检查其中除密码以外的所有文字。"</string>
-    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暂时启用辅助功能"</string>
-    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允许应用在设备上暂时启用辅助功能。恶意应用可能会在未经用户同意的情况下擅自启用辅助功能。"</string>
+    <string name="permlab_temporary_enable_accessibility" msgid="2312612135127310254">"暂时启用无障碍功能"</string>
+    <string name="permdesc_temporary_enable_accessibility" msgid="8079456293182975464">"允许应用在设备上暂时启用无障碍功能。恶意应用可能会在未经用户同意的情况下擅自启用无障碍功能。"</string>
     <string name="permlab_retrieveWindowToken" msgid="7154762602367758602">"检索窗口令牌"</string>
     <string name="permdesc_retrieveWindowToken" msgid="668173747687795074">"允许应用检索窗口令牌。恶意软件可能会借此在未经授权的情况下冒充系统与应用窗口进行互动。"</string>
     <string name="permlab_frameStats" msgid="7056374987314361639">"检索框架统计信息"</string>
@@ -409,8 +409,8 @@
     <string name="permdesc_readInputState" msgid="8387754901688728043">"允许应用记录您所按的键，包括与其他应用进行交互（如输入密码）时按的键。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"绑定至输入法"</string>
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"允许应用绑定至输入法的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"绑定至辅助服务"</string>
-    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允许应用绑定至辅助服务的顶级接口。普通应用绝不需要此权限。"</string>
+    <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"绑定至无障碍服务"</string>
+    <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允许应用绑定至无障碍服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"绑定至打印服务"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"允许应用绑定至打印服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"绑定至打印处理服务"</string>
@@ -1500,7 +1500,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"您目前是在工作资料内使用此应用"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"输入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"无障碍"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁纸"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"通知侦听器"</string>
@@ -1707,9 +1707,9 @@
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"要将音量调高到推荐水平以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
-    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用辅助功能。"</string>
-    <string name="accessibility_enabled" msgid="1381972048564547685">"辅助功能已启用。"</string>
-    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消辅助功能。"</string>
+    <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持续按住双指即可启用无障碍功能。"</string>
+    <string name="accessibility_enabled" msgid="1381972048564547685">"无障碍功能已启用。"</string>
+    <string name="enable_accessibility_canceled" msgid="3833923257966635673">"已取消无障碍功能。"</string>
     <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"正在切换为<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"机主"</string>
