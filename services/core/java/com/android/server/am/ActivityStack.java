@@ -1553,14 +1553,14 @@ final class ActivityStack {
                 // Now the task above it has to return to the home task instead.
                 final int taskNdx = mTaskHistory.indexOf(prevTask) + 1;
                 mTaskHistory.get(taskNdx).setTaskToReturnTo(HOME_ACTIVITY_TYPE);
-            } else {
-                if (DEBUG_STATES && isOnHomeDisplay()) Slog.d(TAG,
+            } else if (!isOnHomeDisplay()) {
+                return false;
+            } else if (!isHomeStack()){
+                if (DEBUG_STATES) Slog.d(TAG,
                         "resumeTopActivityLocked: Launching home next");
-                // Only resume home if on home display
                 final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack() ?
                         HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();
-                return isOnHomeDisplay() &&
-                        mStackSupervisor.resumeHomeStackTask(returnTaskType, prev);
+                return mStackSupervisor.resumeHomeStackTask(returnTaskType, prev);
             }
         }
 
