@@ -1242,22 +1242,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @hide
      * Check whether this activity is running as part of a voice interaction with the user.
      * If true, it should perform its interaction with the user through the
      * {@link VoiceInteractor} returned by {@link #getVoiceInteractor}.
      */
-    @SystemApi
     public boolean isVoiceInteraction() {
         return mVoiceInteractor != null;
     }
 
     /**
-     * @hide
      * Retrieve the active {@link VoiceInteractor} that the user is going through to
      * interact with this activity.
      */
-    @SystemApi
     public VoiceInteractor getVoiceInteractor() {
         return mVoiceInteractor;
     }

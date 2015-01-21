@@ -39,7 +39,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionService;
@@ -426,9 +425,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingPid = Binder.getCallingPid();
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
-                if (!SystemProperties.getBoolean("persist.test.voice_interaction", false)) {
-                    throw new SecurityException("Voice interaction not supported");
-                }
                 try {
                     return mImpl.startVoiceActivityLocked(callingPid, callingUid, token,
                             intent, resolvedType);
