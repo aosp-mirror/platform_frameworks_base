@@ -55,6 +55,8 @@ public:
 
     void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
 
+    void fence();
+
 private:
     friend class RenderThread;
 

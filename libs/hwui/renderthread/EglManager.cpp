@@ -22,9 +22,12 @@
 
 #include <cutils/log.h>
 #include <cutils/properties.h>
+#include <EGL/eglext.h>
 
 #define PROPERTY_RENDER_DIRTY_REGIONS "debug.hwui.render_dirty_regions"
 #define GLES_VERSION 2
+
+#define WAIT_FOR_GPU_COMPLETION 0
 
 // Android-specific addition that is used to show when frames began in systrace
 EGLAPI void EGLAPIENTRY eglBeginFrame(EGLDisplay dpy, EGLSurface surface);
@@ -263,6 +266,14 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
 
 bool EglManager::swapBuffers(EGLSurface surface) {
     mInFrame = false;
+
+#if WAIT_FOR_GPU_COMPLETION
+    {
+        ATRACE_NAME("Finishing GPU work");
+        fence();
+    }
+#endif
+
     eglSwapBuffers(mEglDisplay, surface);
     EGLint err = eglGetError();
     if (CC_LIKELY(err == EGL_SUCCESS)) {
@@ -279,6 +290,13 @@ bool EglManager::swapBuffers(EGLSurface surface) {
             err, egl_error_str(err));
     // Impossible to hit this, but the compiler doesn't know that
     return false;
+}
+
+void EglManager::fence() {
+    EGLSyncKHR fence = eglCreateSyncKHR(mEglDisplay, EGL_SYNC_FENCE_KHR, NULL);
+    eglClientWaitSyncKHR(mEglDisplay, fence,
+            EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
+    eglDestroySyncKHR(mEglDisplay, fence);
 }
 
 void EglManager::cancelFrame() {

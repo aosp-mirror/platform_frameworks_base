@@ -20,7 +20,6 @@
 
 #include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
-#include "Fence.h"
 #include "GammaFontRenderer.h"
 #include "Patch.h"
 #include "PathTessellator.h"
@@ -563,7 +562,7 @@ void OpenGLRenderer::flushLayerUpdates() {
     updateLayers();
     flushLayers();
     // Wait for all the layer updates to be executed
-    AutoFence fence;
+    glFinish();
 }
 
 void OpenGLRenderer::markLayersAsBuildLayers() {
