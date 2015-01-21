@@ -673,7 +673,8 @@ public class RippleDrawable extends LayerDrawable {
 
         mHasValidMask = true;
 
-        if (maskType == MASK_NONE) {
+        final Rect bounds = getBounds();
+        if (maskType == MASK_NONE || bounds.isEmpty()) {
             if (mMaskBuffer != null) {
                 mMaskBuffer.recycle();
                 mMaskBuffer = null;
@@ -686,7 +687,6 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         // Ensure we have a correctly-sized buffer.
-        final Rect bounds = getBounds();
         if (mMaskBuffer == null
                 || mMaskBuffer.getWidth() != bounds.width()
                 || mMaskBuffer.getHeight() != bounds.height()) {
