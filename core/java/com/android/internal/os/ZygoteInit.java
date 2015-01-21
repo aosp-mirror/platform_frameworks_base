@@ -437,7 +437,7 @@ public class ZygoteInit {
 
             WrapperInit.execApplication(parsedArgs.invokeWith,
                     parsedArgs.niceName, parsedArgs.targetSdkVersion,
-                    null, args);
+                    VMRuntime.getCurrentInstructionSet(), null, args);
         } else {
             ClassLoader cl = null;
             if (systemServerClasspath != null) {
