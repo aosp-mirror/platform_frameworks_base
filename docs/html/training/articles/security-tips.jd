@@ -445,7 +445,17 @@ locally. Server-side
 headers like <code>no-cache</code> can also be used to indicate that an application should
 not cache particular content.</p>
 
-
+<p>Devices running platforms older than Android 4.4 (API level 19)
+use a version of {@link android.webkit webkit} that has a number of security issues.
+As a workaround, if your app is running on these devices, it
+should confirm that {@link android.webkit.WebView} objects display only trusted
+content. You should also use the updatable security {@link
+java.security.Provider Provider} object to make sure your app isn’t exposed to
+potential vulnerabilities in SSL, as described in <a
+href="{@docRoot}training/articles/security-gms-provider.html">Updating Your
+Security Provider to Protect Against SSL Exploits</a>. If your application must
+render content from the open web, consider providing your own renderer so
+you can keep it up to date with the latest security patches.</p>
 
 
 <h3 id="Credentials">Handling Credentials</h3>
