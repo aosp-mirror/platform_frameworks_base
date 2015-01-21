@@ -168,6 +168,13 @@ public final class ActivityThread {
     private static final int LOG_ON_PAUSE_CALLED = 30021;
     private static final int LOG_ON_RESUME_CALLED = 30022;
 
+    /** Type for IActivityManager.serviceDoneExecuting: anonymous operation */
+    public static final int SERVICE_DONE_EXECUTING_ANON = 0;
+    /** Type for IActivityManager.serviceDoneExecuting: done with an onStart call */
+    public static final int SERVICE_DONE_EXECUTING_START = 1;
+    /** Type for IActivityManager.serviceDoneExecuting: done stopping (destroying) service */
+    public static final int SERVICE_DONE_EXECUTING_STOP = 2;
+
     private ContextImpl mSystemContext;
 
     static IPackageManager sPackageManager;
@@ -2758,7 +2765,7 @@ public final class ActivityThread {
             mServices.put(data.token, service);
             try {
                 ActivityManagerNative.getDefault().serviceDoneExecuting(
-                        data.token, 0, 0, 0);
+                        data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
             } catch (RemoteException e) {
                 // nothing to do.
             }
@@ -2787,7 +2794,7 @@ public final class ActivityThread {
                     } else {
                         s.onRebind(data.intent);
                         ActivityManagerNative.getDefault().serviceDoneExecuting(
-                                data.token, 0, 0, 0);
+                                data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
                     }
                     ensureJitEnabled();
                 } catch (RemoteException ex) {
@@ -2815,7 +2822,7 @@ public final class ActivityThread {
                                 data.token, data.intent, doRebind);
                     } else {
                         ActivityManagerNative.getDefault().serviceDoneExecuting(
-                                data.token, 0, 0, 0);
+                                data.token, SERVICE_DONE_EXECUTING_ANON, 0, 0);
                     }
                 } catch (RemoteException ex) {
                 }
@@ -2897,7 +2904,7 @@ public final class ActivityThread {
 
                 try {
                     ActivityManagerNative.getDefault().serviceDoneExecuting(
-                            data.token, 1, data.startId, res);
+                            data.token, SERVICE_DONE_EXECUTING_START, data.startId, res);
                 } catch (RemoteException e) {
                     // nothing to do.
                 }
@@ -2928,7 +2935,7 @@ public final class ActivityThread {
 
                 try {
                     ActivityManagerNative.getDefault().serviceDoneExecuting(
-                            token, 0, 0, 0);
+                            token, SERVICE_DONE_EXECUTING_STOP, 0, 0);
                 } catch (RemoteException e) {
                     // nothing to do.
                     Slog.i(TAG, "handleStopService: unable to execute serviceDoneExecuting for "
