@@ -108,9 +108,10 @@ public class VoiceInteractor {
                     request = pullRequest((IVoiceInteractorRequest)args.arg1, msg.arg1 != 0);
                     if (DEBUG) Log.d(TAG, "onCommandResult: req="
                             + ((IVoiceInteractorRequest)args.arg1).asBinder() + "/" + request
-                            + " result=" + args.arg2);
+                            + " completed=" + msg.arg1 + " result=" + args.arg2);
                     if (request != null) {
-                        ((CommandRequest)request).onCommandResult((Bundle) args.arg2);
+                        ((CommandRequest)request).onCommandResult(msg.arg1 != 0,
+                                (Bundle) args.arg2);
                         if (msg.arg1 != 0) {
                             request.clear();
                         }
@@ -338,7 +339,12 @@ public class VoiceInteractor {
             mArgs = args;
         }
 
-        public void onCommandResult(Bundle result) {
+        /**
+         * Results for CommandRequest can be returned in partial chunks.
+         * The isCompleted is set to true iff all results have been returned, indicating the
+         * CommandRequest has completed.
+         */
+        public void onCommandResult(boolean isCompleted, Bundle result) {
         }
 
         IVoiceInteractorRequest submit(IVoiceInteractor interactor, String packageName,
