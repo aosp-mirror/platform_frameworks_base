@@ -107,5 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​លេខ​កូដ PIN ស៊ីម!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិ​​លេខ​កូដ PUK ស៊ីម!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"បាន​ទទួល​យក​លេខ​កូដ​!"</string>
-    <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា​"</string>
 </resources>
