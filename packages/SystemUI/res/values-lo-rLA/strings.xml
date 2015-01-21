@@ -277,7 +277,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"ຄຳ​ເຕືອນ <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Your recent screens appear here"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"​ຂໍ້​ມູນ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ"</string>
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"ບໍ່​ສາ​ມາດ​ເລີ່ມ <xliff:g id="APP">%s</xliff:g> ໄດ້."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ສາກເຕັມແລ້ວ."</string>
@@ -314,7 +314,7 @@
     <string name="guest_exit_guest" msgid="7187359342030096885">"​ລຶບ​ແຂກ"</string>
     <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"ລຶບ​ແຂກ​ບໍ?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"ແອັບຯ​ແລະ​ຂໍ້​ມູນ​ທັງ​ໝົດ​ໃນ​ເຊດ​ຊັນ​ນີ້​ຈະ​ຖືກ​ລຶບ​ອອກ."</string>
-    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"ລຶບ"</string>
+    <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"ລຶບ​"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"ຍິນ​ດີ​ຕ້ອນ​ຮັບ​ກັບ​ມາ, ຜູ່​ຢ້ຽມ​ຢາມ!"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"ທ່ານ​ຕ້ອງ​ການ​ສືບ​ຕໍ່​ເຊດ​ຊັນ​ຂອງ​ທ່ານບໍ່?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"ເລີ່ມຕົ້ນໃຫມ່"</string>
