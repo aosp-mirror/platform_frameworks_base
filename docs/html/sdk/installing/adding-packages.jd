@@ -72,7 +72,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
       <li>Windows: Double-click the <code>SDK Manager.exe</code> file at the root of the Android
   SDK directory.</li>
       <li>Mac/Linux: Open a terminal and navigate to the <code>tools/</code> directory in the
-  Android SDK, then execute <code>android sdk</code>.</li>
+      location where the Android SDK was installed, then execute <code>android sdk</code>.</li>
     </ul>
   </li>
 </ul>
