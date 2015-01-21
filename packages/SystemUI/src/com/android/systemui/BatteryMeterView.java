@@ -23,8 +23,12 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
@@ -56,12 +60,13 @@ public class BatteryMeterView extends View implements DemoMode,
     private float mSubpixelSmoothingRight;
     private final Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     private float mTextHeight, mWarningTextHeight;
+    private int mIconTint = Color.WHITE;
 
     private int mHeight;
     private int mWidth;
     private String mWarningString;
     private final int mCriticalLevel;
-    private final int mChargeColor;
+    private int mChargeColor;
     private final float[] mBoltPoints;
     private final Path mBoltPath = new Path();
 
@@ -292,9 +297,25 @@ public class BatteryMeterView extends View implements DemoMode,
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
             color = mColors[i+1];
-            if (percent <= thresh) return color;
+            if (percent <= thresh) {
+
+                // Respect tinting for "normal" level
+                if (i == mColors.length-2) {
+                    return mIconTint;
+                } else {
+                    return color;
+                }
+            }
         }
         return color;
+    }
+
+    public void setIconTint(int tint) {
+        mIconTint = tint;
+        mFramePaint.setColorFilter(new PorterDuffColorFilter(tint, PorterDuff.Mode.SRC_ATOP));
+        mBoltPaint.setColor(tint);
+        mChargeColor = tint;
+        invalidate();
     }
 
     @Override

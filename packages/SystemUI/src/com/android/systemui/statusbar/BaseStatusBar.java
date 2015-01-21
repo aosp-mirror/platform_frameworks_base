@@ -773,11 +773,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (entry.icon != null) {
-            if (entry.targetSdk >= Build.VERSION_CODES.LOLLIPOP) {
-                entry.icon.setColorFilter(mContext.getResources().getColor(android.R.color.white));
-            } else {
-                entry.icon.setColorFilter(null);
-            }
+            entry.icon.setTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
         }
     }
 
