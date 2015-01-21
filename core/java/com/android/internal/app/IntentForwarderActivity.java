@@ -96,9 +96,12 @@ public class IntentForwarderActivity extends Activity  {
             final android.content.pm.ResolveInfo ri = getPackageManager().resolveActivityAsUser(
                         newIntent, MATCH_DEFAULT_ONLY, targetUserId);
 
-            // Only show a disclosure if this is a normal (non-OS) app
-            final boolean shouldShowDisclosure =
-                    !UserHandle.isSameApp(ri.activityInfo.applicationInfo.uid, Process.SYSTEM_UID);
+            // Don't show the disclosure if next activity is ResolverActivity or ChooserActivity
+            // as those will already have shown work / personal as neccesary etc.
+            final boolean shouldShowDisclosure = ri == null || ri.activityInfo == null ||
+                    !"android".equals(ri.activityInfo.packageName) ||
+                    !(ResolverActivity.class.getName().equals(ri.activityInfo.name)
+                    || ChooserActivity.class.getName().equals(ri.activityInfo.name));
 
             try {
                 startActivityAsCaller(newIntent, null, targetUserId);
