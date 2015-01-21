@@ -31,6 +31,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 import dalvik.system.PathClassLoader;
+import dalvik.system.VMRuntime;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -858,6 +859,7 @@ class ZygoteConnection {
         if (parsedArgs.invokeWith != null) {
             WrapperInit.execApplication(parsedArgs.invokeWith,
                     parsedArgs.niceName, parsedArgs.targetSdkVersion,
+                    VMRuntime.getCurrentInstructionSet(),
                     pipeFd, parsedArgs.remainingArgs);
         } else {
             RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion,
