@@ -1042,8 +1042,10 @@ public class RenderScript {
      * their priority to LOW to avoid starving forground processes.
      */
     public enum Priority {
-        LOW (Process.THREAD_PRIORITY_BACKGROUND + (5 * Process.THREAD_PRIORITY_LESS_FAVORABLE)),
-        NORMAL (Process.THREAD_PRIORITY_DISPLAY);
+        // These values used to represent official thread priority values
+        // now they are simply enums to be used by the runtime side
+        LOW (15),
+        NORMAL (-8);
 
         int mID;
         Priority(int id) {
