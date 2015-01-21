@@ -23,7 +23,6 @@ LOCAL_SRC_FILES := \
     DisplayList.cpp \
     DeferredDisplayList.cpp \
     DeferredLayerUpdater.cpp \
-    DisplayListLogBuffer.cpp \
     DisplayListRenderer.cpp \
     Dither.cpp \
     DrawProfiler.cpp \
@@ -102,4 +101,4 @@ endif
 # Defaults for ATRACE_TAG and LOG_TAG for libhwui
 LOCAL_CFLAGS += -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\"
 
-LOCAL_CFLAGS += -Wall -Werror -Wno-unused-parameter -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Werror -Wno-unused-parameter -Wunreachable-code

@@ -24,7 +24,6 @@
 #include "Debug.h"
 #include "DisplayList.h"
 #include "DisplayListOp.h"
-#include "DisplayListLogBuffer.h"
 
 namespace android {
 namespace uirenderer {

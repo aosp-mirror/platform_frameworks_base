@@ -260,7 +260,7 @@ static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz
 static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    android::uirenderer::renderthread::RenderProxy::outputLogBuffer(fd);
+    android::uirenderer::renderthread::RenderProxy::dumpGraphicsMemory(fd);
 }
 
 // ----------------------------------------------------------------------------
