@@ -1393,6 +1393,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void sendBroadcastToAll(Intent intent) {
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         final long ident = Binder.clearCallingIdentity();
         try {
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
