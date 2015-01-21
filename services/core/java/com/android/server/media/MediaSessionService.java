@@ -872,30 +872,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                 try {
                     String packageName = getContext().getOpPackageName();
                     if (mUseMasterVolume) {
-                        boolean isMasterMute = mAudioService.isMasterMute();
-                        if (direction == MediaSessionManager.DIRECTION_MUTE) {
-                            mAudioService.setMasterMute(!isMasterMute, flags, packageName, mICallback);
-                        } else {
                             mAudioService.adjustMasterVolume(direction, flags, packageName);
-                            // Do not call setMasterMute when direction = 0 which is used just to
-                            // show the UI.
-                            if (isMasterMute && direction != 0) {
-                                mAudioService.setMasterMute(false, flags, packageName, mICallback);
-                            }
-                        }
                     } else {
-                        boolean isStreamMute = mAudioService.isStreamMute(suggestedStream);
-                        if (direction == MediaSessionManager.DIRECTION_MUTE) {
-                            mAudioManager.setStreamMute(suggestedStream, !isStreamMute);
-                        } else {
-                            mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
-                                    flags, packageName);
-                            // Do not call setStreamMute when direction = 0 which is used just to
-                            // show the UI.
-                            if (isStreamMute && direction != 0) {
-                                mAudioManager.setStreamMute(suggestedStream, false);
-                            }
-                        }
+                        mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
+                                flags, packageName);
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error adjusting default volume.", e);

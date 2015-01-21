@@ -52,15 +52,9 @@ interface IAudioService {
 
     void setMasterVolume(int index, int flags, String callingPackage);
 
-    void setStreamSolo(int streamType, boolean state, IBinder cb);
-
-    void setStreamMute(int streamType, boolean state, IBinder cb);
-
     boolean isStreamMute(int streamType);
 
     void forceRemoteSubmixFullVolume(boolean startForcing, IBinder cb);
-
-    void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb);
 
     boolean isMasterMute();
 

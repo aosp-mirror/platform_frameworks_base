@@ -3920,7 +3920,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Bundle userRestrictions = mUserManager.getUserRestrictions();
         mUserManager.setUserRestrictions(new Bundle(), userHandle);
         if (userRestrictions.getBoolean(UserManager.DISALLOW_ADJUST_VOLUME)) {
-            audioManager.setMasterMute(false);
+            audioManager.adjustMasterVolume(AudioManager.ADJUST_UNMUTE, 0);
         }
         if (userRestrictions.getBoolean(UserManager.DISALLOW_UNMUTE_MICROPHONE)) {
             audioManager.setMicrophoneMute(false);
@@ -4841,7 +4841,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
                         iAudioService.setMicrophoneMute(true, who.getPackageName());
                     } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        iAudioService.setMasterMute(true, 0, who.getPackageName(), null);
+                        iAudioService.adjustMasterVolume(AudioManager.ADJUST_MUTE, 0,
+                                who.getPackageName());
                     }
                 } catch (RemoteException re) {
                     Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
@@ -4906,7 +4907,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     if (UserManager.DISALLOW_UNMUTE_MICROPHONE.equals(key)) {
                         iAudioService.setMicrophoneMute(false, who.getPackageName());
                     } else if (UserManager.DISALLOW_ADJUST_VOLUME.equals(key)) {
-                        iAudioService.setMasterMute(false, 0, who.getPackageName(), null);
+                        iAudioService.adjustMasterVolume(AudioManager.ADJUST_UNMUTE, 0,
+                                who.getPackageName());
                     }
                 } catch (RemoteException re) {
                     Slog.e(LOG_TAG, "Failed to talk to AudioService.", re);
@@ -5372,7 +5374,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             IAudioService iAudioService = IAudioService.Stub.asInterface(
                     ServiceManager.getService(Context.AUDIO_SERVICE));
             try{
-                iAudioService.setMasterMute(on, 0, who.getPackageName(), null);
+                iAudioService.adjustMasterVolume(
+                        on ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE, 0,
+                        who.getPackageName());
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Failed to setMasterMute", re);
             }

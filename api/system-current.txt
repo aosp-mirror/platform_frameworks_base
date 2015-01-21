@@ -15107,6 +15107,7 @@ package android.media {
     method public boolean isMicrophoneMute();
     method public boolean isMusicActive();
     method public boolean isSpeakerphoneOn();
+    method public boolean isStreamMute(int);
     method public boolean isVolumeFixed();
     method public deprecated boolean isWiredHeadsetOn();
     method public void loadSoundEffects();
@@ -15128,8 +15129,8 @@ package android.media {
     method public void setRingerMode(int);
     method public deprecated void setRouting(int, int, int);
     method public void setSpeakerphoneOn(boolean);
-    method public void setStreamMute(int, boolean);
-    method public void setStreamSolo(int, boolean);
+    method public deprecated void setStreamMute(int, boolean);
+    method public deprecated void setStreamSolo(int, boolean);
     method public void setStreamVolume(int, int, int);
     method public deprecated void setVibrateSetting(int, int);
     method public deprecated void setWiredHeadsetOn(boolean);
@@ -15148,8 +15149,11 @@ package android.media {
     field public static final deprecated java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
     field public static final java.lang.String ACTION_SCO_AUDIO_STATE_UPDATED = "android.media.ACTION_SCO_AUDIO_STATE_UPDATED";
     field public static final int ADJUST_LOWER = -1; // 0xffffffff
+    field public static final int ADJUST_MUTE = -100; // 0xffffff9c
     field public static final int ADJUST_RAISE = 1; // 0x1
     field public static final int ADJUST_SAME = 0; // 0x0
+    field public static final int ADJUST_TOGGLE_MUTE = 101; // 0x65
+    field public static final int ADJUST_UNMUTE = 100; // 0x64
     field public static final int AUDIOFOCUS_FLAG_DELAY_OK = 1; // 0x1
     field public static final int AUDIOFOCUS_FLAG_LOCK = 4; // 0x4
     field public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 2; // 0x2
