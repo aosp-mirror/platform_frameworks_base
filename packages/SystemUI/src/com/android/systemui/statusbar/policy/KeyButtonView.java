@@ -45,20 +45,12 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
 public class KeyButtonView extends ImageView {
-    private static final String TAG = "StatusBar.KeyButtonView";
-    private static final boolean DEBUG = false;
-
-    // TODO: Get rid of this
-    public static final float DEFAULT_QUIESCENT_ALPHA = 1f;
 
     private long mDownTime;
     private int mCode;
     private int mTouchSlop;
-    private float mDrawingAlpha = 1f;
-    private float mQuiescentAlpha = DEFAULT_QUIESCENT_ALPHA;
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
-    private Animator mAnimateToQuiescent = new ObjectAnimator();
 
     private final Runnable mCheckLongPress = new Runnable() {
         public void run() {
@@ -88,9 +80,6 @@ public class KeyButtonView extends ImageView {
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
 
         mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
-
-
-        setDrawingAlpha(mQuiescentAlpha);
 
         a.recycle();
 
@@ -135,37 +124,6 @@ public class KeyButtonView extends ImageView {
             return true;
         }
         return super.performAccessibilityActionInternal(action, arguments);
-    }
-
-    public void setQuiescentAlpha(float alpha, boolean animate) {
-        mAnimateToQuiescent.cancel();
-        alpha = Math.min(Math.max(alpha, 0), 1);
-        if (alpha == mQuiescentAlpha && alpha == mDrawingAlpha) return;
-        mQuiescentAlpha = alpha;
-        if (DEBUG) Log.d(TAG, "New quiescent alpha = " + mQuiescentAlpha);
-        if (animate) {
-            mAnimateToQuiescent = animateToQuiescent();
-            mAnimateToQuiescent.start();
-        } else {
-            setDrawingAlpha(mQuiescentAlpha);
-        }
-    }
-
-    private ObjectAnimator animateToQuiescent() {
-        return ObjectAnimator.ofFloat(this, "drawingAlpha", mQuiescentAlpha);
-    }
-
-    public float getQuiescentAlpha() {
-        return mQuiescentAlpha;
-    }
-
-    public float getDrawingAlpha() {
-        return mDrawingAlpha;
-    }
-
-    public void setDrawingAlpha(float x) {
-        setImageAlpha((int) (x * 255));
-        mDrawingAlpha = x;
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
