@@ -29,7 +29,6 @@
 #include "DamageAccumulator.h"
 #include "Debug.h"
 #include "DisplayListOp.h"
-#include "DisplayListLogBuffer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "TreeInfo.h"
@@ -39,28 +38,6 @@
 
 namespace android {
 namespace uirenderer {
-
-void RenderNode::outputLogBuffer(int fd) {
-    DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
-    if (logBuffer.isEmpty()) {
-        return;
-    }
-
-    FILE *file = fdopen(fd, "a");
-
-    fprintf(file, "\nRecent DisplayList operations\n");
-    logBuffer.outputCommands(file);
-
-    if (Caches::hasInstance()) {
-        String8 cachesLog;
-        Caches::getInstance().dumpMemoryUsage(cachesLog);
-        fprintf(file, "\nCaches:\n%s\n", cachesLog.string());
-    } else {
-        fprintf(file, "\nNo caches instance.\n");
-    }
-
-    fflush(file);
-}
 
 void RenderNode::debugDumpLayers(const char* prefix) {
     if (mLayer) {
@@ -910,7 +887,6 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         } else {
             const int saveCountOffset = renderer.getSaveCount() - 1;
             const int projectionReceiveIndex = mDisplayListData->projectionReceiveIndex;
-            DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
             for (size_t chunkIndex = 0; chunkIndex < mDisplayListData->getChunks().size(); chunkIndex++) {
                 const DisplayListData::Chunk& chunk = mDisplayListData->getChunks()[chunkIndex];
 
@@ -926,7 +902,6 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
 #if DEBUG_DISPLAY_LIST
                     op->output(level + 1);
 #endif
-                    logBuffer.writeCommand(level, op->name());
                     handler(op, saveCountOffset, properties().getClipToBounds());
 
                     if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && projectionReceiveIndex >= 0 &&

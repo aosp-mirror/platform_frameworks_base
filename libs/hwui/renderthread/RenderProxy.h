@@ -96,7 +96,7 @@ public:
     ANDROID_API void notifyFramePending();
 
     ANDROID_API void dumpProfileInfo(int fd);
-    ANDROID_API static void outputLogBuffer(int fd);
+    ANDROID_API static void dumpGraphicsMemory(int fd);
 
     ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
 

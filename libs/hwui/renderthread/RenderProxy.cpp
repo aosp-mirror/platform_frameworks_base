@@ -387,13 +387,21 @@ void RenderProxy::dumpProfileInfo(int fd) {
     postAndWait(task);
 }
 
-CREATE_BRIDGE1(outputLogBuffer, int fd) {
-    RenderNode::outputLogBuffer(args->fd);
+CREATE_BRIDGE1(dumpGraphicsMemory, int fd) {
+    FILE *file = fdopen(args->fd, "a");
+    if (Caches::hasInstance()) {
+        String8 cachesLog;
+        Caches::getInstance().dumpMemoryUsage(cachesLog);
+        fprintf(file, "\nCaches:\n%s\n", cachesLog.string());
+    } else {
+        fprintf(file, "\nNo caches instance.\n");
+    }
+    fflush(file);
     return nullptr;
 }
 
-void RenderProxy::outputLogBuffer(int fd) {
-    SETUP_TASK(outputLogBuffer);
+void RenderProxy::dumpGraphicsMemory(int fd) {
+    SETUP_TASK(dumpGraphicsMemory);
     args->fd = fd;
     staticPostAndWait(task);
 }

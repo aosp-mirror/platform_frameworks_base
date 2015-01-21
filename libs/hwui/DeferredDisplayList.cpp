@@ -95,7 +95,6 @@ public:
         DEFER_LOGD("%d  replaying DrawBatch %p, with %d ops (batch id %x, merge id %p)",
                 index, this, mOps.size(), getBatchId(), getMergeId());
 
-        DisplayListLogBuffer& logBuffer = DisplayListLogBuffer::getInstance();
         for (unsigned int i = 0; i < mOps.size(); i++) {
             DrawOp* op = mOps[i].op;
             const DeferredDisplayState* state = mOps[i].state;
@@ -104,7 +103,6 @@ public:
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
             renderer.eventMark(op->name());
 #endif
-            logBuffer.writeCommand(0, op->name());
             op->applyDraw(renderer, dirty);
 
 #if DEBUG_MERGE_BEHAVIOR
@@ -261,10 +259,6 @@ public:
         renderer.setupMergedMultiDraw(mClipSideFlags ? &mClipRect : nullptr);
 
         DrawOp* op = mOps[0].op;
-        DisplayListLogBuffer& buffer = DisplayListLogBuffer::getInstance();
-        buffer.writeCommand(0, "multiDraw");
-        buffer.writeCommand(1, op->name());
-
 #if DEBUG_DISPLAY_LIST_OPS_AS_EVENTS
         renderer.eventMark("multiDraw");
         renderer.eventMark(op->name());

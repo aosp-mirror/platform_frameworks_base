@@ -28,7 +28,6 @@
 #include "Canvas.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
-#include "DisplayListLogBuffer.h"
 #include "RenderNode.h"
 #include "Renderer.h"
 #include "ResourceCache.h"

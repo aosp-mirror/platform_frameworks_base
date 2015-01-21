@@ -24,7 +24,6 @@
 #include "ResourceCache.h"
 #include "DeferredDisplayList.h"
 #include "DeferredLayerUpdater.h"
-#include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
 #include "DisplayListRenderer.h"
 #include "RenderNode.h"
