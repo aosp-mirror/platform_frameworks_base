@@ -19,6 +19,7 @@ package com.android.server.am;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +35,7 @@ import android.util.ArraySet;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.FastPrintWriter;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.NeededUriGrants;
 
@@ -140,6 +142,19 @@ public final class ActiveServices {
      */
     final ArrayList<ServiceRecord> mDestroyingServices
             = new ArrayList<ServiceRecord>();
+
+    /** Amount of time to allow a last ANR message to exist before freeing the memory. */
+    static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
+
+    String mLastAnrDump;
+
+    final Runnable mLastAnrDumpClearer = new Runnable() {
+        @Override public void run() {
+            synchronized (mAm) {
+                mLastAnrDump = null;
+            }
+        }
+    };
 
     static final class DelayingProcess extends ArrayList<ServiceRecord> {
         long timeoout;
@@ -2391,23 +2406,15 @@ public final class ActiveServices {
             }
             if (timeout != null && mAm.mLruProcesses.contains(proc)) {
                 Slog.w(TAG, "Timeout executing service: " + timeout);
-                StringBuilder sb = new StringBuilder();
-                sb.append("sxecuting service ");
-                sb.append(timeout.shortName);
-                sb.append(" (execStart=");
-                TimeUtils.formatDuration(timeout.executingStart - now, sb);
-                sb.append(", nesting=");
-                sb.append(timeout.executeNesting);
-                sb.append(", destroyed=");
-                TimeUtils.formatDuration(timeout.destroyTime - now, sb);
-                sb.append(", fg=");
-                sb.append(proc.execServicesFg);
-                sb.append(", create=");
-                TimeUtils.formatDuration(timeout.createTime - now, sb);
-                sb.append(", proc=");
-                sb.append(timeout.app != null ? timeout.app.toShortString() : "null");
-                sb.append(")");
-                anrMessage = sb.toString();
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new FastPrintWriter(sw, false, 1024);
+                pw.println(timeout);
+                timeout.dump(pw, "    ");
+                pw.close();
+                mLastAnrDump = sw.toString();
+                mAm.mHandler.removeCallbacks(mLastAnrDumpClearer);
+                mAm.mHandler.postDelayed(mLastAnrDumpClearer, LAST_ANR_LIFETIME_DURATION_MSECS);
+                anrMessage = "executing service " + timeout.shortName;
             } else {
                 Message msg = mAm.mHandler.obtainMessage(
                         ActivityManagerService.SERVICE_TIMEOUT_MSG);
@@ -2447,6 +2454,11 @@ public final class ActiveServices {
 
         pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
         try {
+            if (mLastAnrDump != null) {
+                pw.println("  Last ANR service:");
+                pw.print(mLastAnrDump);
+                pw.println();
+            }
             int[] users = mAm.getUsersLocked();
             for (int user : users) {
                 ServiceMap smap = getServiceMap(user);
