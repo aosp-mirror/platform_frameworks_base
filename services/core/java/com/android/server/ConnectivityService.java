@@ -2324,6 +2324,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (nri.isRequest) {
                 // Find all networks that are satisfying this request and remove the request
                 // from their request lists.
+                // TODO - it's my understanding that for a request there is only a single
+                // network satisfying it, so this loop is wasteful
+                boolean wasKept = false;
                 for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                     if (nai.networkRequests.get(nri.request.requestId) != null) {
                         nai.networkRequests.remove(nri.request.requestId);
@@ -2335,19 +2338,39 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         if (unneeded(nai)) {
                             if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
                             teardownUnneededNetwork(nai);
+                        } else {
+                            // suspect there should only be one pass through here
+                            // but if any were kept do the check below
+                            wasKept |= true;
                         }
                     }
                 }
 
+                NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
+                if (nai != null) {
+                    mNetworkForRequestId.remove(nri.request.requestId);
+                }
                 // Maintain the illusion.  When this request arrived, we might have pretended
                 // that a network connected to serve it, even though the network was already
                 // connected.  Now that this request has gone away, we might have to pretend
                 // that the network disconnected.  LegacyTypeTracker will generate that
                 // phantom disconnect for this type.
-                NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
-                if (nai != null) {
-                    mNetworkForRequestId.remove(nri.request.requestId);
-                    if (nri.request.legacyType != TYPE_NONE) {
+                if (nri.request.legacyType != TYPE_NONE && nai != null) {
+                    boolean doRemove = true;
+                    if (wasKept) {
+                        // check if any of the remaining requests for this network are for the
+                        // same legacy type - if so, don't remove the nai
+                        for (int i = 0; i < nai.networkRequests.size(); i++) {
+                            NetworkRequest otherRequest = nai.networkRequests.valueAt(i);
+                            if (otherRequest.legacyType == nri.request.legacyType &&
+                                    isRequest(otherRequest)) {
+                                if (DBG) log(" still have other legacy request - leaving");
+                                doRemove = false;
+                            }
+                        }
+                    }
+
+                    if (doRemove) {
                         mLegacyTypeTracker.remove(nri.request.legacyType, nai);
                     }
                 }
