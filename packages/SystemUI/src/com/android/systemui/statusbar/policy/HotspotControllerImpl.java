@@ -110,7 +110,6 @@ public class HotspotControllerImpl implements HotspotController {
                 intent.putExtra(EXTRA_RUN_PROVISION, true);
                 intent.putExtra(EXTRA_ENABLE_WIFI_TETHER, true);
                 intent.setComponent(ComponentName.unflattenFromString(tetherEnable));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 mContext.startServiceAsUser(intent, UserHandle.CURRENT);
             } else {
                 int wifiState = mWifiManager.getWifiState();
