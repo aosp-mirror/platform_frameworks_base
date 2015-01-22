@@ -145,7 +145,7 @@ public final class StrictMode {
      * in {@link VmPolicy.Builder#detectAll()}. Apps can still always opt-into
      * detection using {@link VmPolicy.Builder#detectCleartextNetwork()}.
      */
-    private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.nonssl";
+    private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.clear";
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
@@ -763,8 +763,6 @@ public final class StrictMode {
              * This inspects both IPv4/IPv6 and TCP/UDP network traffic, but it
              * may be subject to false positives, such as when STARTTLS
              * protocols or HTTP proxies are used.
-             *
-             * @hide
              */
             public Builder detectCleartextNetwork() {
                 return enable(DETECT_VM_CLEARTEXT_NETWORK);
@@ -784,7 +782,6 @@ public final class StrictMode {
              * detected.
              *
              * @see #detectCleartextNetwork()
-             * @hide
              */
             public Builder penaltyDeathOnCleartextNetwork() {
                 return enable(PENALTY_DEATH_ON_CLEARTEXT_NETWORK);
