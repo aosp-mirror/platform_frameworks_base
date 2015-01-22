@@ -43,6 +43,7 @@ import com.android.databinding.ext.lazy
 import com.android.databinding.ext.br
 import com.android.databinding.ext.toJavaCode
 import com.android.databinding.ext.isObservable
+import com.android.databinding.expr.ResourceExpr
 
 fun Expr.isObservable() = com.android.databinding.ClassAnalyzer.getInstance().isObservable(this.getResolvedType())
 
@@ -189,6 +190,9 @@ fun Expr.toCode(full : Boolean = false) : KCode {
             app("", it.getPred().toCode())
             app("?", it.getIfTrue().toCode())
             app(":", it.getIfFalse().toCode())
+        }
+        is ResourceExpr -> kcode("") {
+            app("", it.toJava())
         }
         else -> kcode("//NOT IMPLEMENTED YET")
     }

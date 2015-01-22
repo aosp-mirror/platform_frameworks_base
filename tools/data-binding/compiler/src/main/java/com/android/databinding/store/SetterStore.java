@@ -16,7 +16,6 @@
 package com.android.databinding.store;
 
 import com.android.databinding.ClassAnalyzer;
-import com.android.databinding.util.L;
 
 import java.io.File;
 import java.io.IOException;
@@ -318,8 +317,6 @@ public class SetterStore {
 
     public String getSetterCall(String attribute, Class<?> viewType, Class<?> valueType,
             String viewExpression, String valueExpression) {
-        L.d("getting setter call for %s %s %s %s %s", attribute, viewType, valueType,
-                viewExpression, valueExpression);
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
@@ -327,11 +324,9 @@ public class SetterStore {
             }
         }
         ArrayList<AdaptedMethod> adapters = mAdaptedMethods.get(attribute);
-        L.d("returned adapter count %d", adapters == null ? -1 : adapters.size());
         AdaptedMethod adapter = null;
         String setterName = null;
         Method bestSetterMethod = getBestSetter(viewType, valueType, attribute);
-        L.d("setter method: %s", bestSetterMethod == null ? "null" : bestSetterMethod.getName());
         Class<?> bestViewType = null;
         Class<?> bestValueType = null;
         if (bestSetterMethod != null) {
@@ -342,7 +337,6 @@ public class SetterStore {
 
         if (adapters != null) {
             for (AdaptedMethod adaptedMethod : adapters) {
-                L.d("checking adapter method %s", adaptedMethod);
                 if (adaptedMethod.viewType.isAssignableFrom(viewType)) {
                     boolean isBetterView = bestViewType == null ||
                             bestValueType.isAssignableFrom(adaptedMethod.valueType);
@@ -351,12 +345,7 @@ public class SetterStore {
                         bestViewType = adaptedMethod.viewType;
                         bestValueType = adaptedMethod.valueType;
                         adapter = adaptedMethod;
-                        L.d("chosen %s", adaptedMethod);
-                    } else {
-                        L.d("not better");
                     }
-                } else {
-                    L.d("not assignable");
                 }
             }
         }
@@ -469,16 +458,12 @@ public class SetterStore {
     }
 
     private ConversionMethod getConversionMethod(Class<?> from, Class<?> to) {
-        System.out.println("Getting conversion from " + from + " to " + to);
         if (from != null && to != null) {
             for (ConversionMethod conversion : mConversionMethods) {
-                System.out.println("Testing " + conversion.fromType + " to " + conversion.toType);
                 if (canUseForConversion(from, conversion.fromType) &&
                         canUseForConversion(conversion.toType, to)) {
-                    System.out.println("Yes!");
                     return conversion;
                 }
-                System.out.println("Nope!");
             }
         }
         return null;

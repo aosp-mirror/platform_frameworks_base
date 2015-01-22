@@ -39,11 +39,6 @@ import android.view.View;
 })
 public class ViewBindingAdapter {
 
-    @BindingAdapter("android:background")
-    public static void setBackground(View view, int color) {
-        view.setBackgroundColor(color);
-    }
-
     @BindingAdapter("android:padding")
     public static void setPadding(View view, int padding) {
         view.setPadding(padding, padding, padding, padding);

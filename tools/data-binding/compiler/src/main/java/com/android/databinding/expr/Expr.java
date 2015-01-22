@@ -124,7 +124,7 @@ abstract public class Expr {
 
     private BitSet resolveInvalidFlags() {
         BitSet bitSet = new BitSet();
-        if (mCanBeInvalidated) {
+        if (mCanBeInvalidated || getDependants().isEmpty()) {
             bitSet.set(getId(), true);
         }
         for (Dependency dependency : getDependencies()) {

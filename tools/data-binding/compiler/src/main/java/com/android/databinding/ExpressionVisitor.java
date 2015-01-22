@@ -143,6 +143,11 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         return mModel.math(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
     }
 
+    @Override
+    public Expr visitResource(@NotNull BindingExpressionParser.ResourceContext ctx) {
+        return mModel.resourceExpr(ctx.getText());
+    }
+
     //    @Override
 //    public Expr visitIdentifier(@NotNull BindingExpressionParser.IdentifierContext ctx) {
 //        final String identifier = ctx.Identifier().getText();

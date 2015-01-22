@@ -142,6 +142,10 @@ public class ExprModel {
         return register(new GroupExpr(grouped));
     }
 
+    public Expr resourceExpr(String resourceText) {
+        return register(new ResourceExpr(resourceText));
+    }
+
     public List<Expr> getBindingExpressions() {
         return mBindingExpressions;
     }
