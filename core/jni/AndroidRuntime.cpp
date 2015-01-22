@@ -357,22 +357,37 @@ static bool hasFile(const char* file) {
 }
 
 /*
- * Read the persistent locale.
+ * Read the persistent locale. Attempts to read to persist.sys.locale
+ * and falls back to the default locale (ro.product.locale) if
+ * persist.sys.locale is empty.
  */
-static void readLocale(char* language, char* region)
+static void readLocale(char* locale)
 {
-    char propLang[PROPERTY_VALUE_MAX], propRegn[PROPERTY_VALUE_MAX];
+    // Allocate 4 extra bytes because we might read a property into
+    // this array at offset 4.
+    char propLocale[PROPERTY_VALUE_MAX + 4];
 
-    property_get("persist.sys.language", propLang, "");
-    property_get("persist.sys.country", propRegn, "");
-    if (*propLang == 0 && *propRegn == 0) {
-        /* Set to ro properties, default is en_US */
-        property_get("ro.product.locale.language", propLang, "en");
-        property_get("ro.product.locale.region", propRegn, "US");
+    property_get("persist.sys.locale", propLocale, "");
+    if (propLocale[0] == 0) {
+        property_get("ro.product.locale", propLocale, "");
+
+        if (propLocale[0] == 0) {
+            // If persist.sys.locale and ro.product.locale are missing,
+            // construct a locale value from the individual locale components.
+            property_get("ro.product.locale.language", propLocale, "en");
+
+            // The language code is either two or three chars in length. If it
+            // isn't 2 chars long, assume three. Anything else is an error
+            // anyway.
+            const int offset = (propLocale[2] == 0) ? 2 : 3;
+            propLocale[offset] = '-';
+
+            property_get("ro.product.locale.region", propLocale + offset + 1, "US");
+        }
     }
-    strncat(language, propLang, 3);
-    strncat(region, propRegn, 3);
-    //ALOGD("language=%s region=%s\n", language, region);
+
+    strncat(locale, propLocale, PROPERTY_VALUE_MAX);
+    // ALOGD("[DEBUG] locale=%s", locale);
 }
 
 void AndroidRuntime::addOption(const char* optionString, void* extraInfo)
@@ -559,8 +574,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
                                     PROPERTY_VALUE_MAX];
     char profileType[sizeof("-Xprofile-type:")-1 + PROPERTY_VALUE_MAX];
     char profileMaxStackDepth[sizeof("-Xprofile-max-stack-depth:")-1 + PROPERTY_VALUE_MAX];
-    char langOption[sizeof("-Duser.language=") + 3];
-    char regionOption[sizeof("-Duser.region=") + 3];
+    char localeOption[sizeof("-Duser.locale=") + PROPERTY_VALUE_MAX];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
 
@@ -717,11 +731,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
 
     /* Set the properties for locale */
     {
-        strcpy(langOption, "-Duser.language=");
-        strcpy(regionOption, "-Duser.region=");
-        readLocale(langOption, regionOption);
-        addOption(langOption);
-        addOption(regionOption);
+        strcpy(localeOption, "-Duser.locale=");
+        readLocale(localeOption);
+        addOption(localeOption);
     }
 
     /*
