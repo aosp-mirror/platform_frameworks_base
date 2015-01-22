@@ -37,6 +37,7 @@ package android {
     field public static final java.lang.String BIND_INCALL_SERVICE = "android.permission.BIND_INCALL_SERVICE";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
+    field public static final java.lang.String BIND_MEDIA_ROUTE_SERVICE = "android.permission.BIND_MEDIA_ROUTE_SERVICE";
     field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
@@ -128,6 +129,7 @@ package android {
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final java.lang.String NFC = "android.permission.NFC";
+    field public static final java.lang.String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final java.lang.String PERFORM_CDMA_PROVISIONING = "android.permission.PERFORM_CDMA_PROVISIONING";
@@ -164,6 +166,7 @@ package android {
     field public static final java.lang.String RECEIVE_MMS = "android.permission.RECEIVE_MMS";
     field public static final java.lang.String RECEIVE_SMS = "android.permission.RECEIVE_SMS";
     field public static final java.lang.String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
+    field public static final java.lang.String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final java.lang.String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
     field public static final java.lang.String RECOVERY = "android.permission.RECOVERY";
     field public static final java.lang.String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
@@ -571,6 +574,8 @@ package android {
     field public static final int drawablePadding = 16843121; // 0x1010171
     field public static final int drawableRight = 16843120; // 0x1010170
     field public static final int drawableStart = 16843666; // 0x1010392
+    field public static final int drawableTint = 16843990; // 0x10104d6
+    field public static final int drawableTintMode = 16843991; // 0x10104d7
     field public static final int drawableTop = 16843117; // 0x101016d
     field public static final int drawingCacheQuality = 16842984; // 0x10100e8
     field public static final int dropDownAnchor = 16843363; // 0x1010263
@@ -660,6 +665,7 @@ package android {
     field public static final int format = 16843013; // 0x1010105
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
+    field public static final int fraction = 16843992; // 0x10104d8
     field public static final int fragment = 16843491; // 0x10102e3
     field public static final int fragmentAllowEnterTransitionOverlap = 16843976; // 0x10104c8
     field public static final int fragmentAllowReturnTransitionOverlap = 16843977; // 0x10104c9
@@ -2483,6 +2489,7 @@ package android {
     field public static final int Widget_Material_Button_Borderless = 16974425; // 0x1030259
     field public static final int Widget_Material_Button_Borderless_Colored = 16974426; // 0x103025a
     field public static final int Widget_Material_Button_Borderless_Small = 16974427; // 0x103025b
+    field public static final int Widget_Material_Button_Colored = 16974547; // 0x10302d3
     field public static final int Widget_Material_Button_Inset = 16974428; // 0x103025c
     field public static final int Widget_Material_Button_Small = 16974429; // 0x103025d
     field public static final int Widget_Material_Button_Toggle = 16974430; // 0x103025e
@@ -5284,7 +5291,7 @@ package android.app {
 
   public static class VoiceInteractor.CommandRequest extends android.app.VoiceInteractor.Request {
     ctor public VoiceInteractor.CommandRequest(java.lang.String, android.os.Bundle);
-    method public void onCommandResult(android.os.Bundle);
+    method public void onCommandResult(boolean, android.os.Bundle);
   }
 
   public static class VoiceInteractor.CompleteVoiceRequest extends android.app.VoiceInteractor.Request {
@@ -7383,6 +7390,8 @@ package android.content {
     method public abstract java.io.File getCacheDir();
     method public abstract java.lang.ClassLoader getClassLoader();
     method public abstract java.io.File getCodeCacheDir();
+    method public final int getColor(int);
+    method public final android.content.res.ColorStateList getColorStateList(int);
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDatabasePath(java.lang.String);
     method public abstract java.io.File getDir(java.lang.String, int);
@@ -9379,7 +9388,10 @@ package android.content.res {
 
   public class ColorStateList implements android.os.Parcelable {
     ctor public ColorStateList(int[][], int[]);
-    method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public void applyTheme(android.content.res.Resources.Theme);
+    method public boolean canApplyTheme();
+    method public static deprecated android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public int describeContents();
     method public int getColorForState(int[], int);
     method public int getDefaultColor();
@@ -9509,8 +9521,10 @@ package android.content.res {
     method public android.content.res.XmlResourceParser getAnimation(int) throws android.content.res.Resources.NotFoundException;
     method public final android.content.res.AssetManager getAssets();
     method public boolean getBoolean(int) throws android.content.res.Resources.NotFoundException;
-    method public int getColor(int) throws android.content.res.Resources.NotFoundException;
-    method public android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
+    method public deprecated int getColor(int) throws android.content.res.Resources.NotFoundException;
+    method public int getColor(int, android.content.res.Resources.Theme) throws android.content.res.Resources.NotFoundException;
+    method public deprecated android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
+    method public android.content.res.ColorStateList getColorStateList(int, android.content.res.Resources.Theme) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.Configuration getConfiguration();
     method public float getDimension(int) throws android.content.res.Resources.NotFoundException;
     method public int getDimensionPixelOffset(int) throws android.content.res.Resources.NotFoundException;
@@ -11994,6 +12008,8 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable.ConstantState getConstantState();
     method public android.graphics.drawable.Drawable getCurrent();
     method public android.graphics.Rect getDirtyBounds();
+    method public boolean getDither();
+    method public boolean getFilterBitmap();
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
     method public final int getLevel();
@@ -15627,6 +15643,7 @@ package android.media {
     field public static final int COLOR_Format24bitBGR888 = 12; // 0xc
     field public static final int COLOR_Format24bitRGB888 = 11; // 0xb
     field public static final int COLOR_Format25bitARGB1888 = 14; // 0xe
+    field public static final int COLOR_Format32BitRGBA8888 = 2130747392; // 0x7f00a000
     field public static final int COLOR_Format32bitARGB8888 = 16; // 0x10
     field public static final int COLOR_Format32bitBGRA8888 = 15; // 0xf
     field public static final int COLOR_Format8bitRGB332 = 2; // 0x2
@@ -17341,11 +17358,248 @@ package android.media.projection {
 
 }
 
+package android.media.routing {
+
+  public final class MediaRouteSelector implements android.os.Parcelable {
+    method public boolean containsProtocol(java.lang.Class<?>);
+    method public boolean containsProtocol(java.lang.String);
+    method public int describeContents();
+    method public android.os.Bundle getExtras();
+    method public int getOptionalFeatures();
+    method public java.util.List<java.lang.String> getOptionalProtocols();
+    method public int getRequiredFeatures();
+    method public java.util.List<java.lang.String> getRequiredProtocols();
+    method public java.lang.String getServicePackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.routing.MediaRouteSelector> CREATOR;
+  }
+
+  public static final class MediaRouteSelector.Builder {
+    ctor public MediaRouteSelector.Builder();
+    method public android.media.routing.MediaRouteSelector.Builder addOptionalProtocol(java.lang.Class<?>);
+    method public android.media.routing.MediaRouteSelector.Builder addOptionalProtocol(java.lang.String);
+    method public android.media.routing.MediaRouteSelector.Builder addRequiredProtocol(java.lang.Class<?>);
+    method public android.media.routing.MediaRouteSelector.Builder addRequiredProtocol(java.lang.String);
+    method public android.media.routing.MediaRouteSelector build();
+    method public android.media.routing.MediaRouteSelector.Builder setExtras(android.os.Bundle);
+    method public android.media.routing.MediaRouteSelector.Builder setOptionalFeatures(int);
+    method public android.media.routing.MediaRouteSelector.Builder setRequiredFeatures(int);
+    method public android.media.routing.MediaRouteSelector.Builder setServicePackageName(java.lang.String);
+  }
+
+  public abstract class MediaRouteService extends android.app.Service {
+    ctor public MediaRouteService();
+    method public android.media.routing.MediaRouter.ServiceMetadata getServiceMetadata();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.media.routing.MediaRouteService.ClientSession onCreateClientSession(android.media.routing.MediaRouteService.ClientInfo);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.media.routing.MediaRouteService";
+  }
+
+  public static final class MediaRouteService.ClientInfo {
+    method public java.lang.String getPackageName();
+    method public int getUid();
+  }
+
+  public static abstract class MediaRouteService.ClientSession {
+    ctor public MediaRouteService.ClientSession();
+    method public abstract boolean onConnect(android.media.routing.MediaRouter.ConnectionRequest, android.media.routing.MediaRouteService.ConnectionCallback);
+    method public abstract void onDisconnect();
+    method public void onPauseStream();
+    method public void onRelease();
+    method public void onResumeStream();
+    method public abstract boolean onStartDiscovery(android.media.routing.MediaRouter.DiscoveryRequest, android.media.routing.MediaRouteService.DiscoveryCallback);
+    method public abstract void onStopDiscovery();
+  }
+
+  public final class MediaRouteService.ConnectionCallback {
+    method public void onConnected(android.media.routing.MediaRouter.ConnectionInfo);
+    method public void onConnectionFailed(int, java.lang.CharSequence, android.os.Bundle);
+    method public void onDisconnected();
+  }
+
+  public final class MediaRouteService.DiscoveryCallback {
+    method public void onDestinationFound(android.media.routing.MediaRouter.DestinationInfo, java.util.List<android.media.routing.MediaRouter.RouteInfo>);
+    method public void onDestinationLost(android.media.routing.MediaRouter.DestinationInfo);
+    method public void onDiscoveryFailed(int, java.lang.CharSequence, android.os.Bundle);
+  }
+
+  public final class MediaRouter {
+    ctor public MediaRouter(android.content.Context);
+    method public void addSelector(android.media.routing.MediaRouteSelector);
+    method public void clearSelectors();
+    method public android.media.routing.MediaRouter.Delegate createDelegate();
+    method public android.media.routing.MediaRouter.ConnectionInfo getConnection();
+    method public int getConnectionState();
+    method public java.util.List<android.media.routing.MediaRouter.DestinationInfo> getDiscoveredDestinations();
+    method public java.util.List<android.media.routing.MediaRouter.RouteInfo> getDiscoveredRoutes(android.media.routing.MediaRouter.DestinationInfo);
+    method public int getDiscoveryState();
+    method public android.media.AudioAttributes getPreferredAudioAttributes();
+    method public android.view.Display getPreferredPresentationDisplay();
+    method public android.media.VolumeProvider getPreferredVolumeProvider();
+    method public android.media.routing.MediaRouter.DestinationInfo getSelectedDestination();
+    method public android.media.routing.MediaRouter.RouteInfo getSelectedRoute();
+    method public java.util.List<android.media.routing.MediaRouteSelector> getSelectors();
+    method public boolean isReleased();
+    method public void pauseStream();
+    method public void release();
+    method public void removeSelector(android.media.routing.MediaRouteSelector);
+    method public void resumeStream();
+    method public void setRoutingCallback(android.media.routing.MediaRouter.RoutingCallback, android.os.Handler);
+    field public static final int CONNECTION_ERROR_ABORTED = 1; // 0x1
+    field public static final int CONNECTION_ERROR_BARGED = 7; // 0x7
+    field public static final int CONNECTION_ERROR_BROKEN = 6; // 0x6
+    field public static final int CONNECTION_ERROR_BUSY = 4; // 0x4
+    field public static final int CONNECTION_ERROR_TIMEOUT = 5; // 0x5
+    field public static final int CONNECTION_ERROR_UNAUTHORIZED = 2; // 0x2
+    field public static final int CONNECTION_ERROR_UNKNOWN = 0; // 0x0
+    field public static final int CONNECTION_ERROR_UNREACHABLE = 3; // 0x3
+    field public static final int CONNECTION_FLAG_BARGE = 1; // 0x1
+    field public static final int CONNECTION_STATE_CONNECTED = 2; // 0x2
+    field public static final int CONNECTION_STATE_CONNECTING = 1; // 0x1
+    field public static final int CONNECTION_STATE_DISCONNECTED = 0; // 0x0
+    field public static final int DISCONNECTION_REASON_APPLICATION_REQUEST = 0; // 0x0
+    field public static final int DISCONNECTION_REASON_ERROR = 2; // 0x2
+    field public static final int DISCONNECTION_REASON_USER_REQUEST = 1; // 0x1
+    field public static final int DISCOVERY_ERROR_ABORTED = 1; // 0x1
+    field public static final int DISCOVERY_ERROR_NO_CONNECTIVITY = 2; // 0x2
+    field public static final int DISCOVERY_ERROR_UNKNOWN = 0; // 0x0
+    field public static final int DISCOVERY_FLAG_BACKGROUND = 1; // 0x1
+    field public static final int DISCOVERY_STATE_STARTED = 1; // 0x1
+    field public static final int DISCOVERY_STATE_STOPPED = 0; // 0x0
+    field public static final int ROUTE_FEATURE_LIVE_AUDIO = 1; // 0x1
+    field public static final int ROUTE_FEATURE_LIVE_VIDEO = 2; // 0x2
+  }
+
+  public static final class MediaRouter.ConnectionInfo {
+    method public android.media.AudioAttributes getAudioAttributes();
+    method public android.os.Bundle getExtras();
+    method public int getFeatures();
+    method public android.view.Display getPresentationDisplay();
+    method public android.os.IBinder getProtocolBinder(java.lang.String);
+    method public android.os.IBinder getProtocolBinder(int);
+    method public T getProtocolObject(java.lang.Class<T>);
+    method public java.util.List<java.lang.String> getProtocols();
+    method public android.media.routing.MediaRouter.RouteInfo getRoute();
+    method public android.media.VolumeProvider getVolumeProvider();
+  }
+
+  public static final class MediaRouter.ConnectionInfo.Builder {
+    ctor public MediaRouter.ConnectionInfo.Builder(android.media.routing.MediaRouter.RouteInfo);
+    method public android.media.routing.MediaRouter.ConnectionInfo build();
+    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setAudioAttributes(android.media.AudioAttributes);
+    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setExtras(android.os.Bundle);
+    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setPresentationDisplay(android.view.Display);
+    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setProtocolBinder(java.lang.String, android.os.IBinder);
+    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setProtocolStub(java.lang.Class<?>, android.os.IInterface);
+    method public android.media.routing.MediaRouter.ConnectionInfo.Builder setVolumeProvider(android.media.VolumeProvider);
+  }
+
+  public static final class MediaRouter.ConnectionRequest {
+    method public android.os.Bundle getExtras();
+    method public int getFlags();
+    method public android.media.routing.MediaRouter.RouteInfo getRoute();
+    method public void setExtras(android.os.Bundle);
+    method public void setFlags(int);
+    method public void setRoute(android.media.routing.MediaRouter.RouteInfo);
+  }
+
+  public static final class MediaRouter.Delegate {
+    ctor public MediaRouter.Delegate();
+    method public void addStateCallback(android.media.routing.MediaRouter.StateCallback, android.os.Handler);
+    method public void connect(android.media.routing.MediaRouter.DestinationInfo, int);
+    method public void disconnect(int);
+    method public int getConnectionState();
+    method public java.util.List<android.media.routing.MediaRouter.DestinationInfo> getDiscoveredDestinations();
+    method public int getDiscoveryState();
+    method public android.media.routing.MediaRouter.DestinationInfo getSelectedDestination();
+    method public boolean isReleased();
+    method public void removeStateCallback(android.media.routing.MediaRouter.StateCallback);
+    method public void startDiscovery(int);
+    method public void stopDiscovery();
+  }
+
+  public static final class MediaRouter.DestinationInfo {
+    method public java.lang.CharSequence getDescription();
+    method public android.os.Bundle getExtras();
+    method public int getIconResourceId();
+    method public java.lang.String getId();
+    method public java.lang.CharSequence getName();
+    method public android.media.routing.MediaRouter.ServiceMetadata getServiceMetadata();
+    method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
+  }
+
+  public static final class MediaRouter.DestinationInfo.Builder {
+    ctor public MediaRouter.DestinationInfo.Builder(java.lang.String, android.media.routing.MediaRouter.ServiceMetadata, java.lang.CharSequence);
+    method public android.media.routing.MediaRouter.DestinationInfo build();
+    method public android.media.routing.MediaRouter.DestinationInfo.Builder setDescription(java.lang.CharSequence);
+    method public android.media.routing.MediaRouter.DestinationInfo.Builder setExtras(android.os.Bundle);
+    method public android.media.routing.MediaRouter.DestinationInfo.Builder setIconResourceId(int);
+  }
+
+  public static final class MediaRouter.DiscoveryRequest {
+    method public int getFlags();
+    method public java.util.List<android.media.routing.MediaRouteSelector> getSelectors();
+    method public void setFlags(int);
+    method public void setSelectors(java.util.List<android.media.routing.MediaRouteSelector>);
+  }
+
+  public static final class MediaRouter.RouteInfo {
+    method public android.media.routing.MediaRouter.DestinationInfo getDestination();
+    method public android.os.Bundle getExtras();
+    method public int getFeatures();
+    method public java.lang.String getId();
+    method public java.util.List<java.lang.String> getProtocols();
+    method public android.media.routing.MediaRouteSelector getSelector();
+  }
+
+  public static final class MediaRouter.RouteInfo.Builder {
+    ctor public MediaRouter.RouteInfo.Builder(java.lang.String, android.media.routing.MediaRouter.DestinationInfo, android.media.routing.MediaRouteSelector);
+    method public android.media.routing.MediaRouter.RouteInfo.Builder addProtocol(java.lang.Class<T>);
+    method public android.media.routing.MediaRouter.RouteInfo.Builder addProtocol(java.lang.String);
+    method public android.media.routing.MediaRouter.RouteInfo build();
+    method public android.media.routing.MediaRouter.RouteInfo.Builder setExtras(android.os.Bundle);
+    method public android.media.routing.MediaRouter.RouteInfo.Builder setFeatures(int);
+  }
+
+  public static abstract class MediaRouter.RoutingCallback extends android.media.routing.MediaRouter.StateCallback {
+    ctor public MediaRouter.RoutingCallback();
+    method public boolean onPrepareConnectionRequest(android.media.routing.MediaRouter.ConnectionRequest, android.media.routing.MediaRouter.DestinationInfo, java.util.List<android.media.routing.MediaRouter.RouteInfo>);
+    method public boolean onPrepareDiscoveryRequest(android.media.routing.MediaRouter.DiscoveryRequest, java.util.List<android.media.routing.MediaRouteSelector>);
+  }
+
+  public static final class MediaRouter.ServiceMetadata {
+    method public android.content.ComponentName getComponentName();
+    method public android.graphics.drawable.Drawable getIcon(android.content.pm.PackageManager);
+    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+    method public java.lang.String getPackageName();
+    method public android.content.pm.ServiceInfo getService();
+  }
+
+  public static abstract class MediaRouter.StateCallback {
+    ctor public MediaRouter.StateCallback();
+    method public void onConnected();
+    method public void onConnecting();
+    method public void onConnectionFailed(int, java.lang.CharSequence, android.os.Bundle);
+    method public void onConnectionStateChanged(int);
+    method public void onDestinationFound(android.media.routing.MediaRouter.DestinationInfo);
+    method public void onDestinationLost(android.media.routing.MediaRouter.DestinationInfo);
+    method public void onDisconnected();
+    method public void onDiscoveryFailed(int, java.lang.CharSequence, android.os.Bundle);
+    method public void onDiscoveryStarted();
+    method public void onDiscoveryStateChanged(int);
+    method public void onDiscoveryStopped();
+    method public void onReleased();
+    method public void onSelectedDestinationChanged(android.media.routing.MediaRouter.DestinationInfo);
+  }
+
+}
+
 package android.media.session {
 
   public final class MediaController {
     ctor public MediaController(android.content.Context, android.media.session.MediaSession.Token);
     method public void adjustVolume(int, int);
+    method public android.media.routing.MediaRouter.Delegate createMediaRouterDelegate();
     method public boolean dispatchMediaButtonEvent(android.view.KeyEvent);
     method public android.os.Bundle getExtras();
     method public long getFlags();
@@ -17418,6 +17672,7 @@ package android.media.session {
     method public void setExtras(android.os.Bundle);
     method public void setFlags(int);
     method public void setMediaButtonReceiver(android.app.PendingIntent);
+    method public void setMediaRouter(android.media.routing.MediaRouter);
     method public void setMetadata(android.media.MediaMetadata);
     method public void setPlaybackState(android.media.session.PlaybackState);
     method public void setPlaybackToLocal(android.media.AudioAttributes);
@@ -18833,7 +19088,7 @@ package android.net.http {
     method public static android.net.http.HttpResponseCache getInstalled();
     method public int getNetworkCount();
     method public int getRequestCount();
-    method public static android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
+    method public static synchronized android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
     method public long maxSize();
     method public java.net.CacheRequest put(java.net.URI, java.net.URLConnection) throws java.io.IOException;
     method public long size();
@@ -19330,9 +19585,11 @@ package android.net.wifi {
     field public java.util.BitSet allowedKeyManagement;
     field public java.util.BitSet allowedPairwiseCiphers;
     field public java.util.BitSet allowedProtocols;
+    field public java.lang.String creatorName;
     field public int creatorUid;
     field public android.net.wifi.WifiEnterpriseConfig enterpriseConfig;
     field public boolean hiddenSSID;
+    field public java.lang.String lastUpdateName;
     field public int lastUpdateUid;
     field public int networkId;
     field public int numAssociation;
@@ -19529,6 +19786,8 @@ package android.net.wifi {
     field public static final java.lang.String EXTRA_SUPPLICANT_CONNECTED = "connected";
     field public static final java.lang.String EXTRA_SUPPLICANT_ERROR = "supplicantError";
     field public static final java.lang.String EXTRA_WIFI_CONFIGURATION = "wifiConfiguration";
+    field public static final java.lang.String EXTRA_WIFI_CREDENTIAL_EVENT_TYPE = "et";
+    field public static final java.lang.String EXTRA_WIFI_CREDENTIAL_SSID = "ssid";
     field public static final java.lang.String EXTRA_WIFI_INFO = "wifiInfo";
     field public static final java.lang.String EXTRA_WIFI_STATE = "wifi_state";
     field public static final java.lang.String NETWORK_IDS_CHANGED_ACTION = "android.net.wifi.NETWORK_IDS_CHANGED";
@@ -19537,6 +19796,9 @@ package android.net.wifi {
     field public static final java.lang.String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
     field public static final java.lang.String SUPPLICANT_CONNECTION_CHANGE_ACTION = "android.net.wifi.supplicant.CONNECTION_CHANGE";
     field public static final java.lang.String SUPPLICANT_STATE_CHANGED_ACTION = "android.net.wifi.supplicant.STATE_CHANGE";
+    field public static final java.lang.String WIFI_CREDENTIAL_CHANGED_ACTION = "android.net.wifi.WIFI_CREDENTIAL_CHANGED";
+    field public static final int WIFI_CREDENTIAL_FORGOT = 1; // 0x1
+    field public static final int WIFI_CREDENTIAL_SAVED = 0; // 0x0
     field public static final int WIFI_MODE_FULL = 1; // 0x1
     field public static final int WIFI_MODE_FULL_HIGH_PERF = 3; // 0x3
     field public static final int WIFI_MODE_SCAN_ONLY = 2; // 0x2
@@ -19589,11 +19851,13 @@ package android.net.wifi {
   public class WifiScanner {
     method public void configureWifiChange(int, int, int, int, int, android.net.wifi.WifiScanner.BssidInfo[]);
     method public void configureWifiChange(android.net.wifi.WifiScanner.WifiChangeSettings);
-    method public android.net.wifi.ScanResult[] getScanResults();
+    method public boolean getScanResults();
     method public void startBackgroundScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
+    method public void startScan(android.net.wifi.WifiScanner.ScanSettings, android.net.wifi.WifiScanner.ScanListener);
     method public void startTrackingBssids(android.net.wifi.WifiScanner.BssidInfo[], int, android.net.wifi.WifiScanner.BssidListener);
     method public void startTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
     method public void stopBackgroundScan(android.net.wifi.WifiScanner.ScanListener);
+    method public void stopScan(android.net.wifi.WifiScanner.ScanListener);
     method public void stopTrackingBssids(android.net.wifi.WifiScanner.BssidListener);
     method public void stopTrackingWifiChange(android.net.wifi.WifiScanner.WifiChangeListener);
     field public static final int MAX_SCAN_PERIOD_MS = 1024000; // 0xfa000
@@ -19630,6 +19894,7 @@ package android.net.wifi {
 
   public static abstract interface WifiScanner.BssidListener implements android.net.wifi.WifiScanner.ActionListener {
     method public abstract void onFound(android.net.wifi.ScanResult[]);
+    method public abstract void onLost(android.net.wifi.ScanResult[]);
   }
 
   public static class WifiScanner.ChannelSpec {
@@ -19645,10 +19910,36 @@ package android.net.wifi {
     field public android.net.wifi.WifiScanner.BssidInfo[] bssidInfos;
   }
 
+  public static class WifiScanner.ParcelableScanData implements android.os.Parcelable {
+    ctor public WifiScanner.ParcelableScanData(android.net.wifi.WifiScanner.ScanData[]);
+    method public int describeContents();
+    method public android.net.wifi.WifiScanner.ScanData[] getResults();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public android.net.wifi.WifiScanner.ScanData[] mResults;
+  }
+
+  public static class WifiScanner.ParcelableScanResults implements android.os.Parcelable {
+    ctor public WifiScanner.ParcelableScanResults(android.net.wifi.ScanResult[]);
+    method public int describeContents();
+    method public android.net.wifi.ScanResult[] getResults();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public android.net.wifi.ScanResult[] mResults;
+  }
+
+  public static class WifiScanner.ScanData implements android.os.Parcelable {
+    ctor public WifiScanner.ScanData(int, int, android.net.wifi.ScanResult[]);
+    ctor public WifiScanner.ScanData(android.net.wifi.WifiScanner.ScanData);
+    method public int describeContents();
+    method public int getFlags();
+    method public int getId();
+    method public android.net.wifi.ScanResult[] getResults();
+    method public void writeToParcel(android.os.Parcel, int);
+  }
+
   public static abstract interface WifiScanner.ScanListener implements android.net.wifi.WifiScanner.ActionListener {
     method public abstract void onFullResult(android.net.wifi.ScanResult);
     method public abstract void onPeriodChanged(int);
-    method public abstract void onResults(android.net.wifi.ScanResult[]);
+    method public abstract void onResults(android.net.wifi.WifiScanner.ScanData[]);
   }
 
   public static class WifiScanner.ScanSettings implements android.os.Parcelable {
@@ -19657,6 +19948,7 @@ package android.net.wifi {
     method public void writeToParcel(android.os.Parcel, int);
     field public int band;
     field public android.net.wifi.WifiScanner.ChannelSpec[] channels;
+    field public int maxScansToCache;
     field public int numBssidsPerScan;
     field public int periodInMs;
     field public int reportEvents;
@@ -23221,7 +23513,7 @@ package android.os {
     field public static final int TRACE_COUNT_ALLOCS = 1; // 0x1
   }
 
-  public static class Debug.InstructionCount {
+  public static deprecated class Debug.InstructionCount {
     ctor public Debug.InstructionCount();
     method public boolean collect();
     method public int globalMethodInvocations();
@@ -23876,6 +24168,7 @@ package android.os {
     method public android.os.StrictMode.ThreadPolicy.Builder detectDiskReads();
     method public android.os.StrictMode.ThreadPolicy.Builder detectDiskWrites();
     method public android.os.StrictMode.ThreadPolicy.Builder detectNetwork();
+    method public android.os.StrictMode.ThreadPolicy.Builder detectResourceMismatches();
     method public android.os.StrictMode.ThreadPolicy.Builder penaltyDeath();
     method public android.os.StrictMode.ThreadPolicy.Builder penaltyDeathOnNetwork();
     method public android.os.StrictMode.ThreadPolicy.Builder penaltyDialog();
@@ -23887,6 +24180,7 @@ package android.os {
     method public android.os.StrictMode.ThreadPolicy.Builder permitDiskReads();
     method public android.os.StrictMode.ThreadPolicy.Builder permitDiskWrites();
     method public android.os.StrictMode.ThreadPolicy.Builder permitNetwork();
+    method public android.os.StrictMode.ThreadPolicy.Builder permitResourceMismatches();
   }
 
   public static final class StrictMode.VmPolicy {
@@ -23899,11 +24193,13 @@ package android.os {
     method public android.os.StrictMode.VmPolicy build();
     method public android.os.StrictMode.VmPolicy.Builder detectActivityLeaks();
     method public android.os.StrictMode.VmPolicy.Builder detectAll();
+    method public android.os.StrictMode.VmPolicy.Builder detectCleartextNetwork();
     method public android.os.StrictMode.VmPolicy.Builder detectFileUriExposure();
     method public android.os.StrictMode.VmPolicy.Builder detectLeakedClosableObjects();
     method public android.os.StrictMode.VmPolicy.Builder detectLeakedRegistrationObjects();
     method public android.os.StrictMode.VmPolicy.Builder detectLeakedSqlLiteObjects();
     method public android.os.StrictMode.VmPolicy.Builder penaltyDeath();
+    method public android.os.StrictMode.VmPolicy.Builder penaltyDeathOnCleartextNetwork();
     method public android.os.StrictMode.VmPolicy.Builder penaltyDropBox();
     method public android.os.StrictMode.VmPolicy.Builder penaltyLog();
     method public android.os.StrictMode.VmPolicy.Builder setClassInstanceLimit(java.lang.Class, int);
@@ -25530,6 +25826,13 @@ package android.provider {
     field public static final int TYPE_KEEP_TOGETHER = 1; // 0x1
   }
 
+  public static final class ContactsContract.Authorization {
+    ctor public ContactsContract.Authorization();
+    field public static final java.lang.String AUTHORIZATION_METHOD = "authorize";
+    field public static final java.lang.String KEY_AUTHORIZED_URI = "authorized_uri";
+    field public static final java.lang.String KEY_URI_TO_AUTHORIZE = "uri_to_authorize";
+  }
+
   protected static abstract interface ContactsContract.BaseSyncColumns {
     field public static final java.lang.String SYNC1 = "sync1";
     field public static final java.lang.String SYNC2 = "sync2";
@@ -26159,6 +26462,16 @@ package android.provider {
     method public static void set(android.content.ContentProviderClient, android.accounts.Account, byte[]) throws android.os.RemoteException;
     field public static final java.lang.String CONTENT_DIRECTORY = "syncstate";
     field public static final android.net.Uri CONTENT_URI;
+  }
+
+  public static final class ContactsContract.ProviderStatus {
+    field public static final java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/provider_status";
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String STATUS = "status";
+    field public static final int STATUS_CHANGING_LOCALE = 3; // 0x3
+    field public static final int STATUS_NORMAL = 0; // 0x0
+    field public static final int STATUS_NO_ACCOUNTS_NO_CONTACTS = 4; // 0x4
+    field public static final int STATUS_UPGRADING = 1; // 0x1
   }
 
   public static final class ContactsContract.QuickContact {
@@ -26935,7 +27248,7 @@ package android.provider {
     field public static final int LOCATION_MODE_OFF = 0; // 0x0
     field public static final int LOCATION_MODE_SENSORS_ONLY = 1; // 0x1
     field public static final deprecated java.lang.String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
-    field public static final java.lang.String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
+    field public static final deprecated java.lang.String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
     field public static final deprecated java.lang.String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
     field public static final java.lang.String LOCK_PATTERN_VISIBLE = "lock_pattern_visible_pattern";
     field public static final deprecated java.lang.String LOGGING_ID = "logging_id";
@@ -28867,16 +29180,24 @@ package android.service.voice {
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.Dialog getWindow();
     method public void hideWindow();
+    method public void onAbortVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onBackPressed();
+    method public abstract void onCancel(android.service.voice.VoiceInteractionSession.Request);
     method public void onCloseSystemDialogs();
+    method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
+    method public void onCompleteVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
+    method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onCreate(android.os.Bundle);
     method public android.view.View onCreateContentView();
     method public void onDestroy();
+    method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onTaskFinished(android.content.Intent, int);
+    method public void onTaskStarted(android.content.Intent, int);
     method public void setContentView(android.view.View);
     method public void setTheme(int);
     method public void showWindow();
@@ -29211,6 +29532,7 @@ package android.speech.tts {
     method public abstract deprecated void onError(java.lang.String);
     method public void onError(java.lang.String, int);
     method public abstract void onStart(java.lang.String);
+    method public void onStop(java.lang.String, boolean);
   }
 
   public class Voice implements android.os.Parcelable {
@@ -30581,6 +30903,7 @@ package android.telephony {
     method public static java.lang.String formatNumber(java.lang.String, java.lang.String);
     method public static java.lang.String formatNumber(java.lang.String, java.lang.String, java.lang.String);
     method public static java.lang.String formatNumberToE164(java.lang.String, java.lang.String);
+    method public static java.lang.String formatNumberToRFC3966(java.lang.String, java.lang.String);
     method public static deprecated int getFormatTypeForLocale(java.util.Locale);
     method public static java.lang.String getNumberFromIntent(android.content.Intent, android.content.Context);
     method public static java.lang.String getStrippedReversed(java.lang.String);
@@ -33326,6 +33649,13 @@ package android.transition {
     method public void captureStartValues(android.transition.TransitionValues);
   }
 
+  public class ChangeScroll extends android.transition.Transition {
+    ctor public ChangeScroll();
+    ctor public ChangeScroll(android.content.Context, android.util.AttributeSet);
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+  }
+
   public class ChangeTransform extends android.transition.Transition {
     ctor public ChangeTransform();
     ctor public ChangeTransform(android.content.Context, android.util.AttributeSet);
@@ -34295,6 +34625,7 @@ package android.view {
   public class ContextThemeWrapper extends android.content.ContextWrapper {
     ctor public ContextThemeWrapper();
     ctor public ContextThemeWrapper(android.content.Context, int);
+    ctor public ContextThemeWrapper(android.content.Context, android.content.res.Resources.Theme);
     method public void applyOverrideConfiguration(android.content.res.Configuration);
     method protected void onApplyThemeResource(android.content.res.Resources.Theme, int, boolean);
   }
@@ -35384,6 +35715,7 @@ package android.view {
     method public int describeContents();
     method public boolean isValid();
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect) throws java.lang.IllegalArgumentException, android.view.Surface.OutOfResourcesException;
+    method public android.graphics.Canvas lockHardwareCanvas();
     method public void readFromParcel(android.os.Parcel);
     method public void release();
     method public deprecated void unlockCanvas(android.graphics.Canvas);
@@ -35594,6 +35926,7 @@ package android.view {
     method public android.view.animation.Animation getAnimation();
     method public android.os.IBinder getApplicationWindowToken();
     method public android.graphics.drawable.Drawable getBackground();
+    method public int getBackgroundColor();
     method public android.content.res.ColorStateList getBackgroundTintList();
     method public android.graphics.PorterDuff.Mode getBackgroundTintMode();
     method public int getBaseline();
@@ -39448,7 +39781,7 @@ package android.widget {
     ctor public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
   }
 
-  public class ArrayAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
+  public class ArrayAdapter extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.Spinner.ThemedSpinnerAdapter {
     ctor public ArrayAdapter(android.content.Context, int);
     ctor public ArrayAdapter(android.content.Context, int, int);
     ctor public ArrayAdapter(android.content.Context, int, T[]);
@@ -39462,6 +39795,7 @@ package android.widget {
     method public static android.widget.ArrayAdapter<java.lang.CharSequence> createFromResource(android.content.Context, int, int);
     method public android.content.Context getContext();
     method public int getCount();
+    method public android.content.res.Resources.Theme getDropDownViewTheme();
     method public android.widget.Filter getFilter();
     method public T getItem(int);
     method public long getItemId(int);
@@ -39470,6 +39804,7 @@ package android.widget {
     method public void insert(T, int);
     method public void remove(T);
     method public void setDropDownViewResource(int);
+    method public void setDropDownViewTheme(android.content.res.Resources.Theme);
     method public void setNotifyOnChange(boolean);
     method public void sort(java.util.Comparator<? super T>);
   }
@@ -39686,7 +40021,7 @@ package android.widget {
     method public abstract void onCheckedChanged(android.widget.CompoundButton, boolean);
   }
 
-  public abstract class CursorAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
+  public abstract class CursorAdapter extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.Spinner.ThemedSpinnerAdapter {
     ctor public deprecated CursorAdapter(android.content.Context, android.database.Cursor);
     ctor public CursorAdapter(android.content.Context, android.database.Cursor, boolean);
     ctor public CursorAdapter(android.content.Context, android.database.Cursor, int);
@@ -39695,6 +40030,7 @@ package android.widget {
     method public java.lang.CharSequence convertToString(android.database.Cursor);
     method public int getCount();
     method public android.database.Cursor getCursor();
+    method public android.content.res.Resources.Theme getDropDownViewTheme();
     method public android.widget.Filter getFilter();
     method public android.widget.FilterQueryProvider getFilterQueryProvider();
     method public java.lang.Object getItem(int);
@@ -39705,6 +40041,7 @@ package android.widget {
     method public abstract android.view.View newView(android.content.Context, android.database.Cursor, android.view.ViewGroup);
     method protected void onContentChanged();
     method public android.database.Cursor runQueryOnBackgroundThread(java.lang.CharSequence);
+    method public void setDropDownViewTheme(android.content.res.Resources.Theme);
     method public void setFilterQueryProvider(android.widget.FilterQueryProvider);
     method public android.database.Cursor swapCursor(android.database.Cursor);
     field public static final deprecated int FLAG_AUTO_REQUERY = 1; // 0x1
@@ -40471,9 +40808,11 @@ package android.widget {
     ctor public PopupMenu(android.content.Context, android.view.View, int, int, int);
     method public void dismiss();
     method public android.view.View.OnTouchListener getDragToOpenListener();
+    method public int getGravity();
     method public android.view.Menu getMenu();
     method public android.view.MenuInflater getMenuInflater();
     method public void inflate(int);
+    method public void setGravity(int);
     method public void setOnDismissListener(android.widget.PopupMenu.OnDismissListener);
     method public void setOnMenuItemClickListener(android.widget.PopupMenu.OnMenuItemClickListener);
     method public void show();
@@ -40506,6 +40845,7 @@ package android.widget {
     method public int getInputMethodMode();
     method public int getMaxAvailableHeight(android.view.View);
     method public int getMaxAvailableHeight(android.view.View, int);
+    method public boolean getOverlapAnchor();
     method public int getSoftInputMode();
     method public int getWidth();
     method public boolean isAboveAnchor();
@@ -40528,6 +40868,7 @@ package android.widget {
     method public void setInputMethodMode(int);
     method public void setOnDismissListener(android.widget.PopupWindow.OnDismissListener);
     method public void setOutsideTouchable(boolean);
+    method public void setOverlapAnchor(boolean);
     method public void setSoftInputMode(int);
     method public void setSplitTouchEnabled(boolean);
     method public void setTouchInterceptor(android.view.View.OnTouchListener);
@@ -40943,15 +41284,17 @@ package android.widget {
     method public abstract boolean onShareTargetSelected(android.widget.ShareActionProvider, android.content.Intent);
   }
 
-  public class SimpleAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
+  public class SimpleAdapter extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.Spinner.ThemedSpinnerAdapter {
     ctor public SimpleAdapter(android.content.Context, java.util.List<? extends java.util.Map<java.lang.String, ?>>, int, java.lang.String[], int[]);
     method public int getCount();
+    method public android.content.res.Resources.Theme getDropDownViewTheme();
     method public android.widget.Filter getFilter();
     method public java.lang.Object getItem(int);
     method public long getItemId(int);
     method public android.view.View getView(int, android.view.View, android.view.ViewGroup);
     method public android.widget.SimpleAdapter.ViewBinder getViewBinder();
     method public void setDropDownViewResource(int);
+    method public void setDropDownViewTheme(android.content.res.Resources.Theme);
     method public void setViewBinder(android.widget.SimpleAdapter.ViewBinder);
     method public void setViewImage(android.widget.ImageView, int);
     method public void setViewImage(android.widget.ImageView, java.lang.String);
@@ -41070,11 +41413,13 @@ package android.widget {
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int, int);
+    ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int, int, android.content.Context);
     method public int getDropDownHorizontalOffset();
     method public int getDropDownVerticalOffset();
     method public int getDropDownWidth();
     method public int getGravity();
     method public android.graphics.drawable.Drawable getPopupBackground();
+    method public android.content.Context getPopupContext();
     method public java.lang.CharSequence getPrompt();
     method public void onClick(android.content.DialogInterface, int);
     method public void setDropDownHorizontalOffset(int);
@@ -41087,6 +41432,11 @@ package android.widget {
     method public void setPromptId(int);
     field public static final int MODE_DIALOG = 0; // 0x0
     field public static final int MODE_DROPDOWN = 1; // 0x1
+  }
+
+  public static abstract interface Spinner.ThemedSpinnerAdapter {
+    method public abstract android.content.res.Resources.Theme getDropDownViewTheme();
+    method public abstract void setDropDownViewTheme(android.content.res.Resources.Theme);
   }
 
   public abstract interface SpinnerAdapter implements android.widget.Adapter {
@@ -41274,6 +41624,8 @@ package android.widget {
     method public boolean extractText(android.view.inputmethod.ExtractedTextRequest, android.view.inputmethod.ExtractedText);
     method public final int getAutoLinkMask();
     method public int getCompoundDrawablePadding();
+    method public android.content.res.ColorStateList getCompoundDrawableTintList();
+    method public android.graphics.PorterDuff.Mode getCompoundDrawableTintMode();
     method public android.graphics.drawable.Drawable[] getCompoundDrawables();
     method public android.graphics.drawable.Drawable[] getCompoundDrawablesRelative();
     method public int getCompoundPaddingBottom();
@@ -41373,6 +41725,8 @@ package android.widget {
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
+    method public void setCompoundDrawableTintList(android.content.res.ColorStateList);
+    method public void setCompoundDrawableTintMode(android.graphics.PorterDuff.Mode);
     method public void setCompoundDrawables(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesRelative(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int);
@@ -44039,7 +44393,7 @@ package java.lang {
     method public static double nextUp(double);
     method public static float nextUp(float);
     method public static double pow(double, double);
-    method public static synchronized double random();
+    method public static double random();
     method public static double rint(double);
     method public static long round(double);
     method public static int round(float);
