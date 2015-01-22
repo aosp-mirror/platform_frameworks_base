@@ -39,16 +39,24 @@ to Google Play services and when to use each in
 </p>
 
 <pre>
-Node node; // the connected device to send the message to
 GoogleApiClient mGoogleApiClient;
-public static final START_ACTIVITY_PATH = "/start/MainActivity";
+public static final String START_ACTIVITY_PATH = "/start/MainActivity";
 ...
 
-    SendMessageResult result = Wearable.MessageApi.sendMessage(
-            mGoogleApiClient, node, START_ACTIVITY_PATH, null).await();
-    if (!result.getStatus().isSuccess()) {
-        Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
-    }
+private void sendStartActivityMessage(String nodeId) {
+    Wearable.MessageApi.sendMessage(
+      mGoogleApiClient, nodeId, START_ACTIVITY_PATH, new byte[0]).setResultCallback(
+          new ResultCallback&lt;SendMessageResult>() {
+              &#64;Override
+              public void onResult(SendMessageResult sendMessageResult) {
+                  if (!sendMessageResult.getStatus().isSuccess()) {
+                      Log.e(TAG, "Failed to send message with status code: "
+                              + sendMessageResult.getStatus().getStatusCode());
+                  }
+              }
+          }
+      );
+}
 </pre>
 
 <p>
