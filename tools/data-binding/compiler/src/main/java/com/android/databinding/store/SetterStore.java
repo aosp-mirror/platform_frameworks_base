@@ -15,8 +15,8 @@
  */
 package com.android.databinding.store;
 
-import com.android.databinding2.ClassAnalyzer;
-import com.android.databinding2.util.L;
+import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.util.L;
 
 import java.io.File;
 import java.io.IOException;

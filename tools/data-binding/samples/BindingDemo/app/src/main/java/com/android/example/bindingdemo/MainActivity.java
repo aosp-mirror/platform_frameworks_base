@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.android.databinding.library.ChangeListenerRegistry;
 import com.android.databinding.library.OnPropertyChangedListener;
-import com.android.example.bindingdemo.generated.BR;
+import android.binding.BR;
 import com.android.example.bindingdemo.generated.ListItemBinder;
 import com.android.example.bindingdemo.generated.MainActivityBinder;
 import com.android.example.bindingdemo.vo.User;

@@ -75,7 +75,18 @@ public class ProcessBindable extends AbstractProcessor {
                 id++;
                 writer.write("    public static final int " + property + " = " + id + ";\n");
             }
+            writer.write("    public static int getId(String key) {\n");
+            writer.write("        switch(key) {\n");
+            id = 0;
+            for (String property : sortedProperties) {
+                id++;
+                writer.write("            case \"" + property + "\": return " + id + ";\n");
+            }
+            writer.write("        }\n");
+            writer.write("        return -1;\n");
+            writer.write("    }");
             writer.write("}\n");
+
             writer.close();
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,

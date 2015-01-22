@@ -16,15 +16,17 @@
 
 package com.android.databinding2;
 
-import com.android.databinding2.expr.ComparisonExpr;
-import com.android.databinding2.expr.Dependency;
-import com.android.databinding2.expr.Expr;
-import com.android.databinding2.expr.ExprModel;
-import com.android.databinding2.expr.FieldAccessExpr;
-import com.android.databinding2.expr.IdentifierExpr;
-import com.android.databinding2.expr.MethodCallExpr;
-import com.android.databinding2.expr.SymbolExpr;
-import com.android.databinding2.expr.TernaryExpr;
+import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.ExpressionParser;
+import com.android.databinding.expr.ComparisonExpr;
+import com.android.databinding.expr.Dependency;
+import com.android.databinding.expr.Expr;
+import com.android.databinding.expr.ExprModel;
+import com.android.databinding.expr.FieldAccessExpr;
+import com.android.databinding.expr.IdentifierExpr;
+import com.android.databinding.expr.MethodCallExpr;
+import com.android.databinding.expr.SymbolExpr;
+import com.android.databinding.expr.TernaryExpr;
 
 import org.junit.Before;
 import org.junit.Test;

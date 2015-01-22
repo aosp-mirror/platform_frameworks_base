@@ -174,8 +174,9 @@ class DataBinderPlugin : Plugin<Project> {
         log("generated urls: ${urls} len: ${urls.size}")
         val classLoader = URLClassLoader(urls, androidClassLoader)
         log("created class loader")
-        parser.classAnalyzer = com.android.databinding.util.ClassAnalyzer(classLoader)
-        com.android.databinding2.ClassAnalyzer.setClassLoader(classLoader)
+        ClassAnalyzer.setClassLoader(classLoader)
+        parser.classAnalyzer = ClassAnalyzer.getInstance()
+
         project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {
@@ -183,7 +184,6 @@ class DataBinderPlugin : Plugin<Project> {
         val fileManager = compiler.getStandardFileManager(null, null, null)
         val javaCompileTask = variantData.javaCompileTask
         val dexTask = variantData.dexTask
-        parser.analyzeClasses()
         parser.writeViewBinders(viewBinderSource)
         parser.writeDbrFile(viewBinderSource)
 
@@ -231,7 +231,6 @@ class DataBinderPlugin : Plugin<Project> {
     fun generateBrFile(o: Any?) {
         parser.processIfNecessary()
         log("generating BR ${o}")
-        parser.writeBrFile()
         parser.writeViewBinderInterfaces()
     }
 

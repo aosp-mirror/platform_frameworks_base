@@ -14,11 +14,13 @@
 package com.android.databinding2;
 
 
-import com.android.databinding2.expr.Expr;
-import com.android.databinding2.expr.ExprModel;
-import com.android.databinding2.expr.FieldAccessExpr;
-import com.android.databinding2.expr.IdentifierExpr;
-import com.android.databinding2.expr.StaticIdentifierExpr;
+import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.LayoutBinder;
+import com.android.databinding.expr.Expr;
+import com.android.databinding.expr.ExprModel;
+import com.android.databinding.expr.FieldAccessExpr;
+import com.android.databinding.expr.IdentifierExpr;
+import com.android.databinding.expr.StaticIdentifierExpr;
 
 import org.junit.Before;
 import org.junit.Test;
