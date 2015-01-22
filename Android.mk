@@ -821,6 +821,11 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
+# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
+$(full_target): $(framework_built) $(gen)
+$(INTERNAL_PLATFORM_SYSTEM_API_FILE): $(full_target)
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
+
 # ====  check javadoc comments but don't generate docs ========
 include $(CLEAR_VARS)
 
