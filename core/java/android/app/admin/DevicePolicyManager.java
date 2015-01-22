@@ -2677,7 +2677,7 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param target Component name of the agent to be enabled.
-     * @param options TrustAgent-specific feature bundle. If null for any admin, agent
+     * @param configuration TrustAgent-specific feature bundle. If null for any admin, agent
      * will be strictly disabled according to the state of the
      *  {@link #KEYGUARD_DISABLE_TRUST_AGENTS} flag.
      * <p>If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all admins,
@@ -2685,10 +2685,11 @@ public class DevicePolicyManager {
      * <p>Consult documentation for the specific TrustAgent to determine legal options parameters.
      */
     public void setTrustAgentConfiguration(ComponentName admin, ComponentName target,
-            PersistableBundle options) {
+            PersistableBundle configuration) {
         if (mService != null) {
             try {
-                mService.setTrustAgentConfiguration(admin, target, options, UserHandle.myUserId());
+                mService.setTrustAgentConfiguration(admin, target, configuration,
+                        UserHandle.myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2700,7 +2701,12 @@ public class DevicePolicyManager {
      * {@link #setTrustAgentConfiguration(ComponentName, ComponentName, PersistableBundle)} for
      * all device admins.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. If null,
+     * this function returns a list of configurations for all admins that declare
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS}. If any admin declares
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} but doesn't call
+     * {@link #setTrustAgentConfiguration(ComponentName, ComponentName, PersistableBundle)}
+     * for this {@param agent} or calls it with a null configuration, null is returned.
      * @param agent Which component to get enabled features for.
      * @return configuration for the given trust agent.
      */
