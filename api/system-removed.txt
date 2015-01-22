@@ -1,0 +1,66 @@
+package android.media {
+
+  public class AudioFormat {
+    ctor public AudioFormat();
+  }
+
+}
+
+package android.os {
+
+  public final class PowerManager {
+    method public void goToSleep(long);
+    method public deprecated void userActivity(long, boolean);
+    method public void wakeUp(long);
+  }
+
+  public class UserManager {
+    method public android.graphics.drawable.Drawable getBadgedDrawableForUser(android.graphics.drawable.Drawable, android.os.UserHandle, android.graphics.Rect, int);
+    method public android.graphics.drawable.Drawable getBadgedIconForUser(android.graphics.drawable.Drawable, android.os.UserHandle);
+    method public java.lang.CharSequence getBadgedLabelForUser(java.lang.CharSequence, android.os.UserHandle);
+  }
+
+}
+
+package android.text.format {
+
+  public class DateFormat {
+    field public static final deprecated char AM_PM = 97; // 0x0061 'a'
+    field public static final deprecated char CAPITAL_AM_PM = 65; // 0x0041 'A'
+    field public static final deprecated char DATE = 100; // 0x0064 'd'
+    field public static final deprecated char DAY = 69; // 0x0045 'E'
+    field public static final deprecated char HOUR = 104; // 0x0068 'h'
+    field public static final deprecated char HOUR_OF_DAY = 107; // 0x006b 'k'
+    field public static final deprecated char MINUTE = 109; // 0x006d 'm'
+    field public static final deprecated char MONTH = 77; // 0x004d 'M'
+    field public static final deprecated char QUOTE = 39; // 0x0027 '\''
+    field public static final deprecated char SECONDS = 115; // 0x0073 's'
+    field public static final deprecated char STANDALONE_MONTH = 76; // 0x004c 'L'
+    field public static final deprecated char TIME_ZONE = 122; // 0x007a 'z'
+    field public static final deprecated char YEAR = 121; // 0x0079 'y'
+  }
+
+}
+
+package android.view {
+
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method protected void initializeFadingEdge(android.content.res.TypedArray);
+    method protected void initializeScrollbars(android.content.res.TypedArray);
+  }
+
+  public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
+    field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
+  }
+
+}
+
+package android.widget {
+
+  public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
+    method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);
+    method public static android.content.res.ColorStateList getTextColors(android.content.Context, android.content.res.TypedArray);
+  }
+
+}
+
