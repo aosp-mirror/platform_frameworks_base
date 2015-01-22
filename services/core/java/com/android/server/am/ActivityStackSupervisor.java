@@ -400,7 +400,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void moveHomeStack(boolean toFront) {
         ArrayList<ActivityStack> stacks = mHomeStack.mStacks;
-        int topNdx = stacks.size() - 1;
+        final int topNdx = stacks.size() - 1;
         if (topNdx <= 0) {
             return;
         }
@@ -414,6 +414,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (DEBUG_STACK) Slog.d(TAG, "moveHomeTask: topStack old=" + topStack + " new="
                     + mFocusedStack);
         }
+        EventLog.writeEvent(EventLogTags.AM_HOME_STACK_MOVED,
+                mCurrentUser, toFront ? 1 : 0, stacks.get(topNdx).getStackId(),
+                mFocusedStack == null ? -1 : mFocusedStack.getStackId());
+
         if (mService.mBooting || !mService.mBooted) {
             final ActivityRecord r = topRunningActivityLocked();
             if (r != null && r.idle) {
