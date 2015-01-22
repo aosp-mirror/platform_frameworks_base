@@ -192,13 +192,14 @@ as described in <a href="#Drawing">Drawing Your Watch Face</a>.</p>
 
 <h3 id="Timer">Initialize the custom timer</h3>
 
-<p>As a watch face developer, you can decide how often you want to update your watch face by
+<p>As a watch face developer, you decide how often you want to update your watch face by
 providing a custom timer that ticks with the required frequency while the device is in
-interactive mode. This enables you to create custom animations and other visual effects. In
-ambient mode, you should disable the timer to let the CPU sleep and update the watch face
-only when the time changes. For more information, see
-<a href="{@docRoot}training/wearables/watch-faces/performance.html">Optimizing Performance and
-Battery Life</a>.</p>
+interactive mode. This enables you to create custom animations and other visual effects.
+</p>
+
+<p class="note"><strong>Note:</strong> In ambient mode, the system does not reliably call the
+custom timer. To update the watch face in ambient mode, see <a href="#TimeTick">Update the watch
+face in ambient mode</a>.</p>
 
 <p>An example timer definition from the <code>AnalogWatchFaceService</code> class that ticks once
 every second is shown in <a href="#Variables">Declare variables</a>. In the
@@ -210,9 +211,8 @@ conditions apply:</p>
 <li>The device is in interactive mode.</li>
 </ul>
 
-<p>The timer should not run under any other conditions, since this watch face does not
-draw the second hand in ambient mode to conserve power. The <code>AnalogWatchFaceService</code>
-class schedules the next timer tick if required as follows:</p>
+<p>The <code>AnalogWatchFaceService</code> class schedules the next timer tick if required as
+follows:</p>
 
 <pre>
 private void updateTimer() {
@@ -281,15 +281,15 @@ private void unregisterReceiver() {
 
 
 
-<h3 id="TimeTick">Invalidate the canvas when the time changes</h3>
+<h3 id="TimeTick">Update the watch face in ambient mode</h3>
 
-<p>The system calls the <code>Engine.onTimeTick()</code> method every minute. In ambient mode,
-it is usually sufficient to update your watch face once per minute. To update your watch face
-more often while in interactive mode, you provide a custom timer as described in
+<p>In ambient mode, the system calls the <code>Engine.onTimeTick()</code> method every minute.
+It is usually sufficient to update your watch face once per minute in this mode. To update your
+watch face while in interactive mode, you must provide a custom timer as described in
 <a href="#Timer">Initialize the custom timer</a>.</p>
 
-<p>Most watch face implementations just invalidate the canvas to redraw the watch face when
-the time changes:</p>
+<p>In ambient mode, most watch face implementations simply invalidate the canvas to redraw the watch
+face in the <code>Engine.onTimeTick()</code> method:</p>
 
 <pre>
 &#64;Override
@@ -402,20 +402,17 @@ method for the system to redraw the watch face.</p>
 &#64;Override
 public void onAmbientModeChanged(boolean inAmbientMode) {
 
-    boolean wasInAmbientMode = isInAmbientMode();
     super.onAmbientModeChanged(inAmbientMode);
 
-    if (inAmbientMode != wasInAmbientMode) {
-        if (mLowBitAmbient) {
-            boolean antiAlias = !inAmbientMode;
-            mHourPaint.setAntiAlias(antiAlias);
-            mMinutePaint.setAntiAlias(antiAlias);
-            mSecondPaint.setAntiAlias(antiAlias);
-            mTickPaint.setAntiAlias(antiAlias);
-        }
-        invalidate();
-        updateTimer();
+    if (mLowBitAmbient) {
+        boolean antiAlias = !inAmbientMode;
+        mHourPaint.setAntiAlias(antiAlias);
+        mMinutePaint.setAntiAlias(antiAlias);
+        mSecondPaint.setAntiAlias(antiAlias);
+        mTickPaint.setAntiAlias(antiAlias);
     }
+    invalidate();
+    updateTimer();
 }
 </pre>
 
@@ -478,7 +475,7 @@ public void onDraw(Canvas canvas, Rect bounds) {
     float hrLength = centerX - 80;
 
     // Only draw the second hand in interactive mode.
-    if (!mAmbient) {
+    if (!isInAmbientMode()) {
         float secX = (float) Math.sin(secRot) * secLength;
         float secY = (float) -Math.cos(secRot) * secLength;
         canvas.drawLine(centerX, centerY, centerX + secX, centerY +
