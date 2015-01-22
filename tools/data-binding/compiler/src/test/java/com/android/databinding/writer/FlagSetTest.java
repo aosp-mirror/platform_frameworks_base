@@ -19,6 +19,7 @@ package com.android.databinding.writer;
 import org.junit.Test;
 
 import java.util.BitSet;
+import static org.junit.Assert.*;
 
 public class FlagSetTest {
     @Test

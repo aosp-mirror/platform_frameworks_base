@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.android.databinding2;
+package com.android.databinding;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.databinding2;
+package com.android.databinding;
 
 import com.android.databinding.ClassAnalyzer;
 import com.android.databinding.ExpressionParser;

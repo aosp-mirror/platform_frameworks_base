@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.android.databinding2;
+package com.android.databinding;
 
 /**
  * Mock class for Observable interface, used for testing.

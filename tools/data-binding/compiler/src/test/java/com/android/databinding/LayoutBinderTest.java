@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package com.android.databinding2;
+package com.android.databinding;
 
 
 import com.android.databinding.ClassAnalyzer;
@@ -84,7 +84,7 @@ public class LayoutBinderTest {
 
     @Test
     public void testParseWithMethods() {
-        mLayoutBinder.addVariable("user", "com.android.databinding2.LayoutBinderTest.TestUser");
+        mLayoutBinder.addVariable("user", "com.android.databinding.LayoutBinderTest.TestUser");
         mLayoutBinder.parse("user.fullName");
         Expr item = mExprModel.getBindingExpressions().get(0);
         assertTrue(item instanceof FieldAccessExpr);
