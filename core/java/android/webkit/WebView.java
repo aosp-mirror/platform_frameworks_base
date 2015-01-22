@@ -233,11 +233,19 @@ import java.util.Map;
  *
  * <h3>HTML5 Video support</h3>
  *
- * <p>In order to support inline HTML5 video in your application, you need to have hardware
- * acceleration turned on, and set a {@link android.webkit.WebChromeClient}. For full screen support,
- * implementations of {@link WebChromeClient#onShowCustomView(View, WebChromeClient.CustomViewCallback)}
- * and {@link WebChromeClient#onHideCustomView()} are required,
- * {@link WebChromeClient#getVideoLoadingProgressView()} is optional.
+ * <p>In order to support inline HTML5 video in your application you need to have hardware
+ * acceleration turned on.
+ * </p>
+ *
+ * <h3>Full screen support</h3>
+ *
+ * <p>In order to support full screen &mdash; for video or other HTML content &mdash; you need to set a
+ * {@link android.webkit.WebChromeClient} and implement both
+ * {@link WebChromeClient#onShowCustomView(View, WebChromeClient.CustomViewCallback)}
+ * and {@link WebChromeClient#onHideCustomView()}. If the implementation of either of these two methods is
+ * missing then the web contents will not be allowed to enter full screen. Optionally you can implement
+ * {@link WebChromeClient#getVideoLoadingProgressView()} to customize the View displayed whilst a video
+ * is loading.
  * </p>
  *
  * <h3>Layout size</h3>
