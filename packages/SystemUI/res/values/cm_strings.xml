@@ -78,6 +78,13 @@
     <string name="accessibility_quick_settings_sync_changed_off">Sync turned off.</string>
     <string name="accessibility_quick_settings_sync_changed_on">Sync turned on.</string>
 
+    <!-- System Profiles QS tile -->
+    <string name="quick_settings_profiles_label">System profiles</string>
+    <string name="accessibility_quick_settings_profiles_off">Profiles off.</string>
+    <string name="accessibility_quick_settings_profiles">Profile: <xliff:g id="profile" example="Default">%s</xliff:g>.</string>
+    <string name="accessibility_quick_settings_profiles_changed_off">Profiles turned off.</string>
+    <string name="accessibility_quick_settings_profiles_changed">Profile changed to <xliff:g id="profile" example="Default">%s</xliff:g>.</string>
+
     <!-- USB tethering QS tile -->
     <string name="quick_settings_usb_tether_label">USB tethering</string>
 
