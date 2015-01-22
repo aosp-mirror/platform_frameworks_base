@@ -2381,6 +2381,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             applyUpdateLockStateLocked(r);
         }
+        EventLog.writeEvent(EventLogTags.AM_FOCUSED_ACTIVITY, mCurrentUserId,
+                mFocusedActivity == null ? "NULL" : mFocusedActivity.shortComponentName);
     }
 
     final void clearFocusedActivity(ActivityRecord r) {
