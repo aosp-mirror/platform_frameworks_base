@@ -859,6 +859,10 @@ class MountService extends IMountService.Stub
 
         // Temporary workaround for http://b/17945169.
         Slog.d(TAG, "Setting system properties to " + systemLocale + " from mount service");
+        SystemProperties.set("persist.sys.locale", locale.toLanguageTag());
+
+        // TODO: Stop setting these properties once we've removed all
+        // references to them.
         SystemProperties.set("persist.sys.language", locale.getLanguage());
         SystemProperties.set("persist.sys.country", locale.getCountry());
     }
