@@ -6951,11 +6951,7 @@ package android.content {
     method public android.content.ContentProviderResult apply(android.content.ContentProvider, android.content.ContentProviderResult[], int) throws android.content.OperationApplicationException;
     method public int describeContents();
     method public android.net.Uri getUri();
-    method public boolean isAssertQuery();
-    method public boolean isDelete();
-    method public boolean isInsert();
     method public boolean isReadOperation();
-    method public boolean isUpdate();
     method public boolean isWriteOperation();
     method public boolean isYieldAllowed();
     method public static android.content.ContentProviderOperation.Builder newAssertQuery(android.net.Uri);
