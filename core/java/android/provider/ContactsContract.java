@@ -1792,52 +1792,26 @@ public final class ContactsContract {
             public static final String CONTENT_DIRECTORY = "suggestions";
 
             /**
-             * Used with {@link Builder#addParameter} to specify what kind of data is
-             * supplied for the suggestion query.
+             * Used to specify what kind of data is supplied for the suggestion query.
              *
              * @hide
              */
             public static final String PARAMETER_MATCH_NAME = "name";
 
             /**
-             * Used with {@link Builder#addParameter} to specify what kind of data is
-             * supplied for the suggestion query.
-             *
-             * @hide
-             */
-            public static final String PARAMETER_MATCH_EMAIL = "email";
-
-            /**
-             * Used with {@link Builder#addParameter} to specify what kind of data is
-             * supplied for the suggestion query.
-             *
-             * @hide
-             */
-            public static final String PARAMETER_MATCH_PHONE = "phone";
-
-            /**
-             * Used with {@link Builder#addParameter} to specify what kind of data is
-             * supplied for the suggestion query.
-             *
-             * @hide
-             */
-            public static final String PARAMETER_MATCH_NICKNAME = "nickname";
-
-            /**
              * A convenience builder for aggregation suggestion content URIs.
-             *
-             * TODO: change documentation for this class to use the builder.
-             * @hide
              */
             public static final class Builder {
                 private long mContactId;
-                private ArrayList<String> mKinds = new ArrayList<String>();
-                private ArrayList<String> mValues = new ArrayList<String>();
+                private final ArrayList<String> mValues = new ArrayList<String>();
                 private int mLimit;
 
                 /**
                  * Optional existing contact ID.  If it is not provided, the search
-                 * will be based exclusively on the values supplied with {@link #addParameter}.
+                 * will be based exclusively on the values supplied with {@link #addNameParameter}.
+                 *
+                 * @param contactId contact to find aggregation suggestions for
+                 * @return This Builder object to allow for chaining of calls to builder methods
                  */
                 public Builder setContactId(long contactId) {
                     this.mContactId = contactId;
@@ -1845,28 +1819,31 @@ public final class ContactsContract {
                 }
 
                 /**
-                 * A value that can be used when searching for an aggregation
-                 * suggestion.
+                 * Add a name to be used when searching for aggregation suggestions.
                  *
-                 * @param kind can be one of
-                 *            {@link AggregationSuggestions#PARAMETER_MATCH_NAME},
-                 *            {@link AggregationSuggestions#PARAMETER_MATCH_EMAIL},
-                 *            {@link AggregationSuggestions#PARAMETER_MATCH_NICKNAME},
-                 *            {@link AggregationSuggestions#PARAMETER_MATCH_PHONE}
+                 * @param name name to find aggregation suggestions for
+                 * @return This Builder object to allow for chaining of calls to builder methods
                  */
-                public Builder addParameter(String kind, String value) {
-                    if (!TextUtils.isEmpty(value)) {
-                        mKinds.add(kind);
-                        mValues.add(value);
-                    }
+                public Builder addNameParameter(String name) {
+                    mValues.add(name);
                     return this;
                 }
 
+                /**
+                 * Sets the Maximum number of suggested aggregations that should be returned.
+                 * @param limit The maximum number of suggested aggregations
+                 *
+                 * @return This Builder object to allow for chaining of calls to builder methods
+                 */
                 public Builder setLimit(int limit) {
                     mLimit = limit;
                     return this;
                 }
 
+                /**
+                 * Combine all of the options that have been set and return a new {@link Uri}
+                 * object for fetching aggregation suggestions.
+                 */
                 public Uri build() {
                     android.net.Uri.Builder builder = Contacts.CONTENT_URI.buildUpon();
                     builder.appendEncodedPath(String.valueOf(mContactId));
@@ -1875,9 +1852,10 @@ public final class ContactsContract {
                         builder.appendQueryParameter("limit", String.valueOf(mLimit));
                     }
 
-                    int count = mKinds.size();
+                    int count = mValues.size();
                     for (int i = 0; i < count; i++) {
-                        builder.appendQueryParameter("query", mKinds.get(i) + ":" + mValues.get(i));
+                        builder.appendQueryParameter("query", PARAMETER_MATCH_NAME
+                                + ":" + mValues.get(i));
                     }
 
                     return builder.build();
