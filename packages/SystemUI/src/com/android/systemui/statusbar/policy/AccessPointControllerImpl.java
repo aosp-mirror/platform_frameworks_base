@@ -125,7 +125,7 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
                 Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                 intent.putExtra(EXTRA_START_CONNECT_SSID, ap.ssid);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivityAsUser(intent, new UserHandle(mCurrentUser));
+                fireSettingsIntentCallback(intent);
                 return true;
             } else {
                 WifiConfiguration config = new WifiConfiguration();
@@ -139,7 +139,13 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
         return false;
     }
 
-    private void fireCallback(AccessPoint[] aps) {
+    private void fireSettingsIntentCallback(Intent intent) {
+        for (AccessPointCallback callback : mCallbacks) {
+            callback.onSettingsActivityTriggered(intent);
+        }
+    }
+
+    private void fireAcccessPointsCallback(AccessPoint[] aps) {
         for (AccessPointCallback callback : mCallbacks) {
             callback.onAccessPointsChanged(aps);
         }
@@ -208,7 +214,7 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
             aps.add(ap);
         }
         Collections.sort(aps, mByStrength);
-        fireCallback(aps.toArray(new AccessPoint[aps.size()]));
+        fireAcccessPointsCallback(aps.toArray(new AccessPoint[aps.size()]));
     }
 
     private final ActionListener mConnectListener = new ActionListener() {

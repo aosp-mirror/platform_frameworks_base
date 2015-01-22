@@ -30,6 +30,7 @@ import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
+import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController.AccessPoint;
@@ -287,6 +288,11 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             if (accessPoints != null && accessPoints.length > 0) {
                 fireScanStateChanged(false);
             }
+        }
+
+        @Override
+        public void onSettingsActivityTriggered(Intent settingsIntent) {
+            mHost.startSettingsActivity(settingsIntent);
         }
 
         @Override
