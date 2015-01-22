@@ -92,7 +92,7 @@ and declare the following intent filter in the manifest file of the wearable app
         &lt;action android:name=
             "com.example.android.wearable.watchface.CONFIG_DIGITAL" />
         &lt;category android:name=
-       "com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+        <strong>"com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"</strong> />
         &lt;category android:name="android.intent.category.DEFAULT" />
     &lt;/intent-filter>
 &lt;/activity>
@@ -119,8 +119,21 @@ a handheld device. For example, a configuration activity on a handheld device en
 present users with elaborate color pickers to select the background color of a watch face.</p>
 
 <p>To create a companion configuration activity, add a new activity to your handheld app module and
-declare the same intent filter for this activity as the one in <a href="#WearableActivity">Create
-a Wearable Configuration Activity</a>.</p>
+declare the following intent filter in the manifest file of the handheld app:</p>
+
+<pre>
+&lt;activity
+    android:name=".DigitalWatchFaceCompanionConfigActivity"
+    android:label="@string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name=
+            "com.example.android.wearable.watchface.CONFIG_DIGITAL" />
+        &lt;category android:name=
+        <strong>"com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION"</strong> />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
 
 <p>In your configuration activity, build a UI that provides options to customize all the
 configurable elements of your watch face. When users make a selection, use the <a
