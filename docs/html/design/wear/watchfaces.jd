@@ -101,7 +101,7 @@ format.</p>
 <!-- H2: plan for all display modes -->
 <div style="float:right;margin-top:35px;margin-left:20px">
   <img src="{@docRoot}design/media/wear/Render_Interactive.png"
-       width="200" height="195" alt="" style="margin-right:5px"/><br/>
+       width="200" height="195" alt="" style="margin-right:5px;margin-top:20px"/><br/>
   <img src="{@docRoot}design/media/wear/Render_Ambient.png"
      width="200" height="195" alt="" style="margin-right:5px"/>
 </div>
@@ -118,11 +118,12 @@ mode. Your design can use full color with fluid animation in this mode.</p>
 
 <h3>Ambient mode</h3>
 <p>Ambient mode helps the device conserve power. Your design should make clear to the user that
-the screen is in ambient mode by using only grayscale colors. Do not use a lot of white in ambient
-mode, since this distracting and hurts battery life on some screens. In this mode, the screen
-is only updated once every minute. Only show hours and minutes in ambient mode; do not show
-seconds. Your watch face is notified when the device switches to ambient mode, and you should
-thoughtfully design for it.</p>
+the screen is in ambient mode. The background color scheme is <em>strictly limited</em> to black,
+white, and grays. Your watch face may use some color elements on screens that support it
+provided it is unambiguous that the device is in ambient mode. You can use color elements for up
+to 5 percent of total pixels. In this mode, the screen is only updated once every minute. Only
+show hours and minutes in ambient mode; do not show seconds. Your watch face is notified when
+the device switches to ambient mode, and you should thoughtfully design for it.</p>
 
 
 
@@ -131,23 +132,29 @@ thoughtfully design for it.</p>
 
 <p>Android Wear devices feature a variety of screen technologies, each with their own advantages
 and considerations. One important consideration when designing the ambient mode display for your
-watch face is how it affects battery life and screen burn-in on some screens.</p>
-
-<p>You can configure your watch face to display different ambient designs depending on the kind
+watch face is how it affects battery life and screen burn-in on some screens.
+You can configure your watch face to display different ambient designs depending on the kind
 of screen available on the device. Consider the best design for your watch faces on all
 screens.</p>
 
 <div class="layout-content-row" style="margin-top:20px">
 <div class="layout-content-col span-9">
-  <h3>Low bit</h3>
-  <p>Pixels on some screens (including OLED and transflective LED) in ambient mode are either
-  "on" or "off", also known as "low-bit". When designing for low-bit ambient mode, use only black
-  and white, avoid grayscale colors, and disable antialiasing in your paint styles. Make sure to
-  test your design on devices with low-bit ambient mode.</p>
+  <h3>Reduced color space</h3>
+  <p>Some displays use a reduced color space in ambient mode to save power.</p>
+  <p>One reduced color space power saving method is to use a "low-bit" mode. In low-bit mode,
+  the available colors are limited to black, white, blue, red, magenta, green, cyan, and yellow.
+  When designing for low-bit ambient mode, use a black or a white background. For OLED screens,
+  you must use a black background. Non-background pixels must be less than 10 percent of total
+  pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it.
+  You should also disable antialiasing in your paint styles for this mode. Make sure to test
+  your design on devices with low-bit ambient mode.</p>
+  <p>Other displays save power in ambient mode by not producing any color. When designing for
+  displays which do not use color in ambient mode, the background may be either black or
+  white.</p>
 </div>
 <div class="layout-content-col span-4">
   <img src="{@docRoot}design/media/wear/Render_LowBit.png" width="200"
-       height="" alt="" style="margin-top:-30px;margin-left:13px">
+       height="" alt="" style="margin-top:45px;margin-left:13px">
 </div>
 </div>
 
@@ -164,7 +171,7 @@ screens.</p>
 </div>
 <div class="layout-content-col span-4">
   <img src="{@docRoot}design/media/wear/Render_1Bit.png" width="200"
-       height="" alt="" style="margin-top:-30px;margin-left:13px">
+       height="" alt="" style="margin-top:-10px;margin-left:13px">
 </div>
 </div>
 
