@@ -35,14 +35,25 @@ import android.view.KeyEvent;
 final class SendKeyAction extends HdmiCecFeatureAction {
     private static final String TAG = "SendKeyAction";
 
+    // If the first key press lasts this much amount of time without any other key event
+    // coming down, we trigger the press-and-hold operation. Set to the value slightly
+    // shorter than the threshold(500ms) between two successive key press events
+    // as specified in the standard for the operation.
+    private static final int AWAIT_LONGPRESS_MS = 400;
+
     // Amount of time this action waits for a new release key input event. When timed out,
     // the action sends out UCR and finishes its lifecycle. Used to deal with missing key release
     // event, which can lead the device on the receiving end to generating unintended key repeats.
     private static final int AWAIT_RELEASE_KEY_MS = 1000;
 
-    // State in which the action is at work. The state is set in {@link #start()} and
-    // persists throughout the process till it is set back to {@code STATE_NONE} at the end.
-    private static final int STATE_PROCESSING_KEYCODE = 1;
+    // State in which the long press is being checked at the beginning. The state is set in
+    // {@link #start()} and lasts for {@link #AWAIT_LONGPRESS_MS}.
+    private static final int STATE_CHECKING_LONGPRESS = 1;
+
+    // State in which the action is handling incoming keys. Persists throughout the process
+    // till it is set back to {@code STATE_NONE} at the end when a release key event for
+    // the last key is processed.
+    private static final int STATE_PROCESSING_KEYCODE = 2;
 
     // Logical address of the device to which the UCP/UCP commands are sent.
     private final int mTargetAddress;
@@ -77,8 +88,8 @@ final class SendKeyAction extends HdmiCecFeatureAction {
             finish();
             return true;
         }
-        mState = STATE_PROCESSING_KEYCODE;
-        addTimer(mState, AWAIT_RELEASE_KEY_MS);
+        mState = STATE_CHECKING_LONGPRESS;
+        addTimer(mState, AWAIT_LONGPRESS_MS);
         return true;
     }
 
@@ -93,7 +104,7 @@ final class SendKeyAction extends HdmiCecFeatureAction {
      * @param isPressed true if the key event is of {@link KeyEvent#ACTION_DOWN}
      */
     void processKeyEvent(int keycode, boolean isPressed) {
-        if (mState != STATE_PROCESSING_KEYCODE) {
+        if (mState != STATE_CHECKING_LONGPRESS && mState != STATE_PROCESSING_KEYCODE) {
             Slog.w(TAG, "Not in a valid state");
             return;
         }
@@ -152,12 +163,23 @@ final class SendKeyAction extends HdmiCecFeatureAction {
 
     @Override
     public void handleTimerEvent(int state) {
-        // Timeout on waiting for the release key event. Send UCR and quit the action.
-        if (mState != STATE_PROCESSING_KEYCODE) {
-            Slog.w(TAG, "Not in a valid state");
-            return;
+        switch (mState) {
+            case STATE_CHECKING_LONGPRESS:
+                // The first key press lasts long enough to start press-and-hold.
+                mActionTimer.clearTimerMessage();
+                mState = STATE_PROCESSING_KEYCODE;
+                sendKeyDown(mLastKeycode);
+                mLastSendKeyTime = getCurrentTime();
+                addTimer(mState, AWAIT_RELEASE_KEY_MS);
+                break;
+            case STATE_PROCESSING_KEYCODE:
+                // Timeout on waiting for the release key event. Send UCR and quit the action.
+                sendKeyUp();
+                finish();
+                break;
+            default:
+                Slog.w(TAG, "Not in a valid state");
+                break;
         }
-        sendKeyUp();
-        finish();
     }
 }
