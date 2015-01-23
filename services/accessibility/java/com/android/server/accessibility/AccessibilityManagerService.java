@@ -765,16 +765,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Gets the bounds of the active window.
+     * Gets the bounds of a window.
      *
      * @param outBounds The output to which to write the bounds.
      */
-    boolean getActiveWindowBounds(Rect outBounds) {
-        // TODO: This should be refactored to work with accessibility
-        // focus in multiple windows.
+    boolean getWindowBounds(int windowId, Rect outBounds) {
         IBinder token;
         synchronized (mLock) {
-            final int windowId = mSecurityPolicy.mActiveWindowId;
             token = mGlobalWindowTokens.get(windowId);
             if (token == null) {
                 token = getCurrentUserStateLocked().mWindowTokens.get(windowId);
@@ -3257,7 +3254,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
                 // Make sure the point is within the window.
                 Rect windowBounds = mTempRect;
-                getActiveWindowBounds(windowBounds);
+                getWindowBounds(focus.getWindowId(), windowBounds);
                 if (!windowBounds.contains(point.x, point.y)) {
                     return false;
                 }
