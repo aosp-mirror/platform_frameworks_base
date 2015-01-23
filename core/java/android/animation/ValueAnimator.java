@@ -1273,8 +1273,7 @@ public class ValueAnimator extends Animator {
                 }
             }
             if (fraction >= 1f) {
-                if (mCurrentIteration < mRepeatCount ||
-                        (mRepeatCount == INFINITE && mDuration != 0)) {
+                if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
                     // Time to repeat
                     if (mListeners != null) {
                         int numListeners = mListeners.size();
