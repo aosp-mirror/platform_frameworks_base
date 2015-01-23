@@ -501,7 +501,7 @@ public class VpnService extends Service {
                     }
                 }
             }
-            mRoutes.add(new RouteInfo(new LinkAddress(address, prefixLength), null));
+            mRoutes.add(new RouteInfo(new IpPrefix(address, prefixLength), null));
             mConfig.updateAllowedFamilies(address);
             return this;
         }
