@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1094,6 +1095,18 @@ public class Toolbar extends ViewGroup {
         }
 
         return true;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void addClickableRectsForAccessibility(List<RectF> outRects) {
+        // This class always consumes touch events, therefore if it
+        // covers a view we do not want to send a click over it.
+        RectF bounds = new RectF();
+        bounds.set(0, 0, getWidth(), getHeight());
+        outRects.add(bounds);
     }
 
     /**
