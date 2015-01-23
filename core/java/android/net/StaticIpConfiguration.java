@@ -76,15 +76,22 @@ public class StaticIpConfiguration implements Parcelable {
 
     /**
      * Returns the network routes specified by this object. Will typically include a
-     * directly-connected route for the IP address's local subnet and a default route.
+     * directly-connected route for the IP address's local subnet and a default route. If the
+     * default gateway is not covered by the directly-connected route, it will also contain a host
+     * route to the gateway as well. This configuration is arguably invalid, but it used to work
+     * in K and earlier, and other OSes appear to accept it.
      */
     public List<RouteInfo> getRoutes(String iface) {
-        List<RouteInfo> routes = new ArrayList<RouteInfo>(2);
+        List<RouteInfo> routes = new ArrayList<RouteInfo>(3);
         if (ipAddress != null) {
-            routes.add(new RouteInfo(ipAddress, null, iface));
+            RouteInfo connectedRoute = new RouteInfo(ipAddress, null, iface);
+            routes.add(connectedRoute);
+            if (gateway != null && !connectedRoute.matches(gateway)) {
+                routes.add(RouteInfo.makeHostRoute(gateway, iface));
+            }
         }
         if (gateway != null) {
-            routes.add(new RouteInfo((LinkAddress) null, gateway, iface));
+            routes.add(new RouteInfo((IpPrefix) null, gateway, iface));
         }
         return routes;
     }
