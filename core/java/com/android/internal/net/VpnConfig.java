@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.Network;
 import android.net.RouteInfo;
@@ -117,9 +118,7 @@ public class VpnConfig implements Parcelable {
         String[] routes = routesStr.trim().split(" ");
         for (String route : routes) {
             //each route is ip/prefix
-            String[] split = route.split("/");
-            RouteInfo info = new RouteInfo(new LinkAddress
-                    (InetAddress.parseNumericAddress(split[0]), Integer.parseInt(split[1])), null);
+            RouteInfo info = new RouteInfo(new IpPrefix(route), null);
             this.routes.add(info);
             updateAllowedFamilies(info.getDestination().getAddress());
         }
@@ -132,9 +131,7 @@ public class VpnConfig implements Parcelable {
         String[] addresses = addressesStr.trim().split(" ");
         for (String address : addresses) {
             //each address is ip/prefix
-            String[] split = address.split("/");
-            LinkAddress addr = new LinkAddress(InetAddress.parseNumericAddress(split[0]),
-                    Integer.parseInt(split[1]));
+            LinkAddress addr = new LinkAddress(address);
             this.addresses.add(addr);
             updateAllowedFamilies(addr.getAddress());
         }
