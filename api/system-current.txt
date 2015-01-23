@@ -26182,6 +26182,14 @@ package android.provider {
     field public static final java.lang.String CONTENT_DIRECTORY = "suggestions";
   }
 
+  public static final class ContactsContract.Contacts.AggregationSuggestions.Builder {
+    ctor public ContactsContract.Contacts.AggregationSuggestions.Builder();
+    method public android.provider.ContactsContract.Contacts.AggregationSuggestions.Builder addNameParameter(java.lang.String);
+    method public android.net.Uri build();
+    method public android.provider.ContactsContract.Contacts.AggregationSuggestions.Builder setContactId(long);
+    method public android.provider.ContactsContract.Contacts.AggregationSuggestions.Builder setLimit(int);
+  }
+
   public static final class ContactsContract.Contacts.Data implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns {
     field public static final java.lang.String CONTENT_DIRECTORY = "data";
   }
