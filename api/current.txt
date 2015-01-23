@@ -13983,7 +13983,8 @@ package android.media {
 
   public class AsyncPlayer {
     ctor public AsyncPlayer(java.lang.String);
-    method public void play(android.content.Context, android.net.Uri, boolean, int);
+    method public deprecated void play(android.content.Context, android.net.Uri, boolean, int);
+    method public void play(android.content.Context, android.net.Uri, boolean, android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
     method public void stop();
   }
 
