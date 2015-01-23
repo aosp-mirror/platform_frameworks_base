@@ -841,6 +841,8 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
             }
 
+            // Clear the value of mOtherProfile from previous call.
+            mOtherProfile = null;
             mList.clear();
             if (mBaseResolveList != null) {
                 currentResolveList = mOrigResolveList = mBaseResolveList;
