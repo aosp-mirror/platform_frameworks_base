@@ -34,11 +34,11 @@ import java.util.List;
 
 /**
  * This class stores the loading state as it goes through multiple stages of loading:
- *   - preloadRawTasks() will load the raw set of recents tasks from the system
- *   - preloadPlan() will construct a new task stack with all metadata and only icons and thumbnails
- *     that are currently in the cache
- *   - executePlan() will actually load and fill in the icons and thumbnails according to the load
- *     options specified, such that we can transition into the Recents activity seamlessly
+ *   1) preloadRawTasks() will load the raw set of recents tasks from the system
+ *   2) preloadPlan() will construct a new task stack with all metadata and only icons and
+ *      thumbnails that are currently in the cache
+ *   3) executePlan() will actually load and fill in the icons and thumbnails according to the load
+ *      options specified, such that we can transition into the Recents activity seamlessly
  */
 public class RecentsTaskLoadPlan {
     static String TAG = "RecentsTaskLoadPlan";

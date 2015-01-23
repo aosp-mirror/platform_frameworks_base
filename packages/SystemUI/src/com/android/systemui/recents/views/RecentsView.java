@@ -31,7 +31,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
-
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -41,6 +40,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This view is the the top level layout that contains TaskStacks (which are laid out according
@@ -160,9 +160,10 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 TaskStackView stackView = (TaskStackView) child;
                 TaskStack stack = stackView.mStack;
                 // Iterate the stack views and try and find the focused task
-                int taskCount = stackView.getChildCount();
-                for (int j = 0; j < taskCount; j++) {
-                    TaskView tv = (TaskView) stackView.getChildAt(j);
+                List<TaskView> taskViews = stackView.getTaskViews();
+                int taskViewCount = taskViews.size();
+                for (int j = 0; j < taskViewCount; j++) {
+                    TaskView tv = taskViews.get(j);
                     Task task = tv.getTask();
                     if (tv.isFocusedTask()) {
                         onTaskViewClicked(stackView, tv, stack, task, false);
@@ -546,7 +547,14 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     }
 
     @Override
-    public void onAllTaskViewsDismissed() {
+    public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks) {
+        if (removedTasks != null) {
+            int taskCount = removedTasks.size();
+            for (int i = 0; i < taskCount; i++) {
+                onTaskViewDismissed(removedTasks.get(i));
+            }
+        }
+
         mCb.onAllTaskViewsDismissed();
     }
 
