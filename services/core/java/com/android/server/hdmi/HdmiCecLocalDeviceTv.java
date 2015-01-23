@@ -476,7 +476,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiDeviceInfo info = getCecDeviceInfo(logicalAddress);
         if (info == null) {
             if (!handleNewDeviceAtTheTailOfActivePath(physicalAddress)) {
-                HdmiLogger.debug("Device info not found: %X; buffering the command", logicalAddress);
+                HdmiLogger.debug("Device info %X not found; buffering the command", logicalAddress);
                 mDelayedMessageBuffer.add(message);
             }
         } else if (!isInputReady(info.getId())) {
@@ -517,6 +517,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
             doManualPortSwitching(portId, null);
             setPrevPortId(Constants.INVALID_PORT_ID);
+        } else {
+            // No HDMI port to switch to was found. Notify the input change listers to
+            // switch to the lastly shown internal input.
+            mActiveSource.invalidate();
+            setActivePath(Constants.INVALID_PHYSICAL_ADDRESS);
+            mService.invokeInputChangeListener(HdmiDeviceInfo.INACTIVE_DEVICE);
         }
         return true;
     }
@@ -1826,6 +1832,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
         pw.println("mAutoWakeup: " + mAutoWakeup);
         pw.println("mSkipRoutingControl: " + mSkipRoutingControl);
+        pw.println("mPrevPortId: " + mPrevPortId);
         pw.println("CEC devices:");
         pw.increaseIndent();
         for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {
