@@ -147,20 +147,20 @@ public abstract class CameraDevice implements AutoCloseable {
      * <ul>
      *
      * <li>For drawing to a {@link android.view.SurfaceView SurfaceView}: Once the SurfaceView's
-     *   Surface is {@link android.view.SurfaceHolder.Callback#surfaceCreated created}, set the
-     *   size of the Surface with {@link android.view.SurfaceHolder#setFixedSize} to be one of the
-     *   sizes returned by
-     *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceHolder.class)}
-     *   and then obtain the Surface by calling {@link android.view.SurfaceHolder#getSurface}.</li>
+     *   Surface is {@link android.view.SurfaceHolder.Callback#surfaceCreated created}, set the size
+     *   of the Surface with {@link android.view.SurfaceHolder#setFixedSize} to be one of the sizes
+     *   returned by {@link StreamConfigurationMap#getOutputSizes(Class)
+     *   getOutputSizes(SurfaceHolder.class)} and then obtain the Surface by calling {@link
+     *   android.view.SurfaceHolder#getSurface}. If the size is not set by the application, it will
+     *   be rounded to the nearest supported size less than 1080p, by the camera device.</li>
      *
-     * <li>For accessing through an OpenGL texture via a
-     *   {@link android.graphics.SurfaceTexture SurfaceTexture}: Set the size of
-     *   the SurfaceTexture with
-     *   {@link android.graphics.SurfaceTexture#setDefaultBufferSize} to be one
-     *   of the sizes returned by
+     * <li>For accessing through an OpenGL texture via a {@link android.graphics.SurfaceTexture
+     *   SurfaceTexture}: Set the size of the SurfaceTexture with {@link
+     *   android.graphics.SurfaceTexture#setDefaultBufferSize} to be one of the sizes returned by
      *   {@link StreamConfigurationMap#getOutputSizes(Class) getOutputSizes(SurfaceTexture.class)}
-     *   before creating a Surface from the SurfaceTexture with
-     *   {@link Surface#Surface}.</li>
+     *   before creating a Surface from the SurfaceTexture with {@link Surface#Surface}. If the size
+     *   is not set by the application, it will be set to be the smallest supported size less than
+     *   1080p, by the camera device.</li>
      *
      * <li>For recording with {@link android.media.MediaCodec}: Call
      *   {@link android.media.MediaCodec#createInputSurface} after configuring
@@ -189,6 +189,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *   corresponding supported sizes by passing the chosen output format into
      *   {@link StreamConfigurationMap#getOutputSizes(int)}. Then obtain a
      *   {@link android.view.Surface} from it with {@link android.media.ImageReader#getSurface()}.
+     *   If the ImageReader size is not set to a supported size, it will be rounded to a supported
+     *   size less than 1080p by the camera device.
      *   </li>
      *
      * </ul>
