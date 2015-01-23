@@ -22,6 +22,9 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.HashCodeHelpers;
+import android.hardware.camera2.legacy.LegacyCameraDevice;
+import android.hardware.camera2.legacy.LegacyMetadataMapper;
+import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;
 import android.view.Surface;
 import android.util.Log;
 import android.util.Range;
@@ -292,13 +295,21 @@ public final class StreamConfigurationMap {
      * </li>
      * </ul>
      *
-     * This is not an exhaustive list; see the particular class's documentation for further
+     * <p>Surfaces from flexible sources will return true even if the exact size of the Surface does
+     * not match a camera-supported size, as long as the format (or class) is supported and the
+     * camera device supports a size that is equal to or less than 1080p in that format. If such as
+     * Surface is used to create a capture session, it will have its size rounded to the nearest
+     * supported size, below or equal to 1080p. Flexible sources include SurfaceView, SurfaceTexture,
+     * and ImageReader.</p>
+     *
+     * <p>This is not an exhaustive list; see the particular class's documentation for further
      * possible reasons of incompatibility.</p>
      *
      * @param surface a non-{@code null} {@link Surface} object reference
      * @return {@code true} if this is supported, {@code false} otherwise
      *
      * @throws NullPointerException if {@code surface} was {@code null}
+     * @throws IllegalArgumentException if the Surface endpoint is no longer valid
      *
      * @see CameraDevice#createCaptureSession
      * @see #isOutputSupportedFor(Class)
@@ -306,9 +317,37 @@ public final class StreamConfigurationMap {
     public boolean isOutputSupportedFor(Surface surface) {
         checkNotNull(surface, "surface must not be null");
 
-        throw new UnsupportedOperationException("Not implemented yet");
+        Size surfaceSize;
+        int surfaceFormat = -1;
+        try {
+            surfaceSize = LegacyCameraDevice.getSurfaceSize(surface);
+            surfaceFormat = LegacyCameraDevice.detectSurfaceType(surface);
+        } catch(BufferQueueAbandonedException e) {
+            throw new IllegalArgumentException("Abandoned surface", e);
+        }
 
-        // TODO: JNI function that checks the Surface's IGraphicBufferProducer state
+        // See if consumer is flexible.
+        boolean isFlexible = LegacyCameraDevice.isFlexibleConsumer(surface);
+
+        // Override RGB formats to IMPLEMENTATION_DEFINED, b/9487482
+        if ((surfaceFormat >= LegacyMetadataMapper.HAL_PIXEL_FORMAT_RGBA_8888 &&
+                        surfaceFormat <= LegacyMetadataMapper.HAL_PIXEL_FORMAT_BGRA_8888)) {
+            surfaceFormat = LegacyMetadataMapper.HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED;
+        }
+
+        for (StreamConfiguration config : mConfigurations) {
+            if (config.getFormat() == surfaceFormat && config.isOutput()) {
+                // Mathing format, either need exact size match, or a flexible consumer
+                // and a size no bigger than MAX_DIMEN_FOR_ROUNDING
+                if (config.getSize().equals(surfaceSize)) {
+                    return true;
+                } else if (isFlexible &&
+                        (config.getSize().getWidth() <= LegacyCameraDevice.MAX_DIMEN_FOR_ROUNDING)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -1027,7 +1066,8 @@ public final class StreamConfigurationMap {
         int i = 0;
 
         for (int format : getFormatsMap(output).keySet()) {
-            if (format != HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+            if (format != HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED &&
+                format != HAL_PIXEL_FORMAT_RAW_OPAQUE) {
                 formats[i++] = format;
             }
         }
@@ -1089,6 +1129,10 @@ public final class StreamConfigurationMap {
         if (formatsMap.containsKey(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED)) {
             size -= 1;
         }
+        if (formatsMap.containsKey(HAL_PIXEL_FORMAT_RAW_OPAQUE)) {
+            size -= 1;
+        }
+
         return size;
     }
 
