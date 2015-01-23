@@ -214,6 +214,11 @@ public abstract class Image implements AutoCloseable {
          * the underlying data could be mapped as a pointer in JNI without doing
          * any copies with {@code GetDirectBufferAddress}.</p>
          *
+         * <p>For raw formats, each plane is only guaranteed to contain data
+         * up to the last pixel in the last row. In other words, the stride
+         * after the last row may not be mapped into the buffer. This is a
+         * necessary requirement for any interleaved format.</p>
+         *
          * @return the byte buffer containing the image data for this plane.
          */
         public abstract ByteBuffer getBuffer();
