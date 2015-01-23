@@ -13632,6 +13632,7 @@ package android.hardware.hdmi {
   }
 
   public class HdmiDeviceInfo implements android.os.Parcelable {
+    ctor public HdmiDeviceInfo();
     method public int describeContents();
     method public int getAdopterId();
     method public int getDeviceId();
@@ -13647,6 +13648,7 @@ package android.hardware.hdmi {
     method public static int idForHardware(int);
     method public static int idForMhlDevice(int);
     method public boolean isCecDevice();
+    method public boolean isInactivated();
     method public boolean isMhlDevice();
     method public boolean isSourceType();
     method public void writeToParcel(android.os.Parcel, int);
@@ -13659,6 +13661,8 @@ package android.hardware.hdmi {
     field public static final int DEVICE_RESERVED = 2; // 0x2
     field public static final int DEVICE_TUNER = 3; // 0x3
     field public static final int DEVICE_TV = 0; // 0x0
+    field public static final int ID_INVALID = 65535; // 0xffff
+    field public static final android.hardware.hdmi.HdmiDeviceInfo INACTIVE_DEVICE;
     field public static final int PATH_INTERNAL = 0; // 0x0
     field public static final int PATH_INVALID = 65535; // 0xffff
     field public static final int PORT_INVALID = -1; // 0xffffffff
