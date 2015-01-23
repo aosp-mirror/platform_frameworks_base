@@ -796,7 +796,7 @@ bool isSameExcept(const ResTable_config& a, const ResTable_config& b, int axisMa
 }
 
 bool isDensityOnly(const ResTable_config& config) {
-    if (config.density == ResTable_config::DENSITY_NONE) {
+    if (config.density == ResTable_config::DENSITY_DEFAULT) {
         return false;
     }
 
