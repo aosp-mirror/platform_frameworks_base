@@ -18,6 +18,7 @@
 package android.hardware;
 
 import android.os.Build;
+import android.annotation.SystemApi;
 
 /**
  * Class representing a sensor. Use {@link SensorManager#getSensorList} to get
@@ -511,6 +512,27 @@ public final class Sensor {
      */
     public static final String STRING_TYPE_PICK_UP_GESTURE = "android.sensor.pick_up_gesture";
 
+     /**
+     * A constant describing a wrist tilt gesture sensor.
+     *
+     * A sensor of this type triggers when the device face is tilted towards the user.
+     * The only allowed return value is 1.0.
+     * This sensor remains active until disabled.
+     *
+     * @hide This sensor is expected to only be used by the system ui
+     */
+    @SystemApi
+    public static final int TYPE_WRIST_TILT_GESTURE = 26;
+
+    /**
+     * A constant string describing a wrist tilt gesture sensor.
+     *
+     * @hide This sensor is expected to only be used by the system ui
+     * @see #TYPE_WRIST_TILT_GESTURE
+     */
+    @SystemApi
+    public static final String STRING_TYPE_WRIST_TILT_GESTURE = "android.sensor.wrist_tilt_gesture";
+
     /**
      * A constant describing all sensor types.
      */
@@ -591,6 +613,7 @@ public final class Sensor {
             1, // SENSOR_TYPE_WAKE_GESTURE
             1, // SENSOR_TYPE_GLANCE_GESTURE
             1, // SENSOR_TYPE_PICK_UP_GESTURE
+            1, // SENSOR_TYPE_WRIST_TILT_GESTURE
     };
 
     /**
