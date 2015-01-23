@@ -990,6 +990,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    /**
+     * Creates and loads the policy data from xml for data that is shared between
+     * various profiles of a user. In contrast to {@link #getUserData(int)}
+     * it allows access to data of users other than the calling user.
+     *
+     * This function should only be used for shared data, e.g. everything regarding
+     * passwords and should be removed once multiple screen locks are present.
+     * @param userHandle the user for whom to load the policy data
+     * @return
+     */
+    DevicePolicyData getUserDataUnchecked(int userHandle) {
+        long ident = Binder.clearCallingIdentity();
+        try {
+            return getUserData(userHandle);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     void removeUserData(int userHandle) {
         synchronized (this) {
             if (userHandle == UserHandle.USER_OWNER) {
@@ -1930,7 +1949,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -1977,7 +1996,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2024,7 +2043,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2085,7 +2104,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2183,7 +2202,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
         for (UserInfo userInfo : profiles) {
-            DevicePolicyData policy = getUserData(userInfo.id);
+            DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
             final int N = policy.mAdminList.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2240,7 +2259,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2284,7 +2303,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2331,7 +2350,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2378,7 +2397,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2425,7 +2444,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2472,7 +2491,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2497,8 +2516,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // If the user this is called from is part of a profile group, that is the parent
             // of the group.
             UserInfo parent = getProfileParent(userHandle);
-            int id = parent == null ? userHandle : parent.id;
-            DevicePolicyData policy = getUserData(id);
+            int id = (parent == null) ? userHandle : parent.id;
+            DevicePolicyData policy = getUserDataUnchecked(id);
 
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
@@ -2528,7 +2547,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     DeviceAdminInfo.USES_POLICY_WATCH_LOGIN);
 
             // The active password is stored in the parent.
-            DevicePolicyData policy = getUserData(getProfileParent(userHandle).id);
+            UserInfo parent = getProfileParent(userHandle);
+            int id = (parent == null) ? userHandle : parent.id;
+            DevicePolicyData policy = getUserDataUnchecked(id);
 
             return policy.mFailedPasswordAttempts;
         }
@@ -2591,7 +2612,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int count = 0;
         ActiveAdmin strictestAdmin = null;
         for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-            DevicePolicyData policy = getUserData(userInfo.id);
+            DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
             for (ActiveAdmin admin : policy.mAdminList) {
                 if (admin.maximumFailedPasswordsForWipe ==
                         ActiveAdmin.DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
@@ -2804,7 +2825,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -3126,7 +3147,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
                 int profileId = userInfo.id;
-                DevicePolicyData policy = getUserData(profileId);
+                DevicePolicyData policy = getUserDataUnchecked(profileId);
                 final int N = policy.mAdminList.size();
                 if (N > 0) {
                     for (int i=0; i<N; i++) {
@@ -4246,7 +4267,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // and return null.
             boolean allAdminsHaveOptions = true;
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.id);
+                DevicePolicyData policy = getUserDataUnchecked(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i < N; i++) {
                     final ActiveAdmin active = policy.mAdminList.get(i);
@@ -4477,7 +4498,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             for (int i = 0; i < PROFILES_SIZE; ++i) {
                 // Just loop though all admins, only device or profiles
                 // owners can have permitted lists set.
-                DevicePolicyData policy = getUserData(profiles.get(i).id);
+                DevicePolicyData policy = getUserDataUnchecked(profiles.get(i).id);
                 final int N = policy.mAdminList.size();
                 for (int j = 0; j < N; j++) {
                     ActiveAdmin admin = policy.mAdminList.get(j);
@@ -4642,7 +4663,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             for (int i = 0; i < PROFILES_SIZE; ++i) {
                 // Just loop though all admins, only device or profiles
                 // owners can have permitted lists set.
-                DevicePolicyData policy = getUserData(profiles.get(i).id);
+                DevicePolicyData policy = getUserDataUnchecked(profiles.get(i).id);
                 final int N = policy.mAdminList.size();
                 for (int j = 0; j < N; j++) {
                     ActiveAdmin admin = policy.mAdminList.get(j);
@@ -5431,7 +5452,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return Collections.emptyList();
                 }
 
-                DevicePolicyData policy = getUserData(profileId);
+                DevicePolicyData policy = getUserDataUnchecked(profileId);
                 ActiveAdmin admin = policy.mAdminMap.get(ownerComponent);
 
                 if (admin == null || admin.crossProfileWidgetProviders == null
