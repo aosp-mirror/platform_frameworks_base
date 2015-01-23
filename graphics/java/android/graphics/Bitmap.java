@@ -304,7 +304,7 @@ public final class Bitmap implements Parcelable {
      * there are no more references to this bitmap.
      */
     public void recycle() {
-        if (!mRecycled) {
+        if (!mRecycled && mFinalizer.mNativeBitmap != 0) {
             if (nativeRecycle(mNativeBitmap)) {
                 // return value indicates whether native pixel object was actually recycled.
                 // false indicates that it is still in use at the native level and these
@@ -1571,7 +1571,7 @@ public final class Bitmap implements Parcelable {
     }
 
     private static class BitmapFinalizer {
-        private final long mNativeBitmap;
+        private long mNativeBitmap;
 
         // Native memory allocated for the duration of the Bitmap,
         // if pixel data allocated into native memory, instead of java byte[]
@@ -1597,6 +1597,7 @@ public final class Bitmap implements Parcelable {
                     VMRuntime.getRuntime().registerNativeFree(mNativeAllocationByteCount);
                 }
                 nativeDestructor(mNativeBitmap);
+                mNativeBitmap = 0;
             }
         }
     }
