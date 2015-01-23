@@ -669,8 +669,8 @@ public class Build {
         }
 
         if (!TextUtils.isEmpty(bootimage)) {
-            if (!Objects.equals(vendor, bootimage)) {
-                Slog.e(TAG, "Mismatched fingerprints; system and vendor reported " + system
+            if (!Objects.equals(system, bootimage)) {
+                Slog.e(TAG, "Mismatched fingerprints; system reported " + system
                         + " but bootimage reported " + bootimage);
                 return false;
             }
