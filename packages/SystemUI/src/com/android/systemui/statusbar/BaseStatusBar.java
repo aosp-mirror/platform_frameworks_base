@@ -1546,7 +1546,11 @@ public abstract class BaseStatusBar extends SystemUI implements
             dismissKeyguardThenExecute(new OnDismissAction() {
                 public boolean onDismiss() {
                     if (mIsHeadsUp) {
-                        mHeadsUpNotificationView.clear();
+                        // Release the HUN notification to the shade.
+                        //
+                        // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
+                        // become canceled shortly by NoMan, but we can't assume that.
+                        mHeadsUpNotificationView.releaseAndClose();
                     }
                     new Thread() {
                         @Override
