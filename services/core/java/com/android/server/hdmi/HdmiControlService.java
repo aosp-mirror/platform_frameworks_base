@@ -2252,16 +2252,17 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         if (tv() == null) return;
         final int lastInput = contentOn ? tv().getActivePortId() : Constants.INVALID_PORT_ID;
-        tv().doManualPortSwitching(portId, new IHdmiControlCallback.Stub() {
-            @Override
-            public void onComplete(int result) throws RemoteException {
-                // Keep the last input to switch back later when RAP[ContentOff] is received.
-                // This effectively sets the port to invalid one if the switching is for
-                // RAP[ContentOff].
-                setLastInputForMhl(lastInput);
-            }
-        });
-
+        if (portId != Constants.INVALID_PORT_ID) {
+            tv().doManualPortSwitching(portId, new IHdmiControlCallback.Stub() {
+                @Override
+                public void onComplete(int result) throws RemoteException {
+                    // Keep the last input to switch back later when RAP[ContentOff] is received.
+                    // This effectively sets the port to invalid one if the switching is for
+                    // RAP[ContentOff].
+                    setLastInputForMhl(lastInput);
+                }
+            });
+        }
         // MHL device is always directly connected to the port. Update the active port ID to avoid
         // unnecessary post-routing control task.
         tv().setActivePortId(portId);
@@ -2271,7 +2272,8 @@ public final class HdmiControlService extends SystemService {
         // may not be the MHL-enabled one. In this case the device info to be passed to
         // input change listener should be the one describing the corresponding HDMI port.
         HdmiMhlLocalDeviceStub device = mMhlController.getLocalDevice(portId);
-        HdmiDeviceInfo info = (device != null) ? device.getInfo() : mPortDeviceMap.get(portId);
+        HdmiDeviceInfo info = (device != null) ? device.getInfo()
+                : mPortDeviceMap.get(portId, HdmiDeviceInfo.INACTIVE_DEVICE);
         invokeInputChangeListener(info);
     }
 
