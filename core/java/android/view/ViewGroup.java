@@ -831,8 +831,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Clip the bounds by our bounds.
         bounds.left = Math.max(bounds.left, 0);
         bounds.top = Math.max(bounds.top, 0);
-        bounds.right = Math.min(bounds.right, mRight);
-        bounds.bottom = Math.min(bounds.bottom, mBottom);
+        bounds.right = Math.min(bounds.right, getWidth());
+        bounds.bottom = Math.min(bounds.bottom, getHeight());
 
         Iterator<View> iterator = obtainOrderedChildIterator();
         while (iterator.hasNext()) {

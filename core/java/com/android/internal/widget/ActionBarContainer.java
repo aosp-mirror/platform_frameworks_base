@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -30,6 +31,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
+import java.util.List;
 
 /**
  * This class acts as a container for the action bar view and action mode context views.
@@ -222,6 +225,18 @@ public class ActionBarContainer extends FrameLayout {
 
         // An action bar always eats touch events.
         return true;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void addClickableRectsForAccessibility(List<RectF> outRects) {
+        // This class always consumes touch events, therefore if it
+        // covers a view we do not want to send a click over it.
+        RectF bounds = new RectF();
+        bounds.set(0, 0, getWidth(), getHeight());
+        outRects.add(bounds);
     }
 
     @Override
