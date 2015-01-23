@@ -146,6 +146,10 @@ public class ExprModel {
         return register(new ResourceExpr(resourceText));
     }
 
+    public Expr bracketExpr(Expr variableExpr, Expr argExpr) {
+        return register(new BracketExpr(variableExpr, argExpr));
+    }
+
     public List<Expr> getBindingExpressions() {
         return mBindingExpressions;
     }

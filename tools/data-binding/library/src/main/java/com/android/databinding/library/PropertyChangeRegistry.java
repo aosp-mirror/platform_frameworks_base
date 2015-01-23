@@ -15,21 +15,22 @@
  */
 package com.android.databinding.library;
 
-/**
- * Created by mount on 12/15/14.
- */
-public class ChangeListenerRegistry extends
-        CallbackRegistry<OnPropertyChangedListener, Observable> {
+public class PropertyChangeRegistry extends
+        CallbackRegistry<OnPropertyChangedListener, Observable, Void> {
 
-    private static final CallbackRegistry.NotifierCallback<OnPropertyChangedListener, Observable> NOTIFIER_CALLBACK = new CallbackRegistry.NotifierCallback<OnPropertyChangedListener, Observable>() {
+    private static final CallbackRegistry.NotifierCallback<OnPropertyChangedListener, Observable, Void> NOTIFIER_CALLBACK = new CallbackRegistry.NotifierCallback<OnPropertyChangedListener, Observable, Void>() {
         @Override
         public void onNotifyCallback(OnPropertyChangedListener callback, Observable sender,
-                int arg) {
+                int arg, Void notUsed) {
             callback.onPropertyChanged(sender, arg);
         }
     };
 
-    public ChangeListenerRegistry() {
+    public PropertyChangeRegistry() {
         super(NOTIFIER_CALLBACK);
+    }
+
+    public void notifyChange(Observable observable, int propertyId) {
+        notifyCallbacks(observable, propertyId, null);
     }
 }

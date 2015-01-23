@@ -17,7 +17,7 @@
 package com.android.databinding.library;
 
 public class BaseObservable implements Observable {
-    private ChangeListenerRegistry mCallbacks;
+    private PropertyChangeRegistry mCallbacks;
 
     public BaseObservable() {
     }
@@ -25,7 +25,7 @@ public class BaseObservable implements Observable {
     @Override
     public synchronized void addOnPropertyChangedListener(OnPropertyChangedListener listener) {
         if (mCallbacks == null) {
-            mCallbacks = new ChangeListenerRegistry();
+            mCallbacks = new PropertyChangeRegistry();
         }
         mCallbacks.add(listener);
     }
@@ -39,13 +39,13 @@ public class BaseObservable implements Observable {
 
     public synchronized void notifyChange() {
         if (mCallbacks != null) {
-            mCallbacks.notifyCallbacks(this, 0);
+            mCallbacks.notifyCallbacks(this, 0, null);
         }
     }
 
     public void notifyPropertyChanged(int fieldId) {
         if (mCallbacks != null) {
-            mCallbacks.notifyCallbacks(this, fieldId);
+            mCallbacks.notifyCallbacks(this, fieldId, null);
         }
     }
 }

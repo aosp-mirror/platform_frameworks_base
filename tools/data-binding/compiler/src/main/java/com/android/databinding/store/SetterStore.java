@@ -438,7 +438,14 @@ public class SetterStore {
                     return oldParameter.isAssignableFrom(parameter);
                 }
             } else {
-                return getConversionMethod(argument, parameter) != null;
+                ConversionMethod conversionMethod = getConversionMethod(argument, parameter);
+                if (conversionMethod != null) {
+                    return true;
+                }
+                if (getConversionMethod(argument, oldParameter) != null) {
+                    return false;
+                }
+                return argument.equals(Object.class) && !parameter.isPrimitive();
             }
         }
     }

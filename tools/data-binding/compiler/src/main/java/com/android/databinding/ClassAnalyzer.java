@@ -34,6 +34,8 @@ import java.util.Map;
 public class ClassAnalyzer {
 
     private static final String OBSERVABLE_CLASS_NAME = "com.android.databinding.library.Observable";
+    private static final String OBSERVABLE_LIST_CLASS_NAME = "com.android.databinding.library.ObservableList";
+    private static final String OBSERVABLE_MAP_CLASS_NAME = "com.android.databinding.library.ObservableMap";
     private static String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
 
     private static Map<String, String> sTestClassNameMapping = ImmutableMap.of(
@@ -51,6 +53,10 @@ public class ClassAnalyzer {
 
     private final Class mObservable;
 
+    private final Class mObservableList;
+
+    private final Class mObservableMap;
+
     private final Class mBindable;
 
     private final boolean mTestMode;
@@ -60,6 +66,8 @@ public class ClassAnalyzer {
         mTestMode = testMode;
         try {
             mObservable = classLoader.loadClass(getClassName(OBSERVABLE_CLASS_NAME));
+            mObservableList = classLoader.loadClass(getClassName(OBSERVABLE_LIST_CLASS_NAME));
+            mObservableMap = classLoader.loadClass(getClassName(OBSERVABLE_MAP_CLASS_NAME));
             mBindable = classLoader.loadClass(getClassName(BINDABLE_ANNOTATION_NAME));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -112,7 +120,8 @@ public class ClassAnalyzer {
     }
 
     public boolean isObservable(Class klass) {
-        return mObservable.isAssignableFrom(klass);
+        return mObservable.isAssignableFrom(klass) || mObservableList.isAssignableFrom(klass) ||
+            mObservableMap.isAssignableFrom(klass);
     }
 
     public boolean isBindable(Field field) {

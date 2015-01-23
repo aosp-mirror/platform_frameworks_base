@@ -44,6 +44,7 @@ import com.android.databinding.ext.br
 import com.android.databinding.ext.toJavaCode
 import com.android.databinding.ext.isObservable
 import com.android.databinding.expr.ResourceExpr
+import com.android.databinding.expr.BracketExpr
 
 fun Expr.isObservable() = com.android.databinding.ClassAnalyzer.getInstance().isObservable(this.getResolvedType())
 
@@ -193,6 +194,28 @@ fun Expr.toCode(full : Boolean = false) : KCode {
         }
         is ResourceExpr -> kcode("") {
             app("", it.toJava())
+        }
+        is BracketExpr -> kcode("") {
+            app("", it.getTarget().toCode())
+            val bracketType = it.getAccessor();
+            when (bracketType) {
+                BracketExpr.BracketAccessor.ARRAY -> {
+                    app("[", it.getArg().toCode())
+                    app("]")
+                }
+                BracketExpr.BracketAccessor.LIST -> {
+                    app(".get(")
+                    if (it.argCastsInteger()) {
+                        app("(Integer)")
+                    }
+                    app("", it.getArg().toCode())
+                    app(")")
+                }
+                BracketExpr.BracketAccessor.MAP -> {
+                    app(".get(", it.getArg().toCode())
+                    app(")")
+                }
+            }
         }
         else -> kcode("//NOT IMPLEMENTED YET")
     }

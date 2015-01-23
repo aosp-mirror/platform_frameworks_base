@@ -148,6 +148,11 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         return mModel.resourceExpr(ctx.getText());
     }
 
+    @Override
+    public Expr visitBracketOp(@NotNull BindingExpressionParser.BracketOpContext ctx) {
+        return mModel.bracketExpr(visit(ctx.expression(0)), visit(ctx.expression(1)));
+    }
+
     //    @Override
 //    public Expr visitIdentifier(@NotNull BindingExpressionParser.IdentifierContext ctx) {
 //        final String identifier = ctx.Identifier().getText();
