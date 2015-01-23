@@ -77,9 +77,18 @@ public class HdmiDeviceInfo implements Parcelable {
     /** Invalid port ID */
     public static final int PORT_INVALID = -1;
 
+    /** Invalid device ID */
+    public static final int ID_INVALID = 0xFFFF;
+
+    /** Device info used to indicate an inactivated device. */
+    public static final HdmiDeviceInfo INACTIVE_DEVICE = new HdmiDeviceInfo();
+
     private static final int HDMI_DEVICE_TYPE_CEC = 0;
     private static final int HDMI_DEVICE_TYPE_MHL = 1;
     private static final int HDMI_DEVICE_TYPE_HARDWARE = 2;
+
+    // Type used to indicate the device that has relinquished its active source status.
+    private static final int HDMI_DEVICE_TYPE_INACTIVE = 100;
 
     // Offset used for id value. MHL devices, for instance, will be assigned the value from
     // ID_OFFSET_MHL.
@@ -130,6 +139,8 @@ public class HdmiDeviceInfo implements Parcelable {
                             return new HdmiDeviceInfo(physicalAddress, portId, adopterId, deviceId);
                         case HDMI_DEVICE_TYPE_HARDWARE:
                             return new HdmiDeviceInfo(physicalAddress, portId);
+                        case HDMI_DEVICE_TYPE_INACTIVE:
+                            return HdmiDeviceInfo.INACTIVE_DEVICE;
                         default:
                             return null;
                     }
@@ -208,7 +219,6 @@ public class HdmiDeviceInfo implements Parcelable {
 
         mDeviceId = -1;
         mAdopterId = -1;
-
     }
 
     /**
@@ -234,6 +244,28 @@ public class HdmiDeviceInfo implements Parcelable {
 
         mDeviceId = adopterId;
         mAdopterId = deviceId;
+    }
+
+    /**
+     * Constructor. Used to initialize the instance representing an inactivated device.
+     * Can be passed input change listener to indicate the active source yielded
+     * its status, hence the listener should take an appropriate action such as
+     * switching to other input.
+     */
+    public HdmiDeviceInfo() {
+        mHdmiDeviceType = HDMI_DEVICE_TYPE_INACTIVE;
+        mPhysicalAddress = PATH_INVALID;
+        mId = ID_INVALID;
+
+        mLogicalAddress = -1;
+        mDeviceType = DEVICE_INACTIVE;
+        mPortId = PORT_INVALID;
+        mDevicePowerStatus = HdmiControlManager.POWER_STATUS_UNKNOWN;
+        mDisplayName = "Inactive";
+        mVendorId = 0;
+
+        mDeviceId = -1;
+        mAdopterId = -1;
     }
 
     /**
@@ -364,6 +396,14 @@ public class HdmiDeviceInfo implements Parcelable {
     }
 
     /**
+     * Return {@code true} if the device represents an inactivated device that relinquishes
+     * its status as active source by &lt;Active Source&gt; (HDMI-CEC) or Content-off (MHL).
+     */
+    public boolean isInactivated() {
+        return mHdmiDeviceType == HDMI_DEVICE_TYPE_INACTIVE;
+    }
+
+    /**
      * Returns display (OSD) name of the device.
      */
     public String getDisplayName() {
@@ -411,6 +451,8 @@ public class HdmiDeviceInfo implements Parcelable {
                 dest.writeInt(mDeviceId);
                 dest.writeInt(mAdopterId);
                 break;
+            case HDMI_DEVICE_TYPE_INACTIVE:
+                // flow through
             default:
                 // no-op
         }
@@ -437,6 +479,9 @@ public class HdmiDeviceInfo implements Parcelable {
 
             case HDMI_DEVICE_TYPE_HARDWARE:
                 s.append("Hardware: ");
+                break;
+            case HDMI_DEVICE_TYPE_INACTIVE:
+                s.append("Inactivated: ");
                 break;
             default:
                 return "";
