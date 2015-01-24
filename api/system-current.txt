@@ -13146,6 +13146,7 @@ package android.hardware.camera2 {
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY = 2; // 0x2
     field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
     field public static final int LENS_FACING_BACK = 1; // 0x1
+    field public static final int LENS_FACING_EXTERNAL = 2; // 0x2
     field public static final int LENS_FACING_FRONT = 0; // 0x0
     field public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE = 1; // 0x1
     field public static final int LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED = 2; // 0x2
