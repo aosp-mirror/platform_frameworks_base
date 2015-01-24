@@ -5932,23 +5932,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return true;
     }
 
-    /**
-     * Adds the clickable rectangles withing the bounds of this view. They
-     * may overlap. This method is intended for use only by the accessibility
-     * layer.
-     *
-     * @param outRects List to which to add clickable areas.
-     *
-     * @hide
-     */
-    public void addClickableRectsForAccessibility(List<RectF> outRects) {
-        if (isClickable() || isLongClickable()) {
-            RectF bounds = new RectF();
-            bounds.set(0, 0, getWidth(), getHeight());
-            outRects.add(bounds);
-        }
-    }
-
     static void offsetRects(List<RectF> rects, float offsetX, float offsetY) {
         final int rectCount = rects.size();
         for (int i = 0; i < rectCount; i++) {
