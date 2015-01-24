@@ -63,6 +63,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerGlobal;
@@ -874,8 +875,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             } else {
                 stack = container.mStack;
             }
-            stack.mConfigWillChange = config != null
-                    && mService.mConfiguration.diff(config) != 0;
+            stack.mConfigWillChange = config != null && mService.mConfiguration.diff(config) != 0;
             if (DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Starting activity when config will change = " + stack.mConfigWillChange);
 
@@ -1181,9 +1181,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
-                    r.compat, r.launchedFromPackage, r.task.voiceInteractor, app.repProcState,
-                    r.icicle, r.persistentState, results, newIntents, !andResume,
-                    mService.isNextTransitionForward(), profilerInfo);
+                    new Configuration(stack.mOverrideConfig), r.compat, r.launchedFromPackage,
+                    r.task.voiceInteractor, app.repProcState, r.icicle, r.persistentState, results,
+                    newIntents, !andResume, mService.isNextTransitionForward(), profilerInfo);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -2592,6 +2592,27 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final int stackId = activityContainer.mStackId;
             mActivityContainers.remove(stackId);
             mWindowManager.removeStack(stackId);
+        }
+    }
+
+    void resizeStackLocked(int stackId, Rect bounds) {
+        final ActivityStack stack = getStack(stackId);
+        if (stack == null) {
+            Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
+            return;
+        }
+        final Configuration overrideConfig = mWindowManager.resizeStack(stackId, bounds);
+        if (stack.updateOverrideConfiguration(overrideConfig)) {
+            final ActivityRecord r = stack.topRunningActivityLocked(null);
+            if (r != null) {
+                final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
+                // And we need to make sure at this point that all other activities
+                // are made visible with the correct configuration.
+                ensureActivitiesVisibleLocked(r, 0);
+                if (!updated) {
+                    resumeTopActivitiesLocked(stack, null, null);
+                }
+            }
         }
     }
 

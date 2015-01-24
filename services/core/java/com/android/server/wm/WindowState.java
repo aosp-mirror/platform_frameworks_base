@@ -130,7 +130,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     int mLayoutSeq = -1;
 
-    Configuration mConfiguration = null;
+    private Configuration mConfiguration = Configuration.EMPTY;
+    private Configuration mOverrideConfig = Configuration.EMPTY;
     // Sticky answer to isConfigChanged(), remains true until new Configuration is assigned.
     // Used only on {@link #TYPE_KEYGUARD}.
     private boolean mConfigHasChanged;
@@ -1076,9 +1077,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     boolean isConfigChanged() {
-        boolean configChanged = mConfiguration != mService.mCurConfiguration
-                && (mConfiguration == null
-                        || (mConfiguration.diff(mService.mCurConfiguration) != 0));
+        final TaskStack stack = getStack();
+        final Configuration overrideConfig =
+                (stack != null) ? stack.mOverrideConfig : Configuration.EMPTY;
+        final Configuration serviceConfig = mService.mCurConfiguration;
+        boolean configChanged =
+                (mConfiguration != serviceConfig && mConfiguration.diff(serviceConfig) != 0)
+                || (mOverrideConfig != overrideConfig && !mOverrideConfig.equals(overrideConfig));
 
         if ((mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
             // Retain configuration changed status until resetConfiguration called.
@@ -1107,8 +1112,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    void setConfiguration(final Configuration newConfig) {
+    private void setConfiguration(
+            final Configuration newConfig, final Configuration newOverrideConfig) {
         mConfiguration = newConfig;
+        mOverrideConfig = newOverrideConfig;
         mConfigHasChanged = false;
     }
 
@@ -1384,12 +1391,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG, "Reporting new frame to " + this
                     + ": " + mCompatFrame);
             boolean configChanged = isConfigChanged();
+            final TaskStack stack = getStack();
+            final Configuration overrideConfig =
+                    (stack != null) ? stack.mOverrideConfig : Configuration.EMPTY;
             if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION) && configChanged) {
                 Slog.i(TAG, "Sending new config to window " + this + ": "
-                        + mWinAnimator.mSurfaceW + "x" + mWinAnimator.mSurfaceH
-                        + " / " + mService.mCurConfiguration);
+                        + mWinAnimator.mSurfaceW + "x" + mWinAnimator.mSurfaceH + " / config="
+                        + mService.mCurConfiguration + " overrideConfig=" + overrideConfig);
             }
-            setConfiguration(mService.mCurConfiguration);
+            setConfiguration(mService.mCurConfiguration, overrideConfig);
             if (DEBUG_ORIENTATION && mWinAnimator.mDrawState == WindowStateAnimator.DRAW_PENDING)
                 Slog.i(TAG, "Resizing " + this + " WITH DRAW PENDING");
 

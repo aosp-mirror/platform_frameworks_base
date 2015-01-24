@@ -235,6 +235,8 @@ final class ActivityStack {
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
 
+    Configuration mOverrideConfig;
+
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
@@ -348,6 +350,7 @@ final class ActivityStack {
         mStackId = activityContainer.mStackId;
         mCurrentUser = mService.mCurrentUserId;
         mRecentTasks = recentTasks;
+        mOverrideConfig = Configuration.EMPTY;
     }
 
     /**
@@ -450,13 +453,18 @@ final class ActivityStack {
 
     ActivityRecord isInStackLocked(IBinder token) {
         final ActivityRecord r = ActivityRecord.forToken(token);
-        if (r != null) {
-            final TaskRecord task = r.task;
-            if (task != null && task.mActivities.contains(r) && mTaskHistory.contains(task)) {
-                if (task.stack != this) Slog.w(TAG,
+        return isInStackLocked(r);
+    }
+
+    ActivityRecord isInStackLocked(ActivityRecord r) {
+        if (r == null) {
+            return null;
+        }
+        final TaskRecord task = r.task;
+        if (task != null && task.mActivities.contains(r) && mTaskHistory.contains(task)) {
+            if (task.stack != this) Slog.w(TAG,
                     "Illegal state! task does not point to stack it is in.");
-                return r;
-            }
+            return r;
         }
         return null;
     }
@@ -3264,7 +3272,7 @@ final class ActivityStack {
             }
             if (DEBUG_CONTAINERS) Slog.d(TAG, "activityDestroyedLocked: r=" + r);
 
-            if (isInStackLocked(token) != null) {
+            if (isInStackLocked(r) != null) {
                 if (r.state == ActivityState.DESTROYING) {
                     cleanUpActivityLocked(r, true, false);
                     removeActivityFromHistoryLocked(r);
@@ -3643,7 +3651,9 @@ final class ActivityStack {
         // Short circuit: if the two configurations are the exact same
         // object (the common case), then there is nothing to do.
         Configuration newConfig = mService.mConfiguration;
-        if (r.configuration == newConfig && !r.forceNewConfig) {
+        if (r.configuration == newConfig
+                && r.stackConfigOverride == mOverrideConfig
+                && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Configuration unchanged in " + r);
             return true;
@@ -3659,14 +3669,22 @@ final class ActivityStack {
 
         // Okay we now are going to make this activity have the new config.
         // But then we need to figure out how it needs to deal with that.
-        Configuration oldConfig = r.configuration;
+        final Configuration oldConfig = r.configuration;
+        final Configuration oldStackOverride = r.stackConfigOverride;
         r.configuration = newConfig;
+        r.stackConfigOverride = mOverrideConfig;
 
         // Determine what has changed.  May be nothing, if this is a config
         // that has come back from the app after going idle.  In that case
         // we just want to leave the official config object now in the
         // activity and do nothing else.
-        final int changes = oldConfig.diff(newConfig);
+        int stackChanges = oldStackOverride.diff(mOverrideConfig);
+        if (stackChanges == 0 && !oldStackOverride.equals(mOverrideConfig)) {
+            // Assume size change if diff didn't report any changes,
+            // but configurations are not equal.
+            stackChanges = ActivityInfo.CONFIG_SCREEN_SIZE;
+        }
+        final int changes = oldConfig.diff(newConfig) | stackChanges;
         if (changes == 0 && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Configuration no differences in " + r);
@@ -3770,8 +3788,9 @@ final class ActivityStack {
                     (andResume ? "Relaunching to RESUMED " : "Relaunching to PAUSED ")
                     + r);
             r.forceNewConfig = false;
-            r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents,
-                    changes, !andResume, new Configuration(mService.mConfiguration));
+            r.app.thread.scheduleRelaunchActivity(r.appToken, results, newIntents, changes,
+                    !andResume, new Configuration(mService.mConfiguration),
+                    new Configuration(mOverrideConfig));
             // Note: don't need to call pauseIfSleepingLocked() here, because
             // the caller will only pass in 'andResume' if this activity is
             // currently resumed, which implies we aren't sleeping.
@@ -4131,5 +4150,11 @@ final class ActivityStack {
     public String toString() {
         return "ActivityStack{" + Integer.toHexString(System.identityHashCode(this))
                 + " stackId=" + mStackId + ", " + mTaskHistory.size() + " tasks}";
+    }
+
+    boolean updateOverrideConfiguration(Configuration newConfig) {
+        Configuration oldConfig = mOverrideConfig;
+        mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
+        return !mOverrideConfig.equals(oldConfig);
     }
 }

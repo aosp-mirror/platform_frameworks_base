@@ -140,6 +140,10 @@ public abstract class ApplicationThreadNative extends Binder
             int ident = data.readInt();
             ActivityInfo info = ActivityInfo.CREATOR.createFromParcel(data);
             Configuration curConfig = Configuration.CREATOR.createFromParcel(data);
+            Configuration overrideConfig = null;
+            if (data.readInt() != 0) {
+                overrideConfig = Configuration.CREATOR.createFromParcel(data);
+            }
             CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             String referrer = data.readString();
             IVoiceInteractor voiceInteractor = IVoiceInteractor.Stub.asInterface(
@@ -153,8 +157,8 @@ public abstract class ApplicationThreadNative extends Binder
             boolean isForward = data.readInt() != 0;
             ProfilerInfo profilerInfo = data.readInt() != 0
                     ? ProfilerInfo.CREATOR.createFromParcel(data) : null;
-            scheduleLaunchActivity(intent, b, ident, info, curConfig, compatInfo, referrer,
-                    voiceInteractor, procState, state, persistentState, ri, pi,
+            scheduleLaunchActivity(intent, b, ident, info, curConfig, overrideConfig, compatInfo,
+                    referrer, voiceInteractor, procState, state, persistentState, ri, pi,
                     notResumed, isForward, profilerInfo);
             return true;
         }
@@ -167,14 +171,15 @@ public abstract class ApplicationThreadNative extends Binder
             List<ReferrerIntent> pi = data.createTypedArrayList(ReferrerIntent.CREATOR);
             int configChanges = data.readInt();
             boolean notResumed = data.readInt() != 0;
-            Configuration config = null;
+            Configuration config = Configuration.CREATOR.createFromParcel(data);
+            Configuration overrideConfig = null;
             if (data.readInt() != 0) {
-                config = Configuration.CREATOR.createFromParcel(data);
+                overrideConfig = Configuration.CREATOR.createFromParcel(data);
             }
-            scheduleRelaunchActivity(b, ri, pi, configChanges, notResumed, config);
+            scheduleRelaunchActivity(b, ri, pi, configChanges, notResumed, config, overrideConfig);
             return true;
         }
-        
+
         case SCHEDULE_NEW_INTENT_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
@@ -775,11 +780,11 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-            ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
-            PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean notResumed, boolean isForward,
-            ProfilerInfo profilerInfo) throws RemoteException {
+            ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+            CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
+            int procState, Bundle state, PersistableBundle persistentState,
+            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+            boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         intent.writeToParcel(data, 0);
@@ -787,6 +792,12 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(ident);
         info.writeToParcel(data, 0);
         curConfig.writeToParcel(data, 0);
+        if (overrideConfig != null) {
+            data.writeInt(1);
+            overrideConfig.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         compatInfo.writeToParcel(data, 0);
         data.writeString(referrer);
         data.writeStrongBinder(voiceInteractor != null ? voiceInteractor.asBinder() : null);
@@ -810,8 +821,8 @@ class ApplicationThreadProxy implements IApplicationThread {
 
     public final void scheduleRelaunchActivity(IBinder token,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            int configChanges, boolean notResumed, Configuration config)
-            throws RemoteException {
+            int configChanges, boolean notResumed, Configuration config,
+            Configuration overrideConfig) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
@@ -819,9 +830,10 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeTypedList(pendingNewIntents);
         data.writeInt(configChanges);
         data.writeInt(notResumed ? 1 : 0);
-        if (config != null) {
+        config.writeToParcel(data, 0);
+        if (overrideConfig != null) {
             data.writeInt(1);
-            config.writeToParcel(data, 0);
+            overrideConfig.writeToParcel(data, 0);
         } else {
             data.writeInt(0);
         }
@@ -1112,8 +1124,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public final void scheduleActivityConfigurationChanged(
-            IBinder token) throws RemoteException {
+    public final void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);

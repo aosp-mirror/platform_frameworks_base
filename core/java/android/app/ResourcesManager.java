@@ -25,7 +25,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.IBinder;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -38,8 +37,7 @@ import java.util.Locale;
 /** @hide */
 public class ResourcesManager {
     static final String TAG = "ResourcesManager";
-    static final boolean DEBUG_CACHE = false;
-    static final boolean DEBUG_STATS = true;
+    private static final boolean DEBUG = false;
 
     private static ResourcesManager sResourcesManager;
     final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources
@@ -51,7 +49,6 @@ public class ResourcesManager {
     CompatibilityInfo mResCompatibilityInfo;
 
     Configuration mResConfiguration;
-    final Configuration mTmpConfig = new Configuration();
 
     public static ResourcesManager getInstance() {
         synchronized (ResourcesManager.class) {
@@ -144,30 +141,32 @@ public class ResourcesManager {
      * Creates the top level Resources for applications with the given compatibility info.
      *
      * @param resDir the resource directory.
+     * @param splitResDirs split resource directories.
      * @param overlayDirs the resource overlay directories.
      * @param libDirs the shared library resource dirs this app references.
-     * @param compatInfo the compability info. Must not be null.
-     * @param token the application token for determining stack bounds.
+     * @param displayId display Id.
+     * @param overrideConfiguration override configurations.
+     * @param compatInfo the compatibility info. Must not be null.
      */
     public Resources getTopLevelResources(String resDir, String[] splitResDirs,
             String[] overlayDirs, String[] libDirs, int displayId,
-            Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
+            Configuration overrideConfiguration, CompatibilityInfo compatInfo) {
         final float scale = compatInfo.applicationScale;
-        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale, token);
+        Configuration overrideConfigCopy = (overrideConfiguration != null)
+                ? new Configuration(overrideConfiguration) : null;
+        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfigCopy, scale);
         Resources r;
         synchronized (this) {
             // Resources is app scale dependent.
-            if (false) {
-                Slog.w(TAG, "getTopLevelResources: " + resDir + " / " + scale);
-            }
+            if (DEBUG) Slog.w(TAG, "getTopLevelResources: " + resDir + " / " + scale);
+
             WeakReference<Resources> wr = mActiveResources.get(key);
             r = wr != null ? wr.get() : null;
             //if (r != null) Slog.i(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
             if (r != null && r.getAssets().isUpToDate()) {
-                if (false) {
-                    Slog.w(TAG, "Returning cached resources " + r + " " + resDir
-                            + ": appScale=" + r.getCompatibilityInfo().applicationScale);
-                }
+                if (DEBUG) Slog.w(TAG, "Returning cached resources " + r + " " + resDir
+                        + ": appScale=" + r.getCompatibilityInfo().applicationScale
+                        + " key=" + key + " overrideConfig=" + overrideConfiguration);
                 return r;
             }
         }
@@ -213,7 +212,7 @@ public class ResourcesManager {
         //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
         DisplayMetrics dm = getDisplayMetricsLocked(displayId);
         Configuration config;
-        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
+        final boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
         final boolean hasOverrideConfig = key.hasOverrideConfiguration();
         if (!isDefaultDisplay || hasOverrideConfig) {
             config = new Configuration(getConfiguration());
@@ -222,16 +221,14 @@ public class ResourcesManager {
             }
             if (hasOverrideConfig) {
                 config.updateFrom(key.mOverrideConfiguration);
+                if (DEBUG) Slog.v(TAG, "Applied overrideConfig=" + key.mOverrideConfiguration);
             }
         } else {
             config = getConfiguration();
         }
-        r = new Resources(assets, dm, config, compatInfo, token);
-        if (false) {
-            Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
-                    + r.getConfiguration() + " appScale="
-                    + r.getCompatibilityInfo().applicationScale);
-        }
+        r = new Resources(assets, dm, config, compatInfo);
+        if (DEBUG) Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
+                + r.getConfiguration() + " appScale=" + r.getCompatibilityInfo().applicationScale);
 
         synchronized (this) {
             WeakReference<Resources> wr = mActiveResources.get(key);
@@ -244,7 +241,8 @@ public class ResourcesManager {
             }
 
             // XXX need to remove entries when weak references go away
-            mActiveResources.put(key, new WeakReference<Resources>(r));
+            mActiveResources.put(key, new WeakReference<>(r));
+            if (DEBUG) Slog.v(TAG, "mActiveResources.size()=" + mActiveResources.size());
             return r;
         }
     }
@@ -255,7 +253,7 @@ public class ResourcesManager {
             mResConfiguration = new Configuration();
         }
         if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
-            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
+            if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
                     + mResConfiguration.seq + ", newSeq=" + config.seq);
             return false;
         }
@@ -287,7 +285,7 @@ public class ResourcesManager {
             ResourcesKey key = mActiveResources.keyAt(i);
             Resources r = mActiveResources.valueAt(i).get();
             if (r != null) {
-                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
+                if (DEBUG || DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
                         + r + " config to: " + config);
                 int displayId = key.mDisplayId;
                 boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);

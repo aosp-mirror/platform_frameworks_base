@@ -2264,11 +2264,10 @@ class ContextImpl extends Context {
     }
 
     static ContextImpl createActivityContext(ActivityThread mainThread,
-            LoadedApk packageInfo, IBinder activityToken) {
+            LoadedApk packageInfo, Configuration overrideConfiguration) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        if (activityToken == null) throw new IllegalArgumentException("activityInfo");
-        return new ContextImpl(null, mainThread,
-                packageInfo, activityToken, null, false, null, null);
+        return new ContextImpl(null, mainThread, packageInfo, null, null, false, null,
+                overrideConfiguration);
     }
 
     private ContextImpl(ContextImpl container, ActivityThread mainThread,
@@ -2303,15 +2302,14 @@ class ContextImpl extends Context {
 
         Resources resources = packageInfo.getResources(mainThread);
         if (resources != null) {
-            if (activityToken != null
-                    || displayId != Display.DEFAULT_DISPLAY
+            if (displayId != Display.DEFAULT_DISPLAY
                     || overrideConfiguration != null
                     || (compatInfo != null && compatInfo.applicationScale
                             != resources.getCompatibilityInfo().applicationScale)) {
                 resources = mResourcesManager.getTopLevelResources(packageInfo.getResDir(),
                         packageInfo.getSplitResDirs(), packageInfo.getOverlayDirs(),
                         packageInfo.getApplicationInfo().sharedLibraryFiles, displayId,
-                        overrideConfiguration, compatInfo, activityToken);
+                        overrideConfiguration, compatInfo);
             }
         }
         mResources = resources;

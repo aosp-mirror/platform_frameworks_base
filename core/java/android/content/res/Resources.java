@@ -141,9 +141,6 @@ public class Resources {
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
 
-    @SuppressWarnings("unused")
-    private WeakReference<IBinder> mToken;
-
     static {
         sPreloadedDrawables = new LongSparseArray[2];
         sPreloadedDrawables[0] = new LongSparseArray<ConstantState>();
@@ -224,46 +221,44 @@ public class Resources {
     /**
      * Create a new Resources object on top of an existing set of assets in an
      * AssetManager.
-     * 
-     * @param assets Previously created AssetManager. 
-     * @param metrics Current display metrics to consider when 
+     *
+     * @param assets Previously created AssetManager.
+     * @param metrics Current display metrics to consider when
      *                selecting/computing resource values.
-     * @param config Desired device configuration to consider when 
+     * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
-        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
     }
 
     /**
      * Creates a new Resources object with CompatibilityInfo.
-     * 
-     * @param assets Previously created AssetManager. 
-     * @param metrics Current display metrics to consider when 
+     *
+     * @param assets Previously created AssetManager.
+     * @param metrics Current display metrics to consider when
      *                selecting/computing resource values.
-     * @param config Desired device configuration to consider when 
+     * @param config Desired device configuration to consider when
      *               selecting/computing resource values (optional).
      * @param compatInfo this resource's compatibility info. Must not be null.
-     * @param token The Activity token for determining stack affiliation. Usually null.
      * @hide
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config,
-            CompatibilityInfo compatInfo, IBinder token) {
+            CompatibilityInfo compatInfo) {
         mAssets = assets;
         mMetrics.setToDefaults();
         if (compatInfo != null) {
             mCompatibilityInfo = compatInfo;
         }
-        mToken = new WeakReference<IBinder>(token);
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
     }
 
     /**
      * Return a global shared Resources object that provides access to only
-     * system resources (no application resources), and is not configured for 
-     * the current screen (can not use dimension units, does not change based 
-     * on orientation, etc). 
+     * system resources (no application resources), and is not configured for
+     * the current screen (can not use dimension units, does not change based
+     * on orientation, etc).
      */
     public static Resources getSystem() {
         synchronized (sSync) {
