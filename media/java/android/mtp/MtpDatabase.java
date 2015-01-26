@@ -88,6 +88,10 @@ public class MtpDatabase {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
     };
+    private static final String[] FORMAT_PROJECTION = new String[] {
+            Files.FileColumns._ID, // 0
+            Files.FileColumns.FORMAT, // 1
+    };
     private static final String[] PATH_FORMAT_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
             Files.FileColumns.DATA, // 1
@@ -597,6 +601,7 @@ public class MtpDatabase {
             MtpConstants.PROPERTY_PARENT_OBJECT,
             MtpConstants.PROPERTY_PERSISTENT_UID,
             MtpConstants.PROPERTY_NAME,
+            MtpConstants.PROPERTY_DISPLAY_NAME,
             MtpConstants.PROPERTY_DATE_ADDED,
     };
 
@@ -669,43 +674,6 @@ public class MtpDatabase {
             MtpConstants.PROPERTY_DESCRIPTION,
     };
 
-    static final int[] ALL_PROPERTIES = {
-            // NOTE must match FILE_PROPERTIES above
-            MtpConstants.PROPERTY_STORAGE_ID,
-            MtpConstants.PROPERTY_OBJECT_FORMAT,
-            MtpConstants.PROPERTY_PROTECTION_STATUS,
-            MtpConstants.PROPERTY_OBJECT_SIZE,
-            MtpConstants.PROPERTY_OBJECT_FILE_NAME,
-            MtpConstants.PROPERTY_DATE_MODIFIED,
-            MtpConstants.PROPERTY_PARENT_OBJECT,
-            MtpConstants.PROPERTY_PERSISTENT_UID,
-            MtpConstants.PROPERTY_NAME,
-            MtpConstants.PROPERTY_DISPLAY_NAME,
-            MtpConstants.PROPERTY_DATE_ADDED,
-
-            // image specific properties
-            MtpConstants.PROPERTY_DESCRIPTION,
-
-            // audio specific properties
-            MtpConstants.PROPERTY_ARTIST,
-            MtpConstants.PROPERTY_ALBUM_NAME,
-            MtpConstants.PROPERTY_ALBUM_ARTIST,
-            MtpConstants.PROPERTY_TRACK,
-            MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE,
-            MtpConstants.PROPERTY_DURATION,
-            MtpConstants.PROPERTY_GENRE,
-            MtpConstants.PROPERTY_COMPOSER,
-
-            // video specific properties
-            MtpConstants.PROPERTY_ARTIST,
-            MtpConstants.PROPERTY_ALBUM_NAME,
-            MtpConstants.PROPERTY_DURATION,
-            MtpConstants.PROPERTY_DESCRIPTION,
-
-            // image specific properties
-            MtpConstants.PROPERTY_DESCRIPTION,
-    };
-
     private int[] getSupportedObjectProperties(int format) {
         switch (format) {
             case MtpConstants.FORMAT_MP3:
@@ -723,8 +691,6 @@ public class MtpDatabase {
             case MtpConstants.FORMAT_PNG:
             case MtpConstants.FORMAT_BMP:
                 return IMAGE_PROPERTIES;
-            case 0:
-                return ALL_PROPERTIES;
             default:
                 return FILE_PROPERTIES;
         }
@@ -749,6 +715,10 @@ public class MtpDatabase {
 
         MtpPropertyGroup propertyGroup;
         if (property == 0xFFFFFFFFL) {
+            if (format == 0 && handle > 0) {
+                // return properties based on the object's format
+                format = getObjectFormat((int)handle);
+            }
              propertyGroup = mPropertyGroupsByFormat.get(format);
              if (propertyGroup == null) {
                 int[] propertyList = getSupportedObjectProperties(format);
@@ -981,6 +951,26 @@ public class MtpDatabase {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in getObjectFilePath", e);
             return MtpConstants.RESPONSE_GENERAL_ERROR;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
+
+    private int getObjectFormat(int handle) {
+        Cursor c = null;
+        try {
+            c = mMediaProvider.query(mPackageName, mObjectsUri, FORMAT_PROJECTION,
+                            ID_WHERE, new String[] {  Integer.toString(handle) }, null, null);
+            if (c != null && c.moveToNext()) {
+                return c.getInt(1);
+            } else {
+                return -1;
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in getObjectFilePath", e);
+            return -1;
         } finally {
             if (c != null) {
                 c.close();
