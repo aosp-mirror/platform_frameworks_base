@@ -55,7 +55,7 @@ public class NetworkTimeUpdateService {
 
     private static final int EVENT_AUTO_TIME_CHANGED = 1;
     private static final int EVENT_POLL_NETWORK_TIME = 2;
-    private static final int EVENT_NETWORK_CONNECTED = 3;
+    private static final int EVENT_NETWORK_CHANGED = 3;
 
     private static final String ACTION_POLL =
             "com.android.server.NetworkTimeUpdateService.action.POLL";
@@ -248,18 +248,8 @@ public class NetworkTimeUpdateService {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
-                // There is connectivity
-                final ConnectivityManager connManager = (ConnectivityManager) context
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
-                final NetworkInfo netInfo = connManager.getActiveNetworkInfo();
-                if (netInfo != null) {
-                    // Verify that it's a WIFI connection
-                    if (netInfo.getState() == NetworkInfo.State.CONNECTED &&
-                            (netInfo.getType() == ConnectivityManager.TYPE_WIFI ||
-                                netInfo.getType() == ConnectivityManager.TYPE_ETHERNET) ) {
-                        mHandler.obtainMessage(EVENT_NETWORK_CONNECTED).sendToTarget();
-                    }
-                }
+                // Don't bother checking if we have connectivity, NtpTrustedTime does that for us.
+                mHandler.obtainMessage(EVENT_NETWORK_CHANGED).sendToTarget();
             }
         }
     };
@@ -276,7 +266,7 @@ public class NetworkTimeUpdateService {
             switch (msg.what) {
                 case EVENT_AUTO_TIME_CHANGED:
                 case EVENT_POLL_NETWORK_TIME:
-                case EVENT_NETWORK_CONNECTED:
+                case EVENT_NETWORK_CHANGED:
                     onPollNetworkTime(msg.what);
                     break;
             }
