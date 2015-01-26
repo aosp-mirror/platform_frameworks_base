@@ -3612,15 +3612,15 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
-    private Task createTask(int taskId, int stackId, int userId, AppWindowToken atoken) {
-        if (DEBUG_STACK) Slog.i(TAG, "createTask: taskId=" + taskId + " stackId=" + stackId
+    private Task createTaskLocked(int taskId, int stackId, int userId, AppWindowToken atoken) {
+        if (DEBUG_STACK) Slog.i(TAG, "createTaskLocked: taskId=" + taskId + " stackId=" + stackId
                 + " atoken=" + atoken);
         final TaskStack stack = mStackIdToStack.get(stackId);
         if (stack == null) {
             throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
         }
         EventLog.writeEvent(EventLogTags.WM_TASK_CREATED, taskId, stackId);
-        Task task = new Task(atoken, stack, userId, this);
+        Task task = new Task(taskId, stack, userId, this);
         mTaskIdToTask.put(taskId, task);
         stack.addTask(task, !atoken.mLaunchTaskBehind /* toTop */);
         return task;
@@ -3657,7 +3657,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             atoken = new AppWindowToken(this, token, voiceInteraction);
             atoken.inputDispatchingTimeoutNanos = inputDispatchingTimeoutNanos;
-            atoken.groupId = taskId;
             atoken.appFullscreen = fullscreen;
             atoken.showWhenLocked = showWhenLocked;
             atoken.requestedOrientation = requestedOrientation;
@@ -3669,10 +3668,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
-                createTask(taskId, stackId, userId, atoken);
-            } else {
-                task.addAppToken(addPos, atoken);
+                task = createTaskLocked(taskId, stackId, userId, atoken);
             }
+            task.addAppToken(addPos, atoken);
 
             mTokenMap.put(token.asBinder(), atoken);
 
@@ -3685,28 +3683,27 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void setAppGroupId(IBinder token, int groupId) {
+    public void setAppTask(IBinder token, int taskId) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
-                "setAppGroupId()")) {
+                "setAppTask()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
 
         synchronized(mWindowMap) {
             final AppWindowToken atoken = findAppWindowToken(token);
             if (atoken == null) {
-                Slog.w(TAG, "Attempted to set group id of non-existing app token: " + token);
+                Slog.w(TAG, "Attempted to set task id of non-existing app token: " + token);
                 return;
             }
-            final Task oldTask = mTaskIdToTask.get(atoken.groupId);
+            final Task oldTask = atoken.mTask;
             oldTask.removeAppToken(atoken);
 
-            atoken.groupId = groupId;
-            Task newTask = mTaskIdToTask.get(groupId);
+            Task newTask = mTaskIdToTask.get(taskId);
             if (newTask == null) {
-                newTask = createTask(groupId, oldTask.mStack.mStackId, oldTask.mUserId, atoken);
-            } else {
-                newTask.mAppTokens.add(atoken);
+                newTask =
+                        createTaskLocked(taskId, oldTask.mStack.mStackId, oldTask.mUserId, atoken);
             }
+            newTask.addAppToken(Integer.MAX_VALUE /* at top */, atoken);
         }
     }
 
@@ -3990,7 +3987,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void setFocusedStackFrame() {
         final TaskStack stack;
         if (mFocusedApp != null) {
-            Task task = mTaskIdToTask.get(mFocusedApp.groupId);
+            final Task task = mFocusedApp.mTask;
             stack = task.mStack;
             final DisplayContent displayContent = task.getDisplayContent();
             if (displayContent != null) {
@@ -4812,7 +4809,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " animating=" + wtoken.mAppAnimator.animating);
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "removeAppToken: "
                         + wtoken + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
-                final TaskStack stack = mTaskIdToTask.get(wtoken.groupId).mStack;
+                final TaskStack stack = wtoken.mTask.mStack;
                 if (delayed && !wtoken.allAppWindows.isEmpty()) {
                     // set the token aside because it has an active animation to be finished
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
@@ -4877,7 +4874,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int numTasks = tasks.size();
             for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
                 final Task task = tasks.get(taskNdx);
-                Slog.v(TAG, "    Task #" + task.taskId + " activities from bottom to top:");
+                Slog.v(TAG, "    Task #" + task.mTaskId + " activities from bottom to top:");
                 AppTokenList tokens = task.mAppTokens;
                 final int numTokens = tokens.size();
                 for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {

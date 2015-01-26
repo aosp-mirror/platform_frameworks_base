@@ -26,14 +26,13 @@ import com.android.server.EventLogTags;
 class Task {
     TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
-    final int taskId;
+    final int mTaskId;
     final int mUserId;
     boolean mDeferRemoval = false;
     final WindowManagerService mService;
 
-    Task(AppWindowToken wtoken, TaskStack stack, int userId, WindowManagerService service) {
-        taskId = wtoken.groupId;
-        mAppTokens.add(wtoken);
+    Task(int taskId, TaskStack stack, int userId, WindowManagerService service) {
+        mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
         mService = service;
@@ -45,38 +44,47 @@ class Task {
 
     void addAppToken(int addPos, AppWindowToken wtoken) {
         final int lastPos = mAppTokens.size();
-        for (int pos = 0; pos < lastPos && pos < addPos; ++pos) {
-            if (mAppTokens.get(pos).removed) {
-                // addPos assumes removed tokens are actually gone.
-                ++addPos;
+        if (addPos >= lastPos) {
+            addPos = lastPos;
+        } else {
+            for (int pos = 0; pos < lastPos && pos < addPos; ++pos) {
+                if (mAppTokens.get(pos).removed) {
+                    // addPos assumes removed tokens are actually gone.
+                    ++addPos;
+                }
             }
         }
         mAppTokens.add(addPos, wtoken);
+        wtoken.mTask = this;
         mDeferRemoval = false;
     }
 
     void removeLocked() {
         if (!mAppTokens.isEmpty() && mStack.isAnimating()) {
-            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + taskId);
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
             mDeferRemoval = true;
             return;
         }
-        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + taskId);
-        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
+        if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
+        EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, mTaskId, "removeTask");
         mDeferRemoval = false;
         mStack.removeTask(this);
-        mService.mTaskIdToTask.delete(taskId);
+        mService.mTaskIdToTask.delete(mTaskId);
     }
 
     boolean removeAppToken(AppWindowToken wtoken) {
         boolean removed = mAppTokens.remove(wtoken);
         if (mAppTokens.size() == 0) {
-            EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, taskId,
+            EventLog.writeEvent(com.android.server.EventLogTags.WM_TASK_REMOVED, mTaskId,
                     "removeAppToken: last token");
             if (mDeferRemoval) {
                 removeLocked();
             }
         }
+        wtoken.mTask = null;
+        /* Leave mTaskId for now, it might be useful for debug
+        wtoken.mTaskId = -1;
+         */
         return removed;
     }
 
@@ -88,6 +96,6 @@ class Task {
 
     @Override
     public String toString() {
-        return "{taskId=" + taskId + " appTokens=" + mAppTokens + " mdr=" + mDeferRemoval + "}";
+        return "{taskId=" + mTaskId + " appTokens=" + mAppTokens + " mdr=" + mDeferRemoval + "}";
     }
 }

@@ -81,7 +81,7 @@ interface IWindowManager
     void addAppToken(int addPos, IApplicationToken token, int groupId, int stackId,
             int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId,
             int configChanges, boolean voiceInteraction, boolean launchTaskBehind);
-    void setAppGroupId(IBinder token, int groupId);
+    void setAppTask(IBinder token, int taskId);
     void setAppOrientation(IApplicationToken token, int requestedOrientation);
     int getAppOrientation(IApplicationToken token);
     void setFocusedApp(IBinder token, boolean moveFocusNow);
