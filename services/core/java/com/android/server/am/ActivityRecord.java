@@ -515,7 +515,7 @@ final class ActivityRecord {
     void setTask(TaskRecord newTask, TaskRecord taskToAffiliateWith) {
         if (task != null && task.removeActivity(this)) {
             if (task != newTask) {
-                task.stack.removeTask(task);
+                task.stack.removeTask(task, "setTask");
             } else {
                 Slog.d(TAG, "!!! REMOVE THIS LOG !!! setTask: nearly removed stack=" +
                         (newTask == null ? null : newTask.stack));

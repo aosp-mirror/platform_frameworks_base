@@ -2363,7 +2363,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mAppBindArgs;
     }
 
-    final void setFocusedActivityLocked(ActivityRecord r) {
+    final void setFocusedActivityLocked(ActivityRecord r, String reason) {
         if (mFocusedActivity != r) {
             if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivityLocked: r=" + r);
             mFocusedActivity = r;
@@ -2372,7 +2372,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 finishRunningVoiceLocked();
             }
-            mStackSupervisor.setFocusedStack(r);
+            mStackSupervisor.setFocusedStack(r, reason + " setFocusedActivity");
             if (r != null) {
                 mWindowManager.setFocusedApp(r.appToken, true);
             }
@@ -2396,7 +2396,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (stack != null) {
                 ActivityRecord r = stack.topRunningActivityLocked(null);
                 if (r != null) {
-                    setFocusedActivityLocked(r);
+                    setFocusedActivityLocked(r, "setFocusedStack");
                 }
             }
         }
@@ -2440,7 +2440,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mHandler.sendMessage(msg);
     }
 
-    private final int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
+    private int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
             String what, Object obj, ProcessRecord srcApp) {
         app.lastActivityTime = now;
 
@@ -3114,7 +3114,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         return intent;
     }
 
-    boolean startHomeActivityLocked(int userId) {
+    boolean startHomeActivityLocked(int userId, String reason) {
         if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                 && mTopAction == null) {
             // We are running in factory test mode, but unable to find
@@ -3136,7 +3136,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     aInfo.applicationInfo.uid, true);
             if (app == null || app.instrumentationClass == null) {
                 intent.setFlags(intent.getFlags() | Intent.FLAG_ACTIVITY_NEW_TASK);
-                mStackSupervisor.startHomeActivity(intent, aInfo);
+                mStackSupervisor.startHomeActivity(intent, aInfo, reason);
             }
         }
 
@@ -5697,7 +5697,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     startProcessLocked(procs.get(ip), "on-hold", null);
                 }
             }
-            
+
             if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
                 // Start looking for apps that are abusing wake locks.
                 Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
@@ -5837,7 +5837,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             ActivityStack stack = ActivityRecord.getStackLocked(token);
             if (stack != null) {
-                stack.activityDestroyedLocked(token);
+                stack.activityDestroyedLocked(token, "activityDestroyed");
             }
         }
     }
@@ -5948,7 +5948,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new IllegalArgumentException("File descriptors passed in options");
             }
         }
-        
+
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
             int origUserId = userId;
@@ -5978,7 +5978,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 return getIntentSenderLocked(type, packageName, callingUid, userId,
                         token, resultWho, requestCode, intents, resolvedTypes, flags, options);
-                
+
             } catch (RemoteException e) {
                 throw new SecurityException(e);
             }
@@ -8019,7 +8019,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (prev != null && prev.isRecentsActivity()) {
                 task.setTaskToReturnTo(ActivityRecord.RECENTS_ACTIVITY_TYPE);
             }
-            mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options);
+            mStackSupervisor.findTaskToMoveToFrontLocked(task, flags, options, "moveTaskToFront");
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -8048,7 +8048,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mStackSupervisor.showLockTaskToast();
                         return false;
                     }
-                    return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId, null);
+                    return ActivityRecord.getStackLocked(token).moveTaskToBackLocked(taskId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -8154,7 +8154,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (DEBUG_STACK) Slog.d(TAG, "moveTaskToStack: moving task=" + taskId + " to stackId="
                         + stackId + " toTop=" + toTop);
-                mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
+                mStackSupervisor.moveTaskToStackLocked(taskId, stackId, toTop);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -8260,7 +8260,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     || (task != mStackSupervisor.getFocusedStack().topTask()))) {
                         throw new IllegalArgumentException("Invalid task, not in foreground");
                     }
-                    mStackSupervisor.setLockTaskModeLocked(task, !isSystemInitiated);
+                    mStackSupervisor.setLockTaskModeLocked(task, !isSystemInitiated,
+                            "startLockTask");
                 }
             }
         } finally {
@@ -8345,7 +8346,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Log.d(TAG, "stopLockTaskMode");
             // Stop lock task
             synchronized (this) {
-                mStackSupervisor.setLockTaskModeLocked(null, false);
+                mStackSupervisor.setLockTaskModeLocked(null, false, "stopLockTask");
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -10811,7 +10812,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             // Start up initial activity.
             mBooting = true;
-            startHomeActivityLocked(mCurrentUserId);
+            startHomeActivityLocked(mCurrentUserId, "systemReady");
 
             try {
                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
@@ -18366,7 +18367,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return true;
                 }
 
-                mStackSupervisor.setLockTaskModeLocked(null, false);
+                mStackSupervisor.setLockTaskModeLocked(null, false, "startUser");
 
                 final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
                 if (userInfo == null) {
@@ -18623,7 +18624,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     void moveUserToForeground(UserStartedState uss, int oldUserId, int newUserId) {
         boolean homeInFront = mStackSupervisor.switchUserLocked(newUserId, uss);
         if (homeInFront) {
-            startHomeActivityLocked(newUserId);
+            startHomeActivityLocked(newUserId, "moveUserToFroreground");
         } else {
             mStackSupervisor.resumeTopActivitiesLocked();
         }
