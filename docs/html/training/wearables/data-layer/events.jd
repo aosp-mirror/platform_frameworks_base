@@ -267,6 +267,8 @@ or <a href="{@docRoot}reference/com/google/android/gms/wearable/NodeApi.html#rem
 public class MainActivity extends Activity implements
         DataApi.DataListener, ConnectionCallbacks, OnConnectionFailedListener {
 
+    private GoogleApiClient mGoogleApiClient;
+
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -314,4 +316,5 @@ public class MainActivity extends Activity implements
             }
         }
     }
+}
 </pre>
