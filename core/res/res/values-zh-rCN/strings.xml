@@ -1465,9 +1465,9 @@
     <string name="permdesc_copyProtectedData" msgid="4390697124288317831">"允许应用调用默认的容器服务，以便复制内容。普通应用不应使用此权限。"</string>
     <string name="permlab_route_media_output" msgid="1642024455750414694">"更改媒体输出线路"</string>
     <string name="permdesc_route_media_output" msgid="4932818749547244346">"允许该应用将媒体输出线路更改到其他外部设备。"</string>
-    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"访问密钥保护安全存储空间"</string>
+    <string name="permlab_access_keyguard_secure_storage" msgid="7565552237977815047">"访问锁屏安全存储空间"</string>
     <string name="permdesc_access_keyguard_secure_storage" msgid="5866245484303285762">"允许应用访问密钥保护安全存储空间。"</string>
-    <string name="permlab_control_keyguard" msgid="172195184207828387">"控制是显示还是隐藏锁屏"</string>
+    <string name="permlab_control_keyguard" msgid="172195184207828387">"控制锁屏界面的显示和隐藏状态"</string>
     <string name="permdesc_control_keyguard" msgid="3043732290518629061">"允许应用控制锁屏。"</string>
     <string name="permlab_trust_listener" msgid="1765718054003704476">"检测信任状态的变化。"</string>
     <string name="permdesc_trust_listener" msgid="8233895334214716864">"允许应用检测信任状态的变化。"</string>
