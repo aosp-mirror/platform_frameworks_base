@@ -172,6 +172,17 @@ class MtpPropertyGroup {
                 column = Images.ImageColumns.DESCRIPTION;
                 type = MtpConstants.TYPE_STR;
                 break;
+            case MtpConstants.PROPERTY_AUDIO_WAVE_CODEC:
+            case MtpConstants.PROPERTY_AUDIO_BITRATE:
+            case MtpConstants.PROPERTY_SAMPLE_RATE:
+                // these are special cased
+                type = MtpConstants.TYPE_UINT32;
+                break;
+            case MtpConstants.PROPERTY_BITRATE_TYPE:
+            case MtpConstants.PROPERTY_NUMBER_OF_CHANNELS:
+                // these are special cased
+                type = MtpConstants.TYPE_UINT16;
+                break;
             default:
                 type = MtpConstants.TYPE_UNDEFINED;
                 Log.e(TAG, "unsupported property " + code);
@@ -419,6 +430,17 @@ class MtpPropertyGroup {
                             } else {
                                 result.setResult(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
                             }
+                            break;
+                        case MtpConstants.PROPERTY_AUDIO_WAVE_CODEC:
+                        case MtpConstants.PROPERTY_AUDIO_BITRATE:
+                        case MtpConstants.PROPERTY_SAMPLE_RATE:
+                            // we don't have these in our database, so return 0
+                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT32, 0);
+                            break;
+                        case MtpConstants.PROPERTY_BITRATE_TYPE:
+                        case MtpConstants.PROPERTY_NUMBER_OF_CHANNELS:
+                            // we don't have these in our database, so return 0
+                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT16, 0);
                             break;
                         default:
                             if (property.type == MtpConstants.TYPE_STR) {
