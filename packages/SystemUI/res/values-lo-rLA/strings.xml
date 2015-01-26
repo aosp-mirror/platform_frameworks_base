@@ -159,6 +159,7 @@
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"ປິດ <xliff:g id="APP">%s</xliff:g> ໄວ້."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"ປິດ <xliff:g id="APP">%s</xliff:g> ແລ້ວ."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"ທຸກ​ແອັບ​ພ​ລິ​ເຄ​ຊັນ​ບໍ່​ດົນ​ມາ​ນີ້​ຖືກ​ປ່ອຍ​ໄປ."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"ກຳ​ລັງ​ເປີດ <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"ປິດການແຈ້ງເຕືອນແລ້ວ."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"ໜ້າຈໍແຈ້ງເຕືອນ."</string>
@@ -280,6 +281,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ຊອກຫາ"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"ບໍ່​ສາ​ມາດ​ເລີ່ມ <xliff:g id="APP">%s</xliff:g> ໄດ້."</string>
+    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"ປ່ອຍ​ທຸກ​ແອັບ​ພ​ລິ​ເຄ"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ສາກເຕັມແລ້ວ."</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ກຳລັງສາກໄຟ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> ຈຶ່ງ​ຈະ​ເຕັມ"</string>
