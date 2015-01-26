@@ -327,6 +327,33 @@ public class ExprModelTest {
     }
 
     @Test
+    public void testNoFlagsForNonBindingStatic() {
+        LayoutBinder lb = new LayoutBinder(null);
+        mExprModel = lb.getModel();
+        lb.addVariable("a", int.class.getCanonicalName());
+        final MathExpr parsed = parse(lb, "a * (3 + 2)", MathExpr.class);
+        mExprModel.seal();
+        assertTrue(parsed.getRight().getInvalidFlags().isEmpty());
+        assertEquals(1, parsed.getLeft().getInvalidFlags().cardinality());
+        assertEquals(1, mExprModel.getInvalidateableFieldLimit());
+    }
+
+    @Test
+    public void testFlagsForBindingStatic() {
+        LayoutBinder lb = new LayoutBinder(null);
+        mExprModel = lb.getModel();
+        lb.addVariable("a", int.class.getCanonicalName());
+        final Expr staticParsed = parse(lb, "3 + 2", MathExpr.class);
+        final MathExpr parsed = parse(lb, "a * (3 + 2)", MathExpr.class);
+        mExprModel.seal();
+        assertTrue(staticParsed.isBindingExpression());
+        assertEquals(1, staticParsed.getInvalidFlags().cardinality());
+        assertEquals(parsed.getRight().getInvalidFlags(), staticParsed.getInvalidFlags());
+        assertEquals(1, parsed.getLeft().getInvalidFlags().cardinality());
+        assertEquals(2, mExprModel.getInvalidateableFieldLimit());
+    }
+
+    @Test
     public void testPartialNeededRead() {
 
         throw new NotImplementedException("create a test that has a variable which can be read for "

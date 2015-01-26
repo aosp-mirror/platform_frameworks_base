@@ -16,6 +16,7 @@
 package com.android.databinding.store;
 
 import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.util.L;
 
 import java.io.File;
 import java.io.IOException;
@@ -607,42 +608,67 @@ public class SetterStore {
     }
 
     private void applyReflections(ClassAnalyzer classAnalyzer) {
+        // TODO get rid of try caches and move to lazy loading
         if (mConversionMethods == null) {
             mConversionMethods = new ArrayList<>();
             for (String key : mConversions.keySet()) {
-                Class<?> fromType = classAnalyzer.findClass(key);
-                HashMap<String, MethodDescription> conversion = mConversions.get(key);
-                for (String toName : conversion.keySet()) {
-                    Class<?> toType = classAnalyzer.findClass(toName);
-                    MethodDescription methodDescription = conversion.get(toName);
-                    mConversionMethods
-                            .add(new ConversionMethod(fromType, toType, methodDescription));
+                try {
+                    Class<?> fromType = classAnalyzer.findClass(key);
+                    HashMap<String, MethodDescription> conversion = mConversions.get(key);
+                    for (String toName : conversion.keySet()) {
+                        try {
+                            Class<?> toType = classAnalyzer.findClass(toName);
+                            MethodDescription methodDescription = conversion.get(toName);
+                            mConversionMethods
+                                    .add(new ConversionMethod(fromType, toType, methodDescription));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
             mAdaptedMethods = new HashMap<>();
             for (String attribute : mAdapters.keySet()) {
-                ArrayList<AdaptedMethod> adaptedMethods = new ArrayList<>();
-                mAdaptedMethods.put(attribute, adaptedMethods);
-                HashMap<AccessorKey, MethodDescription> adapted = mAdapters.get(attribute);
-                for (AccessorKey key : adapted.keySet()) {
-                    MethodDescription methodDescription = adapted.get(key);
-                    Class<?> viewType = classAnalyzer.findClass(key.viewType);
-                    Class<?> valueType = classAnalyzer.findClass(key.valueType);
-                    adaptedMethods.add(new AdaptedMethod(viewType, valueType,
-                            methodDescription));
+                try {
+                    ArrayList<AdaptedMethod> adaptedMethods = new ArrayList<>();
+                    mAdaptedMethods.put(attribute, adaptedMethods);
+                    HashMap<AccessorKey, MethodDescription> adapted = mAdapters.get(attribute);
+                    for (AccessorKey key : adapted.keySet()) {
+                        try {
+                            MethodDescription methodDescription = adapted.get(key);
+                            Class<?> viewType = classAnalyzer.findClass(key.viewType);
+                            Class<?> valueType = classAnalyzer.findClass(key.valueType);
+                            adaptedMethods.add(new AdaptedMethod(viewType, valueType,
+                                    methodDescription));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
 
             mRenamedMethods = new HashMap<>();
             for (String attribute : mRenamed.keySet()) {
                 ArrayList<RenamedMethod> renamedMethods = new ArrayList<>();
-                mRenamedMethods.put(attribute, renamedMethods);
-                HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
-                for (String declaredClassName : renamed.keySet()) {
-                    MethodDescription methodDescription = renamed.get(declaredClassName);
-                    Class<?> viewType = classAnalyzer.findClass(declaredClassName);
-                    renamedMethods.add(new RenamedMethod(viewType, methodDescription.method));
+                try {
+                    mRenamedMethods.put(attribute, renamedMethods);
+                    HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
+                    for (String declaredClassName : renamed.keySet()) {
+                        try {
+                            MethodDescription methodDescription = renamed.get(declaredClassName);
+                            Class<?> viewType = classAnalyzer.findClass(declaredClassName);
+                            renamedMethods.add(new RenamedMethod(viewType, methodDescription.method));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

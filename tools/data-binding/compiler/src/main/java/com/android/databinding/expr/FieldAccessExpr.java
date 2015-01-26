@@ -52,6 +52,17 @@ public class FieldAccessExpr extends Expr {
     }
 
     @Override
+    protected List<Dependency> constructDependencies() {
+        final List<Dependency> dependencies = constructDynamicChildrenDependencies();
+        for (Dependency dependency : dependencies) {
+            if (dependency.getOther() == mParent) {
+                dependency.setMandatory(true);
+            }
+        }
+        return dependencies;
+    }
+
+    @Override
     protected String computeUniqueKey() {
         return sUniqueKeyJoiner.join(mName, ".", super.computeUniqueKey());
     }
@@ -66,10 +77,5 @@ public class FieldAccessExpr extends Expr {
             mGetter = classAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
         }
         return mGetter.resolvedType;
-    }
-
-    @Override
-    protected List<Dependency> constructDependencies() {
-        return constructDynamicChildrenDependencies();
     }
 }

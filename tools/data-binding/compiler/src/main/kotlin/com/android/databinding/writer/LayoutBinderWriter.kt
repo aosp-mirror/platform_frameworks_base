@@ -567,7 +567,8 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("// read ${expr.getUniqueKey()}")
                 // create an if case for all dependencies that might be null
                 val nullables = expr.getDependencies().filter {
-                    it.getOther().isDynamic() && ClassAnalyzer.isNullable(it.getOther().getResolvedType())
+                    it.isMandatory() &&
+                    ClassAnalyzer.isNullable(it.getOther().getResolvedType())
                 }
                         .map { it.getOther() }
                 if (!expr.isEqualityCheck() && nullables.isNotEmpty()) {

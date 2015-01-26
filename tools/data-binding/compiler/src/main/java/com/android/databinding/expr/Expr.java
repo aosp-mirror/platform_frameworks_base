@@ -124,7 +124,7 @@ abstract public class Expr {
 
     private BitSet resolveInvalidFlags() {
         BitSet bitSet = new BitSet();
-        if (mCanBeInvalidated || getDependants().isEmpty()) {
+        if (mCanBeInvalidated) {
             bitSet.set(getId(), true);
         }
         for (Dependency dependency : getDependencies()) {
@@ -136,6 +136,10 @@ abstract public class Expr {
 
     public void setBindingExpression(boolean isBindingExpression) {
         mIsBindingExpression = isBindingExpression;
+    }
+
+    public boolean isBindingExpression() {
+        return mIsBindingExpression;
     }
 
     public BitSet getShouldReadFlags() {

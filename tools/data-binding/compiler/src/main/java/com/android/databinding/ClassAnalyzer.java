@@ -36,7 +36,7 @@ public class ClassAnalyzer {
     private static final String OBSERVABLE_CLASS_NAME = "com.android.databinding.library.Observable";
     private static final String OBSERVABLE_LIST_CLASS_NAME = "com.android.databinding.library.ObservableList";
     private static final String OBSERVABLE_MAP_CLASS_NAME = "com.android.databinding.library.ObservableMap";
-    private static String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
+    private static final String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
 
     private static Map<String, String> sTestClassNameMapping = ImmutableMap.of(
             OBSERVABLE_CLASS_NAME, "com.android.databinding.MockObservable",
@@ -163,7 +163,7 @@ public class ClassAnalyzer {
 
     private Field findField(Class klass, String name) {
         try {
-            return klass.getField(name);
+            return klass.getDeclaredField(name);
         } catch (Throwable t){}
         try {
             return klass.getField("m" + StringUtils.capitalize(name));
