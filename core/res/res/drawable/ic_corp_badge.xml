@@ -14,23 +14,20 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="19.0dp"
-        android:height="19.0dp"
-        android:viewportWidth="19.0"
-        android:viewportHeight="19.0">
+        android:width="20.0dp"
+        android:height="20.0dp"
+        android:viewportWidth="20.0"
+        android:viewportHeight="20.0">
     <path
-        android:pathData="M9.5,9.5m-9.5,0a9.5,9.5 0,1 1,19 0a9.5,9.5 0,1 1,-19 0"
+        android:pathData="M10.0,10.0m-10.0,0.0a10.0,10.0 0.0,1.0 1.0,20.0 0.0a10.0,10.0 0.0,1.0 1.0,-20.0 0.0"
         android:fillColor="#FF5722"/>
     <path
-        android:pathData="M13.741,6.286l-1.53,0L12.211,5.247l-1.039,-1.039L8.025,4.208L6.986,5.247l0,1.039L5.429,6.286c-0.574,0 -1.034,0.465 -1.034,1.039L4.39,13.039c0.0,0.574 0.465,1.039 1.039,1.039l8.312,0c0.574,0 1.039,-0.465 1.039,-1.039L14.780001,7.325C14.78,6.751 14.316,6.286 13.741,6.286zM11.173,6.286L8.025,6.286L8.025,5.247l3.147,0L11.172,6.286z"
+        android:pathData="M15.2,6.2L4.8,6.2c-0.5,0.0 -0.9,0.4 -0.9,1.0L3.9,10.0c0.0,0.5 0.4,1.0 0.9,1.0l3.8,0.0l0.0,-1.0l2.9,0.0l0.0,1.0l3.8,0.0c0.5,0.0 1.0,-0.4 1.0,-1.0L16.3,7.1C16.2,6.6 15.8,6.2 15.2,6.2z"
         android:fillColor="#FFFFFF"/>
     <path
-        android:pathData="M15.172,7.039c0.0,-0.58 -0.501,-1.05 -1.12,-1.05L5.113,5.989c-0.619,0 -1.115,0.47 -1.115,1.05l0.002,2.193c0,0.618 0.5,1.118 1.118,1.118l8.931,0c0.618,0 1.118,-0.5 1.118,-1.118L15.172,7.039z"
+        android:pathData="M8.6,12.9l0.0,-1.0L4.3,11.9l0.0,2.4c0.0,0.5 0.4,0.9 0.9,0.9l9.5,0.0c0.5,0.0 0.9,-0.4 0.9,-0.9l0.0,-2.4l-4.3,0.0l0.0,1.0L8.6,12.9z"
         android:fillColor="#FFFFFF"/>
     <path
-        android:pathData="M3.5,9.812l12,0l0,1l-12,0z"
-        android:fillColor="#FF5722"/>
-    <path
-        android:pathData="M8.567,9.467l2.037,0l0,2.037l-2.037,0z"
-        android:fillColor="#FF5722"/>
+        android:pathData="M7.1,5.2l0.0,1.0 1.0,0.0 0.0,-1.0 3.799999,0.0 0.0,1.0 1.0,0.0 0.0,-1.0 -1.0,-0.9 -3.799999,0.0z"
+        android:fillColor="#FFFFFF"/>
 </vector>
