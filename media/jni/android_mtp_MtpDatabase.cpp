@@ -934,6 +934,11 @@ static const PropertyTableEntry   kObjectPropertyTable[] = {
     {   MTP_PROPERTY_COMPOSER,          MTP_TYPE_STR        },
     {   MTP_PROPERTY_DURATION,          MTP_TYPE_UINT32     },
     {   MTP_PROPERTY_DESCRIPTION,       MTP_TYPE_STR        },
+    {   MTP_PROPERTY_AUDIO_WAVE_CODEC,  MTP_TYPE_UINT32     },
+    {   MTP_PROPERTY_BITRATE_TYPE,      MTP_TYPE_UINT16     },
+    {   MTP_PROPERTY_AUDIO_BITRATE,     MTP_TYPE_UINT32     },
+    {   MTP_PROPERTY_NUMBER_OF_CHANNELS,MTP_TYPE_UINT16     },
+    {   MTP_PROPERTY_SAMPLE_RATE,       MTP_TYPE_UINT32     },
 };
 
 static const PropertyTableEntry   kDevicePropertyTable[] = {
