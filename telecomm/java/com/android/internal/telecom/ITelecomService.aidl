@@ -126,6 +126,11 @@ interface ITelecomService {
     boolean hasVoiceMailNumber(in PhoneAccountHandle accountHandle);
 
     /**
+     * @see TelecomServiceImpl#getLine1Number
+     */
+    String getLine1Number(in PhoneAccountHandle accountHandle);
+
+    /**
      * @see TelecomServiceImpl#getDefaultPhoneApp
      */
     ComponentName getDefaultPhoneApp();
