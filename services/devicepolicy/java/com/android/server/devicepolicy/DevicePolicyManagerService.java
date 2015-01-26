@@ -4734,6 +4734,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public UserHandle createAndInitializeUser(ComponentName who, String name,
             String ownerName, ComponentName profileOwnerComponent, Bundle adminExtras) {
         UserHandle user = createUser(who, name);
+        if (user == null) {
+            return null;
+        }
         long id = Binder.clearCallingIdentity();
         try {
             String profileOwnerPkg = profileOwnerComponent.getPackageName();
