@@ -221,7 +221,7 @@ public class MediaSessionLegacyHelper {
                 mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
                         direction, flags);
             } else if (isMute) {
-                if (down) {
+                if (down && keyEvent.getRepeatCount() == 0) {
                     mSessionManager.dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
                             AudioManager.ADJUST_TOGGLE_MUTE, flags);
                 }

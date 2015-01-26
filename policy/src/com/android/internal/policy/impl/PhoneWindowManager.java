@@ -43,6 +43,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.AudioService;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -376,6 +377,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mCurrentAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mHasSoftInput = false;
     boolean mTranslucentDecorEnabled = true;
+    boolean mUseTvRouting;
+    boolean mUseMasterVolume;
 
     int mPointerLocationMode = 0; // guarded by mLock
 
@@ -1261,6 +1264,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_doublePressOnPowerBehavior);
         mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_triplePressOnPowerBehavior);
+
+        mUseTvRouting = AudioService.getPlatformType(mContext) == AudioService.PLATFORM_TELEVISION;
+        mUseMasterVolume = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
 
         readConfigurationDependentBehaviors();
 
@@ -4534,6 +4541,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
+                if (mUseTvRouting) {
+                    // On TVs volume keys never go to the foreground app
+                    result &= ~ACTION_PASS_TO_USER;
+                }
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
                         if (interactive && !mScreenshotChordVolumeDownKeyTriggered
@@ -4595,11 +4606,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
 
                     if ((result & ACTION_PASS_TO_USER) == 0) {
-                        // If we aren't passing to the user and no one else
-                        // handled it send it to the session manager to figure
-                        // out.
-                        MediaSessionLegacyHelper.getHelper(mContext)
-                                .sendVolumeKeyEvent(event, true);
+                        if (mUseTvRouting) {
+                            dispatchDirectAudioEvent(event);
+                        } else {
+                            // If we aren't passing to the user and no one else
+                            // handled it send it to the session manager to
+                            // figure out.
+                            MediaSessionLegacyHelper.getHelper(mContext)
+                                    .sendVolumeKeyEvent(event, true);
+                        }
                         break;
                     }
                 }
@@ -4842,6 +4857,59 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Otherwise, consume events since the user can't see what is being
         // interacted with.
         return false;
+    }
+
+    private void dispatchDirectAudioEvent(KeyEvent event) {
+        if (event.getAction() != KeyEvent.ACTION_DOWN) {
+            return;
+        }
+        int keyCode = event.getKeyCode();
+        int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND;
+        String pkgName = mContext.getOpPackageName();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                try {
+                    if (mUseMasterVolume) {
+                        getAudioService().adjustMasterVolume(AudioManager.ADJUST_RAISE, flags,
+                                pkgName);
+                    } else {
+                        getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,
+                                AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error dispatching volume up in dispatchTvAudioEvent.", e);
+                }
+                break;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                try {
+                    if (mUseMasterVolume) {
+                        getAudioService().adjustMasterVolume(AudioManager.ADJUST_LOWER, flags,
+                                pkgName);
+                    } else {
+                        getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,
+                                AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error dispatching volume down in dispatchTvAudioEvent.", e);
+                }
+                break;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                try {
+                    if (event.getRepeatCount() == 0) {
+                        if (mUseMasterVolume) {
+                            getAudioService().adjustMasterVolume(AudioManager.ADJUST_TOGGLE_MUTE,
+                                    flags, pkgName);
+                        } else {
+                            getAudioService().adjustSuggestedStreamVolume(
+                                    AudioManager.ADJUST_TOGGLE_MUTE,
+                                    AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Error dispatching mute in dispatchTvAudioEvent.", e);
+                }
+                break;
+        }
     }
 
     void dispatchMediaKeyWithWakeLock(KeyEvent event) {
