@@ -27728,6 +27728,8 @@ package android.provider {
   }
 
   public static final class Telephony.Threads implements android.provider.Telephony.ThreadsColumns {
+    method public static long getOrCreateThreadId(android.content.Context, java.lang.String);
+    method public static long getOrCreateThreadId(android.content.Context, java.util.Set<java.lang.String>);
     field public static final int BROADCAST_THREAD = 1; // 0x1
     field public static final int COMMON_THREAD = 0; // 0x0
     field public static final android.net.Uri CONTENT_URI;
