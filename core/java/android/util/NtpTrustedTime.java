@@ -19,6 +19,8 @@ package android.util;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.SntpClient;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -34,9 +36,12 @@ public class NtpTrustedTime implements TrustedTime {
     private static final boolean LOGD = false;
 
     private static NtpTrustedTime sSingleton;
+    private static Context sContext;
 
     private final String mServer;
     private final long mTimeout;
+
+    private ConnectivityManager mCM;
 
     private boolean mHasCache;
     private long mCachedNtpTime;
@@ -66,6 +71,7 @@ public class NtpTrustedTime implements TrustedTime {
 
             final String server = secureServer != null ? secureServer : defaultServer;
             sSingleton = new NtpTrustedTime(server, timeout);
+            sContext = context;
         }
 
         return sSingleton;
@@ -77,6 +83,20 @@ public class NtpTrustedTime implements TrustedTime {
             // missing server, so no trusted time available
             return false;
         }
+
+        // We can't do this at initialization time: ConnectivityService might not be running yet.
+        synchronized (this) {
+            if (mCM == null) {
+                mCM = (ConnectivityManager) sContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            }
+        }
+
+        final NetworkInfo ni = mCM == null ? null : mCM.getActiveNetworkInfo();
+        if (ni == null || !ni.isConnected()) {
+            if (LOGD) Log.d(TAG, "forceRefresh: no connectivity");
+            return false;
+        }
+
 
         if (LOGD) Log.d(TAG, "forceRefresh() from cache miss");
         final SntpClient client = new SntpClient();
