@@ -24813,6 +24813,8 @@ package android.provider {
     field public static final java.lang.String EMAIL = "email";
     field public static final java.lang.String EMAIL_ISPRIMARY = "email_isprimary";
     field public static final java.lang.String EMAIL_TYPE = "email_type";
+    field public static final java.lang.String EXTRA_ACCOUNT = "android.provider.extra.ACCOUNT";
+    field public static final java.lang.String EXTRA_DATA_SET = "android.provider.extra.DATA_SET";
     field public static final java.lang.String FULL_MODE = "full_mode";
     field public static final java.lang.String IM_HANDLE = "im_handle";
     field public static final java.lang.String IM_ISPRIMARY = "im_isprimary";
