@@ -30679,6 +30679,7 @@ package android.telecom {
     method public android.telecom.PhoneAccountHandle getConnectionManager();
     method public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
     method public android.content.ComponentName getDefaultPhoneApp();
+    method public java.lang.String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
