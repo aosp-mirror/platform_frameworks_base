@@ -1648,19 +1648,32 @@ public class ListPopupWindow {
         private void setPressedItem(View child, int position, float x, float y) {
             mDrawsInPressedState = true;
 
-            // Ordering is essential. First update the pressed state and layout
-            // the children. This will ensure the selector actually gets drawn.
-            setPressed(true);
-            layoutChildren();
+            // Ordering is essential. First, update the container's pressed state.
+            drawableHotspotChanged(x, y);
+            if (!isPressed()) {
+                setPressed(true);
+            }
+
+            // Next, run layout if we need to stabilize child positions.
+            if (mDataChanged) {
+                layoutChildren();
+            }
 
             // Manage the pressed view based on motion position. This allows us to
             // play nicely with actual touch and scroll events.
             final View motionView = getChildAt(mMotionPosition - mFirstPosition);
-            if (motionView != null) {
+            if (motionView != null && motionView != child && motionView.isPressed()) {
                 motionView.setPressed(false);
             }
             mMotionPosition = position;
-            child.setPressed(true);
+
+            // Offset for child coordinates.
+            final float childX = x - child.getLeft();
+            final float childY = y - child.getTop();
+            child.drawableHotspotChanged(childX, childY);
+            if (!child.isPressed()) {
+                child.setPressed(true);
+            }
 
             // Ensure that keyboard focus starts from the last touched position.
             setSelectedPositionInt(position);
