@@ -1275,7 +1275,7 @@ public class RadialTimePickerView extends View {
             // Calling getDegreesXY() has side-effects, so we need to cache the
             // current inner circle value and restore after the call.
             final boolean wasOnInnerCircle = mIsOnInnerCircle;
-            final int degrees = getDegreesFromXY(x, y);
+            final int degrees = getDegreesFromXY(x, y, true);
             final boolean isOnInnerCircle = mIsOnInnerCircle;
             mIsOnInnerCircle = wasOnInnerCircle;
 
