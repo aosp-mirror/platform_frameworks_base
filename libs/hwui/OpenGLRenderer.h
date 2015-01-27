@@ -222,6 +222,10 @@ public:
         return mCaches;
     }
 
+    RenderState& renderState() {
+        return mRenderState;
+    }
+
     int getViewportWidth() { return mState.getViewportWidth(); }
     int getViewportHeight() { return mState.getViewportHeight(); }
 
@@ -523,9 +527,10 @@ protected:
         return false;
     }
 
-    inline RenderState& renderState() { return mRenderState; }
-
     CanvasState mState;
+    Caches& mCaches;
+    Extensions& mExtensions; // TODO: move to RenderState
+    RenderState& mRenderState;
 
 private:
     /**
@@ -1026,11 +1031,6 @@ private:
     // shader, filters, and shadow
     DrawModifiers mDrawModifiers;
     SkPaint mFilteredPaint;
-
-    // Various caches
-    Caches& mCaches;
-    Extensions& mExtensions;
-    RenderState& mRenderState;
 
     // List of rectangles to clear after saveLayer() is invoked
     std::vector<Rect> mLayers;

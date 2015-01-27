@@ -272,20 +272,6 @@ public:
      */
     void unbindTexture(GLuint texture);
 
-    /**
-     * Sets the scissor for the current surface.
-     */
-    bool setScissor(GLint x, GLint y, GLint width, GLint height);
-
-    /**
-     * Resets the scissor state.
-     */
-    void resetScissor();
-
-    bool enableScissor();
-    bool disableScissor();
-    void setScissorEnabled(bool enabled);
-
     void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard);
     void endTiling();
 
@@ -310,7 +296,6 @@ public:
     GLenum lastSrcMode;
     GLenum lastDstMode;
     Program* currentProgram;
-    bool scissorEnabled;
 
     bool drawDeferDisabled;
     bool drawReorderDisabled;
@@ -407,11 +392,6 @@ private:
     bool mTexCoordsArrayEnabled;
 
     GLuint mTextureUnit;
-
-    GLint mScissorX;
-    GLint mScissorY;
-    GLint mScissorWidth;
-    GLint mScissorHeight;
 
     Extensions& mExtensions;
 

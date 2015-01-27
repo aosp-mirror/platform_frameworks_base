@@ -5,12 +5,21 @@ LOCAL_CLANG_CFLAGS += \
     -Wno-gnu-static-float-init
 
 LOCAL_SRC_FILES := \
+    font/CacheTexture.cpp \
+    font/Font.cpp \
+    renderstate/RenderState.cpp \
+    renderstate/Scissor.cpp \
+    renderthread/CanvasContext.cpp \
+    renderthread/DrawFrameTask.cpp \
+    renderthread/EglManager.cpp \
+    renderthread/RenderProxy.cpp \
+    renderthread/RenderTask.cpp \
+    renderthread/RenderThread.cpp \
+    renderthread/TimeLord.cpp \
+    thread/TaskManager.cpp \
     utils/Blur.cpp \
     utils/GLUtils.cpp \
     utils/SortedListImpl.cpp \
-    thread/TaskManager.cpp \
-    font/CacheTexture.cpp \
-    font/Font.cpp \
     AmbientShadow.cpp \
     AnimationContext.cpp \
     Animator.cpp \
@@ -48,7 +57,6 @@ LOCAL_SRC_FILES := \
     RenderBufferCache.cpp \
     RenderNode.cpp \
     RenderProperties.cpp \
-    RenderState.cpp \
     ResourceCache.cpp \
     ShadowTessellator.cpp \
     SkiaCanvas.cpp \
@@ -60,16 +68,6 @@ LOCAL_SRC_FILES := \
     Texture.cpp \
     TextureCache.cpp \
     TextDropShadowCache.cpp
-
-# RenderThread stuff
-LOCAL_SRC_FILES += \
-    renderthread/CanvasContext.cpp \
-    renderthread/DrawFrameTask.cpp \
-    renderthread/EglManager.cpp \
-    renderthread/RenderProxy.cpp \
-    renderthread/RenderTask.cpp \
-    renderthread/RenderThread.cpp \
-    renderthread/TimeLord.cpp
 
 intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
 

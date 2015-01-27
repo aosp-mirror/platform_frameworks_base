@@ -39,6 +39,9 @@ void RenderState::onGLContextCreated() {
     mCaches->init();
     mCaches->setRenderState(this);
     mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
+
+    LOG_ALWAYS_FATAL_IF(scissor().isEnabled(), "scissor used before GL context created");
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void RenderState::onGLContextDestroyed() {
@@ -123,9 +126,7 @@ void RenderState::resumeFromFunctorInvoke() {
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-    mCaches->scissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
-    mCaches->enableScissor();
-    mCaches->resetScissor();
+    scissor().invalidate();
 
     mCaches->activeTexture(0);
     mCaches->resetBoundTextures();
@@ -139,7 +140,7 @@ void RenderState::resumeFromFunctorInvoke() {
 void RenderState::debugOverdraw(bool enable, bool clear) {
     if (mCaches->debugOverdraw && mFramebuffer == 0) {
         if (clear) {
-            mCaches->disableScissor();
+            scissor().setEnabled(false);
             mCaches->stencil.clear();
         }
         if (enable) {

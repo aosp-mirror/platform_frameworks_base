@@ -16,12 +16,12 @@
 
 #include "EglManager.h"
 
+#include "../Caches.h"
+#include "../renderstate/RenderState.h"
+#include "RenderThread.h"
+
 #include <cutils/log.h>
 #include <cutils/properties.h>
-
-#include "../Caches.h"
-#include "../RenderState.h"
-#include "RenderThread.h"
 
 #define PROPERTY_RENDER_DIRTY_REGIONS "debug.hwui.render_dirty_regions"
 #define GLES_VERSION 2

@@ -17,17 +17,18 @@
 #define LOG_TAG "OpenGLRenderer"
 #define ATRACE_TAG ATRACE_TAG_VIEW
 
-#include <ui/Rect.h>
-
-#include <private/hwui/DrawGlInfo.h>
-
-#include "RenderState.h"
 #include "LayerCache.h"
 #include "LayerRenderer.h"
 #include "Matrix.h"
 #include "Properties.h"
 #include "Rect.h"
+#include "renderstate/RenderState.h"
 #include "utils/TraceUtils.h"
+
+#include <ui/Rect.h>
+
+#include <private/hwui/DrawGlInfo.h>
+
 
 namespace android {
 namespace uirenderer {
@@ -48,7 +49,7 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
         bool opaque) {
     LAYER_RENDERER_LOGD("Rendering into layer, fbo = %d", mLayer->getFbo());
 
-    renderState().bindFramebuffer(mLayer->getFbo());
+    mRenderState.bindFramebuffer(mLayer->getFbo());
 
     const float width = mLayer->layer.getWidth();
     const float height = mLayer->layer.getHeight();
@@ -70,10 +71,10 @@ void LayerRenderer::prepareDirty(float left, float top, float right, float botto
 
 void LayerRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (mLayer->isDirty()) {
-        getCaches().disableScissor();
+        mRenderState.scissor().setEnabled(false);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        getCaches().resetScissor();
+        mRenderState.scissor().reset();
         mLayer->setDirty(false);
     } else {
         OpenGLRenderer::clear(left, top, right, bottom, opaque);
@@ -436,7 +437,7 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
             renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
                     bitmap->width(), bitmap->height(), !layer->isBlend());
 
-            caches.disableScissor();
+            renderState.scissor().setEnabled(false);
             renderer.translate(0.0f, bitmap->height());
             renderer.scale(1.0f, -1.0f);
 

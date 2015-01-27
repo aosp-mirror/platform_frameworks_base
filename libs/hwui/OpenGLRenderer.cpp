@@ -16,6 +16,25 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
+#include "OpenGLRenderer.h"
+
+#include "DeferredDisplayList.h"
+#include "DisplayListRenderer.h"
+#include "Fence.h"
+#include "GammaFontRenderer.h"
+#include "Patch.h"
+#include "PathTessellator.h"
+#include "Properties.h"
+#include "RenderNode.h"
+#include "renderstate/RenderState.h"
+#include "ShadowTessellator.h"
+#include "SkiaShader.h"
+#include "Vector.h"
+#include "VertexBuffer.h"
+#include "utils/GLUtils.h"
+#include "utils/PaintUtils.h"
+#include "utils/TraceUtils.h"
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -31,24 +50,6 @@
 #include <private/hwui/DrawGlInfo.h>
 
 #include <ui/Rect.h>
-
-#include "OpenGLRenderer.h"
-#include "DeferredDisplayList.h"
-#include "DisplayListRenderer.h"
-#include "Fence.h"
-#include "GammaFontRenderer.h"
-#include "Patch.h"
-#include "PathTessellator.h"
-#include "Properties.h"
-#include "RenderNode.h"
-#include "RenderState.h"
-#include "ShadowTessellator.h"
-#include "SkiaShader.h"
-#include "Vector.h"
-#include "VertexBuffer.h"
-#include "utils/GLUtils.h"
-#include "utils/PaintUtils.h"
-#include "utils/TraceUtils.h"
 
 #if DEBUG_DETAILED_EVENTS
     #define EVENT_LOGD(...) eventMarkDEBUG(__VA_ARGS__)
@@ -135,10 +136,10 @@ static inline T min(T a, T b) {
 
 OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         : mState(*this)
-        , mFrameStarted(false)
         , mCaches(Caches::getInstance())
         , mExtensions(Extensions::getInstance())
         , mRenderState(renderState)
+        , mFrameStarted(false)
         , mScissorOptimizationDisabled(false)
         , mSuppressTiling(false)
         , mFirstFrameAfterResize(true)
@@ -256,14 +257,14 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 
 void OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
     if (!opaque) {
-        mCaches.enableScissor();
-        mCaches.setScissor(left, getViewportHeight() - bottom, right - left, bottom - top);
+        mRenderState.scissor().setEnabled(true);
+        mRenderState.scissor().set(left, getViewportHeight() - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
         mDirty = true;
         return;
     }
 
-    mCaches.resetScissor();
+    mRenderState.scissor().reset();
 }
 
 void OpenGLRenderer::syncState() {
@@ -347,7 +348,7 @@ void OpenGLRenderer::resumeAfterLayer() {
     mRenderState.bindFramebuffer(currentSnapshot()->fbo);
     debugOverdraw(true, false);
 
-    mCaches.resetScissor();
+    mRenderState.scissor().reset();
     dirtyClip();
 }
 
@@ -378,7 +379,7 @@ void OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     if (mState.getDirtyClip()) {
         setStencilFromClip(); // can issue draws, so must precede enableScissor()/interrupt()
     }
-    if (mCaches.enableScissor() || prevDirtyClip) {
+    if (mRenderState.scissor().setEnabled(true) || prevDirtyClip) {
         setScissorFromClip();
     }
 
@@ -428,9 +429,11 @@ void OpenGLRenderer::renderOverdraw() {
     if (mCaches.debugOverdraw && onGetTargetFbo() == 0) {
         const Rect* clip = &mTilingClip;
 
-        mCaches.enableScissor();
-        mCaches.setScissor(clip->left, mState.firstSnapshot()->getViewportHeight() - clip->bottom,
-                clip->right - clip->left, clip->bottom - clip->top);
+        mRenderState.scissor().setEnabled(true);
+        mRenderState.scissor().set(clip->left,
+                mState.firstSnapshot()->getViewportHeight() - clip->bottom,
+                clip->right - clip->left,
+                clip->bottom - clip->top);
 
         // 1x overdraw
         mCaches.stencil.enableDebugTest(2);
@@ -835,8 +838,8 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     startTilingCurrentClip(true, true);
 
     // Clear the FBO, expand the clear region by 1 to get nice bilinear filtering
-    mCaches.enableScissor();
-    mCaches.setScissor(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
+    mRenderState.scissor().setEnabled(true);
+    mRenderState.scissor().set(clip.left - 1.0f, bounds.getHeight() - clip.bottom - 1.0f,
             clip.getWidth() + 2.0f, clip.getHeight() + 2.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -863,7 +866,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     bool clipRequired = false;
     mState.calculateQuickRejectForScissor(rect.left, rect.top, rect.right, rect.bottom,
             &clipRequired, nullptr, false); // safely ignore return, should never be rejected
-    mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
+    mRenderState.scissor().setEnabled(mScissorOptimizationDisabled || clipRequired);
 
     if (fboLayer) {
         endTiling();
@@ -1286,7 +1289,7 @@ void OpenGLRenderer::clearLayerRegions() {
         // The list contains bounds that have already been clipped
         // against their initial clip rect, and the current clip
         // is likely different so we need to disable clipping here
-        bool scissorChanged = mCaches.disableScissor();
+        bool scissorChanged = mRenderState.scissor().setEnabled(false);
 
         Vertex mesh[count * 4];
         Vertex* vertex = mesh;
@@ -1317,7 +1320,7 @@ void OpenGLRenderer::clearLayerRegions() {
 
         issueIndexedQuadDraw(&mesh[0], count);
 
-        if (scissorChanged) mCaches.enableScissor();
+        if (scissorChanged) mRenderState.scissor().setEnabled(true);
     } else {
         mLayers.clear();
     }
@@ -1406,7 +1409,8 @@ void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
         writableSnapshot()->setClip(0, 0, mState.getWidth(), mState.getHeight());
     }
     dirtyClip();
-    mCaches.setScissorEnabled(clipRect != nullptr || mScissorOptimizationDisabled);
+    bool enableScissor = (clipRect != nullptr) || mScissorOptimizationDisabled;
+    mRenderState.scissor().setEnabled(enableScissor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1417,7 +1421,7 @@ void OpenGLRenderer::setScissorFromClip() {
     Rect clip(mState.currentClipRect());
     clip.snapToPixelBoundaries();
 
-    if (mCaches.setScissor(clip.left, getViewportHeight() - clip.bottom,
+    if (mRenderState.scissor().set(clip.left, getViewportHeight() - clip.bottom,
             clip.getWidth(), clip.getHeight())) {
         mState.setDirtyClip(false);
     }
@@ -1491,7 +1495,7 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
         }
     }
 
-    mCaches.setScissor(scissorBox.left, getViewportHeight() - scissorBox.bottom,
+    mRenderState.scissor().set(scissorBox.left, getViewportHeight() - scissorBox.bottom,
             scissorBox.getWidth(), scissorBox.getHeight());
 
     const SkPaint* paint = nullptr;
@@ -1537,7 +1541,7 @@ void OpenGLRenderer::setStencilFromClip() {
 
             // Clean and update the stencil, but first make sure we restrict drawing
             // to the region's bounds
-            bool resetScissor = mCaches.enableScissor();
+            bool resetScissor = mRenderState.scissor().setEnabled(true);
             if (resetScissor) {
                 // The scissor was not set so we now need to update it
                 setScissorFromClip();
@@ -1564,7 +1568,7 @@ void OpenGLRenderer::setStencilFromClip() {
                 // so we don't want to dirty the current layer, if any
                 drawRegionRects(clipArea.getClipRegion(), paint, false);
             }
-            if (resetScissor) mCaches.disableScissor();
+            if (resetScissor) mRenderState.scissor().setEnabled(false);
             mSkipOutlineClip = storedSkipOutlineClip;
 
             mCaches.stencil.enableTest(incrementThreshold);
@@ -1611,7 +1615,7 @@ bool OpenGLRenderer::quickRejectSetupScissor(float left, float top, float right,
     }
 
     // not quick rejected, so enable the scissor if clipRequired
-    mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
+    mRenderState.scissor().setEnabled(mScissorOptimizationDisabled || clipRequired);
     mSkipOutlineClip = !roundRectClipRequired;
     return false;
 }
@@ -1638,7 +1642,7 @@ void OpenGLRenderer::setupDraw(bool clearLayer) {
     // Make sure setScissor & setStencil happen at the beginning of
     // this method
     if (mState.getDirtyClip()) {
-        if (mCaches.scissorEnabled) {
+        if (mRenderState.scissor().isEnabled()) {
             setScissorFromClip();
         }
 
@@ -2094,7 +2098,7 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     }
 
     // TODO: use quickReject on bounds from vertices
-    mCaches.enableScissor();
+    mRenderState.scissor().setEnabled(true);
 
     float left = FLT_MAX;
     float top = FLT_MAX;
@@ -2738,7 +2742,7 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         return;
     }
 
-    mCaches.enableScissor();
+    mRenderState.scissor().setEnabled(true);
 
     float x = 0.0f;
     float y = 0.0f;
@@ -2964,7 +2968,7 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     }
 
     // TODO: avoid scissor by calculating maximum bounds using path bounds + font metrics
-    mCaches.enableScissor();
+    mRenderState.scissor().setEnabled(true);
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
     fontRenderer.setFont(paint, SkMatrix::I());
@@ -3038,7 +3042,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 
     updateLayer(layer, true);
 
-    mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
+    mRenderState.scissor().setEnabled(mScissorOptimizationDisabled || clipRequired);
     mCaches.activeTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
@@ -3220,7 +3224,7 @@ void OpenGLRenderer::drawShadow(float casterAlpha,
     if (mState.currentlyIgnored()) return;
 
     // TODO: use quickRejectWithScissor. For now, always force enable scissor.
-    mCaches.enableScissor();
+    mRenderState.scissor().setEnabled(true);
 
     SkPaint paint;
     paint.setAntiAlias(true); // want to use AlphaVertex

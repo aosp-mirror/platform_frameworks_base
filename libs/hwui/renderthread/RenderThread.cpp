@@ -16,14 +16,14 @@
 
 #include "RenderThread.h"
 
-#include <gui/DisplayEventReceiver.h>
-#include <sys/resource.h>
-#include <utils/Log.h>
-
-#include "../RenderState.h"
+#include "../renderstate/RenderState.h"
 #include "CanvasContext.h"
 #include "EglManager.h"
 #include "RenderProxy.h"
+
+#include <gui/DisplayEventReceiver.h>
+#include <sys/resource.h>
+#include <utils/Log.h>
 
 namespace android {
 using namespace uirenderer::renderthread;

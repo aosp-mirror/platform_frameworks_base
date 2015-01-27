@@ -16,19 +16,19 @@
 
 #include "CanvasContext.h"
 
-#include <algorithm>
-#include <private/hwui/DrawGlInfo.h>
-#include <strings.h>
-
 #include "EglManager.h"
 #include "RenderThread.h"
 #include "../AnimationContext.h"
 #include "../Caches.h"
 #include "../DeferredLayerUpdater.h"
-#include "../RenderState.h"
+#include "../renderstate/RenderState.h"
 #include "../LayerRenderer.h"
 #include "../OpenGLRenderer.h"
 #include "../Stencil.h"
+
+#include <algorithm>
+#include <private/hwui/DrawGlInfo.h>
+#include <strings.h>
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20

@@ -16,16 +16,17 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <utils/Log.h>
+#include "Layer.h"
 
 #include "Caches.h"
 #include "DeferredDisplayList.h"
-#include "Layer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "RenderNode.h"
-#include "RenderState.h"
+#include "renderstate/RenderState.h"
 #include "utils/TraceUtils.h"
+
+#include <utils/Log.h>
 
 #define ATRACE_LAYER_WORK(label) \
     ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", \
