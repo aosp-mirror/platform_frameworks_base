@@ -16650,6 +16650,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (changed) {
             requestLayout();
+            invalidateOutline();
         }
     }
 
