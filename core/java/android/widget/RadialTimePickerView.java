@@ -1271,11 +1271,19 @@ public class RadialTimePickerView extends View {
         @Override
         protected int getVirtualViewAt(float x, float y) {
             final int id;
-            final int degrees = getDegreesFromXY(x, y, true);
+
+            // Calling getDegreesXY() has side-effects, so we need to cache the
+            // current inner circle value and restore after the call.
+            final boolean wasOnInnerCircle = mIsOnInnerCircle;
+            final int degrees = getDegreesFromXY(x, y);
+            final boolean isOnInnerCircle = mIsOnInnerCircle;
+            mIsOnInnerCircle = wasOnInnerCircle;
+
             if (degrees != -1) {
                 final int snapDegrees = snapOnly30s(degrees, 0) % 360;
                 if (mShowHours) {
-                    final int hour = getHourForDegrees(snapDegrees, mIsOnInnerCircle);
+                    final int hour24 = getHourForDegrees(snapDegrees, isOnInnerCircle);
+                    final int hour = mIs24HourMode ? hour24 : hour24To12(hour24);
                     id = makeId(TYPE_HOUR, hour);
                 } else {
                     final int current = getCurrentMinute();
@@ -1402,6 +1410,16 @@ public class RadialTimePickerView extends View {
                 hour24 += 12;
             }
             return hour24;
+        }
+
+        private int hour24To12(int hour24) {
+            if (hour24 == 0) {
+                return 12;
+            } else if (hour24 > 12) {
+                return hour24 - 12;
+            } else {
+                return hour24;
+            }
         }
 
         private void getBoundsForVirtualView(int virtualViewId, Rect bounds) {
