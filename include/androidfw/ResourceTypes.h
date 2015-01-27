@@ -107,9 +107,9 @@ struct Res_png_9patch
                        yDivsOffset(0), colorsOffset(0) { }
 
     int8_t wasDeserialized;
-    int8_t numXDivs;
-    int8_t numYDivs;
-    int8_t numColors;
+    uint8_t numXDivs;
+    uint8_t numYDivs;
+    uint8_t numColors;
 
     // The offset (from the start of this structure) to the xDivs & yDivs
     // array for this 9patch. To get a pointer to this array, call
