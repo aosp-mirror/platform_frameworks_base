@@ -23,7 +23,7 @@
 #include <nativehelper/jni.h>
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <media/SoundPool.h>
+#include "SoundPool.h"
 
 using namespace android;
 
@@ -45,20 +45,6 @@ struct audio_attributes_fields_t {
 static audio_attributes_fields_t javaAudioAttrFields;
 
 // ----------------------------------------------------------------------------
-static jint
-android_media_SoundPool_SoundPoolImpl_load_URL(JNIEnv *env, jobject thiz, jstring path, jint priority)
-{
-    ALOGV("android_media_SoundPool_SoundPoolImpl_load_URL");
-    SoundPool *ap = MusterSoundPool(env, thiz);
-    if (path == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return 0;
-    }
-    const char* s = env->GetStringUTFChars(path, NULL);
-    int id = ap->load(s, priority);
-    env->ReleaseStringUTFChars(path, s);
-    return (jint) id;
-}
 
 static jint
 android_media_SoundPool_SoundPoolImpl_load_FD(JNIEnv *env, jobject thiz, jobject fileDescriptor,
@@ -248,10 +234,6 @@ android_media_SoundPool_SoundPoolImpl_release(JNIEnv *env, jobject thiz)
 
 // Dalvik VM type signatures
 static JNINativeMethod gMethods[] = {
-    {   "_load",
-        "(Ljava/lang/String;I)I",
-        (void *)android_media_SoundPool_SoundPoolImpl_load_URL
-    },
     {   "_load",
         "(Ljava/io/FileDescriptor;JJI)I",
         (void *)android_media_SoundPool_SoundPoolImpl_load_FD
