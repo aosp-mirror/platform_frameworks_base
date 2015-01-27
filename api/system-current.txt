@@ -1488,6 +1488,7 @@ package android {
     field public static final int windowExitTransition = 16843832; // 0x1010438
     field public static final int windowFrame = 16842837; // 0x1010055
     field public static final int windowFullscreen = 16843277; // 0x101020d
+    field public static final int windowHasLightStatusBar = 16843995; // 0x10104db
     field public static final int windowHideAnimation = 16842935; // 0x10100b7
     field public static final int windowIsFloating = 16842839; // 0x1010057
     field public static final int windowIsTranslucent = 16842840; // 0x1010058
@@ -36533,6 +36534,7 @@ package android.view {
     field public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 1024; // 0x400
     field public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 512; // 0x200
     field public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 256; // 0x100
+    field public static final int SYSTEM_UI_FLAG_LIGHT_STATUS_BAR = 8192; // 0x2000
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600

@@ -1952,6 +1952,16 @@
 
         <!-- Whether to clip window content to the outline of the window background. -->
         <attr name="windowClipToOutline" format="boolean" />
+
+        <!-- If set, the status bar will be drawn such that it is compatible with a light
+             status bar background.
+             <p>For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the status bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentStatus}.
+             Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_STATUS_BAR} on
+             the decor view. -->
+        <attr name="windowHasLightStatusBar" format="boolean" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->
