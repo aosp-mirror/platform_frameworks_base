@@ -163,6 +163,7 @@ public class NetworkMonitor extends StateMachine {
     /**
      * Force evaluation even if it has succeeded in the past.
      * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
+     * arg2 = Number of evaluation attempts to make. (If 0, make INITIAL_ATTEMPTS attempts.)
      */
     public static final int CMD_FORCE_REEVALUATION = BASE + 8;
 
@@ -212,11 +213,14 @@ public class NetworkMonitor extends StateMachine {
 
     // Negative values disable reevaluation.
     private static final String REEVALUATE_DELAY_PROPERTY = "persist.netmon.reeval_delay";
-    // Default to 5s reevaluation delay.
+    // When connecting, attempt to validate 3 times, pausing 5s between them.
     private static final int DEFAULT_REEVALUATE_DELAY_MS = 5000;
-    private static final int MAX_RETRIES = 10;
-    // Between groups of MAX_RETRIES evaluation attempts, pause 10 mins in hopes ISP outage passes.
+    private static final int INITIAL_ATTEMPTS = 3;
+    // If a network is not validated, make one attempt every 10 mins to see if it starts working.
     private static final int REEVALUATE_PAUSE_MS = 10*60*1000;
+    private static final int PERIODIC_ATTEMPTS = 1;
+    // When an application calls reportBadNetwork, only make one attempt.
+    private static final int REEVALUATE_ATTEMPTS = 1;
     private final int mReevaluateDelayMs;
     private int mReevaluateToken = 0;
     private static final int INVALID_UID = -1;
@@ -235,6 +239,14 @@ public class NetworkMonitor extends StateMachine {
 
     // Set if the user explicitly selected "Do not use this network" in captive portal sign-in app.
     private boolean mUserDoesNotWant = false;
+
+    // How many times we should attempt validation. Only checked in EvaluatingState; must be set
+    // before entering EvaluatingState. Note that whatever code causes us to transition to
+    // EvaluatingState last decides how many attempts will be made, so if one codepath were to
+    // enter EvaluatingState with a specific number of attempts, and then another were to enter it
+    // with a different number of attempts, the second number would be used. This is not currently
+    // a problem because EvaluatingState is not reentrant.
+    private int mMaxAttempts;
 
     public boolean systemReady = false;
 
@@ -305,6 +317,7 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_NETWORK_CONNECTED:
                     if (DBG) log("Connected");
+                    mMaxAttempts = INITIAL_ATTEMPTS;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
@@ -318,6 +331,7 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_FORCE_REEVALUATION:
                     if (DBG) log("Forcing reevaluation");
                     mUidResponsibleForReeval = message.arg1;
+                    mMaxAttempts = message.arg2 != 0 ? message.arg2 : REEVALUATE_ATTEMPTS;
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_CAPTIVE_PORTAL_APP_FINISHED:
@@ -347,7 +361,10 @@ public class NetworkMonitor extends StateMachine {
         public void enter() {
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
-            if (!mUserDoesNotWant) sendMessageDelayed(CMD_FORCE_REEVALUATION, REEVALUATE_PAUSE_MS);
+            if (!mUserDoesNotWant) {
+                sendMessageDelayed(CMD_FORCE_REEVALUATION, 0 /* no UID */,
+                        PERIODIC_ATTEMPTS, REEVALUATE_PAUSE_MS);
+            }
         }
 
         @Override
@@ -413,11 +430,11 @@ public class NetworkMonitor extends StateMachine {
     // Being in the EvaluatingState State indicates the Network is being evaluated for internet
     // connectivity.
     private class EvaluatingState extends State {
-        private int mRetries;
+        private int mAttempt;
 
         @Override
         public void enter() {
-            mRetries = 0;
+            mAttempt = 1;
             sendMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
             if (mUidResponsibleForReeval != INVALID_UID) {
                 TrafficStats.setThreadStatsUid(mUidResponsibleForReeval);
@@ -454,18 +471,18 @@ public class NetworkMonitor extends StateMachine {
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
-                    // Note: This call to isCaptivePortal() could take minutes.  Resolving the
-                    // server's IP addresses could hit the DNS timeout and attempting connections
-                    // to each of the server's several (e.g. 11) IP addresses could each take
-                    // SOCKET_TIMEOUT_MS.  During this time this StateMachine will be unresponsive.
-                    // isCaptivePortal() could be executed on another Thread if this is found to
-                    // cause problems.
+                    // Note: This call to isCaptivePortal() could take up to a minute. Resolving the
+                    // server's IP addresses could hit the DNS timeout, and attempting connections
+                    // to each of the server's several IP addresses (currently one IPv4 and one
+                    // IPv6) could each take SOCKET_TIMEOUT_MS.  During this time this StateMachine
+                    // will be unresponsive. isCaptivePortal() could be executed on another Thread
+                    // if this is found to cause problems.
                     int httpResponseCode = isCaptivePortal();
                     if (httpResponseCode == 204) {
                         transitionTo(mValidatedState);
                     } else if (httpResponseCode >= 200 && httpResponseCode <= 399) {
                         transitionTo(mCaptivePortalState);
-                    } else if (++mRetries > MAX_RETRIES) {
+                    } else if (++mAttempt > mMaxAttempts) {
                         transitionTo(mOfflineState);
                     } else if (mReevaluateDelayMs >= 0) {
                         Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
