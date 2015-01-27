@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.library;
-
-import android.util.Log;
+package android.binding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +25,7 @@ import java.util.List;
  * themselves. This class handles this behavior with constant memory under
  * most circumstances.
  *
- * <p>A subclass of {@link com.android.databinding.library.CallbackRegistry.NotifierCallback} must be passed to
+ * <p>A subclass of {@link CallbackRegistry.NotifierCallback} must be passed to
  * the constructor to define how notifications should be called. That implementation
  * does the actual notification on the listener.</p>
  *
@@ -80,11 +78,11 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
      * Notify all callbacks.
      *
      * @param sender The originator. This is an opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg2 An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      */
     public synchronized void notifyCallbacks(T sender, int arg, A arg2) {
         mNotificationLevel++;
@@ -111,11 +109,11 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
      * Notify up to the first Long.SIZE callbacks that don't have a bit set in <code>removed</code>.
      *
      * @param sender The originator. This is an opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg2 An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      */
     private void notifyFirst64(T sender, int arg, A arg2) {
         final int maxNotified = Math.min(Long.SIZE, mCallbacks.size());
@@ -130,11 +128,11 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
      * <p>Recursion is used to avoid allocating temporary state on the heap.</p>
      *
      * @param sender The originator. This is an opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg2 An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      */
     private void notifyRecurse(T sender, int arg, A arg2) {
         final int callbackCount = mCallbacks.size();
@@ -157,11 +155,11 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
      * remainderIndex is -1, the first 64 will be notified instead.
      *
      * @param sender The originator. This is an opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg2 An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param remainderIndex The index into mRemainderRemoved that should be notified.
      */
     private void notifyRemainder(T sender, int arg, A arg2, int remainderIndex) {
@@ -183,11 +181,11 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
      * endIndex should be notified.
      *
      * @param sender The originator. This is an opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param arg2 An opaque parameter passed to
-     *      {@link com.android.databinding.library.CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
+     *      {@link CallbackRegistry.NotifierCallback#onNotifyCallback(Object, Object, int, A)}
      * @param startIndex The index into the mCallbacks to start notifying.
      * @param endIndex One past the last index into mCallbacks to notify.
      * @param bits A bit field indicating which callbacks have been removed and shouldn't
@@ -381,7 +379,7 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
                 }
             }
         } catch (CloneNotSupportedException e) {
-            Log.e(TAG, "Could not clone CallbackRegistry", e);
+            e.printStackTrace();
         }
         return clone;
     }
@@ -401,8 +399,8 @@ public class CallbackRegistry<C, T, A> implements Cloneable {
          * @param sender The opaque sender object.
          * @param arg The opaque notification parameter.
          * @param arg2 An opaque argument passed in
-         *        {@link com.android.databinding.library.CallbackRegistry#notifyCallbacks}
-         * @see CallbackRegistry#CallbackRegistry(com.android.databinding.library.CallbackRegistry.NotifierCallback)
+         *        {@link CallbackRegistry#notifyCallbacks}
+         * @see CallbackRegistry#CallbackRegistry(CallbackRegistry.NotifierCallback)
          */
         public abstract void onNotifyCallback(C callback, T sender, int arg, A arg2);
     }

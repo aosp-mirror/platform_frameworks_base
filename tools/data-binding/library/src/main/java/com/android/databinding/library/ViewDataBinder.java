@@ -16,6 +16,12 @@
 
 package com.android.databinding.library;
 
+import android.binding.Observable;
+import android.binding.ObservableList;
+import android.binding.ObservableMap;
+import android.binding.OnListChangedListener;
+import android.binding.OnMapChangedListener;
+import android.binding.OnPropertyChangedListener;
 import android.view.View;
 
 import java.lang.Override;
@@ -294,7 +300,7 @@ abstract public class ViewDataBinder {
         }
 
         @Override
-        public void onMapChanged(Object sender, Object key) {
+        public void onMapChanged(ObservableMap sender, Object key) {
             ViewDataBinder binder = getBinder();
             if (binder == null || sender != getTarget()) {
                 return;

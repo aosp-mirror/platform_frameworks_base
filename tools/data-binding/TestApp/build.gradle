@@ -51,10 +51,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.databinding:library:0.3-SNAPSHOT'
+    compile "com.android.support:support-v4:+"
     provided 'com.android.databinding:annotationprocessor:0.3-SNAPSHOT'
 }

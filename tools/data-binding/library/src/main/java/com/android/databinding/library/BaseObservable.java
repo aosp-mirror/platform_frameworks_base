@@ -16,6 +16,9 @@
 
 package com.android.databinding.library;
 
+import android.binding.Observable;
+import android.binding.OnPropertyChangedListener;
+
 public class BaseObservable implements Observable {
     private PropertyChangeRegistry mCallbacks;
 

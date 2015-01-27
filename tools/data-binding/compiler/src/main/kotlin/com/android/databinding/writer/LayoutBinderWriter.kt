@@ -509,7 +509,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("${tmpDirtyFlags.type} ${tmpDirtyFlags.localValue(i)} = ${mDirtyFlags.localValue(i)};")
                 tab("${mDirtyFlags.localValue(i)} = 0;")
             }
-            tab("""log("dirty flags", mDirtyFlags);""")
+            //tab("""log("dirty flags", mDirtyFlags);""")
             model.getPendingExpressions().filterNot {it.isVariable()}.forEach {
                 tab("${it.getResolvedType().toJavaCode()} ${it.localName} = ${it.getDefaultValue()};")
             }
@@ -573,12 +573,12 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 if (!expr.isEqualityCheck() && nullables.isNotEmpty()) {
                     tab ("if ( ${nullables.map { "${it.localName} != null" }.joinToString(" && ")}) {") {
                         tab("${expr.localName}").app(" = ", expr.toCode(true)).app(";")
-                        tab("""log("${expr}" + ${expr.localName},0);""")
+                        //tab("""log("${expr}" + ${expr.localName},0);""")
                     }
                     tab("}")
                 } else {
                     tab("${expr.localName}").app(" = ", expr.toCode(true)).app(";")
-                    tab("""log("${expr}" + ${expr.localName},0);""")
+                    //tab("""log("${expr}" + ${expr.localName},0);""")
                 }
                 if (expr.getResolvedType().isObservable()) {
                     tab("updateRegistration(${expr.getId()}, ${expr.localName});")

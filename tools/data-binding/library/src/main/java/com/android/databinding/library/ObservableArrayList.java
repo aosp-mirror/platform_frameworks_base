@@ -15,6 +15,9 @@
  */
 package com.android.databinding.library;
 
+import android.binding.ObservableList;
+import android.binding.OnListChangedListener;
+
 import java.util.ArrayList;
 import java.util.Collection;
 

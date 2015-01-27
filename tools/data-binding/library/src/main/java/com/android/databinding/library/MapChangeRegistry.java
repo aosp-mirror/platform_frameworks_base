@@ -15,6 +15,10 @@
  */
 package com.android.databinding.library;
 
+import android.binding.CallbackRegistry;
+import android.binding.ObservableMap;
+import android.binding.OnMapChangedListener;
+
 public class MapChangeRegistry
         extends CallbackRegistry<OnMapChangedListener, ObservableMap, Object> {
 
@@ -29,5 +33,9 @@ public class MapChangeRegistry
 
     public MapChangeRegistry() {
         super(NOTIFIER_CALLBACK);
+    }
+
+    public void notifyChange(ObservableMap sender, Object key) {
+        notifyCallbacks(sender, 0, key);
     }
 }

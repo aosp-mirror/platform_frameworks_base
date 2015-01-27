@@ -33,9 +33,9 @@ import java.util.Map;
 
 public class ClassAnalyzer {
 
-    private static final String OBSERVABLE_CLASS_NAME = "com.android.databinding.library.Observable";
-    private static final String OBSERVABLE_LIST_CLASS_NAME = "com.android.databinding.library.ObservableList";
-    private static final String OBSERVABLE_MAP_CLASS_NAME = "com.android.databinding.library.ObservableMap";
+    private static final String OBSERVABLE_CLASS_NAME = "android.binding.Observable";
+    private static final String OBSERVABLE_LIST_CLASS_NAME = "android.binding.ObservableList";
+    private static final String OBSERVABLE_MAP_CLASS_NAME = "android.binding.ObservableMap";
     private static final String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
 
     private static Map<String, String> sTestClassNameMapping = ImmutableMap.of(

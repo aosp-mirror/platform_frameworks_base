@@ -13,28 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.library;
+package android.binding;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class CallbackRegistryTest {
 
     final Integer callback1 = 1;
     final Integer callback2 = 2;
     final Integer callback3 = 3;
-
     CallbackRegistry<Integer, CallbackRegistryTest, Integer> registry;
-
     int notify1;
     int notify2;
     int notify3;
-
     int[] deepNotifyCount = new int[300];
-
     Integer argValue;
 
     private void addNotifyCount(Integer callback) {

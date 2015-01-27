@@ -15,10 +15,14 @@
  */
 package com.android.databinding.library;
 
+import android.binding.CallbackRegistry;
+import android.binding.ObservableList;
+import android.binding.OnListChangedListener;
 import android.support.v4.util.Pools;
 
 public class ListChangeRegistry
-        extends CallbackRegistry<OnListChangedListener, ObservableList, ListChangeRegistry.ListChanges> {
+        extends
+        CallbackRegistry<OnListChangedListener, ObservableList, ListChangeRegistry.ListChanges> {
     private static final Pools.SynchronizedPool<ListChanges> sListChanges =
             new Pools.SynchronizedPool<>(10);
 

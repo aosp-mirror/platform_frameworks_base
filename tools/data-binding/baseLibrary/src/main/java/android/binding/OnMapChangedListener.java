@@ -13,11 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.library;
+package android.binding;
 
-import java.util.Map;
-
-public interface ObservableMap<K, V> extends Map<K, V> {
-    void addOnMapChangedListener(OnMapChangedListener<? extends ObservableMap<K, V>, K> listener);
-    void removeOnMapChangedListener(OnMapChangedListener<? extends ObservableMap<K, V>, K> listener);
+public interface OnMapChangedListener<T extends ObservableMap<K, ?>, K> {
+    void onMapChanged(T sender, K key);
 }

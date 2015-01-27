@@ -15,6 +15,10 @@
  */
 package com.android.databinding.library;
 
+import android.binding.CallbackRegistry;
+import android.binding.Observable;
+import android.binding.OnPropertyChangedListener;
+
 public class PropertyChangeRegistry extends
         CallbackRegistry<OnPropertyChangedListener, Observable, Void> {
 

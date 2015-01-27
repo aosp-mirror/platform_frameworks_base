@@ -16,6 +16,10 @@
 
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'application'
+
+sourceCompatibility = 1.7
+mainClassName = "org.antlr.v4.Tool"
 
 buildscript {
     repositories {
@@ -34,6 +38,16 @@ sourceSets {
             srcDir 'src/main/java'
         }
     }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.tunnelvisionlabs:antlr4:4.4'
+    testCompile 'junit:junit:4.11'
 }
 
 uploadArchives {

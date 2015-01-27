@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.library;
 
-public interface OnListChangedListener {
-    void onChanged();
-    void onItemRangeChanged(int positionStart, int itemCount);
-    void onItemRangeInserted(int positionStart, int itemCount);
-    void onItemRangeMoved(int fromPosition, int toPosition, int itemCount);
-    void onItemRangeRemoved(int positionStart, int itemCount);
+package android.binding;
+
+public interface Observable {
+
+    public void addOnPropertyChangedListener(OnPropertyChangedListener listener);
+
+    public void removeOnPropertyChangedListener(OnPropertyChangedListener listener);
 }

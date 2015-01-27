@@ -15,6 +15,8 @@
  */
 package com.android.databinding.library;
 
+import android.binding.ObservableMap;
+import android.binding.OnMapChangedListener;
 import android.support.v4.util.ArrayMap;
 import android.support.v4.util.SimpleArrayMap;
 

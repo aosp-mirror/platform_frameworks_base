@@ -1,17 +1,40 @@
 package com.android.databinding;
 
-import com.android.databinding.BindingExpressionParser.*;
-
-import junit.framework.TestCase;
+import com.android.databinding.BindingExpressionParser.AndOrOpContext;
+import com.android.databinding.BindingExpressionParser.BinaryOpContext;
+import com.android.databinding.BindingExpressionParser.BindingSyntaxContext;
+import com.android.databinding.BindingExpressionParser.BitShiftOpContext;
+import com.android.databinding.BindingExpressionParser.ComparisonOpContext;
+import com.android.databinding.BindingExpressionParser.DefaultsContext;
+import com.android.databinding.BindingExpressionParser.DotOpContext;
+import com.android.databinding.BindingExpressionParser.ExpressionContext;
+import com.android.databinding.BindingExpressionParser.GroupingContext;
+import com.android.databinding.BindingExpressionParser.LiteralContext;
+import com.android.databinding.BindingExpressionParser.MathOpContext;
+import com.android.databinding.BindingExpressionParser.PrimaryContext;
+import com.android.databinding.BindingExpressionParser.PrimitiveTypeContext;
+import com.android.databinding.BindingExpressionParser.QuestionQuestionOpContext;
+import com.android.databinding.BindingExpressionParser.ResourceContext;
+import com.android.databinding.BindingExpressionParser.StringLiteralContext;
+import com.android.databinding.BindingExpressionParser.TernaryOpContext;
+import com.android.databinding.BindingExpressionParser.UnaryOpContext;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.junit.Test;
 
 import java.io.StringReader;
 
-public class BindingExpressionParserTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+public class BindingExpressionParserTest {
+
+    @Test
     public void testSingleQuoteStringLiteral() throws Exception {
         String expr = "`test`";
         LiteralContext literal = parseLiteral(expr);
@@ -23,6 +46,7 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("`test`", token.getText());
     }
 
+    @Test
     public void testDoubleQuoteStringLiteral() throws Exception {
         String expr = "\"test\"";
 
@@ -33,6 +57,7 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("\"test\"", token.getText());
     }
 
+    @Test
     public void testSingleQuoteEscapeStringLiteral() throws Exception {
         String expr = "`\"t\\`est\"`";
         LiteralContext literal = parseLiteral(expr);
@@ -42,6 +67,7 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("`\"t\\`est\"`", token.getText());
     }
 
+    @Test
     public void testCharLiteral() throws Exception {
         LiteralContext literal = parseLiteral("'c'");
         assertEquals("'c'", literal.getText());
@@ -51,6 +77,7 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("'\\''", literal.getText());
     }
 
+    @Test
     public void testIntLiterals() throws Exception {
         compareIntLiteral("123");
         compareIntLiteral("123l");
@@ -72,6 +99,7 @@ public class BindingExpressionParserTest extends TestCase {
         compareIntLiteral("0B0101_0101l");
     }
 
+    @Test
     public void testFloatLiterals() throws Exception {
         compareFloatLiteral("0.12345");
         compareFloatLiteral("0.12345f");
@@ -82,17 +110,20 @@ public class BindingExpressionParserTest extends TestCase {
         compareFloatLiteral("132450.4e123");
     }
 
+    @Test
     public void testBoolLiterals() throws Exception {
         compareBoolLiteral("true");
         compareBoolLiteral("false");
     }
 
+    @Test
     public void testNullLiteral() throws Exception {
         LiteralContext literal = parseLiteral("null");
         String token = literal.getText();
         assertEquals("null", token);
     }
 
+    @Test
     public void testVoidExtraction() throws Exception {
         PrimaryContext primary = parsePrimary("void.class");
         assertNotNull(primary.classExtraction());
@@ -100,17 +131,20 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("void", primary.classExtraction().getChild(0).getText());
     }
 
+    @Test
     public void testPrimitiveClassExtraction() throws Exception {
         PrimaryContext primary = parsePrimary("int.class");
         PrimitiveTypeContext type = primary.classExtraction().type().primitiveType();
         assertEquals("int", type.getText());
     }
 
+    @Test
     public void testIdentifier() throws Exception {
         PrimaryContext primary = parsePrimary("abcdEfg");
         assertEquals("abcdEfg", primary.identifier().getText());
     }
 
+    @Test
     public void testUnaryOperators() throws Exception {
         compareUnaryOperators("+");
         compareUnaryOperators("-");
@@ -118,6 +152,7 @@ public class BindingExpressionParserTest extends TestCase {
         compareUnaryOperators("~");
     }
 
+    @Test
     public void testMathOperators() throws Exception {
         compareMathOperators("+");
         compareMathOperators("-");
@@ -126,12 +161,14 @@ public class BindingExpressionParserTest extends TestCase {
         compareMathOperators("%");
     }
 
+    @Test
     public void testBitShiftOperators() throws Exception {
         compareBitShiftOperators(">>>");
         compareBitShiftOperators("<<");
         compareBitShiftOperators(">>");
     }
 
+    @Test
     public void testComparisonShiftOperators() throws Exception {
         compareComparisonOperators("<");
         compareComparisonOperators(">");
@@ -141,17 +178,20 @@ public class BindingExpressionParserTest extends TestCase {
         compareComparisonOperators("!=");
     }
 
+    @Test
     public void testAndOrOperators() throws Exception {
         compareAndOrOperators("&&");
         compareAndOrOperators("||");
     }
 
+    @Test
     public void testBinaryOperators() throws Exception {
         compareBinaryOperators("&");
         compareBinaryOperators("|");
         compareBinaryOperators("^");
     }
 
+    @Test
     public void testTernaryOperator() throws Exception {
         TernaryOpContext expression = parseExpression("true ? 1 : 0");
         assertEquals(5, expression.getChildCount());
@@ -161,9 +201,10 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("1",
                 ((PrimaryContext) expression.iftrue).literal().javaLiteral().getText());
         assertEquals(":", expression.getChild(3).getText());
-        assertEquals("0", ((PrimaryContext)expression.iffalse).literal().javaLiteral().getText());
+        assertEquals("0", ((PrimaryContext) expression.iffalse).literal().javaLiteral().getText());
     }
 
+    @Test
     public void testDot() throws Exception {
         DotOpContext expression = parseExpression("one.two.three");
         assertEquals(3, expression.getChildCount());
@@ -175,14 +216,16 @@ public class BindingExpressionParserTest extends TestCase {
         assertEquals("one", ((PrimaryContext) left.expression()).identifier().getText());
     }
 
+    @Test
     public void testQuestionQuestion() throws Exception {
         QuestionQuestionOpContext expression = parseExpression("one ?? two");
         assertEquals(3, expression.getChildCount());
-        assertEquals("one", ((PrimaryContext)expression.left).identifier().getText());
-        assertEquals("two", ((PrimaryContext)expression.right).identifier().getText());
+        assertEquals("one", ((PrimaryContext) expression.left).identifier().getText());
+        assertEquals("two", ((PrimaryContext) expression.right).identifier().getText());
         assertEquals("??", expression.op.getText());
     }
 
+    @Test
     public void testResourceReference() throws Exception {
         compareResource("@id/foo_bar");
         compareResource("@transition/foo_bar");
@@ -192,12 +235,14 @@ public class BindingExpressionParserTest extends TestCase {
         compareResource("@app:id/foo_bar");
     }
 
+    @Test
     public void testDefaults() throws Exception {
         BindingSyntaxContext syntax = parseExpressionString("foo.bar, default = @id/foo_bar");
         DefaultsContext defaults = syntax.defaults();
         assertEquals("@id/foo_bar", defaults.constantValue().ResourceReference().getText());
     }
 
+    @Test
     public void testParentheses() throws Exception {
         GroupingContext grouping = parseExpression("(1234)");
         assertEquals("1234", grouping.expression().getText());
@@ -223,11 +268,11 @@ public class BindingExpressionParserTest extends TestCase {
         BinaryOpContext expression = parseExpression("1 " + op + " 2");
         assertEquals(3, expression.getChildCount());
         assertTrue(expression.left instanceof ExpressionContext);
-        String one = ((PrimaryContext)expression.left).literal().javaLiteral().getText();
+        String one = ((PrimaryContext) expression.left).literal().javaLiteral().getText();
         assertEquals("1", one);
         assertEquals(op, expression.op.getText());
         assertTrue(expression.right instanceof ExpressionContext);
-        String two = ((PrimaryContext)expression.right).literal().javaLiteral().getText();
+        String two = ((PrimaryContext) expression.right).literal().javaLiteral().getText();
         assertEquals("2", two);
     }
 
@@ -235,11 +280,11 @@ public class BindingExpressionParserTest extends TestCase {
         MathOpContext expression = parseExpression("1 " + op + " 2");
         assertEquals(3, expression.getChildCount());
         assertTrue(expression.left instanceof ExpressionContext);
-        String one = ((PrimaryContext)expression.left).literal().javaLiteral().getText();
+        String one = ((PrimaryContext) expression.left).literal().javaLiteral().getText();
         assertEquals("1", one);
         assertEquals(op, expression.op.getText());
         assertTrue(expression.right instanceof ExpressionContext);
-        String two = ((PrimaryContext)expression.right).literal().javaLiteral().getText();
+        String two = ((PrimaryContext) expression.right).literal().javaLiteral().getText();
         assertEquals("2", two);
     }
 
@@ -247,11 +292,11 @@ public class BindingExpressionParserTest extends TestCase {
         BitShiftOpContext expression = parseExpression("1 " + op + " 2");
         assertEquals(3, expression.getChildCount());
         assertTrue(expression.left instanceof ExpressionContext);
-        String one = ((PrimaryContext)expression.left).literal().javaLiteral().getText();
+        String one = ((PrimaryContext) expression.left).literal().javaLiteral().getText();
         assertEquals("1", one);
         assertEquals(op, expression.op.getText());
         assertTrue(expression.right instanceof ExpressionContext);
-        String two = ((PrimaryContext)expression.right).literal().javaLiteral().getText();
+        String two = ((PrimaryContext) expression.right).literal().javaLiteral().getText();
         assertEquals("2", two);
     }
 
@@ -259,11 +304,11 @@ public class BindingExpressionParserTest extends TestCase {
         ComparisonOpContext expression = parseExpression("1 " + op + " 2");
         assertEquals(3, expression.getChildCount());
         assertTrue(expression.left instanceof ExpressionContext);
-        String one = ((PrimaryContext)expression.left).literal().javaLiteral().getText();
+        String one = ((PrimaryContext) expression.left).literal().javaLiteral().getText();
         assertEquals("1", one);
         assertEquals(op, expression.op.getText());
         assertTrue(expression.right instanceof ExpressionContext);
-        String two = ((PrimaryContext)expression.right).literal().javaLiteral().getText();
+        String two = ((PrimaryContext) expression.right).literal().javaLiteral().getText();
         assertEquals("2", two);
     }
 
@@ -271,11 +316,11 @@ public class BindingExpressionParserTest extends TestCase {
         AndOrOpContext expression = parseExpression("1 " + op + " 2");
         assertEquals(3, expression.getChildCount());
         assertTrue(expression.left instanceof ExpressionContext);
-        String one = ((PrimaryContext)expression.left).literal().javaLiteral().getText();
+        String one = ((PrimaryContext) expression.left).literal().javaLiteral().getText();
         assertEquals("1", one);
         assertEquals(op, expression.op.getText());
         assertTrue(expression.right instanceof ExpressionContext);
-        String two = ((PrimaryContext)expression.right).literal().javaLiteral().getText();
+        String two = ((PrimaryContext) expression.right).literal().javaLiteral().getText();
         assertEquals("2", two);
     }
 

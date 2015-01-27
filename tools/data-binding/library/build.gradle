@@ -53,13 +53,6 @@ android {
         }
     }
 }
-sourceSets {
-    test {
-        java {
-            srcDir 'src/test/java'
-        }
-    }
-}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(":baseLibrary")

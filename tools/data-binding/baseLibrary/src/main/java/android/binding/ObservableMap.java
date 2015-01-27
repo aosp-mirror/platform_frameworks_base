@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.library;
+package android.binding;
 
-import java.util.List;
+import java.util.Map;
 
-public interface ObservableList<T> extends List<T> {
-    void addOnListChangedListener(OnListChangedListener listener);
-    void removeOnListChangedListener(OnListChangedListener listener);
+public interface ObservableMap<K, V> extends Map<K, V> {
+    void addOnMapChangedListener(OnMapChangedListener<? extends ObservableMap<K, V>, K> listener);
+    void removeOnMapChangedListener(OnMapChangedListener<? extends ObservableMap<K, V>, K> listener);
 }
