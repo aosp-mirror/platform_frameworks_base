@@ -1,0 +1,211 @@
+page.title=Creating a Scene
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#FromLayout">Create a Scene From a Layout Resource</a></li>
+  <li><a href="#FromCode">Create a Scene in Your Code</a></li>
+  <li><a href="#Actions">Create Scene Actions</a></li>
+</ol>
+</div>
+</div>
+
+<p>Scenes store the state of a view hierarchy, including all its views and their property
+values. The transitions framework can run animations between a starting and an ending scene.
+The starting scene is often determined automatically from the current state of the user
+interface. For the ending scene, the framework enables you to create a scene from a layout
+resource file or from a group of views in your code.</p>
+
+<p>This lesson shows you how to create scenes in your app and how to define scene actions.
+The next lesson shows you how to transition between two scenes.</p>
+
+<p class="note"><strong>Note:</strong> The framework can animate changes in a single view
+hierarchy without using scenes, as described in
+<a href="{@docRoot}training/transitions/transitions.html#NoScenes">Apply a Transition Without
+Scenes</a>. However, understanding this lesson is essential to work with transitions.</p>
+
+
+
+<h2 id="FromLayout">Create a Scene From a Layout Resource</h2>
+
+<p>You can create a {@link android.transition.Scene} instance directly from a layout resource
+file. Use this technique when the view hierarchy in the file is mostly static. The resulting
+scene represents the state of the view hierarchy at the time you created the
+{@link android.transition.Scene} instance. If you change the view hierarchy, you have to
+recreate the scene. The framework creates the scene from the entire view hierarchy in the
+file; you can not create a scene from part of a layout file.</p>
+
+<p>To create a {@link android.transition.Scene} instance from a layout resource file, retrieve
+the scene root from your layout as a {@link android.view.ViewGroup} instance and then call the
+{@link android.transition.Scene#getSceneForLayout Scene.getSceneForLayout()} method with the
+scene root and the resource ID of the layout file that contains the view hierarchy for the
+scene.</p>
+
+<h3>Define Layouts for Scenes</h3>
+
+<p>The code snippets in the rest of this section show you how to create two different scenes
+with the same scene root element. The snippets also demonstrate that you can load multiple
+unrelated {@link android.transition.Scene} objects without implying that they are related to
+each other.</p>
+
+<p>The example consists of the following layout definitions:</p>
+
+<ul>
+<li>The main layout of an activity with a text label and a child layout.</li>
+<li>A relative layout for the first scene with two text fields.</li>
+<li>A relative layout for the second scene with the same two text fields in different order.</li>
+</ul>
+
+<p>The example is designed so that all of the animation occurs within the child layout of the
+main layout for the activity. The text label in the main layout remains static.</p>
+
+<p>The main layout for the activity is defined as follows:</p>
+
+<p class="code-caption">res/layout/activity_main.xml</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/master_layout">
+    &lt;TextView
+        android:id="@+id/title"
+        ...
+        android:text="Title"/>
+    &lt;FrameLayout
+        android:id="@+id/scene_root">
+        &lt;include layout="@layout/a_scene" />
+    &lt;/FrameLayout>
+&lt;/LinearLayout>
+</pre>
+
+<p>This layout definition contains a text field and a child layout for the scene root. The
+layout for the first scene is included in the main layout file. This allows the app to display
+it as part of the initial user interface and also to load it into a scene, since the framework
+can load only a whole layout file into a scene.</p>
+
+<p>The layout for the first scene is defined as follows:</p>
+
+<p class="code-caption">res/layout/a_scene.xml</p>
+
+<pre>
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scene_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    &lt;TextView
+        android:id="@+id/text_view1
+        android:text="Text Line 1" />
+    &lt;TextView
+        android:id="@+id/text_view2
+        android:text="Text Line 2" />
+&lt;/RelativeLayout>
+</pre>
+
+<p>The layout for the second scene contains the same two text fields (with the same IDs)
+placed in a different order and is defined as follows:</p>
+
+<p class="code-caption">res/layout/another_scene.xml</p>
+
+<pre>
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scene_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    &lt;TextView
+        android:id="@+id/text_view2
+        android:text="Text Line 2" />
+    &lt;TextView
+        android:id="@+id/text_view1
+        android:text="Text Line 1" />
+&lt;/RelativeLayout>
+</pre>
+
+<h3>Generate Scenes from Layouts</h3>
+
+<p>After you create definitions for the two relative layouts, you can obtain an scene for
+each of them. This enables you to later transition between the two UI configurations.
+To obtain a scene, you need a reference to the scene root and the layout resource ID.</p>
+
+<p>The following code snippet shows you how to get a reference to the scene root and create
+two {@link android.transition.Scene} objects from the layout files:</p>
+
+<pre>
+Scene mAScene;
+Scene mAnotherScene;
+
+// Create the scene root for the scenes in this app
+mSceneRoot = (ViewGroup) findViewById(R.id.scene_root);
+
+// Create the scenes
+mAScene = Scene.getSceneForLayout(mSceneRoot, R.layout.a_scene, this);
+mAnotherScene =
+    Scene.getSceneForLayout(mSceneRoot, R.layout.another_scene, this);
+</pre>
+
+<p>In the app, there are now two {@link android.transition.Scene} objects based on view
+hierarchies. Both scenes use the scene root defined by the
+{@link android.widget.FrameLayout} element in <code>res/layout/activity_main.xml</code>.</p>
+
+
+
+<h2 id="FromCode">Create a Scene in Your Code</h2>
+
+<p>You can also create a {@link android.transition.Scene} instance in your code from a
+{@link android.view.ViewGroup} object. Use this technique when you modify the view hierarchies
+directly in your code or when you generate them dynamically.</p>
+
+<p>To create a scene from a view hierarchy in your code, use the
+{@link android.transition.Scene#Scene(android.view.ViewGroup, android.view.View) Scene(sceneRoot, viewHierarchy)}
+constructor. Calling this constructor is equivalent to calling the
+{@link android.transition.Scene#getSceneForLayout Scene.getSceneForLayout()} method when you
+have already inflated a layout file.</p>
+
+<p>The following code snippet demonstrates how to create a {@link android.transition.Scene}
+instance from the scene root element and the view hierarchy for the scene in your code:</p>
+
+<pre>
+Scene mScene;
+
+// Obtain the scene root element
+mSceneRoot = (ViewGroup) mSomeLayoutElement;
+
+// Obtain the view hierarchy to add as a child of
+// the scene root when this scene is entered
+mViewHierarchy = (ViewGroup) someOtherLayoutElement;
+
+// Create a scene
+mScene = new Scene(mSceneRoot, mViewHierarchy);
+</pre>
+
+
+
+<h2 id="Actions">Create Scene Actions</h2>
+
+<p>The framework enables you to define custom scene actions that the system runs when entering
+or exiting a scene. In many cases, defining custom scene actions is not necessary, since the
+framework animates the change between scenes automatically.</p>
+
+<p>Scene actions are useful for handling these cases:</p>
+
+<ul>
+<li>Animate views that are not in the same hierarchy. You can animate views for both the
+starting and ending scenes using exit and entry scene actions.</li>
+<li>Animate views that the transitions framework cannot animate automatically, such as
+{@link android.widget.ListView} objects. For more information, see
+<a href="{@docRoot}training/transitions/overview.html#Limitations">Limitations</a>.</li>
+</ul>
+
+<p>To provide custom scene actions, define your actions as {@link java.lang.Runnable} objects
+and pass them to the {@link android.transition.Scene#setExitAction Scene.setExitAction()} or
+{@link android.transition.Scene#setEnterAction Scene.setEnterAction()} methods. The framework
+calls the {@link android.transition.Scene#setExitAction setExitAction()} method on the starting
+scene before running the transition animation and the {@link
+android.transition.Scene#setEnterAction setEnterAction()} method on the ending scene after
+running the transition animation.</p>
+
+<p class="note"><strong>Note:</strong> Do not use scene actions to pass data between views in
+the starting and ending scenes. For more information, see
+<a href="{@docRoot}training/transitions/transitions.html#Callbacks">Defining Transition
+Lifecycle Callbacks</a>.</p>
