@@ -293,7 +293,7 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void setAppGroupId(IBinder arg0, int arg1) throws RemoteException {
+    public void setAppTask(IBinder arg0, int arg1) throws RemoteException {
         // TODO Auto-generated method stub
 
     }

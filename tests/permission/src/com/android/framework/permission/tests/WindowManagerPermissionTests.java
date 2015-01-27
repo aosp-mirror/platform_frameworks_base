@@ -103,7 +103,7 @@ public class WindowManagerPermissionTests extends TestCase {
         }
         
         try {
-            mWm.setAppGroupId(null, 0);
+            mWm.setAppTask(null, 0);
             fail("IWindowManager.setAppGroupId did not throw SecurityException as"
                     + " expected");
         } catch (SecurityException e) {

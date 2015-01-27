@@ -52,7 +52,7 @@ class AppWindowToken extends WindowToken {
 
     final boolean voiceInteraction;
 
-    int groupId = -1;
+    Task mTask;
     boolean appFullscreen;
     int requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean layoutConfigChanges;
@@ -256,7 +256,8 @@ class AppWindowToken extends WindowToken {
         mIsExiting = false;
         removeAllWindows();
 
-        final Task task = service.mTaskIdToTask.get(groupId);
+        // Use local variable because removeAppToken will null out mTask.
+        final Task task = mTask;
         if (task != null) {
             if (!task.removeAppToken(this)) {
                 Slog.e(WindowManagerService.TAG, "removeAppFromTaskLocked: token=" + this
@@ -295,8 +296,8 @@ class AppWindowToken extends WindowToken {
         if (allAppWindows.size() > 0) {
             pw.print(prefix); pw.print("allAppWindows="); pw.println(allAppWindows);
         }
-        pw.print(prefix); pw.print("groupId="); pw.print(groupId);
-                pw.print(" appFullscreen="); pw.print(appFullscreen);
+        pw.print(prefix); pw.print("task="); pw.println(mTask);
+        pw.print(prefix); pw.print(" appFullscreen="); pw.print(appFullscreen);
                 pw.print(" requestedOrientation="); pw.println(requestedOrientation);
         pw.print(prefix); pw.print("hiddenRequested="); pw.print(hiddenRequested);
                 pw.print(" clientHidden="); pw.print(clientHidden);
