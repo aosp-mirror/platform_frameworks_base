@@ -855,27 +855,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Compute the intersection between the child and the sibling.
             if (siblingBounds.intersect(bounds)) {
-                List<RectF> clickableRects = new ArrayList<>();
-                sibling.addClickableRectsForAccessibility(clickableRects);
-
-                final int clickableRectCount = clickableRects.size();
-                for (int j = 0; j < clickableRectCount; j++) {
-                    RectF clickableRect = clickableRects.get(j);
-
-                    // Translate the clickable rect to our coordinates.
-                    offsetChildRectToMyCoords(clickableRect, sibling);
-
-                    // Compute the intersection between the child and the clickable rects.
-                    if (clickableRect.intersect(bounds)) {
-                        // If a clickable rect completely covers the child, done.
-                        if (clickableRect.equals(bounds)) {
-                            releaseOrderedChildIterator();
-                            return false;
-                        }
-                        // Keep track of the intersection rectangle.
-                        intersections.add(clickableRect);
-                    }
-                }
+                // Conservatively we consider an overlapping sibling to be
+                // interactive and ignore it. This is not ideal as if the
+                // sibling completely covers the view despite handling no
+                // touch events we will not be able to click on the view.
+                intersections.add(siblingBounds);
             }
         }
 
@@ -888,54 +872,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         return true;
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void addClickableRectsForAccessibility(List<RectF> outRects) {
-        int sizeBefore = outRects.size();
-
-        super.addClickableRectsForAccessibility(outRects);
-
-        // If we added ourselves, then no need to visit children.
-        if (outRects.size() > sizeBefore) {
-            return;
-        }
-
-        Iterator<View> iterator = obtainOrderedChildIterator();
-        while (iterator.hasNext()) {
-            View child = iterator.next();
-
-            // Cannot click on an invisible view.
-            if (!isVisible(child)) {
-                continue;
-            }
-
-            sizeBefore = outRects.size();
-
-            // Add clickable rects in the child bounds.
-            child.addClickableRectsForAccessibility(outRects);
-
-            // Offset the clickable rects for out children to our coordinates.
-            final int sizeAfter = outRects.size();
-            for (int j = sizeBefore; j < sizeAfter; j++) {
-                RectF rect = outRects.get(j);
-
-                // Translate the clickable rect to our coordinates.
-                offsetChildRectToMyCoords(rect, child);
-
-                // If a clickable rect fills the parent, done.
-                if ((int) rect.left == 0 && (int) rect.top == 0
-                        && (int) rect.right == mRight && (int) rect.bottom == mBottom) {
-                    releaseOrderedChildIterator();
-                    return;
-                }
-            }
-        }
-
-        releaseOrderedChildIterator();
     }
 
     private void offsetChildRectToMyCoords(RectF rect, View child) {
