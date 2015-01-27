@@ -3381,7 +3381,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (resolveInfo != null) {
                     List<ResolveInfo> result = new ArrayList<ResolveInfo>(1);
                     result.add(resolveInfo);
-                    return result;
+                    return filterIfNotPrimaryUser(result, userId);
                 }
                 // Check for cross profile results.
                 resolveInfo = queryCrossProfileIntents(
@@ -3394,16 +3394,37 @@ public class PackageManagerService extends IPackageManager.Stub {
                     result.add(resolveInfo);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
-                return result;
+                return filterIfNotPrimaryUser(result, userId);
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
-                return mActivities.queryIntentForPackage(intent, resolvedType, flags,
-                        pkg.activities, userId);
+                return filterIfNotPrimaryUser(
+                        mActivities.queryIntentForPackage(
+                                intent, resolvedType, flags, pkg.activities, userId),
+                        userId);
             }
             return new ArrayList<ResolveInfo>();
         }
     }
+
+    /**
+     * Filter out activities with primaryUserOnly flag set, when current user is not the owner.
+     *
+     * @return filtered list
+     */
+    private List<ResolveInfo> filterIfNotPrimaryUser(List<ResolveInfo> resolveInfos, int userId) {
+        if (userId == UserHandle.USER_OWNER) {
+            return resolveInfos;
+        }
+        for (int i = resolveInfos.size() - 1; i >= 0; i--) {
+            ResolveInfo info = resolveInfos.get(i);
+            if ((info.activityInfo.flags & ActivityInfo.FLAG_PRIMARY_USER_ONLY) != 0) {
+                resolveInfos.remove(i);
+            }
+        }
+        return resolveInfos;
+    }
+
 
     private ResolveInfo querySkipCurrentProfileIntents(
             List<CrossProfileIntentFilter> matchingFilters, Intent intent, String resolvedType,
