@@ -293,6 +293,7 @@ public final class ActivityThread {
         boolean hideForNow;
         Configuration newConfig;
         Configuration createdConfig;
+        Configuration overrideConfig;
         ActivityClientRecord nextIdle;
 
         ProfilerInfo profilerInfo;
@@ -615,12 +616,13 @@ public final class ActivityThread {
 
         // we use token to identify this activity without having to send the
         // activity itself back to the activity manager. (matters more with ipc)
+        @Override
         public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-                ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-                String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
-                PersistableBundle persistentState, List<ResultInfo> pendingResults,
-                List<ReferrerIntent> pendingNewIntents, boolean notResumed, boolean isForward,
-                ProfilerInfo profilerInfo) {
+                ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+                CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
+                int procState, Bundle state, PersistableBundle persistentState,
+                List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+                boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) {
 
             updateProcessState(procState, false);
 
@@ -644,16 +646,19 @@ public final class ActivityThread {
 
             r.profilerInfo = profilerInfo;
 
+            r.overrideConfig = overrideConfig;
             updatePendingConfiguration(curConfig);
 
             sendMessage(H.LAUNCH_ACTIVITY, r);
         }
 
+        @Override
         public final void scheduleRelaunchActivity(IBinder token,
                 List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-                int configChanges, boolean notResumed, Configuration config) {
+                int configChanges, boolean notResumed, Configuration config,
+                Configuration overrideConfig) {
             requestRelaunchActivity(token, pendingResults, pendingNewIntents,
-                    configChanges, notResumed, config, true);
+                    configChanges, notResumed, config, overrideConfig, true);
         }
 
         public final void scheduleNewIntent(List<ReferrerIntent> intents, IBinder token) {
@@ -887,6 +892,7 @@ public final class ActivityThread {
             sendMessage(H.LOW_MEMORY, null);
         }
 
+        @Override
         public void scheduleActivityConfigurationChanged(IBinder token) {
             sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
         }
@@ -1668,7 +1674,7 @@ public final class ActivityThread {
             String[] libDirs, int displayId, Configuration overrideConfiguration,
             LoadedApk pkgInfo) {
         return mResourcesManager.getTopLevelResources(resDir, splitResDirs, overlayDirs, libDirs,
-                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo(), null);
+                displayId, overrideConfiguration, pkgInfo.getCompatibilityInfo());
     }
 
     final Handler getHandler() {
@@ -2353,7 +2359,8 @@ public final class ActivityThread {
 
     private Context createBaseContextForActivity(ActivityClientRecord r,
             final Activity activity) {
-        ContextImpl appContext = ContextImpl.createActivityContext(this, r.packageInfo, r.token);
+        ContextImpl appContext =
+                ContextImpl.createActivityContext(this, r.packageInfo, r.overrideConfig);
         appContext.setOuterContext(activity);
         Context baseContext = appContext;
 
@@ -3561,7 +3568,7 @@ public final class ActivityThread {
 
             // request all activities to relaunch for the changes to take place
             for (Map.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
-                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, false);
+                requestRelaunchActivity(entry.getKey(), null, null, 0, false, null, null, false);
             }
         }
     }
@@ -3805,7 +3812,7 @@ public final class ActivityThread {
     public final void requestRelaunchActivity(IBinder token,
             List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
             int configChanges, boolean notResumed, Configuration config,
-            boolean fromServer) {
+            Configuration overrideConfig, boolean fromServer) {
         ActivityClientRecord target = null;
 
         synchronized (mResourcesManager) {
@@ -3853,6 +3860,9 @@ public final class ActivityThread {
             }
             if (config != null) {
                 target.createdConfig = config;
+            }
+            if (overrideConfig != null) {
+                target.overrideConfig = overrideConfig;
             }
             target.pendingConfigChanges |= configChanges;
         }
@@ -3966,6 +3976,7 @@ public final class ActivityThread {
             }
         }
         r.startsNotResumed = tmp.startsNotResumed;
+        r.overrideConfig = tmp.overrideConfig;
 
         handleLaunchActivity(r, currentIntent);
     }

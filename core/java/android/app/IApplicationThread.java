@@ -33,7 +33,6 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.service.voice.IVoiceInteractionSession;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
@@ -59,14 +58,14 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-            ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
-            PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean notResumed, boolean isForward,
-            ProfilerInfo profilerInfo) throws RemoteException;
+            ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+            CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
+            int procState, Bundle state, PersistableBundle persistentState,
+            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+            boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, int configChanges,
-            boolean notResumed, Configuration config) throws RemoteException;
+            List<ReferrerIntent> pendingNewIntents, int configChanges, boolean notResumed,
+            Configuration config, Configuration overrideConfig) throws RemoteException;
     void scheduleNewIntent(List<ReferrerIntent> intent, IBinder token) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;

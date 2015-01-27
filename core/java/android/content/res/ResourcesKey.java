@@ -16,27 +16,23 @@
 
 package android.content.res;
 
-import android.os.IBinder;
+import java.util.Objects;
 
 /** @hide */
 public final class ResourcesKey {
-    final String mResDir;
-    final float mScale;
+    private final String mResDir;
+    private final float mScale;
     private final int mHash;
-    private final IBinder mToken;
 
     public final int mDisplayId;
-    public final Configuration mOverrideConfiguration = new Configuration();
+    public final Configuration mOverrideConfiguration;
 
     public ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration,
-            float scale, IBinder token) {
+            float scale) {
         mResDir = resDir;
         mDisplayId = displayId;
-        if (overrideConfiguration != null) {
-            mOverrideConfiguration.setTo(overrideConfiguration);
-        }
+        mOverrideConfiguration = overrideConfiguration;
         mScale = scale;
-        mToken = token;
 
         int hash = 17;
         hash = 31 * hash + (mResDir == null ? 0 : mResDir.hashCode());
@@ -48,7 +44,8 @@ public final class ResourcesKey {
     }
 
     public boolean hasOverrideConfiguration() {
-        return !Configuration.EMPTY.equals(mOverrideConfiguration);
+        return mOverrideConfiguration != null
+                && !Configuration.EMPTY.equals(mOverrideConfiguration);
     }
 
     @Override
@@ -63,16 +60,8 @@ public final class ResourcesKey {
         }
         ResourcesKey peer = (ResourcesKey) obj;
 
-        if ((mResDir == null) && (peer.mResDir != null)) {
+        if (!Objects.equals(mResDir, peer.mResDir)) {
             return false;
-        }
-        if ((mResDir != null) && (peer.mResDir == null)) {
-            return false;
-        }
-        if ((mResDir != null) && (peer.mResDir != null)) {
-            if (!mResDir.equals(peer.mResDir)) {
-                return false;
-            }
         }
         if (mDisplayId != peer.mDisplayId) {
             return false;

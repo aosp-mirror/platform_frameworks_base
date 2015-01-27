@@ -19,8 +19,10 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerService.TAG;
 
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Debug;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TypedValue;
@@ -78,9 +80,14 @@ public class TaskStack {
     /** Detach this stack from its display when animation completes. */
     boolean mDeferDetach;
 
+    // Contains configurations settings that are different from the global configuration due to
+    // stack specific operations. E.g. {@link #setBounds}.
+    Configuration mOverrideConfig;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
+        mOverrideConfig = Configuration.EMPTY;
         // TODO: remove bounds from log, they are always 0.
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
                 mBounds.right, mBounds.bottom);
@@ -129,12 +136,33 @@ public class TaskStack {
         mDimLayer.setBounds(bounds);
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
-
+        updateOverrideConfiguration();
         return true;
     }
 
     void getBounds(Rect out) {
         out.set(mBounds);
+    }
+
+    void updateOverrideConfiguration() {
+        final Configuration serviceConfig = mService.mCurConfiguration;
+        if (mFullscreen) {
+            mOverrideConfig = Configuration.EMPTY;
+            return;
+        }
+
+        if (mOverrideConfig == Configuration.EMPTY) {
+            mOverrideConfig  = new Configuration();
+        }
+
+        // TODO(multidisplay): Update Dp to that of display stack is on.
+        final float density = serviceConfig.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        mOverrideConfig.screenWidthDp =
+                Math.min((int)(mBounds.width() / density), serviceConfig.screenWidthDp);
+        mOverrideConfig.screenHeightDp =
+                Math.min((int)(mBounds.height() / density), serviceConfig.screenHeightDp);
+        mOverrideConfig.smallestScreenWidthDp =
+                Math.min(mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
     }
 
     void updateDisplayInfo() {

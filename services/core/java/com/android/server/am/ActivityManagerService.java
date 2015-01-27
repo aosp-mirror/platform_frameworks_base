@@ -8162,12 +8162,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void resizeStack(int stackBoxId, Rect bounds) {
+    public void resizeStack(int stackId, Rect bounds) {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "resizeStackBox()");
         long ident = Binder.clearCallingIdentity();
         try {
-            mWindowManager.resizeStack(stackBoxId, bounds);
+            synchronized (this) {
+                mStackSupervisor.resizeStackLocked(stackId, bounds);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
