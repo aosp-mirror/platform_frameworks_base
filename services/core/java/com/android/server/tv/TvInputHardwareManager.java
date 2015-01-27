@@ -677,7 +677,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private AudioDevicePort mAudioSource;
         private List<AudioDevicePort> mAudioSink = new ArrayList<>();
         private AudioPatch mAudioPatch = null;
-        private float mCommittedVolume = 0.0f;
+        // Set to an invalid value for a volume, so that current volume can be applied at the
+        // first call to updateAudioConfigLocked().
+        private float mCommittedVolume = -1f;
         private float mSourceVolume = 0.0f;
 
         private TvStreamConfig mActiveConfig = null;
