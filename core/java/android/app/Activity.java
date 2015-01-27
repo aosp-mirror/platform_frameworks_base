@@ -2377,8 +2377,10 @@ public class Activity extends ContextThemeWrapper
         if (mDefaultKeyMode == DEFAULT_KEYS_DISABLE) {
             return false;
         } else if (mDefaultKeyMode == DEFAULT_KEYS_SHORTCUT) {
-            if (getWindow().performPanelShortcut(Window.FEATURE_OPTIONS_PANEL,
-                    keyCode, event, Menu.FLAG_ALWAYS_PERFORM_CLOSE)) {
+            Window w = getWindow();
+            if (w.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                    w.performPanelShortcut(Window.FEATURE_OPTIONS_PANEL, keyCode, event,
+                            Menu.FLAG_ALWAYS_PERFORM_CLOSE)) {
                 return true;
             }
             return false;
@@ -2943,7 +2945,8 @@ public class Activity extends ContextThemeWrapper
      * time it needs to be displayed.
      */
     public void invalidateOptionsMenu() {
-        if (mActionBar == null || !mActionBar.invalidateOptionsMenu()) {
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                (mActionBar == null || !mActionBar.invalidateOptionsMenu())) {
             mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
         }
     }
@@ -3155,7 +3158,8 @@ public class Activity extends ContextThemeWrapper
      * open, this method does nothing.
      */
     public void openOptionsMenu() {
-        if (mActionBar == null || !mActionBar.openOptionsMenu()) {
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                (mActionBar == null || !mActionBar.openOptionsMenu())) {
             mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
         }
     }
@@ -3165,7 +3169,9 @@ public class Activity extends ContextThemeWrapper
      * closed, this method does nothing.
      */
     public void closeOptionsMenu() {
-        mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL)) {
+            mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+        }
     }
 
     /**
