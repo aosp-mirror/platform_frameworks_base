@@ -57,11 +57,11 @@ class DataBinderPlugin : Plugin<Project> {
 
     var variantData : ApplicationVariantData by Delegates.notNull()
 
-    val testOut by Delegates.lazy {
-        File("app/build/databinder")
-    }
     var viewBinderSource : File by Delegates.notNull()
-    val viewBinderCompileOutput by Delegates.lazy { File(testOut, "out") }
+    val viewBinderSourceRoot by Delegates.lazy {
+        File(project.getBuildDir(), "databinder")
+    }
+    val viewBinderCompileOutput by Delegates.lazy { File(viewBinderSourceRoot, "out") }
 
     override fun apply(project: Project?) {
         if (project == null) return
@@ -108,6 +108,7 @@ class DataBinderPlugin : Plugin<Project> {
         val ss = p.getExtensions().getByName("android") as AppExtension
         androidJar = File(ss.getSdkDirectory().getAbsolutePath() + "/platforms/${ss.getCompileSdkVersion()}/android.jar")
         log("creating parser!")
+        log("project build dir:${p.getBuildDir()}")
         val clazz = javaClass<ApplicationVariantImpl>()
         val field = clazz.getDeclaredField("variantData")
         field.setAccessible(true)
@@ -129,13 +130,15 @@ class DataBinderPlugin : Plugin<Project> {
         val codeGenTargetFolder = variantData.generateRClassTask.getSourceOutputDir()
         val resGenTargetFolder = variantData.generateRClassTask.getResDir()
         variantData.addJavaSourceFoldersToModel(codeGenTargetFolder)
+        variantData.addJavaSourceFoldersToModel(viewBinderSourceRoot)
+
         val jCompileTask = variantData.javaCompileTask
         val dexTask = variantData.dexTask
         val options = jCompileTask.getOptions()
         log("compile options: ${options.optionMap()}")
-        viewBinderSource = File(testOut.getAbsolutePath() + "/src/" + packageName.split("\\.").join("/"))
+        viewBinderSource = File(viewBinderSourceRoot.getAbsolutePath() + "/src/" + packageName.split("\\.").join("/"))
         viewBinderSource.mkdirs()
-        variantData.registerJavaGeneratingTask(project.task("dataBinderDummySourceGenTask", MethodClosure(this,"dummySourceGenTask" )), File(testOut.getAbsolutePath() + "/src/"))
+        variantData.registerJavaGeneratingTask(project.task("dataBinderDummySourceGenTask", MethodClosure(this,"dummySourceGenTask" )), File(viewBinderSourceRoot.getAbsolutePath() + "/src/"))
         viewBinderCompileOutput.mkdirs()
         log("view binder source will be ${viewBinderSource}")
         log("adding out dir to input files ${viewBinderCompileOutput}")
