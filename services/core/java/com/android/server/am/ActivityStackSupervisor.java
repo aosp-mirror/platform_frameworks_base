@@ -1596,7 +1596,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    final int startActivityUncheckedLocked(ActivityRecord r, ActivityRecord sourceRecord,
+    final int startActivityUncheckedLocked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,
             boolean doResume, Bundle options, TaskRecord inTask) {
         final Intent intent = r.intent;
@@ -1807,6 +1807,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         ActivityStack targetStack;
 
         intent.setFlags(launchFlags);
+        final boolean noAnimation = (launchFlags & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0;
 
         // We may want to try to place the new activity in to an existing task.  We always
         // do this if the target activity is singleTask or singleInstance; we will also do
@@ -1869,8 +1870,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 intentActivity.setTaskToAffiliateWith(sourceRecord.task);
                             }
                             movedHome = true;
-                            targetStack.moveTaskToFrontLocked(intentActivity.task, r, options,
-                                    "bringingFoundTaskToFront");
+                            targetStack.moveTaskToFrontLocked(intentActivity.task, noAnimation,
+                                    options, "bringingFoundTaskToFront");
                             if ((launchFlags &
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
@@ -2100,7 +2101,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             targetStack.moveToFront("sourceStackToFront");
             final TaskRecord topTask = targetStack.topTask();
             if (topTask != sourceTask) {
-                targetStack.moveTaskToFrontLocked(sourceTask, r, options, "sourceTaskToFront");
+                targetStack.moveTaskToFrontLocked(sourceTask, noAnimation, options,
+                        "sourceTaskToFront");
             }
             if (!addingToTask && (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
@@ -2154,7 +2156,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             targetStack = inTask.stack;
-            targetStack.moveTaskToFrontLocked(inTask, r, options, "inTaskToFront");
+            targetStack.moveTaskToFrontLocked(inTask, noAnimation, options, "inTaskToFront");
 
             // Check whether we should actually launch the new activity in to the task,
             // or just reuse the current activity on top.
@@ -2519,7 +2521,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // we'll just indicate that this task returns to the home task.
             task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
         }
-        task.stack.moveTaskToFrontLocked(task, null, options, reason);
+        task.stack.moveTaskToFrontLocked(task, false /* noAnimation */, options, reason);
         if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack="
                 + task.stack);
     }
