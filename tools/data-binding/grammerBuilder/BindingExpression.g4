@@ -5,7 +5,6 @@
 grammar BindingExpression;
 
 bindingSyntax
-//    :   '{' expression defaults? '}'
     :   expression defaults?
     ;
 
@@ -15,11 +14,6 @@ defaults
 constantValue
     :   literal
     |   ResourceReference
-    |   constantExpression
-    ;
-
-constantExpression
-    :   constantExpression '.' Identifier
     |   identifier
     ;
 
@@ -31,15 +25,15 @@ expression
     |   identifier                                      # Primary
     |   classExtraction                                 # Primary
     |   ResourceReference                               # Resource
-    |   typeArguments (explicitGenericInvocationSuffix | 'this' arguments) # GenericCall
+//    |   typeArguments (explicitGenericInvocationSuffix | 'this' arguments) # GenericCall
     |   expression '.' Identifier                       # DotOp
 //    |   expression '.' 'this'                           # ThisReference
-    |   expression '.' explicitGenericInvocation        # ExplicitGenericInvocationOp
+//    |   expression '.' explicitGenericInvocation        # ExplicitGenericInvocationOp
     |   expression '[' expression ']'                   # BracketOp
     |   target=expression '.' methodName=Identifier '(' args=expressionList? ')' # MethodInvocation
     |   '(' type ')' expression                         # CastOp
-    |   ('+'|'-') expression                            # UnaryOp
-    |   ('~'|'!') expression                            # UnaryOp
+    |   op=('+'|'-') expression                         # UnaryOp
+    |   op=('~'|'!') expression                         # UnaryOp
     |   left=expression op=('*'|'/'|'%') right=expression             # MathOp
     |   left=expression op=('+'|'-') right=expression                 # MathOp
     |   left=expression op=('<<' | '>>>' | '>>') right=expression     # BitShiftOp

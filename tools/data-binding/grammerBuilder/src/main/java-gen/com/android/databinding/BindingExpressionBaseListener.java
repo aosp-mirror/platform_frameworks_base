@@ -83,19 +83,6 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterMethodInvocation(@NotNull BindingExpressionParser.MethodInvocationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -103,6 +90,19 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitMethodInvocation(@NotNull BindingExpressionParser.MethodInvocationContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -304,19 +304,6 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExplicitGenericInvocationOp(@NotNull BindingExpressionParser.ExplicitGenericInvocationOpContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExplicitGenericInvocationOp(@NotNull BindingExpressionParser.ExplicitGenericInvocationOpContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterTypeArguments(@NotNull BindingExpressionParser.TypeArgumentsContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -337,19 +324,6 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitGrouping(@NotNull BindingExpressionParser.GroupingContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterGenericCall(@NotNull BindingExpressionParser.GenericCallContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGenericCall(@NotNull BindingExpressionParser.GenericCallContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -402,19 +376,6 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPrimitiveType(@NotNull BindingExpressionParser.PrimitiveTypeContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterConstantExpression(@NotNull BindingExpressionParser.ConstantExpressionContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitConstantExpression(@NotNull BindingExpressionParser.ConstantExpressionContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

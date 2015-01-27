@@ -73,17 +73,6 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	void exitAndOrOp(@NotNull BindingExpressionParser.AndOrOpContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link BindingExpressionParser#expressionList}.
-	 * @param ctx the parse tree
-	 */
-	void enterExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BindingExpressionParser#expressionList}.
-	 * @param ctx the parse tree
-	 */
-	void exitExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx);
-
-	/**
 	 * Enter a parse tree produced by the {@code MethodInvocation}
 	 * labeled alternative in {@link BindingExpressionParser#expression}.
 	 * @param ctx the parse tree
@@ -95,6 +84,17 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMethodInvocation(@NotNull BindingExpressionParser.MethodInvocationContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link BindingExpressionParser#expressionList}.
+	 * @param ctx the parse tree
+	 */
+	void enterExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BindingExpressionParser#expressionList}.
+	 * @param ctx the parse tree
+	 */
+	void exitExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link BindingExpressionParser#classOrInterfaceType}.
@@ -278,19 +278,6 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	void exitResource(@NotNull BindingExpressionParser.ResourceContext ctx);
 
 	/**
-	 * Enter a parse tree produced by the {@code ExplicitGenericInvocationOp}
-	 * labeled alternative in {@link BindingExpressionParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterExplicitGenericInvocationOp(@NotNull BindingExpressionParser.ExplicitGenericInvocationOpContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code ExplicitGenericInvocationOp}
-	 * labeled alternative in {@link BindingExpressionParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitExplicitGenericInvocationOp(@NotNull BindingExpressionParser.ExplicitGenericInvocationOpContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link BindingExpressionParser#typeArguments}.
 	 * @param ctx the parse tree
 	 */
@@ -313,19 +300,6 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitGrouping(@NotNull BindingExpressionParser.GroupingContext ctx);
-
-	/**
-	 * Enter a parse tree produced by the {@code GenericCall}
-	 * labeled alternative in {@link BindingExpressionParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void enterGenericCall(@NotNull BindingExpressionParser.GenericCallContext ctx);
-	/**
-	 * Exit a parse tree produced by the {@code GenericCall}
-	 * labeled alternative in {@link BindingExpressionParser#expression}.
-	 * @param ctx the parse tree
-	 */
-	void exitGenericCall(@NotNull BindingExpressionParser.GenericCallContext ctx);
 
 	/**
 	 * Enter a parse tree produced by the {@code MathOp}
@@ -372,17 +346,6 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPrimitiveType(@NotNull BindingExpressionParser.PrimitiveTypeContext ctx);
-
-	/**
-	 * Enter a parse tree produced by {@link BindingExpressionParser#constantExpression}.
-	 * @param ctx the parse tree
-	 */
-	void enterConstantExpression(@NotNull BindingExpressionParser.ConstantExpressionContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link BindingExpressionParser#constantExpression}.
-	 * @param ctx the parse tree
-	 */
-	void exitConstantExpression(@NotNull BindingExpressionParser.ConstantExpressionContext ctx);
 
 	/**
 	 * Enter a parse tree produced by the {@code QuestionQuestionOp}
