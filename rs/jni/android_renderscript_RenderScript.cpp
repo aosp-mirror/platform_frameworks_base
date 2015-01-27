@@ -1382,6 +1382,14 @@ nScriptForEach(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot,
         sc.zStart     = limit_ptr[4];
         sc.zEnd       = limit_ptr[5];
         sc.strategy   = RS_FOR_EACH_STRATEGY_DONT_CARE;
+        sc.arrayStart = 0;
+        sc.arrayEnd = 0;
+        sc.array2Start = 0;
+        sc.array2End = 0;
+        sc.array3Start = 0;
+        sc.array3End = 0;
+        sc.array4Start = 0;
+        sc.array4End = 0;
 
         sca = &sc;
     }
