@@ -57,15 +57,13 @@ public class SetterStore {
 
     private final HashMap<String, HashMap<String, MethodDescription>> mConversions;
 
-    private ArrayList<ConversionMethod> mConversionMethods;
+    private final ClassAnalyzer mClassAnalyzer;
 
-    private HashMap<String, ArrayList<AdaptedMethod>> mAdaptedMethods;
-
-    private HashMap<String, ArrayList<RenamedMethod>> mRenamedMethods;
-
-    private SetterStore(HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters,
+    private SetterStore(ClassAnalyzer classAnalyzer,
+            HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters,
             HashMap<String, HashMap<String, MethodDescription>> renamedMethods,
             HashMap<String, HashMap<String, MethodDescription>> conversionMethods) {
+        mClassAnalyzer = classAnalyzer;
         if (adapters == null || renamedMethods == null || conversionMethods == null) {
             mAdapters = new HashMap<>();
             mRenamed = new HashMap<>();
@@ -107,7 +105,7 @@ public class SetterStore {
                 HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters = new HashMap<>();
                 HashMap<String, HashMap<String, MethodDescription>> renamed = new HashMap<>();
                 HashMap<String, HashMap<String, MethodDescription>> conversions = new HashMap<>();
-                sStore = new SetterStore(adapters, renamed, conversions);
+                sStore = new SetterStore(null, adapters, renamed, conversions);
             }
         }
         return sStore;
@@ -116,7 +114,6 @@ public class SetterStore {
     public static SetterStore get(ClassAnalyzer classAnalyzer) {
         if (sStore == null) {
             sStore = load(classAnalyzer);
-            sStore.applyReflections(classAnalyzer);
         }
         return sStore;
     }
@@ -133,7 +130,7 @@ public class SetterStore {
                 URL resource = resources.nextElement();
                 merge(adapters, renamedMethods, conversionMethods, resource);
             }
-            return new SetterStore(adapters, renamedMethods, conversionMethods);
+            return new SetterStore(classAnalyzer, adapters, renamedMethods, conversionMethods);
         } catch (IOException e) {
             System.err.println("Could not read SetterStore intermediate file: " +
                     e.getLocalizedMessage());
@@ -143,7 +140,7 @@ public class SetterStore {
                     e.getLocalizedMessage());
             e.printStackTrace();
         }
-        return new SetterStore(adapters, renamedMethods, conversionMethods);
+        return new SetterStore(classAnalyzer, adapters, renamedMethods, conversionMethods);
     }
 
     private static SetterStore load(InputStream inputStream)
@@ -155,7 +152,7 @@ public class SetterStore {
                 = (HashMap<String, HashMap<String, MethodDescription>>) in.readObject();
         HashMap<String, HashMap<String, MethodDescription>> conversionMethods
                 = (HashMap<String, HashMap<String, MethodDescription>>) in.readObject();
-        return new SetterStore(adapters, renamedMethods, conversionMethods);
+        return new SetterStore(null, adapters, renamedMethods, conversionMethods);
     }
 
     public void addRenamedMethod(String attribute, String declaringClass, String method,
@@ -316,16 +313,16 @@ public class SetterStore {
         }
     }
 
-    public String getSetterCall(String attribute, Class<?> viewType, Class<?> valueType,
-            String viewExpression, String valueExpression) {
+    public String getSetterCall(String attribute, Class<?> viewType,
+            Class<?> valueType, String viewExpression, String valueExpression) {
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
                 attribute = attribute.substring(colon + 1);
             }
         }
-        ArrayList<AdaptedMethod> adapters = mAdaptedMethods.get(attribute);
-        AdaptedMethod adapter = null;
+        HashMap<AccessorKey, MethodDescription> adapters = mAdapters.get(attribute);
+        MethodDescription adapter = null;
         String setterName = null;
         Method bestSetterMethod = getBestSetter(viewType, valueType, attribute);
         Class<?> bestViewType = null;
@@ -337,21 +334,23 @@ public class SetterStore {
         }
 
         if (adapters != null) {
-            for (AdaptedMethod adaptedMethod : adapters) {
-                if (adaptedMethod.viewType.isAssignableFrom(viewType)) {
+            for (AccessorKey key : adapters.keySet()) {
+                Class<?> adapterViewType = mClassAnalyzer.findClass(key.viewType);
+                if (adapterViewType.isAssignableFrom(viewType)) {
+                    Class<?> adapterValueType = mClassAnalyzer.findClass(key.valueType);
                     boolean isBetterView = bestViewType == null ||
-                            bestValueType.isAssignableFrom(adaptedMethod.valueType);
-                    if (isBetterParameter(valueType, adaptedMethod.valueType, bestValueType,
+                            bestValueType.isAssignableFrom(adapterValueType);
+                    if (isBetterParameter(valueType, adapterValueType, bestValueType,
                             isBetterView)) {
-                        bestViewType = adaptedMethod.viewType;
-                        bestValueType = adaptedMethod.valueType;
-                        adapter = adaptedMethod;
+                        bestViewType = adapterViewType;
+                        bestValueType = adapterValueType;
+                        adapter = adapters.get(key);
                     }
                 }
             }
         }
 
-        ConversionMethod conversionMethod = getConversionMethod(valueType, bestValueType);
+        MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType);
         if (conversionMethod != null) {
             valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +
                     valueExpression + ")";
@@ -370,11 +369,12 @@ public class SetterStore {
     private Method getBestSetter(Class<?> viewType, Class<?> argumentType, String attribute) {
         String setterName = null;
 
-        ArrayList<RenamedMethod> renamed = mRenamedMethods.get(attribute);
+        HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
         if (renamed != null) {
-            for (RenamedMethod renamedMethod : renamed) {
-                if (renamedMethod.viewType.isAssignableFrom(viewType)) {
-                    setterName = renamedMethod.method;
+            for (String className : renamed.keySet()) {
+                Class<?> renamedViewType = mClassAnalyzer.findClass(className);
+                if (renamedViewType.isAssignableFrom(viewType)) {
+                    setterName = renamed.get(className).method;
                     break;
                 }
             }
@@ -410,8 +410,8 @@ public class SetterStore {
         return "set" + propertyName;
     }
 
-    private boolean isBetterParameter(Class<?> argument, Class<?> parameter,
-            Class<?> oldParameter, boolean isBetterViewTypeMatch) {
+    private boolean isBetterParameter(Class<?> argument, Class<?> parameter, Class<?> oldParameter,
+            boolean isBetterViewTypeMatch) {
         // Right view type. Check the value
         if (!isBetterViewTypeMatch && oldParameter.equals(argument)) {
             return false;
@@ -439,7 +439,7 @@ public class SetterStore {
                     return oldParameter.isAssignableFrom(parameter);
                 }
             } else {
-                ConversionMethod conversionMethod = getConversionMethod(argument, parameter);
+                MethodDescription conversionMethod = getConversionMethod(argument, parameter);
                 if (conversionMethod != null) {
                     return true;
                 }
@@ -465,12 +465,18 @@ public class SetterStore {
         }
     }
 
-    private ConversionMethod getConversionMethod(Class<?> from, Class<?> to) {
+    private MethodDescription getConversionMethod(Class<?> from, Class<?> to) {
         if (from != null && to != null) {
-            for (ConversionMethod conversion : mConversionMethods) {
-                if (canUseForConversion(from, conversion.fromType) &&
-                        canUseForConversion(conversion.toType, to)) {
-                    return conversion;
+            for (String fromClassName : mConversions.keySet()) {
+                Class<?> convertFrom = mClassAnalyzer.findClass(fromClassName);
+                if (canUseForConversion(from, convertFrom)) {
+                    HashMap<String, MethodDescription> conversion = mConversions.get(fromClassName);
+                    for (String toClassName : conversion.keySet()) {
+                        Class<?> convertTo = mClassAnalyzer.findClass(toClassName);
+                        if (canUseForConversion(convertTo, to)) {
+                            return conversion.get(toClassName);
+                        }
+                    }
                 }
             }
         }
@@ -602,73 +608,6 @@ public class SetterStore {
                     if (!firstVals.containsKey(key2)) {
                         firstVals.put(key2, secondVals.get(key2));
                     }
-                }
-            }
-        }
-    }
-
-    private void applyReflections(ClassAnalyzer classAnalyzer) {
-        // TODO get rid of try caches and move to lazy loading
-        if (mConversionMethods == null) {
-            mConversionMethods = new ArrayList<>();
-            for (String key : mConversions.keySet()) {
-                try {
-                    Class<?> fromType = classAnalyzer.findClass(key);
-                    HashMap<String, MethodDescription> conversion = mConversions.get(key);
-                    for (String toName : conversion.keySet()) {
-                        try {
-                            Class<?> toType = classAnalyzer.findClass(toName);
-                            MethodDescription methodDescription = conversion.get(toName);
-                            mConversionMethods
-                                    .add(new ConversionMethod(fromType, toType, methodDescription));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            mAdaptedMethods = new HashMap<>();
-            for (String attribute : mAdapters.keySet()) {
-                try {
-                    ArrayList<AdaptedMethod> adaptedMethods = new ArrayList<>();
-                    mAdaptedMethods.put(attribute, adaptedMethods);
-                    HashMap<AccessorKey, MethodDescription> adapted = mAdapters.get(attribute);
-                    for (AccessorKey key : adapted.keySet()) {
-                        try {
-                            MethodDescription methodDescription = adapted.get(key);
-                            Class<?> viewType = classAnalyzer.findClass(key.viewType);
-                            Class<?> valueType = classAnalyzer.findClass(key.valueType);
-                            adaptedMethods.add(new AdaptedMethod(viewType, valueType,
-                                    methodDescription));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            mRenamedMethods = new HashMap<>();
-            for (String attribute : mRenamed.keySet()) {
-                ArrayList<RenamedMethod> renamedMethods = new ArrayList<>();
-                try {
-                    mRenamedMethods.put(attribute, renamedMethods);
-                    HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
-                    for (String declaredClassName : renamed.keySet()) {
-                        try {
-                            MethodDescription methodDescription = renamed.get(declaredClassName);
-                            Class<?> viewType = classAnalyzer.findClass(declaredClassName);
-                            renamedMethods.add(new RenamedMethod(viewType, methodDescription.method));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }
