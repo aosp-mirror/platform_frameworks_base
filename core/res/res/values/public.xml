@@ -1759,9 +1759,7 @@
   <public type="attr" name="actionModeSplitBackground" id="0x0101039d" />
   <public type="attr" name="textAppearanceListItem" id="0x0101039e" />
   <public type="attr" name="textAppearanceListItemSmall" id="0x0101039f" />
-  <!-- @deprecated Removed. -->
   <public type="attr" name="targetDescriptions" id="0x010103a0" />
-  <!-- @deprecated Removed. -->
   <public type="attr" name="directionDescriptions" id="0x010103a1" />
   <public type="attr" name="overridesImplicitlyEnabledSubtype" id="0x010103a2" />
   <public type="attr" name="listPreferredItemPaddingLeft" id="0x010103a3" />
