@@ -910,21 +910,27 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @see Activity#openOptionsMenu()
      */
     public void openOptionsMenu() {
-        mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL)) {
+            mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
+        }
     }
-    
+
     /**
      * @see Activity#closeOptionsMenu()
      */
     public void closeOptionsMenu() {
-        mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL)) {
+            mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+        }
     }
 
     /**
      * @see Activity#invalidateOptionsMenu()
      */
     public void invalidateOptionsMenu() {
-        mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL)) {
+            mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
+        }
     }
 
     /**
