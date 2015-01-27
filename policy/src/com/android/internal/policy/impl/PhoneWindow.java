@@ -894,7 +894,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     void doInvalidatePanelMenu(int featureId) {
-        PanelFeatureState st = getPanelState(featureId, true);
+        PanelFeatureState st = getPanelState(featureId, false);
+        if (st == null) {
+            return;
+        }
         Bundle savedActionViewStates = null;
         if (st.menu != null) {
             savedActionViewStates = new Bundle();
@@ -933,8 +936,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // The panel key was pushed, so set the chording key
             mPanelChordingKey = keyCode;
 
-            PanelFeatureState st = getPanelState(featureId, true);
-            if (!st.isOpen) {
+            PanelFeatureState st = getPanelState(featureId, false);
+            if (st != null && !st.isOpen) {
                 return preparePanel(st, event);
             }
         }
@@ -952,12 +955,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mPanelChordingKey != 0) {
             mPanelChordingKey = 0;
 
-            if (event.isCanceled() || (mDecor != null && mDecor.mActionMode != null)) {
+            final PanelFeatureState st = getPanelState(featureId, false);
+
+            if (event.isCanceled() || (mDecor != null && mDecor.mActionMode != null) ||
+                    (st == null)) {
                 return;
             }
 
             boolean playSoundEffect = false;
-            final PanelFeatureState st = getPanelState(featureId, true);
             if (featureId == FEATURE_OPTIONS_PANEL && mDecorContentParent != null &&
                     mDecorContentParent.canShowOverflowMenu() &&
                     !ViewConfiguration.get(getContext()).hasPermanentMenuKey()) {
@@ -1056,7 +1061,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public boolean performPanelShortcut(int featureId, int keyCode, KeyEvent event, int flags) {
-        return performPanelShortcut(getPanelState(featureId, true), keyCode, event, flags);
+        return performPanelShortcut(getPanelState(featureId, false), keyCode, event, flags);
     }
 
     private boolean performPanelShortcut(PanelFeatureState st, int keyCode, KeyEvent event,
@@ -1149,11 +1154,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mInvalidatePanelMenuRunnable.run();
                     }
 
-                    final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+                    final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
 
                     // If we don't have a menu or we're waiting for a full content refresh,
                     // forget it. This is a lingering event that no longer matters.
-                    if (st.menu != null && !st.refreshMenuContent &&
+                    if (st != null && st.menu != null && !st.refreshMenuContent &&
                             cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
                         mDecorContentParent.showOverflowMenu();
@@ -1161,15 +1166,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             } else {
                 mDecorContentParent.hideOverflowMenu();
-                if (cb != null && !isDestroyed()) {
-                    final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+                final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+                if (st != null && cb != null && !isDestroyed()) {
                     cb.onPanelClosed(FEATURE_ACTION_BAR, st.menu);
                 }
             }
             return;
         }
 
-        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+
+        if (st == null) {
+            return;
+        }
 
         // Save the future expanded mode state since closePanel will reset it
         boolean newExpandedMode = toggleMenuMode ? !st.isInExpandedMode : st.isInExpandedMode;
@@ -2302,8 +2311,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // combination such as Control+C.  Temporarily prepare the panel then mark it
             // unprepared again when finished to ensure that the panel will again be prepared
             // the next time it is shown for real.
-            if (mPreparedPanel == null) {
-                PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
+            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+            if (st != null && mPreparedPanel == null) {
                 preparePanel(st, ev);
                 handled = performPanelShortcut(st, ev.getKeyCode(), ev,
                         Menu.FLAG_PERFORM_NO_CLOSE);
@@ -3906,8 +3915,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public boolean isShortcutKey(int keyCode, KeyEvent event) {
-        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
-        return st.menu != null && st.menu.isShortcutKey(keyCode, event);
+        PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+        return st != null && st.menu != null && st.menu.isShortcutKey(keyCode, event);
     }
 
     private void updateDrawable(int featureId, DrawableFeatureState st, boolean fromResume) {
