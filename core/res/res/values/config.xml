@@ -2021,4 +2021,7 @@
 
     <!-- Use ERI text for network name on CDMA LTE -->
     <bool name="config_LTE_eri_for_network_name">true</bool>
+
+    <!-- Whether to start in touch mode -->
+    <bool name="config_defaultInTouchMode">true</bool>
 </resources>
