@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.android.databinding.ClassAnalyzer;
 
 abstract public class Expr {
+
     public static final int NO_ID = -1;
     protected List<Expr> mChildren = new ArrayList<>();
 
@@ -70,7 +71,6 @@ abstract public class Expr {
      * This set denotes the times when this expression must be read.
      *
      * It is the union of invalidation flags of all of its non-conditional dependants.
-     *
      */
     BitSet mShouldReadFlags;
 
@@ -468,6 +468,7 @@ abstract public class Expr {
     }
 
     BitSet mConditionalFlags;
+
     private BitSet findConditionalFlags() {
         Preconditions.checkState(isConditional(), "should not call this on a non-conditional expr");
         if (mConditionalFlags == null) {
@@ -484,7 +485,8 @@ abstract public class Expr {
             final Dependency dependency = getDependants().get(0);
             if (dependency.getCondition() != null) {
                 flags.or(dependency.getDependant().findConditionalFlags());
-                flags.set(dependency.getDependant().getRequirementFlagIndex(dependency.getExpectedOutput()));
+                flags.set(dependency.getDependant()
+                        .getRequirementFlagIndex(dependency.getExpectedOutput()));
             }
         }
     }
@@ -500,6 +502,7 @@ abstract public class Expr {
     }
 
     private Node mCalculationPaths = null;
+
     protected Node getAllCalculationPaths() {
         if (mCalculationPaths == null) {
             Node node = new Node();
@@ -530,7 +533,22 @@ abstract public class Expr {
     }
 
     protected BitSet getPredicateInvalidFlags() {
-        throw new IllegalStateException("must override getPredicateInvalidFlags in " + getClass().getSimpleName());
+        throw new IllegalStateException(
+                "must override getPredicateInvalidFlags in " + getClass().getSimpleName());
+    }
+
+    /**
+     * Used by code generation
+     */
+    public boolean shouldReadNow(final Iterable<Expr> justRead) {
+        return !getShouldReadFlags().isEmpty() &&
+                !Iterables.any(getDependencies(), new Predicate<Dependency>() {
+                    @Override
+                    public boolean apply(Dependency input) {
+                        return !(input.getOther().isRead() || (justRead != null && Iterables
+                                .contains(justRead, input.getOther())));
+                    }
+                });
     }
 
     public boolean isEqualityCheck() {
@@ -538,6 +556,7 @@ abstract public class Expr {
     }
 
     static class Node {
+
         BitSet mBitSet = new BitSet();
         List<Node> mParents = new ArrayList<>();
         int mConditionFlag = -1;
@@ -556,7 +575,7 @@ abstract public class Expr {
                     return false;
                 }
                 for (Node parent : mParents) {
-                    if (! parent.areAllPathsSatisfied(readSoFar)) {
+                    if (!parent.areAllPathsSatisfied(readSoFar)) {
                         return false;
                     }
                 }

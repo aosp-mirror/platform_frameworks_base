@@ -18,14 +18,36 @@ import com.android.databinding.testapp.vo.NotBindableVo;
 
 import android.test.UiThreadTest;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependantBindingBinder> {
 
     public BasicDependantBindingTest() {
         super(BasicDependantBindingBinder.class, R.layout.basic_dependant_binding);
     }
 
-    public void testFull() {
-        testWith(new NotBindableVo("a"), new NotBindableVo("b"));
+    public List<NotBindableVo> permutations(String value) {
+        List<NotBindableVo> result = new ArrayList<>();
+        result.add(null);
+        result.add(new NotBindableVo(null));
+        result.add(new NotBindableVo(value));
+        return result;
+    }
+
+    @UiThreadTest
+    public void testAllPermutations() {
+        List<NotBindableVo> obj1s = permutations("a");
+        List<NotBindableVo> obj2s = permutations("b");
+        for (NotBindableVo obj1 : obj1s) {
+            for (NotBindableVo obj2 : obj2s) {
+                createBinder(); //get a new one
+                testWith(obj1, obj2);
+                createBinder();
+                mBinder.rebindDirty();
+                testWith(obj1, obj2);
+            }
+        }
     }
 
     private void testWith(NotBindableVo obj1, NotBindableVo obj2) {
@@ -35,7 +57,8 @@ public class BasicDependantBindingTest extends BaseDataBinderTest<BasicDependant
         assertValues(safeGet(obj1), safeGet(obj2),
                 obj1 == null ? "" : obj1.mergeStringFields(obj2),
                 obj2 == null ? "" : obj2.mergeStringFields(obj1),
-                safeGet(obj1) + safeGet(obj2)
+                (obj1 == null ? null : obj1.getStringValue())
+                        + (obj2 == null ? null : obj2.getStringValue())
         );
     }
 

@@ -16,6 +16,7 @@ package com.android.databinding.testapp;
 import com.android.databinding.library.DataBinder;
 import com.android.databinding.library.IViewDataBinder;
 
+import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 
 public class BaseDataBinderTest<T extends IViewDataBinder>
@@ -33,13 +34,24 @@ public class BaseDataBinderTest<T extends IViewDataBinder>
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        createBinder();
+    }
+
+    public boolean isMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    protected void createBinder() {
+        mBinder = null;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mBinder = DataBinder.createBinder(mBinderClass, getActivity(), mLayoutId, null);
             }
         });
-        getInstrumentation().waitForIdleSync();
+        if (!isMainThread()) {
+            getInstrumentation().waitForIdleSync();
+        }
         assertNotNull(mBinder);
     }
 }

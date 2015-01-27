@@ -23,6 +23,26 @@ public class BasicBindingTest extends BaseDataBinderTest<BasicBindingBinder> {
     }
 
     @UiThreadTest
+    public void testTextViewContentInInitialization() {
+        assertAB("X", "Y");
+    }
+
+    @UiThreadTest
+    public void testNullValuesInInitialization() {
+        assertAB(null, null);
+    }
+
+    @UiThreadTest
+    public void testSecondIsNullInInitialization() {
+        assertAB(null, "y");
+    }
+
+    @UiThreadTest
+    public void testFirstIsNullInInitialization() {
+        assertAB("x", null);
+    }
+
+    @UiThreadTest
     public void testTextViewContent() {
         assertAB("X", "Y");
     }

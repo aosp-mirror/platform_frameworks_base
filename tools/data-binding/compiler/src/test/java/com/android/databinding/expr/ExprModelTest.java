@@ -16,6 +16,7 @@
 
 package com.android.databinding.expr;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 import com.android.databinding.ClassAnalyzer;
@@ -125,16 +126,61 @@ public class ExprModelTest {
         final Expr ternary = lb.parse("a == null ? b : c");
         final Expr equality = mExprModel.comparison("==", a, mExprModel.symbol("null", Object.class));
         lb.getModel().seal();
-        Iterable<Expr> shouldRead = getShouldRead(lb.getModel().getExprMap().values());
+        Iterable<Expr> shouldRead = getShouldRead();
         // a and a == null
         assertEquals(2, Iterables.size(shouldRead));
-        final Iterable<Expr> readFirst = getReadFirst(shouldRead);
+        final Iterable<Expr> readFirst = getReadFirst(shouldRead, null);
         assertEquals(1, Iterables.size(readFirst));
         final Expr first = Iterables.getFirst(readFirst, null);
         assertSame(a, first);
         // now , assume we've read this
         final BitSet shouldReadFlags = first.getShouldReadFlags();
         assertNotNull(shouldReadFlags);
+    }
+
+    @Test
+    public void testTernaryInsideTernary() {
+        LayoutBinder lb = new LayoutBinder(null);
+        mExprModel = lb.getModel();
+        IdentifierExpr cond1 = lb.addVariable("cond1", "boolean");
+        IdentifierExpr cond2 = lb.addVariable("cond2", "boolean");
+
+        IdentifierExpr a = lb.addVariable("a", "boolean");
+        IdentifierExpr b = lb.addVariable("b", "boolean");
+        IdentifierExpr c = lb.addVariable("c", "boolean");
+
+        final TernaryExpr ternaryExpr = parse(lb, "cond1 ? cond2 ? a : b : c", TernaryExpr.class);
+        final TernaryExpr innerTernary = (TernaryExpr) ternaryExpr.getIfTrue();
+        mExprModel.seal();
+
+        Iterable<Expr> toRead = getShouldRead();
+        assertEquals(1, Iterables.size(toRead));
+        assertEquals(ternaryExpr.getPred(), Iterables.getFirst(toRead, null));
+
+        Iterable<Expr> readNow = getReadFirst(toRead);
+        assertEquals(1, Iterables.size(readNow));
+        assertEquals(ternaryExpr.getPred(), Iterables.getFirst(readNow, null));
+        int cond1True = ternaryExpr.getRequirementFlagIndex(true);
+        int cond1False = ternaryExpr.getRequirementFlagIndex(false);
+        // ok, it is read now.
+        mExprModel.markBitsRead();
+
+        // now it should read cond2 or c, depending on the flag from first
+        toRead = getShouldRead();
+        assertEquals(2, Iterables.size(toRead));
+        assertExactMatch(toRead, ternaryExpr.getIfFalse(), innerTernary.getPred());
+        assertFlags(ternaryExpr.getIfFalse(), cond1False);
+        assertFlags(ternaryExpr.getIfTrue(), cond1True);
+
+        mExprModel.markBitsRead();
+
+        // now it should read a or b, innerTernary, outerTernary
+        toRead = getShouldRead();
+        assertExactMatch(toRead, innerTernary.getIfTrue(), innerTernary.getIfFalse(), ternaryExpr,
+                innerTernary);
+        assertFlags(innerTernary.getIfTrue(), innerTernary.getRequirementFlagIndex(true));
+        assertFlags(innerTernary.getIfFalse(), innerTernary.getRequirementFlagIndex(false));
+        assertFalse(mExprModel.markBitsRead());
     }
 
     @Test
@@ -153,7 +199,7 @@ public class ExprModelTest {
         final Expr aIsNull = mExprModel.comparison("==", a, mExprModel.symbol("null", Object.class));
         final Expr bIsNull = mExprModel.comparison("==", b, mExprModel.symbol("null", Object.class));
         lb.getModel().seal();
-        Iterable<Expr> shouldRead = getShouldRead(lb.getModel().getPendingExpressions());
+        Iterable<Expr> shouldRead = getShouldRead();
         // a and a == null
         assertEquals(2, Iterables.size(shouldRead));
         assertFalse(a.getShouldReadFlags().isEmpty());
@@ -164,7 +210,7 @@ public class ExprModelTest {
         assertTrue(e.getShouldReadFlags().isEmpty());
 
 
-        Iterable<Expr> readFirst = getReadFirst(shouldRead);
+        Iterable<Expr> readFirst = getReadFirst(shouldRead, null);
         assertEquals(1, Iterables.size(readFirst));
         final Expr first = Iterables.getFirst(readFirst, null);
         assertSame(a, first);
@@ -172,7 +218,7 @@ public class ExprModelTest {
         for (Expr expr : mExprModel.getPendingExpressions()) {
             assertNull(expr.mShouldReadFlags);
         }
-        shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        shouldRead = getShouldRead();
         assertExactMatch(shouldRead, e, b, bIsNull);
 
         assertFlags(e, aTernary.getRequirementFlagIndex(false));
@@ -180,7 +226,7 @@ public class ExprModelTest {
         assertFlags(b, aTernary.getRequirementFlagIndex(true));
         assertFlags(bIsNull, aTernary.getRequirementFlagIndex(true));
         assertTrue(mExprModel.markBitsRead());
-        shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        shouldRead = getShouldRead();
         assertEquals(4, Iterables.size(shouldRead));
         assertTrue(Iterables.contains(shouldRead, c));
         assertTrue(Iterables.contains(shouldRead, d));
@@ -235,7 +281,7 @@ public class ExprModelTest {
 
 
         mExprModel.seal();
-        Iterable<Expr> shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        Iterable<Expr> shouldRead = getShouldRead();
 
         assertExactMatch(shouldRead, a, b, c, abCmp, bcCmp);
 
@@ -251,7 +297,7 @@ public class ExprModelTest {
 
         assertTrue(mExprModel.markBitsRead());
 
-        shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        shouldRead = getShouldRead();
         Expr[] batch = {d, e, u1, u2, u1GetCondD, u2GetCondE, xxPlusU2getCondE, abTernary,
                 abTernary.getIfTrue(), abTernary.getIfFalse()};
         assertExactMatch(shouldRead, batch);
@@ -272,7 +318,7 @@ public class ExprModelTest {
 
         assertTrue(mExprModel.markBitsRead());
 
-        shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        shouldRead = getShouldRead();
         // actually, there is no real case to read u1 anymore because if b>c was not true,
         // u1.getCond(d) will never be set. Right now, we don't have mechanism to figure this out
         // and also it does not affect correctness (just an unnecessary if stmt)
@@ -298,10 +344,10 @@ public class ExprModelTest {
         IdentifierExpr b = lb.addVariable("b", int.class.getCanonicalName());
         final TernaryExpr abTernary = parse(lb, "a > 3 ? a : b", TernaryExpr.class);
         mExprModel.seal();
-        Iterable<Expr> shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        Iterable<Expr> shouldRead = getShouldRead();
         assertExactMatch(shouldRead, a, abTernary.getPred());
         assertTrue(mExprModel.markBitsRead());
-        shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        shouldRead = getShouldRead();
         assertExactMatch(shouldRead, b, abTernary);
         assertFalse(mExprModel.markBitsRead());
     }
@@ -316,10 +362,10 @@ public class ExprModelTest {
         final TernaryExpr a3Ternary = parse(lb, "a > 3 ? c > 4 ? a : b : c", TernaryExpr.class);
         final TernaryExpr c4Ternary = (TernaryExpr) a3Ternary.getIfTrue();
         mExprModel.seal();
-        Iterable<Expr> shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        Iterable<Expr> shouldRead = getShouldRead();
         assertExactMatch(shouldRead, a, a3Ternary.getPred());
         assertTrue(mExprModel.markBitsRead());
-        shouldRead = getShouldRead(mExprModel.getPendingExpressions());
+        shouldRead = getShouldRead();
         assertExactMatch(shouldRead, c, c4Ternary.getPred());
         assertFlags(c, a3Ternary.getRequirementFlagIndex(true),
                 a3Ternary.getRequirementFlagIndex(false));
@@ -411,12 +457,24 @@ public class ExprModelTest {
         L.d("end of %s", s);
     }
 
+//    private Iterable<Expr> getReadFirst(Iterable<Expr> shouldRead) {
+//        return mExprModel.filterCanBeReadNow(shouldRead);
+//    }
+
     private Iterable<Expr> getReadFirst(Iterable<Expr> shouldRead) {
-        return mExprModel.filterCanBeReadNow(shouldRead);
+        return getReadFirst(shouldRead, null);
+    }
+    private Iterable<Expr> getReadFirst(Iterable<Expr> shouldRead, final Iterable<Expr> justRead) {
+        return Iterables.filter(shouldRead, new Predicate<Expr>() {
+            @Override
+            public boolean apply(Expr input) {
+                return input.shouldReadNow(justRead);
+            }
+        });
     }
 
-    private Iterable<Expr> getShouldRead(Iterable<Expr> exprs) {
-        return mExprModel.filterShouldRead(exprs);
+    private Iterable<Expr> getShouldRead() {
+        return mExprModel.filterShouldRead(mExprModel.getPendingExpressions());
     }
 
     public static class User {

@@ -40,7 +40,9 @@ public class ClassAnalyzer {
 
     private static Map<String, String> sTestClassNameMapping = ImmutableMap.of(
             OBSERVABLE_CLASS_NAME, "com.android.databinding.MockObservable",
-            BINDABLE_ANNOTATION_NAME, "com.android.databinding.MockBindable"
+            BINDABLE_ANNOTATION_NAME, "com.android.databinding.MockBindable",
+            OBSERVABLE_LIST_CLASS_NAME, "com.android.databinding.MockObservableLsit",
+            OBSERVABLE_MAP_CLASS_NAME, "com.android.databinding.MockObservableMap"
     );
 
     private static ClassAnalyzer sClassAnalyzer;

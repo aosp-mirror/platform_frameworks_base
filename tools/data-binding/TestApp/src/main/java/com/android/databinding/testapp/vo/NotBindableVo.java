@@ -14,42 +14,69 @@
 package com.android.databinding.testapp.vo;
 
 public class NotBindableVo {
-    private int intValue;
-    private String stringValue;
+    private int mIntValue;
+    private int mIntValueGetCount;
+    private boolean mBoolValue;
+    private int mBoolValueGetCount;
+    private String mStringValue;
+    private int mStringValueGetCount;
 
     public NotBindableVo() {
     }
 
     public NotBindableVo(int intValue) {
-        this.intValue = intValue;
+        this.mIntValue = intValue;
     }
 
     public NotBindableVo(String stringValue) {
-        this.stringValue = stringValue;
+        this.mStringValue = stringValue;
     }
 
     public NotBindableVo(int intValue, String stringValue) {
-        this.intValue = intValue;
-        this.stringValue = stringValue;
+        this.mIntValue = intValue;
+        this.mStringValue = stringValue;
     }
 
     public int getIntValue() {
-        return intValue;
+        mIntValueGetCount ++;
+        return mIntValue;
     }
 
     public void setIntValue(int intValue) {
-        this.intValue = intValue;
+        this.mIntValue = intValue;
     }
 
     public String getStringValue() {
-        return stringValue;
+        mStringValueGetCount ++;
+        return mStringValue;
     }
 
     public void setStringValue(String stringValue) {
-        this.stringValue = stringValue;
+        this.mStringValue = stringValue;
     }
 
     public String mergeStringFields(NotBindableVo other) {
-        return stringValue + (other == null ? "" : other.stringValue);
+        return mStringValue + (other == null ? "" : other.mStringValue);
+    }
+
+    public boolean getBoolValue() {
+        mBoolValueGetCount ++;
+        return mBoolValue;
+    }
+
+    public void setBoolValue(boolean boolValue) {
+        mBoolValue = boolValue;
+    }
+
+    public int getIntValueGetCount() {
+        return mIntValueGetCount;
+    }
+
+    public int getBoolValueGetCount() {
+        return mBoolValueGetCount;
+    }
+
+    public int getStringValueGetCount() {
+        return mStringValueGetCount;
     }
 }

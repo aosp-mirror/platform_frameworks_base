@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:bind="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <variable name="obj1" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj2" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="obj3" type="com.android.databinding.testapp.vo.NotBindableVo"/>
+    <variable name="cond1" type="boolean"/>
+    <variable name="cond2" type="boolean"/>
+    <TextView
+            android:id="@+id/textView"
+            android:text="{cond1 ? cond2 ? obj1.stringValue : obj2.stringValue : obj3.stringValue}"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+</LinearLayout>
