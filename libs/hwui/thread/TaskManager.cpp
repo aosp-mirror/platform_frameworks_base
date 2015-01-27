@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-#include <sys/sysinfo.h>
-#if defined(HAVE_PTHREADS)
 #include <sys/resource.h>
-#endif
+#include <sys/sysinfo.h>
 
 #include "TaskManager.h"
 #include "Task.h"
@@ -83,9 +81,7 @@ bool TaskManager::addTaskBase(const sp<TaskBase>& task, const sp<TaskProcessorBa
 ///////////////////////////////////////////////////////////////////////////////
 
 status_t TaskManager::WorkerThread::readyToRun() {
-#if defined(HAVE_PTHREADS)
     setpriority(PRIO_PROCESS, 0, PRIORITY_FOREGROUND);
-#endif
     return NO_ERROR;
 }
 

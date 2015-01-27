@@ -16,19 +16,13 @@
 
 #define LOG_TAG "BootAnimation"
 
-#include <cutils/properties.h>
-
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
-
+#include <cutils/properties.h>
+#include <sys/resource.h>
 #include <utils/Log.h>
 #include <utils/threads.h>
-
-#if defined(HAVE_PTHREADS)
-# include <pthread.h>
-# include <sys/resource.h>
-#endif
 
 #include "BootAnimation.h"
 
@@ -38,9 +32,7 @@ using namespace android;
 
 int main()
 {
-#if defined(HAVE_PTHREADS)
     setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_DISPLAY);
-#endif
 
     char value[PROPERTY_VALUE_MAX];
     property_get("debug.sf.nobootanimation", value, "0");
