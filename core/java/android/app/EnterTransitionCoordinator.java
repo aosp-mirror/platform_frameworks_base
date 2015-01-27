@@ -18,7 +18,6 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -565,7 +564,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         clearState();
     }
 
-    public void cancelEnter() {
+    /**
+     * Cancels the enter transition.
+     * @return True if the enter transition is still pending capturing the target state. If so,
+     * any transition started on the decor will do nothing.
+     */
+    public boolean cancelEnter() {
         setGhostVisibility(View.INVISIBLE);
         mHasStopped = true;
         mIsCanceled = true;
@@ -576,6 +580,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         mActivity = null;
         clearState();
+        return super.cancelPendingTransitions();
     }
 
     private void makeOpaque() {
