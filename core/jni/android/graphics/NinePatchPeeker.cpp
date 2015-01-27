@@ -24,7 +24,9 @@ bool NinePatchPeeker::peek(const char tag[], const void* data, size_t length) {
     if (!strcmp("npTc", tag) && length >= sizeof(Res_png_9patch)) {
         Res_png_9patch* patch = (Res_png_9patch*) data;
         size_t patchSize = patch->serializedSize();
-        assert(length == patchSize);
+        if (length != patchSize) {
+            return false;
+        }
         // You have to copy the data because it is owned by the png reader
         Res_png_9patch* patchNew = (Res_png_9patch*) malloc(patchSize);
         memcpy(patchNew, patch, patchSize);
