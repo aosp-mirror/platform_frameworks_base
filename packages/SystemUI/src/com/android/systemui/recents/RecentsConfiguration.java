@@ -134,6 +134,7 @@ public class RecentsConfiguration {
     public boolean fakeShadows;
 
     /** Dev options and global settings */
+    public boolean multiStackEnabled;
     public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
     public boolean debugModeEnabled;
@@ -294,6 +295,7 @@ public class RecentsConfiguration {
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) != 0;
         lockToAppEnabled = ssp.getSystemSetting(context,
                 Settings.System.LOCK_TO_APP_ENABLED) != 0;
+        multiStackEnabled = "1".equals(ssp.getSystemProperty("overview.enableMultiStack"));
     }
 
     /** Called when the configuration has changed, and we want to reset any configuration specific
@@ -335,8 +337,8 @@ public class RecentsConfiguration {
      * Returns the task stack bounds in the current orientation. These bounds do not account for
      * the system insets.
      */
-    public void getTaskStackBounds(int windowWidth, int windowHeight, int topInset, int rightInset,
-                                   Rect taskStackBounds) {
+    public void getAvailableTaskStackBounds(int windowWidth, int windowHeight, int topInset,
+            int rightInset, Rect taskStackBounds) {
         Rect searchBarBounds = new Rect();
         getSearchBarBounds(windowWidth, windowHeight, topInset, searchBarBounds);
         if (isLandscape && hasTransposedSearchBar) {
@@ -353,7 +355,7 @@ public class RecentsConfiguration {
      * the system insets.
      */
     public void getSearchBarBounds(int windowWidth, int windowHeight, int topInset,
-                                   Rect searchBarSpaceBounds) {
+            Rect searchBarSpaceBounds) {
         // Return empty rects if search is not enabled
         int searchBarSize = searchBarSpaceHeightPx;
         if (!Constants.DebugFlags.App.EnableSearchLayout || !hasSearchBarAppWidget()) {

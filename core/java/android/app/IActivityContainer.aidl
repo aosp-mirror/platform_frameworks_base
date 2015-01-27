@@ -32,6 +32,7 @@ interface IActivityContainer {
     void checkEmbeddedAllowed(in Intent intent);
     void checkEmbeddedAllowedIntentSender(in IIntentSender intentSender);
     int getDisplayId();
+    int getStackId();
     boolean injectEvent(in InputEvent event);
     void release();
 }

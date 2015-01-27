@@ -17,6 +17,7 @@
 package com.android.systemui.recents.model;
 
 import android.graphics.Color;
+import android.graphics.Rect;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.NamedCounter;
@@ -173,21 +174,12 @@ public class TaskStack {
         public void onStackUnfiltered(TaskStack newStack, ArrayList<Task> curTasks);
     }
 
-    /** A pair of indices representing the group and task positions in the stack and group. */
-    public static class GroupTaskIndex {
-        public int groupIndex; // Index in the stack
-        public int taskIndex;  // Index in the group
-
-        public GroupTaskIndex() {}
-
-        public GroupTaskIndex(int gi, int ti) {
-            groupIndex = gi;
-            taskIndex = ti;
-        }
-    }
-
     // The task offset to apply to a task id as a group affiliation
     static final int IndividualTaskIdOffset = 1 << 16;
+
+    public final int id;
+    public final Rect stackBounds = new Rect();
+    public final Rect displayBounds = new Rect();
 
     FilteredTaskList mTaskList = new FilteredTaskList();
     TaskStackCallbacks mCb;
@@ -195,9 +187,23 @@ public class TaskStack {
     ArrayList<TaskGrouping> mGroups = new ArrayList<TaskGrouping>();
     HashMap<Integer, TaskGrouping> mAffinitiesGroups = new HashMap<Integer, TaskGrouping>();
 
-    /** Sets the callbacks for this task stack */
+    public TaskStack() {
+        this(0);
+    }
+
+    public TaskStack(int stackId) {
+        id = stackId;
+    }
+
+    /** Sets the callbacks for this task stack. */
     public void setCallbacks(TaskStackCallbacks cb) {
         mCb = cb;
+    }
+
+    /** Sets the bounds of this stack. */
+    public void setBounds(Rect stackBounds, Rect displayBounds) {
+        this.stackBounds.set(stackBounds);
+        this.displayBounds.set(displayBounds);
     }
 
     /** Resets this TaskStack. */

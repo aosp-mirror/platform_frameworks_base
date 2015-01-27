@@ -29,8 +29,10 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
+import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -40,6 +42,7 @@ import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,13 +59,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void onAllTaskViewsDismissed();
         public void onExitToHomeAnimationTriggered();
         public void onScreenPinningRequest();
+
+        public void onMultiStackAddStack();
+        public void onMultiStackResizeStack();
+        public void onMultiStackRemoveStack();
+        public void onMultiStackMoveTask(Task t);
     }
 
     RecentsConfiguration mConfig;
     LayoutInflater mInflater;
     DebugOverlayView mDebugOverlay;
+    ViewStub mMultiStackDebugStub;
+    View mMultiStackDebugView;
+    RecentsViewLayoutAlgorithm mLayoutAlgorithm;
 
     ArrayList<TaskStack> mStacks;
+    List<TaskStackView> mImmutableTaskStackViews = new ArrayList<TaskStackView>();
     View mSearchBar;
     RecentsViewCallbacks mCb;
 
@@ -82,6 +94,29 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
         mInflater = LayoutInflater.from(context);
+        mLayoutAlgorithm = new RecentsViewLayoutAlgorithm(mConfig);
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        if (!mConfig.multiStackEnabled) return;
+
+        mMultiStackDebugStub = (ViewStub) findViewById(R.id.multistack_debug_view_stub);
+        if (mMultiStackDebugView == null) {
+            mMultiStackDebugView = mMultiStackDebugStub.inflate();
+            mMultiStackDebugView.findViewById(R.id.add_stack).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mCb.onMultiStackAddStack();
+                }
+            });
+            mMultiStackDebugView.findViewById(R.id.resize_stack).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mCb.onMultiStackResizeStack();
+                }
+            });
+        }
     }
 
     /** Sets the callbacks */
@@ -99,24 +134,19 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         int numStacks = stacks.size();
 
         // Make a list of the stack view children only
-        ArrayList<TaskStackView> stackViews = new ArrayList<TaskStackView>();
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                stackViews.add((TaskStackView) child);
-            }
-        }
+        ArrayList<TaskStackView> stackViewsList = new ArrayList<TaskStackView>();
+        List<TaskStackView> stackViews = getTaskStackViews();
 
         // Remove all/extra stack views
         int numTaskStacksToKeep = 0; // Keep no tasks if we are recreating the layout
         if (mConfig.launchedReuseTaskStackViews) {
-            numTaskStacksToKeep = Math.min(childCount, numStacks);
+            numTaskStacksToKeep = Math.min(stackViews.size(), numStacks);
         }
         for (int i = stackViews.size() - 1; i >= numTaskStacksToKeep; i--) {
             removeView(stackViews.get(i));
             stackViews.remove(i);
         }
+        stackViewsList.addAll(stackViews);
 
         // Update the stack views that we are keeping
         for (int i = 0; i < numTaskStacksToKeep; i++) {
@@ -133,42 +163,51 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             TaskStackView stackView = new TaskStackView(getContext(), stack);
             stackView.setCallbacks(this);
             addView(stackView);
+            stackViewsList.add(stackView);
         }
+
+        // Set the immutable stack views list
+        mImmutableTaskStackViews = Collections.unmodifiableList(stackViewsList);
 
         // Enable debug mode drawing on all the stacks if necessary
         if (mConfig.debugModeEnabled) {
-            for (int i = childCount - 1; i >= 0; i--) {
-                View v = getChildAt(i);
-                if (v != mSearchBar) {
-                    TaskStackView stackView = (TaskStackView) v;
-                    stackView.setDebugOverlay(mDebugOverlay);
-                }
+            for (int i = mImmutableTaskStackViews.size() - 1; i >= 0; i--) {
+                TaskStackView stackView = mImmutableTaskStackViews.get(i);
+                stackView.setDebugOverlay(mDebugOverlay);
             }
+        }
+
+        // Bring the debug view to the front
+        if (mMultiStackDebugView != null) {
+            mMultiStackDebugView.bringToFront();
         }
 
         // Trigger a new layout
         requestLayout();
     }
 
+    /** Gets the list of task views */
+    List<TaskStackView> getTaskStackViews() {
+        return mImmutableTaskStackViews;
+    }
+
     /** Launches the focused task from the first stack if possible */
     public boolean launchFocusedTask() {
         // Get the first stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                TaskStack stack = stackView.mStack;
-                // Iterate the stack views and try and find the focused task
-                List<TaskView> taskViews = stackView.getTaskViews();
-                int taskViewCount = taskViews.size();
-                for (int j = 0; j < taskViewCount; j++) {
-                    TaskView tv = taskViews.get(j);
-                    Task task = tv.getTask();
-                    if (tv.isFocusedTask()) {
-                        onTaskViewClicked(stackView, tv, stack, task, false);
-                        return true;
-                    }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            TaskStack stack = stackView.getStack();
+            // Iterate the stack views and try and find the focused task
+            List<TaskView> taskViews = stackView.getTaskViews();
+            int taskViewCount = taskViews.size();
+            for (int j = 0; j < taskViewCount; j++) {
+                TaskView tv = taskViews.get(j);
+                Task task = tv.getTask();
+                if (tv.isFocusedTask()) {
+                    onTaskViewClicked(stackView, tv, stack, task, false);
+                    return true;
                 }
             }
         }
@@ -178,24 +217,22 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** Launches the task that Recents was launched from, if possible */
     public boolean launchPreviousTask() {
         // Get the first stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                TaskStack stack = stackView.mStack;
-                ArrayList<Task> tasks = stack.getTasks();
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            TaskStack stack = stackView.getStack();
+            ArrayList<Task> tasks = stack.getTasks();
 
-                // Find the launch task in the stack
-                if (!tasks.isEmpty()) {
-                    int taskCount = tasks.size();
-                    for (int j = 0; j < taskCount; j++) {
-                        if (tasks.get(j).isLaunchTarget) {
-                            Task task = tasks.get(j);
-                            TaskView tv = stackView.getChildViewForTask(task);
-                            onTaskViewClicked(stackView, tv, stack, task, false);
-                            return true;
-                        }
+            // Find the launch task in the stack
+            if (!tasks.isEmpty()) {
+                int taskCount = tasks.size();
+                for (int j = 0; j < taskCount; j++) {
+                    if (tasks.get(j).isLaunchTarget) {
+                        Task task = tasks.get(j);
+                        TaskView tv = stackView.getChildViewForTask(task);
+                        onTaskViewClicked(stackView, tv, stack, task, false);
+                        return true;
                     }
                 }
             }
@@ -209,13 +246,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // to ensure that it runs
         ctx.postAnimationTrigger.increment();
 
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.startEnterRecentsAnimation(ctx);
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            stackView.startEnterRecentsAnimation(ctx);
         }
         ctx.postAnimationTrigger.decrement();
     }
@@ -225,13 +260,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         // We have to increment/decrement the post animation trigger in case there are no children
         // to ensure that it runs
         ctx.postAnimationTrigger.increment();
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.startExitToHomeAnimation(ctx);
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            stackView.startExitToHomeAnimation(ctx);
         }
         ctx.postAnimationTrigger.decrement();
 
@@ -287,20 +320,29 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
 
         Rect taskStackBounds = new Rect();
-        mConfig.getTaskStackBounds(width, height, mConfig.systemInsets.top,
+        mConfig.getAvailableTaskStackBounds(width, height, mConfig.systemInsets.top,
                 mConfig.systemInsets.right, taskStackBounds);
 
-        // Measure each TaskStackView with the full width and height of the window since the 
+        // Measure each TaskStackView with the full width and height of the window since the
         // transition view is a child of that stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar && child.getVisibility() != GONE) {
-                TaskStackView tsv = (TaskStackView) child;
-                // Set the insets to be the top/left inset + search bounds
-                tsv.setStackInsetRect(taskStackBounds);
-                tsv.measure(widthMeasureSpec, heightMeasureSpec);
+        List<TaskStackView> stackViews = getTaskStackViews();
+        List<Rect> stackViewsBounds = mLayoutAlgorithm.computeStackRects(stackViews,
+                taskStackBounds);
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            if (stackView.getVisibility() != GONE) {
+                // We are going to measure the TaskStackView with the whole RecentsView dimensions,
+                // but the actual stack is going to be inset to the bounds calculated by the layout
+                // algorithm
+                stackView.setStackInsetRect(stackViewsBounds.get(i));
+                stackView.measure(widthMeasureSpec, heightMeasureSpec);
             }
+        }
+
+        // Measure the multistack debug view
+        if (mMultiStackDebugView != null) {
+            mMultiStackDebugView.measure(width, height);
         }
 
         setMeasuredDimension(width, height);
@@ -322,13 +364,26 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Layout each TaskStackView with the full width and height of the window since the 
         // transition view is a child of that stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar && child.getVisibility() != GONE) {
-                child.layout(left, top, left + child.getMeasuredWidth(),
-                        top + child.getMeasuredHeight());
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            if (stackView.getVisibility() != GONE) {
+                stackView.layout(left, top, left + stackView.getMeasuredWidth(),
+                        top + stackView.getMeasuredHeight());
             }
+        }
+
+        // Layout the multistack debug view
+        if (mMultiStackDebugView != null) {
+            Rect taskStackBounds = new Rect();
+            mConfig.getAvailableTaskStackBounds(getMeasuredWidth(), getMeasuredHeight(),
+                    mConfig.systemInsets.top, mConfig.systemInsets.right, taskStackBounds);
+            mMultiStackDebugView.layout(left,
+                    taskStackBounds.bottom - mConfig.systemInsets.bottom -
+                            mMultiStackDebugView.getMeasuredHeight(),
+                    left + mMultiStackDebugView.getMeasuredWidth(),
+                    taskStackBounds.bottom - mConfig.systemInsets.bottom);
         }
     }
 
@@ -343,41 +398,29 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** Notifies each task view of the user interaction. */
     public void onUserInteraction() {
         // Get the first stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.onUserInteraction();
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            stackView.onUserInteraction();
         }
     }
 
     /** Focuses the next task in the first stack view */
     public void focusNextTask(boolean forward) {
         // Get the first stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.focusNextTask(forward, true);
-                break;
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        if (!stackViews.isEmpty()) {
+            stackViews.get(0).focusNextTask(forward, true);
         }
     }
 
     /** Dismisses the focused task. */
     public void dismissFocusedTask() {
         // Get the first stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.dismissFocusedTask();
-                break;
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        if (!stackViews.isEmpty()) {
+            stackViews.get(0).dismissFocusedTask();
         }
     }
 
@@ -476,9 +519,16 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     }
                 };
             }
-            opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
-                    b, offsetX, offsetY, transform.rect.width(), transform.rect.height(),
-                    sourceView.getHandler(), animStartedListener);
+            if (mConfig.multiStackEnabled) {
+                opts = ActivityOptions.makeCustomAnimation(sourceView.getContext(),
+                        R.anim.recents_from_unknown_enter,
+                        R.anim.recents_from_unknown_exit,
+                        sourceView.getHandler(), animStartedListener);
+            } else {
+                opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
+                        b, offsetX, offsetY, transform.rect.width(), transform.rect.height(),
+                        sourceView.getHandler(), animStartedListener);
+            }
         }
 
         final ActivityOptions launchOpts = opts;
@@ -561,13 +611,11 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     /** Final callback after Recents is finally hidden. */
     public void onRecentsHidden() {
         // Notify each task stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.onRecentsHidden();
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            stackView.onRecentsHidden();
         }
     }
 
@@ -599,18 +647,23 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         }
     }
 
+    @Override
+    public void onMultiStackMoveTask(Task t) {
+        if (mCb != null) {
+            mCb.onMultiStackMoveTask(t);
+        }
+    }
+
     /**** RecentsPackageMonitor.PackageCallbacks Implementation ****/
 
     @Override
     public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
         // Propagate this event down to each task stack view
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                TaskStackView stackView = (TaskStackView) child;
-                stackView.onPackagesChanged(monitor, packageName, userId);
-            }
+        List<TaskStackView> stackViews = getTaskStackViews();
+        int stackCount = stackViews.size();
+        for (int i = 0; i < stackCount; i++) {
+            TaskStackView stackView = stackViews.get(i);
+            stackView.onPackagesChanged(monitor, packageName, userId);
         }
     }
 }

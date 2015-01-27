@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
+import android.app.IActivityContainer;
 import android.app.IActivityManager;
 import android.app.ITaskStackListener;
 import android.app.SearchManager;
@@ -49,10 +50,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
@@ -64,6 +67,8 @@ import com.android.systemui.recents.Recents;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -228,6 +233,23 @@ public class SystemServicesProxy {
         return null;
     }
 
+    /** Returns a list of all the launcher apps sorted by name. */
+    public List<ResolveInfo> getLauncherApps() {
+        if (mPm == null) return new ArrayList<ResolveInfo>();
+
+        final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> activities = mPm.queryIntentActivities(mainIntent, 0 /* flags */);
+        Collections.sort(activities, new Comparator<ResolveInfo>() {
+            @Override
+            public int compare(ResolveInfo o1, ResolveInfo o2) {
+                return getActivityLabel(o1.activityInfo).compareTo(
+                        getActivityLabel(o2.activityInfo));
+            }
+        });
+        return activities;
+    }
+
     /** Returns whether the recents is currently running */
     public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
             AtomicBoolean isHomeTopMost) {
@@ -248,6 +270,64 @@ public class SystemServicesProxy {
             }
         }
         return false;
+    }
+
+    /** Create a new stack. */
+    public void createNewStack(int displayId, Rect bounds, Intent activity) {
+        try {
+            IActivityContainer container = mIam.createStackOnDisplay(displayId);
+            if (container != null) {
+                // Resize the stack
+                resizeStack(container.getStackId(), bounds);
+                // Start the new activity on that stack
+                container.startActivity(activity);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Resizes a stack. */
+    public void resizeStack(int stackId, Rect bounds) {
+        if (mIam == null) return;
+
+        try {
+            mIam.resizeStack(stackId, bounds);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Returns the stack info for all stacks. */
+    public SparseArray<ActivityManager.StackInfo> getAllStackInfos() {
+        if (mIam == null) return new SparseArray<ActivityManager.StackInfo>();
+
+        try {
+            SparseArray<ActivityManager.StackInfo> stacks =
+                    new SparseArray<ActivityManager.StackInfo>();
+            List<ActivityManager.StackInfo> infos = mIam.getAllStackInfos();
+            int stackCount = infos.size();
+            for (int i = 0; i < stackCount; i++) {
+                ActivityManager.StackInfo info = infos.get(i);
+                stacks.put(info.stackId, info);
+            }
+            return stacks;
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return new SparseArray<ActivityManager.StackInfo>();
+        }
+    }
+
+    /** Returns the focused stack id. */
+    public int getFocusedStack() {
+        if (mIam == null) return -1;
+
+        try {
+            return mIam.getFocusedStackId();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
     /** Returns whether the specified task is in the home stack */
@@ -313,7 +393,7 @@ public class SystemServicesProxy {
         return thumbnail;
     }
 
-    /** Moves a task to the front with the specified activity options */
+    /** Moves a task to the front with the specified activity options. */
     public void moveTaskToFront(int taskId, ActivityOptions opts) {
         if (mAm == null) return;
         if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
@@ -323,6 +403,18 @@ public class SystemServicesProxy {
                     opts.toBundle());
         } else {
             mAm.moveTaskToFront(taskId, ActivityManager.MOVE_TASK_WITH_HOME);
+        }
+    }
+
+    /** Moves a task to another stack. */
+    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+        if (mIam == null) return;
+        if (Constants.DebugFlags.App.EnableSystemServicesProxy) return;
+
+        try {
+            mIam.moveTaskToStack(taskId, stackId, toTop);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
@@ -521,6 +613,13 @@ public class SystemServicesProxy {
     public int getSystemSetting(Context context, String setting) {
         ContentResolver cr = context.getContentResolver();
         return Settings.System.getInt(cr, setting, 0);
+    }
+
+    /**
+     * Returns a system property.
+     */
+    public String getSystemProperty(String key) {
+        return SystemProperties.get(key);
     }
 
     /**

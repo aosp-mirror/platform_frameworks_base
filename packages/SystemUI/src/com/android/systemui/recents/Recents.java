@@ -24,7 +24,6 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -56,7 +55,6 @@ import com.android.systemui.recents.views.TaskViewHeader;
 import com.android.systemui.recents.views.TaskViewTransform;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -112,6 +110,9 @@ public class Recents extends SystemUI
 
         /** Preloads the next task */
         public void run() {
+            // Temporarily skip this if multi stack is enabled
+            if (mConfig.multiStackEnabled) return;
+
             RecentsConfiguration config = RecentsConfiguration.getInstance();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
                 RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -362,13 +363,21 @@ public class Recents extends SystemUI
     }
 
     void showRelativeAffiliatedTask(boolean showNextTask) {
+        // Return early if there is no focused stack
+        int focusedStackId = mSystemServicesProxy.getFocusedStack();
+        TaskStack focusedStack = null;
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);
-        TaskStack stack = plan.getTaskStack();
+        if (mConfig.multiStackEnabled) {
+            if (focusedStackId < 0) return;
+            focusedStack = plan.getTaskStack(focusedStackId);
+        } else {
+            focusedStack = plan.getAllTaskStacks().get(0);
+        }
 
-        // Return early if there are no tasks
-        if (stack.getTaskCount() == 0) return;
+        // Return early if there are no tasks in the focused stack
+        if (focusedStack.getTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = mSystemServicesProxy.getTopMostTask();
         // Return early if there is no running task (can't determine affiliated tasks in this case)
@@ -377,7 +386,7 @@ public class Recents extends SystemUI
         if (mSystemServicesProxy.isInHomeStack(runningTask.id)) return;
 
         // Find the task in the recents list
-        ArrayList<Task> tasks = stack.getTasks();
+        ArrayList<Task> tasks = focusedStack.getTasks();
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
@@ -399,7 +408,7 @@ public class Recents extends SystemUI
                             R.anim.recents_launch_prev_affiliated_task_source);
                 }
                 if (toTaskKey != null) {
-                    toTask = stack.findTaskWithId(toTaskKey.id);
+                    toTask = focusedStack.findTaskWithId(toTaskKey.id);
                 }
                 numAffiliatedTasks = group.getTaskCount();
                 break;
@@ -473,8 +482,9 @@ public class Recents extends SystemUI
             // Reload the widget id before we get the task stack bounds
             reloadSearchBarAppWidget(mContext, mSystemServicesProxy);
         }
-        mConfig.getTaskStackBounds(mWindowRect.width(), mWindowRect.height(), mStatusBarHeight,
-                (mConfig.hasTransposedNavBar ? mNavBarWidth : 0), mTaskStackBounds);
+        mConfig.getAvailableTaskStackBounds(mWindowRect.width(), mWindowRect.height(),
+                mStatusBarHeight, (mConfig.hasTransposedNavBar ? mNavBarWidth : 0),
+                mTaskStackBounds);
         if (mConfig.isLandscape && mConfig.hasTransposedNavBar) {
             mSystemInsets.set(0, mStatusBarHeight, mNavBarWidth, 0);
         } else {
@@ -653,8 +663,25 @@ public class Recents extends SystemUI
             // Create a new load plan if onPreloadRecents() was never triggered
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
+
+        // Temporarily skip the transition (use a dummy fade) if multi stack is enabled.
+        // For multi-stack we need to figure out where each of the tasks are going.
+        if (mConfig.multiStackEnabled) {
+            loader.preloadTasks(sInstanceLoadPlan, true);
+            ArrayList<TaskStack> stacks = sInstanceLoadPlan.getAllTaskStacks();
+            TaskStack stack = stacks.get(0);
+            mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, true);
+            TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
+                    mDummyStackView.computeStackVisibilityReport();
+            ActivityOptions opts = getUnknownTransitionActivityOptions();
+            startAlternateRecentsActivity(topTask, opts, true /* fromHome */,
+                    false /* fromSearchHome */, false /* fromThumbnail */, stackVr);
+            return;
+        }
+
         loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
-        TaskStack stack = sInstanceLoadPlan.getTaskStack();
+        ArrayList<TaskStack> stacks = sInstanceLoadPlan.getAllTaskStacks();
+        TaskStack stack = stacks.get(0);
 
         // Prepare the dummy stack for the transition
         mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);

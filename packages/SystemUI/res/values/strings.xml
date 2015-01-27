@@ -672,6 +672,19 @@
     <!-- Recents: Dismiss all button. [CHAR LIMIT=NONE] -->
     <string name="recents_dismiss_all_message">Dismiss all applications</string>
 
+    <!-- Recents: MultiStack add stack button. [CHAR LIMIT=NONE] -->
+    <string name="recents_multistack_add_stack">+</string>
+    <!-- Recents: MultiStack remove stack button. [CHAR LIMIT=NONE] -->
+    <string name="recents_multistack_remove_stack">-</string>
+    <!-- Recents: MultiStack resize stack button. [CHAR LIMIT=NONE] -->
+    <string name="recents_multistack_resize_stack">[]</string>
+    <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
+    <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>
+    <!-- Recents: MultiStack add stack split vertical radio button. [CHAR LIMIT=NONE] -->
+    <string name="recents_multistack_add_stack_dialog_split_vertical">Split Vertical</string>
+    <!-- Recents: MultiStack add stack split custom radio button. [CHAR LIMIT=NONE] -->
+    <string name="recents_multistack_add_stack_dialog_split_custom">Split Custom</string>
+
     <!-- Expanded Status Bar Header: Battery Charged [CHAR LIMIT=40] -->
     <string name="expanded_header_battery_charged">Charged</string>
 

@@ -123,6 +123,16 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             return false;
         }
 
+        int action = ev.getAction();
+        if (mConfig.multiStackEnabled) {
+            // Check if we are within the bounds of the stack view contents
+            if ((action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
+                if (!mSv.getTouchableRegion().contains((int) ev.getX(), (int) ev.getY())) {
+                    return false;
+                }
+            }
+        }
+
         // Pass through to swipe helper if we are swiping
         mInterceptedBySwipeHelper = mSwipeHelper.onInterceptTouchEvent(ev);
         if (mInterceptedBySwipeHelper) {
@@ -131,7 +141,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
         boolean wasScrolling = mScroller.isScrolling() ||
                 (mScroller.mScrollAnimator != null && mScroller.mScrollAnimator.isRunning());
-        int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info
@@ -198,6 +207,16 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             return false;
         }
 
+        int action = ev.getAction();
+        if (mConfig.multiStackEnabled) {
+            // Check if we are within the bounds of the stack view contents
+            if ((action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
+                if (!mSv.getTouchableRegion().contains((int) ev.getX(), (int) ev.getY())) {
+                    return false;
+                }
+            }
+        }
+
         // Pass through to swipe helper if we are swiping
         if (mInterceptedBySwipeHelper && mSwipeHelper.onTouchEvent(ev)) {
             return true;
@@ -206,7 +225,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         // Update the velocity tracker
         initVelocityTrackerIfNotExists();
 
-        int action = ev.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 // Save the touch down info

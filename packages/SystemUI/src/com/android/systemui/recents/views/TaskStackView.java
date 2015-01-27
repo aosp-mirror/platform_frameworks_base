@@ -60,6 +60,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         public void onAllTaskViewsDismissed(ArrayList<Task> removedTasks);
         public void onTaskStackFilterTriggered();
         public void onTaskStackUnfilterTriggered();
+
+        public void onMultiStackMoveTask(Task t);
     }
 
     RecentsConfiguration mConfig;
@@ -147,6 +149,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
         // Layout again with the new stack
         requestLayout();
+    }
+
+    /** Returns the task stack. */
+    TaskStack getStack() {
+        return mStack;
     }
 
     /** Sets the debug overlay */
@@ -623,6 +630,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public boolean onGenericMotionEvent(MotionEvent ev) {
         return mTouchHandler.onGenericMotionEvent(ev);
+    }
+
+    /** Returns the region that touch gestures can be started in. */
+    Rect getTouchableRegion() {
+        return mTaskStackBounds;
     }
 
     @Override
@@ -1323,6 +1335,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     public void onTaskViewFocusChanged(TaskView tv, boolean focused) {
         if (focused) {
             mFocusedTaskIndex = mStack.indexOfTask(tv.getTask());
+        }
+    }
+
+    @Override
+    public void onMultiStackMoveTask(TaskView tv) {
+        if (mCb != null) {
+            mCb.onMultiStackMoveTask(tv.getTask());
         }
     }
 

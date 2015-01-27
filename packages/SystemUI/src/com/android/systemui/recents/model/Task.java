@@ -36,6 +36,9 @@ public class Task {
         public void onTaskDataLoaded();
         /* Notifies when a task has been unbound */
         public void onTaskDataUnloaded();
+
+        /* Notifies when a task's stack id has changed. */
+        public void onMultiStackDebugTaskStackIdChanged();
     }
 
     /** The ComponentNameKey represents the unique primary key for a component
@@ -68,14 +71,17 @@ public class Task {
     public static class TaskKey {
         final ComponentNameKey mComponentNameKey;
         public final int id;
+        public int stackId;
         public final Intent baseIntent;
         public final int userId;
         public long firstActiveTime;
         public long lastActiveTime;
 
-        public TaskKey(int id, Intent intent, int userId, long firstActiveTime, long lastActiveTime) {
+        public TaskKey(int id, int stackId, Intent intent, int userId, long firstActiveTime,
+                long lastActiveTime) {
             mComponentNameKey = new ComponentNameKey(intent.getComponent(), userId);
             this.id = id;
+            this.stackId = stackId;
             this.baseIntent = intent;
             this.userId = userId;
             this.firstActiveTime = firstActiveTime;
@@ -92,18 +98,19 @@ public class Task {
             if (!(o instanceof TaskKey)) {
                 return false;
             }
-            return id == ((TaskKey) o).id
-                    && userId == ((TaskKey) o).userId;
+            TaskKey otherKey = (TaskKey) o;
+            return id == otherKey.id && stackId == otherKey.stackId && userId == otherKey.userId;
         }
 
         @Override
         public int hashCode() {
-            return (id << 5) + userId;
+            return Objects.hash(id, stackId, userId);
         }
 
         @Override
         public String toString() {
             return "Task.Key: " + id + ", "
+                    + "s: " + stackId + ", "
                     + "u: " + userId + ", "
                     + "lat: " + lastActiveTime + ", "
                     + baseIntent.getComponent().getPackageName();
@@ -178,6 +185,14 @@ public class Task {
             throw new RuntimeException("This task is already assigned to a group.");
         }
         this.group = group;
+    }
+
+    /** Updates the stack id of this task. */
+    public void setStackId(int stackId) {
+        key.stackId = stackId;
+        if (mCb != null) {
+            mCb.onMultiStackDebugTaskStackIdChanged();
+        }
     }
 
     /** Notifies the callback listeners that this task has been loaded */

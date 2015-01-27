@@ -43,6 +43,16 @@
         android:ellipsize="marquee"
         android:fadingEdge="horizontal" />
     <com.android.systemui.recents.views.FixedSizeImageView
+        android:id="@+id/move_task"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="52dp"
+        android:layout_gravity="center_vertical|end"
+        android:padding="12dp"
+        android:background="@drawable/recents_button_bg"
+        android:src="@drawable/star"
+        android:visibility="gone" />
+    <com.android.systemui.recents.views.FixedSizeImageView
         android:id="@+id/dismiss_task"
         android:layout_width="48dp"
         android:layout_height="48dp"

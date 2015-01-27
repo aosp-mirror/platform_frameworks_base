@@ -45,6 +45,8 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         public void onTaskViewDismissed(TaskView tv);
         public void onTaskViewClipStateChanged(TaskView tv);
         public void onTaskViewFocusChanged(TaskView tv, boolean focused);
+
+        public void onMultiStackMoveTask(TaskView tv);
     }
 
     RecentsConfiguration mConfig;
@@ -457,6 +459,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             .start();
     }
 
+    /** Enables/disables handling touch on this task view. */
+    void setTouchEnabled(boolean enabled) {
+        setOnClickListener(enabled ? this : null);
+    }
+
     /** Animates this task view if the user does not interact with the stack after a certain time. */
     void startNoUserInteractionAnimation() {
         mHeaderView.startNoUserInteractionAnimation();
@@ -667,6 +674,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Rebind any listeners
             mHeaderView.mApplicationIcon.setOnClickListener(this);
             mHeaderView.mDismissButton.setOnClickListener(this);
+            if (mConfig.multiStackEnabled) {
+                mHeaderView.mMoveTaskButton.setOnClickListener(this);
+            }
             mActionButtonView.setOnClickListener(this);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 if (mConfig.developerOptionsEnabled) {
@@ -687,6 +697,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Unbind any listeners
             mHeaderView.mApplicationIcon.setOnClickListener(null);
             mHeaderView.mDismissButton.setOnClickListener(null);
+            if (mConfig.multiStackEnabled) {
+                mHeaderView.mMoveTaskButton.setOnClickListener(null);
+            }
             mActionButtonView.setOnClickListener(null);
             if (Constants.DebugFlags.App.EnableDevAppInfoOnLongPress) {
                 mHeaderView.mApplicationIcon.setOnLongClickListener(null);
@@ -695,9 +708,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mTaskDataLoaded = false;
     }
 
-    /** Enables/disables handling touch on this task view. */
-    void setTouchEnabled(boolean enabled) {
-        setOnClickListener(enabled ? this : null);
+    @Override
+    public void onMultiStackDebugTaskStackIdChanged() {
+        mHeaderView.rebindToTask(mTask);
     }
 
     /**** View.OnClickListener Implementation ****/
@@ -717,6 +730,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                         }
                     } else if (v == mHeaderView.mDismissButton) {
                         dismissTask();
+                    } else if (v == mHeaderView.mMoveTaskButton) {
+                        if (mCb != null) {
+                            mCb.onMultiStackMoveTask(tv);
+                        }
                     }
                 }
             }, 125);

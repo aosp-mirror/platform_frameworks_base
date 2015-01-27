@@ -20,7 +20,7 @@
         <item name="android:windowAnimationStyle">@style/Animation.RecentsActivity</item>
     </style>
 
-    <style name="RecentsTheme" parent="@android:style/Theme">
+    <style name="RecentsTheme" parent="@android:style/Theme.Material.Light">
         <!-- NoTitle -->
         <item name="android:windowNoTitle">true</item>
         <!-- Misc -->
