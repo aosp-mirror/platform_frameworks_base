@@ -437,6 +437,35 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot?>training/transitions/index.html"
+             description=
+             "How to animate state changes in a view hierarchy using transitions."
+            >Animating Views Using Scenes and Transitions</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/transitions/overview.html">
+            The Transitions Framework
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/transitions/scenes.html">
+            Creating a Scene
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/transitions/transitions.html">
+            Applying a Transition
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/transitions/custom-transitions.html">
+            Creating Custom Transitions
+          </a>
+          </li>
+
+        </ul>
+      </li>
+
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>training/animation/index.html"
              description=
