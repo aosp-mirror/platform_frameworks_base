@@ -8709,10 +8709,8 @@ public final class ContactsContract {
              * dialog to chose an account
              * <p>
              * Type: {@link Account}
-             *
-             * @hide
              */
-            public static final String ACCOUNT = "com.android.contacts.extra.ACCOUNT";
+            public static final String EXTRA_ACCOUNT = "android.provider.extra.ACCOUNT";
 
             /**
              * Used to specify the data set within the account in which to create the
@@ -8722,10 +8720,8 @@ public final class ContactsContract {
              * created in the base account, with no data set.
              * <p>
              * Type: String
-             *
-             * @hide
              */
-            public static final String DATA_SET = "com.android.contacts.extra.DATA_SET";
+            public static final String EXTRA_DATA_SET = "android.provider.extra.DATA_SET";
         }
     }
 }
