@@ -32,16 +32,19 @@ abstract public class MidiPort implements Closeable {
     private final int mPortNumber;
 
     /**
-     * Minimum size of packed message as sent through our ParcelFileDescriptor
-     * 8 bytes for timestamp and 1 to 3 bytes for message
+     * Maximum size of a packet that can pass through our ParcelFileDescriptor
      */
-    protected static final int MIN_PACKED_MESSAGE_SIZE = 9;
+    protected static final int MAX_PACKET_SIZE = 1024;
 
     /**
-     * Maximum size of packed message as sent through our ParcelFileDescriptor
-     * 8 bytes for timestamp and 1 to 3 bytes for message
+     * size of message timestamp in bytes
      */
-    protected static final int MAX_PACKED_MESSAGE_SIZE = 11;
+    private static final int TIMESTAMP_SIZE = 8;
+
+    /**
+     * Maximum amount of MIDI data that can be included in a packet
+     */
+    public static final int MAX_PACKET_DATA_SIZE = MAX_PACKET_SIZE - TIMESTAMP_SIZE;
 
 
   /* package */ MidiPort(int portNumber) {
@@ -76,49 +79,52 @@ abstract public class MidiPort implements Closeable {
      */
     protected static int packMessage(byte[] message, int offset, int size, long timestamp,
             byte[] dest) {
-        // pack variable length message first
+        if (size + TIMESTAMP_SIZE > MAX_PACKET_SIZE) {
+            size = MAX_PACKET_SIZE - TIMESTAMP_SIZE;
+        }
+        // message data goes first
         System.arraycopy(message, offset, dest, 0, size);
-        int destOffset = size;
-        // timestamp takes 8 bytes
-        for (int i = 0; i < 8; i++) {
-            dest[destOffset++] = (byte)timestamp;
+
+        // followed by timestamp
+        for (int i = 0; i < TIMESTAMP_SIZE; i++) {
+            dest[size++] = (byte)timestamp;
             timestamp >>= 8;
         }
 
-        return destOffset;
+        return size;
     }
 
     /**
-     * Utility function for unpacking a MIDI message to be sent through our ParcelFileDescriptor
-     * returns the offet of of MIDI message in packed buffer
+     * Utility function for unpacking a MIDI message received from our ParcelFileDescriptor
+     * returns the offset of the MIDI message in packed buffer
      */
     protected static int getMessageOffset(byte[] buffer, int bufferLength) {
-        // message is at start of buffer
+        // message is at the beginning
         return 0;
     }
 
     /**
-     * Utility function for unpacking a MIDI message to be sent through our ParcelFileDescriptor
-     * returns size of MIDI message in packed buffer
+     * Utility function for unpacking a MIDI message received from our ParcelFileDescriptor
+     * returns size of MIDI data in packed buffer
      */
     protected static int getMessageSize(byte[] buffer, int bufferLength) {
-        // message length is total buffer length minus size of the timestamp and port number
-        return bufferLength - 8 /* sizeof(timestamp) */;
+        // message length is total buffer length minus size of the timestamp
+        return bufferLength - TIMESTAMP_SIZE;
     }
 
     /**
-     * Utility function for unpacking a MIDI message to be sent through our ParcelFileDescriptor
+     * Utility function for unpacking a MIDI message received from our ParcelFileDescriptor
      * unpacks timestamp from packed buffer
      */
     protected static long getMessageTimeStamp(byte[] buffer, int bufferLength) {
+        // timestamp is at end of the packet
+        int offset = bufferLength;
         long timestamp = 0;
 
-        // timestamp follows variable length message data
-        int dataLength = getMessageSize(buffer, bufferLength);
-        for (int i = dataLength + 7; i >= dataLength; i--) {
-            int b = (int)buffer[i] & 0xFF;
+        for (int i = 0; i < TIMESTAMP_SIZE; i++) {
+            int b = (int)buffer[--offset] & 0xFF;
             timestamp = (timestamp << 8) | b;
         }
         return timestamp;
-     }
+    }
 }

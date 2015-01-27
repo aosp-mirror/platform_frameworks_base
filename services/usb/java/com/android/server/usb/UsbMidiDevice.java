@@ -21,9 +21,9 @@ import android.hardware.usb.UsbDevice;
 import android.midi.MidiDeviceInfo;
 import android.midi.MidiDeviceServer;
 import android.midi.MidiManager;
+import android.midi.MidiPort;
 import android.midi.MidiReceiver;
 import android.midi.MidiSender;
-import android.midi.MidiUtils;
 import android.os.Bundle;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -45,7 +45,9 @@ public final class UsbMidiDevice implements Closeable {
 
     // for polling multiple FileDescriptors for MIDI events
     private final StructPollfd[] mPollFDs;
+    // streams for reading from ALSA driver
     private final FileInputStream[] mInputStreams;
+    // streams for writing to ALSA driver
     private final FileOutputStream[] mOutputStreams;
 
     public static UsbMidiDevice create(Context context, UsbDevice usbDevice, int card, int device) {
@@ -131,7 +133,7 @@ public final class UsbMidiDevice implements Closeable {
         new Thread() {
             @Override
             public void run() {
-                byte[] buffer = new byte[3];
+                byte[] buffer = new byte[MidiPort.MAX_PACKET_DATA_SIZE];
                 try {
                     boolean done = false;
                     while (!done) {
@@ -141,7 +143,8 @@ public final class UsbMidiDevice implements Closeable {
                             if ((pfd.revents & OsConstants.POLLIN) != 0) {
                                 // clear readable flag
                                 pfd.revents = 0;
-                                int count = readMessage(buffer, index);
+
+                                int count = mInputStreams[index].read(buffer);
                                 mOutputPortReceivers[index].onPost(buffer, 0, count,
                                         System.nanoTime());
                             } else if ((pfd.revents & (OsConstants.POLLERR
@@ -150,7 +153,7 @@ public final class UsbMidiDevice implements Closeable {
                             }
                         }
 
-                        // poll if none are readable
+                        // wait until we have a readable port
                         Os.poll(mPollFDs, -1 /* infinite timeout */);
                      }
                 } catch (IOException e) {
@@ -172,26 +175,6 @@ public final class UsbMidiDevice implements Closeable {
         for (int i = 0; i < mOutputStreams.length; i++) {
             mOutputStreams[i].close();
         }
-    }
-
-    private int readMessage(byte[] buffer, int index) throws IOException {
-        FileInputStream inputStream = mInputStreams[index];
-
-        if (inputStream.read(buffer, 0, 1) != 1) {
-            Log.e(TAG, "could not read command byte");
-            return -1;
-        }
-        int dataSize = MidiUtils.getMessageDataSize(buffer[0]);
-        if (dataSize < 0) {
-            return -1;
-        }
-        if (dataSize > 0) {
-            if (inputStream.read(buffer, 1, dataSize) != dataSize) {
-                Log.e(TAG, "could not read command data");
-                return -1;
-            }
-        }
-        return dataSize + 1;
     }
 
     private static native int nativeGetSubdeviceCount(int card, int device);
