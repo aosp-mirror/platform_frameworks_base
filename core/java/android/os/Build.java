@@ -597,6 +597,11 @@ public class Build {
          * Lollipop with an extra sugar coating on the outside!
          */
         public static final int LOLLIPOP_MR1 = 22;
+
+        /**
+         * M comes after L.
+         */
+        public static final int MNC = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */
