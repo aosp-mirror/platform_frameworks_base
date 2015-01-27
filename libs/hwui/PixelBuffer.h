@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_PIXEL_BUFFER_H
 
 #include <GLES3/gl3.h>
+#include <cutils/log.h>
 
 namespace android {
 namespace uirenderer {

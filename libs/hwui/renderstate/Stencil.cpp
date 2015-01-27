@@ -17,7 +17,7 @@
 #include "Debug.h"
 #include "Extensions.h"
 #include "Properties.h"
-#include "Stencil.h"
+#include "renderstate/Stencil.h"
 
 #include <GLES2/gl2ext.h>
 

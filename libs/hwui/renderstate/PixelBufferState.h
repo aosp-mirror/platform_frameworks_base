@@ -13,33 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef RENDERSTATE_SCISSOR_H
-#define RENDERSTATE_SCISSOR_H
+#ifndef RENDERSTATE_PIXELBUFFERSTATE_H
+#define RENDERSTATE_PIXELBUFFERSTATE_H
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include <GLES3/gl3.h>
 
 namespace android {
 namespace uirenderer {
 
-class Scissor {
-    friend class RenderState;
+class PixelBufferState {
+    friend class Caches; // TODO: move to RenderState
 public:
-    bool setEnabled(bool enabled);
-    bool set(GLint x, GLint y, GLint width, GLint height);
-    void reset();
-    bool isEnabled() { return mEnabled; }
+    bool bind(GLuint buffer);
+    bool unbind();
 private:
-    Scissor();
-    void invalidate();
-    bool mEnabled;
-    GLint mScissorX;
-    GLint mScissorY;
-    GLint mScissorWidth;
-    GLint mScissorHeight;
+    PixelBufferState();
+    GLuint mCurrentPixelBuffer;
 };
 
 } /* namespace uirenderer */
 } /* namespace android */
 
-#endif // RENDERSTATE_SCISSOR_H
+#endif // RENDERSTATE_PIXELBUFFERSTATE_H

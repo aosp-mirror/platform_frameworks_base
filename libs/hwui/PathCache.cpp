@@ -31,7 +31,6 @@
 #include "PathCache.h"
 
 #include "thread/Signal.h"
-#include "thread/Task.h"
 #include "thread/TaskProcessor.h"
 
 namespace android {

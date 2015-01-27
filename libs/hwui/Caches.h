@@ -21,7 +21,27 @@
     #define LOG_TAG "OpenGLRenderer"
 #endif
 
+
+#include "AssetAtlas.h"
+#include "Dither.h"
+#include "Extensions.h"
+#include "FboCache.h"
+#include "GradientCache.h"
+#include "LayerCache.h"
+#include "PatchCache.h"
+#include "ProgramCache.h"
+#include "PathCache.h"
+#include "RenderBufferCache.h"
+#include "renderstate/PixelBufferState.h"
+#include "ResourceCache.h"
+#include "TessellationCache.h"
+#include "TextDropShadowCache.h"
+#include "TextureCache.h"
+#include "thread/TaskProcessor.h"
+#include "thread/TaskManager.h"
+
 #include <vector>
+#include <memory>
 
 #include <GLES3/gl3.h>
 
@@ -32,25 +52,6 @@
 #include <cutils/compiler.h>
 
 #include <SkPath.h>
-
-#include "thread/TaskProcessor.h"
-#include "thread/TaskManager.h"
-
-#include "AssetAtlas.h"
-#include "Extensions.h"
-#include "TextureCache.h"
-#include "LayerCache.h"
-#include "RenderBufferCache.h"
-#include "GradientCache.h"
-#include "PatchCache.h"
-#include "ProgramCache.h"
-#include "PathCache.h"
-#include "TessellationCache.h"
-#include "TextDropShadowCache.h"
-#include "FboCache.h"
-#include "ResourceCache.h"
-#include "Stencil.h"
-#include "Dither.h"
 
 namespace android {
 namespace uirenderer {
@@ -64,29 +65,6 @@ class GammaFontRenderer;
 // GL ES 2.0 defines that at least 16 texture units must be supported
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
 
-// Maximum number of quads that pre-allocated meshes can draw
-static const uint32_t gMaxNumberOfQuads = 2048;
-
-// Generates simple and textured vertices
-#define FV(x, y, u, v) { x, y, u, v }
-
-// This array is never used directly but used as a memcpy source in the
-// OpenGLRenderer constructor
-static const TextureVertex gMeshVertices[] = {
-        FV(0.0f, 0.0f, 0.0f, 0.0f),
-        FV(1.0f, 0.0f, 1.0f, 0.0f),
-        FV(0.0f, 1.0f, 0.0f, 1.0f),
-        FV(1.0f, 1.0f, 1.0f, 1.0f)
-};
-static const GLsizei gMeshStride = sizeof(TextureVertex);
-static const GLsizei gVertexStride = sizeof(Vertex);
-static const GLsizei gAlphaVertexStride = sizeof(AlphaVertex);
-static const GLsizei gMeshTextureOffset = 2 * sizeof(float);
-static const GLsizei gVertexAlphaOffset = 2 * sizeof(float);
-static const GLsizei gVertexAAWidthOffset = 2 * sizeof(float);
-static const GLsizei gVertexAALengthOffset = 3 * sizeof(float);
-static const GLsizei gMeshCount = 4;
-
 // Must define as many texture units as specified by REQUIRED_TEXTURE_UNITS_COUNT
 static const GLenum gTextureUnits[] = {
     GL_TEXTURE0,
@@ -95,28 +73,31 @@ static const GLenum gTextureUnits[] = {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Debug
-///////////////////////////////////////////////////////////////////////////////
-
-struct CacheLogger {
-    CacheLogger() {
-        INIT_LOGD("Creating OpenGL renderer caches");
-    }
-}; // struct CacheLogger
-
-///////////////////////////////////////////////////////////////////////////////
 // Caches
 ///////////////////////////////////////////////////////////////////////////////
 
 class RenderNode;
 class RenderState;
 
-class ANDROID_API Caches: public Singleton<Caches> {
-    Caches();
+class ANDROID_API Caches {
+public:
+    static Caches& createInstance(RenderState& renderState) {
+        LOG_ALWAYS_FATAL_IF(sInstance, "double create of Caches attempted");
+        sInstance = new Caches(renderState);
+        return *sInstance;
+    }
 
-    friend class Singleton<Caches>;
+    static Caches& getInstance() {
+        LOG_ALWAYS_FATAL_IF(!sInstance, "instance not yet created");
+        return *sInstance;
+    }
 
-    CacheLogger mLogger;
+    static bool hasInstance() {
+        return sInstance != 0;
+    }
+private:
+    Caches(RenderState& renderState);
+    static Caches* sInstance;
 
 public:
     enum FlushMode {
@@ -134,8 +115,6 @@ public:
      * Initialize global system properties.
      */
     bool initProperties();
-
-    void setRenderState(RenderState* renderState) { mRenderState = renderState; }
 
     /**
      * Flush the cache.
@@ -175,59 +154,6 @@ public:
      */
     void deleteLayerDeferred(Layer* layer);
 
-    /**
-     * Binds the VBO used to render simple textured quads.
-     */
-    bool bindMeshBuffer();
-
-    /**
-     * Binds the specified VBO if needed.
-     */
-    bool bindMeshBuffer(const GLuint buffer);
-
-    /**
-     * Unbinds the VBO used to render simple textured quads.
-     */
-    bool unbindMeshBuffer();
-
-    /**
-     * Binds a global indices buffer that can draw up to
-     * gMaxNumberOfQuads quads.
-     */
-    bool bindQuadIndicesBuffer();
-    bool bindShadowIndicesBuffer();
-    bool unbindIndicesBuffer();
-
-    /**
-     * Binds the specified buffer as the current GL unpack pixel buffer.
-     */
-    bool bindPixelBuffer(const GLuint buffer);
-
-    /**
-     * Resets the current unpack pixel buffer to 0 (default value.)
-     */
-    bool unbindPixelBuffer();
-
-    /**
-     * Binds an attrib to the specified float vertex pointer.
-     * Assumes a stride of gMeshStride and a size of 2.
-     */
-    void bindPositionVertexPointer(bool force, const GLvoid* vertices, GLsizei stride = gMeshStride);
-
-    /**
-     * Binds an attrib to the specified float vertex pointer.
-     * Assumes a stride of gMeshStride and a size of 2.
-     */
-    void bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, GLsizei stride = gMeshStride);
-
-    /**
-     * Resets the vertex pointers.
-     */
-    void resetVertexPointers();
-    void resetTexCoordsVertexPointer();
-
-    void enableTexCoordsVertexArray();
-    void disableTexCoordsVertexArray();
 
     /**
      * Activate the specified texture unit. The texture unit must
@@ -300,9 +226,6 @@ public:
     bool drawDeferDisabled;
     bool drawReorderDisabled;
 
-    // VBO to draw with
-    GLuint meshBuffer;
-
     // Misc
     GLint maxTextureSize;
 
@@ -333,7 +256,6 @@ public:
     TaskManager tasks;
 
     Dither dither;
-    Stencil stencil;
 
     bool gpuPixelBuffersEnabled;
 
@@ -356,6 +278,8 @@ public:
     int propertyAmbientShadowStrength;
     int propertySpotShadowStrength;
 
+    PixelBufferState& pixelBuffer() { return *mPixelBufferState; }
+
 private:
     enum OverdrawColorSet {
         kColorSet_Default = 0,
@@ -366,8 +290,6 @@ private:
     void initExtensions();
     void initConstraints();
     void initStaticProperties();
-
-    bool bindIndicesBufferInternal(const GLuint buffer);
 
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }
@@ -381,15 +303,9 @@ private:
         if (label) *label = '\0';
     }
 
-    GLuint mCurrentBuffer;
-    GLuint mCurrentIndicesBuffer;
-    GLuint mCurrentPixelBuffer;
-    const void* mCurrentPositionPointer;
-    GLsizei mCurrentPositionStride;
-    const void* mCurrentTexCoordsPointer;
-    GLsizei mCurrentTexCoordsStride;
+    RenderState* mRenderState;
 
-    bool mTexCoordsArrayEnabled;
+    std::unique_ptr<PixelBufferState> mPixelBufferState; // TODO: move to RenderState
 
     GLuint mTextureUnit;
 
@@ -397,10 +313,6 @@ private:
 
     // Used to render layers
     std::unique_ptr<TextureVertex[]> mRegionMesh;
-
-    // Global index buffer
-    GLuint mMeshIndices;
-    GLuint mShadowStripsIndices;
 
     mutable Mutex mGarbageLock;
     Vector<Layer*> mLayerGarbage;
@@ -414,8 +326,6 @@ private:
     GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
 
     OverdrawColorSet mOverdrawDebugColorSet;
-
-    RenderState* mRenderState;
 }; // class Caches
 
 }; // namespace uirenderer

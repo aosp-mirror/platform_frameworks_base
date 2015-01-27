@@ -23,6 +23,7 @@
 #include "Patch.h"
 #include "PatchCache.h"
 #include "Properties.h"
+#include "renderstate/RenderState.h"
 
 namespace android {
 namespace uirenderer {
@@ -31,9 +32,13 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-PatchCache::PatchCache():
-        mSize(0), mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity),
-        mMeshBuffer(0), mFreeBlocks(nullptr), mGenerationId(0) {
+PatchCache::PatchCache(RenderState& renderState)
+        : mRenderState(renderState)
+        , mSize(0)
+        , mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity)
+        , mMeshBuffer(0)
+        , mFreeBlocks(nullptr)
+        , mGenerationId(0) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_PATCH_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting patch cache size to %skB", property);
@@ -48,15 +53,15 @@ PatchCache::~PatchCache() {
     clear();
 }
 
-void PatchCache::init(Caches& caches) {
+void PatchCache::init() {
     bool created = false;
     if (!mMeshBuffer) {
         glGenBuffers(1, &mMeshBuffer);
         created = true;
     }
 
-    caches.bindMeshBuffer(mMeshBuffer);
-    caches.resetVertexPointers();
+    mRenderState.meshState().bindMeshBuffer(mMeshBuffer);
+    mRenderState.meshState().resetVertexPointers();
 
     if (created) {
         createVertexBuffer();
@@ -85,7 +90,7 @@ void PatchCache::clear() {
     clearCache();
 
     if (mMeshBuffer) {
-        Caches::getInstance().unbindMeshBuffer();
+        mRenderState.meshState().unbindMeshBuffer();
         glDeleteBuffers(1, &mMeshBuffer);
         mMeshBuffer = 0;
         mSize = 0;
@@ -187,7 +192,7 @@ void PatchCache::createVertexBuffer() {
  */
 void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
     // This call ensures the VBO exists and that it is bound
-    init(Caches::getInstance());
+    init();
 
     // If we're running out of space, let's clear the entire cache
     uint32_t size = newMesh->getSize();
@@ -219,7 +224,7 @@ void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
 
     // Copy the 9patch mesh in the VBO
     newMesh->offset = (GLintptr) (block->offset);
-    newMesh->textureOffset = newMesh->offset + gMeshTextureOffset;
+    newMesh->textureOffset = newMesh->offset + kMeshTextureOffset;
     glBufferSubData(GL_ARRAY_BUFFER, newMesh->offset, size, vertices);
 
     // Remove the block since we've used it entirely

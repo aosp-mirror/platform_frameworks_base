@@ -29,11 +29,9 @@
 #include <utils/String8.h>
 
 namespace android {
-
-using namespace uirenderer;
-ANDROID_SINGLETON_STATIC_INSTANCE(Caches);
-
 namespace uirenderer {
+
+Caches* Caches::sInstance = nullptr;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Macros
@@ -49,8 +47,12 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Caches::Caches(): Singleton<Caches>(),
-        mExtensions(Extensions::getInstance()), mInitialized(false), mRenderState(nullptr) {
+Caches::Caches(RenderState& renderState)
+        : patchCache(renderState)
+        , mRenderState(&renderState)
+        , mExtensions(Extensions::getInstance())
+        , mInitialized(false) {
+    INIT_LOGD("Creating OpenGL renderer caches");
     init();
     initFont();
     initConstraints();
@@ -60,7 +62,8 @@ Caches::Caches(): Singleton<Caches>(),
     initTempProperties();
 
     mDebugLevel = readDebugLevel();
-    ALOGD("Enabling debug mode %d", mDebugLevel);
+    ALOGD_IF(mDebugLevel != kDebugDisabled,
+            "Enabling debug mode %d", mDebugLevel);
 }
 
 bool Caches::init() {
@@ -68,25 +71,10 @@ bool Caches::init() {
 
     ATRACE_NAME("Caches::init");
 
-    glGenBuffers(1, &meshBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
-
-    mCurrentBuffer = meshBuffer;
-    mCurrentIndicesBuffer = 0;
-    mCurrentPositionPointer = this;
-    mCurrentPositionStride = 0;
-    mCurrentTexCoordsPointer = this;
-    mCurrentPixelBuffer = 0;
-
-    mTexCoordsArrayEnabled = false;
-
     glActiveTexture(gTextureUnits[0]);
     mTextureUnit = 0;
 
     mRegionMesh = nullptr;
-    mMeshIndices = 0;
-    mShadowStripsIndices = 0;
     blend = false;
     lastSrcMode = GL_ZERO;
     lastDstMode = GL_ZERO;
@@ -98,11 +86,12 @@ bool Caches::init() {
     debugOverdraw = false;
     debugStencilClip = kStencilHide;
 
-    patchCache.init(*this);
+    patchCache.init();
 
     mInitialized = true;
 
     resetBoundTextures();
+    mPixelBufferState.reset(new PixelBufferState());
 
     return true;
 }
@@ -216,16 +205,7 @@ bool Caches::initProperties() {
 
 void Caches::terminate() {
     if (!mInitialized) return;
-
-    glDeleteBuffers(1, &meshBuffer);
-    mCurrentBuffer = 0;
-
-    glDeleteBuffers(1, &mMeshIndices);
-    mMeshIndices = 0;
     mRegionMesh.release();
-
-    glDeleteBuffers(1, &mShadowStripsIndices);
-    mShadowStripsIndices = 0;
 
     fboCache.clear();
 
@@ -235,6 +215,8 @@ void Caches::terminate() {
     patchCache.clear();
 
     clearGarbage();
+
+    mPixelBufferState.release();
 
     mInitialized = false;
 }
@@ -366,154 +348,8 @@ void Caches::flush(FlushMode mode) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// VBO
+// Textures
 ///////////////////////////////////////////////////////////////////////////////
-
-bool Caches::bindMeshBuffer() {
-    return bindMeshBuffer(meshBuffer);
-}
-
-bool Caches::bindMeshBuffer(const GLuint buffer) {
-    if (mCurrentBuffer != buffer) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        mCurrentBuffer = buffer;
-        return true;
-    }
-    return false;
-}
-
-bool Caches::unbindMeshBuffer() {
-    if (mCurrentBuffer) {
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        mCurrentBuffer = 0;
-        return true;
-    }
-    return false;
-}
-
-bool Caches::bindIndicesBufferInternal(const GLuint buffer) {
-    if (mCurrentIndicesBuffer != buffer) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-        mCurrentIndicesBuffer = buffer;
-        return true;
-    }
-    return false;
-}
-
-bool Caches::bindQuadIndicesBuffer() {
-    if (!mMeshIndices) {
-        std::unique_ptr<uint16_t[]> regionIndices(new uint16_t[gMaxNumberOfQuads * 6]);
-        for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
-            uint16_t quad = i * 4;
-            int index = i * 6;
-            regionIndices[index    ] = quad;       // top-left
-            regionIndices[index + 1] = quad + 1;   // top-right
-            regionIndices[index + 2] = quad + 2;   // bottom-left
-            regionIndices[index + 3] = quad + 2;   // bottom-left
-            regionIndices[index + 4] = quad + 1;   // top-right
-            regionIndices[index + 5] = quad + 3;   // bottom-right
-        }
-
-        glGenBuffers(1, &mMeshIndices);
-        bool force = bindIndicesBufferInternal(mMeshIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, gMaxNumberOfQuads * 6 * sizeof(uint16_t),
-                regionIndices.get(), GL_STATIC_DRAW);
-        return force;
-    }
-
-    return bindIndicesBufferInternal(mMeshIndices);
-}
-
-bool Caches::bindShadowIndicesBuffer() {
-    if (!mShadowStripsIndices) {
-        std::unique_ptr<uint16_t[]> shadowIndices(new uint16_t[MAX_SHADOW_INDEX_COUNT]);
-        ShadowTessellator::generateShadowIndices(shadowIndices.get());
-        glGenBuffers(1, &mShadowStripsIndices);
-        bool force = bindIndicesBufferInternal(mShadowStripsIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_SHADOW_INDEX_COUNT * sizeof(uint16_t),
-            shadowIndices.get(), GL_STATIC_DRAW);
-        return force;
-    }
-
-    return bindIndicesBufferInternal(mShadowStripsIndices);
-}
-
-bool Caches::unbindIndicesBuffer() {
-    if (mCurrentIndicesBuffer) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        mCurrentIndicesBuffer = 0;
-        return true;
-    }
-    return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PBO
-///////////////////////////////////////////////////////////////////////////////
-
-bool Caches::bindPixelBuffer(const GLuint buffer) {
-    if (mCurrentPixelBuffer != buffer) {
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
-        mCurrentPixelBuffer = buffer;
-        return true;
-    }
-    return false;
-}
-
-bool Caches::unbindPixelBuffer() {
-    if (mCurrentPixelBuffer) {
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        mCurrentPixelBuffer = 0;
-        return true;
-    }
-    return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Meshes and textures
-///////////////////////////////////////////////////////////////////////////////
-
-void Caches::bindPositionVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
-    if (force || vertices != mCurrentPositionPointer || stride != mCurrentPositionStride) {
-        GLuint slot = currentProgram->position;
-        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
-        mCurrentPositionPointer = vertices;
-        mCurrentPositionStride = stride;
-    }
-}
-
-void Caches::bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
-    if (force || vertices != mCurrentTexCoordsPointer || stride != mCurrentTexCoordsStride) {
-        GLuint slot = currentProgram->texCoords;
-        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
-        mCurrentTexCoordsPointer = vertices;
-        mCurrentTexCoordsStride = stride;
-    }
-}
-
-void Caches::resetVertexPointers() {
-    mCurrentPositionPointer = this;
-    mCurrentTexCoordsPointer = this;
-}
-
-void Caches::resetTexCoordsVertexPointer() {
-    mCurrentTexCoordsPointer = this;
-}
-
-void Caches::enableTexCoordsVertexArray() {
-    if (!mTexCoordsArrayEnabled) {
-        glEnableVertexAttribArray(Program::kBindingTexCoords);
-        mCurrentTexCoordsPointer = this;
-        mTexCoordsArrayEnabled = true;
-    }
-}
-
-void Caches::disableTexCoordsVertexArray() {
-    if (mTexCoordsArrayEnabled) {
-        glDisableVertexAttribArray(Program::kBindingTexCoords);
-        mTexCoordsArrayEnabled = false;
-    }
-}
 
 void Caches::activeTexture(GLuint textureUnit) {
     if (mTextureUnit != textureUnit) {
@@ -614,7 +450,7 @@ void Caches::unregisterFunctors(uint32_t functorCount) {
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
-        mRegionMesh.reset(new TextureVertex[gMaxNumberOfQuads * 4]);
+        mRegionMesh.reset(new TextureVertex[kMaxNumberOfQuads * 4]);
     }
 
     return mRegionMesh.get();

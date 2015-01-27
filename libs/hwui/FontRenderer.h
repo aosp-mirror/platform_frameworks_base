@@ -17,7 +17,12 @@
 #ifndef ANDROID_HWUI_FONT_RENDERER_H
 #define ANDROID_HWUI_FONT_RENDERER_H
 
-#include <utils/Functor.h>
+#include "font/FontUtil.h"
+#include "font/CacheTexture.h"
+#include "font/CachedGlyphInfo.h"
+#include "font/Font.h"
+#include "utils/SortedList.h"
+
 #include <utils/LruCache.h>
 #include <utils/Vector.h>
 #include <utils/StrongPointer.h>
@@ -25,12 +30,6 @@
 #include <SkPaint.h>
 
 #include <GLES2/gl2.h>
-
-#include "font/FontUtil.h"
-#include "font/CacheTexture.h"
-#include "font/CachedGlyphInfo.h"
-#include "font/Font.h"
-#include "utils/SortedList.h"
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
 #include "RenderScript.h"
@@ -47,26 +46,20 @@ namespace uirenderer {
 
 class OpenGLRenderer;
 
-///////////////////////////////////////////////////////////////////////////////
-// TextSetupFunctor
-///////////////////////////////////////////////////////////////////////////////
-class TextSetupFunctor: public Functor {
+class TextSetupFunctor {
 public:
-    struct Data {
-        Data(GLenum glyphFormat) : glyphFormat(glyphFormat) {
-        }
-
-        GLenum glyphFormat;
-    };
-
     TextSetupFunctor(OpenGLRenderer* renderer, float x, float y, bool pureTranslate,
-            int alpha, SkXfermode::Mode mode, const SkPaint* paint): Functor(),
-            renderer(renderer), x(x), y(y), pureTranslate(pureTranslate),
-            alpha(alpha), mode(mode), paint(paint) {
+            int alpha, SkXfermode::Mode mode, const SkPaint* paint)
+        : renderer(renderer)
+        , x(x)
+        , y(y)
+        , pureTranslate(pureTranslate)
+        , alpha(alpha)
+        , mode(mode)
+        , paint(paint) {
     }
-    ~TextSetupFunctor() { }
 
-    status_t operator ()(int what, void* data) override;
+    status_t setup(GLenum glyphFormat);
 
     OpenGLRenderer* renderer;
     float x;
@@ -76,10 +69,6 @@ public:
     SkXfermode::Mode mode;
     const SkPaint* paint;
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// FontRenderer
-///////////////////////////////////////////////////////////////////////////////
 
 class FontRenderer {
 public:
@@ -101,22 +90,14 @@ public:
     // bounds is an out parameter
     bool renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
             uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y, const float* positions,
-            Rect* bounds, Functor* functor, bool forceFinish = true);
+            Rect* bounds, TextSetupFunctor* functor, bool forceFinish = true);
 
     // bounds is an out parameter
     bool renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
             uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-            float hOffset, float vOffset, Rect* bounds, Functor* functor);
+            float hOffset, float vOffset, Rect* bounds, TextSetupFunctor* functor);
 
     struct DropShadow {
-        DropShadow() { };
-
-        DropShadow(const DropShadow& dropShadow):
-            width(dropShadow.width), height(dropShadow.height),
-            image(dropShadow.image), penX(dropShadow.penX),
-            penY(dropShadow.penY) {
-        }
-
         uint32_t width;
         uint32_t height;
         uint8_t* image;
@@ -152,7 +133,7 @@ private:
     void flushAllAndInvalidate();
 
     void checkInit();
-    void initRender(const Rect* clip, Rect* bounds, Functor* functor);
+    void initRender(const Rect* clip, Rect* bounds, TextSetupFunctor* functor);
     void finishRender();
 
     void issueDrawCommand(Vector<CacheTexture*>& cacheTextures);
@@ -193,7 +174,7 @@ private:
 
     bool mUploadTexture;
 
-    Functor* mFunctor;
+    TextSetupFunctor* mFunctor;
     const Rect* mClip;
     Rect* mBounds;
     bool mDrawn;

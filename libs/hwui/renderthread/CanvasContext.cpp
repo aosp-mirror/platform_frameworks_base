@@ -22,9 +22,9 @@
 #include "../Caches.h"
 #include "../DeferredLayerUpdater.h"
 #include "../renderstate/RenderState.h"
+#include "../renderstate/Stencil.h"
 #include "../LayerRenderer.h"
 #include "../OpenGLRenderer.h"
-#include "../Stencil.h"
 
 #include <algorithm>
 #include <private/hwui/DrawGlInfo.h>

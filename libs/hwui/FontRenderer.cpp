@@ -14,7 +14,17 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
+#include "FontRenderer.h"
+
+#include "Caches.h"
+#include "Debug.h"
+#include "Extensions.h"
+#include "OpenGLRenderer.h"
+#include "PixelBuffer.h"
+#include "Rect.h"
+#include "renderstate/RenderState.h"
+#include "utils/Blur.h"
+#include "utils/Timing.h"
 
 #include <SkGlyph.h>
 #include <SkUtils.h>
@@ -27,17 +37,6 @@
 #include <RenderScript.h>
 #endif
 
-#include "utils/Blur.h"
-#include "utils/Timing.h"
-
-#include "Caches.h"
-#include "Debug.h"
-#include "Extensions.h"
-#include "FontRenderer.h"
-#include "OpenGLRenderer.h"
-#include "PixelBuffer.h"
-#include "Rect.h"
-
 namespace android {
 namespace uirenderer {
 
@@ -47,9 +46,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // TextSetupFunctor
 ///////////////////////////////////////////////////////////////////////////////
-status_t TextSetupFunctor::operator ()(int what, void* data) {
-    Data* typedData = reinterpret_cast<Data*>(data);
-    GLenum glyphFormat = typedData ? typedData->glyphFormat : GL_ALPHA;
+status_t TextSetupFunctor::setup(GLenum glyphFormat) {
 
     renderer->setupDraw();
     renderer->setupDrawTextGamma(paint);
@@ -397,7 +394,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
 CacheTexture* FontRenderer::createCacheTexture(int width, int height, GLenum format,
         bool allocate) {
-    CacheTexture* cacheTexture = new CacheTexture(width, height, format, gMaxNumberOfQuads);
+    CacheTexture* cacheTexture = new CacheTexture(width, height, format, kMaxNumberOfQuads);
 
     if (allocate) {
         Caches::getInstance().activeTexture(0);
@@ -473,7 +470,7 @@ void FontRenderer::checkTextureUpdate() {
     checkTextureUpdateForCache(caches, mRGBACacheTextures, resetPixelStore, lastTextureId);
 
     // Unbind any PBO we might have used to update textures
-    caches.unbindPixelBuffer();
+    caches.pixelBuffer().unbind();
 
     // Reset to default unpack row length to avoid affecting texture
     // uploads in other parts of the renderer
@@ -485,26 +482,29 @@ void FontRenderer::checkTextureUpdate() {
 }
 
 void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
-    Caches& caches = Caches::getInstance();
+    if (!mFunctor) return;
+
+    Caches& caches = mFunctor->renderer->getCaches();
+    RenderState& renderState = mFunctor->renderer->renderState();
+
     bool first = true;
-    bool force = false;
+    bool forceRebind = false;
     for (uint32_t i = 0; i < cacheTextures.size(); i++) {
         CacheTexture* texture = cacheTextures[i];
         if (texture->canDraw()) {
             if (first) {
                 if (mFunctor) {
-                    TextSetupFunctor::Data functorData(texture->getFormat());
-                    (*mFunctor)(0, &functorData);
+                    mFunctor->setup(texture->getFormat());
                 }
 
                 checkTextureUpdate();
-                caches.bindQuadIndicesBuffer();
+                renderState.meshState().bindQuadIndicesBuffer();
 
                 if (!mDrawn) {
                     // If returns true, a VBO was bound and we must
                     // rebind our vertex attrib pointers even if
                     // they have the same values as the current pointers
-                    force = caches.unbindMeshBuffer();
+                    forceRebind = renderState.meshState().unbindMeshBuffer();
                 }
 
                 caches.activeTexture(0);
@@ -515,14 +515,16 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
             texture->setLinearFiltering(mLinearFiltering, false);
 
             TextureVertex* mesh = texture->mesh();
-            caches.bindPositionVertexPointer(force, &mesh[0].x);
-            caches.bindTexCoordsVertexPointer(force, &mesh[0].u);
-            force = false;
+            MeshState& meshState = renderState.meshState();
+            Program* program = caches.currentProgram;
+            meshState.bindPositionVertexPointer(program, forceRebind, &mesh[0].x);
+            meshState.bindTexCoordsVertexPointer(program, forceRebind, &mesh[0].u);
 
             glDrawElements(GL_TRIANGLES, texture->meshElementCount(),
                     GL_UNSIGNED_SHORT, texture->indices());
 
             texture->resetMesh();
+            forceRebind = false;
         }
     }
 }
@@ -647,7 +649,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
                 Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, nullptr, positions);
 
         // Unbind any PBO we might have used
-        Caches::getInstance().unbindPixelBuffer();
+        Caches::getInstance().pixelBuffer().unbind();
 
         blurImage(&dataBuffer, paddedWidth, paddedHeight, radius);
     }
@@ -661,7 +663,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     return image;
 }
 
-void FontRenderer::initRender(const Rect* clip, Rect* bounds, Functor* functor) {
+void FontRenderer::initRender(const Rect* clip, Rect* bounds, TextSetupFunctor* functor) {
     checkInit();
 
     mDrawn = false;
@@ -689,7 +691,7 @@ void FontRenderer::endPrecaching() {
 
 bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, int x, int y,
-        const float* positions, Rect* bounds, Functor* functor, bool forceFinish) {
+        const float* positions, Rect* bounds, TextSetupFunctor* functor, bool forceFinish) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
@@ -707,7 +709,7 @@ bool FontRenderer::renderPosText(const SkPaint* paint, const Rect* clip, const c
 
 bool FontRenderer::renderTextOnPath(const SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, const SkPath* path,
-        float hOffset, float vOffset, Rect* bounds, Functor* functor) {
+        float hOffset, float vOffset, Rect* bounds, TextSetupFunctor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
