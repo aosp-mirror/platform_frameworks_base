@@ -227,18 +227,6 @@ public class ActionBarContainer extends FrameLayout {
         return true;
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    public void addClickableRectsForAccessibility(List<RectF> outRects) {
-        // This class always consumes touch events, therefore if it
-        // covers a view we do not want to send a click over it.
-        RectF bounds = new RectF();
-        bounds.set(0, 0, getWidth(), getHeight());
-        outRects.add(bounds);
-    }
-
     @Override
     public boolean onHoverEvent(MotionEvent ev) {
         super.onHoverEvent(ev);
