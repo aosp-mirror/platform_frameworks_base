@@ -2,7 +2,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    android_media_SoundPool_SoundPoolImpl.cpp
+    android_media_SoundPool_SoundPoolImpl.cpp \
+    SoundPool.cpp \
+    SoundPoolThread.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     liblog \
@@ -10,7 +12,9 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libandroid_runtime \
     libnativehelper \
-    libmedia
+    libmedia \
+    libmediandk \
+    libbinder
 
 LOCAL_MODULE:= libsoundpool
 
