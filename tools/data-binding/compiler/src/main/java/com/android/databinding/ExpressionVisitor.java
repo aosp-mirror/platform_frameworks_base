@@ -52,9 +52,9 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
 
     @Override
     public Expr visitGrouping(@NotNull BindingExpressionParser.GroupingContext ctx) {
-        Preconditions.checkArgument(ctx.children.size() == 1, "Grouping expression should have"
-                + " only 1 child");
-        return mModel.group(ctx.children.get(0).accept(this));
+        Preconditions.checkArgument(ctx.children.size() == 3, "Grouping expression should have"
+                + " 3 children. # of children: %d", ctx.children.size());
+        return mModel.group(ctx.children.get(1).accept(this));
     }
 
     @Override

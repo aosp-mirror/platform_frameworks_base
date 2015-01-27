@@ -114,6 +114,10 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
                 "GeneratedDataBinderRenderer", jDataBinder.getLayoutBinders())
     }
 
+    public fun generatedCode() : Boolean {
+        return jDataBinder.getLayoutBinders().isNotEmpty()
+    }
+
     public fun writeAttrFile() {
         outputResDir.mkdirs()
 //        writeToFile(File(outputResDir, "bindingattrs.xml"), styler.render())
@@ -122,7 +126,9 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     public fun writeDbrFile() : Unit = writeDbrFile(dbrOutputDir)
     public fun writeDbrFile(dir : File) : Unit {
         dir.mkdirs()
-        writeToFile(File(dir, "${dbr.className}.java"), dbr.write())
+        if (dbr.layoutBinders.isNotEmpty()) {
+            writeToFile(File(dir, "${dbr.className}.java"), dbr.write())
+        }
     }
 
     public fun writeViewBinderInterfaces() : Unit = writeViewBinderInterfaces(outputDir)

@@ -60,7 +60,9 @@ public class TernaryExpr extends Expr {
     protected List<Dependency> constructDependencies() {
         List<Dependency> deps = Lists.newArrayList();
         if (mPred.isDynamic()) {
-            deps.add(new Dependency(this, mPred));
+            final Dependency pred = new Dependency(this, mPred);
+            pred.setMandatory(true);
+            deps.add(pred);
         }
         if (mIfTrue.isDynamic()) {
             deps.add(new Dependency(this, mIfTrue, mPred, true));

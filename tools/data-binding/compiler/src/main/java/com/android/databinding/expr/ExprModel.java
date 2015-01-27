@@ -45,19 +45,6 @@ public class ExprModel {
     private static final String FALSE_KEY_SUFFIX = "== false";
 
     /**
-     * This that can directly or indirectly (via field) can be notified.
-     *
-     * For instance, if "user" is a variable defined, it is an IdentifierExpr and will be in this
-     * list.
-     * If there are field accesses on this user and if this user is Observable, they'll be on this
-     * list since those fields can be invalidated individually as well.
-     *
-     * If user is not observable, its fields won't be in this list because they cannot be
-     * invalidated individually.
-     */
-    List<Expr> mNotifiableExpressions = new ArrayList<>();
-
-    /**
      * Used by code generation. Keeps the list of expressions that are waiting to be evaluated.
      */
     private List<Expr> mPendingExpressions;
@@ -198,6 +185,7 @@ public class ExprModel {
      * Give id to each expression. Will be useful if we serialize.
      */
     public void seal() {
+        List<Expr> notifiableExpressions = new ArrayList<>();
         //ensure class analyzer. We need to know observables at this point
         final ClassAnalyzer classAnalyzer = ClassAnalyzer.getInstance();
 
@@ -210,7 +198,7 @@ public class ExprModel {
             flagMapping.add(expr.getUniqueKey());
             expr.setId(counter++);
             mObservables.add(expr);
-            mNotifiableExpressions.add(expr);
+            notifiableExpressions.add(expr);
             L.d("observable %s", expr.getUniqueKey());
         }
 
@@ -219,7 +207,7 @@ public class ExprModel {
         for (Expr expr : nonObservableIds) {
             flagMapping.add(expr.getUniqueKey());
             expr.setId(counter++);
-            mNotifiableExpressions.add(expr);
+            notifiableExpressions.add(expr);
             L.d("non-observable %s", expr.getUniqueKey());
         }
 
@@ -233,7 +221,7 @@ public class ExprModel {
                 if (parent instanceof FieldAccessExpr && parent.isDynamic()) {
                     flagMapping.add(parent.getUniqueKey());
                     parent.setId(counter++);
-                    mNotifiableExpressions.add(parent);
+                    notifiableExpressions.add(parent);
                     L.d("notifiable field %s : %s for %s : %s", parent.getUniqueKey(),
                             Integer.toHexString(System.identityHashCode(parent)),
                             expr.getUniqueKey(),
@@ -241,7 +229,18 @@ public class ExprModel {
                 }
             }
         }
-        for (Expr expr : mNotifiableExpressions) {
+
+        // non-dynamic binding expressions receive some ids so that they can be invalidated
+        for (Expr expr : mBindingExpressions) {
+            Preconditions.checkState(expr.isDynamic() || !expr.hasId());
+            if (!expr.isDynamic()) {
+                // give it an id for invalidateAll
+                expr.setId(counter ++);
+                notifiableExpressions.add(expr);
+            }
+        }
+
+        for (Expr expr : notifiableExpressions) {
             expr.enableDirectInvalidation();
         }
 
@@ -327,22 +326,12 @@ public class ExprModel {
     }
 
     private Iterable<Expr> filterObservables(final ClassAnalyzer classAnalyzer) {
-//        return Iterables.filter(mExprMap.values(), new Predicate<Expr>() {
-//            @Override
-//            public boolean apply(Expr input) {
-//                return input.isDynamic() && (input.canBeInvalidated() || classAnalyzer.isObservable(input.getResolvedType()));
-//            }
-//        });
         return Iterables.filter(mExprMap.values(), new Predicate<Expr>() {
             @Override
             public boolean apply(Expr input) {
-                return input.isDynamic() && classAnalyzer.isObservable(input.getResolvedType());
+                return classAnalyzer.isObservable(input.getResolvedType());
             }
         });
-    }
-
-    public List<Expr> getNotifiableExpressions() {
-        return mNotifiableExpressions;
     }
 
     public List<Expr> getPendingExpressions() {

@@ -52,7 +52,13 @@ public class MethodCallExpr extends Expr {
 
     @Override
     protected List<Dependency> constructDependencies() {
-        return constructDynamicChildrenDependencies();
+        final List<Dependency> dependencies = constructDynamicChildrenDependencies();
+        for (Dependency dependency : dependencies) {
+            if (dependency.getOther() == mTarget) {
+                dependency.setMandatory(true);
+            }
+        }
+        return dependencies;
     }
 
     @Override

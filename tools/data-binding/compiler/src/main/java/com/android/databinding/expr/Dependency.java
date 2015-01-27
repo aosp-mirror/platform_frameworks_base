@@ -22,6 +22,10 @@ public class Dependency {
     // should get calculations
     boolean mElevated;
 
+    // this means that trying to calculate the dependant expression w/o
+    // will crash the app unless "Other" has a non-null value
+    boolean mMandatory = false;
+
     public Dependency(Expr dependant, Expr other) {
         mDependant = dependant;
         mOther = other;
@@ -36,6 +40,14 @@ public class Dependency {
         mCondition = condition;
         mOther.addDependant(this);
         mExpectedOutput = expectedOutput;
+    }
+
+    public void setMandatory(boolean mandatory) {
+        mMandatory = mandatory;
+    }
+
+    public boolean isMandatory() {
+        return mMandatory;
     }
 
     public boolean isConditional() {

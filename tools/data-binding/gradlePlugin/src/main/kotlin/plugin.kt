@@ -180,6 +180,10 @@ class DataBinderPlugin : Plugin<Project> {
         project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {
+        log("SSXX: ${parser.generatedCode()}")
+        if (!parser.generatedCode()) {
+            return
+        }
         val compiler = ToolProvider.getSystemJavaCompiler()
         val fileManager = compiler.getStandardFileManager(null, null, null)
         val javaCompileTask = variantData.javaCompileTask
