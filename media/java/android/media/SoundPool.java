@@ -543,11 +543,6 @@ public class SoundPool {
 
         public int load(String path, int priority)
         {
-            // pass network streams to player
-            if (path.startsWith("http:"))
-                return _load(path, priority);
-
-            // try local path
             int id = 0;
             try {
                 File f = new File(path);
@@ -562,6 +557,7 @@ public class SoundPool {
             return id;
         }
 
+        @Override
         public int load(Context context, int resId, int priority) {
             AssetFileDescriptor afd = context.getResources().openRawResourceFd(resId);
             int id = 0;
@@ -576,6 +572,7 @@ public class SoundPool {
             return id;
         }
 
+        @Override
         public int load(AssetFileDescriptor afd, int priority) {
             if (afd != null) {
                 long len = afd.getLength();
@@ -588,16 +585,17 @@ public class SoundPool {
             }
         }
 
+        @Override
         public int load(FileDescriptor fd, long offset, long length, int priority) {
             return _load(fd, offset, length, priority);
         }
 
-        private native final int _load(String uri, int priority);
-
         private native final int _load(FileDescriptor fd, long offset, long length, int priority);
 
+        @Override
         public native final boolean unload(int soundID);
 
+        @Override
         public final int play(int soundID, float leftVolume, float rightVolume,
                 int priority, int loop, float rate) {
             if (isRestricted()) {
@@ -620,16 +618,22 @@ public class SoundPool {
             }
         }
 
+        @Override
         public native final void pause(int streamID);
 
+        @Override
         public native final void resume(int streamID);
 
+        @Override
         public native final void autoPause();
 
+        @Override
         public native final void autoResume();
 
+        @Override
         public native final void stop(int streamID);
 
+        @Override
         public final void setVolume(int streamID, float leftVolume, float rightVolume) {
             if (isRestricted()) {
                 return;
@@ -639,16 +643,21 @@ public class SoundPool {
 
         private native final void _setVolume(int streamID, float leftVolume, float rightVolume);
 
+        @Override
         public void setVolume(int streamID, float volume) {
             setVolume(streamID, volume, volume);
         }
 
+        @Override
         public native final void setPriority(int streamID, int priority);
 
+        @Override
         public native final void setLoop(int streamID, int loop);
 
+        @Override
         public native final void setRate(int streamID, float rate);
 
+        @Override
         public void setOnLoadCompleteListener(SoundPool.OnLoadCompleteListener listener)
         {
             synchronized(mLock) {
@@ -729,52 +738,69 @@ public class SoundPool {
             return 0;
         }
 
+        @Override
         public int load(Context context, int resId, int priority) {
             return 0;
         }
 
+        @Override
         public int load(AssetFileDescriptor afd, int priority) {
             return 0;
         }
 
+        @Override
         public int load(FileDescriptor fd, long offset, long length, int priority) {
             return 0;
         }
 
+        @Override
         public final boolean unload(int soundID) {
             return true;
         }
 
+        @Override
         public final int play(int soundID, float leftVolume, float rightVolume,
                 int priority, int loop, float rate) {
             return 0;
         }
 
+        @Override
         public final void pause(int streamID) { }
 
+        @Override
         public final void resume(int streamID) { }
 
+        @Override
         public final void autoPause() { }
 
+        @Override
         public final void autoResume() { }
 
+        @Override
         public final void stop(int streamID) { }
 
+        @Override
         public final void setVolume(int streamID,
                 float leftVolume, float rightVolume) { }
 
+        @Override
         public void setVolume(int streamID, float volume) {
         }
 
+        @Override
         public final void setPriority(int streamID, int priority) { }
 
+        @Override
         public final void setLoop(int streamID, int loop) { }
 
+        @Override
         public final void setRate(int streamID, float rate) { }
 
+        @Override
         public void setOnLoadCompleteListener(SoundPool.OnLoadCompleteListener listener) {
         }
 
+        @Override
         public final void release() { }
     }
 }
