@@ -479,7 +479,7 @@ static status_t decode(int fd, int64_t offset, int64_t length,
         uint32_t *rate, int *numChannels, audio_format_t *audioFormat,
         sp<MemoryHeapBase> heap, size_t *memsize) {
 
-    ALOGV("fd %d, offset %lld, size %lld", fd, offset, length);
+    ALOGV("fd %d, offset %" PRId64 ", size %" PRId64, fd, offset, length);
     AMediaExtractor *ex = AMediaExtractor_new();
     status_t err = AMediaExtractor_setDataSourceFd(ex, fd, offset, length);
 
@@ -523,7 +523,7 @@ static status_t decode(int fd, int64_t offset, int64_t length,
             while (!sawOutputEOS) {
                 if (!sawInputEOS) {
                     ssize_t bufidx = AMediaCodec_dequeueInputBuffer(codec, 5000);
-                    ALOGV("input buffer %d", bufidx);
+                    ALOGV("input buffer %zd", bufidx);
                     if (bufidx >= 0) {
                         size_t bufsize;
                         uint8_t *buf = AMediaCodec_getInputBuffer(codec, bufidx, &bufsize);
