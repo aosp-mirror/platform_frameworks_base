@@ -1,0 +1,189 @@
+page.title=Creating Custom Transitions
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Extend">Extend the Transition Class</a></li>
+  <li><a href="#CaptureProperties">Capture View Property Values</a></li>
+  <li><a href="#CreateAnimator">Create a Custom Animator</a></li>
+  <li><a href="#Apply">Apply a Custom Transition</a></li>
+</ol>
+</div>
+</div>
+
+<p>A custom transition enables you to create an animation that is not available from any of
+the built-in transition classes. For example, you can define a custom transition that turns
+the foreground color of text and input fields to gray to indicate that the fields are disabled
+in the new screen. This type of change helps users see the fields you disabled.</p>
+
+<p>A custom transition, like one of the built-in transition types, applies animations to
+child views of both the starting and ending scenes. Unlike built-in transition types,
+however, you have to provide the code that captures property values and generates animations.
+You may also want to define a subset of target views for your animation.</p>
+
+<p>This lesson teaches you to capture property values and generate animations to create
+custom transitions.</p>
+
+
+
+<h2 id="Extend">Extend the Transition Class</h2>
+
+<p>To create a custom transition, add a class to your project that extends the {@link
+android.transition.Transition} class and override the methods shown in the following snippet:</p>
+
+<pre>
+public class CustomTransition extends Transition {
+
+    &#64;Override
+    public void captureStartValues(TransitionValues values) {}
+
+    &#64;Override
+    public void captureEndValues(TransitionValues values) {}
+
+    &#64;Override
+    public Animator createAnimator(ViewGroup sceneRoot,
+                                   TransitionValues startValues,
+                                   TransitionValues endValues) {}
+}
+</pre>
+
+<p>The following sections explain how to override these methods.</p>
+
+
+
+<h2 id="CaptureProperties">Capture View Property Values</h2>
+
+<p>Transition animations use the property animation system described in
+<a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a>. Property
+animations change a view property between a starting and ending value over a specified
+period of time, so the framework needs to have both the starting and ending value of
+the property to construct the animation.</p>
+
+<p>However, a property animation usually needs only a small subset of all the view's property
+values. For example, a color animation needs color property values, while a movement
+animation needs position property values. Since the property values needed for an animation
+are specific to a transition, the transitions framework does not provide every property value
+to a transition. Instead, the framework invokes callback methods that allow a transition to
+capture only the property values it needs and store them in the framework.</p>
+
+
+<h3 id="StartingValues">Capturing Starting Values</h3>
+
+<p>To pass the starting view values to the framework, implement the
+{@link android.transition.Transition#captureStartValues captureStartValues(transitionValues)}
+method. The framework calls this method for every view in the starting scene. The method
+argument is a {@link android.transition.TransitionValues} object that contains a reference
+to the view and a {@link java.util.Map} instance in which you can store the view values you
+want. In your implementation, retrieve these property values and pass them back to the
+framework by storing them in the map.</p>
+
+<p>To ensure that the key for a property value does not conflict with other {@link
+android.transition.TransitionValues} keys, use the following naming scheme:</p>
+
+<pre>
+package_name:transition_name:property_name
+</pre>
+
+<p>The following snippet shows an implementation of the {@link
+android.transition.Transition#captureStartValues captureStartValues()} method:</p>
+
+<pre>
+public class CustomTransition extends Transition {
+
+    // Define a key for storing a property value in
+    // TransitionValues.values with the syntax
+    // package_name:transition_class:property_name to avoid collisions
+    private static final String PROPNAME_BACKGROUND =
+            "com.example.android.customtransition:CustomTransition:background";
+
+    &#64;Override
+    public void captureStartValues(TransitionValues transitionValues) {
+        // Call the convenience method captureValues
+        captureValues(transitionValues);
+    }
+
+
+    // For the view in transitionValues.view, get the values you
+    // want and put them in transitionValues.values
+    private void captureValues(TransitionValues transitionValues) {
+        // Get a reference to the view
+        View view = transitionValues.view;
+        // Store its background property in the values map
+        transitionValues.values.put(PROPNAME_BACKGROUND, view.getBackground());
+    }
+    ...
+}
+</pre>
+
+
+<h3 id="EndingValues">Capture Ending Values</h3>
+
+<p>The framework calls the {@link android.transition.Transition#captureEndValues} method
+once for every target view in the ending scene. In all other respects, {@link
+android.transition.Transition#captureEndValues captureEndValues()} works the same as {@link
+android.transition.Transition#captureStartValues captureStartValues()}.</p>
+
+<p>The following code snippet shows an implementation of the {@link
+android.transition.Transition#captureEndValues captureEndValues()} method:</p>
+
+<pre>
+&#64;Override
+public void captureEndValues(TransitionValues transitionValues) {
+    captureValues(transitionValues);
+}
+</pre>
+
+<p>In this example, both the {@link android.transition.Transition#captureStartValues
+captureStartValues()} and {@link android.transition.Transition#captureEndValues captureEndValues()}
+methods invoke <code>captureValues()</code> to retrieve and store values. The view property
+that <code>captureValues()</code> retrieves is the same, but it has different values in the
+starting and ending scenes. The framework maintains separate maps for the starting and ending
+states of a view.</p>
+
+
+
+<h2 id="CreateAnimator">Create a Custom Animator</h2>
+
+<p>To animate the changes to a view between its state in the starting scene and its state in
+the ending scene, you provide an animator by overriding the {@link
+android.transition.Transition#createAnimator createAnimator()} method. When the
+framework calls this method, it passes in the scene root view and the {@link
+android.transition.TransitionValues} objects that contain the starting and ending values
+you captured.</p>
+
+<p>The number of times the framework calls the {@link
+android.transition.Transition#createAnimator createAnimator()} method depends on the changes that
+occur between the starting and ending scenes. For example, consider a fade out/fade in animation
+implemented as a custom transition. If the starting scene has five targets of which two are
+removed from the ending scene, and the ending scene has the three targets from the starting
+scene plus a new target, then the framework calls {@link
+android.transition.Transition#createAnimator createAnimator()} six times: three of the calls
+animate the fading out and fading in of the targets that stay in both scene objects; two more calls
+animate the fading out of the targets removed from the ending scene; and one call
+animates the fading in of the new target in the ending scene.</p>
+
+<p>For target views that exist on both the starting and ending scenes, the framework provides
+a {@link android.transition.TransitionValues} object for both the <code>startValues</code> and
+<code>endValues</code> arguments. For target views that only exist in the starting or the
+ending scene, the framework provides a {@link android.transition.TransitionValues} object
+for the corresponding argument and <code>null</code> for the other.</p>
+
+<p>To implement the {@link android.transition.Transition#createAnimator} method when you create
+a custom transition, use the view property values you captured to create an {@link
+android.animation.Animator} object and return it to the framework. For an example implementation,
+see the <a
+href="{@docRoot}samples/CustomTransition/src/com.example.android.customtransition/ChangeColor.html">
+<code>ChangeColor</code></a> class in the <a href="{@docRoot}samples/CustomTransition/index.html">
+CustomTransition</a> sample. For more information about property animators, see
+<a href="{@docRoot}guide/topics/graphics/prop-animation.html">Property Animation</a>.</p>
+
+
+
+<h2 id="Apply">Apply a Custom Transition</h2>
+
+<p>Custom transitions work the same as built-in transitions. You can apply a custom transition
+using a transition manager, as described in <a
+href="{@docRoot}training/transitions/transitions.html#Apply">Applying a Transition</a>.</p>
