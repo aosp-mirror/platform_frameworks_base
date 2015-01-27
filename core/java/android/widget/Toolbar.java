@@ -1101,18 +1101,6 @@ public class Toolbar extends ViewGroup {
      * @hide
      */
     @Override
-    public void addClickableRectsForAccessibility(List<RectF> outRects) {
-        // This class always consumes touch events, therefore if it
-        // covers a view we do not want to send a click over it.
-        RectF bounds = new RectF();
-        bounds.set(0, 0, getWidth(), getHeight());
-        outRects.add(bounds);
-    }
-
-    /**
-     * @hide
-     */
-    @Override
     protected void onSetLayoutParams(View child, ViewGroup.LayoutParams lp) {
         /*
          * Apps may set ActionBar.LayoutParams on their action bar custom views when
