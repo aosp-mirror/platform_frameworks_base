@@ -4715,7 +4715,7 @@ public class AudioService extends IAudioService.Stub {
             synchronized (mLastDeviceConnectMsgTime) {
                 long time = SystemClock.uptimeMillis();
                 if (mLastDeviceConnectMsgTime > time) {
-                    delay = (int)(mLastDeviceConnectMsgTime - time);
+                    delay = (int)(mLastDeviceConnectMsgTime - time) + 30;
                 }
             }
         }
