@@ -799,6 +799,15 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mIsStartingTransition = false;
     }
 
+    /**
+     * Cancels any pending transitions and returns true if there is a transition is in
+     * the middle of starting.
+     */
+    protected boolean cancelPendingTransitions() {
+        mPendingTransition = null;
+        return mIsStartingTransition;
+    }
+
     protected void moveSharedElementsToOverlay() {
         if (mWindow == null || !mWindow.getSharedElementsUseOverlay()) {
             return;
