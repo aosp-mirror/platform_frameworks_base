@@ -16,10 +16,8 @@
 
 #include "RenderThread.h"
 
-#if defined(HAVE_PTHREADS)
-#include <sys/resource.h>
-#endif
 #include <gui/DisplayEventReceiver.h>
+#include <sys/resource.h>
 #include <utils/Log.h>
 
 #include "../RenderState.h"
@@ -250,9 +248,7 @@ void RenderThread::requestVsync() {
 }
 
 bool RenderThread::threadLoop() {
-#if defined(HAVE_PTHREADS)
     setpriority(PRIO_PROCESS, 0, PRIORITY_DISPLAY);
-#endif
     initThreadLocals();
 
     int timeoutMillis = -1;
