@@ -813,9 +813,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowManagerPolicyThread.set(Thread.currentThread(), Looper.myLooper());
 
                 mPolicy.init(mContext, WindowManagerService.this, WindowManagerService.this);
-                mAnimator.mAboveUniverseLayer = mPolicy.getAboveUniverseLayer()
-                        * TYPE_LAYER_MULTIPLIER
-                        + TYPE_LAYER_OFFSET;
             }
         }, 0);
     }
@@ -2943,37 +2940,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return null;
-    }
-
-    public void setUniverseTransformLocked(WindowState window, float alpha,
-            float offx, float offy, float dsdx, float dtdx, float dsdy, float dtdy) {
-        Transformation transform = window.mWinAnimator.mUniverseTransform;
-        transform.setAlpha(alpha);
-        Matrix matrix = transform.getMatrix();
-        matrix.getValues(mTmpFloats);
-        mTmpFloats[Matrix.MTRANS_X] = offx;
-        mTmpFloats[Matrix.MTRANS_Y] = offy;
-        mTmpFloats[Matrix.MSCALE_X] = dsdx;
-        mTmpFloats[Matrix.MSKEW_Y] = dtdx;
-        mTmpFloats[Matrix.MSKEW_X] = dsdy;
-        mTmpFloats[Matrix.MSCALE_Y] = dtdy;
-        matrix.setValues(mTmpFloats);
-        final DisplayContent displayContent = window.getDisplayContent();
-        if (displayContent == null) {
-            return;
-        }
-
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-        final RectF dispRect = new RectF(0, 0,
-                displayInfo.logicalWidth, displayInfo.logicalHeight);
-        matrix.mapRect(dispRect);
-        window.mGivenTouchableRegion.set(0, 0,
-                displayInfo.logicalWidth, displayInfo.logicalHeight);
-        window.mGivenTouchableRegion.op((int)dispRect.left, (int)dispRect.top,
-                (int)dispRect.right, (int)dispRect.bottom, Region.Op.DIFFERENCE);
-        window.mTouchableInsets = ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
-        displayContent.layoutNeeded = true;
-        performLayoutAndPlaceSurfacesLocked();
     }
 
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
@@ -8473,7 +8439,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 numRemoved++;
                 continue;
             } else if (lastBelow == i-1) {
-                if (w.mAttrs.type == TYPE_WALLPAPER || w.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
+                if (w.mAttrs.type == TYPE_WALLPAPER) {
                     lastBelow = i;
                 }
             }
@@ -8728,8 +8694,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     + displayContent.layoutNeeded + " dw=" + dw + " dh=" + dh);
         }
 
-        WindowStateAnimator universeBackground = null;
-
         mPolicy.beginLayoutLw(isDefaultDisplay, dw, dh, mRotation);
         if (isDefaultDisplay) {
             // Not needed on non-default displays.
@@ -8787,8 +8751,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     || ((win.isConfigChanged() || win.setInsetsChanged()) &&
                             ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
                             (win.mHasSurface && win.mAppToken != null &&
-                            win.mAppToken.layoutConfigChanges)))
-                    || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
+                            win.mAppToken.layoutConfigChanges)))) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
@@ -8812,16 +8775,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (topAttached < 0) topAttached = i;
                 }
             }
-            if (win.mViewVisibility == View.VISIBLE
-                    && win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND
-                    && universeBackground == null) {
-                universeBackground = win.mWinAnimator;
-            }
-        }
-
-        if (mAnimator.mUniverseBackground  != universeBackground) {
-            mFocusMayChange = true;
-            mAnimator.mUniverseBackground = universeBackground;
         }
 
         boolean attachedBehindDream = false;
@@ -10364,11 +10317,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowState computeFocusedWindowLocked() {
-        if (mAnimator.mUniverseBackground != null
-                && mAnimator.mUniverseBackground.mWin.canReceiveKeys()) {
-            return mAnimator.mUniverseBackground.mWin;
-        }
-
         final int displayCount = mDisplayContents.size();
         for (int i = 0; i < displayCount; i++) {
             final DisplayContent displayContent = mDisplayContents.valueAt(i);

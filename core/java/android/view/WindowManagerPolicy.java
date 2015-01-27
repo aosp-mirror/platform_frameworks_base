@@ -579,13 +579,6 @@ public interface WindowManagerPolicy {
     public int getMaxWallpaperLayer();
 
     /**
-     * Return the window layer at which windows appear above the normal
-     * universe (that is no longer impacted by the universe background
-     * transform).
-     */
-    public int getAboveUniverseLayer();
-
-    /**
      * Return the display width available after excluding any screen
      * decorations that can never be removed.  That is, system bar or
      * button bar.

@@ -501,13 +501,6 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_NAVIGATION_BAR_PANEL = FIRST_SYSTEM_WINDOW+24;
 
         /**
-         * Window type: Behind the universe of the real windows.
-         * In multiuser systems shows on all users' windows.
-         * @hide
-         */
-        public static final int TYPE_UNIVERSE_BACKGROUND = FIRST_SYSTEM_WINDOW+25;
-
-        /**
          * Window type: Display overlay window.  Used to simulate secondary display devices.
          * In multiuser systems shows on all users' windows.
          * @hide

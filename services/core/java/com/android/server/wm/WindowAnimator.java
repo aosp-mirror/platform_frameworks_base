@@ -79,9 +79,6 @@ public class WindowAnimator {
      * seen. If multiple windows satisfy this, use the lowest window. */
     WindowState mWindowDetachedWallpaper = null;
 
-    WindowStateAnimator mUniverseBackground = null;
-    int mAboveUniverseLayer = 0;
-
     int mBulkUpdateParams = 0;
     Object mLastWindowFreezeSource;
 
@@ -813,10 +810,6 @@ public class WindowAnimator {
         if (mWindowDetachedWallpaper != null) {
             pw.print(prefix); pw.print("mWindowDetachedWallpaper=");
                 pw.println(mWindowDetachedWallpaper);
-        }
-        if (mUniverseBackground != null) {
-            pw.print(prefix); pw.print("mUniverseBackground="); pw.print(mUniverseBackground);
-                    pw.print(" mAboveUniverseLayer="); pw.println(mAboveUniverseLayer);
         }
     }
 

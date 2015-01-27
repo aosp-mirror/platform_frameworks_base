@@ -1723,7 +1723,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_STATUS_BAR_PANEL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_SYSTEM_DIALOG:
-            case TYPE_UNIVERSE_BACKGROUND:
             case TYPE_VOLUME_OVERLAY:
             case TYPE_PRIVATE_PRESENTATION:
                 break;
@@ -1822,8 +1821,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return 2;
         }
         switch (type) {
-        case TYPE_UNIVERSE_BACKGROUND:
-            return 1;
         case TYPE_PRIVATE_PRESENTATION:
             return 2;
         case TYPE_WALLPAPER:
@@ -1935,11 +1932,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int getAboveUniverseLayer() {
-        return windowTypeToLayerLw(TYPE_SYSTEM_ERROR);
-    }
-
-    @Override
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation) {
         if (mHasNavigationBar) {
             // For a basic navigation bar, when we are in landscape mode we place
@@ -1997,7 +1989,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_NAVIGATION_BAR:
             case TYPE_WALLPAPER:
             case TYPE_DREAM:
-            case TYPE_UNIVERSE_BACKGROUND:
             case TYPE_KEYGUARD_SCRIM:
                 return false;
             default:
@@ -3769,8 +3760,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + mOverscanScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = mOverscanScreenTop
                             + mOverscanScreenHeight;
-                } else if (attrs.type == TYPE_BOOT_PROGRESS
-                        || attrs.type == TYPE_UNIVERSE_BACKGROUND) {
+                } else if (attrs.type == TYPE_BOOT_PROGRESS) {
                     // Boot progress screen always covers entire display.
                     pf.left = df.left = of.left = cf.left = mOverscanScreenLeft;
                     pf.top = df.top = of.top = cf.top = mOverscanScreenTop;

@@ -606,9 +606,8 @@ final class AccessibilityController {
                 final int windowCount = windowList.size();
                 for (int i = 0; i < windowCount; i++) {
                     WindowState windowState = windowList.get(i);
-                    if ((windowState.isOnScreen() || windowState.mAttrs.type == WindowManager
-                            .LayoutParams.TYPE_UNIVERSE_BACKGROUND)
-                            && !windowState.mWinAnimator.mEnterAnimationPending) {
+                    if (windowState.isOnScreen() &&
+                            !windowState.mWinAnimator.mEnterAnimationPending) {
                         outWindows.put(windowState.mLayer, windowState);
                     }
                 }
@@ -1237,7 +1236,6 @@ final class AccessibilityController {
                     && windowType != WindowManager.LayoutParams.TYPE_DRAG
                     && windowType != WindowManager.LayoutParams.TYPE_HIDDEN_NAV_CONSUMER
                     && windowType != WindowManager.LayoutParams.TYPE_POINTER
-                    && windowType != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
                     && windowType != WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY
                     && windowType != WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY
