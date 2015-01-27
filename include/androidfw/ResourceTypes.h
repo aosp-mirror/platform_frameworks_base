@@ -107,9 +107,9 @@ struct Res_png_9patch
                        yDivs(NULL), colors(NULL) { }
 
     int8_t wasDeserialized;
-    int8_t numXDivs;
-    int8_t numYDivs;
-    int8_t numColors;
+    uint8_t numXDivs;
+    uint8_t numYDivs;
+    uint8_t numColors;
 
     // These tell where the next section of a patch starts.
     // For example, the first patch includes the pixels from
