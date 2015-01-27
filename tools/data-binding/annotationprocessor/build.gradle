@@ -37,7 +37,7 @@ sourceSets {
 }
 
 dependencies {
-    compile project(":annotations")
+    compile project(":baseLibrary")
     compile project(":compiler")
 }
 

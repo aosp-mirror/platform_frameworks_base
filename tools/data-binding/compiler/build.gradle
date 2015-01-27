@@ -35,9 +35,9 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'com.google.guava:guava:18.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    compile project(":annotations")
-    compile project(":grammerBuilder")
-    compile project(":xmlGrammer")
+    compile project(":baseLibrary")
+    compile project(":grammarBuilder")
+    compile project(":xmlGrammar")
 }
 uploadArchives {
     repositories {

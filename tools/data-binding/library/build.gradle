@@ -31,6 +31,7 @@ buildscript {
 
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1"
@@ -52,10 +53,16 @@ android {
         }
     }
 }
-
+sourceSets {
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+    }
+}
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":annotations")
+    compile project(":baseLibrary")
     provided 'com.android.support:cardview-v7:+'
     provided 'com.android.support:appcompat-v7:+'
     provided project(":annotationprocessor")

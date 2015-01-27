@@ -48,7 +48,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: mavenLocal().url)
-            pom.artifactId = 'grammerBuilder'
+            pom.artifactId = 'grammarBuilder'
         }
     }
 }
