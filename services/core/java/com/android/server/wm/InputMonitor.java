@@ -239,9 +239,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         // As an optimization, we could try to prune the list of windows but this turns
         // out to be difficult because only the native code knows for sure which window
         // currently has touch focus.
-        final WindowStateAnimator universeBackground = mService.mAnimator.mUniverseBackground;
-        final int aboveUniverseLayer = mService.mAnimator.mAboveUniverseLayer;
-        boolean addedUniverse = false;
         boolean disableWallpaperTouchEvents = false;
 
         // If there's a drag in flight, provide a pseudowindow to catch drag input
@@ -299,20 +296,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     mService.mDragState.sendDragStartedIfNeededLw(child);
                 }
 
-                if (universeBackground != null && !addedUniverse
-                        && child.mBaseLayer < aboveUniverseLayer && onDefaultDisplay) {
-                    final WindowState u = universeBackground.mWin;
-                    if (u.mInputChannel != null && u.mInputWindowHandle != null) {
-                        addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
-                                u.mAttrs.type, true, u == mInputFocus, false);
-                    }
-                    addedUniverse = true;
-                }
-
-                if (child.mWinAnimator != universeBackground) {
-                    addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible,
-                            hasFocus, hasWallpaper);
-                }
+                addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible, hasFocus,
+                        hasWallpaper);
             }
         }
 

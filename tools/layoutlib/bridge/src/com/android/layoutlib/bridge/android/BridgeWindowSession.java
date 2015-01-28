@@ -191,12 +191,6 @@ public final class BridgeWindowSession implements IWindowSession {
     }
 
     @Override
-    public void setUniverseTransform(IBinder window, float alpha, float offx, float offy,
-            float dsdx, float dtdx, float dsdy, float dtdy) {
-        // pass for now.
-    }
-
-    @Override
     public IBinder asBinder() {
         // pass for now.
         return null;

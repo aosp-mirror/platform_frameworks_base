@@ -85,10 +85,6 @@ class WindowStateAnimator {
     final Context mContext;
     final boolean mIsWallpaper;
 
-    // If this is a universe background window, this is the transformation
-    // it is applying to the rest of the universe.
-    final Transformation mUniverseTransform = new Transformation();
-
     // Currently running animation.
     boolean mAnimating;
     boolean mLocalAnimating;
@@ -1096,9 +1092,6 @@ class WindowStateAnimator {
             if (appTransformation != null) {
                 tmpMatrix.postConcat(appTransformation.getMatrix());
             }
-            if (mAnimator.mUniverseBackground != null) {
-                tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
-            }
             if (screenAnimation) {
                 tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
@@ -1164,9 +1157,6 @@ class WindowStateAnimator {
                         mHasClipRect = true;
                     }
                 }
-                if (mAnimator.mUniverseBackground != null) {
-                    mShownAlpha *= mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
-                }
                 if (screenAnimation) {
                     mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
                 }
@@ -1192,25 +1182,18 @@ class WindowStateAnimator {
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
-        final boolean applyUniverseTransformation = (mAnimator.mUniverseBackground != null
-                && mWin.mAttrs.type != WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
-                && mWin.mBaseLayer < mAnimator.mAboveUniverseLayer);
         MagnificationSpec spec = null;
         //TODO (multidisplay): Magnification is supported only for the default display.
         if (mService.mAccessibilityController != null && displayId == Display.DEFAULT_DISPLAY) {
             spec = mService.mAccessibilityController.getMagnificationSpecForWindowLocked(mWin);
         }
-        if (applyUniverseTransformation || spec != null) {
+        if (spec != null) {
             final Rect frame = mWin.mFrame;
             final float tmpFloats[] = mService.mTmpFloats;
             final Matrix tmpMatrix = mWin.mTmpMatrix;
 
             tmpMatrix.setScale(mWin.mGlobalScale, mWin.mGlobalScale);
             tmpMatrix.postTranslate(frame.left + mWin.mXOffset, frame.top + mWin.mYOffset);
-
-            if (applyUniverseTransformation) {
-                tmpMatrix.postConcat(mAnimator.mUniverseBackground.mUniverseTransform.getMatrix());
-            }
 
             if (spec != null && !spec.isNop()) {
                 tmpMatrix.postScale(spec.scale, spec.scale);
@@ -1231,9 +1214,6 @@ class WindowStateAnimator {
             mWin.mShownFrame.set(x, y, x + w, y + h);
 
             mShownAlpha = mAlpha;
-            if (applyUniverseTransformation) {
-                mShownAlpha *= mAnimator.mUniverseBackground.mUniverseTransform.getAlpha();
-            }
         } else {
             mWin.mShownFrame.set(mWin.mFrame);
             if (mWin.mXOffset != 0 || mWin.mYOffset != 0) {
@@ -1301,17 +1281,9 @@ class WindowStateAnimator {
                     displayInfo.logicalHeight - w.mCompatFrame.top);
         } else if (w.mLayer >= mService.mSystemDecorLayer) {
             // Above the decor layer is easy, just use the entire window.
-            // Unless we have a universe background...  in which case all the
-            // windows need to be cropped by the screen, so they don't cover
-            // the universe background.
-            if (mAnimator.mUniverseBackground == null) {
-                w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
-            } else {
-                applyDecorRect(mService.mScreenRect);
-            }
-        } else if (w.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND
-                || w.mDecorFrame.isEmpty()) {
-            // The universe background isn't cropped, nor windows without policy decor.
+            w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
+        } else if (w.mDecorFrame.isEmpty()) {
+            // Windows without policy decor aren't cropped.
             w.mSystemDecorRect.set(0, 0, w.mCompatFrame.width(), w.mCompatFrame.height());
         } else if (w.mAttrs.type == LayoutParams.TYPE_WALLPAPER && mAnimator.mAnimating) {
             // If we're animating, the wallpaper crop should only be updated at the end of the
@@ -1931,11 +1903,6 @@ class WindowStateAnimator {
         if (mSurfaceResized || mSurfaceDestroyDeferred) {
             pw.print(prefix); pw.print("mSurfaceResized="); pw.print(mSurfaceResized);
                     pw.print(" mSurfaceDestroyDeferred="); pw.println(mSurfaceDestroyDeferred);
-        }
-        if (mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_UNIVERSE_BACKGROUND) {
-            pw.print(prefix); pw.print("mUniverseTransform=");
-                    mUniverseTransform.printShortString(pw);
-                    pw.println();
         }
         if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
             pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
