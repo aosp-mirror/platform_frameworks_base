@@ -328,15 +328,15 @@ public class LegacyMetadataMapper {
         appendStreamConfig(availableStreamConfigs,
                 ImageFormat.YUV_420_888, previewSizes);
         for (int format : p.getSupportedPreviewFormats()) {
-            if (ImageFormat.isPublicFormat(format)) {
+            if (ImageFormat.isPublicFormat(format) && format != ImageFormat.NV21) {
                 appendStreamConfig(availableStreamConfigs, format, previewSizes);
-            } else {
+            } else if (VERBOSE) {
                 /*
                  *  Do not add any formats unknown to us
                  * (since it would fail runtime checks in StreamConfigurationMap)
                  */
-                Log.w(TAG,
-                        String.format("mapStreamConfigs - Skipping non-public format %x", format));
+                Log.v(TAG,
+                        String.format("mapStreamConfigs - Skipping format %x", format));
             }
         }
 
@@ -389,8 +389,8 @@ public class LegacyMetadataMapper {
             int j = 0;
             for (String mode : antiBandingModes) {
                 int convertedMode = convertAntiBandingMode(mode);
-                if (convertedMode == -1) {
-                    Log.w(TAG, "Antibanding mode " + ((mode == null) ? "NULL" : mode) +
+                if (VERBOSE && convertedMode == -1) {
+                    Log.v(TAG, "Antibanding mode " + ((mode == null) ? "NULL" : mode) +
                             " not supported, skipping...");
                 } else {
                     modes[j++] = convertedMode;
