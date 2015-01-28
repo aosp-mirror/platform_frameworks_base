@@ -117,7 +117,7 @@ public class ArrayUtils {
 
             // Guard against unexpected values
             if (strIndex < 0) {
-                Log.w(TAG, "Ignoring invalid value " + str);
+                if (VERBOSE) Log.v(TAG, "Ignoring invalid value " + str);
                 continue;
             }
 
