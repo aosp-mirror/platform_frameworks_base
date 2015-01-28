@@ -29,7 +29,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
-import android.util.Log;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Slog;
 import android.view.View;
 import android.widget.Button;
@@ -180,20 +181,6 @@ public class BackupRestoreConfirmation extends Activity {
         mEncPassword = (TextView) findViewById(R.id.enc_password);
         TextView curPwDesc = (TextView) findViewById(R.id.password_desc);
 
-        // We vary the password prompt depending on whether one is predefined, and whether
-        // the device is encrypted.
-        mIsEncrypted = deviceIsEncrypted();
-        if (!haveBackupPassword()) {
-            curPwDesc.setVisibility(View.GONE);
-            mCurPassword.setVisibility(View.GONE);
-            if (layoutId == R.layout.confirm_backup) {
-                TextView encPwDesc = (TextView) findViewById(R.id.enc_password_desc);
-                encPwDesc.setText(mIsEncrypted
-                                  ? R.string.backup_enc_password_required
-                                  : R.string.backup_enc_password_optional);
-            }
-        }
-
         mAllowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -209,6 +196,7 @@ public class BackupRestoreConfirmation extends Activity {
                 sendAcknowledgement(mToken, false, mObserver);
                 mAllowButton.setEnabled(false);
                 mDenyButton.setEnabled(false);
+                finish();
             }
         });
 
@@ -218,6 +206,39 @@ public class BackupRestoreConfirmation extends Activity {
             mAllowButton.setEnabled(!mDidAcknowledge);
             mDenyButton.setEnabled(!mDidAcknowledge);
         }
+
+        // We vary the password prompt depending on whether one is predefined, and whether
+        // the device is encrypted.
+        mIsEncrypted = deviceIsEncrypted();
+        if (!haveBackupPassword()) {
+            curPwDesc.setVisibility(View.GONE);
+            mCurPassword.setVisibility(View.GONE);
+            if (layoutId == R.layout.confirm_backup) {
+                TextView encPwDesc = (TextView) findViewById(R.id.enc_password_desc);
+                if (mIsEncrypted) {
+                    encPwDesc.setText(R.string.backup_enc_password_required);
+                    monitorEncryptionPassword();
+                } else {
+                    encPwDesc.setText(R.string.backup_enc_password_optional);
+                }
+            }
+        }
+    }
+
+    private void monitorEncryptionPassword() {
+        mAllowButton.setEnabled(false);
+        mEncPassword.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mAllowButton.setEnabled(mEncPassword.getText().length() > 0);
+            }
+        });
     }
 
     // Preserve the restore observer callback binder across activity relaunch
