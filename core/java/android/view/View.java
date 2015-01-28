@@ -4569,11 +4569,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Register a callback to be invoked when the scroll position of this view
-     * changed.
+     * Register a callback to be invoked when the scroll X or Y positions of
+     * this view change.
+     * <p>
+     * <b>Note:</b> Some views handle scrolling independently from View and may
+     * have their own separate listeners for scroll-type events. For example,
+     * {@link android.widget.ListView ListView} allows clients to register an
+     * {@link android.widget.ListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener) AbsListView.OnScrollListener}
+     * to listen for changes in list scroll position.
      *
-     * @param l The callback that will run.
-     * @hide Only used internally.
+     * @param l The listener to notify when the scroll X or Y position changes.
+     * @see android.view.View#getScrollX()
+     * @see android.view.View#getScrollY()
      */
     public void setOnScrollChangeListener(OnScrollChangeListener l) {
         getListenerInfo().mOnScrollChangeListener = l;
@@ -9942,9 +9949,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Interface definition for a callback to be invoked when the scroll
-     * position of a view changes.
+     * X or Y positions of a view change.
+     * <p>
+     * <b>Note:</b> Some views handle scrolling independently from View and may
+     * have their own separate listeners for scroll-type events. For example,
+     * {@link android.widget.ListView ListView} allows clients to register an
+     * {@link android.widget.ListView#setOnScrollListener(android.widget.AbsListView.OnScrollListener) AbsListView.OnScrollListener}
+     * to listen for changes in list scroll position.
      *
-     * @hide Only used internally.
+     * @see #setOnScrollChangeListener(View.OnScrollChangeListener)
      */
     public interface OnScrollChangeListener {
         /**

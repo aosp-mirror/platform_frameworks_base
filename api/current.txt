@@ -34084,6 +34084,7 @@ package android.view {
     method public void setOnHoverListener(android.view.View.OnHoverListener);
     method public void setOnKeyListener(android.view.View.OnKeyListener);
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
+    method public void setOnScrollChangeListener(android.view.View.OnScrollChangeListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);
     method public void setOnTouchListener(android.view.View.OnTouchListener);
     method public void setOutlineProvider(android.view.ViewOutlineProvider);
@@ -34349,6 +34350,10 @@ package android.view {
 
   public static abstract interface View.OnLongClickListener {
     method public abstract boolean onLongClick(android.view.View);
+  }
+
+  public static abstract interface View.OnScrollChangeListener {
+    method public abstract void onScrollChange(android.view.View, int, int, int, int);
   }
 
   public static abstract interface View.OnSystemUiVisibilityChangeListener {
