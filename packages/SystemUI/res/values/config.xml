@@ -255,7 +255,7 @@
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
     <!-- Doze: can we assume the pickup sensor includes a proximity check? -->
-    <bool name="doze_pickup_performs_proximity_check">true</bool>
+    <bool name="doze_pickup_performs_proximity_check">false</bool>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">900</integer>
