@@ -12616,6 +12616,8 @@ package android.hardware.camera2 {
     field public static final int CAMERA_DISABLED = 1; // 0x1
     field public static final int CAMERA_DISCONNECTED = 2; // 0x2
     field public static final int CAMERA_ERROR = 3; // 0x3
+    field public static final int CAMERA_IN_USE = 4; // 0x4
+    field public static final int MAX_CAMERAS_IN_USE = 5; // 0x5
   }
 
   public abstract class CameraCaptureSession implements java.lang.AutoCloseable {
@@ -12756,13 +12758,23 @@ package android.hardware.camera2 {
     method public java.lang.String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method public void openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateCallback, android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method public void registerAvailabilityCallback(android.hardware.camera2.CameraManager.AvailabilityCallback, android.os.Handler);
+    method public void registerTorchCallback(android.hardware.camera2.CameraManager.TorchCallback, android.os.Handler);
+    method public void setTorchMode(java.lang.String, boolean) throws android.hardware.camera2.CameraAccessException;
     method public void unregisterAvailabilityCallback(android.hardware.camera2.CameraManager.AvailabilityCallback);
+    method public void unregisterTorchCallback(android.hardware.camera2.CameraManager.TorchCallback);
   }
 
   public static abstract class CameraManager.AvailabilityCallback {
     ctor public CameraManager.AvailabilityCallback();
     method public void onCameraAvailable(java.lang.String);
     method public void onCameraUnavailable(java.lang.String);
+  }
+
+  public static abstract class CameraManager.TorchCallback {
+    ctor public CameraManager.TorchCallback();
+    method public void onTorchModeAvailable(java.lang.String);
+    method public void onTorchModeChanged(java.lang.String, boolean);
+    method public void onTorchModeUnavailable(java.lang.String);
   }
 
   public abstract class CameraMetadata {

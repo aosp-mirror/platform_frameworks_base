@@ -109,8 +109,11 @@ public final class CameraManager {
      * of the state of individual CameraManager instances.</p>
      *
      * @param callback the new callback to send camera availability notices to
-     * @param handler The handler on which the callback should be invoked, or
-     * {@code null} to use the current thread's {@link android.os.Looper looper}.
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *             the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the handler is {@code null} but the current thread has
+     *             no looper.
      */
     public void registerAvailabilityCallback(AvailabilityCallback callback, Handler handler) {
         if (handler == null) {
@@ -135,6 +138,42 @@ public final class CameraManager {
      */
     public void unregisterAvailabilityCallback(AvailabilityCallback callback) {
         CameraManagerGlobal.get().unregisterAvailabilityCallback(callback);
+    }
+
+    /**
+     * Register a callback to be notified about torch mode status.
+     *
+     * <p>Registering the same callback again will replace the handler with the
+     * new one provided.</p>
+     *
+     * <p>The first time a callback is registered, it is immediately called
+     * with the torch mode status of all currently known camera devices.</p>
+     *
+     * <p>Since this callback will be registered with the camera service, remember to unregister it
+     * once it is no longer needed; otherwise the callback will continue to receive events
+     * indefinitely and it may prevent other resources from being released. Specifically, the
+     * callbacks will be invoked independently of the general activity lifecycle and independently
+     * of the state of individual CameraManager instances.</p>
+     *
+     * @param callback The new callback to send torch mode status to
+     * @param handler The handler on which the callback should be invoked, or {@code null} to use
+     *             the current thread's {@link android.os.Looper looper}.
+     *
+     * @throws IllegalArgumentException if the handler is {@code null} but the current thread has
+     *             no looper.
+     */
+    public void registerTorchCallback(TorchCallback callback, Handler handler) {
+    }
+
+    /**
+     * Remove a previously-added callback; the callback will no longer receive torch mode status
+     * callbacks.
+     *
+     * <p>Removing a callback that isn't registered has no effect.</p>
+     *
+     * @param callback The callback to remove from the notification list
+     */
+    public void unregisterTorchCallback(TorchCallback callback) {
     }
 
     /**
@@ -384,6 +423,47 @@ public final class CameraManager {
     }
 
     /**
+     * Set the flash unit's torch mode of the camera of the given ID without opening the camera
+     * device.
+     *
+     * <p>Use {@link #getCameraIdList} to get the list of available camera devices and use
+     * {@link #getCameraCharacteristics} to check whether the camera device has a flash unit.
+     * Note that even if a camera device has a flash unit, turning on the torch mode may fail
+     * if the camera device or other camera resources needed to turn on the torch mode are in use.
+     * </p>
+     *
+     * <p> If {@link #setTorchMode} is called to turn on or off the torch mode successfully,
+     * {@link CameraManager.TorchCallback#onTorchModeChanged} will be invoked.
+     * However, even if turning on the torch mode is successful, the application does not have the
+     * exclusive ownership of the flash unit or the camera device. The torch mode will be turned
+     * off and becomes unavailable when the camera device that the flash unit belongs to becomes
+     * unavailable ({@link CameraManager.TorchCallback#onTorchModeAvailable} will be
+     * invoked) or when other camera resources to keep the torch on become unavailable (
+     * {@link CameraManager.TorchCallback#onTorchModeUnavailable} will be invoked). Also,
+     * other applications are free to call {@link #setTorchMode} to turn off the torch mode (
+     * {@link CameraManager.TorchCallback#onTorchModeChanged} will be invoked).
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device that the flash unit belongs to.
+     * @param enabled
+     *             The desired state of the torch mode for the target camera device. Set to
+     *             {@code true} to turn on the torch mode. Set to {@code false} to turn off the
+     *             torch mode.
+     *
+     * @throws CameraAccessException if it failed to access the flash unit.
+     *             {@link CameraAccessException#CAMERA_IN_USE} will be thrown if the camera device
+     *             is in use. {@link CameraAccessException#MAX_CAMERAS_IN_USE} will be thrown if
+     *             other camera resources needed to turn on the torch mode are in use.
+     *
+     * @throws IllegalArgumentException if cameraId was null, cameraId doesn't match any currently
+     *             or previously available camera device, or the camera device doesn't have a
+     *             flash unit.
+     */
+    public void setTorchMode(String cameraId, boolean enabled) throws CameraAccessException {
+
+    }
+
+    /**
      * A callback for camera devices becoming available or
      * unavailable to open.
      *
@@ -423,6 +503,68 @@ public final class CameraManager {
          * @param cameraId The unique identifier of the disconnected camera.
          */
         public void onCameraUnavailable(String cameraId) {
+            // default empty implementation
+        }
+    }
+
+    /**
+     * A callback for camera flash torch modes becoming available, unavailable, enabled, or
+     * disabled.
+     *
+     * <p>The torch mode becomes available when the camera device it belongs to is no longer in use
+     * and other camera resources it needs are no longer busy. It becomes unavailable when the
+     * camera device it belongs to becomes unavailable or other camera resouces it needs become
+     * busy due to other higher priority camera activities. The torch mode changes when an
+     * application calls {@link #setTorchMode} successfully.
+     *
+     * <p>Extend this callback and pass an instance of the subclass to
+     * {@link CameraManager#registerTorchCallback} to be notified of such status changes.
+     * </p>
+     *
+     * @see registerTorchCallback
+     */
+    public static abstract class TorchCallback {
+        /**
+         * The torch mode of a camera has become available to use.
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the camera whose torch mode has become
+         *                 available.
+         */
+        public void onTorchModeAvailable(String cameraId) {
+            // default empty implementation
+        }
+
+        /**
+         * A previously-available torch mode of a camera has become unavailable.
+         *
+         * <p>If torch mode was previously turned on by calling {@link #setTorchMode}, it will be
+         * turned off before {@link CameraManager.TorchCallback#onTorchModeUnavailable} is
+         * invoked. {@link #setTorchMode} will fail until the flash unit becomes available again.
+         * </p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the camera whose torch mode has become
+         *                 unavailable.
+         */
+        public void onTorchModeUnavailable(String cameraId) {
+            // default empty implementation
+        }
+
+        /**
+         * Torch mode of a camera has been turned on or off through {@link #setTorchMode}.
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param cameraId The unique identifier of the camera whose torch mode has been changed.
+         *
+         * @param enabled The state that the torch mode of the camera has been changed to.
+         *                {@code true} when the torch mode has been turned on. {@code false} when
+         *                the torch mode has been turned off.
+         */
+        public void onTorchModeChanged(String cameraId, boolean enabled) {
             // default empty implementation
         }
     }
