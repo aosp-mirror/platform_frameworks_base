@@ -630,10 +630,6 @@
     <string name="quick_settings_done">Done</string>
     <!-- QuickSettings: Control panel: Label for connected device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connected">Connected</string>
-    <!-- QuickSettings: Control panel: Label for a connected Wi-Fi access point when the connection is established by a Wi-Fi assistant application. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_connected_via_wfa">Connected via Wi\u2011Fi assistant</string>
-    <!-- QuickSettings: Control panel: Label for saved device or connection. [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_saved">Saved</string>
     <!-- QuickSettings: Control panel: Label for connecting device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connecting">Connecting...</string>
     <!-- QuickSettings: Tethering. [CHAR LIMIT=NONE] -->

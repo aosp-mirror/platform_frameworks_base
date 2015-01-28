@@ -166,7 +166,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true /* force callback */);
-        mAccessPoints.setNetworkController(this);
     }
 
     private void registerListeners() {
@@ -669,6 +668,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mobileSignalController.dump(pw);
         }
         mWifiSignalController.dump(pw);
+
+        mAccessPoints.dump(pw);
     }
 
     private boolean mDemoMode;

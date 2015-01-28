@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import java.util.List;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -24,16 +26,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
-import com.android.systemui.statusbar.phone.QSTileHost;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPointController.AccessPoint;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
 /** Quick settings tile: Wifi **/
@@ -282,10 +283,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         }
 
         @Override
-        public void onAccessPointsChanged(final AccessPoint[] accessPoints) {
-            mAccessPoints = accessPoints;
+        public void onAccessPointsChanged(final List<AccessPoint> accessPoints) {
+            mAccessPoints = accessPoints.toArray(new AccessPoint[accessPoints.size()]);
             updateItems();
-            if (accessPoints != null && accessPoints.length > 0) {
+            if (accessPoints != null && accessPoints.size() > 0) {
                 fireScanStateChanged(false);
             }
         }
@@ -299,7 +300,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         public void onDetailItemClick(Item item) {
             if (item == null || item.tag == null) return;
             final AccessPoint ap = (AccessPoint) item.tag;
-            if (!ap.isConnected) {
+            if (!ap.isActive()) {
                 if (mWifiController.connect(ap)) {
                     mHost.collapsePanels();
                 }
@@ -326,16 +327,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                     final AccessPoint ap = mAccessPoints[i];
                     final Item item = new Item();
                     item.tag = ap;
-                    item.icon = ap.iconId;
-                    item.line1 = ap.ssid;
-                    if (ap.isConnected) {
-                        item.line2 = mContext.getString(ap.isConfigured ?
-                                R.string.quick_settings_connected :
-                                R.string.quick_settings_connected_via_wfa);
-                    } else if (ap.networkId >= 0) {
-                        item.line2 = mContext.getString(R.string.quick_settings_saved);
-                    }
-                    item.overlay = ap.hasSecurity
+                    item.icon = mWifiController.getIcon(ap);
+                    item.line1 = ap.getSsid();
+                    item.line2 = ap.getSummary();
+                    item.overlay = ap.getSecurity() != AccessPoint.SECURITY_NONE
                             ? mContext.getDrawable(R.drawable.qs_ic_wifi_lock)
                             : null;
                     items[i] = item;

@@ -18,6 +18,10 @@ package com.android.systemui.statusbar.policy;
 
 import android.content.Intent;
 
+import com.android.settingslib.wifi.AccessPoint;
+
+import java.util.List;
+
 public interface NetworkController {
 
     boolean hasMobileDataFeature();
@@ -50,24 +54,13 @@ public interface NetworkController {
         void addAccessPointCallback(AccessPointCallback callback);
         void removeAccessPointCallback(AccessPointCallback callback);
         void scanForAccessPoints();
+        int getIcon(AccessPoint ap);
         boolean connect(AccessPoint ap);
         boolean canConfigWifi();
 
         public interface AccessPointCallback {
-            void onAccessPointsChanged(AccessPoint[] accessPoints);
+            void onAccessPointsChanged(List<AccessPoint> accessPoints);
             void onSettingsActivityTriggered(Intent settingsIntent);
-        }
-
-        public static class AccessPoint {
-            public static final int NO_NETWORK = -1;  // see WifiManager
-
-            public int networkId;
-            public int iconId;
-            public String ssid;
-            public boolean isConnected;
-            public boolean isConfigured;
-            public boolean hasSecurity;
-            public int level;  // 0 - 5
         }
     }
 
