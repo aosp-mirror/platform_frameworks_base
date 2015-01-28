@@ -159,8 +159,7 @@
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Opusti aplikacijo <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Aplikacija <xliff:g id="APP">%s</xliff:g> je bila odstranjena."</string>
-    <!-- no translation found for accessibility_recents_all_items_dismissed (4464697366179168836) -->
-    <skip />
+    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Vse nedavne aplikacije so bile opuščene."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Zaganjanje aplikacije <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Obvestilo je bilo odstranjeno."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Zaslon z obvestili."</string>
@@ -282,8 +281,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pripenjanje zaslona"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"iskanje"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikacije <xliff:g id="APP">%s</xliff:g> ni bilo mogoče zagnati."</string>
-    <!-- no translation found for recents_dismiss_all_message (8495275386693095768) -->
-    <skip />
+    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Opusti vse aplikacije"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Akumulator napolnjen"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Polnjenje"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do napolnjenosti"</string>
