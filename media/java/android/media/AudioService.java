@@ -536,6 +536,20 @@ public class AudioService extends IAudioService.Stub {
 
     private AudioManagerInternal.RingerModeDelegate mRingerModeDelegate;
 
+    // Intent "extra" data keys.
+    public static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
+    public static final String CONNECT_INTENT_KEY_STATE = "state";
+    public static final String CONNECT_INTENT_KEY_ADDRESS = "address";
+    public static final String CONNECT_INTENT_KEY_HAS_PLAYBACK = "hasPlayback";
+    public static final String CONNECT_INTENT_KEY_HAS_CAPTURE = "hasCapture";
+    public static final String CONNECT_INTENT_KEY_HAS_MIDI = "hasMIDI";
+    public static final String CONNECT_INTENT_KEY_DEVICE_CLASS = "class";
+
+    // Defines the format for the connection "address" for ALSA devices
+    public static String makeAlsaAddressString(int card, int device) {
+        return "card=" + card + ";device=" + device + ";";
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -3433,14 +3447,32 @@ public class AudioService extends IAudioService.Stub {
         return device;
     }
 
-    public void setWiredDeviceConnectionState(int device, int state, String name) {
+    /*
+     * A class just for packaging up a set of connection parameters.
+     */
+    private class WiredDeviceConnectionState {
+        public int mType;
+        public int mState;
+        public String mAddress;
+        public String mName;
+
+        public WiredDeviceConnectionState(int type, int state, String address, String name) {
+            mType = type;
+            mState = state;
+            mAddress = address;
+            mName = name;
+        }
+    }
+
+    public void setWiredDeviceConnectionState(int type, int state, String address,
+            String name) {
         synchronized (mConnectedDevices) {
-            int delay = checkSendBecomingNoisyIntent(device, state);
+            int delay = checkSendBecomingNoisyIntent(type, state);
             queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
-                    device,
-                    state,
-                    name,
+                    0,
+                    0,
+                    new WiredDeviceConnectionState(type, state, address, name),
                     delay);
         }
     }
@@ -4172,7 +4204,8 @@ public class AudioService extends IAudioService.Stub {
                             AudioSystem.setDeviceConnectionState(
                                                             ((Integer)device.getKey()).intValue(),
                                                             AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                            (String)device.getValue());
+                                                            (String)device.getValue(),
+                                                            "unknown-device");
                         }
                     }
                     // Restore call state
@@ -4274,8 +4307,12 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_SET_WIRED_DEVICE_CONNECTION_STATE:
-                    onSetWiredDeviceConnectionState(msg.arg1, msg.arg2, (String)msg.obj);
-                    mAudioEventWakeLock.release();
+                    {   WiredDeviceConnectionState connectState =
+                            (WiredDeviceConnectionState)msg.obj;
+                        onSetWiredDeviceConnectionState(connectState.mType, connectState.mState,
+                                connectState.mAddress, connectState.mName);
+                        mAudioEventWakeLock.release();
+                    }
                     break;
 
                 case MSG_SET_A2DP_SRC_CONNECTION_STATE:
@@ -4388,7 +4425,8 @@ public class AudioService extends IAudioService.Stub {
         setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE,
-                address);
+                address,
+                "a2dp-device");
         // Reset A2DP suspend state each time a new sink is connected
         AudioSystem.setParameters("A2dpSuspended=false");
         mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
@@ -4406,7 +4444,8 @@ public class AudioService extends IAudioService.Stub {
         }
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                address);
+                address,
+                "a2dp-device");
         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         synchronized (mCurAudioRoutes) {
             // Remove A2DP routes as well
@@ -4435,7 +4474,8 @@ public class AudioService extends IAudioService.Stub {
     private void makeA2dpSrcAvailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE,
-                address);
+                address,
+                "a2dp-device");
         mConnectedDevices.put( new Integer(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP),
                 address);
     }
@@ -4444,7 +4484,8 @@ public class AudioService extends IAudioService.Stub {
     private void makeA2dpSrcUnavailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                address);
+                address,
+                "a2dp-device");
         mConnectedDevices.remove(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP);
     }
 
@@ -4560,22 +4601,26 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private boolean handleDeviceConnection(boolean connected, int device, String params) {
+    private boolean handleDeviceConnection(boolean connect, int device, String address, String deviceName) {
+        Slog.i(TAG, "handleDeviceConnection(" + connect +
+                " dev:" + Integer.toHexString(device) +
+                " address:" + address + 
+                " name:" + deviceName + ")");
         synchronized (mConnectedDevices) {
             boolean isConnected = (mConnectedDevices.containsKey(device) &&
-                    (params.isEmpty() || mConnectedDevices.get(device).equals(params)));
+                    (address.isEmpty() || mConnectedDevices.get(device).equals(address)));
 
-            if (isConnected && !connected) {
+            if (isConnected && !connect) {
                 AudioSystem.setDeviceConnectionState(device,
                                               AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                                              mConnectedDevices.get(device));
+                                              address, deviceName);
                  mConnectedDevices.remove(device);
                  return true;
-            } else if (!isConnected && connected) {
+            } else if (!isConnected && connect) {
                  AudioSystem.setDeviceConnectionState(device,
                                                       AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                      params);
-                 mConnectedDevices.put(new Integer(device), params);
+                                                      address, deviceName);
+                 mConnectedDevices.put(new Integer(device), address);
                  return true;
             }
         }
@@ -4628,12 +4673,18 @@ public class AudioService extends IAudioService.Stub {
         return delay;
     }
 
-    private void sendDeviceConnectionIntent(int device, int state, String name)
+    private void sendDeviceConnectionIntent(int device, int state, String address, String deviceName)
     {
+        Slog.i(TAG, "sendDeviceConnectionIntent(dev:0x" + Integer.toHexString(device) +
+                " state:0x" + Integer.toHexString(state) +
+                " address:" + address +
+                " name:" + deviceName + ");");
         Intent intent = new Intent();
 
-        intent.putExtra("state", state);
-        intent.putExtra("name", name);
+        intent.putExtra(CONNECT_INTENT_KEY_STATE, state);
+        intent.putExtra(CONNECT_INTENT_KEY_ADDRESS, address);
+        intent.putExtra(CONNECT_INTENT_KEY_PORT_NAME, deviceName);
+
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
         int connType = 0;
@@ -4652,6 +4703,8 @@ public class AudioService extends IAudioService.Stub {
                 device == AudioSystem.DEVICE_OUT_HDMI_ARC) {
             connType = AudioRoutesInfo.MAIN_HDMI;
             configureHdmiPlugIntent(intent, state);
+        } else if (device == AudioSystem.DEVICE_OUT_USB_DEVICE) {
+            connType = AudioRoutesInfo.MAIN_USB;
         }
 
         synchronized (mCurAudioRoutes) {
@@ -4678,8 +4731,14 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private void onSetWiredDeviceConnectionState(int device, int state, String name)
+    private void onSetWiredDeviceConnectionState(int device, int state, String address,
+            String deviceName)
     {
+        Slog.i(TAG, "onSetWiredDeviceConnectionState(dev:" + Integer.toHexString(device)
+                + " state:" + Integer.toHexString(state)
+                + " address:" + address
+                + " deviceName:" + deviceName + ");");
+
         synchronized (mConnectedDevices) {
             if ((state == 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
@@ -4689,7 +4748,7 @@ public class AudioService extends IAudioService.Stub {
             boolean isUsb = ((device & ~AudioSystem.DEVICE_OUT_ALL_USB) == 0) ||
                             (((device & AudioSystem.DEVICE_BIT_IN) != 0) &&
                              ((device & ~AudioSystem.DEVICE_IN_ALL_USB) == 0));
-            handleDeviceConnection((state == 1), device, (isUsb ? name : ""));
+            handleDeviceConnection(state == 1, device, address, deviceName);
             if (state != 0) {
                 if ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
                     (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE) ||
@@ -4727,8 +4786,8 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             }
-            if (!isUsb && (device != AudioSystem.DEVICE_IN_WIRED_HEADSET)) {
-                sendDeviceConnectionIntent(device, state, name);
+            if (!isUsb && device != AudioSystem.DEVICE_IN_WIRED_HEADSET) {
+                sendDeviceConnectionIntent(device, state, address, deviceName);
             }
         }
     }
@@ -4852,8 +4911,9 @@ public class AudioService extends IAudioService.Stub {
                 }
 
                 boolean connected = (state == BluetoothProfile.STATE_CONNECTED);
-                boolean success = handleDeviceConnection(connected, outDevice, address) &&
-                                      handleDeviceConnection(connected, inDevice, address);
+                boolean success =
+                    handleDeviceConnection(connected, outDevice, address, "Bluetooth Headset") &&
+                    handleDeviceConnection(connected, inDevice, address, "Bluetooth Headset");
                 if (success) {
                     synchronized (mScoClients) {
                         if (connected) {

@@ -26,9 +26,10 @@ package android.media;
 
 public class AudioMixPort extends AudioPort {
 
-    AudioMixPort(AudioHandle handle, int role, int[] samplingRates, int[] channelMasks,
+    AudioMixPort(AudioHandle handle, int role, String deviceName,
+            int[] samplingRates, int[] channelMasks,
             int[] formats, AudioGain[] gains) {
-        super(handle, role, samplingRates, channelMasks, formats, gains);
+        super(handle, role, deviceName, samplingRates, channelMasks, formats, gains);
     }
 
     /**

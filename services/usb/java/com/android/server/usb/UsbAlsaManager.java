@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
+import android.media.AudioService;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.midi.MidiDeviceInfo;
@@ -179,15 +180,16 @@ public final class UsbAlsaManager {
                         " alsaDevice: " + alsaDevice);
             return;
         }
-        String params = ("card=" + alsaCard + ";device=" + alsaDevice);
 
+        String address = AudioService.makeAlsaAddressString(alsaCard, alsaDevice);
         try {
             // Playback Device
             if (audioDevice.mHasPlayback) {
                 int device = (audioDevice == mAccessoryAudioDevice ?
                         AudioSystem.DEVICE_OUT_USB_ACCESSORY :
                         AudioSystem.DEVICE_OUT_USB_DEVICE);
-                mAudioService.setWiredDeviceConnectionState(device, state, params);
+                mAudioService.setWiredDeviceConnectionState(
+                        device, state, address, audioDevice.mDeviceName);
             }
 
             // Capture Device
@@ -195,7 +197,8 @@ public final class UsbAlsaManager {
                int device = (audioDevice == mAccessoryAudioDevice ?
                         AudioSystem.DEVICE_IN_USB_ACCESSORY :
                         AudioSystem.DEVICE_IN_USB_DEVICE);
-                mAudioService.setWiredDeviceConnectionState(device, state, params);
+                mAudioService.setWiredDeviceConnectionState(
+                        device, state, address, audioDevice.mDeviceName);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");

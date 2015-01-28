@@ -15,7 +15,7 @@
  */
 
 package android.media;
-
+import android.util.Slog;
 
 /**
  * An audio port is a node of the audio framework or hardware that can be connected to or
@@ -37,6 +37,7 @@ package android.media;
  * @hide
  */
 public class AudioPort {
+    private static final String TAG = "AudioPort";
 
     /**
      * For use by the audio framework.
@@ -68,16 +69,20 @@ public class AudioPort {
 
     AudioHandle mHandle;
     protected final int mRole;
+    private final String mName;
     private final int[] mSamplingRates;
     private final int[] mChannelMasks;
     private final int[] mFormats;
     private final AudioGain[] mGains;
     private AudioPortConfig mActiveConfig;
 
-    AudioPort(AudioHandle handle, int role, int[] samplingRates, int[] channelMasks,
+    AudioPort(AudioHandle handle, int role, String name,
+            int[] samplingRates, int[] channelMasks,
             int[] formats, AudioGain[] gains) {
+
         mHandle = handle;
         mRole = role;
+        mName = name;
         mSamplingRates = samplingRates;
         mChannelMasks = channelMasks;
         mFormats = formats;
@@ -93,6 +98,14 @@ public class AudioPort {
      */
     public int role() {
         return mRole;
+    }
+
+    /**
+     * Get the human-readable name of this port. Perhaps an internal
+     * designation or an physical device.
+     */
+    public String name() {
+        return mName;
     }
 
     /**

@@ -904,7 +904,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // Note that we don't set any name to ARC.
         mService.getAudioManager().setWiredDeviceConnectionState(
                 AudioSystem.DEVICE_OUT_HDMI_ARC,
-                enabled ? 1 : 0, "");
+                enabled ? 1 : 0, "", "");
     }
 
     /**
