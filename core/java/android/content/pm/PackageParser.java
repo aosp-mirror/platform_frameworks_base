@@ -3082,6 +3082,12 @@ public class PackageParser {
             a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
         }
 
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestActivity_primaryUserOnly,
+                false)) {
+            a.info.flags |= ActivityInfo.FLAG_PRIMARY_USER_ONLY;
+        }
+
         if (!receiver) {
             if (sa.getBoolean(
                     com.android.internal.R.styleable.AndroidManifestActivity_hardwareAccelerated,
@@ -3152,11 +3158,6 @@ public class PackageParser {
                     a.info.exported = false;
                     setExported = true;
                 }
-            }
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_primaryUserOnly,
-                    false)) {
-                a.info.flags |= ActivityInfo.FLAG_PRIMARY_USER_ONLY;
             }
         }
 
