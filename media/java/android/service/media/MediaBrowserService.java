@@ -32,8 +32,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.service.media.IMediaBrowserService;
 import android.service.media.IMediaBrowserServiceCallbacks;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -73,6 +75,13 @@ public abstract class MediaBrowserService extends Service {
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.media.browse.MediaBrowserService";
+
+    /**
+     * A key for passing the MediaItem to the ResultReceiver in getMediaItem.
+     *
+     * @hide
+     */
+    public static final String KEY_MEDIA_ITEM = "media_item";
 
     private final ArrayMap<IBinder, ConnectionRecord> mConnections = new ArrayMap();
     private final Handler mHandler = new Handler();
@@ -261,6 +270,33 @@ public abstract class MediaBrowserService extends Service {
                 }
             });
         }
+
+        @Override
+        public void getMediaItem(final String mediaId, final ResultReceiver receiver) {
+            if (TextUtils.isEmpty(mediaId) || receiver == null) {
+                return;
+            }
+
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    final Result<MediaBrowser.MediaItem> result
+                            = new Result<MediaBrowser.MediaItem>(mediaId) {
+                        @Override
+                        void onResultSent(MediaBrowser.MediaItem item) {
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelable(KEY_MEDIA_ITEM, item);
+                            receiver.send(0, bundle);
+                        }
+                    };
+                    try {
+                        MediaBrowserService.this.getMediaItem(mediaId, result);
+                    } catch (UnsupportedOperationException e) {
+                        receiver.send(-1, null);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -284,20 +320,21 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Called to get the root information for browsing by a particular client.
      * <p>
-     * The implementation should verify that the client package has
-     * permission to access browse media information before returning
-     * the root id; it should return null if the client is not
-     * allowed to access this information.
+     * The implementation should verify that the client package has permission
+     * to access browse media information before returning the root id; it
+     * should return null if the client is not allowed to access this
+     * information.
      * </p>
      *
-     * @param clientPackageName The package name of the application
-     * which is requesting access to browse media.
-     * @param clientUid The uid of the application which is requesting
-     * access to browse media.
+     * @param clientPackageName The package name of the application which is
+     *            requesting access to browse media.
+     * @param clientUid The uid of the application which is requesting access to
+     *            browse media.
      * @param rootHints An optional bundle of service-specific arguments to send
-     * to the media browse service when connecting and retrieving the root id
-     * for browsing, or null if none.  The contents of this bundle may affect
-     * the information returned when browsing.
+     *            to the media browse service when connecting and retrieving the
+     *            root id for browsing, or null if none. The contents of this
+     *            bundle may affect the information returned when browsing.
+     * @return The {@link BrowserRoot} for accessing this app's content or null.
      */
     public abstract @Nullable BrowserRoot onGetRoot(@NonNull String clientPackageName,
             int clientUid, @Nullable Bundle rootHints);
@@ -305,24 +342,51 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Called to get information about the children of a media item.
      * <p>
-     * Implementations must call result.{@link Result#sendResult result.sendResult} with the list
-     * of children. If loading the children will be an expensive operation that should be performed
-     * on another thread, result.{@link Result#detach result.detach} may be called before returning
-     * from this function, and then {@link Result#sendResult result.sendResult} called when
-     * the loading is complete.
+     * Implementations must call {@link Result#sendResult result.sendResult}
+     * with the list of children. If loading the children will be an expensive
+     * operation that should be performed on another thread,
+     * {@link Result#detach result.detach} may be called before returning from
+     * this function, and then {@link Result#sendResult result.sendResult}
+     * called when the loading is complete.
      *
-     * @param parentId The id of the parent media item whose
-     * children are to be queried.
-     * @return The list of children, or null if the id is invalid.
+     * @param parentId The id of the parent media item whose children are to be
+     *            queried.
+     * @param result The Result to send the list of children to, or null if the
+     *            id is invalid.
      */
     public abstract void onLoadChildren(@NonNull String parentId,
             @NonNull Result<List<MediaBrowser.MediaItem>> result);
+
+    /**
+     * Called to get a specific media item. The mediaId should be the same id
+     * that would be returned for this item when it is in a list of child items.
+     * <p>
+     * Implementations must call {@link Result#sendResult result.sendResult}. If
+     * loading the item will be an expensive operation {@link Result#detach
+     * result.detach} may be called before returning from this function, and
+     * then {@link Result#sendResult result.sendResult} called when the item has
+     * been loaded.
+     * <p>
+     * The default implementation throws an exception.
+     *
+     * @param mediaId The id for the specific
+     *            {@link android.media.browse.MediaBrowser.MediaItem}.
+     * @param result The Result to send the item to, or null if the id is
+     *            invalid.
+     * @throws UnsupportedOperationException
+     */
+    public void getMediaItem(String mediaId, Result<MediaBrowser.MediaItem> result)
+            throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("getMediaItem is not supported.");
+    }
 
     /**
      * Call to set the media session.
      * <p>
      * This should be called as soon as possible during the service's startup.
      * It may only be called once.
+     *
+     * @param token The token for the service's {@link MediaSession}.
      */
     public void setSessionToken(final MediaSession.Token token) {
         if (token == null) {
