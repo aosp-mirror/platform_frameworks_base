@@ -703,7 +703,11 @@ public class TelephonyManager {
     public String getNai(int slotId) {
         int[] subId = SubscriptionManager.getSubId(slotId);
         try {
-            return getSubscriberInfo().getNaiForSubscriber(subId[0]);
+            String nai = getSubscriberInfo().getNaiForSubscriber(subId[0]);
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Rlog.v(TAG, "Nai = " + nai);
+            }
+            return nai;
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
