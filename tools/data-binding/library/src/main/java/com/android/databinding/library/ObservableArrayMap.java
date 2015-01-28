@@ -46,28 +46,17 @@ public class ObservableArrayMap<K, V> extends ArrayMap<K, V> implements Observab
 
     @Override
     public void clear() {
-        notifyChange(null);
+        boolean wasEmpty = isEmpty();
+        if (!wasEmpty) {
+            super.clear();
+            notifyChange(null);
+        }
     }
 
     public V put(K k, V v) {
         V val = super.put(k, v);
         notifyChange(k);
         return v;
-    }
-
-    @Override
-    public void putAll(Map<? extends K, ? extends V> map) {
-        super.putAll(map);
-        for (K key : map.keySet()) {
-            notifyChange(key);
-        }
-    }
-
-    @Override
-    public V remove(Object o) {
-        V val = super.remove(o);
-        notifyChange(o);
-        return val;
     }
 
     @Override
@@ -86,7 +75,7 @@ public class ObservableArrayMap<K, V> extends ArrayMap<K, V> implements Observab
     @Override
     public boolean retainAll(Collection<?> collection) {
         boolean removed = false;
-        for (int i = size(); i >= 0; i--) {
+        for (int i = size() - 1; i >= 0; i--) {
             Object key = keyAt(i);
             if (!collection.contains(key)) {
                 removeAt(i);
@@ -94,15 +83,6 @@ public class ObservableArrayMap<K, V> extends ArrayMap<K, V> implements Observab
             }
         }
         return removed;
-    }
-
-    @Override
-    public void putAll(SimpleArrayMap<? extends K, ? extends V> array) {
-        super.putAll(array);
-        for (int i = array.size(); i >= 0; i--) {
-            K key = array.keyAt(i);
-            notifyChange(key);
-        }
     }
 
     @Override
