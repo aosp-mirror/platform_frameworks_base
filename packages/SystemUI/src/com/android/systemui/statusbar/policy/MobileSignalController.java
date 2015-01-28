@@ -239,10 +239,13 @@ public class MobileSignalController extends SignalController<
 
         String contentDescription = getStringIfExists(getContentDescription());
         String dataContentDescription = getStringIfExists(icons.mDataContentDescription);
+
+        boolean showDataIcon = mCurrentState.dataConnected && mCurrentState.inetForNetwork != 0
+                || mCurrentState.iconGroup == TelephonyIcons.ROAMING;
+
         // Only send data sim callbacks to QS.
         if (mCurrentState.dataSim) {
-            int qsTypeIcon = mCurrentState.dataConnected ?
-                    icons.mQsDataType[mCurrentState.inetForNetwork] : 0;
+            int qsTypeIcon = showDataIcon ? icons.mQsDataType[mCurrentState.inetForNetwork] : 0;
             int length = mSignalsChangedCallbacks.size();
             for (int i = 0; i < length; i++) {
                 mSignalsChangedCallbacks.get(i).onMobileDataSignalChanged(mCurrentState.enabled
@@ -257,8 +260,6 @@ public class MobileSignalController extends SignalController<
                         icons.mIsWide && qsTypeIcon != 0);
             }
         }
-        boolean showDataIcon = mCurrentState.dataConnected && mCurrentState.inetForNetwork != 0
-                || mCurrentState.iconGroup == TelephonyIcons.ROAMING;
         int typeIcon = showDataIcon ? icons.mDataType : 0;
         int signalClustersLength = mSignalClusters.size();
         for (int i = 0; i < signalClustersLength; i++) {
