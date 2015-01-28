@@ -3165,7 +3165,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             // If the user is chording a menu shortcut, release the chord since
             // this window lost focus
-            if (!hasWindowFocus && mPanelChordingKey != 0) {
+            if (hasFeature(FEATURE_OPTIONS_PANEL) && !hasWindowFocus && mPanelChordingKey != 0) {
                 closePanel(FEATURE_OPTIONS_PANEL);
             }
 

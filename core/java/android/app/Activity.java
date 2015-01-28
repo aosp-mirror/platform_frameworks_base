@@ -3226,7 +3226,9 @@ public class Activity extends ContextThemeWrapper
      * Programmatically closes the most recently opened context menu, if showing.
      */
     public void closeContextMenu() {
-        mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
+        if (mWindow.hasFeature(Window.FEATURE_CONTEXT_MENU)) {
+            mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
+        }
     }
 
     /**
