@@ -5104,7 +5104,6 @@ public final class Settings {
          * Whether Theater Mode is on.
          * {@hide}
          */
-        @SystemApi
         public static final String THEATER_MODE_ON = "theater_mode_on";
 
         /**
