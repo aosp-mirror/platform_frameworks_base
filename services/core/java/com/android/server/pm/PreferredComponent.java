@@ -192,7 +192,7 @@ public class PreferredComponent {
         }
     }
 
-    public boolean sameSet(List<ResolveInfo> query, int priority) {
+    public boolean sameSet(List<ResolveInfo> query) {
         if (mSetPackages == null) {
             return query == null;
         }
@@ -201,10 +201,10 @@ public class PreferredComponent {
         }
         final int NQ = query.size();
         final int NS = mSetPackages.length;
+
         int numMatch = 0;
         for (int i=0; i<NQ; i++) {
             ResolveInfo ri = query.get(i);
-            if (ri.priority != priority) continue;
             ActivityInfo ai = ri.activityInfo;
             boolean good = false;
             for (int j=0; j<NS; j++) {
