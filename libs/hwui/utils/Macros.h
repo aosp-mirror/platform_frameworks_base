@@ -18,8 +18,8 @@
 
 #define PREVENT_COPY_AND_ASSIGN(Type) \
     private: \
-        Type(const Type&); \
-        void operator=(const Type&)
+        Type(const Type&) = delete; \
+        void operator=(const Type&) = delete
 
 #define DESCRIPTION_TYPE(Type) \
         int compare(const Type& rhs) const { return memcmp(this, &rhs, sizeof(Type));} \

@@ -17,13 +17,6 @@
 #ifndef ANDROID_HWUI_DISPLAY_OPERATION_H
 #define ANDROID_HWUI_DISPLAY_OPERATION_H
 
-#include <SkColor.h>
-#include <SkPath.h>
-#include <SkPathOps.h>
-#include <SkXfermode.h>
-
-#include <private/hwui/DrawGlInfo.h>
-
 #include "OpenGLRenderer.h"
 #include "AssetAtlas.h"
 #include "DeferredDisplayList.h"
@@ -31,10 +24,17 @@
 #include "GammaFontRenderer.h"
 #include "Patch.h"
 #include "RenderNode.h"
-#include "RenderState.h"
+#include "renderstate/RenderState.h"
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
 #include "utils/PaintUtils.h"
+
+#include <SkColor.h>
+#include <SkPath.h>
+#include <SkPathOps.h>
+#include <SkXfermode.h>
+
+#include <private/hwui/DrawGlInfo.h>
 
 // Use OP_LOG for logging with arglist, OP_LOGS if just printing char*
 #define OP_LOGS(s) OP_LOG("%s", (s))

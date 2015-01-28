@@ -27,6 +27,7 @@
 
 #include "AssetAtlas.h"
 #include "Caches.h"
+#include "Scissor.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -81,6 +82,7 @@ public:
 
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
 
+    Scissor& scissor() { return mScissor; }
 private:
     friend class renderthread::RenderThread;
     friend class Caches;
@@ -91,6 +93,8 @@ private:
 
     RenderState(renderthread::RenderThread& thread);
     ~RenderState();
+
+    Scissor mScissor;
 
     renderthread::RenderThread& mRenderThread;
     Caches* mCaches;

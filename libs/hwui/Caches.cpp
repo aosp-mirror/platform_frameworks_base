@@ -16,16 +16,17 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <utils/Log.h>
-#include <utils/String8.h>
-
 #include "Caches.h"
+
 #include "DisplayListRenderer.h"
 #include "GammaFontRenderer.h"
-#include "Properties.h"
 #include "LayerRenderer.h"
+#include "Properties.h"
+#include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
-#include "RenderState.h"
+
+#include <utils/Log.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -79,10 +80,6 @@ bool Caches::init() {
     mCurrentPixelBuffer = 0;
 
     mTexCoordsArrayEnabled = false;
-
-    glDisable(GL_SCISSOR_TEST);
-    scissorEnabled = false;
-    mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
 
     glActiveTexture(gTextureUnits[0]);
     mTextureUnit = 0;
@@ -576,71 +573,6 @@ void Caches::unbindTexture(GLuint texture) {
             mBoundTextures[i] = 0;
         }
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Scissor
-///////////////////////////////////////////////////////////////////////////////
-
-bool Caches::setScissor(GLint x, GLint y, GLint width, GLint height) {
-    if (scissorEnabled && (x != mScissorX || y != mScissorY ||
-            width != mScissorWidth || height != mScissorHeight)) {
-
-        if (x < 0) {
-            width += x;
-            x = 0;
-        }
-        if (y < 0) {
-            height += y;
-            y = 0;
-        }
-        if (width < 0) {
-            width = 0;
-        }
-        if (height < 0) {
-            height = 0;
-        }
-        glScissor(x, y, width, height);
-
-        mScissorX = x;
-        mScissorY = y;
-        mScissorWidth = width;
-        mScissorHeight = height;
-
-        return true;
-    }
-    return false;
-}
-
-bool Caches::enableScissor() {
-    if (!scissorEnabled) {
-        glEnable(GL_SCISSOR_TEST);
-        scissorEnabled = true;
-        resetScissor();
-        return true;
-    }
-    return false;
-}
-
-bool Caches::disableScissor() {
-    if (scissorEnabled) {
-        glDisable(GL_SCISSOR_TEST);
-        scissorEnabled = false;
-        return true;
-    }
-    return false;
-}
-
-void Caches::setScissorEnabled(bool enabled) {
-    if (scissorEnabled != enabled) {
-        if (enabled) glEnable(GL_SCISSOR_TEST);
-        else glDisable(GL_SCISSOR_TEST);
-        scissorEnabled = enabled;
-    }
-}
-
-void Caches::resetScissor() {
-    mScissorX = mScissorY = mScissorWidth = mScissorHeight = 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
