@@ -769,7 +769,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Whether the UI is currently running in touch mode (not showing
      * navigational focus because the user is directly pressing the screen).
      */
-    boolean mInTouchMode = true;
+    boolean mInTouchMode;
 
     private ViewServer mViewServer;
     private final ArrayList<WindowChangeListener> mWindowChangeListeners =
@@ -830,6 +830,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_sf_limitedAlpha);
         mHasPermanentDpad = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_hasPermanentDpad);
+        mInTouchMode = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_defaultInTouchMode);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings();

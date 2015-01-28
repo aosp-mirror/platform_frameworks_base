@@ -2154,4 +2154,5 @@
 
   <java-symbol type="bool" name="config_use_sim_language_file" />
   <java-symbol type="bool" name="config_LTE_eri_for_network_name" />
+  <java-symbol type="bool" name="config_defaultInTouchMode" />
 </resources>
