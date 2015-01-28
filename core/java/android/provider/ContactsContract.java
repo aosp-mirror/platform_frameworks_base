@@ -2248,33 +2248,6 @@ public final class ContactsContract {
         public static final String DELETED = "deleted";
 
         /**
-         * The "name_verified" flag: "1" means that the name fields on this raw
-         * contact can be trusted and therefore should be used for the entire
-         * aggregated contact.
-         * <p>
-         * If an aggregated contact contains more than one raw contact with a
-         * verified name, one of those verified names is chosen at random.
-         * If an aggregated contact contains no verified names, the
-         * name is chosen randomly from the constituent raw contacts.
-         * </p>
-         * <p>
-         * Updating this flag from "0" to "1" automatically resets it to "0" on
-         * all other raw contacts in the same aggregated contact.
-         * </p>
-         * <p>
-         * Sync adapters should only specify a value for this column when
-         * inserting a raw contact and leave it out when doing an update.
-         * </p>
-         * <p>
-         * The default value is "0"
-         * </p>
-         * <p>Type: INTEGER</p>
-         *
-         * @hide
-         */
-        public static final String NAME_VERIFIED = "name_verified";
-
-        /**
          * The "read-only" flag: "0" by default, "1" if the row cannot be modified or
          * deleted except by a sync adapter.  See {@link ContactsContract#CALLER_IS_SYNCADAPTER}.
          * <P>Type: INTEGER</P>
@@ -2970,7 +2943,6 @@ public final class ContactsContract {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DELETED);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, CONTACT_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, STARRED);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, NAME_VERIFIED);
                 android.content.Entity contact = new android.content.Entity(cv);
 
                 // read data rows until the contact id changes
