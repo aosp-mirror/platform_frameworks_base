@@ -33,7 +33,7 @@ public class MidiInputPort extends MidiPort implements MidiReceiver {
     private final FileOutputStream mOutputStream;
 
     // buffer to use for sending messages out our output stream
-    private final byte[] mBuffer = new byte[MAX_PACKED_MESSAGE_SIZE];
+    private final byte[] mBuffer = new byte[MAX_PACKET_SIZE];
 
   /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
         super(portNumber);
@@ -50,10 +50,19 @@ public class MidiInputPort extends MidiPort implements MidiReceiver {
      *                  {@link java.lang.System#nanoTime}
      */
     public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException {
+        assert(offset >= 0 && count >= 0 && offset + count <= msg.length);
+
         synchronized (mBuffer) {
-            int length = packMessage(msg, offset, count, timestamp, mBuffer);
             try {
-                mOutputStream.write(mBuffer, 0, length);
+                while (count > 0) {
+                    int length = packMessage(msg, offset, count, timestamp, mBuffer);
+                    mOutputStream.write(mBuffer, 0, length);
+                    int sent = getMessageSize(mBuffer, length);
+                    assert(sent >= 0 && sent <= length);
+
+                    offset += sent;
+                    count -= sent;
+                }
             } catch (IOException e) {
                 IoUtils.closeQuietly(mOutputStream);
                 // report I/O failure

@@ -45,7 +45,7 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
     private final Thread mThread = new Thread() {
         @Override
         public void run() {
-            byte[] buffer = new byte[MAX_PACKED_MESSAGE_SIZE];
+            byte[] buffer = new byte[MAX_PACKET_SIZE];
             ArrayList<MidiReceiver> deadReceivers = new ArrayList<MidiReceiver>();
 
             try {
@@ -54,9 +54,6 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
                     int count = mInputStream.read(buffer);
                     if (count < 0) {
                         break;
-                    } else if (count < MIN_PACKED_MESSAGE_SIZE || count > MAX_PACKED_MESSAGE_SIZE) {
-                        Log.e(TAG, "Number of bytes read out of range: " + count);
-                        continue;
                     }
 
                     int offset = getMessageOffset(buffer, count);
@@ -95,7 +92,6 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
             }
         }
     };
-
 
   /* package */ MidiOutputPort(ParcelFileDescriptor pfd, int portNumber) {
         super(portNumber);
