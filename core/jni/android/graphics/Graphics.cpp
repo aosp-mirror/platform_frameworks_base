@@ -366,7 +366,7 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     if (!canvasHandle) {
         return NULL;
     }
-    SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
+    SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->asSkCanvas();
     SkASSERT(c);
     return c;
 }

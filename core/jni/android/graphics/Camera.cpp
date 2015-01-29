@@ -96,7 +96,7 @@ static void Camera_getMatrix(JNIEnv* env, jobject obj, jlong matrixHandle) {
 }
 
 static void Camera_applyToCanvas(JNIEnv* env, jobject obj, jlong canvasHandle) {
-    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
+    SkCanvas* canvas = reinterpret_cast<android::Canvas*>(canvasHandle)->asSkCanvas();
     jlong viewHandle = env->GetLongField(obj, gNativeInstanceFieldID);
     Sk3DView* v = reinterpret_cast<Sk3DView*>(viewHandle);
     v->applyToCanvas(canvas);

@@ -101,7 +101,7 @@ void Picture::draw(Canvas* canvas) {
     }
     validate();
     if (NULL != mPicture.get()) {
-        mPicture.get()->playback(canvas->getSkCanvas());
+        mPicture.get()->playback(canvas->asSkCanvas());
     }
 }
 
