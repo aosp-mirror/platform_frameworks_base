@@ -34,6 +34,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
@@ -878,6 +879,17 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return oldStatus;
     }
 
+    @ServiceThreadOnly
+    private void updateArcFeatureStatus(int portId, boolean isConnected) {
+        assertRunOnServiceThread();
+        // HEAC 2.4, HEACT 5-15
+        // Should not activate ARC if +5V status is false.
+        HdmiPortInfo portInfo = mService.getPortInfo(portId);
+        if (portInfo.isArcSupported()) {
+            changeArcFeatureEnabled(isConnected);
+        }
+    }
+
     private void notifyArcStatusToAudioService(boolean enabled) {
         // Note that we don't set any name to ARC.
         mService.getAudioManager().setWiredDeviceConnectionState(
@@ -1509,6 +1521,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             // It covers seq #40, #43.
             hotplugActions.get(0).pollAllDevicesNow();
         }
+        updateArcFeatureStatus(portId, connected);
     }
 
     private void removeCecSwitches(int portId) {
