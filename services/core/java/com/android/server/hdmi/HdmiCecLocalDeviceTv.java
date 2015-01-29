@@ -580,6 +580,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!isInDeviceList(address, path)) {
             handleNewDeviceAtTheTailOfActivePath(path);
         }
+
+        // Add the device ahead with default information to handle <Active Source>
+        // promptly, rather than waiting till the new device action is finished.
+        HdmiDeviceInfo deviceInfo = new HdmiDeviceInfo(address, path, getPortId(path), type,
+                Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(address));
+        addCecDevice(deviceInfo);
         startNewDeviceAction(ActiveSource.of(address, path), type);
         return true;
     }
@@ -1465,7 +1471,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
      * @return true if exist; otherwise false
      */
     @ServiceThreadOnly
-    private boolean isInDeviceList(int logicalAddress, int physicalAddress) {
+    boolean isInDeviceList(int logicalAddress, int physicalAddress) {
         assertRunOnServiceThread();
         HdmiDeviceInfo device = getCecDeviceInfo(logicalAddress);
         if (device == null) {
