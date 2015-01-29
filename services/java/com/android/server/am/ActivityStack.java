@@ -3208,6 +3208,8 @@ final class ActivityStack {
                     aInfo, resultTo, resultWho, requestCode, callingPid, callingUid,
                     callingPackage, startFlags, options, componentSpecified, null);
             
+            Binder.restoreCallingIdentity(origId);
+
             if (mConfigWillChange && mMainStack) {
                 // If the caller also wants to switch to a new configuration,
                 // do so now.  This allows a clean switch, as we are waiting
@@ -3220,8 +3222,6 @@ final class ActivityStack {
                         "Updating to new configuration after starting activity.");
                 mService.updateConfigurationLocked(config, null, false, false);
             }
-            
-            Binder.restoreCallingIdentity(origId);
             
             if (outResult != null) {
                 outResult.result = res;
