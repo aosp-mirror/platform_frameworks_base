@@ -310,7 +310,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifySessionEvent(" + eventType + ")");
-                        mSessionCallback.onSessionEvent(eventType, eventArgs);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onSessionEvent(eventType, eventArgs);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in sending event (event=" + eventType + ")");
                     }
@@ -329,7 +331,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyChannelRetuned");
-                        mSessionCallback.onChannelRetuned(channelUri);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onChannelRetuned(channelUri);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyChannelRetuned");
                     }
@@ -366,7 +370,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTracksChanged");
-                        mSessionCallback.onTracksChanged(tracks);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTracksChanged(tracks);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTracksChanged");
                     }
@@ -394,7 +400,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTrackSelected");
-                        mSessionCallback.onTrackSelected(type, trackId);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTrackSelected(type, trackId);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTrackSelected");
                     }
@@ -415,7 +423,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyVideoAvailable");
-                        mSessionCallback.onVideoAvailable();
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onVideoAvailable();
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyVideoAvailable");
                     }
@@ -447,7 +457,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyVideoUnavailable");
-                        mSessionCallback.onVideoUnavailable(reason);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onVideoUnavailable(reason);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyVideoUnavailable");
                     }
@@ -486,7 +498,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyContentAllowed");
-                        mSessionCallback.onContentAllowed();
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onContentAllowed();
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyContentAllowed");
                     }
@@ -526,7 +540,9 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyContentBlocked");
-                        mSessionCallback.onContentBlocked(rating.flattenToString());
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onContentBlocked(rating.flattenToString());
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyContentBlocked");
                     }
@@ -557,7 +573,9 @@ public abstract class TvInputService extends Service {
                     try {
                         if (DEBUG) Log.d(TAG, "layoutSurface (l=" + left + ", t=" + top + ", r="
                                 + right + ", b=" + bottom + ",)");
-                        mSessionCallback.onLayoutSurface(left, top, right, bottom);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onLayoutSurface(left, top, right, bottom);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in layoutSurface");
                     }
