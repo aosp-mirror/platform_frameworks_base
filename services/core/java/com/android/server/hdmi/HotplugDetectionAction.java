@@ -38,6 +38,7 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
 
     private static final int POLLING_INTERVAL_MS = 5000;
     private static final int TIMEOUT_COUNT = 3;
+    private static final int AVR_COUNT_MAX = 3;
 
     // State in which waits for next polling
     private static final int STATE_WAIT_FOR_NEXT_POLLING = 1;
@@ -47,6 +48,12 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
             - Constants.ADDR_TV + 1;
 
     private int mTimeoutCount = 0;
+
+    // Counter used to ensure the connection to AVR is stable. Occasional failure to get
+    // polling response from AVR despite its presence leads to unstable status flipping.
+    // This is a workaround to deal with it, by removing the device only if the removal
+    // is detected {@code AVR_COUNT_MAX} times in a row.
+    private int mAvrStatusCount = 0;
 
     /**
      * Constructor
@@ -148,8 +155,20 @@ final class HotplugDetectionAction extends HdmiCecFeatureAction {
         BitSet removed = complement(currentInfos, polledResult);
         int index = -1;
         while ((index = removed.nextSetBit(index + 1)) != -1) {
+            if (index == Constants.ADDR_AUDIO_SYSTEM) {
+                ++mAvrStatusCount;
+                Slog.w(TAG, "Ack not returned from AVR. count: " + mAvrStatusCount);
+                if (mAvrStatusCount < AVR_COUNT_MAX) {
+                    continue;
+                }
+            }
             Slog.v(TAG, "Remove device by hot-plug detection:" + index);
             removeDevice(index);
+        }
+
+        // Reset the counter if the ack is returned from AVR.
+        if (!removed.get(Constants.ADDR_AUDIO_SYSTEM)) {
+            mAvrStatusCount = 0;
         }
 
         // Next, check added devices.
