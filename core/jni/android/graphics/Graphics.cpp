@@ -511,18 +511,15 @@ AndroidPixelRef::~AndroidPixelRef() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static bool computeAllocationSize(const SkImageInfo& info, size_t* size, size_t* rowBytes) {
-        int32_t rowBytes32 = SkToS32(info.minRowBytes());
-        int64_t bigSize = (int64_t)info.height() * rowBytes32;
-        if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
-            return false; // allocation will be too large
-        }
+static bool computeAllocationSize(const SkBitmap& bitmap, size_t* size) {
+    int32_t rowBytes32 = SkToS32(bitmap.rowBytes());
+    int64_t bigSize = (int64_t)bitmap.height() * rowBytes32;
+    if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
+        return false; // allocation will be too large
+    }
 
-        *size = sk_64_asS32(bigSize);
-        *rowBytes = rowBytes32;
-
-        SkASSERT(*size >= info.getSafeSize(*rowBytes));
-        return true;
+    *size = sk_64_asS32(bigSize);
+    return true;
 }
 
 jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
@@ -533,10 +530,14 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
         return NULL;
     }
 
-    size_t size, rowBytes;
-    if (!computeAllocationSize(info, &size, &rowBytes)) {
+    size_t size;
+    if (!computeAllocationSize(*bitmap, &size)) {
         return NULL;
     }
+
+    // we must respect the rowBytes value already set on the bitmap instead of
+    // attempting to compute our own.
+    const size_t rowBytes = bitmap->rowBytes();
 
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
@@ -580,10 +581,14 @@ bool GraphicsJNI::allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ct
         return NULL;
     }
 
-    size_t size, rowBytes;
-    if (!computeAllocationSize(info, &size, &rowBytes)) {
+    size_t size;
+    if (!computeAllocationSize(*bitmap, &size)) {
         return false;
     }
+
+    // we must respect the rowBytes value already set on the bitmap instead of
+    // attempting to compute our own.
+    const size_t rowBytes = bitmap->rowBytes();
 
     void* addr = sk_malloc_flags(size, 0);
     if (NULL == addr) {
