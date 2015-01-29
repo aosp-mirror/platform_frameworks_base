@@ -1316,6 +1316,8 @@ package android {
     field public static final int topRightRadius = 16843178; // 0x10101aa
     field public static final int touchscreenBlocksFocus = 16843919; // 0x101048f
     field public static final int track = 16843631; // 0x101036f
+    field public static final int trackTint = 16843993; // 0x10104d9
+    field public static final int trackTintMode = 16843994; // 0x10104da
     field public static final int transcriptMode = 16843008; // 0x1010100
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
@@ -39054,7 +39056,11 @@ package android.widget {
     method public java.lang.CharSequence getTextOn();
     method public android.graphics.drawable.Drawable getThumbDrawable();
     method public int getThumbTextPadding();
+    method public android.content.res.ColorStateList getThumbTintList();
+    method public android.graphics.PorterDuff.Mode getThumbTintMode();
     method public android.graphics.drawable.Drawable getTrackDrawable();
+    method public android.content.res.ColorStateList getTrackTintList();
+    method public android.graphics.PorterDuff.Mode getTrackTintMode();
     method public void onMeasure(int, int);
     method public void setShowText(boolean);
     method public void setSplitTrack(boolean);
@@ -39068,8 +39074,12 @@ package android.widget {
     method public void setThumbDrawable(android.graphics.drawable.Drawable);
     method public void setThumbResource(int);
     method public void setThumbTextPadding(int);
+    method public void setThumbTintList(android.content.res.ColorStateList);
+    method public void setThumbTintMode(android.graphics.PorterDuff.Mode);
     method public void setTrackDrawable(android.graphics.drawable.Drawable);
     method public void setTrackResource(int);
+    method public void setTrackTintList(android.content.res.ColorStateList);
+    method public void setTrackTintMode(android.graphics.PorterDuff.Mode);
   }
 
   public class TabHost extends android.widget.FrameLayout implements android.view.ViewTreeObserver.OnTouchModeChangeListener {

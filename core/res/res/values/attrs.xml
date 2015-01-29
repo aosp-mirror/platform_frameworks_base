@@ -7257,8 +7257,34 @@
     <declare-styleable name="Switch">
         <!-- Drawable to use as the "thumb" that switches back and forth. -->
         <attr name="thumb" />
+        <!-- Tint to apply to the thumb. -->
+        <attr name="thumbTint" />
+        <!-- Blending mode used to apply the thumb tint. -->
+        <attr name="thumbTintMode" />
         <!-- Drawable to use as the "track" that the switch thumb slides within. -->
         <attr name="track" format="reference" />
+        <!-- Tint to apply to the track. -->
+        <attr name="trackTint" format="color" />
+        <!-- Blending mode used to apply the track tint. -->
+        <attr name="trackTintMode">
+            <!-- The tint is drawn on top of the drawable.
+                 [Sa + (1 - Sa)*Da, Rc = Sc + (1 - Sa)*Dc] -->
+            <enum name="src_over" value="3" />
+            <!-- The tint is masked by the alpha channel of the drawable. The drawable’s
+                 color channels are thrown out. [Sa * Da, Sc * Da] -->
+            <enum name="src_in" value="5" />
+            <!-- The tint is drawn above the drawable, but with the drawable’s alpha
+                 channel masking the result. [Da, Sc * Da + (1 - Sa) * Dc] -->
+            <enum name="src_atop" value="9" />
+            <!-- Multiplies the color and alpha channels of the drawable with those of
+                 the tint. [Sa * Da, Sc * Dc] -->
+            <enum name="multiply" value="14" />
+            <!-- [Sa + Da - Sa * Da, Sc + Dc - Sc * Dc] -->
+            <enum name="screen" value="15" />
+            <!-- Combines the tint and drawable color and alpha channels, clamping the
+                 result to valid color values. Saturate(S + D) -->
+            <enum name="add" value="16" />
+        </attr>
         <!-- Text to use when the switch is in the checked/"on" state. -->
         <attr name="textOn" />
         <!-- Text to use when the switch is in the unchecked/"off" state. -->
