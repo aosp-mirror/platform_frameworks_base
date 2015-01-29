@@ -98,10 +98,8 @@ header.hide=1
     serve banner and interstitial ads using the Google Mobile Ads APIs.</p>
 
     <h4>3. Read the documentation</h4>
-    <p>Read the <a class="external-link" href="https://www.google.com/adsense/localized-terms">AdSense
-    Terms of Service</a> and the <a class="external-link"
-    href="https://support.google.com/admob/topic/1307235?hl=en&ref_topic=1307209">AdMob
-    publisher guidelines and policies</a>.</p>
+    <p>Your use of the Google Mobile Ads SDK is governed by the terms between you and Google that
+    govern your use of the Google product (AdSense/AdMob, AdX or DFP) with which you use the SDK.</p>
     <p>For quick access while developing your Android apps, the <a
     href="{@docRoot}reference/gms-packages.html">Google Mobile Ads API reference</a> is available here on
     developer.android.com.</p>
