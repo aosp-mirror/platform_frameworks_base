@@ -273,7 +273,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
             layerCache.getSize(), layerCache.getMaxSize(), layerCache.getCount());
     if (mRenderState) {
         int memused = 0;
-        for (std::set<const Layer*>::iterator it = mRenderState->mActiveLayers.begin();
+        for (std::set<Layer*>::iterator it = mRenderState->mActiveLayers.begin();
                 it != mRenderState->mActiveLayers.end(); it++) {
             const Layer* layer = *it;
             log.appendFormat("    Layer size %dx%d; isTextureLayer()=%d; texid=%u fbo=%u; refs=%d\n",
