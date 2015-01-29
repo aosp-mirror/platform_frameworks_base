@@ -881,8 +881,8 @@ public final class MediaCodecInfo {
                         (int)(mAspectRatioRange.getUpper().doubleValue() * height));
                 return range;
             } catch (IllegalArgumentException e) {
-                // should not be here
-                Log.w(TAG, "could not get supported widths for " + height , e);
+                // height is not supported because there are no suitable widths
+                Log.v(TAG, "could not get supported widths for " + height);
                 throw new IllegalArgumentException("unsupported height");
             }
         }
@@ -925,8 +925,8 @@ public final class MediaCodecInfo {
                         (int)(width / mAspectRatioRange.getLower().doubleValue()));
                 return range;
             } catch (IllegalArgumentException e) {
-                // should not be here
-                Log.w(TAG, "could not get supported heights for " + width , e);
+                // width is not supported because there are no suitable heights
+                Log.v(TAG, "could not get supported heights for " + width);
                 throw new IllegalArgumentException("unsupported width");
             }
         }
