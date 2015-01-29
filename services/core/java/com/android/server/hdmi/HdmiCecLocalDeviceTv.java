@@ -432,11 +432,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
         List<SendKeyAction> action = getActions(SendKeyAction.class);
+        int logicalAddress = findKeyReceiverAddress();
+        if (logicalAddress == mAddress) {
+            Slog.w(TAG, "Discard key event to itself :" + keyCode + " pressed:" + isPressed);
+            return;
+        }
         if (!action.isEmpty()) {
             action.get(0).processKeyEvent(keyCode, isPressed);
         } else {
             if (isPressed) {
-                int logicalAddress = findKeyReceiverAddress();
                 if (logicalAddress != Constants.ADDR_INVALID) {
                     addAndStartAction(new SendKeyAction(this, logicalAddress, keyCode));
                     return;
