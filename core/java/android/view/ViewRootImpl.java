@@ -1326,6 +1326,11 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
+        // Non-visible windows can't hold accessibility focus.
+        if (mAttachInfo.mWindowVisibility != View.VISIBLE) {
+            host.clearAccessibilityFocus();
+        }
+
         // Execute enqueued actions on every traversal in case a detached view enqueued an action
         getRunQueue().executeActions(mAttachInfo.mHandler);
 
