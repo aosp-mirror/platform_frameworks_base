@@ -351,7 +351,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
     int bytesPerPixel = 0;
 
     dataSize = ySize = cSize = cStride = 0;
-    int32_t fmt = buffer->format;
+    int32_t fmt = buffer->flexFormat;
 
     bool usingRGBAOverride = usingRGBAToJpegOverride(fmt, readerFormat);
     fmt = applyFormatOverrides(fmt, readerFormat);
@@ -363,18 +363,21 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
                 (idx == 1) ?
                     buffer->dataCb :
                 buffer->dataCr;
+            // only map until last pixel
             if (idx == 0) {
-                dataSize = buffer->stride * buffer->height;
+                dataSize = buffer->stride * (buffer->height - 1) + buffer->width;
             } else {
-                dataSize = buffer->chromaStride * buffer->height / 2;
+                dataSize = buffer->chromaStride * (buffer->height / 2 - 1) +
+                        buffer->chromaStep * (buffer->width / 2 - 1) + 1;
             }
             break;
         // NV21
         case HAL_PIXEL_FORMAT_YCrCb_420_SP:
             cr = buffer->data + (buffer->stride * buffer->height);
             cb = cr + 1;
-            ySize = buffer->width * buffer->height;
-            cSize = buffer->width * buffer->height / 2;
+            // only map until last pixel
+            ySize = buffer->width * (buffer->height - 1) + buffer->width;
+            cSize = buffer->width * (buffer->height / 2 - 1) + buffer->width - 1;
 
             pData =
                 (idx == 0) ?
@@ -488,7 +491,7 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
     int pixelStride = 0;
     ALOG_ASSERT(buffer != NULL, "buffer is NULL");
 
-    int32_t fmt = buffer->format;
+    int32_t fmt = buffer->flexFormat;
 
     fmt = applyFormatOverrides(fmt, readerFormat);
 
@@ -548,7 +551,7 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
     int rowStride = 0;
     ALOG_ASSERT(buffer != NULL, "buffer is NULL");
 
-    int32_t fmt = buffer->format;
+    int32_t fmt = buffer->flexFormat;
 
     fmt = applyFormatOverrides(fmt, readerFormat);
 
@@ -796,7 +799,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         return ACQUIRE_NO_BUFFERS;
     }
 
-    if (buffer->format == HAL_PIXEL_FORMAT_YCrCb_420_SP) {
+    if (buffer->flexFormat == HAL_PIXEL_FORMAT_YCrCb_420_SP) {
         jniThrowException(env, "java/lang/UnsupportedOperationException",
                 "NV21 format is not supported by ImageReader");
         return -1;
@@ -825,8 +828,10 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     }
 
     int bufFmt = buffer->format;
+    if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888) {
+        bufFmt = buffer->flexFormat;
+    }
     if (imgReaderFmt != bufFmt) {
-
         if (imgReaderFmt == HAL_PIXEL_FORMAT_YCbCr_420_888 && (bufFmt ==
                 HAL_PIXEL_FORMAT_YCrCb_420_SP || bufFmt == HAL_PIXEL_FORMAT_YV12)) {
             // Special casing for when producer switches to a format compatible with flexible YUV
@@ -848,7 +853,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
             String8 msg;
             msg.appendFormat("The producer output buffer format 0x%x doesn't "
                     "match the ImageReader's configured buffer format 0x%x.",
-                    buffer->format, ctx->getBufferFormat());
+                    bufFmt, ctx->getBufferFormat());
             jniThrowException(env, "java/lang/UnsupportedOperationException",
                     msg.string());
             return -1;
