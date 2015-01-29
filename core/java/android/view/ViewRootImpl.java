@@ -472,8 +472,10 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Compute surface insets required to draw at specified Z value.
                 // TODO: Use real shadow insets for a constant max Z.
-                final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
-                attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+                if (!attrs.hasManualSurfaceInsets) {
+                    final int surfaceInset = (int) Math.ceil(view.getZ() * 2);
+                    attrs.surfaceInsets.set(surfaceInset, surfaceInset, surfaceInset, surfaceInset);
+                }
 
                 CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
@@ -760,6 +762,7 @@ public final class ViewRootImpl implements ViewParent,
             final int oldInsetRight = mWindowAttributes.surfaceInsets.right;
             final int oldInsetBottom = mWindowAttributes.surfaceInsets.bottom;
             final int oldSoftInputMode = mWindowAttributes.softInputMode;
+            final boolean oldHasManualSurfaceInsets = mWindowAttributes.hasManualSurfaceInsets;
 
             // Keep track of the actual window flags supplied by the client.
             mClientWindowLayoutFlags = attrs.flags;
@@ -786,6 +789,7 @@ public final class ViewRootImpl implements ViewParent,
             // Restore old surface insets.
             mWindowAttributes.surfaceInsets.set(
                     oldInsetLeft, oldInsetTop, oldInsetRight, oldInsetBottom);
+            mWindowAttributes.hasManualSurfaceInsets = oldHasManualSurfaceInsets;
 
             applyKeepScreenOnFlag(mWindowAttributes);
 
