@@ -327,6 +327,7 @@
   <java-symbol type="integer" name="config_wifi_framework_scan_result_rssi_level_patchup_value" />
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="string"  name="config_wifi_random_mac_oui" />
+  <java-symbol type="integer"  name="config_wifi_network_switching_blacklist_time" />
 
   <java-symbol type="bool" name="editable_voicemailnumber" />
 
