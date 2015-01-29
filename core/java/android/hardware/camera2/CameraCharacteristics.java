@@ -1069,8 +1069,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.scaler.availableInputOutputFormatsMap. When using an
      * input stream, there must be at least one output stream
      * configured to to receive the reprocessed images.</p>
+     * <p>When an input stream and some output streams are used in a reprocessing request,
+     * only the input buffer will be used to produce these output stream buffers, and a
+     * new sensor image will not be captured.</p>
      * <p>For example, for Zero Shutter Lag (ZSL) still capture use case, the input
-     * stream image format will be RAW_OPAQUE, the associated output stream image format
+     * stream image format will be OPAQUE, the associated output stream image format
      * should be JPEG.</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>0 or 1.</p>
@@ -1080,8 +1083,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
-     * @hide
      */
+    @PublicKey
     public static final Key<Integer> REQUEST_MAX_NUM_INPUT_STREAMS =
             new Key<Integer>("android.request.maxNumInputStreams", int.class);
 
@@ -1157,8 +1160,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING MANUAL_POST_PROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING OPAQUE_REPROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS READ_SENSOR_SETTINGS}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING YUV_REPROCESSING}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1167,8 +1172,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS
      * @see #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
@@ -1345,10 +1352,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>The mapping of image formats that are supported by this
      * camera device for input streams, to their corresponding output formats.</p>
      * <p>All camera devices with at least 1
-     * android.request.maxNumInputStreams will have at least one
+     * {@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} will have at least one
      * available input format.</p>
      * <p>The camera device will support the following map of formats,
-     * if its dependent capability is supported:</p>
+     * if its dependent capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}) is supported:</p>
      * <table>
      * <thead>
      * <tr>
@@ -1359,45 +1366,42 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="left">RAW_OPAQUE</td>
+     * <td align="left">OPAQUE</td>
      * <td align="left">JPEG</td>
-     * <td align="left">ZSL</td>
+     * <td align="left">OPAQUE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">RAW_OPAQUE</td>
+     * <td align="left">OPAQUE</td>
      * <td align="left">YUV_420_888</td>
-     * <td align="left">ZSL</td>
+     * <td align="left">OPAQUE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">RAW_OPAQUE</td>
-     * <td align="left">RAW16</td>
-     * <td align="left">RAW</td>
-     * </tr>
-     * <tr>
-     * <td align="left">RAW16</td>
      * <td align="left">YUV_420_888</td>
-     * <td align="left">RAW</td>
-     * </tr>
-     * <tr>
-     * <td align="left">RAW16</td>
      * <td align="left">JPEG</td>
-     * <td align="left">RAW</td>
+     * <td align="left">YUV_REPROCESSING</td>
+     * </tr>
+     * <tr>
+     * <td align="left">YUV_420_888</td>
+     * <td align="left">YUV_420_888</td>
+     * <td align="left">YUV_REPROCESSING</td>
      * </tr>
      * </tbody>
      * </table>
-     * <p>For ZSL-capable camera devices, using the RAW_OPAQUE format
+     * <p>OPAQUE refers to a device-internal format that is not directly application-visible.
+     * An OPAQUE input or output surface can be acquired by
+     * OpaqueImageRingBufferQueue#getInputSurface() or
+     * OpaqueImageRingBufferQueue#getOutputSurface().
+     * For a OPAQUE_REPROCESSING-capable camera device, using the OPAQUE format
      * as either input or output will never hurt maximum frame rate (i.e.
-     * StreamConfigurationMap#getOutputStallDuration(int,Size)
-     * for a <code>format =</code> RAW_OPAQUE is always 0).</p>
+     * StreamConfigurationMap#getOutputStallDuration(klass,Size) is always 0),
+     * where klass is android.media.OpaqueImageRingBufferQueue.class.</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
      * <p>TODO: typedef to ReprocessFormatMap</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
-     * <p><b>Full capability</b> -
-     * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
-     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @hide
      */
     public static final Key<int[]> SCALER_AVAILABLE_INPUT_OUTPUT_FORMATS_MAP =

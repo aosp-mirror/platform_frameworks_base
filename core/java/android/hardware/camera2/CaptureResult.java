@@ -1627,7 +1627,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>This control (except for MANUAL) is only effective if
      * <code>{@link CaptureRequest#CONTROL_MODE android.control.mode} != OFF</code> and any 3A routine is active.</p>
      * <p>ZERO_SHUTTER_LAG will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
-     * contains ZSL. MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
+     * contains OPAQUE_REPROCESSING. MANUAL will be supported if {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
      * contains MANUAL_SENSOR. Other intent values are always supported.</p>
      * <p><b>Possible values:</b>
      * <ul>
@@ -1988,6 +1988,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * camera device will use the highest-quality enhancement algorithms,
      * even if it slows down capture rate. FAST means the camera device will
      * not slow down capture rate when applying edge enhancement.</p>
+     * <p>For YUV_REPROCESSING, these FAST/HIGH_QUALITY modes both mean that the camera
+     * device will apply FAST/HIGH_QUALITY YUV-domain edge enhancement, respectively.
+     * The camera device may adjust its internal noise reduction parameters for best
+     * image quality based on the {@link CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR android.reprocess.effectiveExposureFactor}, if it is set.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #EDGE_MODE_OFF OFF}</li>
@@ -2003,6 +2007,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#EDGE_AVAILABLE_EDGE_MODES
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR
      * @see #EDGE_MODE_OFF
      * @see #EDGE_MODE_FAST
      * @see #EDGE_MODE_HIGH_QUALITY
@@ -2465,18 +2470,28 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>Mode of operation for the noise reduction algorithm.</p>
      * <p>The noise reduction algorithm attempts to improve image quality by removing
-     * excessive noise added by the capture process, especially in dark conditions.
-     * OFF means no noise reduction will be applied by the camera device.</p>
+     * excessive noise added by the capture process, especially in dark conditions.</p>
+     * <p>OFF means no noise reduction will be applied by the camera device, for both raw and
+     * YUV domain.</p>
+     * <p>MINIMAL means that only sensor raw domain basic noise reduction is enabled ,to remove
+     * demosaicing or other processing artifacts. For YUV_REPROCESSING, MINIMAL is same as OFF.
+     * This mode is optional, may not be support by all devices. The application should check
+     * {@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes} before using it.</p>
      * <p>FAST/HIGH_QUALITY both mean camera device determined noise filtering
      * will be applied. HIGH_QUALITY mode indicates that the camera device
      * will use the highest-quality noise filtering algorithms,
      * even if it slows down capture rate. FAST means the camera device will not
      * slow down capture rate when applying noise filtering.</p>
+     * <p>For YUV_REPROCESSING, these FAST/HIGH_QUALITY modes both mean that the camera device
+     * will apply FAST/HIGH_QUALITY YUV domain noise reduction, respectively. The camera device
+     * may adjust the noise reduction parameters for best image quality based on the
+     * {@link CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR android.reprocess.effectiveExposureFactor} if it is set.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #NOISE_REDUCTION_MODE_OFF OFF}</li>
      *   <li>{@link #NOISE_REDUCTION_MODE_FAST FAST}</li>
      *   <li>{@link #NOISE_REDUCTION_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
+     *   <li>{@link #NOISE_REDUCTION_MODE_MINIMAL MINIMAL}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES android.noiseReduction.availableNoiseReductionModes}</p>
@@ -2487,9 +2502,11 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CameraCharacteristics#NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES
+     * @see CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR
      * @see #NOISE_REDUCTION_MODE_OFF
      * @see #NOISE_REDUCTION_MODE_FAST
      * @see #NOISE_REDUCTION_MODE_HIGH_QUALITY
+     * @see #NOISE_REDUCTION_MODE_MINIMAL
      */
     @PublicKey
     public static final Key<Integer> NOISE_REDUCTION_MODE =
@@ -3646,6 +3663,52 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      */
     public static final Key<Long> SYNC_FRAME_NUMBER =
             new Key<Long>("android.sync.frameNumber", long.class);
+
+    /**
+     * <p>The amount of exposure time increase factor applied to the original output
+     * frame by the application processing before sending for reprocessing.</p>
+     * <p>This is optional, and will be supported if the camera device supports YUV_REPROCESSING
+     * capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains YUV_REPROCESSING).</p>
+     * <p>For some YUV reprocessing use cases, the application may choose to filter the original
+     * output frames to effectively reduce the noise to the same level as a frame that was
+     * captured with longer exposure time. To be more specific, assuming the original captured
+     * images were captured with a sensitivity of S and an exposure time of T, the model in
+     * the camera device is that the amount of noise in the image would be approximately what
+     * would be expected if the original capture parameters had been a sensitivity of
+     * S/effectiveExposureFactor and an exposure time of T*effectiveExposureFactor, rather
+     * than S and T respectively. If the captured images were processed by the application
+     * before being sent for reprocessing, then the application may have used image processing
+     * algorithms and/or multi-frame image fusion to reduce the noise in the
+     * application-processed images (input images). By using the effectiveExposureFactor
+     * control, the application can communicate to the camera device the actual noise level
+     * improvement in the application-processed image. With this information, the camera
+     * device can select appropriate noise reduction and edge enhancement parameters to avoid
+     * excessive noise reduction ({@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}) and insufficient edge
+     * enhancement ({@link CaptureRequest#EDGE_MODE android.edge.mode}) being applied to the reprocessed frames.</p>
+     * <p>For example, for multi-frame image fusion use case, the application may fuse
+     * multiple output frames together to a final frame for reprocessing. When N image are
+     * fused into 1 image for reprocessing, the exposure time increase factor could be up to
+     * square root of N (based on a simple photon shot noise model). The camera device will
+     * adjust the reprocessing noise reduction and edge enhancement parameters accordingly to
+     * produce the best quality images.</p>
+     * <p>This is relative factor, 1.0 indicates the application hasn't processed the input
+     * buffer in a way that affects its effective exposure time.</p>
+     * <p>This control is only effective for YUV reprocessing capture request. For noise
+     * reduction reprocessing, it is only effective when <code>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode} != OFF</code>.
+     * Similarly, for edge enhancement reprocessing, it is only effective when
+     * <code>{@link CaptureRequest#EDGE_MODE android.edge.mode} != OFF</code>.</p>
+     * <p><b>Units</b>: Relative exposure time increase factor.</p>
+     * <p><b>Range of valid values:</b><br>
+     * &gt;= 1.0</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#EDGE_MODE
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    @PublicKey
+    public static final Key<Float> REPROCESS_EFFECTIVE_EXPOSURE_FACTOR =
+            new Key<Float>("android.reprocess.effectiveExposureFactor", float.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
