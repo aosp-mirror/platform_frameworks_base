@@ -640,13 +640,9 @@ public class TelephonyManager {
      */
     /** {@hide} */
     public String getDeviceId(int slotId) {
-        // FIXME methods taking slot id should not use subscription, instead us Uicc directly
-        int[] subId = SubscriptionManager.getSubId(slotId);
-        if (subId == null || subId.length == 0) {
-            return null;
-        }
+        // FIXME this assumes phoneId == slotId
         try {
-            return getSubscriberInfo().getDeviceIdForSubscriber(subId[0]);
+            return getSubscriberInfo().getDeviceIdForPhone(slotId);
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
