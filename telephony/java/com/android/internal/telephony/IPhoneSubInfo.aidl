@@ -33,10 +33,10 @@ interface IPhoneSubInfo {
     String getNaiForSubscriber(int subId);
 
     /**
-     * Retrieves the unique device ID of a subId for the device, e.g., IMEI
+     * Retrieves the unique device ID of a phone for the device, e.g., IMEI
      * for GSM phones.
      */
-    String getDeviceIdForSubscriber(int subId);
+    String getDeviceIdForPhone(int phoneId);
 
     /**
      * Retrieves the IMEI.
