@@ -1456,6 +1456,25 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     /**
+     * Returns the {@link HdmiDeviceInfo} instance whose physical address matches
+     * the given routing path. This is the version accessible safely from threads
+     * other than service thread.
+     *
+     * @param path routing path or physical address
+     * @return {@link HdmiDeviceInfo} if the matched info is found; otherwise null
+     */
+    HdmiDeviceInfo getSafeDeviceInfoByPath(int path) {
+        synchronized (mLock) {
+            for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {
+                if (info.getPhysicalAddress() == path) {
+                    return info;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
      * Whether a device of the specified physical address and logical address exists
      * in a device info list. However, both are minimal condition and it could
      * be different device from the original one.
