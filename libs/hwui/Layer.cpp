@@ -68,13 +68,21 @@ Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth
 }
 
 Layer::~Layer() {
-    renderState.requireGLContext();
     renderState.unregisterLayer(this);
     SkSafeUnref(colorFilter);
-    removeFbo();
-    deleteTexture();
+
+    if (stencil || fbo || texture.id) {
+        renderState.requireGLContext();
+        removeFbo();
+        deleteTexture();
+    }
 
     delete[] mesh;
+}
+
+void Layer::onGlContextLost() {
+    removeFbo();
+    deleteTexture();
 }
 
 uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {

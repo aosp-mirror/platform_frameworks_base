@@ -62,10 +62,10 @@ public:
 
     void debugOverdraw(bool enable, bool clear);
 
-    void registerLayer(const Layer* layer) {
+    void registerLayer(Layer* layer) {
         mActiveLayers.insert(layer);
     }
-    void unregisterLayer(const Layer* layer) {
+    void unregisterLayer(Layer* layer) {
         mActiveLayers.erase(layer);
     }
 
@@ -107,7 +107,7 @@ private:
     Stencil* mStencil;
 
     AssetAtlas mAssetAtlas;
-    std::set<const Layer*> mActiveLayers;
+    std::set<Layer*> mActiveLayers;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;
 
     GLsizei mViewportWidth;

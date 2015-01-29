@@ -51,6 +51,10 @@ void RenderState::onGLContextCreated() {
     mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
 }
 
+static void layerLostGlContext(Layer* layer) {
+    layer->onGlContextLost();
+}
+
 void RenderState::onGLContextDestroyed() {
 /*
     size_t size = mActiveLayers.size();
@@ -83,7 +87,9 @@ void RenderState::onGLContextDestroyed() {
         LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
     }
 */
+
     // TODO: reset all cached state in state objects
+    std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
     mAssetAtlas.terminate();
 
     delete mMeshState;

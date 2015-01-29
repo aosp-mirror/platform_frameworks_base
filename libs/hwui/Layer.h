@@ -288,6 +288,12 @@ public:
     void postDecStrong();
 
     /**
+     * Lost the GL context but the layer is still around, mark it invalid internally
+     * so the dtor knows not to do any GL work
+     */
+    void onGlContextLost();
+
+    /**
      * Bounds of the layer.
      */
     Rect layer;
