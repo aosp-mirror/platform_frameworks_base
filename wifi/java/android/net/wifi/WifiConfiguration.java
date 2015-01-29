@@ -688,6 +688,31 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Last time the system tried to roam and failed because of authentication failure or DHCP
+     * RENEW failure.
+     */
+    public long lastRoamingFailure;
+
+    /** @hide */
+    public static int ROAMING_FAILURE_IP_CONFIG = 1;
+    /** @hide */
+    public static int ROAMING_FAILURE_AUTH_FAILURE = 2;
+
+    /**
+     * @hide
+     * Initial amount of time this Wifi configuration gets blacklisted for network switching
+     * because of roaming failure
+     */
+    public long roamingFailureBlackListTimeMilli = 1000;
+
+    /**
+     * @hide
+     * Last roaming failure reason code
+     */
+    public int lastRoamingFailureReason;
+
+    /**
+     * @hide
      * Last time the system was disconnected to this configuration.
      */
     public long lastDisconnected;
@@ -1148,6 +1173,18 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append( "sec");
             }
         }
+        if (this.lastRoamingFailure != 0) {
+            sbuf.append('\n');
+            long diff = now_ms - this.lastRoamingFailure;
+            if (diff <= 0) {
+                sbuf.append("lastRoamingFailure since <incorrect>");
+            } else {
+                sbuf.append("lastRoamingFailure: ").append(Long.toString(diff/1000));
+                sbuf.append( "sec");
+            }
+        }
+        sbuf.append("roamingFailureBlackListTimeMilli: ").
+                append(Long.toString(this.roamingFailureBlackListTimeMilli));
         sbuf.append('\n');
         if (this.linkedConfigurations != null) {
             for(String key : this.linkedConfigurations.keySet()) {
@@ -1518,6 +1555,9 @@ public class WifiConfiguration implements Parcelable {
             lastConnected = source.lastConnected;
             lastDisconnected = source.lastDisconnected;
             lastConnectionFailure = source.lastConnectionFailure;
+            lastRoamingFailure = source.lastRoamingFailure;
+            lastRoamingFailureReason = source.lastRoamingFailureReason;
+            roamingFailureBlackListTimeMilli = source.roamingFailureBlackListTimeMilli;
             numConnectionFailures = source.numConnectionFailures;
             numIpConfigFailures = source.numIpConfigFailures;
             numAuthFailures = source.numAuthFailures;
@@ -1587,6 +1627,9 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(lastUpdateUid);
         dest.writeLong(blackListTimestamp);
         dest.writeLong(lastConnectionFailure);
+        dest.writeLong(lastRoamingFailure);
+        dest.writeInt(lastRoamingFailureReason);
+        dest.writeLong(roamingFailureBlackListTimeMilli);
         dest.writeInt(numConnectionFailures);
         dest.writeInt(numIpConfigFailures);
         dest.writeInt(numAuthFailures);
@@ -1649,6 +1692,9 @@ public class WifiConfiguration implements Parcelable {
                 config.lastUpdateUid = in.readInt();
                 config.blackListTimestamp = in.readLong();
                 config.lastConnectionFailure = in.readLong();
+                config.lastRoamingFailure = in.readLong();
+                config.lastRoamingFailureReason = in.readInt();
+                config.roamingFailureBlackListTimeMilli = in.readLong();
                 config.numConnectionFailures = in.readInt();
                 config.numIpConfigFailures = in.readInt();
                 config.numAuthFailures = in.readInt();
