@@ -5188,4 +5188,9 @@
     <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
     <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
 
+    <!-- Manufacturer name for USB MIDI Peripheral port -->
+    <string name="usb_midi_peripheral_manufacturer_name">Android</string>
+    <!-- Model name for USB MIDI Peripheral port -->
+    <string name="usb_midi_peripheral_model_name">USB Peripheral Port</string>
+
 </resources>
