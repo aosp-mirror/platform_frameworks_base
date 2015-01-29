@@ -119,8 +119,8 @@ trainingnavtop=true
 
 <p>
   Avoid screen elements being clipped due to overscan and by incorporating a 10% margin
-  on all sides of your layout. This translates into a 27dp margin on the left and right edges and
-  a 48dp margin on the top and bottom of your base layouts for activities. The following
+  on all sides of your layout. This translates into a 48dp margin on the left and right edges and
+  a 27dp margin on the top and bottom of your base layouts for activities. The following
   example layout demonstrates how to set these margins in the root layout for a TV app:
 </p>
 
