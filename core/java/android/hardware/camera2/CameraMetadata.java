@@ -439,23 +439,40 @@ public abstract class CameraMetadata<TKey> {
     public static final int REQUEST_AVAILABLE_CAPABILITIES_RAW = 3;
 
     /**
-     * <p>The camera device supports the Zero Shutter Lag use case.</p>
+     * <p>The camera device supports the Zero Shutter Lag reprocessing use case.</p>
      * <ul>
-     * <li>At least one input stream can be used.</li>
-     * <li>RAW_OPAQUE is supported as an output/input format</li>
-     * <li>Using RAW_OPAQUE does not cause a frame rate drop
+     * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
+     * <li>OPAQUE is supported as an output/input format, that is,
+     *   StreamConfigurationMap#getOutputSizes(klass) and
+     *   StreamConfigurationMap#getInputSizes(klass) return non empty Size[] and have common
+     *   sizes, where klass is android.media.OpaqueImageRingBufferQueue.class. See
+     *   android.scaler.availableInputOutputFormatsMap for detailed information about
+     *   OPAQUE format.</li>
+     * <li>android.scaler.availableInputOutputFormatsMap has the required map entries.</li>
+     * <li>Using OPAQUE does not cause a frame rate drop
      *   relative to the sensor's maximum capture rate (at that
-     *   resolution).</li>
-     * <li>RAW_OPAQUE will be reprocessable into both YUV_420_888
+     *   resolution), see android.scaler.availableInputOutputFormatsMap for more details.</li>
+     * <li>OPAQUE will be reprocessable into both YUV_420_888
      *   and JPEG formats.</li>
-     * <li>The maximum available resolution for RAW_OPAQUE streams
+     * <li>The maximum available resolution for OPAQUE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
+     * <li>Only below controls are effective for reprocessing requests and
+     *   will be present in capture results, other controls in reprocess
+     *   requests will be ignored by the camera device.<ul>
+     * <li>android.jpeg.*</li>
+     * <li>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</li>
+     * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
      * </ul>
+     * </li>
+     * </ul>
+     *
+     * @see CaptureRequest#EDGE_MODE
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
-     * @hide
      */
-    public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_OPAQUE_REPROCESSING = 4;
 
     /**
      * <p>The camera device supports accurately reporting the sensor settings for many of
@@ -514,6 +531,45 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6;
+
+    /**
+     * <p>The camera device supports the YUV420_888 reprocessing use case, similar as
+     * OPAQUE_REPROCESSING, This capability requires the camera device to support the
+     * following:</p>
+     * <ul>
+     * <li>One input stream is supported, that is, <code>{@link CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS android.request.maxNumInputStreams} == 1</code>.</li>
+     * <li>YUV420_888 is supported as a common format for both input and output, that is,
+     *   StreamConfigurationMap#getOutputSizes(YUV420_888) and
+     *   StreamConfigurationMap#getInputSizes(YUV420_888) return non empty Size[] and have
+     *   common sizes.</li>
+     * <li>android.scaler.availableInputOutputFormatsMap has the required map entries.</li>
+     * <li>Using YUV420_888 does not cause a frame rate drop
+     *   relative to the sensor's maximum capture rate (at that
+     *   resolution), see android.scaler.availableInputOutputFormatsMap for more details.</li>
+     * <li>YUV420_888 will be reprocessable into both YUV_420_888
+     *   and JPEG formats.</li>
+     * <li>The maximum available resolution for YUV420_888 streams
+     *   (both input/output) will match the maximum available
+     *   resolution of JPEG streams.</li>
+     * <li>Only the below controls are effective for reprocessing requests and will be
+     *   present in capture results. The reprocess requests are from the original capture
+     *   results that are assocaited with the intermidate YUV420_888 output buffers.
+     *   All other controls in the reprocess requests will be ignored by the camera device.<ul>
+     * <li>android.jpeg.*</li>
+     * <li>{@link CaptureRequest#NOISE_REDUCTION_MODE android.noiseReduction.mode}</li>
+     * <li>{@link CaptureRequest#EDGE_MODE android.edge.mode}</li>
+     * <li>{@link CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR android.reprocess.effectiveExposureFactor}</li>
+     * </ul>
+     * </li>
+     * </ul>
+     *
+     * @see CaptureRequest#EDGE_MODE
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     * @see CaptureRequest#REPROCESS_EFFECTIVE_EXPOSURE_FACTOR
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_INPUT_STREAMS
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -1829,6 +1885,13 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#NOISE_REDUCTION_MODE
      */
     public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
+
+    /**
+     * <p>MINIMAL noise reduction is applied without reducing frame rate relative to
+     * sensor output. </p>
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_MINIMAL = 3;
 
     //
     // Enumeration values for CaptureRequest#SENSOR_TEST_PATTERN_MODE
