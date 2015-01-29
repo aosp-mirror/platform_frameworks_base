@@ -62,11 +62,6 @@ final class ActiveSourceHandler {
     void process(ActiveSource newActive, int deviceType) {
         // Seq #17
         HdmiCecLocalDeviceTv tv = mSource;
-        ActiveSource activeSource = tv.getActiveSource();
-        if (activeSource.equals(newActive)) {
-            invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-            return;
-        }
         HdmiDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
         if (device == null) {
             tv.startNewDeviceAction(newActive, deviceType);
