@@ -4,11 +4,16 @@ import android.binding.Bindable;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,11 +47,16 @@ public class ProcessBindable extends AbstractProcessor {
         if (mFileGenerated) {
             return false;
         }
-        HashSet<String> properties = readIntermediateFile();
+        Intermediate properties = readIntermediateFile();
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
+            TypeElement enclosing = (TypeElement) element.getEnclosingElement();
+            properties.cleanProperties(enclosing.getQualifiedName().toString());
+        }
+        for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
+            TypeElement enclosing = (TypeElement) element.getEnclosingElement();
             String name = getPropertyName(element);
             if (name != null) {
-                properties.add(name);
+                properties.addProperty(enclosing.getQualifiedName().toString(), name);
             }
         }
         writeIntermediateFile(properties);
@@ -55,9 +65,12 @@ public class ProcessBindable extends AbstractProcessor {
         return true;
     }
 
-    private void generateBR(HashSet<String> properties) {
+    private void generateBR(Intermediate intermediate) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
                 "************* Generating BR file from Bindable attributes");
+        HashSet<String> properties = new HashSet<>();
+        intermediate.captureProperties(properties);
+        mergeClassPathResources(properties);
         try {
             ArrayList<String> sortedProperties = new ArrayList<String>();
             sortedProperties.addAll(properties);
@@ -182,8 +195,8 @@ public class ProcessBindable extends AbstractProcessor {
                 element.getReturnType().getKind() == TypeKind.BOOLEAN;
     }
 
-    private HashSet<String> readIntermediateFile() {
-        HashSet<String> properties = null;
+    private Intermediate readIntermediateFile() {
+        Intermediate properties = null;
         ObjectInputStream in = null;
         try {
             FileObject intermediate = processingEnv.getFiler()
@@ -191,7 +204,7 @@ public class ProcessBindable extends AbstractProcessor {
                             ProcessBindable.class.getPackage().getName(), "binding_properties.bin");
             if (new File(intermediate.getName()).exists()) {
                 in = new ObjectInputStream(intermediate.openInputStream());
-                properties = (HashSet<String>) in.readObject();
+                properties = (Intermediate) in.readObject();
             }
         } catch (IOException e) {
             System.err.println("Could not read Binding properties intermediate file: " +
@@ -209,12 +222,50 @@ public class ProcessBindable extends AbstractProcessor {
             }
         }
         if (properties == null) {
-            properties = new HashSet<>();
+            properties = new IntermediateV1();
         }
         return properties;
     }
 
-    private void writeIntermediateFile(HashSet<String> properties) {
+    private void mergeClassPathResources(HashSet<String> intermediateProperties) {
+        try {
+            String resourcePath = ProcessBindable.class.getPackage().getName()
+                    .replace('.', '/') + "/binding_properties.bin";
+            Enumeration<URL> resources = getClass().getClassLoader()
+                    .getResources(resourcePath);
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                System.out.println("Merging binding adapters from " + url);
+                InputStream inputStream = null;
+                try {
+                    inputStream = url.openStream();
+                    ObjectInputStream in = new ObjectInputStream(inputStream);
+                    Intermediate properties = (Intermediate) in.readObject();
+                    if (properties != null) {
+                        properties.captureProperties(intermediateProperties);
+                    }
+                } catch (IOException e) {
+                    System.err.println("Could not merge in Bindables from " + url + ": " +
+                            e.getLocalizedMessage());
+                } catch (ClassNotFoundException e) {
+                    System.err.println("Could not read Binding properties intermediate file: " +
+                            e.getLocalizedMessage());
+                } finally {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e2) {
+                        System.err.println("Error closing intermediate Bindables store: " +
+                                e2.getLocalizedMessage());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read Binding properties intermediate file: " +
+                    e.getLocalizedMessage());
+        }
+    }
+
+    private void writeIntermediateFile(Intermediate properties) {
         try {
             FileObject intermediate = processingEnv.getFiler().createResource(
                     StandardLocation.CLASS_OUTPUT, ProcessBindable.class.getPackage().getName(),
@@ -225,6 +276,42 @@ public class ProcessBindable extends AbstractProcessor {
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                     "Could not write to intermediate file: " + e.getLocalizedMessage());
+        }
+    }
+
+    private interface Intermediate {
+        void captureProperties(Set<String> properties);
+
+        void cleanProperties(String className);
+
+        void addProperty(String className, String propertyName);
+    }
+
+    private static class IntermediateV1 implements Serializable, Intermediate {
+        private static final long serialVersionUID = 1L;
+
+        private final HashMap<String, HashSet<String>> mProperties = new HashMap<>();
+
+        @Override
+        public void captureProperties(Set<String> properties) {
+            for (HashSet<String> propertySet : mProperties.values()) {
+                properties.addAll(propertySet);
+            }
+        }
+
+        @Override
+        public void cleanProperties(String className) {
+            mProperties.remove(className);
+        }
+
+        @Override
+        public void addProperty(String className, String propertyName) {
+            HashSet<String> properties = mProperties.get(className);
+            if (properties == null) {
+                properties = new HashSet<>();
+                mProperties.put(className, properties);
+            }
+            properties.add(propertyName);
         }
     }
 }

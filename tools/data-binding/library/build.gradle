@@ -23,7 +23,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.14.2'
+        classpath 'com.android.tools.build:gradle:1.0.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -37,7 +37,6 @@ android {
     buildToolsVersion "21.1"
 
     defaultConfig {
-        applicationId "com.android.databinding.library"
         minSdkVersion 7
         targetSdkVersion 21
         versionCode 1
@@ -49,7 +48,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
         }
     }
     packagingOptions {

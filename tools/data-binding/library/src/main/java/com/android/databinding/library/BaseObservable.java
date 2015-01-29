@@ -16,6 +16,7 @@
 
 package com.android.databinding.library;
 
+import android.binding.Bindable;
 import android.binding.Observable;
 import android.binding.OnPropertyChangedListener;
 
