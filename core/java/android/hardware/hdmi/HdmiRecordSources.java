@@ -759,6 +759,8 @@ public final class HdmiRecordSources {
      */
     @SystemApi
     public static boolean checkRecordSource(byte[] recordSource) {
+        if (recordSource == null || recordSource.length == 0) return false;
+
         int recordSourceType = recordSource[0];
         int extraDataSize = recordSource.length - 1;
         switch (recordSourceType) {
