@@ -227,7 +227,7 @@ public class ClassAnalyzer {
             return "0L";
         }
         if("float".equals(className)) {
-            return "0fL";
+            return "0f";
         }
         if("double".equals(className)) {
             return "0.0";

@@ -28,7 +28,7 @@ import android.view.View;
         @BindingMethod(type = "android.view.View", attribute = "android:nextFocusLeft", method = "setNextFocusLeftId"),
         @BindingMethod(type = "android.view.View", attribute = "android:nextFocusRight", method = "setNextFocusRightId"),
         @BindingMethod(type = "android.view.View", attribute = "android:nextFocusUp", method = "setNextFocusUpId"),
-        @BindingMethod(type = "android.view.View", attribute = "android:padding", method = "setPaddingRelative"),
+        @BindingMethod(type = "android.view.View", attribute = "android:nextFocusDown", method = "setNextFocusDownId"),
         @BindingMethod(type = "android.view.View", attribute = "android:requiresFadingEdge", method = "setVerticalFadingEdgeEnabled"),
         @BindingMethod(type = "android.view.View", attribute = "android:scrollbarDefaultDelayBeforeFade", method = "setScrollBarDefaultDelayBeforeFade"),
         @BindingMethod(type = "android.view.View", attribute = "android:scrollbarFadeDuration", method = "setScrollBarFadeDuration"),
@@ -38,6 +38,9 @@ import android.view.View;
         @BindingMethod(type = "android.view.View", attribute = "android:transformPivotY", method = "setPivotY"),
 })
 public class ViewBindingAdapter {
+    public static int FADING_EDGE_NONE = 0;
+    public static int FADING_EDGE_HORIZONTAL = 1;
+    public static int FADING_EDGE_VERTICAL = 2;
 
     @BindingAdapter("android:padding")
     public static void setPadding(View view, int padding) {
@@ -88,5 +91,13 @@ public class ViewBindingAdapter {
     public static void setPaddingTop(View view, int padding) {
         view.setPadding(view.getPaddingLeft(), padding, view.getPaddingRight(),
                 view.getPaddingBottom());
+    }
+
+    @BindingAdapter("android:requiresFadingEdge")
+    public static void setRequiresFadingEdge(View view, int value) {
+        final boolean vertical = (value & FADING_EDGE_VERTICAL) != 0;
+        final boolean horizontal = (value & FADING_EDGE_HORIZONTAL) != 0;
+        view.setVerticalFadingEdgeEnabled(vertical);
+        view.setHorizontalFadingEdgeEnabled(horizontal);
     }
 }

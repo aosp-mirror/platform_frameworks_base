@@ -112,7 +112,13 @@ public class ProcessBindable extends AbstractProcessor {
         if (name.length() >= 2) {
             char firstChar = name.charAt(0);
             char secondChar = name.charAt(1);
-            if ((firstChar == 'm' && Character.isUpperCase(secondChar)) ||
+            if (name.length() > 2 && firstChar == 'm' && secondChar == '_') {
+                char thirdChar = name.charAt(2);
+                if (Character.isJavaIdentifierStart(thirdChar)) {
+                    return "" + Character.toLowerCase(thirdChar) +
+                            name.subSequence(3, name.length());
+                }
+            } else if ((firstChar == 'm' && Character.isUpperCase(secondChar)) ||
                     (firstChar == '_' && Character.isJavaIdentifierStart(secondChar))) {
                 return "" + Character.toLowerCase(secondChar) + name.subSequence(2, name.length());
             }

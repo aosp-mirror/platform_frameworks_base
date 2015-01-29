@@ -59,7 +59,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.databinding:library:0.3-SNAPSHOT'
+    compile project(":library")
     compile "com.android.support:support-v4:+"
-    provided 'com.android.databinding:annotationprocessor:0.3-SNAPSHOT'
+    provided project(":annotationprocessor")
 }

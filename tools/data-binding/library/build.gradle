@@ -52,6 +52,9 @@ android {
             runProguard false
         }
     }
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
 }
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
