@@ -335,7 +335,7 @@ public class SubscriptionInfo implements Parcelable {
     public String toString() {
         return "{id=" + mId + ", iccId=" + mIccId + " simSlotIndex=" + mSimSlotIndex
                 + " displayName=" + mDisplayName + " carrierName=" + mCarrierName
-                + " nameSource=" + mNameSource + " iconTint=" + mIconTint + " number=" + mNumber
+                + " nameSource=" + mNameSource + " iconTint=" + mIconTint
                 + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
                 + " mnc " + mMnc + "}";
     }
