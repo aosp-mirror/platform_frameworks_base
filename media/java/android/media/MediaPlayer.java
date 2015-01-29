@@ -40,6 +40,7 @@ import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.widget.VideoView;
@@ -70,6 +71,8 @@ import java.lang.Runnable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
+import java.util.BitSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -639,9 +642,7 @@ public class MediaPlayer implements SubtitleController.Listener
         }
 
         mTimeProvider = new TimeProvider(this);
-        mOutOfBandSubtitleTracks = new Vector<SubtitleTrack>();
         mOpenSubtitleSources = new Vector<InputStream>();
-        mInbandSubtitleTracks = new SubtitleTrack[0];
         IBinder b = ServiceManager.getService(Context.APP_OPS_SERVICE);
         mAppOps = IAppOpsService.Stub.asInterface(b);
 
@@ -1693,8 +1694,6 @@ public class MediaPlayer implements SubtitleController.Listener
             }
             mOpenSubtitleSources.clear();
         }
-        mOutOfBandSubtitleTracks.clear();
-        mInbandSubtitleTracks = new SubtitleTrack[0];
         if (mSubtitleController != null) {
             mSubtitleController.reset();
         }
@@ -1709,6 +1708,11 @@ public class MediaPlayer implements SubtitleController.Listener
         if (mEventHandler != null) {
             mEventHandler.removeCallbacksAndMessages(null);
         }
+
+        synchronized (mIndexTrackPairs) {
+            mIndexTrackPairs.clear();
+            mInbandTrackIndices.clear();
+        };
     }
 
     private native void _reset();
@@ -2050,6 +2054,16 @@ public class MediaPlayer implements SubtitleController.Listener
 
     };
 
+    // We would like domain specific classes with more informative names than the `first` and `second`
+    // in generic Pair, but we would also like to avoid creating new/trivial classes. As a compromise
+    // we document the meanings of `first` and `second` here:
+    //
+    // Pair.first - inband track index; non-null iff representing an inband track.
+    // Pair.second - a SubtitleTrack registered with mSubtitleController; non-null iff representing
+    //               an inband subtitle track or any out-of-band track (subtitle or timedtext).
+    private Vector<Pair<Integer, SubtitleTrack>> mIndexTrackPairs = new Vector<>();
+    private BitSet mInbandTrackIndices = new BitSet();
+
     /**
      * Returns an array of track information.
      *
@@ -2061,17 +2075,20 @@ public class MediaPlayer implements SubtitleController.Listener
     public TrackInfo[] getTrackInfo() throws IllegalStateException {
         TrackInfo trackInfo[] = getInbandTrackInfo();
         // add out-of-band tracks
-        TrackInfo allTrackInfo[] = new TrackInfo[trackInfo.length + mOutOfBandSubtitleTracks.size()];
-        System.arraycopy(trackInfo, 0, allTrackInfo, 0, trackInfo.length);
-        int i = trackInfo.length;
-        for (SubtitleTrack track: mOutOfBandSubtitleTracks) {
-            int type = track.isTimedText()
-                    ? TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT
-                    : TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE;
-            allTrackInfo[i] = new TrackInfo(type, track.getFormat());
-            ++i;
+        synchronized (mIndexTrackPairs) {
+            TrackInfo allTrackInfo[] = new TrackInfo[mIndexTrackPairs.size()];
+            for (int i = 0; i < allTrackInfo.length; i++) {
+                Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
+                if (p.first != null) {
+                    // inband track
+                    allTrackInfo[i] = trackInfo[p.first];
+                } else {
+                    SubtitleTrack track = p.second;
+                    allTrackInfo[i] = new TrackInfo(track.getTrackType(), track.getFormat());
+                }
+            }
+            return allTrackInfo;
         }
-        return allTrackInfo;
     }
 
     private TrackInfo[] getInbandTrackInfo() throws IllegalStateException {
@@ -2167,22 +2184,21 @@ public class MediaPlayer implements SubtitleController.Listener
         }
     }
 
-    private final Object mInbandSubtitleLock = new Object();
-    private SubtitleTrack[] mInbandSubtitleTracks;
     private int mSelectedSubtitleTrackIndex = -1;
-    private Vector<SubtitleTrack> mOutOfBandSubtitleTracks;
     private Vector<InputStream> mOpenSubtitleSources;
 
     private OnSubtitleDataListener mSubtitleDataListener = new OnSubtitleDataListener() {
         @Override
         public void onSubtitleData(MediaPlayer mp, SubtitleData data) {
             int index = data.getTrackIndex();
-            if (index >= mInbandSubtitleTracks.length) {
-                return;
-            }
-            SubtitleTrack track = mInbandSubtitleTracks[index];
-            if (track != null) {
-                track.onData(data);
+            synchronized (mIndexTrackPairs) {
+                for (Pair<Integer, SubtitleTrack> p : mIndexTrackPairs) {
+                    if (p.first != null && p.first == index && p.second != null) {
+                        // inband subtitle track that owns data
+                        SubtitleTrack track = p.second;
+                        track.onData(data);
+                    }
+                }
             }
         }
     };
@@ -2201,17 +2217,23 @@ public class MediaPlayer implements SubtitleController.Listener
         if (track == null) {
             return;
         }
-        for (int i = 0; i < mInbandSubtitleTracks.length; i++) {
-            if (mInbandSubtitleTracks[i] == track) {
-                Log.v(TAG, "Selecting subtitle track " + i);
-                mSelectedSubtitleTrackIndex = i;
-                try {
-                    selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
-                } catch (IllegalStateException e) {
+
+        synchronized (mIndexTrackPairs) {
+            for (Pair<Integer, SubtitleTrack> p : mIndexTrackPairs) {
+                if (p.first != null && p.second == track) {
+                    // inband subtitle track that is selected
+                    mSelectedSubtitleTrackIndex = p.first;
+                    break;
                 }
-                setOnSubtitleDataListener(mSubtitleDataListener);
-                break;
             }
+        }
+
+        if (mSelectedSubtitleTrackIndex >= 0) {
+            try {
+                selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
+            } catch (IllegalStateException e) {
+            }
+            setOnSubtitleDataListener(mSubtitleDataListener);
         }
         // no need to select out-of-band tracks
     }
@@ -2252,7 +2274,9 @@ public class MediaPlayer implements SubtitleController.Listener
                     mOpenSubtitleSources.remove(fIs);
                 }
                 scanner.close();
-                mOutOfBandSubtitleTracks.add(track);
+                synchronized (mIndexTrackPairs) {
+                    mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
+                }
                 track.onData(contents.getBytes(), true /* eos */, ~0 /* runID: keep forever */);
                 return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
             }
@@ -2274,23 +2298,33 @@ public class MediaPlayer implements SubtitleController.Listener
             return;
         }
 
+        populateInbandTracks();
+
+        if (mSubtitleController != null) {
+            mSubtitleController.selectDefaultTrack();
+        }
+    }
+
+    private void populateInbandTracks() {
         TrackInfo[] tracks = getInbandTrackInfo();
-        synchronized (mInbandSubtitleLock) {
-            SubtitleTrack[] inbandTracks = new SubtitleTrack[tracks.length];
-            for (int i=0; i < tracks.length; i++) {
+        synchronized (mIndexTrackPairs) {
+            for (int i = 0; i < tracks.length; i++) {
+                if (mInbandTrackIndices.get(i)) {
+                    continue;
+                } else {
+                    mInbandTrackIndices.set(i);
+                }
+
+                // newly appeared inband track
                 if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
-                    if (i < mInbandSubtitleTracks.length) {
-                        inbandTracks[i] = mInbandSubtitleTracks[i];
-                    } else {
-                        SubtitleTrack track = mSubtitleController.addTrack(
-                                tracks[i].getFormat());
-                        inbandTracks[i] = track;
-                    }
+                    SubtitleTrack track = mSubtitleController.addTrack(
+                            tracks[i].getFormat());
+                    mIndexTrackPairs.add(Pair.create(i, track));
+                } else {
+                    mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(i, null));
                 }
             }
-            mInbandSubtitleTracks = inbandTracks;
         }
-        mSubtitleController.selectDefaultTrack();
     }
 
     /* TODO: Limit the total number of external timed text source to a reasonable number.
@@ -2438,7 +2472,9 @@ public class MediaPlayer implements SubtitleController.Listener
             mSubtitleController.registerRenderer(new SRTRenderer(context, mEventHandler));
         }
         final SubtitleTrack track = mSubtitleController.addTrack(fFormat);
-        mOutOfBandSubtitleTracks.add(track);
+        synchronized (mIndexTrackPairs) {
+            mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
+        }
 
         final FileDescriptor fd3 = fd2;
         final long offset2 = offset;
@@ -2510,12 +2546,18 @@ public class MediaPlayer implements SubtitleController.Listener
      * @see #deselectTrack(int)
      */
     public int getSelectedTrack(int trackType) throws IllegalStateException {
-        if (trackType == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE && mSubtitleController != null) {
+        if (mSubtitleController != null
+                && (trackType == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE
+                || trackType == TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT)) {
             SubtitleTrack subtitleTrack = mSubtitleController.getSelectedTrack();
             if (subtitleTrack != null) {
-                int index = mOutOfBandSubtitleTracks.indexOf(subtitleTrack);
-                if (index >= 0) {
-                    return mInbandSubtitleTracks.length + index;
+                synchronized (mIndexTrackPairs) {
+                    for (int i = 0; i < mIndexTrackPairs.size(); i++) {
+                        Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
+                        if (p.second == subtitleTrack && subtitleTrack.getTrackType() == trackType) {
+                            return i;
+                        }
+                    }
                 }
             }
         }
@@ -2527,8 +2569,16 @@ public class MediaPlayer implements SubtitleController.Listener
             request.writeInt(INVOKE_ID_GET_SELECTED_TRACK);
             request.writeInt(trackType);
             invoke(request, reply);
-            int selectedTrack = reply.readInt();
-            return selectedTrack;
+            int inbandTrackIndex = reply.readInt();
+            synchronized (mIndexTrackPairs) {
+                for (int i = 0; i < mIndexTrackPairs.size(); i++) {
+                    Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
+                    if (p.first != null && p.first == inbandTrackIndex) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
         } finally {
             request.recycle();
             reply.recycle();
@@ -2588,36 +2638,30 @@ public class MediaPlayer implements SubtitleController.Listener
     private void selectOrDeselectTrack(int index, boolean select)
             throws IllegalStateException {
         // handle subtitle track through subtitle controller
-        SubtitleTrack track = null;
-        synchronized (mInbandSubtitleLock) {
-            if (mInbandSubtitleTracks.length == 0) {
-                TrackInfo[] tracks = getInbandTrackInfo();
-                mInbandSubtitleTracks = new SubtitleTrack[tracks.length];
-                for (int i=0; i < tracks.length; i++) {
-                    if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
-                        mInbandSubtitleTracks[i] = mSubtitleController.addTrack(tracks[i].getFormat());
-                    }
-                }
-            }
+        populateInbandTracks();
+
+        Pair<Integer,SubtitleTrack> p = null;
+        try {
+            p = mIndexTrackPairs.get(index);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // ignore bad index
+            return;
         }
 
-        if (index < mInbandSubtitleTracks.length) {
-            track = mInbandSubtitleTracks[index];
-        } else if (index < mInbandSubtitleTracks.length + mOutOfBandSubtitleTracks.size()) {
-            track = mOutOfBandSubtitleTracks.get(index - mInbandSubtitleTracks.length);
+        SubtitleTrack track = p.second;
+        if (track == null) {
+            // inband (de)select
+            selectOrDeselectInbandTrack(p.first, select);
+            return;
         }
 
-        if (mSubtitleController != null && track != null) {
-            if (select) {
-                if (track.isTimedText()) {
-                    int ttIndex = getSelectedTrack(TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
-                    if (ttIndex >= 0 && ttIndex < mInbandSubtitleTracks.length) {
-                        // deselect inband counterpart
-                        selectOrDeselectInbandTrack(ttIndex, false);
-                    }
-                }
-                mSubtitleController.selectTrack(track);
-            } else if (mSubtitleController.getSelectedTrack() == track) {
+        if (mSubtitleController == null) {
+            return;
+        }
+
+        if (!select) {
+            // out-of-band deselect
+            if (mSubtitleController.getSelectedTrack() == track) {
                 mSubtitleController.selectTrack(null);
             } else {
                 Log.w(TAG, "trying to deselect track that was not selected");
@@ -2625,7 +2669,20 @@ public class MediaPlayer implements SubtitleController.Listener
             return;
         }
 
-        selectOrDeselectInbandTrack(index, select);
+        // out-of-band select
+        if (track.getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT) {
+            int ttIndex = getSelectedTrack(TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
+            synchronized (mIndexTrackPairs) {
+                if (ttIndex >= 0 && ttIndex < mIndexTrackPairs.size()) {
+                    Pair<Integer,SubtitleTrack> p2 = mIndexTrackPairs.get(ttIndex);
+                    if (p2.first != null && p2.second == null) {
+                        // deselect inband counterpart
+                        selectOrDeselectInbandTrack(p2.first, false);
+                    }
+                }
+            }
+        }
+        mSubtitleController.selectTrack(track);
     }
 
     private void selectOrDeselectInbandTrack(int index, boolean select)
