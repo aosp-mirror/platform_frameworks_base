@@ -7,8 +7,11 @@ LOCAL_CLANG_CFLAGS += \
 LOCAL_SRC_FILES := \
     font/CacheTexture.cpp \
     font/Font.cpp \
+    renderstate/MeshState.cpp \
+    renderstate/PixelBufferState.cpp \
     renderstate/RenderState.cpp \
     renderstate/Scissor.cpp \
+    renderstate/Stencil.cpp \
     renderthread/CanvasContext.cpp \
     renderthread/DrawFrameTask.cpp \
     renderthread/EglManager.cpp \
@@ -63,7 +66,6 @@ LOCAL_SRC_FILES := \
     SkiaShader.cpp \
     Snapshot.cpp \
     SpotShadow.cpp \
-    Stencil.cpp \
     TessellationCache.cpp \
     Texture.cpp \
     TextureCache.cpp \

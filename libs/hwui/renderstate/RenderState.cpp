@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RenderState.h"
+#include "renderstate/RenderState.h"
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
@@ -24,6 +24,9 @@ namespace uirenderer {
 RenderState::RenderState(renderthread::RenderThread& thread)
         : mRenderThread(thread)
         , mCaches(nullptr)
+        , mMeshState(nullptr)
+        , mScissor(nullptr)
+        , mStencil(nullptr)
         , mViewportWidth(0)
         , mViewportHeight(0)
         , mFramebuffer(0) {
@@ -31,17 +34,21 @@ RenderState::RenderState(renderthread::RenderThread& thread)
 }
 
 RenderState::~RenderState() {
+    LOG_ALWAYS_FATAL_IF(mMeshState || mScissor || mStencil,
+            "State object lifecycle not managed correctly");
 }
 
 void RenderState::onGLContextCreated() {
-    // This is delayed because the first access of Caches makes GL calls
-    mCaches = &Caches::getInstance();
-    mCaches->init();
-    mCaches->setRenderState(this);
-    mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
+    LOG_ALWAYS_FATAL_IF(mMeshState || mScissor || mStencil,
+            "State object lifecycle not managed correctly");
+    mMeshState = new MeshState();
+    mScissor = new Scissor();
+    mStencil = new Stencil();
 
-    LOG_ALWAYS_FATAL_IF(scissor().isEnabled(), "scissor used before GL context created");
-    glDisable(GL_SCISSOR_TEST);
+    // This is delayed because the first access of Caches makes GL calls
+    mCaches = &Caches::createInstance(*this);
+    mCaches->init();
+    mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
 }
 
 void RenderState::onGLContextDestroyed() {
@@ -76,7 +83,15 @@ void RenderState::onGLContextDestroyed() {
         LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
     }
 */
+    // TODO: reset all cached state in state objects
     mAssetAtlas.terminate();
+
+    delete mMeshState;
+    mMeshState = nullptr;
+    delete mScissor;
+    mScissor = nullptr;
+    delete mStencil;
+    mStencil = nullptr;
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {
@@ -112,10 +127,10 @@ void RenderState::interruptForFunctorInvoke() {
         }
     }
     mCaches->resetActiveTexture();
-    mCaches->unbindMeshBuffer();
-    mCaches->unbindIndicesBuffer();
-    mCaches->resetVertexPointers();
-    mCaches->disableTexCoordsVertexArray();
+    meshState().unbindMeshBuffer();
+    meshState().unbindIndicesBuffer();
+    meshState().resetVertexPointers();
+    meshState().disableTexCoordsVertexArray();
     debugOverdraw(false, false);
 }
 
@@ -141,12 +156,12 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
     if (mCaches->debugOverdraw && mFramebuffer == 0) {
         if (clear) {
             scissor().setEnabled(false);
-            mCaches->stencil.clear();
+            stencil().clear();
         }
         if (enable) {
-            mCaches->stencil.enableDebugWrite();
+            stencil().enableDebugWrite();
         } else {
-            mCaches->stencil.disable();
+            stencil().disable();
         }
     }
 }

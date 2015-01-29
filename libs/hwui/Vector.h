@@ -17,6 +17,9 @@
 #ifndef ANDROID_HWUI_VECTOR_H
 #define ANDROID_HWUI_VECTOR_H
 
+#include <math.h>
+#include <utils/Log.h>
+
 namespace android {
 namespace uirenderer {
 

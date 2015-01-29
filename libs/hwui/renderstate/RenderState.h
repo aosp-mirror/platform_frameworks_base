@@ -27,7 +27,10 @@
 
 #include "AssetAtlas.h"
 #include "Caches.h"
-#include "Scissor.h"
+#include "renderstate/MeshState.h"
+#include "renderstate/PixelBufferState.h"
+#include "renderstate/Scissor.h"
+#include "renderstate/Stencil.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -81,8 +84,9 @@ public:
     void postDecStrong(VirtualLightRefBase* object);
 
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
-
-    Scissor& scissor() { return mScissor; }
+    MeshState& meshState() { return *mMeshState; }
+    Scissor& scissor() { return *mScissor; }
+    Stencil& stencil() { return *mStencil; }
 private:
     friend class renderthread::RenderThread;
     friend class Caches;
@@ -94,10 +98,14 @@ private:
     RenderState(renderthread::RenderThread& thread);
     ~RenderState();
 
-    Scissor mScissor;
 
     renderthread::RenderThread& mRenderThread;
     Caches* mCaches;
+
+    MeshState* mMeshState;
+    Scissor* mScissor;
+    Stencil* mStencil;
+
     AssetAtlas mAssetAtlas;
     std::set<const Layer*> mActiveLayers;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;

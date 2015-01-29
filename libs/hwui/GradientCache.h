@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_GRADIENT_CACHE_H
 #define ANDROID_HWUI_GRADIENT_CACHE_H
 
+#include <memory>
+
 #include <GLES3/gl3.h>
 
 #include <SkShader.h>

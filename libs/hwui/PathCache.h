@@ -17,21 +17,22 @@
 #ifndef ANDROID_HWUI_PATH_CACHE_H
 #define ANDROID_HWUI_PATH_CACHE_H
 
-#include <GLES2/gl2.h>
+#include "Debug.h"
+#include "Texture.h"
+#include "thread/Task.h"
+#include "thread/TaskProcessor.h"
+#include "utils/Macros.h"
+#include "utils/Pair.h"
 
+#include <GLES2/gl2.h>
+#include <SkPath.h>
 #include <utils/LruCache.h>
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
 
-#include "Debug.h"
-#include "Texture.h"
-#include "utils/Macros.h"
-#include "utils/Pair.h"
-
 class SkBitmap;
 class SkCanvas;
 class SkPaint;
-class SkPath;
 struct SkRect;
 
 namespace android {

@@ -16,13 +16,14 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <utils/Log.h>
+#include "PixelBuffer.h"
 
-#include "Caches.h"
 #include "Debug.h"
 #include "Extensions.h"
-#include "PixelBuffer.h"
 #include "Properties.h"
+#include "renderstate/RenderState.h"
+
+#include <utils/Log.h>
 
 namespace android {
 namespace uirenderer {
@@ -93,14 +94,16 @@ private:
     Caches& mCaches;
 };
 
-GpuPixelBuffer::GpuPixelBuffer(GLenum format, uint32_t width, uint32_t height)
+GpuPixelBuffer::GpuPixelBuffer(GLenum format,
+        uint32_t width, uint32_t height)
         : PixelBuffer(format, width, height)
         , mMappedPointer(nullptr)
-        , mCaches(Caches::getInstance()) {
+        , mCaches(Caches::getInstance()){
     glGenBuffers(1, &mBuffer);
-    mCaches.bindPixelBuffer(mBuffer);
+
+    mCaches.pixelBuffer().bind(mBuffer);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, getSize(), nullptr, GL_DYNAMIC_DRAW);
-    mCaches.unbindPixelBuffer();
+    mCaches.pixelBuffer().unbind();
 }
 
 GpuPixelBuffer::~GpuPixelBuffer() {
@@ -109,7 +112,7 @@ GpuPixelBuffer::~GpuPixelBuffer() {
 
 uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
-        mCaches.bindPixelBuffer(mBuffer);
+        mCaches.pixelBuffer().bind(mBuffer);
         mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
 #if DEBUG_OPENGL
         if (!mMappedPointer) {
@@ -128,7 +131,7 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
 void GpuPixelBuffer::unmap() {
     if (mAccessMode != kAccessMode_None) {
         if (mMappedPointer) {
-            mCaches.bindPixelBuffer(mBuffer);
+            mCaches.pixelBuffer().bind(mBuffer);
             GLboolean status = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
             if (status == GL_FALSE) {
                 ALOGE("Corrupted GPU pixel buffer");
@@ -145,7 +148,7 @@ uint8_t* GpuPixelBuffer::getMappedPointer() const {
 
 void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) {
     // If the buffer is not mapped, unmap() will not bind it
-    mCaches.bindPixelBuffer(mBuffer);
+    mCaches.pixelBuffer().bind(mBuffer);
     unmap();
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat,
             GL_UNSIGNED_BYTE, reinterpret_cast<void*>(offset));
@@ -155,7 +158,8 @@ void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t hei
 // Factory
 ///////////////////////////////////////////////////////////////////////////////
 
-PixelBuffer* PixelBuffer::create(GLenum format, uint32_t width, uint32_t height, BufferType type) {
+PixelBuffer* PixelBuffer::create(GLenum format,
+        uint32_t width, uint32_t height, BufferType type) {
     if (type == kBufferType_Auto && Caches::getInstance().gpuPixelBuffersEnabled) {
         return new GpuPixelBuffer(format, width, height);
     }

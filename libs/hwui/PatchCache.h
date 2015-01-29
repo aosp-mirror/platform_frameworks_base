@@ -51,9 +51,9 @@ class Caches;
 
 class PatchCache {
 public:
-    PatchCache();
+    PatchCache(RenderState& renderState);
     ~PatchCache();
-    void init(Caches& caches);
+    void init();
 
     const Patch* get(const AssetAtlas::Entry* entry,
             const uint32_t bitmapWidth, const uint32_t bitmapHeight,
@@ -168,6 +168,7 @@ private:
     void dumpFreeBlocks(const char* prefix);
 #endif
 
+    RenderState& mRenderState;
     uint32_t mMaxSize;
     uint32_t mSize;
 

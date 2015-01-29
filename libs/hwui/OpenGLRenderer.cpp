@@ -152,7 +152,7 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
     memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
     mDrawModifiers.mOverrideLayerAlpha = 1.0f;
 
-    memcpy(mMeshVertices, gMeshVertices, sizeof(gMeshVertices));
+    memcpy(mMeshVertices, kMeshVertices, sizeof(kMeshVertices));
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -436,22 +436,22 @@ void OpenGLRenderer::renderOverdraw() {
                 clip->bottom - clip->top);
 
         // 1x overdraw
-        mCaches.stencil.enableDebugTest(2);
+        mRenderState.stencil().enableDebugTest(2);
         drawColor(mCaches.getOverdrawColor(1), SkXfermode::kSrcOver_Mode);
 
         // 2x overdraw
-        mCaches.stencil.enableDebugTest(3);
+        mRenderState.stencil().enableDebugTest(3);
         drawColor(mCaches.getOverdrawColor(2), SkXfermode::kSrcOver_Mode);
 
         // 3x overdraw
-        mCaches.stencil.enableDebugTest(4);
+        mRenderState.stencil().enableDebugTest(4);
         drawColor(mCaches.getOverdrawColor(3), SkXfermode::kSrcOver_Mode);
 
         // 4x overdraw and higher
-        mCaches.stencil.enableDebugTest(4, true);
+        mRenderState.stencil().enableDebugTest(4, true);
         drawColor(mCaches.getOverdrawColor(4), SkXfermode::kSrcOver_Mode);
 
-        mCaches.stencil.disable();
+        mRenderState.stencil().disable();
     }
 }
 
@@ -894,7 +894,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
         layer->setAlpha(255);
     }
 
-    mCaches.unbindMeshBuffer();
+    mRenderState.meshState().unbindMeshBuffer();
 
     mCaches.activeTexture(0);
 
@@ -963,7 +963,7 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     setupDrawTextureTransformUniforms(layer->getTexTransform());
     setupDrawMesh(&mMeshVertices[0].x, &mMeshVertices[0].u);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, kMeshCount);
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
@@ -1005,7 +1005,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
                 layer->getTexture(), &layerPaint, blend,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
-                GL_TRIANGLE_STRIP, gMeshCount, swap, swap || simpleTransform);
+                GL_TRIANGLE_STRIP, kMeshCount, swap, swap || simpleTransform);
 
         resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
     }
@@ -1171,7 +1171,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 
         numQuads++;
 
-        if (numQuads >= gMaxNumberOfQuads) {
+        if (numQuads >= kMaxNumberOfQuads) {
             DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
                     GL_UNSIGNED_SHORT, nullptr));
             numQuads = 0;
@@ -1264,7 +1264,7 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
 void OpenGLRenderer::issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount) {
     GLsizei elementsCount = quadsCount * 6;
     while (elementsCount > 0) {
-        GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
+        GLsizei drawCount = min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
 
         setupDrawIndexedVertices(&mesh[0].x);
         glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, nullptr);
@@ -1537,7 +1537,7 @@ void OpenGLRenderer::setStencilFromClip() {
                 incrementThreshold = 0;
             }
 
-            mCaches.stencil.enableWrite(incrementThreshold);
+            mRenderState.stencil().enableWrite(incrementThreshold);
 
             // Clean and update the stencil, but first make sure we restrict drawing
             // to the region's bounds
@@ -1547,7 +1547,7 @@ void OpenGLRenderer::setStencilFromClip() {
                 setScissorFromClip();
             }
 
-            mCaches.stencil.clear();
+            mRenderState.stencil().clear();
 
             // stash and disable the outline clip state, since stencil doesn't account for outline
             bool storedSkipOutlineClip = mSkipOutlineClip;
@@ -1571,7 +1571,7 @@ void OpenGLRenderer::setStencilFromClip() {
             if (resetScissor) mRenderState.scissor().setEnabled(false);
             mSkipOutlineClip = storedSkipOutlineClip;
 
-            mCaches.stencil.enableTest(incrementThreshold);
+            mRenderState.stencil().enableTest(incrementThreshold);
 
             // Draw the region used to generate the stencil if the appropriate debug
             // mode is enabled
@@ -1584,7 +1584,7 @@ void OpenGLRenderer::setStencilFromClip() {
             }
         } else {
             EVENT_LOGD("setStencilFromClip - disabling");
-            mCaches.stencil.disable();
+            mRenderState.stencil().disable();
         }
     }
 }
@@ -1661,7 +1661,7 @@ void OpenGLRenderer::setupDraw(bool clearLayer) {
     // the stencil buffer and if stencil highlight debugging is on
     mDescription.hasDebugHighlight = !mCaches.debugOverdraw &&
             mCaches.debugStencilClip == Caches::kStencilShowHighlight &&
-            mCaches.stencil.isTestEnabled();
+            mRenderState.stencil().isTestEnabled();
 }
 
 void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
@@ -1680,7 +1680,7 @@ void OpenGLRenderer::setupDrawWithExternalTexture() {
 }
 
 void OpenGLRenderer::setupDrawNoTexture() {
-    mCaches.disableTexCoordsVertexArray();
+    mRenderState.meshState().disableTexCoordsVertexArray();
 }
 
 void OpenGLRenderer::setupDrawVertexAlpha(bool useShadowAlphaInterp) {
@@ -1892,21 +1892,21 @@ void OpenGLRenderer::setupDrawTextGammaUniforms() {
 }
 
 void OpenGLRenderer::setupDrawSimpleMesh() {
-    bool force = mCaches.bindMeshBuffer();
-    mCaches.bindPositionVertexPointer(force, nullptr);
-    mCaches.unbindIndicesBuffer();
+    bool force = mRenderState.meshState().bindMeshBuffer();
+    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force, nullptr);
+    mRenderState.meshState().unbindIndicesBuffer();
 }
 
 void OpenGLRenderer::setupDrawTexture(GLuint texture) {
     if (texture) bindTexture(texture);
     mTextureUnit++;
-    mCaches.enableTexCoordsVertexArray();
+    mRenderState.meshState().enableTexCoordsVertexArray();
 }
 
 void OpenGLRenderer::setupDrawExternalTexture(GLuint texture) {
     bindExternalTexture(texture);
     mTextureUnit++;
-    mCaches.enableTexCoordsVertexArray();
+    mRenderState.meshState().enableTexCoordsVertexArray();
 }
 
 void OpenGLRenderer::setupDrawTextureTransform() {
@@ -1922,27 +1922,29 @@ void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
         const GLvoid* texCoords, GLuint vbo) {
     bool force = false;
     if (!vertices || vbo) {
-        force = mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
+        force = mRenderState.meshState().bindMeshBuffer(vbo);
     } else {
-        force = mCaches.unbindMeshBuffer();
+        force = mRenderState.meshState().unbindMeshBuffer();
     }
 
-    mCaches.bindPositionVertexPointer(force, vertices);
+    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force, vertices);
     if (mCaches.currentProgram->texCoords >= 0) {
-        mCaches.bindTexCoordsVertexPointer(force, texCoords);
+        mRenderState.meshState().bindTexCoordsVertexPointer(mCaches.currentProgram, force, texCoords);
     }
 
-    mCaches.unbindIndicesBuffer();
+    mRenderState.meshState().unbindIndicesBuffer();
 }
 
 void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
         const GLvoid* texCoords, const GLvoid* colors) {
-    bool force = mCaches.unbindMeshBuffer();
+    bool force = mRenderState.meshState().unbindMeshBuffer();
     GLsizei stride = sizeof(ColorTextureVertex);
 
-    mCaches.bindPositionVertexPointer(force, vertices, stride);
+    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force,
+            vertices, stride);
     if (mCaches.currentProgram->texCoords >= 0) {
-        mCaches.bindTexCoordsVertexPointer(force, texCoords, stride);
+        mRenderState.meshState().bindTexCoordsVertexPointer(mCaches.currentProgram, force,
+                texCoords, stride);
     }
     int slot = mCaches.currentProgram->getAttrib("colors");
     if (slot >= 0) {
@@ -1950,7 +1952,7 @@ void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
         glVertexAttribPointer(slot, 4, GL_FLOAT, GL_FALSE, stride, colors);
     }
 
-    mCaches.unbindIndicesBuffer();
+    mRenderState.meshState().unbindIndicesBuffer();
 }
 
 void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
@@ -1958,24 +1960,26 @@ void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
     bool force = false;
     // If vbo is != 0 we want to treat the vertices parameter as an offset inside
     // a VBO. However, if vertices is set to NULL and vbo == 0 then we want to
-    // use the default VBO found in Caches
+    // use the default VBO found in RenderState
     if (!vertices || vbo) {
-        force = mCaches.bindMeshBuffer(vbo == 0 ? mCaches.meshBuffer : vbo);
+        force = mRenderState.meshState().bindMeshBuffer(vbo);
     } else {
-        force = mCaches.unbindMeshBuffer();
+        force = mRenderState.meshState().unbindMeshBuffer();
     }
-    mCaches.bindQuadIndicesBuffer();
+    mRenderState.meshState().bindQuadIndicesBuffer();
 
-    mCaches.bindPositionVertexPointer(force, vertices);
+    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force, vertices);
     if (mCaches.currentProgram->texCoords >= 0) {
-        mCaches.bindTexCoordsVertexPointer(force, texCoords);
+        mRenderState.meshState().bindTexCoordsVertexPointer(mCaches.currentProgram,
+                force, texCoords);
     }
 }
 
 void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
-    bool force = mCaches.unbindMeshBuffer();
-    mCaches.bindQuadIndicesBuffer();
-    mCaches.bindPositionVertexPointer(force, vertices, gVertexStride);
+    bool force = mRenderState.meshState().unbindMeshBuffer();
+    mRenderState.meshState().bindQuadIndicesBuffer();
+    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force,
+            vertices, kVertexStride);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2034,8 +2038,8 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top,
     // No need to check for a UV mapper on the texture object, only ARGB_8888
     // bitmaps get packed in the atlas
     drawAlpha8TextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
-            paint, (GLvoid*) nullptr, (GLvoid*) gMeshTextureOffset,
-            GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
+            paint, (GLvoid*) nullptr, (GLvoid*) kMeshTextureOffset,
+            GL_TRIANGLE_STRIP, kMeshCount, ignoreTransform);
 }
 
 /**
@@ -2228,7 +2232,7 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
 
     getMapper(texture).map(u1, v1, u2, v2);
 
-    mCaches.unbindMeshBuffer();
+    mRenderState.meshState().unbindMeshBuffer();
     resetDrawTextureTexCoords(u1, v1, u2, v2);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
@@ -2275,12 +2279,12 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
         drawAlpha8TextureMesh(dstLeft, dstTop, dstRight, dstBottom,
                 texture->id, paint,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
-                GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
+                GL_TRIANGLE_STRIP, kMeshCount, ignoreTransform);
     } else {
         drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom,
                 texture->id, paint, texture->blend,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
-                GL_TRIANGLE_STRIP, gMeshCount, false, ignoreTransform);
+                GL_TRIANGLE_STRIP, kMeshCount, false, ignoreTransform);
     }
 
     if (CC_UNLIKELY(useScaleTransform)) {
@@ -2412,33 +2416,34 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
     setupDrawShaderUniforms(getShader(paint));
 
     const void* vertices = vertexBuffer.getBuffer();
-    mCaches.unbindMeshBuffer();
-    mCaches.bindPositionVertexPointer(true, vertices, isAA ? gAlphaVertexStride : gVertexStride);
-    mCaches.resetTexCoordsVertexPointer();
+    mRenderState.meshState().unbindMeshBuffer();
+    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram,
+            true, vertices, isAA ? kAlphaVertexStride : kVertexStride);
+    mRenderState.meshState().resetTexCoordsVertexPointer();
 
     int alphaSlot = -1;
     if (isAA) {
-        void* alphaCoords = ((GLbyte*) vertices) + gVertexAlphaOffset;
+        void* alphaCoords = ((GLbyte*) vertices) + kVertexAlphaOffset;
         alphaSlot = mCaches.currentProgram->getAttrib("vtxAlpha");
         // TODO: avoid enable/disable in back to back uses of the alpha attribute
         glEnableVertexAttribArray(alphaSlot);
-        glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, alphaCoords);
+        glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, kAlphaVertexStride, alphaCoords);
     }
 
     const VertexBuffer::Mode mode = vertexBuffer.getMode();
     if (mode == VertexBuffer::kStandard) {
-        mCaches.unbindIndicesBuffer();
+        mRenderState.meshState().unbindIndicesBuffer();
         glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexBuffer.getVertexCount());
     } else if (mode == VertexBuffer::kOnePolyRingShadow) {
-        mCaches.bindShadowIndicesBuffer();
+        mRenderState.meshState().bindShadowIndicesBuffer();
         glDrawElements(GL_TRIANGLE_STRIP, ONE_POLY_RING_SHADOW_INDEX_COUNT,
                 GL_UNSIGNED_SHORT, nullptr);
     } else if (mode == VertexBuffer::kTwoPolyRingShadow) {
-        mCaches.bindShadowIndicesBuffer();
+        mRenderState.meshState().bindShadowIndicesBuffer();
         glDrawElements(GL_TRIANGLE_STRIP, TWO_POLY_RING_SHADOW_INDEX_COUNT,
                 GL_UNSIGNED_SHORT, nullptr);
     } else if (mode == VertexBuffer::kIndices) {
-        mCaches.unbindIndicesBuffer();
+        mRenderState.meshState().unbindIndicesBuffer();
         glDrawElements(GL_TRIANGLE_STRIP, vertexBuffer.getIndexCount(),
                 GL_UNSIGNED_SHORT, vertexBuffer.getIndices());
     }
@@ -2720,9 +2725,9 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms(getShader(paint));
-    setupDrawMesh(nullptr, (GLvoid*) gMeshTextureOffset);
+    setupDrawMesh(nullptr, (GLvoid*) kMeshTextureOffset);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, kMeshCount);
 }
 
 bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
@@ -2871,8 +2876,6 @@ void OpenGLRenderer::setClippingRoundRect(LinearAllocator& allocator,
         const Rect& rect, float radius, bool highPriority) {
     mState.setClippingRoundRect(allocator, rect, radius, highPriority);
 }
-
-
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float x, float y,
         const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
@@ -3078,7 +3081,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             GLsizei elementsCount = layer->meshElementCount;
 
             while (elementsCount > 0) {
-                GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
+                GLsizei drawCount = min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
 
                 setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
                 DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
@@ -3156,9 +3159,9 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms(getShader(paint));
-    setupDrawMesh(nullptr, (GLvoid*) gMeshTextureOffset);
+    setupDrawMesh(nullptr, (GLvoid*) kMeshTextureOffset);
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, kMeshCount);
 }
 
 // Same values used by Skia
@@ -3337,7 +3340,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawSimpleMesh();
 
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, kMeshCount);
 }
 
 void OpenGLRenderer::drawTextureRect(float left, float top, float right, float bottom,
@@ -3345,7 +3348,7 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
     GLvoid* vertices = (GLvoid*) nullptr;
-    GLvoid* texCoords = (GLvoid*) gMeshTextureOffset;
+    GLvoid* texCoords = (GLvoid*) kMeshTextureOffset;
 
     if (texture->uvMapper) {
         vertices = &mMeshVertices[0].x;
@@ -3364,11 +3367,11 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
         texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
                 paint, texture->blend, vertices, texCoords,
-                GL_TRIANGLE_STRIP, gMeshCount, false, true);
+                GL_TRIANGLE_STRIP, kMeshCount, false, true);
     } else {
         texture->setFilter(getFilter(paint), true);
         drawTextureMesh(left, top, right, bottom, texture->id, paint,
-                texture->blend, vertices, texCoords, GL_TRIANGLE_STRIP, gMeshCount);
+                texture->blend, vertices, texCoords, GL_TRIANGLE_STRIP, kMeshCount);
     }
 
     if (texture->uvMapper) {
