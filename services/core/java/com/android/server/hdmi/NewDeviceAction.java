@@ -163,6 +163,12 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
     }
 
     private void addDeviceInfo() {
+        // The device should be in the device list with default information.
+        if (!tv().isInDeviceList(mDeviceLogicalAddress, mDevicePhysicalAddress)) {
+            Slog.w(TAG, String.format("Device not found (%02x, %04x)",
+                    mDeviceLogicalAddress, mDevicePhysicalAddress));
+            return;
+        }
         if (mDisplayName == null) {
             mDisplayName = HdmiUtils.getDefaultDeviceName(mDeviceLogicalAddress);
         }
