@@ -657,6 +657,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList textColorLink = null;
         int textSize = 15;
         String fontFamily = null;
+        boolean fontFamilyExplicit = false;
         int typefaceIndex = -1;
         int styleIndex = -1;
         boolean allCaps = false;
@@ -1011,6 +1012,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_fontFamily:
                 fontFamily = a.getString(attr);
+                fontFamilyExplicit = true;
                 break;
 
             case com.android.internal.R.styleable.TextView_password:
@@ -1299,6 +1301,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             typefaceIndex = MONOSPACE;
         }
 
+        if (typefaceIndex != -1 && !fontFamilyExplicit) {
+            fontFamily = null;
+        }
         setTypefaceFromAttrs(fontFamily, typefaceIndex, styleIndex);
 
         if (shadowcolor != 0) {
