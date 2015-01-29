@@ -97,14 +97,18 @@ public class FusionEngine implements LocationListener {
 
     /** Called on mLooper thread */
     public void enable() {
-        mEnabled = true;
-        updateRequirements();
+        if (!mEnabled) {
+            mEnabled = true;
+            updateRequirements();
+        }
     }
 
     /** Called on mLooper thread */
     public void disable() {
-        mEnabled = false;
-        updateRequirements();
+        if (mEnabled) {
+            mEnabled = false;
+            updateRequirements();
+        }
     }
 
     /** Called on mLooper thread */
@@ -131,16 +135,14 @@ public class FusionEngine implements LocationListener {
     private void enableProvider(String name, long minTime) {
         ProviderStats stats = mStats.get(name);
 
-        if (stats.available) {
-            if (!stats.requested) {
-                stats.requestTime = SystemClock.elapsedRealtime();
-                stats.requested = true;
-                stats.minTime = minTime;
-                mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
-            } else if (stats.minTime != minTime) {
-                stats.minTime = minTime;
-                mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
-            }
+        if (!stats.requested) {
+            stats.requestTime = SystemClock.elapsedRealtime();
+            stats.requested = true;
+            stats.minTime = minTime;
+            mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
+        } else if (stats.minTime != minTime) {
+            stats.minTime = minTime;
+            mLocationManager.requestLocationUpdates(name, minTime, 0, this, mLooper);
         }
     }
 
