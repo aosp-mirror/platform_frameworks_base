@@ -426,17 +426,16 @@ public final class UsbAlsaManager {
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
                 notifyDeviceState(audioDevice, false);
+                mSelectedAudioDevice = null;
+
+                // if there any external devices left, select one of them
+                selectDefaultDevice();
             }
         }
         UsbMidiDevice usbMidiDevice = mMidiDevices.remove(usbDevice);
         if (usbMidiDevice != null) {
             IoUtils.closeQuietly(usbMidiDevice);
         }
-
-        mSelectedAudioDevice = null;
-
-        // if there any external devices left, select one of them
-        selectDefaultDevice();
     }
 
    /* package */ void setAccessoryAudioState(boolean enabled, int card, int device) {
