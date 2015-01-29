@@ -7,11 +7,13 @@ LOCAL_CLANG_CFLAGS += \
 LOCAL_SRC_FILES := \
     font/CacheTexture.cpp \
     font/Font.cpp \
+    renderstate/Blend.cpp \
     renderstate/MeshState.cpp \
     renderstate/PixelBufferState.cpp \
     renderstate/RenderState.cpp \
     renderstate/Scissor.cpp \
     renderstate/Stencil.cpp \
+    renderstate/TextureState.cpp \
     renderthread/CanvasContext.cpp \
     renderthread/DrawFrameTask.cpp \
     renderthread/EglManager.cpp \

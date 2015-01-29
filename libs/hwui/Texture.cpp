@@ -24,18 +24,44 @@
 namespace android {
 namespace uirenderer {
 
-Texture::Texture(): id(0), generation(0), blend(false), width(0), height(0),
-        cleanup(false), bitmapSize(0), mipMap(false), uvMapper(nullptr), isInUse(false),
-        mWrapS(GL_CLAMP_TO_EDGE), mWrapT(GL_CLAMP_TO_EDGE),
-        mMinFilter(GL_NEAREST), mMagFilter(GL_NEAREST),
-        mFirstFilter(true), mFirstWrap(true), mCaches(Caches::getInstance()) {
+Texture::Texture()
+        : id(0)
+        , generation(0)
+        , blend(false)
+        , width(0)
+        , height(0)
+        , cleanup(false)
+        , bitmapSize(0)
+        , mipMap(false)
+        , uvMapper(nullptr)
+        , isInUse(false)
+        , mWrapS(GL_CLAMP_TO_EDGE)
+        , mWrapT(GL_CLAMP_TO_EDGE)
+        , mMinFilter(GL_NEAREST)
+        , mMagFilter(GL_NEAREST)
+        , mFirstFilter(true)
+        , mFirstWrap(true)
+        , mCaches(Caches::getInstance()) {
 }
 
-Texture::Texture(Caches& caches): id(0), generation(0), blend(false), width(0), height(0),
-        cleanup(false), bitmapSize(0), mipMap(false), uvMapper(nullptr), isInUse(false),
-        mWrapS(GL_CLAMP_TO_EDGE), mWrapT(GL_CLAMP_TO_EDGE),
-        mMinFilter(GL_NEAREST), mMagFilter(GL_NEAREST),
-        mFirstFilter(true), mFirstWrap(true), mCaches(caches) {
+Texture::Texture(Caches& caches)
+        : id(0)
+        , generation(0)
+        , blend(false)
+        , width(0)
+        , height(0)
+        , cleanup(false)
+        , bitmapSize(0)
+        , mipMap(false)
+        , uvMapper(nullptr)
+        , isInUse(false)
+        , mWrapS(GL_CLAMP_TO_EDGE)
+        , mWrapT(GL_CLAMP_TO_EDGE)
+        , mMinFilter(GL_NEAREST)
+        , mMagFilter(GL_NEAREST)
+        , mFirstFilter(true)
+        , mFirstWrap(true)
+        , mCaches(caches) {
 }
 
 void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force,
@@ -48,7 +74,7 @@ void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force
         mWrapT = wrapT;
 
         if (bindTexture) {
-            mCaches.bindTexture(renderTarget, id);
+            mCaches.textureState().bindTexture(renderTarget, id);
         }
 
         glTexParameteri(renderTarget, GL_TEXTURE_WRAP_S, wrapS);
@@ -66,7 +92,7 @@ void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool for
         mMagFilter = mag;
 
         if (bindTexture) {
-            mCaches.bindTexture(renderTarget, id);
+            mCaches.textureState().bindTexture(renderTarget, id);
         }
 
         if (mipMap && min == GL_LINEAR) min = GL_LINEAR_MIPMAP_LINEAR;
@@ -77,7 +103,7 @@ void Texture::setFilterMinMag(GLenum min, GLenum mag, bool bindTexture, bool for
 }
 
 void Texture::deleteTexture() const {
-    mCaches.deleteTexture(id);
+    mCaches.textureState().deleteTexture(id);
 }
 
 }; // namespace uirenderer

@@ -285,7 +285,7 @@ void GradientCache::generateTexture(uint32_t* colors, float* positions, Texture*
     memcpy(pixels + rowBytes, pixels, rowBytes);
 
     glGenTextures(1, &texture->id);
-    Caches::getInstance().bindTexture(texture->id);
+    Caches::getInstance().textureState().bindTexture(texture->id);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     if (mUseFloatTexture) {

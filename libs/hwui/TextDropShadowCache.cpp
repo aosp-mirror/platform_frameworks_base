@@ -207,7 +207,7 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, 
 
         glGenTextures(1, &texture->id);
 
-        caches.bindTexture(texture->id);
+        caches.textureState().bindTexture(texture->id);
         // Textures are Alpha8
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

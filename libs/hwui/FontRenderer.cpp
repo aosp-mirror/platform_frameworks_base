@@ -284,7 +284,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     uint32_t cacheWidth = cacheTexture->getWidth();
 
     if (!cacheTexture->getPixelBuffer()) {
-        Caches::getInstance().activeTexture(0);
+        Caches::getInstance().textureState().activateTexture(0);
         // Large-glyph texture memory is allocated only as needed
         cacheTexture->allocateTexture();
     }
@@ -397,7 +397,7 @@ CacheTexture* FontRenderer::createCacheTexture(int width, int height, GLenum for
     CacheTexture* cacheTexture = new CacheTexture(width, height, format, kMaxNumberOfQuads);
 
     if (allocate) {
-        Caches::getInstance().activeTexture(0);
+        Caches::getInstance().textureState().activateTexture(0);
         cacheTexture->allocateTexture();
         cacheTexture->allocateMesh();
     }
@@ -443,8 +443,8 @@ void checkTextureUpdateForCache(Caches& caches, Vector<CacheTexture*>& cacheText
         if (cacheTexture->isDirty() && cacheTexture->getPixelBuffer()) {
             if (cacheTexture->getTextureId() != lastTextureId) {
                 lastTextureId = cacheTexture->getTextureId();
-                caches.activeTexture(0);
-                caches.bindTexture(lastTextureId);
+                caches.textureState().activateTexture(0);
+                caches.textureState().bindTexture(lastTextureId);
             }
 
             if (cacheTexture->upload()) {
@@ -470,7 +470,7 @@ void FontRenderer::checkTextureUpdate() {
     checkTextureUpdateForCache(caches, mRGBACacheTextures, resetPixelStore, lastTextureId);
 
     // Unbind any PBO we might have used to update textures
-    caches.pixelBuffer().unbind();
+    caches.pixelBufferState().unbind();
 
     // Reset to default unpack row length to avoid affecting texture
     // uploads in other parts of the renderer
@@ -507,11 +507,11 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
                     forceRebind = renderState.meshState().unbindMeshBuffer();
                 }
 
-                caches.activeTexture(0);
+                caches.textureState().activateTexture(0);
                 first = false;
             }
 
-            caches.bindTexture(texture->getTextureId());
+            caches.textureState().bindTexture(texture->getTextureId());
             texture->setLinearFiltering(mLinearFiltering, false);
 
             TextureVertex* mesh = texture->mesh();
@@ -649,7 +649,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
                 Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, nullptr, positions);
 
         // Unbind any PBO we might have used
-        Caches::getInstance().pixelBuffer().unbind();
+        Caches::getInstance().pixelBufferState().unbind();
 
         blurImage(&dataBuffer, paddedWidth, paddedHeight, radius);
     }

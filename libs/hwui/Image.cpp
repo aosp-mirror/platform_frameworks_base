@@ -39,7 +39,7 @@ Image::Image(sp<GraphicBuffer> buffer) {
     } else {
         // Create a 2D texture to sample from the EGLImage
         glGenTextures(1, &mTexture);
-        Caches::getInstance().bindTexture(mTexture);
+        Caches::getInstance().textureState().bindTexture(mTexture);
         glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, mImage);
 
         GLenum status = GL_NO_ERROR;
@@ -54,7 +54,7 @@ Image::~Image() {
         eglDestroyImageKHR(eglGetDisplay(EGL_DEFAULT_DISPLAY), mImage);
         mImage = EGL_NO_IMAGE_KHR;
 
-        Caches::getInstance().deleteTexture(mTexture);
+        Caches::getInstance().textureState().deleteTexture(mTexture);
         mTexture = 0;
     }
 }

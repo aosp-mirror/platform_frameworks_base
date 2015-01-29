@@ -23,10 +23,6 @@ namespace uirenderer {
 
 RenderState::RenderState(renderthread::RenderThread& thread)
         : mRenderThread(thread)
-        , mCaches(nullptr)
-        , mMeshState(nullptr)
-        , mScissor(nullptr)
-        , mStencil(nullptr)
         , mViewportWidth(0)
         , mViewportHeight(0)
         , mFramebuffer(0) {
@@ -34,13 +30,14 @@ RenderState::RenderState(renderthread::RenderThread& thread)
 }
 
 RenderState::~RenderState() {
-    LOG_ALWAYS_FATAL_IF(mMeshState || mScissor || mStencil,
+    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
             "State object lifecycle not managed correctly");
 }
 
 void RenderState::onGLContextCreated() {
-    LOG_ALWAYS_FATAL_IF(mMeshState || mScissor || mStencil,
+    LOG_ALWAYS_FATAL_IF(mBlend || mMeshState || mScissor || mStencil,
             "State object lifecycle not managed correctly");
+    mBlend = new Blend();
     mMeshState = new MeshState();
     mScissor = new Scissor();
     mStencil = new Stencil();
@@ -92,6 +89,10 @@ void RenderState::onGLContextDestroyed() {
     std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
     mAssetAtlas.terminate();
 
+    mCaches->terminate();
+
+    delete mBlend;
+    mBlend = nullptr;
     delete mMeshState;
     mMeshState = nullptr;
     delete mScissor;
@@ -132,7 +133,7 @@ void RenderState::interruptForFunctorInvoke() {
             mCaches->currentProgram = nullptr;
         }
     }
-    mCaches->resetActiveTexture();
+    mCaches->textureState().resetActiveTexture();
     meshState().unbindMeshBuffer();
     meshState().unbindIndicesBuffer();
     meshState().resetVertexPointers();
@@ -148,14 +149,10 @@ void RenderState::resumeFromFunctorInvoke() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     scissor().invalidate();
+    blend().invalidate();
 
-    mCaches->activeTexture(0);
-    mCaches->resetBoundTextures();
-
-    mCaches->blend = true;
-    glEnable(GL_BLEND);
-    glBlendFunc(mCaches->lastSrcMode, mCaches->lastDstMode);
-    glBlendEquation(GL_FUNC_ADD);
+    mCaches->textureState().activateTexture(0);
+    mCaches->textureState().resetBoundTextures();
 }
 
 void RenderState::debugOverdraw(bool enable, bool clear) {

@@ -71,55 +71,6 @@ static GLenum getFilter(const SkPaint* paint) {
 // Globals
 ///////////////////////////////////////////////////////////////////////////////
 
-/**
- * Structure mapping Skia xfermodes to OpenGL blending factors.
- */
-struct Blender {
-    SkXfermode::Mode mode;
-    GLenum src;
-    GLenum dst;
-}; // struct Blender
-
-// In this array, the index of each Blender equals the value of the first
-// entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
-static const Blender gBlends[] = {
-    { SkXfermode::kClear_Mode,    GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrc_Mode,      GL_ONE,                 GL_ZERO },
-    { SkXfermode::kDst_Mode,      GL_ZERO,                GL_ONE },
-    { SkXfermode::kSrcOver_Mode,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstOver_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
-    { SkXfermode::kSrcIn_Mode,    GL_DST_ALPHA,           GL_ZERO },
-    { SkXfermode::kDstIn_Mode,    GL_ZERO,                GL_SRC_ALPHA },
-    { SkXfermode::kSrcOut_Mode,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkXfermode::kDstOut_Mode,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrcATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
-    { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
-    { SkXfermode::kModulate_Mode, GL_ZERO,                GL_SRC_COLOR },
-    { SkXfermode::kScreen_Mode,   GL_ONE,                 GL_ONE_MINUS_SRC_COLOR }
-};
-
-// This array contains the swapped version of each SkXfermode. For instance
-// this array's SrcOver blending mode is actually DstOver. You can refer to
-// createLayer() for more information on the purpose of this array.
-static const Blender gBlendsSwap[] = {
-    { SkXfermode::kClear_Mode,    GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkXfermode::kSrc_Mode,      GL_ZERO,                GL_ONE },
-    { SkXfermode::kDst_Mode,      GL_ONE,                 GL_ZERO },
-    { SkXfermode::kSrcOver_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_ONE },
-    { SkXfermode::kDstOver_Mode,  GL_ONE,                 GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kSrcIn_Mode,    GL_ZERO,                GL_SRC_ALPHA },
-    { SkXfermode::kDstIn_Mode,    GL_DST_ALPHA,           GL_ZERO },
-    { SkXfermode::kSrcOut_Mode,   GL_ZERO,                GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kDstOut_Mode,   GL_ONE_MINUS_DST_ALPHA, GL_ZERO },
-    { SkXfermode::kSrcATop_Mode,  GL_ONE_MINUS_DST_ALPHA, GL_SRC_ALPHA },
-    { SkXfermode::kDstATop_Mode,  GL_DST_ALPHA,           GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kXor_Mode,      GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA },
-    { SkXfermode::kPlus_Mode,     GL_ONE,                 GL_ONE },
-    { SkXfermode::kModulate_Mode, GL_DST_COLOR,           GL_ZERO },
-    { SkXfermode::kScreen_Mode,   GL_ONE_MINUS_DST_COLOR, GL_ONE }
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Functions
@@ -234,7 +185,7 @@ void OpenGLRenderer::prepareDirty(float left, float top,
     // for each layer and wait until the first drawing command
     // to start the frame
     if (currentSnapshot()->fbo == 0) {
-        syncState();
+        mRenderState.blend().syncEnabled();
         updateLayers();
     } else {
         startFrame();
@@ -265,14 +216,6 @@ void OpenGLRenderer::clear(float left, float top, float right, float bottom, boo
     }
 
     mRenderState.scissor().reset();
-}
-
-void OpenGLRenderer::syncState() {
-    if (mCaches.blend) {
-        glEnable(GL_BLEND);
-    } else {
-        glDisable(GL_BLEND);
-    }
 }
 
 void OpenGLRenderer::startTilingCurrentClip(bool opaque, bool expand) {
@@ -559,7 +502,7 @@ void OpenGLRenderer::cancelLayerUpdate(Layer* layer) {
 
 void OpenGLRenderer::flushLayerUpdates() {
     ATRACE_NAME("Update HW Layers");
-    syncState();
+    mRenderState.blend().syncEnabled();
     updateLayers();
     flushLayers();
     // Wait for all the layer updates to be executed
@@ -756,7 +699,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
         return false;
     }
 
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
     Layer* layer = mCaches.layerCache.get(mRenderState, bounds.getWidth(), bounds.getHeight());
     if (!layer) {
         return false;
@@ -896,7 +839,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
 
     mRenderState.meshState().unbindMeshBuffer();
 
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
 
     // When the layer is stored in an FBO, we can save a bit of fillrate by
     // drawing only the dirty region
@@ -1898,13 +1841,13 @@ void OpenGLRenderer::setupDrawSimpleMesh() {
 }
 
 void OpenGLRenderer::setupDrawTexture(GLuint texture) {
-    if (texture) bindTexture(texture);
+    if (texture) mCaches.textureState().bindTexture(texture);
     mTextureUnit++;
     mRenderState.meshState().enableTexCoordsVertexArray();
 }
 
 void OpenGLRenderer::setupDrawExternalTexture(GLuint texture) {
-    bindExternalTexture(texture);
+    mCaches.textureState().bindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
     mTextureUnit++;
     mRenderState.meshState().enableTexCoordsVertexArray();
 }
@@ -2050,7 +1993,7 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top,
 void OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
         int bitmapCount, TextureVertex* vertices, bool pureTranslate,
         const Rect& bounds, const SkPaint* paint) {
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
 
@@ -2081,7 +2024,7 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
         return;
     }
 
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
     Texture* texture = getTexture(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -2122,7 +2065,7 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
         colors = tempColors.get();
     }
 
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
     Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     const UvMapper& mapper(getMapper(texture));
 
@@ -2217,7 +2160,7 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
         return;
     }
 
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
     Texture* texture = getTexture(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -2317,7 +2260,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
     }
 
     if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
-        mCaches.activeTexture(0);
+        mCaches.textureState().activateTexture(0);
         Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
         if (!texture) return;
         const AutoTexture autoCleanup(texture);
@@ -2371,7 +2314,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
  */
 void OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
         TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint) {
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -2556,7 +2499,7 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
     }
 
     if (p->getPathEffect() != nullptr) {
-        mCaches.activeTexture(0);
+        mCaches.textureState().activateTexture(0);
         const PathTexture* texture = mCaches.pathCache.getRoundRect(
                 right - left, bottom - top, rx, ry, p);
         drawShape(left, top, texture, p);
@@ -2574,7 +2517,7 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p
         return;
     }
     if (p->getPathEffect() != nullptr) {
-        mCaches.activeTexture(0);
+        mCaches.textureState().activateTexture(0);
         const PathTexture* texture = mCaches.pathCache.getCircle(radius, p);
         drawShape(x - radius, y - radius, texture, p);
     } else {
@@ -2597,7 +2540,7 @@ void OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
     }
 
     if (p->getPathEffect() != nullptr) {
-        mCaches.activeTexture(0);
+        mCaches.textureState().activateTexture(0);
         const PathTexture* texture = mCaches.pathCache.getOval(right - left, bottom - top, p);
         drawShape(left, top, texture, p);
     } else {
@@ -2621,7 +2564,7 @@ void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
 
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
     if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != nullptr || useCenter) {
-        mCaches.activeTexture(0);
+        mCaches.textureState().activateTexture(0);
         const PathTexture* texture = mCaches.pathCache.getArc(right - left, bottom - top,
                 startAngle, sweepAngle, useCenter, p);
         drawShape(left, top, texture, p);
@@ -2658,7 +2601,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
         // only fill style is supported by drawConvexPath, since others have to handle joins
         if (p->getPathEffect() != nullptr || p->getStrokeJoin() != SkPaint::kMiter_Join ||
                 p->getStrokeMiter() != SkPaintDefaults_MiterLimit) {
-            mCaches.activeTexture(0);
+            mCaches.textureState().activateTexture(0);
             const PathTexture* texture =
                     mCaches.pathCache.getRect(right - left, bottom - top, p);
             drawShape(left, top, texture, p);
@@ -2687,7 +2630,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
 void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
         int bytesCount, int count, const float* positions,
         FontRenderer& fontRenderer, int alpha, float x, float y) {
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
 
     TextShadow textShadow;
     if (!getTextShadow(paint, &textShadow)) {
@@ -3001,7 +2944,7 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
 void OpenGLRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
     if (mState.currentlyIgnored()) return;
 
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
 
     const PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
@@ -3046,7 +2989,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
     updateLayer(layer, true);
 
     mRenderState.scissor().setEnabled(mScissorOptimizationDisabled || clipRequired);
-    mCaches.activeTexture(0);
+    mCaches.textureState().activateTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
         if (layer->region.isRect()) {
@@ -3485,33 +3428,16 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
                 description.framebufferMode = mode;
                 description.swapSrcDst = swapSrcDst;
 
-                if (mCaches.blend) {
-                    glDisable(GL_BLEND);
-                    mCaches.blend = false;
-                }
-
+                mRenderState.blend().disable();
                 return;
             } else {
                 mode = SkXfermode::kSrcOver_Mode;
             }
         }
-
-        if (!mCaches.blend) {
-            glEnable(GL_BLEND);
-        }
-
-        GLenum sourceMode = swapSrcDst ? gBlendsSwap[mode].src : gBlends[mode].src;
-        GLenum destMode = swapSrcDst ? gBlendsSwap[mode].dst : gBlends[mode].dst;
-
-        if (sourceMode != mCaches.lastSrcMode || destMode != mCaches.lastDstMode) {
-            glBlendFunc(sourceMode, destMode);
-            mCaches.lastSrcMode = sourceMode;
-            mCaches.lastDstMode = destMode;
-        }
-    } else if (mCaches.blend) {
-        glDisable(GL_BLEND);
+        mRenderState.blend().enable(mode, swapSrcDst);
+    } else {
+        mRenderState.blend().disable();
     }
-    mCaches.blend = blend;
 }
 
 bool OpenGLRenderer::useProgram(Program* program) {
