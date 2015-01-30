@@ -87,6 +87,7 @@ LOCAL_SRC_FILES:= \
     android_graphics_Canvas.cpp \
     android_graphics_Picture.cpp \
     android/graphics/AutoDecodeCancel.cpp \
+    android/graphics/AvoidXferMode.cpp \
     android/graphics/Bitmap.cpp \
     android/graphics/BitmapFactory.cpp \
     android/graphics/Camera.cpp \

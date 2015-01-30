@@ -23,7 +23,7 @@ package android.graphics;
 @Deprecated
 public class AvoidXfermode extends Xfermode {
 
-    // these need to match the enum in SkAvoidXfermode.h on the native side
+    // these need to match the enum in AvoidXfermode.h on the native side
     public enum Mode {
         AVOID   (0),    //!< draw everywhere except on the opColor
         TARGET  (1);    //!< draw only on top of the opColor
