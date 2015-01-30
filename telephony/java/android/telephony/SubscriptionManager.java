@@ -1101,9 +1101,7 @@ public class SubscriptionManager {
             // What else can we do?
             return false;
         }
-        // FIXME: use better way to get roaming status instead of reading from system property
-        return Boolean.parseBoolean(TelephonyManager.getTelephonyProperty(phoneId,
-                TelephonyProperties.PROPERTY_OPERATOR_ISROAMING, null));
+        return TelephonyManager.getDefault().isNetworkRoaming(subId);
     }
 
     /**
