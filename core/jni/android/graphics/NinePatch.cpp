@@ -120,7 +120,7 @@ public:
     static void drawF(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRectF,
             jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
+        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->asSkCanvas();
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);
@@ -139,7 +139,7 @@ public:
     static void drawI(JNIEnv* env, jobject, jlong canvasHandle, jobject boundsRect,
             jlong bitmapHandle, jlong chunkHandle, jlong paintHandle,
             jint destDensity, jint srcDensity) {
-        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->getSkCanvas();
+        SkCanvas* canvas       = reinterpret_cast<Canvas*>(canvasHandle)->asSkCanvas();
         const SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
         Res_png_9patch* chunk  = reinterpret_cast<Res_png_9patch*>(chunkHandle);
         const Paint* paint     = reinterpret_cast<Paint*>(paintHandle);

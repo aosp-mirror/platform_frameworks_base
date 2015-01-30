@@ -50,7 +50,7 @@ public:
     //       moved within this interface! Further, the return value should
     //       NOT be unref'd and is valid until this canvas is destroyed or a
     //       new bitmap is set.
-    virtual SkCanvas* getSkCanvas() = 0;
+    virtual SkCanvas* asSkCanvas() = 0;
 
     virtual void setBitmap(SkBitmap* bitmap, bool copyState) = 0;
 

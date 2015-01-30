@@ -136,7 +136,7 @@ public:
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas interface
 // ----------------------------------------------------------------------------
-    virtual SkCanvas* getSkCanvas() override {
+    virtual SkCanvas* asSkCanvas() override {
         LOG_ALWAYS_FATAL("DisplayListRenderer has no SkCanvas");
         return nullptr;
     }
