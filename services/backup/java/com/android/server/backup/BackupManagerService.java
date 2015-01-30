@@ -382,6 +382,7 @@ public class BackupManagerService {
                     // we're now good to go, so start the backup alarms
                     if (MORE_DEBUG) Slog.d(TAG, "Now provisioned, so starting backups");
                     startBackupAlarmsLocked(FIRST_BACKUP_INTERVAL);
+                    scheduleNextFullBackupJob();
                 }
             }
         }
@@ -3853,6 +3854,16 @@ public class BackupManagerService {
             PackageInfo currentPackage;
 
             try {
+                if (!mEnabled || !mProvisioned) {
+                    // Backups are globally disabled, so don't proceed.
+                    if (DEBUG) {
+                        Slog.i(TAG, "full backup requested but e=" + mEnabled
+                                + " p=" + mProvisioned + "; ignoring");
+                    }
+                    mUpdateSchedule = false;
+                    return;
+                }
+
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Slog.w(TAG, "Transport not present; full data backup not performed");
@@ -4149,6 +4160,17 @@ public class BackupManagerService {
     boolean beginFullBackup(FullBackupJob scheduledJob) {
         long now = System.currentTimeMillis();
         FullBackupEntry entry = null;
+
+        if (!mEnabled || !mProvisioned) {
+            // Backups are globally disabled, so don't proceed.  We also don't reschedule
+            // the job driving automatic backups; that job will be scheduled again when
+            // the user enables backup.
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "beginFullBackup but e=" + mEnabled
+                        + " p=" + mProvisioned + "; ignoring");
+            }
+            return false;
+        }
 
         if (DEBUG_SCHEDULING) {
             Slog.i(TAG, "Beginning scheduled full backup operation");
