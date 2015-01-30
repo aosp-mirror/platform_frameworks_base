@@ -296,7 +296,7 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
     texture->width = bitmap->width();
     texture->height = bitmap->height();
 
-    Caches::getInstance().bindTexture(texture->id);
+    Caches::getInstance().textureState().bindTexture(texture->id);
 
     switch (bitmap->colorType()) {
     case kAlpha_8_SkColorType:

@@ -541,12 +541,6 @@ private:
     void discardFramebuffer(float left, float top, float right, float bottom);
 
     /**
-     * Ensures the state of the renderer is the same as the state of
-     * the GL context.
-     */
-    void syncState();
-
-    /**
      * Tells the GPU what part of the screen is about to be redrawn.
      * This method will use the current layer space clip rect.
      * This method needs to be invoked every time getTargetFbo() is
@@ -850,22 +844,6 @@ private:
      * Returns true if the specified paint will draw invisible text.
      */
     bool canSkipText(const SkPaint* paint) const;
-
-    /**
-     * Binds the specified texture. The texture unit must have been selected
-     * prior to calling this method.
-     */
-    inline void bindTexture(GLuint texture) {
-        mCaches.bindTexture(texture);
-    }
-
-    /**
-     * Binds the specified EGLImage texture. The texture unit must have been selected
-     * prior to calling this method.
-     */
-    inline void bindExternalTexture(GLuint texture) {
-        mCaches.bindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
-    }
 
     /**
      * Enable or disable blending as necessary. This function sets the appropriate

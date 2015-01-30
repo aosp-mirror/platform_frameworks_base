@@ -101,9 +101,9 @@ GpuPixelBuffer::GpuPixelBuffer(GLenum format,
         , mCaches(Caches::getInstance()){
     glGenBuffers(1, &mBuffer);
 
-    mCaches.pixelBuffer().bind(mBuffer);
+    mCaches.pixelBufferState().bind(mBuffer);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, getSize(), nullptr, GL_DYNAMIC_DRAW);
-    mCaches.pixelBuffer().unbind();
+    mCaches.pixelBufferState().unbind();
 }
 
 GpuPixelBuffer::~GpuPixelBuffer() {
@@ -112,7 +112,7 @@ GpuPixelBuffer::~GpuPixelBuffer() {
 
 uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
-        mCaches.pixelBuffer().bind(mBuffer);
+        mCaches.pixelBufferState().bind(mBuffer);
         mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
 #if DEBUG_OPENGL
         if (!mMappedPointer) {
@@ -131,7 +131,7 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
 void GpuPixelBuffer::unmap() {
     if (mAccessMode != kAccessMode_None) {
         if (mMappedPointer) {
-            mCaches.pixelBuffer().bind(mBuffer);
+            mCaches.pixelBufferState().bind(mBuffer);
             GLboolean status = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
             if (status == GL_FALSE) {
                 ALOGE("Corrupted GPU pixel buffer");
@@ -148,7 +148,7 @@ uint8_t* GpuPixelBuffer::getMappedPointer() const {
 
 void GpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) {
     // If the buffer is not mapped, unmap() will not bind it
-    mCaches.pixelBuffer().bind(mBuffer);
+    mCaches.pixelBufferState().bind(mBuffer);
     unmap();
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, mFormat,
             GL_UNSIGNED_BYTE, reinterpret_cast<void*>(offset));

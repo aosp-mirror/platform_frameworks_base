@@ -33,6 +33,7 @@
 #include "PathCache.h"
 #include "RenderBufferCache.h"
 #include "renderstate/PixelBufferState.h"
+#include "renderstate/TextureState.h"
 #include "ResourceCache.h"
 #include "TessellationCache.h"
 #include "TextDropShadowCache.h"
@@ -57,20 +58,6 @@ namespace android {
 namespace uirenderer {
 
 class GammaFontRenderer;
-
-///////////////////////////////////////////////////////////////////////////////
-// Globals
-///////////////////////////////////////////////////////////////////////////////
-
-// GL ES 2.0 defines that at least 16 texture units must be supported
-#define REQUIRED_TEXTURE_UNITS_COUNT 3
-
-// Must define as many texture units as specified by REQUIRED_TEXTURE_UNITS_COUNT
-static const GLenum gTextureUnits[] = {
-    GL_TEXTURE0,
-    GL_TEXTURE1,
-    GL_TEXTURE2
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 // Caches
@@ -155,49 +142,6 @@ public:
     void deleteLayerDeferred(Layer* layer);
 
 
-    /**
-     * Activate the specified texture unit. The texture unit must
-     * be specified using an integer number (0 for GL_TEXTURE0 etc.)
-     */
-    void activeTexture(GLuint textureUnit);
-
-    /**
-     * Invalidate the cached value of the active texture unit.
-     */
-    void resetActiveTexture();
-
-    /**
-     * Binds the specified texture as a GL_TEXTURE_2D texture.
-     * All texture bindings must be performed with this method or
-     * bindTexture(GLenum, GLuint).
-     */
-    void bindTexture(GLuint texture);
-
-    /**
-     * Binds the specified texture with the specified render target.
-     * All texture bindings must be performed with this method or
-     * bindTexture(GLuint).
-     */
-    void bindTexture(GLenum target, GLuint texture);
-
-    /**
-     * Deletes the specified texture and clears it from the cache
-     * of bound textures.
-     * All textures must be deleted using this method.
-     */
-    void deleteTexture(GLuint texture);
-
-    /**
-     * Signals that the cache of bound textures should be cleared.
-     * Other users of the context may have altered which textures are bound.
-     */
-    void resetBoundTextures();
-
-    /**
-     * Clear the cache of bound textures.
-     */
-    void unbindTexture(GLuint texture);
-
     void startTiling(GLuint x, GLuint y, GLuint width, GLuint height, bool discard);
     void endTiling();
 
@@ -218,9 +162,6 @@ public:
     void registerFunctors(uint32_t functorCount);
     void unregisterFunctors(uint32_t functorCount);
 
-    bool blend;
-    GLenum lastSrcMode;
-    GLenum lastDstMode;
     Program* currentProgram;
 
     bool drawDeferDisabled;
@@ -278,7 +219,8 @@ public:
     int propertyAmbientShadowStrength;
     int propertySpotShadowStrength;
 
-    PixelBufferState& pixelBuffer() { return *mPixelBufferState; }
+    PixelBufferState& pixelBufferState() { return *mPixelBufferState; }
+    TextureState& textureState() { return *mTextureState; }
 
 private:
     enum OverdrawColorSet {
@@ -305,9 +247,8 @@ private:
 
     RenderState* mRenderState;
 
-    std::unique_ptr<PixelBufferState> mPixelBufferState; // TODO: move to RenderState
-
-    GLuint mTextureUnit;
+    PixelBufferState* mPixelBufferState = nullptr; // TODO: move to RenderState
+    TextureState* mTextureState = nullptr; // TODO: move to RenderState
 
     Extensions& mExtensions;
 
@@ -321,9 +262,6 @@ private:
     bool mInitialized;
 
     uint32_t mFunctorsCount;
-
-    // Caches texture bindings for the GL_TEXTURE_2D target
-    GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
 
     OverdrawColorSet mOverdrawDebugColorSet;
 }; // class Caches

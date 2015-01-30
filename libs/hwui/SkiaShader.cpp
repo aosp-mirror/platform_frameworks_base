@@ -57,7 +57,7 @@ static inline void bindUniformColor(int slot, uint32_t color) {
 }
 
 static inline void bindTexture(Caches* caches, Texture* texture, GLenum wrapS, GLenum wrapT) {
-    caches->bindTexture(texture->id);
+    caches->textureState().bindTexture(texture->id);
     texture->setWrapST(wrapS, wrapT);
 }
 
@@ -176,7 +176,7 @@ void SkiaLayerShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
     }
 
     GLuint textureSlot = (*textureUnit)++;
-    caches->activeTexture(textureSlot);
+    caches->textureState().activateTexture(textureSlot);
 
     const float width = layer->getWidth();
     const float height = layer->getHeight();
@@ -270,7 +270,7 @@ void SkiaBitmapShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
     }
 
     GLuint textureSlot = (*textureUnit)++;
-    Caches::getInstance().activeTexture(textureSlot);
+    Caches::getInstance().textureState().activateTexture(textureSlot);
 
     BitmapShaderInfo shaderInfo;
     if (!bitmapShaderHelper(caches, nullptr, &shaderInfo, extensions, bitmap, xy)) {
@@ -392,7 +392,7 @@ void SkiaGradientShader::setupProgram(Caches* caches, const mat4& modelViewMatri
             shader.asAGradient(&gradInfo);
         }
         GLuint textureSlot = (*textureUnit)++;
-        caches->activeTexture(textureSlot);
+        caches->textureState().activateTexture(textureSlot);
 
 #ifndef SK_SCALAR_IS_FLOAT
     #error Need to convert gradInfo.fColorOffsets to float!

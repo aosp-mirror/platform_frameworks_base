@@ -24,7 +24,7 @@
 #include <utils/RefBase.h>
 
 #include <private/hwui/DrawGlInfo.h>
-
+#include <renderstate/Blend.h>
 #include "AssetAtlas.h"
 #include "Caches.h"
 #include "renderstate/MeshState.h"
@@ -84,6 +84,7 @@ public:
     void postDecStrong(VirtualLightRefBase* object);
 
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
+    Blend& blend() { return *mBlend; }
     MeshState& meshState() { return *mMeshState; }
     Scissor& scissor() { return *mScissor; }
     Stencil& stencil() { return *mStencil; }
@@ -100,11 +101,12 @@ private:
 
 
     renderthread::RenderThread& mRenderThread;
-    Caches* mCaches;
+    Caches* mCaches = nullptr;
 
-    MeshState* mMeshState;
-    Scissor* mScissor;
-    Stencil* mStencil;
+    Blend* mBlend = nullptr;
+    MeshState* mMeshState = nullptr;
+    Scissor* mScissor = nullptr;
+    Stencil* mStencil = nullptr;
 
     AssetAtlas mAssetAtlas;
     std::set<Layer*> mActiveLayers;

@@ -196,7 +196,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
         return nullptr;
     }
 
-    caches.activeTexture(0);
+    caches.textureState().activateTexture(0);
     Layer* layer = caches.layerCache.get(renderState, width, height);
     if (!layer) {
         ALOGW("Could not obtain a layer");
@@ -283,7 +283,7 @@ Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
     layer->region.clear();
     layer->setRenderTarget(GL_NONE); // see ::updateTextureLayer()
 
-    Caches::getInstance().activeTexture(0);
+    Caches::getInstance().textureState().activateTexture(0);
     layer->generateTexture();
 
     return layer;
@@ -412,8 +412,8 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         glGenTextures(1, &texture);
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
-        caches.activeTexture(0);
-        caches.bindTexture(texture);
+        caches.textureState().activateTexture(0);
+        caches.textureState().bindTexture(texture);
 
         glPixelStorei(GL_PACK_ALIGNMENT, bitmap->bytesPerPixel());
 
@@ -475,7 +475,7 @@ error:
         renderState.bindFramebuffer(previousFbo);
         layer->setAlpha(alpha, mode);
         layer->setFbo(previousLayerFbo);
-        caches.deleteTexture(texture);
+        caches.textureState().deleteTexture(texture);
         caches.fboCache.put(fbo);
         renderState.setViewport(previousViewportWidth, previousViewportHeight);
 

@@ -157,7 +157,7 @@ void CacheTexture::releaseTexture() {
         mTexture = nullptr;
     }
     if (mTextureId) {
-        mCaches.deleteTexture(mTextureId);
+        mCaches.textureState().deleteTexture(mTextureId);
         mTextureId = 0;
     }
     mDirty = false;
@@ -169,7 +169,7 @@ void CacheTexture::setLinearFiltering(bool linearFiltering, bool bind) {
        mLinearFiltering = linearFiltering;
 
        const GLenum filtering = linearFiltering ? GL_LINEAR : GL_NEAREST;
-       if (bind) mCaches.bindTexture(getTextureId());
+       if (bind) mCaches.textureState().bindTexture(getTextureId());
        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
    }
@@ -189,7 +189,7 @@ void CacheTexture::allocateTexture() {
     if (!mTextureId) {
         glGenTextures(1, &mTextureId);
 
-        mCaches.bindTexture(mTextureId);
+        mCaches.textureState().bindTexture(mTextureId);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Initialize texture dimensions
         glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,

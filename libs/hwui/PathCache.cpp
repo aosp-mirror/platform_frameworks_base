@@ -230,7 +230,7 @@ void PathCache::removeTexture(PathTexture* texture) {
         }
 
         if (texture->id) {
-            Caches::getInstance().deleteTexture(texture->id);
+            Caches::getInstance().textureState().deleteTexture(texture->id);
         }
         delete texture;
     }
@@ -312,7 +312,7 @@ void PathCache::generateTexture(SkBitmap& bitmap, Texture* texture) {
 
     glGenTextures(1, &texture->id);
 
-    Caches::getInstance().bindTexture(texture->id);
+    Caches::getInstance().textureState().bindTexture(texture->id);
     // Textures are Alpha8
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

@@ -134,7 +134,7 @@ bool Layer::resize(const uint32_t width, const uint32_t height) {
     setSize(desiredWidth, desiredHeight);
 
     if (fbo) {
-        caches.activeTexture(0);
+        caches.textureState().activateTexture(0);
         bindTexture();
         allocateTexture();
 
@@ -195,7 +195,7 @@ void Layer::setColorFilter(SkColorFilter* filter) {
 
 void Layer::bindTexture() const {
     if (texture.id) {
-        caches.bindTexture(renderTarget, texture.id);
+        caches.textureState().bindTexture(renderTarget, texture.id);
     }
 }
 
@@ -219,7 +219,7 @@ void Layer::deleteTexture() {
 }
 
 void Layer::clearTexture() {
-    caches.unbindTexture(texture.id);
+    caches.textureState().unbindTexture(texture.id);
     texture.id = 0;
 }
 

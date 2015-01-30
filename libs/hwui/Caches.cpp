@@ -49,6 +49,7 @@ Caches* Caches::sInstance = nullptr;
 
 Caches::Caches(RenderState& renderState)
         : patchCache(renderState)
+        , dither(*this)
         , mRenderState(&renderState)
         , mExtensions(Extensions::getInstance())
         , mInitialized(false) {
@@ -71,13 +72,8 @@ bool Caches::init() {
 
     ATRACE_NAME("Caches::init");
 
-    glActiveTexture(gTextureUnits[0]);
-    mTextureUnit = 0;
 
     mRegionMesh = nullptr;
-    blend = false;
-    lastSrcMode = GL_ZERO;
-    lastDstMode = GL_ZERO;
     currentProgram = nullptr;
 
     mFunctorsCount = 0;
@@ -90,8 +86,8 @@ bool Caches::init() {
 
     mInitialized = true;
 
-    resetBoundTextures();
-    mPixelBufferState.reset(new PixelBufferState());
+    mPixelBufferState = new PixelBufferState();
+    mTextureState = new TextureState();
 
     return true;
 }
@@ -122,12 +118,6 @@ void Caches::initExtensions() {
 }
 
 void Caches::initConstraints() {
-    GLint maxTextureUnits;
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-    if (maxTextureUnits < REQUIRED_TEXTURE_UNITS_COUNT) {
-        ALOGW("At least %d texture units are required!", REQUIRED_TEXTURE_UNITS_COUNT);
-    }
-
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 }
 
@@ -216,8 +206,10 @@ void Caches::terminate() {
 
     clearGarbage();
 
-    mPixelBufferState.release();
-
+    delete mPixelBufferState;
+    mPixelBufferState = nullptr;
+    delete mTextureState;
+    mTextureState = nullptr;
     mInitialized = false;
 }
 
@@ -345,70 +337,6 @@ void Caches::flush(FlushMode mode) {
 
     clearGarbage();
     glFinish();
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Textures
-///////////////////////////////////////////////////////////////////////////////
-
-void Caches::activeTexture(GLuint textureUnit) {
-    if (mTextureUnit != textureUnit) {
-        glActiveTexture(gTextureUnits[textureUnit]);
-        mTextureUnit = textureUnit;
-    }
-}
-
-void Caches::resetActiveTexture() {
-    mTextureUnit = -1;
-}
-
-void Caches::bindTexture(GLuint texture) {
-    if (mBoundTextures[mTextureUnit] != texture) {
-        glBindTexture(GL_TEXTURE_2D, texture);
-        mBoundTextures[mTextureUnit] = texture;
-    }
-}
-
-void Caches::bindTexture(GLenum target, GLuint texture) {
-    if (target == GL_TEXTURE_2D) {
-        bindTexture(texture);
-    } else {
-        // GLConsumer directly calls glBindTexture() with
-        // target=GL_TEXTURE_EXTERNAL_OES, don't cache this target
-        // since the cached state could be stale
-        glBindTexture(target, texture);
-    }
-}
-
-void Caches::deleteTexture(GLuint texture) {
-    // When glDeleteTextures() is called on a currently bound texture,
-    // OpenGL ES specifies that the texture is then considered unbound
-    // Consider the following series of calls:
-    //
-    // glGenTextures -> creates texture name 2
-    // glBindTexture(2)
-    // glDeleteTextures(2) -> 2 is now unbound
-    // glGenTextures -> can return 2 again
-    //
-    // If we don't call glBindTexture(2) after the second glGenTextures
-    // call, any texture operation will be performed on the default
-    // texture (name=0)
-
-    unbindTexture(texture);
-
-    glDeleteTextures(1, &texture);
-}
-
-void Caches::resetBoundTextures() {
-    memset(mBoundTextures, 0, REQUIRED_TEXTURE_UNITS_COUNT * sizeof(GLuint));
-}
-
-void Caches::unbindTexture(GLuint texture) {
-    for (int i = 0; i < REQUIRED_TEXTURE_UNITS_COUNT; i++) {
-        if (mBoundTextures[i] == texture) {
-            mBoundTextures[i] = 0;
-        }
-    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

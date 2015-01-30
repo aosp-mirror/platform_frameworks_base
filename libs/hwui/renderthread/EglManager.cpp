@@ -214,9 +214,6 @@ void EglManager::destroy() {
     if (mEglDisplay == EGL_NO_DISPLAY) return;
 
     usePBufferSurface();
-    if (Caches::hasInstance()) {
-        Caches::getInstance().terminate();
-    }
 
     mRenderThread.renderState().onGLContextDestroyed();
     eglDestroyContext(mEglDisplay, mEglContext);
