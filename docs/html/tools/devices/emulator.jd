@@ -122,7 +122,7 @@ machine.</p>
 mobile devices, including: </p>
 
 <ul>
-  <li>An ARMv5 CPU and the corresponding memory-management unit (MMU)</li>
+  <li>An ARMv5, ARMv7, or x86 CPU</li>
   <li>A 16-bit LCD display</li>
   <li>One or more keyboards (a Qwerty-based keyboard and associated Dpad/Phone
 buttons)</li>
