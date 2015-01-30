@@ -169,6 +169,12 @@ public class ZenModeControllerImpl implements ZenModeController {
         return NotificationManager.from(mContext).getEffectsSuppressor();
     }
 
+    @Override
+    public boolean isCountdownConditionSupported() {
+        return NotificationManager.from(mContext)
+                .isSystemConditionProviderEnabled(ZenModeConfig.COUNTDOWN_PATH);
+    }
+
     private void fireNextAlarmChanged() {
         for (Callback cb : mCallbacks) {
             cb.onNextAlarmChanged();

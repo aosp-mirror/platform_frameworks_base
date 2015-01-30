@@ -31,6 +31,7 @@ public interface ZenModeController {
     void setUserId(int userId);
     boolean isZenAvailable();
     ComponentName getEffectsSuppressor();
+    boolean isCountdownConditionSupported();
 
     public static class Callback {
         public void onZenChanged(int zen) {}

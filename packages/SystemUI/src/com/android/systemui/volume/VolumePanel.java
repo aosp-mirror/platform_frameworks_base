@@ -350,6 +350,17 @@ public class VolumePanel extends Handler implements DemoMode {
         };
     }
 
+    protected LayoutParams getDialogLayoutParams(Window window, Resources res) {
+        final LayoutParams lp = window.getAttributes();
+        lp.token = null;
+        lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
+        lp.type = LayoutParams.TYPE_STATUS_BAR_PANEL;
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.windowAnimations = com.android.systemui.R.style.VolumePanelAnimation;
+        lp.setTitle(TAG);
+        return lp;
+    }
+
     public VolumePanel(Context context, ZenModeController zenController) {
         mTag = String.format("%s.%08x", TAG, hashCode());
         mContext = context;
@@ -408,14 +419,7 @@ public class VolumePanel extends Handler implements DemoMode {
 
         mDialog.create();
 
-        final LayoutParams lp = window.getAttributes();
-        lp.token = null;
-        lp.y = res.getDimensionPixelOffset(com.android.systemui.R.dimen.volume_panel_top);
-        lp.type = LayoutParams.TYPE_STATUS_BAR_PANEL;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.windowAnimations = com.android.systemui.R.style.VolumePanelAnimation;
-        lp.setTitle(TAG);
-        window.setAttributes(lp);
+        window.setAttributes(getDialogLayoutParams(window, res));
 
         updateWidth();
 

@@ -19,7 +19,6 @@ package com.android.systemui.volume;
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
 import android.app.ActivityManager;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -85,10 +84,6 @@ public class ZenModePanel extends LinearLayout {
     private final int mSubheadWarningColor;
     private final int mSubheadColor;
     private final Interpolator mInterpolator;
-    private final int mMaxConditions;
-    private final int mMaxOptionalConditions;
-    private final boolean mCountdownConditionSupported;
-    private final int mFirstConditionIndex;
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
     private final Uri mForeverId;
 
@@ -103,6 +98,10 @@ public class ZenModePanel extends LinearLayout {
 
     private Callback mCallback;
     private ZenModeController mController;
+    private boolean mCountdownConditionSupported;
+    private int mMaxConditions;
+    private int mMaxOptionalConditions;
+    private int mFirstConditionIndex;
     private boolean mRequestingConditions;
     private Condition mExitCondition;
     private String mExitConditionText;
@@ -127,14 +126,6 @@ public class ZenModePanel extends LinearLayout {
         mSubheadColor = res.getColor(R.color.qs_subhead);
         mInterpolator = AnimationUtils.loadInterpolator(mContext,
                 com.android.internal.R.interpolator.fast_out_slow_in);
-        mCountdownConditionSupported = NotificationManager.from(mContext)
-                .isSystemConditionProviderEnabled(ZenModeConfig.COUNTDOWN_PATH);
-        final int countdownDelta = mCountdownConditionSupported ? 1 : 0;
-        mFirstConditionIndex = COUNTDOWN_CONDITION_INDEX + countdownDelta;
-        final int minConditions = 1 /*forever*/ + countdownDelta;
-        mMaxConditions = MathUtils.constrain(res.getInteger(R.integer.zen_mode_max_conditions),
-                minConditions, 100);
-        mMaxOptionalConditions = mMaxConditions - minConditions;
         mForeverId = Condition.newId(mContext).appendPath("forever").build();
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
@@ -192,9 +183,6 @@ public class ZenModePanel extends LinearLayout {
         Interaction.register(mMoreSettings, mInteractionCallback);
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
-        for (int i = 0; i < mMaxConditions; i++) {
-            mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
-        }
 
         setLayoutTransition(newLayoutTransition(mTransitionHelper));
     }
@@ -306,6 +294,16 @@ public class ZenModePanel extends LinearLayout {
 
     public void init(ZenModeController controller) {
         mController = controller;
+        mCountdownConditionSupported = mController.isCountdownConditionSupported();
+        final int countdownDelta = mCountdownConditionSupported ? 1 : 0;
+        mFirstConditionIndex = COUNTDOWN_CONDITION_INDEX + countdownDelta;
+        final int minConditions = 1 /*forever*/ + countdownDelta;
+        mMaxConditions = MathUtils.constrain(mContext.getResources()
+                .getInteger(R.integer.zen_mode_max_conditions), minConditions, 100);
+        mMaxOptionalConditions = mMaxConditions - minConditions;
+        for (int i = 0; i < mMaxConditions; i++) {
+            mZenConditions.addView(mInflater.inflate(R.layout.zen_mode_condition, this, false));
+        }
         setExitCondition(mController.getExitCondition());
         refreshExitConditionText();
         mSessionZen = getSelectedZen(-1);
