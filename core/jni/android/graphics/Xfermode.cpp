@@ -18,7 +18,7 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
-#include "AvoidXferMode.h"
+#include "AvoidXfermode.h"
 #include "SkPixelXorXfermode.h"
 
 namespace android {
@@ -35,8 +35,8 @@ public:
     static jlong avoid_create(JNIEnv* env, jobject, jint opColor,
                                 jint tolerance, jint modeHandle)
     {
-        AvoidXferMode::Mode mode = static_cast<AvoidXferMode::Mode>(modeHandle);
-        return reinterpret_cast<jlong>(AvoidXferMode::Create(opColor, tolerance, mode));
+        AvoidXfermode::Mode mode = static_cast<AvoidXfermode::Mode>(modeHandle);
+        return reinterpret_cast<jlong>(AvoidXfermode::Create(opColor, tolerance, mode));
     }
 
     static jlong pixelxor_create(JNIEnv* env, jobject, jint opColor)
