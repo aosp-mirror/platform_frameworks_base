@@ -951,6 +951,10 @@ include the action bar on devices running Android 2.1 or higher."
               Creating a Catalog Browser</a>
           </li>
           <li>
+            <a href="<?cs var:toroot ?>training/tv/playback/card.html">
+              Providing a Card View</a>
+          </li>
+          <li>
             <a href="<?cs var:toroot ?>training/tv/playback/details.html"
                ja-lang="詳細ビューをビルドする">
               Building a Details View</a>
