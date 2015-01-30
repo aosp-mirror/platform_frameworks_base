@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * This class is used for sending data to a port on a MIDI device
  *
+ * CANDIDATE FOR PUBLIC API
  * @hide
  */
 public class MidiInputPort extends MidiPort implements MidiReceiver {

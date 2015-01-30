@@ -26,8 +26,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * This class is used for receiving data to a port on a MIDI device
+ * This class is used for receiving data from a port on a MIDI device
  *
+ * CANDIDATE FOR PUBLIC API
  * @hide
  */
 public class MidiOutputPort extends MidiPort implements MidiSender {

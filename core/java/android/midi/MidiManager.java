@@ -35,6 +35,7 @@ import java.util.HashMap;
  * {@samplecode
  * MidiManager manager = (MidiManager) getSystemService(Context.MIDI_SERVICE);}
  *
+ * CANDIDATE FOR PUBLIC API
  * @hide
  */
 public class MidiManager {
@@ -184,7 +185,7 @@ public class MidiManager {
      * @param properties a {@link android.os.Bundle} containing properties describing the device
      * @param isPrivate true if this device should only be visible and accessible to apps
      *                  with the same UID as the caller
-     * @return a {@link MidiVirtualDevice} object to locally represent the device
+     * @return a {@link MidiDeviceServer} object to locally represent the device
      */
     public MidiDeviceServer createDeviceServer(int numInputPorts, int numOutputPorts,
             Bundle properties, boolean isPrivate) {

@@ -25,7 +25,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 
-/** @hide */
+/**
+ * This class is used to provide the implemention of MIDI device.
+ * Applications may call {@link MidiManager#createDeviceServer}
+ * to create an instance of this class to implement a virtual MIDI device.
+ *
+ * CANDIDATE FOR PUBLIC API
+ * @hide
+ */
 public final class MidiDeviceServer implements Closeable {
     private static final String TAG = "MidiDeviceServer";
 

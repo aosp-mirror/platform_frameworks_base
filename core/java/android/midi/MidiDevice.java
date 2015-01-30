@@ -30,6 +30,7 @@ import java.util.ArrayList;
  * This class is used for sending and receiving data to and from an MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.
  *
+ * CANDIDATE FOR PUBLIC API
  * @hide
  */
 public final class MidiDevice {
