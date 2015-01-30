@@ -3397,6 +3397,7 @@
 
     <!-- This is used to express that something occurred within the last X days (e.g., Last 7 days). -->
     <plurals name="last_num_days">
+        <item quantity="one">Last <xliff:g id="count">%d</xliff:g> day</item>
         <item quantity="other">Last <xliff:g id="count">%d</xliff:g> days</item>
     </plurals>
 
