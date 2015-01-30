@@ -56,6 +56,9 @@ startpage=true
     <dd>Learn how to use the Leanback support library to build a browsing interface for media
       catalogs.</dd>
 
+  <dt><b><a href="details.html">Providing a Card View</a></b></dt>
+    <dd>Learn how to use the Leanback support library to build a card view for content items.</dd>
+
   <dt><b><a href="details.html">Building a Details View</a></b></dt>
     <dd>Learn how to use the Leanback support library to build a details page for media items.</dd>
 
