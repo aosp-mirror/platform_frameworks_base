@@ -46,7 +46,9 @@ void RenderState::onGLContextCreated() {
     mStencil = new Stencil();
 
     // This is delayed because the first access of Caches makes GL calls
-    mCaches = &Caches::createInstance(*this);
+    if (!mCaches) {
+        mCaches = &Caches::createInstance(*this);
+    }
     mCaches->init();
     mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
 }
