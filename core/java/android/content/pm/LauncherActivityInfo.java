@@ -39,6 +39,7 @@ public class LauncherActivityInfo {
 
     private ActivityInfo mActivityInfo;
     private ComponentName mComponentName;
+    private ResolveInfo mResolveInfo;
     private UserHandle mUser;
     private long mFirstInstallTime;
 
@@ -52,6 +53,7 @@ public class LauncherActivityInfo {
     LauncherActivityInfo(Context context, ResolveInfo info, UserHandle user,
             long firstInstallTime) {
         this(context);
+        mResolveInfo = info;
         mActivityInfo = info.activityInfo;
         mComponentName = LauncherApps.getComponentName(info);
         mUser = user;
@@ -92,7 +94,7 @@ public class LauncherActivityInfo {
      * @return The label for the activity.
      */
     public CharSequence getLabel() {
-        return mActivityInfo.loadLabel(mPm);
+        return mResolveInfo.loadLabel(mPm);
     }
 
     /**
@@ -104,8 +106,22 @@ public class LauncherActivityInfo {
      * @return The drawable associated with the activity
      */
     public Drawable getIcon(int density) {
-        // TODO: Use density
-        return mActivityInfo.loadIcon(mPm);
+        int iconRes = mResolveInfo.getIconResource();
+        Resources resources = null;
+        Drawable icon = null;
+        // Get the preferred density icon from the app's resources
+        if (density != 0 && iconRes != 0) {
+            try {
+                resources = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
+                icon = resources.getDrawableForDensity(iconRes, density);
+            } catch (NameNotFoundException | Resources.NotFoundException exc) {
+            }
+        }
+        // Get the default density icon
+        if (icon == null) {
+            icon = mResolveInfo.loadIcon(mPm);
+        }
+        return icon;
     }
 
     /**
@@ -151,23 +167,7 @@ public class LauncherActivityInfo {
      * @return A badged icon for the activity.
      */
     public Drawable getBadgedIcon(int density) {
-        int iconRes = mActivityInfo.getIconResource();
-        Resources resources = null;
-        Drawable originalIcon = null;
-        try {
-            resources = mPm.getResourcesForApplication(mActivityInfo.applicationInfo);
-            try {
-                if (density != 0) {
-                    originalIcon = resources.getDrawableForDensity(iconRes, density);
-                }
-            } catch (Resources.NotFoundException e) {
-            }
-        } catch (NameNotFoundException nnfe) {
-        }
-
-        if (originalIcon == null) {
-            originalIcon = mActivityInfo.loadIcon(mPm);
-        }
+        Drawable originalIcon = getIcon(density);
 
         if (originalIcon instanceof BitmapDrawable) {
             return mPm.getUserBadgedIcon(originalIcon, mUser);
