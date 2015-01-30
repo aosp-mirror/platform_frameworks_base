@@ -736,6 +736,10 @@ include the action bar on devices running Android 2.1 or higher."
             Displaying a Location Address
           </a>
           </li>
+          <li><a href="<?cs var:toroot ?>training/location/geofencing.html">
+            Creating and Monitoring Geofences
+          </a>
+          </li>
         </ul>
       </li>
     </ul>
