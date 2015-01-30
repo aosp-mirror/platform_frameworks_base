@@ -4857,6 +4857,37 @@ package android.app {
     method public android.app.Notification.Builder setWhen(long);
   }
 
+  public static final class Notification.CarExtender implements android.app.Notification.Extender {
+    ctor public Notification.CarExtender();
+    ctor public Notification.CarExtender(android.app.Notification);
+    method public android.app.Notification.Builder extend(android.app.Notification.Builder);
+    method public int getColor();
+    method public android.graphics.Bitmap getLargeIcon();
+    method public android.app.Notification.CarExtender.UnreadConversation getUnreadConversation();
+    method public android.app.Notification.CarExtender setColor(int);
+    method public android.app.Notification.CarExtender setLargeIcon(android.graphics.Bitmap);
+    method public android.app.Notification.CarExtender setUnreadConversation(android.app.Notification.CarExtender.UnreadConversation);
+  }
+
+  public static class Notification.CarExtender.Builder {
+    ctor public Notification.CarExtender.Builder(java.lang.String);
+    method public android.app.Notification.CarExtender.Builder addMessage(java.lang.String);
+    method public android.app.Notification.CarExtender.UnreadConversation build();
+    method public android.app.Notification.CarExtender.Builder setLatestTimestamp(long);
+    method public android.app.Notification.CarExtender.Builder setReadPendingIntent(android.app.PendingIntent);
+    method public android.app.Notification.CarExtender.Builder setReplyAction(android.app.PendingIntent, android.app.RemoteInput);
+  }
+
+  public static class Notification.CarExtender.UnreadConversation {
+    method public long getLatestTimestamp();
+    method public java.lang.String[] getMessages();
+    method public java.lang.String getParticipant();
+    method public java.lang.String[] getParticipants();
+    method public android.app.PendingIntent getReadPendingIntent();
+    method public android.app.RemoteInput getRemoteInput();
+    method public android.app.PendingIntent getReplyPendingIntent();
+  }
+
   public static abstract interface Notification.Extender {
     method public abstract android.app.Notification.Builder extend(android.app.Notification.Builder);
   }
