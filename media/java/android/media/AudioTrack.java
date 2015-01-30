@@ -234,7 +234,7 @@ public class AudioTrack
      */
     private int mChannelCount = 1;
     /**
-     * The audio channel mask.
+     * The audio channel mask used for calling native AudioTrack
      */
     private int mChannels = AudioFormat.CHANNEL_OUT_MONO;
 
@@ -253,9 +253,15 @@ public class AudioTrack
      */
     private int mDataLoadMode = MODE_STREAM;
     /**
-     * The current audio channel configuration.
+     * The current channel position mask, as specified on AudioTrack creation.
+     * Can be set simultaneously with channel index mask {@link #mChannelIndexMask}.
+     * May be set to {@link AudioFormat#CHANNEL_INVALID} if a channel index mask is specified.
      */
     private int mChannelConfiguration = AudioFormat.CHANNEL_OUT_MONO;
+    /**
+     * The current audio channel index configuration (if specified).
+     */
+    private int mChannelIndexMask = 0;
     /**
      * The encoding of the audio samples.
      * @see AudioFormat#ENCODING_PCM_8BIT
@@ -424,16 +430,24 @@ public class AudioTrack
                 rate = 44100;
             }
         }
-        int channelMask = AudioFormat.CHANNEL_OUT_FRONT_LEFT | AudioFormat.CHANNEL_OUT_FRONT_RIGHT;
-        if ((format.getPropertySetMask() & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0)
-        {
+        int channelIndexMask = 0;
+        if ((format.getPropertySetMask()
+                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) != 0) {
+            channelIndexMask = format.getChannelIndexMask();
+        }
+        int channelMask = 0;
+        if ((format.getPropertySetMask()
+                & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK) != 0) {
             channelMask = format.getChannelMask();
+        } else if (channelIndexMask == 0) { // if no masks at all, use stereo
+            channelMask = AudioFormat.CHANNEL_OUT_FRONT_LEFT
+                    | AudioFormat.CHANNEL_OUT_FRONT_RIGHT;
         }
         int encoding = AudioFormat.ENCODING_DEFAULT;
         if ((format.getPropertySetMask() & AudioFormat.AUDIO_FORMAT_HAS_PROPERTY_ENCODING) != 0) {
             encoding = format.getEncoding();
         }
-        audioParamCheck(rate, channelMask, encoding, mode);
+        audioParamCheck(rate, channelMask, channelIndexMask, encoding, mode);
         mStreamType = AudioSystem.STREAM_DEFAULT;
 
         audioBuffSizeCheck(bufferSizeInBytes);
@@ -653,6 +667,48 @@ public class AudioTrack
             AudioFormat.CHANNEL_OUT_SIDE_LEFT |
             AudioFormat.CHANNEL_OUT_SIDE_RIGHT;
 
+    // Java channel mask definitions below match those
+    // in /system/core/include/system/audio.h in the JNI code of AudioTrack.
+
+    // internal maximum size for bits parameter, not part of public API
+    private static final int AUDIO_CHANNEL_BITS_LOG2 = 30;
+
+    // log(2) of maximum number of representations, not part of public API
+    private static final int AUDIO_CHANNEL_REPRESENTATION_LOG2 = 2;
+
+    // used to create a channel index mask or channel position mask
+    // with getChannelMaskFromRepresentationAndBits();
+    private static final int CHANNEL_OUT_REPRESENTATION_POSITION = 0;
+    private static final int CHANNEL_OUT_REPRESENTATION_INDEX = 2;
+
+    /**
+     * Return the channel mask from its representation and bits.
+     *
+     * This creates a channel mask for mChannels which combines a
+     * representation field and a bits field.  This is for internal
+     * communication to native code, not part of the public API.
+     *
+     * @param representation the type of channel mask,
+     *   either CHANNEL_OUT_REPRESENTATION_POSITION
+     *   or CHANNEL_OUT_REPRESENTATION_INDEX
+     * @param bits is the channel bits specifying occupancy
+     * @return the channel mask
+     * @throws java.lang.IllegalArgumentException if representation is not recognized or
+     *   the bits field is not acceptable for that representation
+     */
+    private static int getChannelMaskFromRepresentationAndBits(int representation, int bits) {
+        switch (representation) {
+        case CHANNEL_OUT_REPRESENTATION_POSITION:
+        case CHANNEL_OUT_REPRESENTATION_INDEX:
+            if ((bits & ~((1 << AUDIO_CHANNEL_BITS_LOG2) - 1)) != 0) {
+                throw new IllegalArgumentException("invalid bits " + bits);
+            }
+            return representation << AUDIO_CHANNEL_BITS_LOG2 | bits;
+        default:
+            throw new IllegalArgumentException("invalid representation " + representation);
+        }
+    }
+
     // Convenience method for the constructor's parameter checks.
     // This is where constructor IllegalArgumentException-s are thrown
     // postconditions:
@@ -661,8 +717,8 @@ public class AudioTrack
     //    mAudioFormat is valid
     //    mSampleRate is valid
     //    mDataLoadMode is valid
-    private void audioParamCheck(int sampleRateInHz,
-                                 int channelConfig, int audioFormat, int mode) {
+    private void audioParamCheck(int sampleRateInHz, int channelConfig, int channelIndexMask,
+                                 int audioFormat, int mode) {
         //--------------
         // sample rate, note these values are subject to change
         if (sampleRateInHz < SAMPLE_RATE_HZ_MIN || sampleRateInHz > SAMPLE_RATE_HZ_MAX) {
@@ -688,12 +744,37 @@ public class AudioTrack
             mChannels = AudioFormat.CHANNEL_OUT_STEREO;
             break;
         default:
+            if (channelConfig == AudioFormat.CHANNEL_INVALID && channelIndexMask != 0) {
+                mChannelCount = 0;
+                break; // channel index configuration only
+            }
             if (!isMultichannelConfigSupported(channelConfig)) {
                 // input channel configuration features unsupported channels
                 throw new IllegalArgumentException("Unsupported channel configuration.");
             }
             mChannels = channelConfig;
             mChannelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
+        }
+        // check the channel index configuration (if present)
+        mChannelIndexMask = channelIndexMask;
+        if (mChannelIndexMask != 0) {
+            // restrictive: indexMask could allow up to AUDIO_CHANNEL_BITS_LOG2
+            final int indexMask = (1 << CHANNEL_COUNT_MAX) - 1;
+            if ((channelIndexMask & ~indexMask) != 0) {
+                throw new IllegalArgumentException("Unsupported channel index configuration "
+                        + channelIndexMask);
+            }
+            int channelIndexCount = Integer.bitCount(channelIndexMask);
+            if (mChannelCount == 0) {
+                 mChannelCount = channelIndexCount;
+            } else if (mChannelCount != channelIndexCount) {
+                throw new IllegalArgumentException("Channel count must match");
+            }
+
+            // AudioTrack prefers to use the channel index configuration
+            // over the channel position configuration if both are specified.
+            mChannels = getChannelMaskFromRepresentationAndBits(
+                    CHANNEL_OUT_REPRESENTATION_INDEX, mChannelIndexMask);
         }
 
         //--------------
@@ -865,9 +946,9 @@ public class AudioTrack
     }
 
     /**
-     * Returns the configured channel configuration.
-     * See {@link AudioFormat#CHANNEL_OUT_MONO}
-     * and {@link AudioFormat#CHANNEL_OUT_STEREO}.
+     * Returns the configured channel position mask.
+     * For example, refer to {@link AudioFormat#CHANNEL_OUT_MONO},
+     * {@link AudioFormat#CHANNEL_OUT_STEREO}, {@link AudioFormat#CHANNEL_OUT_5POINT1}.
      */
     public int getChannelConfiguration() {
         return mChannelConfiguration;
@@ -1004,8 +1085,7 @@ public class AudioTrack
             channelCount = 2;
             break;
         default:
-            if ((channelConfig & SUPPORTED_OUT_CHANNELS) != channelConfig) {
-                // input channel configuration features unsupported channels
+            if (!isMultichannelConfigSupported(channelConfig)) {
                 loge("getMinBufferSize(): Invalid channel configuration.");
                 return ERROR_BAD_VALUE;
             } else {

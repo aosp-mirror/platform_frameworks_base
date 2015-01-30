@@ -15603,6 +15603,8 @@ package android.media {
   }
 
   public class AudioFormat {
+    method public int getChannelCount();
+    method public int getChannelIndexMask();
     method public int getChannelMask();
     method public int getEncoding();
     method public int getSampleRate();
@@ -15661,7 +15663,8 @@ package android.media {
     ctor public AudioFormat.Builder();
     ctor public AudioFormat.Builder(android.media.AudioFormat);
     method public android.media.AudioFormat build();
-    method public android.media.AudioFormat.Builder setChannelMask(int);
+    method public android.media.AudioFormat.Builder setChannelIndexMask(int) throws java.lang.IllegalArgumentException;
+    method public android.media.AudioFormat.Builder setChannelMask(int) throws java.lang.IllegalArgumentException;
     method public android.media.AudioFormat.Builder setEncoding(int) throws java.lang.IllegalArgumentException;
     method public android.media.AudioFormat.Builder setSampleRate(int) throws java.lang.IllegalArgumentException;
   }

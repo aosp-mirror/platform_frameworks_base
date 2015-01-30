@@ -890,7 +890,7 @@ int register_android_hardware_SoundTrigger(JNIEnv *env)
 
     jclass audioFormatClass = FindClassOrDie(env, kAudioFormatClassPathName);
     gAudioFormatClass = MakeGlobalRefOrDie(env, audioFormatClass);
-    gAudioFormatCstor = GetMethodIDOrDie(env, audioFormatClass, "<init>", "(III)V");
+    gAudioFormatCstor = GetMethodIDOrDie(env, audioFormatClass, "<init>", "(IIII)V");
 
     jclass soundModelEventClass = FindClassOrDie(env, kSoundModelEventClassPathName);
     gSoundModelEventClass = MakeGlobalRefOrDie(env, soundModelEventClass);

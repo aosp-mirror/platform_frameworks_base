@@ -17,7 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
-
+import android.annotation.NonNull;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -286,13 +286,15 @@ public class AudioFormat {
      */
     // Update sound trigger JNI in core/jni/android_hardware_SoundTrigger.cpp when modifying this
     // constructor
-    private AudioFormat(int encoding, int sampleRate, int channelMask) {
+    private AudioFormat(int encoding, int sampleRate, int channelMask, int channelIndexMask) {
         mEncoding = encoding;
         mSampleRate = sampleRate;
         mChannelMask = channelMask;
+        mChannelIndexMask = channelIndexMask;
         mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_ENCODING |
                 AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE |
-                AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK;
+                AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK |
+                AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK;
     }
 
     /** @hide */
@@ -303,10 +305,13 @@ public class AudioFormat {
     public final static int AUDIO_FORMAT_HAS_PROPERTY_SAMPLE_RATE = 0x1 << 1;
     /** @hide */
     public final static int AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK = 0x1 << 2;
+    /** @hide */
+    public final static int AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK = 0x1 << 3;
 
     private int mEncoding;
     private int mSampleRate;
     private int mChannelMask;
+    private int mChannelIndexMask;
     private int mPropertySetMask;
 
     /**
@@ -345,6 +350,34 @@ public class AudioFormat {
         return mChannelMask;
     }
 
+    /**
+     * Return the channel index mask.
+     * @return one of the values that can be set in {@link Builder#setChannelIndexMask(int)} or
+     * {@link AudioFormat#CHANNEL_INVALID} if not set or an invalid mask was used.
+     */
+    public int getChannelIndexMask() {
+        if ((mPropertySetMask & AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK) == 0) {
+            return CHANNEL_INVALID;
+        }
+        return mChannelIndexMask;
+    }
+
+    /**
+     * Return the channel count.
+     * @return the channel count derived from the channel position mask or the channel index mask.
+     * Zero is returned if both the channel position mask and the channel index mask are not set.
+     */
+    public int getChannelCount() {
+        final int channelIndexCount = Integer.bitCount(getChannelIndexMask());
+        int channelCount = channelCountFromOutChannelMask(getChannelMask());
+        if (channelCount == 0) {
+            channelCount = channelIndexCount;
+        } else if (channelCount != channelIndexCount && channelIndexCount != 0) {
+            channelCount = 0; // position and index channel count mismatch
+        }
+        return channelCount;
+    }
+
     /** @hide */
     public int getPropertySetMask() {
         return mPropertySetMask;
@@ -368,6 +401,7 @@ public class AudioFormat {
         private int mEncoding = ENCODING_INVALID;
         private int mSampleRate = 0;
         private int mChannelMask = CHANNEL_INVALID;
+        private int mChannelIndexMask = 0;
         private int mPropertySetMask = AUDIO_FORMAT_HAS_PROPERTY_NONE;
 
         /**
@@ -384,6 +418,7 @@ public class AudioFormat {
             mEncoding = af.mEncoding;
             mSampleRate = af.mSampleRate;
             mChannelMask = af.mChannelMask;
+            mChannelIndexMask = af.mChannelIndexMask;
             mPropertySetMask = af.mPropertySetMask;
         }
 
@@ -397,6 +432,7 @@ public class AudioFormat {
             af.mEncoding = mEncoding;
             af.mSampleRate = mSampleRate;
             af.mChannelMask = mChannelMask;
+            af.mChannelIndexMask = mChannelIndexMask;
             af.mPropertySetMask = mPropertySetMask;
             return af;
         }
@@ -437,25 +473,100 @@ public class AudioFormat {
         }
 
         /**
-         * Sets the channel mask.
+         * Sets the channel position mask.
+         * The channel position mask specifies the association between audio samples in a frame
+         * with named endpoint channels. The samples in the frame correspond to the
+         * named set bits in the channel position mask, in ascending bit order.
+         * See {@link #setChannelIndexMask(int)} to specify channels
+         * based on endpoint numbered channels.
          * @param channelMask describes the configuration of the audio channels.
-         *    <p>For output, the mask should be a combination of
+         *    <p> For output, the channelMask can be an OR-ed combination of
+         *    channel position masks, e.g.
          *    {@link AudioFormat#CHANNEL_OUT_FRONT_LEFT},
-         *    {@link AudioFormat#CHANNEL_OUT_FRONT_CENTER},
          *    {@link AudioFormat#CHANNEL_OUT_FRONT_RIGHT},
-         *    {@link AudioFormat#CHANNEL_OUT_SIDE_LEFT},
-         *    {@link AudioFormat#CHANNEL_OUT_SIDE_RIGHT},
+         *    {@link AudioFormat#CHANNEL_OUT_FRONT_CENTER},
+         *    {@link AudioFormat#CHANNEL_OUT_LOW_FREQUENCY}
          *    {@link AudioFormat#CHANNEL_OUT_BACK_LEFT},
-         *    {@link AudioFormat#CHANNEL_OUT_BACK_RIGHT}.
-         *    <p>for input, the mask should be {@link AudioFormat#CHANNEL_IN_MONO} or
+         *    {@link AudioFormat#CHANNEL_OUT_BACK_RIGHT},
+         *    {@link AudioFormat#CHANNEL_OUT_BACK_CENTER},
+         *    {@link AudioFormat#CHANNEL_OUT_SIDE_LEFT},
+         *    {@link AudioFormat#CHANNEL_OUT_SIDE_RIGHT}.
+         *    <p> For a valid {@link AudioTrack} channel position mask,
+         *    the following conditions apply:
+         *    <br> (1) at most eight channel positions may be used;
+         *    <br> (2) right/left pairs should be matched.
+         *    <p> For input or {@link AudioRecord}, the mask should be
+         *    {@link AudioFormat#CHANNEL_IN_MONO} or
          *    {@link AudioFormat#CHANNEL_IN_STEREO}.  {@link AudioFormat#CHANNEL_IN_MONO} is
          *    guaranteed to work on all devices.
-         * @return the same Builder instance.
+         * @return the same <code>Builder</code> instance.
+         * @throws IllegalArgumentException if the channel mask is invalid or
+         *    if both channel index mask and channel position mask
+         *    are specified but do not have the same channel count.
          */
-        public Builder setChannelMask(int channelMask) {
-            // only validated when used, with input or output context
+        public @NonNull Builder setChannelMask(int channelMask) throws IllegalArgumentException {
+            if (channelMask == 0) {
+                throw new IllegalArgumentException("Invalid zero channel mask");
+            } else if (/* channelMask != 0 && */ mChannelIndexMask != 0 &&
+                    Integer.bitCount(channelMask) != Integer.bitCount(mChannelIndexMask)) {
+                throw new IllegalArgumentException("Mismatched channel count for mask " +
+                        Integer.toHexString(channelMask).toUpperCase());
+            }
             mChannelMask = channelMask;
             mPropertySetMask |= AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_MASK;
+            return this;
+        }
+
+        /**
+         * Sets the channel index mask.
+         * A channel index mask specifies the association of audio samples in the frame
+         * with numbered endpoint channels. The i-th bit in the channel index
+         * mask corresponds to the i-th endpoint channel.
+         * For example, an endpoint with four channels is represented
+         * as index mask bits 0 through 3.
+         * See {@link #setChannelMask(int)} for a positional mask interpretation.
+         * <p> Both {@link AudioTrack} and {@link AudioRecord} support
+         * a channel index mask.
+         * If a channel index mask is specified it is used,
+         * otherwise the channel position mask specified
+         * by <code>setChannelMask</code> is used.
+         * For <code>AudioTrack</code> and <code>AudioRecord</code>,
+         * a channel position mask is not required if a channel index mask is specified.
+         *
+         * @param channelIndexMask describes the configuration of the audio channels.
+         *    <p> For output, the <code>channelIndexMask</code> is an OR-ed combination of
+         *    bits representing the mapping of <code>AudioTrack</code> write samples
+         *    to output sink channels.
+         *    For example, a mask of <code>0xa</code>, or binary <code>1010</code>,
+         *    means the <code>AudioTrack</code> write frame consists of two samples,
+         *    which are routed to the second and the fourth channels of the output sink.
+         *    Unmatched output sink channels are zero filled and unmatched
+         *    <code>AudioTrack</code> write samples are dropped.
+         *    <p> For input, the <code>channelIndexMask</code> is an OR-ed combination of
+         *    bits representing the mapping of input source channels to
+         *    <code>AudioRecord</code> read samples.
+         *    For example, a mask of <code>0x5</code>, or binary
+         *    <code>101</code>, will read from the first and third channel of the input
+         *    source device and store them in the first and second sample of the
+         *    <code>AudioRecord</code> read frame.
+         *    Unmatched input source channels are dropped and
+         *    unmatched <code>AudioRecord</code> read samples are zero filled.
+         * @return the same <code>Builder</code> instance.
+         * @throws IllegalArgumentException if the channel index mask is invalid or
+         *    if both channel index mask and channel position mask
+         *    are specified but do not have the same channel count.
+         */
+        public @NonNull Builder setChannelIndexMask(int channelIndexMask)
+                throws IllegalArgumentException {
+            if (channelIndexMask == 0) {
+                throw new IllegalArgumentException("Invalid zero channel index mask");
+            } else if (/* channelIndexMask != 0 && */ mChannelMask != 0 &&
+                    Integer.bitCount(channelIndexMask) != Integer.bitCount(mChannelMask)) {
+                throw new IllegalArgumentException("Mismatched channel count for index mask " +
+                        Integer.toHexString(channelIndexMask).toUpperCase());
+            }
+            mChannelIndexMask = channelIndexMask;
+            mPropertySetMask |= AUDIO_FORMAT_HAS_PROPERTY_CHANNEL_INDEX_MASK;
             return this;
         }
 
@@ -480,7 +591,8 @@ public class AudioFormat {
         return new String("AudioFormat:"
                 + " props=" + mPropertySetMask
                 + " enc=" + mEncoding
-                + " chan=0x" + Integer.toHexString(mChannelMask)
+                + " chan=0x" + Integer.toHexString(mChannelMask).toUpperCase()
+                + " chan_index=0x" + Integer.toHexString(mChannelIndexMask).toUpperCase()
                 + " rate=" + mSampleRate);
     }
 
