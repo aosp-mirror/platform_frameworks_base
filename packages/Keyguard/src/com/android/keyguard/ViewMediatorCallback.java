@@ -62,6 +62,11 @@ public interface ViewMediatorCallback {
     void readyForKeyguardDone();
 
     /**
+     * Reset the keyguard and bouncer.
+     */
+    void resetKeyguard();
+
+    /**
      * Play the "device trusted" sound.
      */
     void playTrustedSound();

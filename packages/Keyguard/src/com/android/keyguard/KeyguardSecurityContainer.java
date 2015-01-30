@@ -55,6 +55,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         public void userActivity();
         public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput);
         public void finish();
+        public void reset();
     }
 
     public KeyguardSecurityContainer(Context context, AttributeSet attrs) {
@@ -414,7 +415,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {
-
         public void userActivity() {
             if (mSecurityCallback != null) {
                 mSecurityCallback.userActivity();
@@ -439,6 +439,9 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             }
         }
 
+        public void reset() {
+            mSecurityCallback.reset();
+        }
     };
 
     // The following is used to ignore callbacks from SecurityViews that are no longer current
@@ -453,6 +456,8 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         public boolean isVerifyUnlockOnly() { return false; }
         @Override
         public void dismiss(boolean securityVerified) { }
+        @Override
+        public void reset() {}
     };
 
     private int getSecurityViewIdForMode(SecurityMode securityMode) {

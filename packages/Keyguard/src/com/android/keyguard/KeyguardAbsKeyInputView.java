@@ -32,7 +32,7 @@ import com.android.internal.widget.LockPatternUtils;
  * Base class for PIN and password unlock screens.
  */
 public abstract class KeyguardAbsKeyInputView extends LinearLayout
-        implements KeyguardSecurityView {
+        implements KeyguardSecurityView, EmergencyButton.EmergencyButtonCallback {
     protected KeyguardSecurityCallback mCallback;
     protected LockPatternUtils mLockPatternUtils;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
@@ -85,6 +85,13 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         mLockPatternUtils = new LockPatternUtils(mContext);
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
+
+        EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
+        button.setCallback(this);
+    }
+
+    public void onEmergencyButtonClickedWhenInCall() {
+        mCallback.reset();
     }
 
     /*

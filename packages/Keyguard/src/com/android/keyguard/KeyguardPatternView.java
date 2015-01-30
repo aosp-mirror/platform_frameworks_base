@@ -38,7 +38,8 @@ import com.android.internal.widget.LockPatternView;
 import java.util.List;
 
 public class KeyguardPatternView extends LinearLayout implements KeyguardSecurityView,
-        AppearAnimationCreator<LockPatternView.CellState> {
+        AppearAnimationCreator<LockPatternView.CellState>,
+        EmergencyButton.EmergencyButtonCallback {
 
     private static final String TAG = "SecurityPatternView";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -140,6 +141,13 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
         mContainer = (ViewGroup) findViewById(R.id.container);
         mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
+
+        EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
+        button.setCallback(this);
+    }
+
+    public void onEmergencyButtonClickedWhenInCall() {
+        mCallback.reset();
     }
 
     @Override

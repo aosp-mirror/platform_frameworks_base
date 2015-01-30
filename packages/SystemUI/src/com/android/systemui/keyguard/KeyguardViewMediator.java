@@ -489,6 +489,11 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
+        public void resetKeyguard() {
+            resetStateLocked();
+        }
+
+        @Override
         public void playTrustedSound() {
             KeyguardViewMediator.this.playTrustedSound();
         }

@@ -50,8 +50,14 @@ public class EmergencyButton extends Button {
             updateEmergencyCallButton();
         }
     };
+
+    public interface EmergencyButtonCallback {
+        public void onEmergencyButtonClickedWhenInCall();
+    }
+
     private LockPatternUtils mLockPatternUtils;
     private PowerManager mPowerManager;
+    private EmergencyButtonCallback mEmergencyButtonCallback;
 
     public EmergencyButton(Context context) {
         this(context, null);
@@ -95,6 +101,9 @@ public class EmergencyButton extends Button {
         mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
         if (mLockPatternUtils.isInCall()) {
             mLockPatternUtils.resumeCall();
+            if (mEmergencyButtonCallback != null) {
+                mEmergencyButtonCallback.onEmergencyButtonClickedWhenInCall();
+            }
         } else {
             final boolean bypassHandler = true;
             KeyguardUpdateMonitor.getInstance(mContext).reportEmergencyCallAction(bypassHandler);
@@ -124,4 +133,7 @@ public class EmergencyButton extends Button {
         mLockPatternUtils.updateEmergencyCallButtonState(this, enabled, false);
     }
 
+    public void setCallback(EmergencyButtonCallback callback) {
+        mEmergencyButtonCallback = callback;
+    }
 }

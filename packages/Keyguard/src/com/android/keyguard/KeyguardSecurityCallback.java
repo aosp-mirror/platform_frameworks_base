@@ -40,4 +40,8 @@ public interface KeyguardSecurityCallback {
      */
     void reportUnlockAttempt(boolean success);
 
+    /**
+     * Resets the keyguard view.
+     */
+    void reset();
 }

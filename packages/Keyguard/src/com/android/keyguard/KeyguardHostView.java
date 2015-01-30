@@ -196,6 +196,11 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     }
 
     @Override
+    public void reset() {
+        mViewMediatorCallback.resetKeyguard();
+    }
+
+    @Override
     public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.setNeedsInput(needsInput);
@@ -427,6 +432,4 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public SecurityMode getCurrentSecurityMode() {
         return mSecurityContainer.getCurrentSecurityMode();
     }
-
-
 }
