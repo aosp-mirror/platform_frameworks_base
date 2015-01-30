@@ -1513,6 +1513,7 @@
   <java-symbol type="layout" name="screen_title" />
   <java-symbol type="layout" name="screen_title_icons" />
   <java-symbol type="string" name="system_ui_date_pattern" />
+  <java-symbol type="string" name="android_preparing_apk" />
   <java-symbol type="string" name="android_start_title" />
   <java-symbol type="string" name="android_upgrading_title" />
   <java-symbol type="string" name="bugreport_title" />
