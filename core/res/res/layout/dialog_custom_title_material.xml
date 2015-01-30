@@ -27,6 +27,8 @@ This is a custom layout for a dialog.
         android:layout_weight="0"
         android:gravity="center_vertical|start"
         style="?attr/windowTitleBackgroundStyle" />
+    <View android:layout_width="match_parent"
+        android:layout_height="0dp" />
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
