@@ -122,11 +122,6 @@ public class Picture {
      * @param canvas  The picture is drawn to this canvas
      */
     public void draw(Canvas canvas) {
-        if (canvas.isHardwareAccelerated()) {
-            throw new IllegalArgumentException(
-                    "Picture playback is only supported on software canvas.");
-        }
-
         if (mRecordingCanvas != null) {
             endRecording();
         }

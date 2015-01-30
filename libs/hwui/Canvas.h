@@ -42,14 +42,14 @@ public:
      */
     static Canvas* create_canvas(SkCanvas* skiaCanvas);
 
-    // TODO: enable HWUI to either create similar canvas wrapper or subclass
-    //       directly from Canvas
-    //static Canvas* create_canvas(uirenderer::Renderer* renderer);
-
-    // TODO: this is a temporary affordance until all necessary logic can be
-    //       moved within this interface! Further, the return value should
-    //       NOT be unref'd and is valid until this canvas is destroyed or a
-    //       new bitmap is set.
+    /**
+     *  Provides a Skia SkCanvas interface that acts as a proxy to this Canvas.
+     *  It is useful for testing and clients (e.g. Picture/Movie) that expect to
+     *  draw their contents into an SkCanvas.
+     *
+     *  Further, the returned SkCanvas should NOT be unref'd and is valid until
+     *  this canvas is destroyed or a new bitmap is set.
+     */
     virtual SkCanvas* asSkCanvas() = 0;
 
     virtual void setBitmap(SkBitmap* bitmap, bool copyState) = 0;

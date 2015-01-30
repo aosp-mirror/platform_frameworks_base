@@ -28,6 +28,7 @@
 #include "Canvas.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
+#include "SkiaCanvasProxy.h"
 #include "RenderNode.h"
 #include "Renderer.h"
 #include "ResourceCache.h"
@@ -136,10 +137,8 @@ public:
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas interface
 // ----------------------------------------------------------------------------
-    virtual SkCanvas* asSkCanvas() override {
-        LOG_ALWAYS_FATAL("DisplayListRenderer has no SkCanvas");
-        return nullptr;
-    }
+    virtual SkCanvas* asSkCanvas() override;
+
     virtual void setBitmap(SkBitmap* bitmap, bool copyState) override {
         LOG_ALWAYS_FATAL("DisplayListRenderer is not backed by a bitmap.");
     }
@@ -244,6 +243,7 @@ public:
 private:
 
     CanvasState mState;
+    std::unique_ptr<SkiaCanvasProxy> mSkiaCanvasProxy;
 
     enum DeferredBarrierType {
         kBarrier_None,
