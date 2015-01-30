@@ -453,10 +453,6 @@ interface ISms {
      */
     void setPremiumSmsPermission(String packageName, int permission);
 
-    /**
-     * Set the SMS send permission for the specified package.
-     * Requires system permission.
-     */
      /**
      * Set the SMS send permission for the specified package.
      * Requires system permission.
@@ -482,6 +478,14 @@ interface ISms {
      * @see #getImsSmsFormat()
      */
     boolean isImsSmsSupportedForSubscriber(int subId);
+
+    /**
+     * User needs to pick SIM for SMS if multiple SIMs present and if current subId passed in is not
+     * active/valid.
+     * @param subId current subId for sending SMS
+     * @return true if SIM for SMS sending needs to be chosen
+     */
+    boolean isSmsSimPickActivityNeeded(int subId);
 
     /*
      * get user prefered SMS subId
