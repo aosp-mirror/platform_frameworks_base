@@ -842,7 +842,12 @@ class ZygoteConnection {
             if (args.niceName != null) {
                 String property = "wrap." + args.niceName;
                 if (property.length() > 31) {
-                    property = property.substring(0, 31);
+                    // Avoid creating an illegal property name when truncating.
+                    if (property.charAt(30) != '.') {
+                        property = property.substring(0, 31);
+                    } else {
+                        property = property.substring(0, 30);
+                    }
                 }
                 args.invokeWith = SystemProperties.get(property);
                 if (args.invokeWith != null && args.invokeWith.length() == 0) {
