@@ -16,7 +16,6 @@
 package com.android.databinding.store;
 
 import com.android.databinding.ClassAnalyzer;
-import com.android.databinding.util.L;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,28 +50,12 @@ public class SetterStore {
 
     private static SetterStore sStore;
 
-    private final HashMap<String, HashMap<AccessorKey, MethodDescription>> mAdapters;
-
-    private final HashMap<String, HashMap<String, MethodDescription>> mRenamed;
-
-    private final HashMap<String, HashMap<String, MethodDescription>> mConversions;
-
+    private final IntermediateV1 mStore;
     private final ClassAnalyzer mClassAnalyzer;
 
-    private SetterStore(ClassAnalyzer classAnalyzer,
-            HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters,
-            HashMap<String, HashMap<String, MethodDescription>> renamedMethods,
-            HashMap<String, HashMap<String, MethodDescription>> conversionMethods) {
+    private SetterStore(ClassAnalyzer classAnalyzer, IntermediateV1 store) {
         mClassAnalyzer = classAnalyzer;
-        if (adapters == null || renamedMethods == null || conversionMethods == null) {
-            mAdapters = new HashMap<>();
-            mRenamed = new HashMap<>();
-            mConversions = new HashMap<>();
-        } else {
-            mAdapters = adapters;
-            mRenamed = renamedMethods;
-            mConversions = conversionMethods;
-        }
+        mStore = store;
     }
 
     public static SetterStore get(ProcessingEnvironment processingEnvironment) {
@@ -102,10 +85,7 @@ public class SetterStore {
                 }
             }
             if (sStore == null) {
-                HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters = new HashMap<>();
-                HashMap<String, HashMap<String, MethodDescription>> renamed = new HashMap<>();
-                HashMap<String, HashMap<String, MethodDescription>> conversions = new HashMap<>();
-                sStore = new SetterStore(null, adapters, renamed, conversions);
+                sStore = new SetterStore(null, new IntermediateV1());
             }
         }
         return sStore;
@@ -119,18 +99,16 @@ public class SetterStore {
     }
 
     private static SetterStore load(ClassAnalyzer classAnalyzer) {
-        HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters = new HashMap<>();
-        HashMap<String, HashMap<String, MethodDescription>> renamedMethods = new HashMap<>();
-        HashMap<String, HashMap<String, MethodDescription>> conversionMethods = new HashMap<>();
+        IntermediateV1 store = new IntermediateV1();
         String resourceName = SetterStore.class.getPackage().getName().replace('.', '/') +
                 "/setter_store.bin";
         try {
             Enumeration<URL> resources = classAnalyzer.getClassLoader().getResources(resourceName);
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
-                merge(adapters, renamedMethods, conversionMethods, resource);
+                merge(store, resource);
             }
-            return new SetterStore(classAnalyzer, adapters, renamedMethods, conversionMethods);
+            return new SetterStore(classAnalyzer, store);
         } catch (IOException e) {
             System.err.println("Could not read SetterStore intermediate file: " +
                     e.getLocalizedMessage());
@@ -140,27 +118,22 @@ public class SetterStore {
                     e.getLocalizedMessage());
             e.printStackTrace();
         }
-        return new SetterStore(classAnalyzer, adapters, renamedMethods, conversionMethods);
+        return new SetterStore(classAnalyzer, store);
     }
 
     private static SetterStore load(InputStream inputStream)
             throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(inputStream);
-        HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters
-                = (HashMap<String, HashMap<AccessorKey, MethodDescription>>) in.readObject();
-        HashMap<String, HashMap<String, MethodDescription>> renamedMethods
-                = (HashMap<String, HashMap<String, MethodDescription>>) in.readObject();
-        HashMap<String, HashMap<String, MethodDescription>> conversionMethods
-                = (HashMap<String, HashMap<String, MethodDescription>>) in.readObject();
-        return new SetterStore(null, adapters, renamedMethods, conversionMethods);
+        Intermediate intermediate = (Intermediate) in.readObject();
+        return new SetterStore(null, (IntermediateV1) intermediate.upgrade());
     }
 
     public void addRenamedMethod(String attribute, String declaringClass, String method,
             TypeElement declaredOn) {
-        HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
+        HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed == null) {
             renamed = new HashMap<>();
-            mRenamed.put(attribute, renamed);
+            mStore.renamedMethods.put(attribute, renamed);
         }
         MethodDescription methodDescription =
                 new MethodDescription(declaredOn.getQualifiedName().toString(), method);
@@ -168,11 +141,11 @@ public class SetterStore {
     }
 
     public void addBindingAdapter(String attribute, ExecutableElement bindingMethod) {
-        HashMap<AccessorKey, MethodDescription> adapters = mAdapters.get(attribute);
+        HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
 
         if (adapters == null) {
             adapters = new HashMap<>();
-            mAdapters.put(attribute, adapters);
+            mStore.adapterMethods.put(attribute, adapters);
         }
         List<? extends VariableElement> parameters = bindingMethod.getParameters();
         String view = getQualifiedName(parameters.get(0).asType());
@@ -240,17 +213,17 @@ public class SetterStore {
         String fromType = getQualifiedName(parameters.get(0).asType());
         String toType = getQualifiedName(conversionMethod.getReturnType());
         MethodDescription methodDescription = new MethodDescription(conversionMethod);
-        HashMap<String, MethodDescription> convertTo = mConversions.get(fromType);
+        HashMap<String, MethodDescription> convertTo = mStore.conversionMethods.get(fromType);
         if (convertTo == null) {
             convertTo = new HashMap<>();
-            mConversions.put(fromType, convertTo);
+            mStore.conversionMethods.put(fromType, convertTo);
         }
         convertTo.put(toType, methodDescription);
     }
 
     public void clear(Set<String> classes) {
         ArrayList<AccessorKey> removedAccessorKeys = new ArrayList<>();
-        for (HashMap<AccessorKey, MethodDescription> adapters : mAdapters.values()) {
+        for (HashMap<AccessorKey, MethodDescription> adapters : mStore.adapterMethods.values()) {
             for (AccessorKey key : adapters.keySet()) {
                 MethodDescription description = adapters.get(key);
                 if (classes.contains(description.type)) {
@@ -264,7 +237,7 @@ public class SetterStore {
         }
 
         ArrayList<String> removedRenamed = new ArrayList<>();
-        for (HashMap<String, MethodDescription> renamed : mRenamed.values()) {
+        for (HashMap<String, MethodDescription> renamed : mStore.renamedMethods.values()) {
             for (String key : renamed.keySet()) {
                 if (classes.contains(renamed.get(key).type)) {
                     removedRenamed.add(key);
@@ -277,7 +250,7 @@ public class SetterStore {
         }
 
         ArrayList<String> removedConversions = new ArrayList<>();
-        for (HashMap<String, MethodDescription> convertTos : mConversions.values()) {
+        for (HashMap<String, MethodDescription> convertTos : mStore.conversionMethods.values()) {
             for (String toType : convertTos.keySet()) {
                 MethodDescription methodDescription = convertTos.get(toType);
                 if (classes.contains(methodDescription.type)) {
@@ -301,11 +274,7 @@ public class SetterStore {
         try {
             out = new ObjectOutputStream(resource.openOutputStream());
 
-            processingEnvironment.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                    "============= adapters: " + mAdapters);
-            out.writeObject(mAdapters);
-            out.writeObject(mRenamed);
-            out.writeObject(mConversions);
+            out.writeObject(mStore);
         } finally {
             if (out != null) {
                 out.close();
@@ -321,7 +290,7 @@ public class SetterStore {
                 attribute = attribute.substring(colon + 1);
             }
         }
-        HashMap<AccessorKey, MethodDescription> adapters = mAdapters.get(attribute);
+        HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
         MethodDescription adapter = null;
         String setterName = null;
         Method bestSetterMethod = getBestSetter(viewType, valueType, attribute);
@@ -369,7 +338,7 @@ public class SetterStore {
     private Method getBestSetter(Class<?> viewType, Class<?> argumentType, String attribute) {
         String setterName = null;
 
-        HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
+        HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed != null) {
             for (String className : renamed.keySet()) {
                 Class<?> renamedViewType = mClassAnalyzer.findClass(className);
@@ -467,10 +436,11 @@ public class SetterStore {
 
     private MethodDescription getConversionMethod(Class<?> from, Class<?> to) {
         if (from != null && to != null) {
-            for (String fromClassName : mConversions.keySet()) {
+            for (String fromClassName : mStore.conversionMethods.keySet()) {
                 Class<?> convertFrom = mClassAnalyzer.findClass(fromClassName);
                 if (canUseForConversion(from, convertFrom)) {
-                    HashMap<String, MethodDescription> conversion = mConversions.get(fromClassName);
+                    HashMap<String, MethodDescription> conversion =
+                            mStore.conversionMethods.get(fromClassName);
                     for (String toClassName : conversion.keySet()) {
                         Class<?> convertTo = mClassAnalyzer.findClass(toClassName);
                         if (canUseForConversion(convertTo, to)) {
@@ -567,9 +537,7 @@ public class SetterStore {
         }
     }
 
-    private static void merge(HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters,
-            HashMap<String, HashMap<String, MethodDescription>> renamed,
-            HashMap<String, HashMap<String, MethodDescription>> conversions,
+    private static void merge(IntermediateV1 store,
             URL nextUrl) throws IOException, ClassNotFoundException {
         InputStream inputStream = null;
         JarFile jarFile = null;
@@ -577,15 +545,11 @@ public class SetterStore {
             System.out.println("merging " + nextUrl);
             inputStream = nextUrl.openStream();
             ObjectInputStream in = new ObjectInputStream(inputStream);
-            HashMap<String, HashMap<AccessorKey, MethodDescription>> adapters2 =
-                    (HashMap<String, HashMap<AccessorKey, MethodDescription>>) in.readObject();
-            merge(adapters, adapters2);
-            HashMap<String, HashMap<String, MethodDescription>> renamed2 =
-                    (HashMap<String, HashMap<String, MethodDescription>>) in.readObject();
-            merge(renamed, renamed2);
-            HashMap<String, HashMap<String, MethodDescription>> conversions2 =
-                    (HashMap<String, HashMap<String, MethodDescription>>) in.readObject();
-            merge(conversions, conversions2);
+            Intermediate intermediate = (Intermediate) in.readObject();
+            IntermediateV1 intermediateV1 = (IntermediateV1) intermediate.upgrade();
+            merge(store.adapterMethods, intermediateV1.adapterMethods);
+            merge(store.renamedMethods, intermediateV1.renamedMethods);
+            merge(store.conversionMethods, intermediateV1.conversionMethods);
         } finally {
             if (inputStream != null) {
                 inputStream.close();
@@ -687,61 +651,25 @@ public class SetterStore {
         }
     }
 
-    private static class ConversionMethod {
-
-        public final Class<?> fromType;
-
-        public final Class<?> toType;
-
-        public final String type;
-
-        public final String method;
-
-        public ConversionMethod(Class<?> fromType, Class<?> toType, MethodDescription method) {
-            this.fromType = fromType;
-            this.toType = toType;
-            this.type = method.type;
-            this.method = method.method;
-        }
+    private interface Intermediate {
+        Intermediate upgrade();
     }
 
-    private static class AdaptedMethod {
+    private static class IntermediateV1 implements Serializable, Intermediate {
+        private static final long serialVersionUID = 1;
+        public final HashMap<String, HashMap<AccessorKey, MethodDescription>> adapterMethods =
+                new HashMap<>();
+        public final HashMap<String, HashMap<String, MethodDescription>> renamedMethods =
+                new HashMap<>();
+        public final HashMap<String, HashMap<String, MethodDescription>> conversionMethods =
+                new HashMap<>();
 
-        public final Class<?> viewType;
-
-        public final Class<?> valueType;
-
-        public final String type;
-
-        public final String method;
-
-        public AdaptedMethod(Class<?> viewType, Class<?> valueType, MethodDescription method) {
-            this.viewType = viewType;
-            this.valueType = valueType;
-            this.type = method.type;
-            this.method = method.method;
+        public IntermediateV1() {
         }
 
         @Override
-        public String toString() {
-            return "AdaptedMethod{" +
-                    "viewType=" + viewType +
-                    ", valueType=" + valueType +
-                    ", type='" + type + '\'' +
-                    ", method='" + method + '\'' +
-                    '}';
-        }
-    }
-
-    private static class RenamedMethod {
-
-        public final Class<?> viewType;
-
-        public final String method;
-
-        public RenamedMethod(Class<?> viewType, String method) {
-            this.viewType = viewType;
-            this.method = method;
+        public Intermediate upgrade() {
+            return this;
         }
     }
 }
