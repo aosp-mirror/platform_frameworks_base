@@ -5,19 +5,19 @@
  * found in the LICENSE file.
  */
 
-#ifndef AvoidXferMode_DEFINED
-#define AvoidXferMode_DEFINED
+#ifndef AvoidXfermode_DEFINED
+#define AvoidXfermode_DEFINED
 
 #include "SkColor.h"
 #include "SkTypes.h"
 #include "SkXfermode.h"
 
-/** \class AvoidXferMode
+/** \class AvoidXfermode
 
     This xfermode will draw the src everywhere except on top of the specified
     color.
 */
-class AvoidXferMode : public SkXfermode {
+class AvoidXfermode : public SkXfermode {
 public:
     enum Mode {
         kAvoidColor_Mode,   //!< draw everywhere except on the opColor
@@ -39,8 +39,8 @@ public:
                 Tolerance near 0: draw only on colors that are nearly identical to the op-color
                 Tolerance near 255: draw on any colors even remotely similar to the op-color
      */
-    static AvoidXferMode* Create(SkColor opColor, U8CPU tolerance, Mode mode) {
-        return SkNEW_ARGS(AvoidXferMode, (opColor, tolerance, mode));
+    static AvoidXfermode* Create(SkColor opColor, U8CPU tolerance, Mode mode) {
+        return SkNEW_ARGS(AvoidXfermode, (opColor, tolerance, mode));
     }
 
     // overrides from SkXfermode
@@ -52,10 +52,10 @@ public:
             const SkAlpha aa[]) const override;
 
     SK_TO_STRING_OVERRIDE()
-    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(AvoidXferMode)
+    SK_DECLARE_PUBLIC_FLATTENABLE_DESERIALIZATION_PROCS(AvoidXfermode)
 
 protected:
-    AvoidXferMode(SkColor opColor, U8CPU tolerance, Mode mode);
+    AvoidXfermode(SkColor opColor, U8CPU tolerance, Mode mode);
     void flatten(SkWriteBuffer&) const override;
 
 private:

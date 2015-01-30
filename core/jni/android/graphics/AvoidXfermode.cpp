@@ -5,13 +5,13 @@
  * found in the LICENSE file.
  */
 
-#include "AvoidXferMode.h"
+#include "AvoidXfermode.h"
 #include "SkColorPriv.h"
 #include "SkReadBuffer.h"
 #include "SkWriteBuffer.h"
 #include "SkString.h"
 
-AvoidXferMode::AvoidXferMode(SkColor opColor, U8CPU tolerance, Mode mode) {
+AvoidXfermode::AvoidXfermode(SkColor opColor, U8CPU tolerance, Mode mode) {
     if (tolerance > 255) {
         tolerance = 255;
     }
@@ -21,14 +21,14 @@ AvoidXferMode::AvoidXferMode(SkColor opColor, U8CPU tolerance, Mode mode) {
     fMode = mode;
 }
 
-SkFlattenable* AvoidXferMode::CreateProc(SkReadBuffer& buffer) {
+SkFlattenable* AvoidXfermode::CreateProc(SkReadBuffer& buffer) {
     const SkColor color = buffer.readColor();
     const unsigned tolerance = buffer.readUInt();
     const unsigned mode = buffer.readUInt();
     return Create(color, tolerance, (Mode)mode);
 }
 
-void AvoidXferMode::flatten(SkWriteBuffer& buffer) const {
+void AvoidXfermode::flatten(SkWriteBuffer& buffer) const {
     buffer.writeColor(fOpColor);
     buffer.writeUInt(fTolerance);
     buffer.writeUInt(fMode);
@@ -71,7 +71,7 @@ static inline unsigned Accurate255To256(unsigned x) {
     return x + (x >> 7);
 }
 
-void AvoidXferMode::xfer32(SkPMColor dst[], const SkPMColor src[], int count,
+void AvoidXfermode::xfer32(SkPMColor dst[], const SkPMColor src[], int count,
                              const SkAlpha aa[]) const {
     unsigned    opR = SkColorGetR(fOpColor);
     unsigned    opG = SkColorGetG(fOpColor);
@@ -120,7 +120,7 @@ static inline U16CPU SkBlend3216(SkPMColor src, U16CPU dst, unsigned scale) {
                         SkAlphaBlend(SkPacked32ToB16(src), SkGetPackedB16(dst), scale));
 }
 
-void AvoidXferMode::xfer16(uint16_t dst[], const SkPMColor src[], int count,
+void AvoidXfermode::xfer16(uint16_t dst[], const SkPMColor src[], int count,
                              const SkAlpha aa[]) const {
     unsigned    opR = SkColorGetR(fOpColor) >> (8 - SK_R16_BITS);
     unsigned    opG = SkColorGetG(fOpColor) >> (8 - SK_G16_BITS);
@@ -160,13 +160,13 @@ void AvoidXferMode::xfer16(uint16_t dst[], const SkPMColor src[], int count,
     }
 }
 
-void AvoidXferMode::xferA8(SkAlpha dst[], const SkPMColor src[], int count,
-                             const SkAlpha aa[]) const {
+void AvoidXfermode::xferA8(SkAlpha dst[], const SkPMColor src[], int count,
+        const SkAlpha aa[]) const {
 }
 
 #ifndef SK_IGNORE_TO_STRING
-void AvoidXferMode::toString(SkString* str) const {
-    str->append("AvoidXferMode: opColor: ");
+void AvoidXfermode::toString(SkString* str) const {
+    str->append("AvoidXfermode: opColor: ");
     str->appendHex(fOpColor);
     str->appendf("distMul: %d ", fDistMul);
 
