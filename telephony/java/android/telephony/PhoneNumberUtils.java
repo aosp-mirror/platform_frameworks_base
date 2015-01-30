@@ -39,8 +39,6 @@ import android.text.style.TtsSpan;
 import android.util.SparseIntArray;
 
 import static com.android.internal.telephony.PhoneConstants.SUBSCRIPTION_KEY;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
 
 import java.util.Locale;
@@ -2200,8 +2198,8 @@ public class PhoneNumberUtils
         if (!TextUtils.isEmpty(dialStr)) {
             if (isReallyDialable(dialStr.charAt(0)) &&
                 isNonSeparator(dialStr)) {
-                String currIso = SystemProperties.get(PROPERTY_OPERATOR_ISO_COUNTRY, "");
-                String defaultIso = SystemProperties.get(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+                String currIso = TelephonyManager.getDefault().getNetworkCountryIso();
+                String defaultIso = TelephonyManager.getDefault().getSimCountryIso();
                 if (!TextUtils.isEmpty(currIso) && !TextUtils.isEmpty(defaultIso)) {
                     return cdmaCheckAndProcessPlusCodeByNumberFormat(dialStr,
                             getFormatTypeFromCountryCode(currIso),
@@ -2223,7 +2221,7 @@ public class PhoneNumberUtils
     public static String cdmaCheckAndProcessPlusCodeForSms(String dialStr) {
         if (!TextUtils.isEmpty(dialStr)) {
             if (isReallyDialable(dialStr.charAt(0)) && isNonSeparator(dialStr)) {
-                String defaultIso = SystemProperties.get(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
+                String defaultIso = TelephonyManager.getDefault().getSimCountryIso();
                 if (!TextUtils.isEmpty(defaultIso)) {
                     int format = getFormatTypeFromCountryCode(defaultIso);
                     return cdmaCheckAndProcessPlusCodeByNumberFormat(dialStr, format, format);

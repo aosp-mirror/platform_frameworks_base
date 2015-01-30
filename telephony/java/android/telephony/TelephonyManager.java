@@ -1077,7 +1077,7 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkOperator() {
-        return getNetworkOperator(getDefaultSubscription());
+        return getNetworkOperatorForPhone(getDefaultPhone());
     }
 
     /**
@@ -1091,8 +1091,23 @@ public class TelephonyManager {
      * @param subId
      */
     /** {@hide} */
-   public String getNetworkOperator(int subId) {
+   public String getNetworkOperatorForSubscription(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
+        return getNetworkOperatorForPhone(phoneId);
+     }
+
+    /**
+     * Returns the numeric name (MCC+MNC) of current registered operator
+     * for a particular subscription.
+     * <p>
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
+     *
+     * @param phoneId
+     * @hide
+     **/
+   public String getNetworkOperatorForPhone(int phoneId) {
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, "");
      }
 
@@ -1130,7 +1145,7 @@ public class TelephonyManager {
      * on a CDMA network).
      */
     public String getNetworkCountryIso() {
-        return getNetworkCountryIso(getDefaultSubscription());
+        return getNetworkCountryIsoForPhone(getDefaultPhone());
     }
 
     /**
@@ -1144,8 +1159,23 @@ public class TelephonyManager {
      * @param subId for which Network CountryIso is returned
      */
     /** {@hide} */
-    public String getNetworkCountryIso(int subId) {
+    public String getNetworkCountryIsoForSubscription(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
+        return getNetworkCountryIsoForPhone(phoneId);
+    }
+
+    /**
+     * Returns the ISO country code equivalent of the current registered
+     * operator's MCC (Mobile Country Code) of a subscription.
+     * <p>
+     * Availability: Only when user is registered to a network. Result may be
+     * unreliable on CDMA networks (use {@link #getPhoneType()} to determine if
+     * on a CDMA network).
+     *
+     * @param phoneId for which Network CountryIso is returned
+     */
+    /** {@hide} */
+    public String getNetworkCountryIsoForPhone(int phoneId) {
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, "");
     }
 
@@ -1537,6 +1567,34 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperator() {
+        return getSimOperatorNumeric();
+    }
+
+    /**
+     * Returns the MCC+MNC (mobile country code + mobile network code) of the
+     * provider of the SIM. 5 or 6 decimal digits.
+     * <p>
+     * Availability: SIM state must be {@link #SIM_STATE_READY}
+     *
+     * @see #getSimState
+     *
+     * @param subId for which SimOperator is returned
+     * @hide
+     */
+    public String getSimOperator(int subId) {
+        return getSimOperatorNumericForSubscription(subId);
+    }
+
+    /**
+     * Returns the MCC+MNC (mobile country code + mobile network code) of the
+     * provider of the SIM. 5 or 6 decimal digits.
+     * <p>
+     * Availability: SIM state must be {@link #SIM_STATE_READY}
+     *
+     * @see #getSimState
+     * @hide
+     */
+    public String getSimOperatorNumeric() {
         int subId = SubscriptionManager.getDefaultDataSubId();
         if (!SubscriptionManager.isUsableSubIdValue(subId)) {
             subId = SubscriptionManager.getDefaultSmsSubId();
@@ -1547,8 +1605,8 @@ public class TelephonyManager {
                 }
             }
         }
-        Rlog.d(TAG, "getSimOperator(): default subId=" + subId);
-        return getSimOperator(subId);
+        Rlog.d(TAG, "getSimOperatorNumeric(): default subId=" + subId);
+        return getSimOperatorNumericForSubscription(subId);
     }
 
     /**
@@ -1560,14 +1618,24 @@ public class TelephonyManager {
      * @see #getSimState
      *
      * @param subId for which SimOperator is returned
+     * @hide
      */
-    /** {@hide} */
-    public String getSimOperator(int subId) {
+    public String getSimOperatorNumericForSubscription(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        String operator = getTelephonyProperty(phoneId,
+        return getSimOperatorNumericForPhone(phoneId);
+    }
+
+   /**
+     * Returns the MCC+MNC (mobile country code + mobile network code) of the
+     * provider of the SIM for a particular subscription. 5 or 6 decimal digits.
+     * <p>
+     *
+     * @param phoneId for which SimOperator is returned
+     * @hide
+     */
+    public String getSimOperatorNumericForPhone(int phoneId) {
+        return getTelephonyProperty(phoneId,
                 TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, "");
-        Rlog.d(TAG, "getSimOperator: subId=" + subId + " operator=" + operator);
-        return operator;
     }
 
     /**
@@ -1578,7 +1646,7 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperatorName() {
-        return getSimOperatorName(getDefaultSubscription());
+        return getSimOperatorNameForPhone(getDefaultPhone());
     }
 
     /**
@@ -1589,30 +1657,61 @@ public class TelephonyManager {
      * @see #getSimState
      *
      * @param subId for which SimOperatorName is returned
+     * @hide
      */
-    /** {@hide} */
-    public String getSimOperatorName(int subId) {
+    public String getSimOperatorNameForSubscription(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, "");
+        return getSimOperatorNameForPhone(phoneId);
+    }
+
+    /**
+     * Returns the Service Provider Name (SPN).
+     *
+     * @hide
+     */
+    public String getSimOperatorNameForPhone(int phoneId) {
+         return getTelephonyProperty(phoneId,
+                TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, "");
     }
 
     /**
      * Returns the ISO country code equivalent for the SIM provider's country code.
      */
     public String getSimCountryIso() {
-        return getSimCountryIso(getDefaultSubscription());
+        return getSimCountryIsoForPhone(getDefaultPhone());
     }
 
     /**
      * Returns the ISO country code equivalent for the SIM provider's country code.
      *
      * @param subId for which SimCountryIso is returned
+     *
+     * @hide
      */
-    /** {@hide} */
     public String getSimCountryIso(int subId) {
+        return getSimCountryIsoForSubscription(subId);
+    }
+
+    /**
+     * Returns the ISO country code equivalent for the SIM provider's country code.
+     *
+     * @param subId for which SimCountryIso is returned
+     *
+     * @hide
+     */
+    public String getSimCountryIsoForSubscription(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
-        return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY,
-                "");
+        return getSimCountryIsoForPhone(phoneId);
+    }
+
+    /**
+     * Returns the ISO country code equivalent for the SIM provider's country code.
+     *
+     * @hide
+     */
+    public String getSimCountryIsoForPhone(int phoneId) {
+        return getTelephonyProperty(phoneId,
+                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, "");
     }
 
     /**
@@ -3677,4 +3776,344 @@ public class TelephonyManager {
            return false;
        }
    }
+
+   /**
+    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
+    *
+    * @hide
+    */
+    public void setSimOperatorNumeric(String numeric) {
+        int phoneId = getDefaultPhone();
+        setSimOperatorNumericForPhone(phoneId, numeric);
+    }
+
+   /**
+    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the given phone.
+    *
+    * @hide
+    */
+    public void setSimOperatorNumericForPhone(int phoneId, String numeric) {
+        setTelephonyProperty(phoneId,
+                TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, numeric);
+    }
+
+    /**
+     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the default phone.
+     *
+     * @hide
+     */
+    public void setSimOperatorName(String name) {
+        int phoneId = getDefaultPhone();
+        setSimOperatorNameForPhone(phoneId, name);
+    }
+
+    /**
+     * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC for the given phone.
+     *
+     * @hide
+     */
+    public void setSimOperatorNameForPhone(int phoneId, String name) {
+        setTelephonyProperty(phoneId,
+                TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA, name);
+    }
+
+   /**
+    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY for the default phone.
+    *
+    * @hide
+    */
+    public void setSimCountryIso(String iso) {
+        int phoneId = getDefaultPhone();
+        setSimCountryIsoForPhone(phoneId, iso);
+    }
+
+   /**
+    * Set TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY for the given phone.
+    *
+    * @hide
+    */
+    public void setSimCountryIsoForPhone(int phoneId, String iso) {
+        setTelephonyProperty(phoneId,
+                TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY, iso);
+    }
+
+    /**
+     * Set TelephonyProperties.PROPERTY_SIM_STATE for the default phone.
+     *
+     * @hide
+     */
+    public void setSimState(String state) {
+        int phoneId = getDefaultPhone();
+        setSimStateForPhone(phoneId, state);
+    }
+
+    /**
+     * Set TelephonyProperties.PROPERTY_SIM_STATE for the given phone.
+     *
+     * @hide
+     */
+    public void setSimStateForPhone(int phoneId, String state) {
+        setTelephonyProperty(phoneId,
+                TelephonyProperties.PROPERTY_SIM_STATE, state);
+    }
+
+    /**
+     * Set baseband version for the default phone.
+     *
+     * @param version baseband version
+     * @hide
+     */
+    public void setBasebandVersion(String version) {
+        int phoneId = getDefaultPhone();
+        setBasebandVersionForPhone(phoneId, version);
+    }
+
+    /**
+     * Set baseband version by phone id.
+     *
+     * @param phoneId for which baseband version is set
+     * @param version baseband version
+     * @hide
+     */
+    public void setBasebandVersionForPhone(int phoneId, String version) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            String prop = TelephonyProperties.PROPERTY_BASEBAND_VERSION +
+                    ((phoneId == 0) ? "" : Integer.toString(phoneId));
+            SystemProperties.set(prop, version);
+        }
+    }
+
+    /**
+     * Set phone type for the default phone.
+     *
+     * @param type phone type
+     *
+     * @hide
+     */
+    public void setPhoneType(int type) {
+        int phoneId = getDefaultPhone();
+        setPhoneType(phoneId, type);
+    }
+
+    /**
+     * Set phone type by phone id.
+     *
+     * @param phoneId for which phone type is set
+     * @param type phone type
+     *
+     * @hide
+     */
+    public void setPhoneType(int phoneId, int type) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            TelephonyManager.setTelephonyProperty(phoneId,
+                    TelephonyProperties.CURRENT_ACTIVE_PHONE, String.valueOf(type));
+        }
+    }
+
+    /**
+     * Get OTASP number schema for the default phone.
+     *
+     * @param defaultValue default value
+     * @return OTA SP number schema
+     *
+     * @hide
+     */
+    public String getOtaSpNumberSchema(String defaultValue) {
+        int phoneId = getDefaultPhone();
+        return getOtaSpNumberSchemaForPhone(phoneId, defaultValue);
+    }
+
+    /**
+     * Get OTASP number schema by phone id.
+     *
+     * @param phoneId for which OTA SP number schema is get
+     * @param defaultValue default value
+     * @return OTA SP number schema
+     *
+     * @hide
+     */
+    public String getOtaSpNumberSchemaForPhone(int phoneId, String defaultValue) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            return TelephonyManager.getTelephonyProperty(phoneId,
+                    TelephonyProperties.PROPERTY_OTASP_NUM_SCHEMA, defaultValue);
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Get SMS receive capable from system property for the default phone.
+     *
+     * @param defaultValue default value
+     * @return SMS receive capable
+     *
+     * @hide
+     */
+    public boolean getSmsReceiveCapable(boolean defaultValue) {
+        int phoneId = getDefaultPhone();
+        return getSmsReceiveCapableForPhone(phoneId, defaultValue);
+    }
+
+    /**
+     * Get SMS receive capable from system property by phone id.
+     *
+     * @param phoneId for which SMS receive capable is get
+     * @param defaultValue default value
+     * @return SMS receive capable
+     *
+     * @hide
+     */
+    public boolean getSmsReceiveCapableForPhone(int phoneId, boolean defaultValue) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            return Boolean.valueOf(TelephonyManager.getTelephonyProperty(phoneId,
+                    TelephonyProperties.PROPERTY_SMS_RECEIVE, String.valueOf(defaultValue)));
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Get SMS send capable from system property for the default phone.
+     *
+     * @param defaultValue default value
+     * @return SMS send capable
+     *
+     * @hide
+     */
+    public boolean getSmsSendCapable(boolean defaultValue) {
+        int phoneId = getDefaultPhone();
+        return getSmsSendCapableForPhone(phoneId, defaultValue);
+    }
+
+    /**
+     * Get SMS send capable from system property by phone id.
+     *
+     * @param phoneId for which SMS send capable is get
+     * @param defaultValue default value
+     * @return SMS send capable
+     *
+     * @hide
+     */
+    public boolean getSmsSendCapableForPhone(int phoneId, boolean defaultValue) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            return Boolean.valueOf(TelephonyManager.getTelephonyProperty(phoneId,
+                    TelephonyProperties.PROPERTY_SMS_SEND, String.valueOf(defaultValue)));
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Set the alphabetic name of current registered operator.
+     * @param name the alphabetic name of current registered operator.
+     * @hide
+     */
+    public void setNetworkOperatorName(String name) {
+        int phoneId = getDefaultPhone();
+        setNetworkOperatorNameForPhone(phoneId, name);
+    }
+
+    /**
+     * Set the alphabetic name of current registered operator.
+     * @param phoneId which phone you want to set
+     * @param name the alphabetic name of current registered operator.
+     * @hide
+     */
+    public void setNetworkOperatorNameForPhone(int phoneId, String name) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, name);
+        }
+    }
+
+    /**
+     * Set the numeric name (MCC+MNC) of current registered operator.
+     * @param operator the numeric name (MCC+MNC) of current registered operator
+     * @hide
+     */
+    public void setNetworkOperatorNumeric(String numeric) {
+        int phoneId = getDefaultPhone();
+        setNetworkOperatorNumericForPhone(phoneId, numeric);
+    }
+
+    /**
+     * Set the numeric name (MCC+MNC) of current registered operator.
+     * @param phoneId for which phone type is set
+     * @param operator the numeric name (MCC+MNC) of current registered operator
+     * @hide
+     */
+    public void setNetworkOperatorNumericForPhone(int phoneId, String numeric) {
+        setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_NUMERIC, numeric);
+    }
+
+    /**
+     * Set roaming state of the current network, for GSM purposes.
+     * @param isRoaming is network in romaing state or not
+     * @hide
+     */
+    public void setNetworkRoaming(boolean isRoaming) {
+        int phoneId = getDefaultPhone();
+        setNetworkRoamingForPhone(phoneId, isRoaming);
+    }
+
+    /**
+     * Set roaming state of the current network, for GSM purposes.
+     * @param phoneId which phone you want to set
+     * @param isRoaming is network in romaing state or not
+     * @hide
+     */
+    public void setNetworkRoamingForPhone(int phoneId, boolean isRoaming) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            setTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ISROAMING,
+                    isRoaming ? "true" : "false");
+        }
+    }
+
+    /**
+     * Set the ISO country code equivalent of the current registered
+     * operator's MCC (Mobile Country Code).
+     * @param iso the ISO country code equivalent of the current registered
+     * @hide
+     */
+    public void setNetworkCountryIso(String iso) {
+        int phoneId = getDefaultPhone();
+        setNetworkCountryIsoForPhone(phoneId, iso);
+    }
+
+    /**
+     * Set the ISO country code equivalent of the current registered
+     * operator's MCC (Mobile Country Code).
+     * @param phoneId which phone you want to set
+     * @param iso the ISO country code equivalent of the current registered
+     * @hide
+     */
+    public void setNetworkCountryIsoForPhone(int phoneId, String iso) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            setTelephonyProperty(phoneId,
+                    TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, iso);
+        }
+    }
+
+    /**
+     * Set the network type currently in use on the device for data transmission.
+     * @param type the network type currently in use on the device for data transmission
+     * @hide
+     */
+    public void setDataNetworkType(int type) {
+        int phoneId = getDefaultPhone();
+        setDataNetworkTypeForPhone(phoneId, type);
+    }
+
+    /**
+     * Set the network type currently in use on the device for data transmission.
+     * @param phoneId which phone you want to set
+     * @param type the network type currently in use on the device for data transmission
+     * @hide
+     */
+    public void setDataNetworkTypeForPhone(int phoneId, int type) {
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            setTelephonyProperty(phoneId,
+                    TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
+                    ServiceState.rilRadioTechnologyToString(type));
+        }
+    }
 }
