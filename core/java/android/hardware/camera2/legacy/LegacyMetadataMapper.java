@@ -474,6 +474,15 @@ public class LegacyMetadataMapper {
 
             m.set(CONTROL_AE_COMPENSATION_STEP, ParamsUtils.createRational(step));
         }
+
+        /*
+         * control.aeLockAvailable
+         */
+        {
+            boolean aeLockAvailable = p.isAutoExposureLockSupported();
+
+            m.set(CONTROL_AE_LOCK_AVAILABLE, aeLockAvailable);
+        }
     }
 
 
@@ -571,6 +580,16 @@ public class LegacyMetadataMapper {
                 Log.v(TAG, "mapControlAwb - control.awbAvailableModes set to " +
                         ListUtils.listToString(awbAvail));
             }
+
+
+            /*
+             * control.awbLockAvailable
+             */
+            {
+                boolean awbLockAvailable = p.isAutoWhiteBalanceLockSupported();
+
+                m.set(CONTROL_AWB_LOCK_AVAILABLE, awbLockAvailable);
+            }
         }
     }
 
@@ -618,17 +637,44 @@ public class LegacyMetadataMapper {
         /*
          * android.control.availableSceneModes
          */
+        int maxNumDetectedFaces = p.getMaxNumDetectedFaces();
         List<String> sceneModes = p.getSupportedSceneModes();
         List<Integer> supportedSceneModes =
                 ArrayUtils.convertStringListToIntList(sceneModes, sLegacySceneModes, sSceneModes);
-        if (supportedSceneModes == null) { // camera1 doesn't support scene mode settings
-            supportedSceneModes = new ArrayList<Integer>();
-            supportedSceneModes.add(CONTROL_SCENE_MODE_DISABLED); // disabled is always available
+
+        // Special case where the only scene mode listed is AUTO => no scene mode
+        if (sceneModes != null && sceneModes.size() == 1 &&
+                sceneModes.get(0) == Parameters.SCENE_MODE_AUTO) {
+            supportedSceneModes = null;
         }
-        if (p.getMaxNumDetectedFaces() > 0) { // always supports FACE_PRIORITY when face detecting
-            supportedSceneModes.add(CONTROL_SCENE_MODE_FACE_PRIORITY);
+
+        boolean sceneModeSupported = true;
+        if (supportedSceneModes == null && maxNumDetectedFaces == 0) {
+            sceneModeSupported = false;
         }
-        m.set(CONTROL_AVAILABLE_SCENE_MODES, ArrayUtils.toIntArray(supportedSceneModes));
+
+        if (sceneModeSupported) {
+            if (supportedSceneModes == null) {
+                supportedSceneModes = new ArrayList<Integer>();
+            }
+            if (maxNumDetectedFaces > 0) { // always supports FACE_PRIORITY when face detecting
+                supportedSceneModes.add(CONTROL_SCENE_MODE_FACE_PRIORITY);
+            }
+            // Remove all DISABLED occurrences
+            if (supportedSceneModes.contains(CONTROL_SCENE_MODE_DISABLED)) {
+                while(supportedSceneModes.remove(new Integer(CONTROL_SCENE_MODE_DISABLED))) {}
+            }
+            m.set(CONTROL_AVAILABLE_SCENE_MODES, ArrayUtils.toIntArray(supportedSceneModes));
+        } else {
+            m.set(CONTROL_AVAILABLE_SCENE_MODES, new int[] {CONTROL_SCENE_MODE_DISABLED});
+        }
+
+        /*
+         * android.control.availableModes
+         */
+        m.set(CONTROL_AVAILABLE_MODES, sceneModeSupported ?
+                new int[] { CONTROL_MODE_AUTO, CONTROL_MODE_USE_SCENE_MODE } :
+                new int[] { CONTROL_MODE_AUTO });
     }
 
     private static void mapLens(CameraMetadataNative m, Camera.Parameters p) {
