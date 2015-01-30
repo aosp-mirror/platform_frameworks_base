@@ -16121,6 +16121,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mStackSupervisor.getFocusedStack();
     }
 
+    @Override
+    public int getFocusedStackId() throws RemoteException {
+        ActivityStack focusedStack = getFocusedStack();
+        if (focusedStack != null) {
+            return focusedStack.getStackId();
+        }
+        return -1;
+    }
+
     public Configuration getConfiguration() {
         Configuration ci;
         synchronized(this) {

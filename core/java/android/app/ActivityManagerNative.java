@@ -766,6 +766,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_FOCUSED_STACK_ID_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int focusedStackId = getFocusedStackId();
+            reply.writeNoException();
+            reply.writeInt(focusedStackId);
+            return true;
+        }
+
         case REGISTER_TASK_STACK_LISTENER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -3288,6 +3296,18 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+    @Override
+    public int getFocusedStackId() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_FOCUSED_STACK_ID_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int focusedStackId = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return focusedStackId;
     }
     @Override
     public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException

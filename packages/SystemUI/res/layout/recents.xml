@@ -15,7 +15,7 @@
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" 
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
     <!-- Status Bar Scrim View -->
     <ImageView
@@ -29,9 +29,16 @@
     <!-- Recents View -->
     <com.android.systemui.recents.views.RecentsView
         android:id="@+id/recents_view"
-        android:layout_width="match_parent" 
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:focusable="true" />
+        android:focusable="true">
+        <!-- MultiStack Debug View -->
+        <ViewStub android:id="@+id/multistack_debug_view_stub"
+               android:layout="@layout/recents_multistack_debug"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="left|bottom" />
+    </com.android.systemui.recents.views.RecentsView>
 
     <!-- Empty View -->
     <ViewStub android:id="@+id/empty_view_stub"

@@ -18,6 +18,7 @@ package com.android.systemui.recents;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
+import android.app.Dialog;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
@@ -43,7 +44,6 @@ import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
-import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.views.DebugOverlayView;
@@ -74,6 +74,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     ViewStub mDebugOverlayStub;
     View mEmptyView;
     DebugOverlayView mDebugOverlay;
+
+    // MultiStack debug
+    RecentsMultiStackDialog mMultiStackDebugDialog;
 
     // Search AppWidget
     RecentsAppWidgetHost mAppWidgetHost;
@@ -190,7 +193,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Start loading tasks according to the load plan
-        if (plan.getTaskStack() == null) {
+        ArrayList<TaskStack> stacks = plan.getAllTaskStacks();
+        if (stacks.size() == 0) {
             loader.preloadTasks(plan, mConfig.launchedFromHome);
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
@@ -199,9 +203,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         loadOpts.numVisibleTaskThumbnails = mConfig.launchedNumVisibleThumbnails;
         loader.loadTasks(this, plan, loadOpts);
 
-        SpaceNode root = plan.getSpaceNode();
-        ArrayList<TaskStack> stacks = root.getStacks();
-        boolean hasTasks = root.hasTasks();
+        boolean hasTasks = plan.hasTasks();
         if (hasTasks) {
             mRecentsView.setTaskStacks(stacks);
         }
@@ -589,6 +591,40 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 (mConfig.debugModeEnabled ? "Enabled" : "Disabled") + ", please restart Recents now",
                 Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    /**** RecentsMultiStackDialog ****/
+
+    private RecentsMultiStackDialog getMultiStackDebugDialog() {
+        if (mMultiStackDebugDialog == null) {
+            mMultiStackDebugDialog = new RecentsMultiStackDialog(getFragmentManager());
+        }
+        return mMultiStackDebugDialog;
+    }
+
+    @Override
+    public void onMultiStackAddStack() {
+        RecentsMultiStackDialog dialog = getMultiStackDebugDialog();
+        dialog.showAddStackDialog();
+    }
+
+    @Override
+    public void onMultiStackResizeStack() {
+        RecentsMultiStackDialog dialog = getMultiStackDebugDialog();
+        dialog.showResizeStackDialog();
+    }
+
+    @Override
+    public void onMultiStackRemoveStack() {
+        RecentsMultiStackDialog dialog = getMultiStackDebugDialog();
+        dialog.showRemoveStackDialog();
+    }
+
+    @Override
+    public void onMultiStackMoveTask(Task t) {
+        RecentsMultiStackDialog dialog = getMultiStackDebugDialog();
+        dialog.showMoveTaskDialog(t);
     }
 
     /**** RecentsView.RecentsViewCallbacks Implementation ****/
