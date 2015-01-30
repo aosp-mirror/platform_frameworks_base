@@ -1735,6 +1735,22 @@ public class Am extends BaseCommand {
         int right = Integer.valueOf(rightStr);
         String bottomStr = nextArgRequired();
         int bottom = Integer.valueOf(bottomStr);
+        if (left < 0) {
+            System.err.println("Error: bad left arg: " + leftStr);
+            return;
+        }
+        if (top < 0) {
+            System.err.println("Error: bad top arg: " + topStr);
+            return;
+        }
+        if (right <= 0) {
+            System.err.println("Error: bad right arg: " + rightStr);
+            return;
+        }
+        if (bottom <= 0) {
+            System.err.println("Error: bad bottom arg: " + bottomStr);
+            return;
+        }
 
         try {
             mAm.resizeStack(stackId, new Rect(left, top, right, bottom));

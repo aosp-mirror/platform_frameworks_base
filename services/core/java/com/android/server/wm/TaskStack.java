@@ -26,6 +26,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TypedValue;
+
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
@@ -126,6 +127,7 @@ public class TaskStack {
         boolean oldFullscreen = mFullscreen;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            bounds.intersect(mTmpRect); // ensure bounds are entirely within the display rect
             mFullscreen = mTmpRect.equals(bounds);
         }
 

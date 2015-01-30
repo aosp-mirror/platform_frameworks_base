@@ -220,6 +220,9 @@ final class ActivityStack {
      */
     boolean mConfigWillChange;
 
+    // Whether or not this stack covers the entire screen; by default stacks are full screen
+    boolean mFullscreen = true;
+
     long mLaunchStartTime = 0;
     long mFullyDrawnStartTime = 0;
 
@@ -1125,7 +1128,8 @@ final class ActivityStack {
 
         final int numStacks = mStacks.size();
         while (stackNdx < numStacks) {
-            tasks = mStacks.get(stackNdx).mTaskHistory;
+            ActivityStack historyStack = mStacks.get(stackNdx);
+            tasks = historyStack.mTaskHistory;
             final int numTasks = tasks.size();
             while (taskNdx < numTasks) {
                 activities = tasks.get(taskNdx).mActivities;
@@ -1133,7 +1137,7 @@ final class ActivityStack {
                 while (activityNdx < numActivities) {
                     final ActivityRecord activity = activities.get(activityNdx);
                     if (!activity.finishing) {
-                        return activity.fullscreen ? null : activity;
+                        return historyStack.mFullscreen && activity.fullscreen ? null : activity;
                     }
                     ++activityNdx;
                 }
@@ -1149,7 +1153,7 @@ final class ActivityStack {
 
     // Checks if any of the stacks above this one has a fullscreen activity behind it.
     // If so, this stack is hidden, otherwise it is visible.
-    private boolean isStackVisible() {
+    private boolean isStackVisibleLocked() {
         if (!isAttached()) {
             return false;
         }
@@ -1164,11 +1168,18 @@ final class ActivityStack {
          * wallpaper to be shown behind it.
          */
         for (int i = mStacks.indexOf(this) + 1; i < mStacks.size(); i++) {
-            final ArrayList<TaskRecord> tasks = mStacks.get(i).getAllTasks();
-            for (int taskNdx = 0; taskNdx < tasks.size(); taskNdx++) {
+            ActivityStack stack = mStacks.get(i);
+            // stack above isn't full screen, so, we assume we're still visible. at some point
+            // we should look at the stack bounds to see if we're occluded even if the stack
+            // isn't fullscreen
+            if (!stack.mFullscreen) {
+                continue;
+            }
+            final ArrayList<TaskRecord> tasks = stack.getAllTasks();
+            for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = tasks.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
-                for (int activityNdx = 0; activityNdx < activities.size(); activityNdx++) {
+                for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                     final ActivityRecord r = activities.get(activityNdx);
 
                     // Conditions for an activity to obscure the stack we're
@@ -1214,7 +1225,7 @@ final class ActivityStack {
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = true;
-        boolean behindFullscreen = !isStackVisible();
+        boolean behindFullscreen = !isStackVisibleLocked();
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
@@ -1337,7 +1348,7 @@ final class ActivityStack {
                                     // This case created for transitioning activities from
                                     // translucent to opaque {@link Activity#convertToOpaque}.
                                     if (getVisibleBehindActivity() == r) {
-                                        releaseBackgroundResources();
+                                        releaseBackgroundResources(r);
                                     } else {
                                         if (!mStackSupervisor.mStoppingActivities.contains(r)) {
                                             mStackSupervisor.mStoppingActivities.add(r);
@@ -1369,7 +1380,7 @@ final class ActivityStack {
         }
     }
 
-    void convertToTranslucent(ActivityRecord r) {
+    void convertActivityToTranslucent(ActivityRecord r) {
         mTranslucentActivityWaiting = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
@@ -3282,10 +3293,9 @@ final class ActivityStack {
         }
     }
 
-    void releaseBackgroundResources() {
+    void releaseBackgroundResources(ActivityRecord r) {
         if (hasVisibleBehindActivity() &&
                 !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
-            final ActivityRecord r = getVisibleBehindActivity();
             if (r == topRunningActivityLocked(null)) {
                 // Don't release the top activity if it has requested to run behind the next
                 // activity.
@@ -4143,6 +4153,10 @@ final class ActivityStack {
     boolean updateOverrideConfiguration(Configuration newConfig) {
         Configuration oldConfig = mOverrideConfig;
         mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
+        // we override the configuration only when the stack's dimensions are different from
+        // the display. in this manner, we know that if the override configuration is empty,
+        // the stack is necessarily full screen
+        mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
         return !mOverrideConfig.equals(oldConfig);
     }
 }
