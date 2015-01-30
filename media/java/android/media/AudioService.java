@@ -748,7 +748,7 @@ public class AudioService extends IAudioService.Stub {
                                     setAllIndexes(mStreamStates[mStreamVolumeAlias[streamType]]);
                 }
                 // apply stream volume
-                if (!mStreamStates[streamType].isMuted_syncVSS()) {
+                if (!mStreamStates[streamType].mIsMuted) {
                     mStreamStates[streamType].applyAllVolumes();
                 }
             }
@@ -970,6 +970,7 @@ public class AudioService extends IAudioService.Stub {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType
                 + ", flags=" + flags);
         int streamType;
+        boolean isMute = isMuteAdjust(direction);
         if (mVolumeControlStream != -1) {
             streamType = mVolumeControlStream;
         } else {
@@ -984,7 +985,8 @@ public class AudioService extends IAudioService.Stub {
         }
 
         // For notifications/ring, show the ui before making any adjustments
-        if (mVolumeController.suppressAdjustment(resolvedStream, flags)) {
+        // Don't suppress mute/unmute requests
+        if (mVolumeController.suppressAdjustment(resolvedStream, flags, isMute)) {
             direction = 0;
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
             flags &= ~AudioManager.FLAG_VIBRATE;
@@ -1011,10 +1013,17 @@ public class AudioService extends IAudioService.Stub {
         ensureValidDirection(direction);
         ensureValidStreamType(streamType);
 
+        boolean isMuteAdjust = isMuteAdjust(direction);
+
         // use stream type alias here so that streams with same alias have the same behavior,
         // including with regard to silent mode control (e.g the use of STREAM_RING below and in
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
         int streamTypeAlias = mStreamVolumeAlias[streamType];
+
+        if (isMuteAdjust && !isStreamAffectedByMute(streamTypeAlias)) {
+            return;
+        }
+
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
         final int device = getDeviceForStream(streamTypeAlias);
@@ -1100,13 +1109,37 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
 
-            if ((direction == AudioManager.ADJUST_RAISE) &&
+            if (isMuteAdjust) {
+                boolean state;
+                if (direction == AudioManager.ADJUST_TOGGLE_MUTE) {
+                    state = !streamState.mIsMuted;
+                } else {
+                    state = direction == AudioManager.ADJUST_MUTE;
+                }
+                if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
+                    setSystemAudioMute(state);
+                }
+                for (int stream = 0; stream < mStreamStates.length; stream++) {
+                    if (streamTypeAlias == mStreamVolumeAlias[stream]) {
+                        mStreamStates[stream].mute(state);
+
+                        Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+                        intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, stream);
+                        intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
+                        sendBroadcastToAll(intent);
+                    }
+                }
+            } else if ((direction == AudioManager.ADJUST_RAISE) &&
                     !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
-                Log.e(TAG, "adjustStreamVolume() safe volume index = "+oldIndex);
+                Log.e(TAG, "adjustStreamVolume() safe volume index = " + oldIndex);
                 mVolumeController.postDisplaySafeVolumeWarning(flags);
-            } else if (streamState.adjustIndex(direction * step, device)) {
-                // Post message to set system volume (it in turn will post a message
-                // to persist). Do not change volume if stream is muted.
+            } else if (streamState.adjustIndex(direction * step, device) || streamState.mIsMuted) {
+                // Post message to set system volume (it in turn will post a
+                // message to persist).
+                if (streamState.mIsMuted) {
+                    // Unmute the stream if it was previously muted
+                    streamState.mute(false);
+                }
                 sendMsg(mAudioHandler,
                         MSG_SET_DEVICE_VOLUME,
                         SENDMSG_QUEUE,
@@ -1116,7 +1149,7 @@ public class AudioService extends IAudioService.Stub {
                         0);
             }
 
-            // Check if volume update should be send to Hdmi system audio.
+            // Check if volume update should be sent to Hdmi system audio.
             int newIndex = mStreamStates[streamType].getIndex(device);
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
                 setSystemAudioVolume(oldIndex, newIndex, getStreamMaxVolume(streamType), flags);
@@ -1129,7 +1162,7 @@ public class AudioService extends IAudioService.Stub {
                             oldIndex != newIndex) {
                         synchronized (mHdmiPlaybackClient) {
                             int keyCode = (direction == -1) ? KeyEvent.KEYCODE_VOLUME_DOWN :
-                                                               KeyEvent.KEYCODE_VOLUME_UP;
+                                    KeyEvent.KEYCODE_VOLUME_UP;
                             mHdmiPlaybackClient.sendKeyEvent(keyCode, true);
                             mHdmiPlaybackClient.sendKeyEvent(keyCode, false);
                         }
@@ -1170,6 +1203,10 @@ public class AudioService extends IAudioService.Stub {
 
     public void adjustMasterVolume(int steps, int flags, String callingPackage, int uid) {
         if (mUseFixedVolume) {
+            return;
+        }
+        if (isMuteAdjust(steps)) {
+            setMasterMuteInternal(steps, flags, callingPackage, uid);
             return;
         }
         ensureValidSteps(steps);
@@ -1500,46 +1537,6 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** @see AudioManager#setStreamSolo(int, boolean) */
-    public void setStreamSolo(int streamType, boolean state, IBinder cb) {
-        if (mUseFixedVolume) {
-            return;
-        }
-        int streamAlias = mStreamVolumeAlias[streamType];
-        for (int stream = 0; stream < mStreamStates.length; stream++) {
-            if (!isStreamAffectedByMute(streamAlias) || streamAlias == mStreamVolumeAlias[stream]) {
-                continue;
-            }
-            mStreamStates[stream].mute(cb, state);
-         }
-    }
-
-    /** @see AudioManager#setStreamMute(int, boolean) */
-    public void setStreamMute(int streamType, boolean state, IBinder cb) {
-        if (mUseFixedVolume) {
-            return;
-        }
-        if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-            streamType = getActiveStreamType(streamType);
-        }
-        int streamAlias = mStreamVolumeAlias[streamType];
-        if (isStreamAffectedByMute(streamAlias)) {
-            if (streamAlias == AudioSystem.STREAM_MUSIC) {
-                setSystemAudioMute(state);
-            }
-            for (int stream = 0; stream < mStreamStates.length; stream++) {
-                if (streamAlias == mStreamVolumeAlias[stream]) {
-                    mStreamStates[stream].mute(cb, state);
-
-                    Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
-                    intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, stream);
-                    intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
-                    sendBroadcastToAll(intent);
-                }
-            }
-        }
-    }
-
     private void setSystemAudioMute(boolean state) {
         if (mHdmiManager == null || mHdmiTvClient == null) return;
         synchronized (mHdmiManager) {
@@ -1561,7 +1558,7 @@ public class AudioService extends IAudioService.Stub {
             streamType = getActiveStreamType(streamType);
         }
         synchronized (VolumeStreamState.class) {
-            return mStreamStates[streamType].isMuted_syncVSS();
+            return mStreamStates[streamType].mIsMuted;
         }
     }
 
@@ -1665,19 +1662,16 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** @see AudioManager#setMasterMute(boolean, int) */
-    public void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb) {
-        setMasterMuteInternal(state, flags, callingPackage, cb, Binder.getCallingUid());
-    }
-
-    private void setMasterMuteInternal(boolean state, int flags, String callingPackage, IBinder cb,
-            int uid) {
-        if (mUseFixedVolume) {
-            return;
-        }
+    private void setMasterMuteInternal(int adjust, int flags, String callingPackage, int uid) {
         if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
+        }
+        boolean state;
+        if (adjust == AudioManager.ADJUST_TOGGLE_MUTE) {
+            state = !AudioSystem.getMasterMute();
+        } else {
+            state = adjust == AudioManager.ADJUST_MUTE;
         }
         if (state != AudioSystem.getMasterMute()) {
             setSystemAudioMute(state);
@@ -1714,7 +1708,7 @@ public class AudioService extends IAudioService.Stub {
             int index = mStreamStates[streamType].getIndex(device);
 
             // by convention getStreamVolume() returns 0 when a stream is muted.
-            if (mStreamStates[streamType].isMuted_syncVSS()) {
+            if (mStreamStates[streamType].mIsMuted) {
                 index = 0;
             }
             if (index != 0 && (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
@@ -1934,11 +1928,11 @@ public class AudioService extends IAudioService.Stub {
                         }
                     }
                 }
-                mStreamStates[streamType].mute(null, false);
+                mStreamStates[streamType].mute(false);
                 mRingerModeMutedStreams &= ~(1 << streamType);
             } else {
                 // mute
-                mStreamStates[streamType].mute(null, true);
+                mStreamStates[streamType].mute(true);
                 mRingerModeMutedStreams |= (1 << streamType);
             }
         }
@@ -2426,13 +2420,9 @@ public class AudioService extends IAudioService.Stub {
             streamState.readSettings();
             synchronized (VolumeStreamState.class) {
                 // unmute stream that was muted but is not affect by mute anymore
-                if (streamState.isMuted_syncVSS() && ((!isStreamAffectedByMute(streamType) &&
+                if (streamState.mIsMuted && ((!isStreamAffectedByMute(streamType) &&
                         !isStreamMutedByRingerMode(streamType)) || mUseFixedVolume)) {
-                    int size = streamState.mDeathHandlers.size();
-                    for (int i = 0; i < size; i++) {
-                        streamState.mDeathHandlers.get(i).mMuteCount = 1;
-                        streamState.mDeathHandlers.get(i).mute_syncVSS(false);
-                    }
+                    streamState.mIsMuted = false;
                 }
             }
         }
@@ -3221,8 +3211,16 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void ensureValidDirection(int direction) {
-        if (direction < AudioManager.ADJUST_LOWER || direction > AudioManager.ADJUST_RAISE) {
-            throw new IllegalArgumentException("Bad direction " + direction);
+        switch (direction) {
+            case AudioManager.ADJUST_LOWER:
+            case AudioManager.ADJUST_RAISE:
+            case AudioManager.ADJUST_SAME:
+            case AudioManager.ADJUST_MUTE:
+            case AudioManager.ADJUST_UNMUTE:
+            case AudioManager.ADJUST_TOGGLE_MUTE:
+                break;
+            default:
+                throw new IllegalArgumentException("Bad direction " + direction);
         }
     }
 
@@ -3236,6 +3234,11 @@ public class AudioService extends IAudioService.Stub {
         if (streamType < 0 || streamType >= mStreamStates.length) {
             throw new IllegalArgumentException("Bad stream type " + streamType);
         }
+    }
+
+    private boolean isMuteAdjust(int adjust) {
+        return adjust == AudioManager.ADJUST_MUTE || adjust == AudioManager.ADJUST_UNMUTE
+                || adjust == AudioManager.ADJUST_TOGGLE_MUTE;
     }
 
     private boolean isInCommunication() {
@@ -3467,11 +3470,11 @@ public class AudioService extends IAudioService.Stub {
     public class VolumeStreamState {
         private final int mStreamType;
 
+        private boolean mIsMuted;
         private String mVolumeIndexSettingName;
         private int mIndexMax;
         private final ConcurrentHashMap<Integer, Integer> mIndex =
                                             new ConcurrentHashMap<Integer, Integer>(8, 0.75f, 4);
-        private ArrayList<VolumeDeathHandler> mDeathHandlers; //handles mute/solo clients death
 
         private VolumeStreamState(String settingName, int streamType) {
 
@@ -3481,9 +3484,6 @@ public class AudioService extends IAudioService.Stub {
             mIndexMax = MAX_STREAM_VOLUME[streamType];
             AudioSystem.initStreamVolume(streamType, 0, mIndexMax);
             mIndexMax *= 10;
-
-            // mDeathHandlers must be created before calling readSettings()
-            mDeathHandlers = new ArrayList<VolumeDeathHandler>();
 
             readSettings();
         }
@@ -3549,7 +3549,7 @@ public class AudioService extends IAudioService.Stub {
         // must be called while synchronized VolumeStreamState.class
         public void applyDeviceVolume_syncVSS(int device) {
             int index;
-            if (isMuted_syncVSS()) {
+            if (mIsMuted) {
                 index = 0;
             } else if (((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 && mAvrcpAbsVolSupported)
                     || ((device & mFullVolumeDevices) != 0)) {
@@ -3565,7 +3565,7 @@ public class AudioService extends IAudioService.Stub {
                 // apply default volume first: by convention this will reset all
                 // devices volumes in audio policy manager to the supplied value
                 int index;
-                if (isMuted_syncVSS()) {
+                if (mIsMuted) {
                     index = 0;
                 } else {
                     index = (getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5)/10;
@@ -3578,7 +3578,7 @@ public class AudioService extends IAudioService.Stub {
                     Map.Entry entry = (Map.Entry)i.next();
                     int device = ((Integer)entry.getKey()).intValue();
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
-                        if (isMuted_syncVSS()) {
+                        if (mIsMuted) {
                             index = 0;
                         } else if (((device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
                                 mAvrcpAbsVolSupported)
@@ -3688,14 +3688,20 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
-        public void mute(IBinder cb, boolean state) {
+        public void mute(boolean state) {
             synchronized (VolumeStreamState.class) {
-                VolumeDeathHandler handler = getDeathHandler_syncVSS(cb, state);
-                if (handler == null) {
-                    Log.e(TAG, "Could not get client death handler for stream: "+mStreamType);
-                    return;
+                if (state != mIsMuted) {
+                    mIsMuted = state;
+                    // Set the new mute volume. This propagates the values to
+                    // the audio system, otherwise the volume won't be changed
+                    // at the lower level.
+                    sendMsg(mAudioHandler,
+                            MSG_SET_ALL_VOLUMES,
+                            SENDMSG_QUEUE,
+                            0,
+                            0,
+                            this, 0);
                 }
-                handler.mute_syncVSS(state);
             }
         }
 
@@ -3733,117 +3739,9 @@ public class AudioService extends IAudioService.Stub {
             return index;
         }
 
-        private class VolumeDeathHandler implements IBinder.DeathRecipient {
-            private IBinder mICallback; // To be notified of client's death
-            private int mMuteCount; // Number of active mutes for this client
-
-            VolumeDeathHandler(IBinder cb) {
-                mICallback = cb;
-            }
-
-            // must be called while synchronized VolumeStreamState.class
-            public void mute_syncVSS(boolean state) {
-                boolean updateVolume = false;
-                if (state) {
-                    if (mMuteCount == 0) {
-                        // Register for client death notification
-                        try {
-                            // mICallback can be 0 if muted by AudioService
-                            if (mICallback != null) {
-                                mICallback.linkToDeath(this, 0);
-                            }
-                            VolumeStreamState.this.mDeathHandlers.add(this);
-                            // If the stream is not yet muted by any client, set level to 0
-                            if (!VolumeStreamState.this.isMuted_syncVSS()) {
-                                updateVolume = true;
-                            }
-                        } catch (RemoteException e) {
-                            // Client has died!
-                            binderDied();
-                            return;
-                        }
-                    } else {
-                        Log.w(TAG, "stream: "+mStreamType+" was already muted by this client");
-                    }
-                    mMuteCount++;
-                } else {
-                    if (mMuteCount == 0) {
-                        Log.e(TAG, "unexpected unmute for stream: "+mStreamType);
-                    } else {
-                        mMuteCount--;
-                        if (mMuteCount == 0) {
-                            // Unregister from client death notification
-                            VolumeStreamState.this.mDeathHandlers.remove(this);
-                            // mICallback can be 0 if muted by AudioService
-                            if (mICallback != null) {
-                                mICallback.unlinkToDeath(this, 0);
-                            }
-                            if (!VolumeStreamState.this.isMuted_syncVSS()) {
-                                updateVolume = true;
-                            }
-                        }
-                    }
-                }
-                if (updateVolume) {
-                    sendMsg(mAudioHandler,
-                            MSG_SET_ALL_VOLUMES,
-                            SENDMSG_QUEUE,
-                            0,
-                            0,
-                            VolumeStreamState.this, 0);
-                }
-            }
-
-            public void binderDied() {
-                Log.w(TAG, "Volume service client died for stream: "+mStreamType);
-                synchronized (VolumeStreamState.class) {
-                    if (mMuteCount != 0) {
-                        // Reset all active mute requests from this client.
-                        mMuteCount = 1;
-                        mute_syncVSS(false);
-                    }
-                }
-            }
-        }
-
-        private int muteCount() {
-            int count = 0;
-            int size = mDeathHandlers.size();
-            for (int i = 0; i < size; i++) {
-                count += mDeathHandlers.get(i).mMuteCount;
-            }
-            return count;
-        }
-
-        // must be called while synchronized VolumeStreamState.class
-        private boolean isMuted_syncVSS() {
-            return muteCount() != 0;
-        }
-
-        // must be called while synchronized VolumeStreamState.class
-        private VolumeDeathHandler getDeathHandler_syncVSS(IBinder cb, boolean state) {
-            VolumeDeathHandler handler;
-            int size = mDeathHandlers.size();
-            for (int i = 0; i < size; i++) {
-                handler = mDeathHandlers.get(i);
-                if (cb == handler.mICallback) {
-                    return handler;
-                }
-            }
-            // If this is the first mute request for this client, create a new
-            // client death handler. Otherwise, it is an out of sequence unmute request.
-            if (state) {
-                handler = new VolumeDeathHandler(cb);
-            } else {
-                Log.w(TAG, "stream was not muted by this client");
-                handler = null;
-            }
-            return handler;
-        }
-
         private void dump(PrintWriter pw) {
-            pw.print("   Mute count: ");
-            pw.println(muteCount());
+            pw.print("   Muted: ");
+            pw.println(mIsMuted);
             pw.print("   Max: ");
             pw.println((mIndexMax + 5) / 10);
             pw.print("   Current: ");
@@ -5648,7 +5546,10 @@ public class AudioService extends IAudioService.Stub {
                     Settings.Secure.LONG_PRESS_TIMEOUT, 500, UserHandle.USER_CURRENT);
         }
 
-        public boolean suppressAdjustment(int resolvedStream, int flags) {
+        public boolean suppressAdjustment(int resolvedStream, int flags, boolean isMute) {
+            if (isMute) {
+                return false;
+            }
             boolean suppress = false;
             if (resolvedStream == AudioSystem.STREAM_RING && mController != null) {
                 final long now = SystemClock.uptimeMillis();
@@ -5800,12 +5701,6 @@ public class AudioService extends IAudioService.Stub {
         @Override
         public void setRingerModeInternal(int ringerMode, String caller) {
             AudioService.this.setRingerModeInternal(ringerMode, caller);
-        }
-
-        @Override
-        public void setMasterMuteForUid(boolean state, int flags, String callingPackage, IBinder cb,
-                int uid) {
-            setMasterMuteInternal(state, flags, callingPackage, cb, uid);
         }
     }
 

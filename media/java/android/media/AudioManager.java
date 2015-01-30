@@ -346,6 +346,31 @@ public class AudioManager {
      */
     public static final int ADJUST_SAME = 0;
 
+    /**
+     * Mute the volume. Has no effect if the stream is already muted.
+     *
+     * @see #adjustVolume(int, int)
+     * @see #adjustStreamVolume(int, int, int)
+     */
+    public static final int ADJUST_MUTE = -100;
+
+    /**
+     * Unmute the volume. Has no effect if the stream is not muted.
+     *
+     * @see #adjustVolume(int, int)
+     * @see #adjustStreamVolume(int, int, int)
+     */
+    public static final int ADJUST_UNMUTE = 100;
+
+    /**
+     * Toggle the mute state. If muted the stream will be unmuted. If not muted
+     * the stream will be muted.
+     *
+     * @see #adjustVolume(int, int)
+     * @see #adjustStreamVolume(int, int, int)
+     */
+    public static final int ADJUST_TOGGLE_MUTE = 101;
+
     // Flags should be powers of 2!
 
     /**
@@ -777,13 +802,17 @@ public class AudioManager {
      * screen is showing. Another example, if music is playing in the background
      * and a call is not active, the music stream will be adjusted.
      * <p>
-     * This method should only be used by applications that replace the platform-wide
-     * management of audio settings or the main telephony application.
-     * <p>This method has no effect if the device implements a fixed volume policy
+     * This method should only be used by applications that replace the
+     * platform-wide management of audio settings or the main telephony
+     * application.
+     * <p>
+     * This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     *
      * @param direction The direction to adjust the volume. One of
-     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
-     *            {@link #ADJUST_SAME}.
+     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE},
+     *            {@link #ADJUST_SAME}, {@link #ADJUST_MUTE},
+     *            {@link #ADJUST_UNMUTE}, or {@link #ADJUST_TOGGLE_MUTE}.
      * @param flags One or more flags.
      * @see #adjustSuggestedStreamVolume(int, int, int)
      * @see #adjustStreamVolume(int, int, int)
@@ -808,16 +837,20 @@ public class AudioManager {
      * Adjusts the volume of the most relevant stream, or the given fallback
      * stream.
      * <p>
-     * This method should only be used by applications that replace the platform-wide
-     * management of audio settings or the main telephony application.
-     *
-     * <p>This method has no effect if the device implements a fixed volume policy
+     * This method should only be used by applications that replace the
+     * platform-wide management of audio settings or the main telephony
+     * application.
+     * <p>
+     * This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     *
      * @param direction The direction to adjust the volume. One of
-     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE}, or
-     *            {@link #ADJUST_SAME}.
+     *            {@link #ADJUST_LOWER}, {@link #ADJUST_RAISE},
+     *            {@link #ADJUST_SAME}, {@link #ADJUST_MUTE},
+     *            {@link #ADJUST_UNMUTE}, or {@link #ADJUST_TOGGLE_MUTE}.
      * @param suggestedStreamType The stream type that will be used if there
-     *            isn't a relevant stream. {@link #USE_DEFAULT_STREAM_TYPE} is valid here.
+     *            isn't a relevant stream. {@link #USE_DEFAULT_STREAM_TYPE} is
+     *            valid here.
      * @param flags One or more flags.
      * @see #adjustVolume(int, int)
      * @see #adjustStreamVolume(int, int, int)
@@ -1088,72 +1121,72 @@ public class AudioManager {
     }
 
     /**
-     * Solo or unsolo a particular stream. All other streams are muted.
+     * Solo or unsolo a particular stream.
      * <p>
-     * The solo command is protected against client process death: if a process
-     * with an active solo request on a stream dies, all streams that were muted
-     * because of this request will be unmuted automatically.
-     * <p>
-     * The solo requests for a given stream are cumulative: the AudioManager
-     * can receive several solo requests from one or more clients and the stream
-     * will be unsoloed only when the same number of unsolo requests are received.
-     * <p>
-     * For a better user experience, applications MUST unsolo a soloed stream
-     * in onPause() and solo is again in onResume() if appropriate.
-     * <p>This method has no effect if the device implements a fixed volume policy
-     * as indicated by {@link #isVolumeFixed()}.
+     * Do not use. This method has been deprecated and is now a no-op.
+     * {@link #requestAudioFocus} should be used for exclusive audio playback.
      *
      * @param streamType The stream to be soloed/unsoloed.
-     * @param state The required solo state: true for solo ON, false for solo OFF
-     *
+     * @param state The required solo state: true for solo ON, false for solo
+     *            OFF
      * @see #isVolumeFixed()
+     * @deprecated Do not use. If you need exclusive audio playback use
+     *             {@link #requestAudioFocus}.
      */
+    @Deprecated
     public void setStreamSolo(int streamType, boolean state) {
-        IAudioService service = getService();
-        try {
-            service.setStreamSolo(streamType, state, mICallBack);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setStreamSolo", e);
-        }
+        Log.w(TAG, "setStreamSolo has been deprecated. Do not use.");
     }
 
     /**
      * Mute or unmute an audio stream.
      * <p>
-     * The mute command is protected against client process death: if a process
-     * with an active mute request on a stream dies, this stream will be unmuted
-     * automatically.
+     * This method should only be used by applications that replace the
+     * platform-wide management of audio settings or the main telephony
+     * application.
      * <p>
-     * The mute requests for a given stream are cumulative: the AudioManager
-     * can receive several mute requests from one or more clients and the stream
-     * will be unmuted only when the same number of unmute requests are received.
-     * <p>
-     * For a better user experience, applications MUST unmute a muted stream
-     * in onPause() and mute is again in onResume() if appropriate.
-     * <p>
-     * This method should only be used by applications that replace the platform-wide
-     * management of audio settings or the main telephony application.
-     * <p>This method has no effect if the device implements a fixed volume policy
+     * This method has no effect if the device implements a fixed volume policy
      * as indicated by {@link #isVolumeFixed()}.
+     * <p>
+     * This method was deprecated in API level 22. Prior to API level 22 this
+     * method had significantly different behavior and should be used carefully.
+     * The following applies only to pre-22 platforms:
+     * <ul>
+     * <li>The mute command is protected against client process death: if a
+     * process with an active mute request on a stream dies, this stream will be
+     * unmuted automatically.</li>
+     * <li>The mute requests for a given stream are cumulative: the AudioManager
+     * can receive several mute requests from one or more clients and the stream
+     * will be unmuted only when the same number of unmute requests are
+     * received.</li>
+     * <li>For a better user experience, applications MUST unmute a muted stream
+     * in onPause() and mute is again in onResume() if appropriate.</li>
+     * </ul>
      *
      * @param streamType The stream to be muted/unmuted.
-     * @param state The required mute state: true for mute ON, false for mute OFF
-     *
+     * @param state The required mute state: true for mute ON, false for mute
+     *            OFF
      * @see #isVolumeFixed()
+     * @deprecated Use {@link #adjustStreamVolume(int, int, int)} with
+     *             {@link #ADJUST_MUTE} or {@link #ADJUST_UNMUTE} instead.
      */
+    @Deprecated
     public void setStreamMute(int streamType, boolean state) {
-        IAudioService service = getService();
-        try {
-            service.setStreamMute(streamType, state, mICallBack);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setStreamMute", e);
+        Log.w(TAG, "setStreamMute is deprecated. adjustStreamVolume should be used instead.");
+        int direction = state ? ADJUST_MUTE : ADJUST_UNMUTE;
+        if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            adjustSuggestedStreamVolume(direction, streamType, 0);
+        } else {
+            adjustStreamVolume(streamType, direction, 0);
         }
     }
 
     /**
-     * get stream mute state.
+     * Returns the current mute state for a particular stream.
      *
-     * @hide
+     * @param streamType The stream to get mute state for.
+     * @return The mute state for the given stream.
+     * @see #adjustStreamVolume(int, int, int)
      */
     public boolean isStreamMute(int streamType) {
         IAudioService service = getService();
@@ -1162,29 +1195,6 @@ public class AudioManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in isStreamMute", e);
             return false;
-        }
-    }
-
-    /**
-     * set master mute state.
-     *
-     * @hide
-     */
-    public void setMasterMute(boolean state) {
-        setMasterMute(state, FLAG_SHOW_UI);
-    }
-
-    /**
-     * set master mute state with optional flags.
-     *
-     * @hide
-     */
-    public void setMasterMute(boolean state, int flags) {
-        IAudioService service = getService();
-        try {
-            service.setMasterMute(state, flags, mContext.getOpPackageName(), mICallBack);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setMasterMute", e);
         }
     }
 
