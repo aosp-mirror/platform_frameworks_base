@@ -172,7 +172,7 @@ public class QSTileView extends ViewGroup {
         }
     }
 
-    public void setDual(boolean dual) {
+    public boolean setDual(boolean dual) {
         final boolean changed = dual != mDual;
         mDual = dual;
         if (changed) {
@@ -199,6 +199,7 @@ public class QSTileView extends ViewGroup {
         setFocusable(!dual);
         mDivider.setVisibility(dual ? VISIBLE : GONE);
         postInvalidate();
+        return changed;
     }
 
     private void setRipple(RippleDrawable tileBackground) {
