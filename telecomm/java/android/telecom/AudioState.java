@@ -54,9 +54,14 @@ public final class AudioState implements Parcelable {
     public static final int ROUTE_ALL = ROUTE_EARPIECE | ROUTE_BLUETOOTH | ROUTE_WIRED_HEADSET |
             ROUTE_SPEAKER;
 
-    private final boolean isMuted;
-    private final int route;
-    private final int supportedRouteMask;
+    /** Note: Deprecated, please do not use if possible. */
+    @SystemApi public final boolean isMuted;
+
+    /** Note: Deprecated, please do not use if possible. */
+    @SystemApi public final int route;
+
+    /** Note: Deprecated, please do not use if possible. */
+    @SystemApi public final int supportedRouteMask;
 
     public AudioState(boolean muted, int route, int supportedRouteMask) {
         this.isMuted = muted;

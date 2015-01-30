@@ -112,6 +112,11 @@ public abstract class Conference implements IConferenceable {
         return mState;
     }
 
+    /** @hide */
+    @Deprecated public final int getCapabilities() {
+        return getConnectionCapabilities();
+    }
+
     /**
      * Returns the capabilities of a conference. See {@code CAPABILITY_*} constants in class
      * {@link Connection} for valid values.
@@ -274,6 +279,11 @@ public abstract class Conference implements IConferenceable {
      */
     public final DisconnectCause getDisconnectCause() {
         return mDisconnectCause;
+    }
+
+    /** @hide */
+    @Deprecated public final void setCapabilities(int connectionCapabilities) {
+        setConnectionCapabilities(connectionCapabilities);
     }
 
     /**
