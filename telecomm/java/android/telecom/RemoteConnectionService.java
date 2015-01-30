@@ -235,8 +235,12 @@ final class RemoteConnectionService {
 
         @Override
         public void setVideoProvider(String callId, IVideoProvider videoProvider) {
+            RemoteConnection.VideoProvider remoteVideoProvider = null;
+            if (videoProvider != null) {
+                remoteVideoProvider = new RemoteConnection.VideoProvider(videoProvider);
+            }
             findConnectionForAction(callId, "setVideoProvider")
-                    .setVideoProvider(new RemoteConnection.VideoProvider(videoProvider));
+                    .setVideoProvider(remoteVideoProvider);
         }
 
         @Override
