@@ -1855,9 +1855,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     synchronized (ActivityManagerService.this) {
                         if (DEBUG_PSS) Slog.d(TAG, "Collected native and kernel memory in "
                                 + (SystemClock.uptimeMillis()-start) + "ms");
-                        mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
-                                memInfo.getFreeSizeKb(), memInfo.getZramTotalSizeKb(),
-                                memInfo.getKernelUsedSizeKb(), nativeTotalPss);
+                        final long cachedKb = memInfo.getCachedSizeKb();
+                        final long freeKb = memInfo.getFreeSizeKb();
+                        final long zramKb = memInfo.getZramTotalSizeKb();
+                        final long kernelKb = memInfo.getKernelUsedSizeKb();
+                        EventLogTags.writeAmMeminfo(cachedKb*1024, freeKb*1024, zramKb*1024,
+                                kernelKb*1024, nativeTotalPss*1024);
+                        mProcessStats.addSysMemUsageLocked(cachedKb, freeKb, zramKb, kernelKb,
+                                nativeTotalPss);
                     }
                 }
 
@@ -13902,9 +13907,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             memInfo.readMemInfo();
             if (nativeProcTotalPss > 0) {
                 synchronized (this) {
-                    mProcessStats.addSysMemUsageLocked(memInfo.getCachedSizeKb(),
-                            memInfo.getFreeSizeKb(), memInfo.getZramTotalSizeKb(),
-                            memInfo.getKernelUsedSizeKb(), nativeProcTotalPss);
+                    final long cachedKb = memInfo.getCachedSizeKb();
+                    final long freeKb = memInfo.getFreeSizeKb();
+                    final long zramKb = memInfo.getZramTotalSizeKb();
+                    final long kernelKb = memInfo.getKernelUsedSizeKb();
+                    EventLogTags.writeAmMeminfo(cachedKb*1024, freeKb*1024, zramKb*1024,
+                            kernelKb*1024, nativeProcTotalPss*1024);
+                    mProcessStats.addSysMemUsageLocked(cachedKb, freeKb, zramKb, kernelKb,
+                            nativeProcTotalPss);
                 }
             }
             if (!brief) {
@@ -17107,6 +17117,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Record new PSS sample for a process.
      */
     void recordPssSample(ProcessRecord proc, int procState, long pss, long uss, long now) {
+        EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss*1024, uss*1024);
         proc.lastPssTime = now;
         proc.baseProcessTracker.addPss(pss, uss, true, proc.pkgList);
         if (DEBUG_PSS) Slog.d(TAG, "PSS of " + proc.toShortString()
