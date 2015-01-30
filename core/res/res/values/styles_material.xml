@@ -770,6 +770,9 @@ please see styles_device_defaults.xml.
         <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_material</item>
         <item name="popupElevation">@dimen/floating_window_z</item>
+        <item name="popupAnimationStyle">@empty</item>
+        <item name="popupEnterTransition">@transition/popup_window_enter</item>
+        <item name="popupExitTransition">@transition/popup_window_exit</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="overlapAnchor">true</item>
@@ -780,11 +783,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.Spinner.DropDown"/>
-
-    <style name="Widget.Material.Spinner.DropDown.ActionBar">
-        <item name="background">@drawable/spinner_background_material</item>
-        <item name="overlapAnchor">true</item>
-    </style>
+    <style name="Widget.Material.Spinner.DropDown.ActionBar" />
 
     <style name="Widget.Material.Spinner.Underlined">
         <item name="background">@drawable/spinner_textfield_background_material</item>
@@ -847,7 +846,9 @@ please see styles_device_defaults.xml.
         <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_material</item>
         <item name="popupElevation">@dimen/floating_window_z</item>
-        <item name="popupAnimationStyle">@style/Animation.Material.Popup</item>
+        <item name="popupAnimationStyle">@empty</item>
+        <item name="popupEnterTransition">@transition/popup_window_enter</item>
+        <item name="popupExitTransition">@transition/popup_window_exit</item>
         <item name="dropDownVerticalOffset">0dip</item>
         <item name="dropDownHorizontalOffset">0dip</item>
         <item name="dropDownWidth">wrap_content</item>

@@ -40948,6 +40948,8 @@ package android.widget {
     method public void setClippingEnabled(boolean);
     method public void setContentView(android.view.View);
     method public void setElevation(float);
+    method public void setEnterTransition(android.transition.Transition);
+    method public void setExitTransition(android.transition.Transition);
     method public void setFocusable(boolean);
     method public void setHeight(int);
     method public void setIgnoreCheekPress();

@@ -14885,10 +14885,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     void setDisplayListProperties(RenderNode renderNode) {
         if (renderNode != null) {
             renderNode.setHasOverlappingRendering(hasOverlappingRendering());
-            if (mParent instanceof ViewGroup) {
-                renderNode.setClipToBounds(
-                        (((ViewGroup) mParent).mGroupFlags & ViewGroup.FLAG_CLIP_CHILDREN) != 0);
-            }
+            renderNode.setClipToBounds(mParent instanceof ViewGroup
+                    && ((ViewGroup) mParent).getClipChildren());
+
             float alpha = 1;
             if (mParent instanceof ViewGroup && (((ViewGroup) mParent).mGroupFlags &
                     ViewGroup.FLAG_SUPPORT_STATIC_TRANSFORMATIONS) != 0) {

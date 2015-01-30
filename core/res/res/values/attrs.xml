@@ -4338,6 +4338,10 @@
         <attr name="popupAnimationStyle" format="reference" />
         <!-- Whether the popup window should overlap its anchor view. -->
         <attr name="overlapAnchor" format="boolean" />
+        <!-- Transition used to move views into the popup window. -->
+        <attr name="popupEnterTransition" format="reference" />
+        <!-- Transition used to move views out of the popup window. -->
+        <attr name="popupExitTransition" format="reference" />
     </declare-styleable>
     <declare-styleable name="ListPopupWindow">
         <!-- Amount of pixels by which the drop down should be offset vertically. -->
