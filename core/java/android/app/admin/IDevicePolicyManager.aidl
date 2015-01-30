@@ -32,34 +32,34 @@ import java.util.List;
  * {@hide}
  */
 interface IDevicePolicyManager {
-    void setPasswordQuality(in ComponentName who, int quality, int userHandle);
+    void setPasswordQuality(in ComponentName who, int quality);
     int getPasswordQuality(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumLength(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumLength(in ComponentName who, int length);
     int getPasswordMinimumLength(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumUpperCase(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumUpperCase(in ComponentName who, int length);
     int getPasswordMinimumUpperCase(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumLowerCase(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumLowerCase(in ComponentName who, int length);
     int getPasswordMinimumLowerCase(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumLetters(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumLetters(in ComponentName who, int length);
     int getPasswordMinimumLetters(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumNumeric(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumNumeric(in ComponentName who, int length);
     int getPasswordMinimumNumeric(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumSymbols(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumSymbols(in ComponentName who, int length);
     int getPasswordMinimumSymbols(in ComponentName who, int userHandle);
 
-    void setPasswordMinimumNonLetter(in ComponentName who, int length, int userHandle);
+    void setPasswordMinimumNonLetter(in ComponentName who, int length);
     int getPasswordMinimumNonLetter(in ComponentName who, int userHandle);
 
-    void setPasswordHistoryLength(in ComponentName who, int length, int userHandle);
+    void setPasswordHistoryLength(in ComponentName who, int length);
     int getPasswordHistoryLength(in ComponentName who, int userHandle);
 
-    void setPasswordExpirationTimeout(in ComponentName who, long expiration, int userHandle);
+    void setPasswordExpirationTimeout(in ComponentName who, long expiration);
     long getPasswordExpirationTimeout(in ComponentName who, int userHandle);
 
     long getPasswordExpiration(in ComponentName who, int userHandle);
@@ -68,33 +68,33 @@ interface IDevicePolicyManager {
     int getCurrentFailedPasswordAttempts(int userHandle);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle);
 
-    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, int userHandle);
+    void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle);
 
-    boolean resetPassword(String password, int flags, int userHandle);
+    boolean resetPassword(String password, int flags);
 
-    void setMaximumTimeToLock(in ComponentName who, long timeMs, int userHandle);
+    void setMaximumTimeToLock(in ComponentName who, long timeMs);
     long getMaximumTimeToLock(in ComponentName who, int userHandle);
 
     void lockNow();
 
     void wipeData(int flags, int userHandle);
 
-    ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList, int userHandle);
+    ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
     void setRecommendedGlobalProxy(in ComponentName admin, in ProxyInfo proxyInfo);
 
-    int setStorageEncryption(in ComponentName who, boolean encrypt, int userHandle);
+    int setStorageEncryption(in ComponentName who, boolean encrypt);
     boolean getStorageEncryption(in ComponentName who, int userHandle);
     int getStorageEncryptionStatus(int userHandle);
 
-    void setCameraDisabled(in ComponentName who, boolean disabled, int userHandle);
+    void setCameraDisabled(in ComponentName who, boolean disabled);
     boolean getCameraDisabled(in ComponentName who, int userHandle);
 
-    void setScreenCaptureDisabled(in ComponentName who, int userHandle, boolean disabled);
+    void setScreenCaptureDisabled(in ComponentName who, boolean disabled);
     boolean getScreenCaptureDisabled(in ComponentName who, int userHandle);
 
-    void setKeyguardDisabledFeatures(in ComponentName who, int which, int userHandle);
+    void setKeyguardDisabledFeatures(in ComponentName who, int which);
     int getKeyguardDisabledFeatures(in ComponentName who, int userHandle);
 
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing, int userHandle);
@@ -186,7 +186,7 @@ interface IDevicePolicyManager {
     boolean getCrossProfileCallerIdDisabledForUser(int userId);
 
     void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
-            in PersistableBundle args, int userId);
+            in PersistableBundle args);
     List<PersistableBundle> getTrustAgentConfiguration(in ComponentName admin,
             in ComponentName agent, int userId);
 
@@ -194,7 +194,7 @@ interface IDevicePolicyManager {
     boolean removeCrossProfileWidgetProvider(in ComponentName admin, String packageName);
     List<String> getCrossProfileWidgetProviders(in ComponentName admin);
 
-    void setAutoTimeRequired(in ComponentName who, int userHandle, boolean required);
+    void setAutoTimeRequired(in ComponentName who, boolean required);
     boolean getAutoTimeRequired();
 
     boolean isRemovingAdmin(in ComponentName adminReceiver, int userHandle);
