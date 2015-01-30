@@ -11,7 +11,7 @@ public class ParceledListSliceTest extends TestCase {
 
     public void testSmallList() throws Exception {
         final int objectCount = 100;
-        List<SmallObject> list = new ArrayList<>();
+        List<SmallObject> list = new ArrayList<SmallObject>();
         for (int i = 0; i < objectCount; i++) {
             list.add(new SmallObject(i * 2, (i * 2) + 1));
         }
@@ -20,7 +20,7 @@ public class ParceledListSliceTest extends TestCase {
 
         Parcel parcel = Parcel.obtain();
         try {
-            parcel.writeParcelable(new ParceledListSlice<>(list), 0);
+            parcel.writeParcelable(new ParceledListSlice<SmallObject>(list), 0);
             parcel.setDataPosition(0);
             slice = parcel.readParcelable(getClass().getClassLoader());
         } finally {
@@ -56,7 +56,7 @@ public class ParceledListSliceTest extends TestCase {
         final int thresholdBytes = 256 * 1024;
         final int objectCount = thresholdBytes / measureLargeObject();
 
-        List<LargeObject> list = new ArrayList<>();
+        List<LargeObject> list = new ArrayList<LargeObject>();
         for (int i = 0; i < objectCount; i++) {
             list.add(new LargeObject(
                     i * 5,
@@ -71,7 +71,7 @@ public class ParceledListSliceTest extends TestCase {
 
         Parcel parcel = Parcel.obtain();
         try {
-            parcel.writeParcelable(new ParceledListSlice<>(list), 0);
+            parcel.writeParcelable(new ParceledListSlice<LargeObject>(list), 0);
             parcel.setDataPosition(0);
             slice = parcel.readParcelable(getClass().getClassLoader());
         } finally {
@@ -95,7 +95,7 @@ public class ParceledListSliceTest extends TestCase {
      * Test that only homogeneous elements may be unparceled.
      */
     public void testHomogeneousElements() throws Exception {
-        List<BaseObject> list = new ArrayList<>();
+        List<BaseObject> list = new ArrayList<BaseObject>();
         list.add(new LargeObject(0, 1, 2, 3, 4));
         list.add(new SmallObject(5, 6));
         list.add(new SmallObject(7, 8));
