@@ -24,6 +24,7 @@ import java.io.Closeable;
  * This class represents a MIDI input or output port.
  * Base class for {@link MidiInputPort} and {@link MidiOutputPort}
  *
+ * CANDIDATE FOR PUBLIC API
  * @hide
  */
 abstract public class MidiPort implements Closeable {
