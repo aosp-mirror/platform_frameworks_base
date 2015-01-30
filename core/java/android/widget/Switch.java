@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.animation.ObjectAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -24,6 +25,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.Region.Op;
@@ -84,7 +86,17 @@ public class Switch extends CompoundButton {
     private static final int MONOSPACE = 3;
 
     private Drawable mThumbDrawable;
+    private ColorStateList mThumbTintList = null;
+    private PorterDuff.Mode mThumbTintMode = null;
+    private boolean mHasThumbTint = false;
+    private boolean mHasThumbTintMode = false;
+
     private Drawable mTrackDrawable;
+    private ColorStateList mTrackTintList = null;
+    private PorterDuff.Mode mTrackTintMode = null;
+    private boolean mHasTrackTint = false;
+    private boolean mHasTrackTintMode = false;
+
     private int mThumbTextPadding;
     private int mSwitchMinWidth;
     private int mSwitchPadding;
@@ -473,6 +485,86 @@ public class Switch extends CompoundButton {
     }
 
     /**
+     * Applies a tint to the track drawable. Does not modify the current
+     * tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to {@link #setTrackDrawable(Drawable)} will
+     * automatically mutate the drawable and apply the specified tint and tint
+     * mode using {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#Switch_trackTint
+     * @see #getTrackTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public void setTrackTintList(@Nullable ColorStateList tint) {
+        mTrackTintList = tint;
+        mHasTrackTint = true;
+
+        applyTrackTint();
+    }
+
+    /**
+     * @return the tint applied to the track drawable
+     * @attr ref android.R.styleable#Switch_trackTint
+     * @see #setTrackTintList(ColorStateList)
+     */
+    @Nullable
+    public ColorStateList getTrackTintList() {
+        return mTrackTintList;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setTrackTintList(ColorStateList)}} to the track drawable.
+     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#Switch_trackTintMode
+     * @see #getTrackTintMode()
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public void setTrackTintMode(@Nullable PorterDuff.Mode tintMode) {
+        mTrackTintMode = tintMode;
+        mHasTrackTintMode = true;
+
+        applyTrackTint();
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the track
+     *         drawable
+     * @attr ref android.R.styleable#Switch_trackTintMode
+     * @see #setTrackTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    public PorterDuff.Mode getTrackTintMode() {
+        return mTrackTintMode;
+    }
+
+    private void applyTrackTint() {
+        if (mTrackDrawable != null && (mHasTrackTint || mHasTrackTintMode)) {
+            mTrackDrawable = mTrackDrawable.mutate();
+
+            if (mHasTrackTint) {
+                mTrackDrawable.setTintList(mTrackTintList);
+            }
+
+            if (mHasTrackTintMode) {
+                mTrackDrawable.setTintMode(mTrackTintMode);
+            }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mTrackDrawable.isStateful()) {
+                mTrackDrawable.setState(getDrawableState());
+            }
+        }
+    }
+
+    /**
      * Set the drawable used for the switch "thumb" - the piece that the user
      * can physically touch and drag along the track.
      *
@@ -513,6 +605,86 @@ public class Switch extends CompoundButton {
      */
     public Drawable getThumbDrawable() {
         return mThumbDrawable;
+    }
+
+    /**
+     * Applies a tint to the thumb drawable. Does not modify the current
+     * tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to {@link #setThumbDrawable(Drawable)} will
+     * automatically mutate the drawable and apply the specified tint and tint
+     * mode using {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#Switch_thumbTint
+     * @see #getThumbTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public void setThumbTintList(@Nullable ColorStateList tint) {
+        mThumbTintList = tint;
+        mHasThumbTint = true;
+
+        applyThumbTint();
+    }
+
+    /**
+     * @return the tint applied to the thumb drawable
+     * @attr ref android.R.styleable#Switch_thumbTint
+     * @see #setThumbTintList(ColorStateList)
+     */
+    @Nullable
+    public ColorStateList getThumbTintList() {
+        return mThumbTintList;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setThumbTintList(ColorStateList)}} to the thumb drawable.
+     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#Switch_thumbTintMode
+     * @see #getThumbTintMode()
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public void setThumbTintMode(@Nullable PorterDuff.Mode tintMode) {
+        mThumbTintMode = tintMode;
+        mHasThumbTintMode = true;
+
+        applyThumbTint();
+    }
+
+    /**
+     * @return the blending mode used to apply the tint to the thumb
+     *         drawable
+     * @attr ref android.R.styleable#Switch_thumbTintMode
+     * @see #setThumbTintMode(PorterDuff.Mode)
+     */
+    @Nullable
+    public PorterDuff.Mode getThumbTintMode() {
+        return mThumbTintMode;
+    }
+
+    private void applyThumbTint() {
+        if (mThumbDrawable != null && (mHasThumbTint || mHasThumbTintMode)) {
+            mThumbDrawable = mThumbDrawable.mutate();
+
+            if (mHasThumbTint) {
+                mThumbDrawable.setTintList(mThumbTintList);
+            }
+
+            if (mHasThumbTintMode) {
+                mThumbDrawable.setTintMode(mThumbTintMode);
+            }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mThumbDrawable.isStateful()) {
+                mThumbDrawable.setState(getDrawableState());
+            }
+        }
     }
 
     /**
