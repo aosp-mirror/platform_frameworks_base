@@ -513,11 +513,7 @@ public final class BroadcastQueue {
                 }
             }
             try {
-                if (DEBUG_BROADCAST_LIGHT) {
-                    int seq = r.intent.getIntExtra("seq", -1);
-                    Slog.i(TAG, "Delivering to " + filter
-                            + " (seq=" + seq + "): " + r);
-                }
+                if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG, "Delivering to " + filter + " : " + r);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode, r.resultData,
                     r.resultExtras, r.ordered, r.initialSticky, r.userId);
@@ -662,12 +658,9 @@ public final class BroadcastQueue {
                     // result if requested...
                     if (r.resultTo != null) {
                         try {
-                            if (DEBUG_BROADCAST) {
-                                int seq = r.intent.getIntExtra("seq", -1);
-                                Slog.i(TAG, "Finishing broadcast ["
-                                        + mQueueName + "] " + r.intent.getAction()
-                                        + " seq=" + seq + " app=" + r.callerApp);
-                            }
+                            if (DEBUG_BROADCAST) Slog.i(TAG,
+                                    "Finishing broadcast [" + mQueueName + "] "
+                                    + r.intent.getAction() + " app=" + r.callerApp);
                             performReceiveLocked(r.callerApp, r.resultTo,
                                 new Intent(r.intent), r.resultCode,
                                 r.resultData, r.resultExtras, false, false, r.userId);

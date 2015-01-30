@@ -7057,7 +7057,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            final IPackageManager pm = AppGlobals.getPackageManager();
             final String authority = uri.getAuthority();
             final ProviderInfo pi = getProviderInfoLocked(authority, userId);
             if (pi == null) {
@@ -15784,14 +15783,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     callerPackage, callingPid, callingUid, resolvedType,
                     requiredPermission, appOp, receivers, resultTo, resultCode,
                     resultData, map, ordered, sticky, false, userId);
+
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());
-            if (DEBUG_BROADCAST) {
-                int seq = r.intent.getIntExtra("seq", -1);
-                Slog.i(TAG, "Enqueueing broadcast " + r.intent.getAction() + " seq=" + seq);
-            }
-            boolean replaced = replacePending && queue.replaceOrderedBroadcastLocked(r); 
+            if (DEBUG_BROADCAST) Slog.i(
+                    TAG, "Enqueueing broadcast " + r.intent.getAction());
+
+            boolean replaced = replacePending && queue.replaceOrderedBroadcastLocked(r);
             if (!replaced) {
                 queue.enqueueOrderedBroadcastLocked(r);
                 queue.scheduleBroadcastsLocked();
@@ -18352,8 +18351,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private Set getProfileIdsLocked(int userId) {
-        Set userIds = new HashSet<Integer>();
+    private Set<Integer> getProfileIdsLocked(int userId) {
+        Set<Integer> userIds = new HashSet<Integer>();
         final List<UserInfo> profiles = getUserManagerLocked().getProfiles(
                 userId, false /* enabledOnly */);
         for (UserInfo user : profiles) {
