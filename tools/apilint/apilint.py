@@ -48,8 +48,9 @@ def format(fg=None, bg=None, bright=False, bold=False, dim=False, reset=False):
 
 
 class Field():
-    def __init__(self, clazz, raw, blame):
+    def __init__(self, clazz, line, raw, blame):
         self.clazz = clazz
+        self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
 
@@ -73,8 +74,9 @@ class Field():
 
 
 class Method():
-    def __init__(self, clazz, raw, blame):
+    def __init__(self, clazz, line, raw, blame):
         self.clazz = clazz
+        self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
 
@@ -110,8 +112,9 @@ class Method():
 
 
 class Class():
-    def __init__(self, pkg, raw, blame):
+    def __init__(self, pkg, line, raw, blame):
         self.pkg = pkg
+        self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
         self.ctors = []
@@ -140,7 +143,8 @@ class Class():
 
 
 class Package():
-    def __init__(self, raw, blame):
+    def __init__(self, line, raw, blame):
+        self.line = line
         self.raw = raw.strip(" {;")
         self.blame = blame
 
@@ -151,64 +155,92 @@ class Package():
         return self.raw
 
 
-def parse_api(fn):
+def parse_api(f):
+    line = 0
     api = {}
     pkg = None
     clazz = None
     blame = None
 
     re_blame = re.compile("^([a-z0-9]{7,}) \(<([^>]+)>.+?\) (.+?)$")
+    for raw in f.readlines():
+        line += 1
+        raw = raw.rstrip()
+        match = re_blame.match(raw)
+        if match is not None:
+            blame = match.groups()[0:2]
+            raw = match.groups()[2]
+        else:
+            blame = None
 
-    with open(fn) as f:
-        for raw in f.readlines():
-            raw = raw.rstrip()
-            match = re_blame.match(raw)
-            if match is not None:
-                blame = match.groups()[0:2]
-                raw = match.groups()[2]
-            else:
-                blame = None
-
-            if raw.startswith("package"):
-                pkg = Package(raw, blame)
-            elif raw.startswith("  ") and raw.endswith("{"):
-                clazz = Class(pkg, raw, blame)
-                api[clazz.fullname] = clazz
-            elif raw.startswith("    ctor"):
-                clazz.ctors.append(Method(clazz, raw, blame))
-            elif raw.startswith("    method"):
-                clazz.methods.append(Method(clazz, raw, blame))
-            elif raw.startswith("    field"):
-                clazz.fields.append(Field(clazz, raw, blame))
+        if raw.startswith("package"):
+            pkg = Package(line, raw, blame)
+        elif raw.startswith("  ") and raw.endswith("{"):
+            clazz = Class(pkg, line, raw, blame)
+            api[clazz.fullname] = clazz
+        elif raw.startswith("    ctor"):
+            clazz.ctors.append(Method(clazz, line, raw, blame))
+        elif raw.startswith("    method"):
+            clazz.methods.append(Method(clazz, line, raw, blame))
+        elif raw.startswith("    field"):
+            clazz.fields.append(Field(clazz, line, raw, blame))
 
     return api
 
 
+def parse_api_file(fn):
+    with open(fn) as f:
+        return parse_api(f)
+
+
+class Failure():
+    def __init__(self, sig, clazz, detail, error, msg):
+        self.sig = sig
+        self.clazz = clazz
+        self.detail = detail
+        self.error = error
+        self.msg = msg
+
+        if error:
+            dump = "%sError:%s %s" % (format(fg=RED, bg=BLACK, bold=True), format(reset=True), msg)
+        else:
+            dump = "%sWarning:%s %s" % (format(fg=YELLOW, bg=BLACK, bold=True), format(reset=True), msg)
+
+        self.line = clazz.line
+        blame = clazz.blame
+        if detail is not None:
+            dump += "\n    in " + repr(detail)
+            self.line = detail.line
+            blame = detail.blame
+        dump += "\n    in " + repr(clazz)
+        dump += "\n    in " + repr(clazz.pkg)
+        dump += "\n    at line " + repr(self.line)
+        if blame is not None:
+            dump += "\n    last modified by %s in %s" % (blame[1], blame[0])
+
+        self.dump = dump
+
+    def __repr__(self):
+        return self.dump
+
+
 failures = {}
 
-def _fail(clazz, detail, msg):
+def _fail(clazz, detail, error, msg):
     """Records an API failure to be processed later."""
     global failures
 
     sig = "%s-%s-%s" % (clazz.fullname, repr(detail), msg)
     sig = sig.replace(" deprecated ", " ")
 
-    res = msg
-    blame = clazz.blame
-    if detail is not None:
-        res += "\n    in " + repr(detail)
-        blame = detail.blame
-    res += "\n    in " + repr(clazz)
-    res += "\n    in " + repr(clazz.pkg)
-    if blame is not None:
-        res += "\n    last modified by %s in %s" % (blame[1], blame[0])
-    failures[sig] = res
+    failures[sig] = Failure(sig, clazz, detail, error, msg)
+
 
 def warn(clazz, detail, msg):
-    _fail(clazz, detail, "%sWarning:%s %s" % (format(fg=YELLOW, bg=BLACK, bold=True), format(reset=True), msg))
+    _fail(clazz, detail, False, msg)
 
 def error(clazz, detail, msg):
-    _fail(clazz, detail, "%sError:%s %s" % (format(fg=RED, bg=BLACK, bold=True), format(reset=True), msg))
+    _fail(clazz, detail, True, msg)
 
 
 def verify_constants(clazz):
@@ -770,28 +802,29 @@ def verify_compat(cur, prev):
     return failures
 
 
-cur = parse_api(sys.argv[1])
-cur_fail = verify_style(cur)
+if __name__ == "__main__":
+    cur = parse_api_file(sys.argv[1])
+    cur_fail = verify_style(cur)
 
-if len(sys.argv) > 2:
-    prev = parse_api(sys.argv[2])
-    prev_fail = verify_style(prev)
+    if len(sys.argv) > 2:
+        prev = parse_api_file(sys.argv[2])
+        prev_fail = verify_style(prev)
 
-    # ignore errors from previous API level
-    for p in prev_fail:
-        if p in cur_fail:
-            del cur_fail[p]
+        # ignore errors from previous API level
+        for p in prev_fail:
+            if p in cur_fail:
+                del cur_fail[p]
 
-    # look for compatibility issues
-    compat_fail = verify_compat(cur, prev)
+        # look for compatibility issues
+        compat_fail = verify_compat(cur, prev)
 
-    print "%s API compatibility issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
-    for f in sorted(compat_fail):
-        print compat_fail[f]
+        print "%s API compatibility issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+        for f in sorted(compat_fail):
+            print compat_fail[f]
+            print
+
+
+    print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
+    for f in sorted(cur_fail):
+        print cur_fail[f]
         print
-
-
-print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
-for f in sorted(cur_fail):
-    print cur_fail[f]
-    print
