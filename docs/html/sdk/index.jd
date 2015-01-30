@@ -481,14 +481,14 @@ rendering. You can then configure your project to use Java Development Kit (JDK)
 
 <ul>
 <li>GNOME or KDE desktop</li>
-<li>GNU C Library (glibc) 2.11 or later</li>
+<li>GNU C Library (glibc) 2.15 or later</li>
 <li>2 GB RAM minimum, 4 GB RAM recommended</li>
 <li>400 MB hard disk space</li>
 <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
 <li>1280 x 800 minimum screen resolution</li>
 <li>Oracle&reg;  Java Development Kit (JDK) 7 </li>
 </ul>
-<p>Tested on Ubuntu&reg;  12.04, Precise Pangolin (64-bit distribution capable of running
+<p>Tested on Ubuntu&reg;  14.04, Trusty Tahr (64-bit distribution capable of running
 32-bit applications).</p>
 
 
