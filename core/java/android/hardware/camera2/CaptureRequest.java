@@ -552,6 +552,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * in this matrix result metadata. The transform should keep the magnitude
      * of the output color values within <code>[0, 1.0]</code> (assuming input color
      * values is within the normalized range <code>[0, 1.0]</code>), or clipping may occur.</p>
+     * <p>The valid range of each matrix element varies on different devices, but
+     * values within [-1.5, 3.0] are guaranteed not to be clipped.</p>
      * <p><b>Units</b>: Unitless scale factors</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
@@ -575,6 +577,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * TRANSFORM_MATRIX.</p>
      * <p>The gains in the result metadata are the gains actually
      * applied by the camera device to the current frame.</p>
+     * <p>The valid range of gains varies on different devices, but gains
+     * between [1.0, 3.0] are guaranteed not to be clipped. Even if a given
+     * device allows gains below 1.0, this is usually not recommended because
+     * this can create color artifacts.</p>
      * <p><b>Units</b>: Unitless gain factors</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
@@ -1239,10 +1245,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * update, as if this frame is never captured. This mode can be used in the scenario
      * where the application doesn't want a 3A manual control capture to affect
      * the subsequent auto 3A capture results.</p>
-     * <p>LEGACY mode devices will only support AUTO and USE_SCENE_MODE modes.
-     * LIMITED mode devices will only support OFF and OFF_KEEP_STATE if they
-     * support the MANUAL_SENSOR and MANUAL_POST_PROCSESING capabilities.
-     * FULL mode devices will always support OFF and OFF_KEEP_STATE.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #CONTROL_MODE_OFF OFF}</li>
@@ -1250,9 +1252,12 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #CONTROL_MODE_USE_SCENE_MODE USE_SCENE_MODE}</li>
      *   <li>{@link #CONTROL_MODE_OFF_KEEP_STATE OFF_KEEP_STATE}</li>
      * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#CONTROL_AVAILABLE_MODES android.control.availableModes}</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_MODES
      * @see #CONTROL_MODE_OFF
      * @see #CONTROL_MODE_AUTO
      * @see #CONTROL_MODE_USE_SCENE_MODE
