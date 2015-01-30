@@ -55,10 +55,6 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
         startQueuedActions();
-
-        // Switch TV input after bootup.
-        setActiveSource(true);
-        maySendActiveSource(Constants.ADDR_TV);
     }
 
     @Override
