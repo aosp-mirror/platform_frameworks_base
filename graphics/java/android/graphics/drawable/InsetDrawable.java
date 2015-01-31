@@ -408,6 +408,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         if (!mMutated && super.mutate() == this) {
             mState = new InsetState(mState);
             mDrawable.mutate();
+            mState.mDrawableState = mDrawable.getConstantState();
             mMutated = true;
         }
         return this;
