@@ -18,6 +18,7 @@ package android.widget;
 
 import java.util.ArrayList;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -203,11 +204,15 @@ public class FrameLayout extends ViewGroup {
     }
 
     @Override
-    @RemotableViewMethod
-    public void setVisibility(@Visibility int visibility) {
-        super.setVisibility(visibility);
-        if (mForeground != null) {
-            mForeground.setVisible(visibility == VISIBLE, false);
+    protected void onVisibilityChanged(@NonNull View changedView, @Visibility int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+
+        final Drawable dr = mForeground;
+        if (dr != null) {
+            final boolean visible = visibility == VISIBLE && getVisibility() == VISIBLE;
+            if (visible != dr.isVisible()) {
+                dr.setVisible(visible, false);
+            }
         }
     }
 

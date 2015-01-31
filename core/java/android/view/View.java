@@ -6780,7 +6780,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @RemotableViewMethod
     public void setVisibility(@Visibility int visibility) {
         setFlags(visibility, VISIBILITY_MASK);
-        if (mBackground != null) mBackground.setVisible(visibility == VISIBLE, false);
     }
 
     /**
@@ -8806,19 +8805,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Called when the visibility of the view or an ancestor of the view is changed.
-     * @param changedView The view whose visibility changed. Could be 'this' or
-     * an ancestor view.
-     * @param visibility The new visibility of changedView: {@link #VISIBLE},
-     * {@link #INVISIBLE} or {@link #GONE}.
+     * Called when the visibility of the view or an ancestor of the view has
+     * changed.
+     *
+     * @param changedView The view whose visibility changed. May be
+     *                    {@code this} or an ancestor view.
+     * @param visibility The new visibility, one of {@link #VISIBLE},
+     *                   {@link #INVISIBLE} or {@link #GONE}.
      */
     protected void onVisibilityChanged(@NonNull View changedView, @Visibility int visibility) {
-        if (visibility == VISIBLE) {
+        final boolean visible = visibility == VISIBLE && getVisibility() == VISIBLE;
+        if (visible) {
             if (mAttachInfo != null) {
                 initialAwakenScrollBars();
             } else {
                 mPrivateFlags |= PFLAG_AWAKEN_SCROLL_BARS_ON_ATTACH;
             }
+        }
+
+        final Drawable dr = mBackground;
+        if (dr != null && visible != dr.isVisible()) {
+            dr.setVisible(visible, false);
         }
     }
 
