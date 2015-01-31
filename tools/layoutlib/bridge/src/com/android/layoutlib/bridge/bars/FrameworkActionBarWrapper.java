@@ -19,10 +19,8 @@ package com.android.layoutlib.bridge.bars;
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ActionBarCallback;
-import com.android.ide.common.rendering.api.ActionBarCallback.HomeButtonStyle;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
-import com.android.ide.common.rendering.api.SessionParams;
 import com.android.internal.R;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
@@ -54,10 +52,9 @@ import static com.android.resources.ResourceType.MENU;
 /**
  * A common API to access {@link ToolbarActionBar} and {@link WindowDecorActionBar}.
  */
-public abstract class CustomActionBarWrapper {
+public abstract class FrameworkActionBarWrapper {
 
     @NonNull protected ActionBar mActionBar;
-    @NonNull protected SessionParams mParams;
     @NonNull protected ActionBarCallback mCallback;
     @NonNull protected BridgeContext mContext;
 
@@ -68,49 +65,48 @@ public abstract class CustomActionBarWrapper {
      *                     ?attr/windowActionBarFullscreenDecorLayout
      */
     @NonNull
-    public static CustomActionBarWrapper getActionBarWrapper(@NonNull BridgeContext context,
-            @NonNull SessionParams params, @NonNull View decorContent) {
+    public static FrameworkActionBarWrapper getActionBarWrapper(@NonNull BridgeContext context,
+            @NonNull ActionBarCallback callback, @NonNull View decorContent) {
         View view = decorContent.findViewById(R.id.action_bar);
         if (view instanceof Toolbar) {
-            return new ToolbarWrapper(context, params, ((Toolbar) view));
+            return new ToolbarWrapper(context, callback, (Toolbar) view);
         } else if (view instanceof ActionBarView) {
-            return new WindowActionBarWrapper(context, params, decorContent,
-                    ((ActionBarView) view));
+            return new WindowActionBarWrapper(context, callback, decorContent,
+                    (ActionBarView) view);
         } else {
             throw new IllegalStateException("Can't make an action bar out of " +
                     view.getClass().getSimpleName());
         }
     }
 
-    CustomActionBarWrapper(@NonNull BridgeContext context, @NonNull SessionParams params,
+    FrameworkActionBarWrapper(@NonNull BridgeContext context, ActionBarCallback callback,
             @NonNull ActionBar actionBar) {
         mActionBar = actionBar;
-        mParams = params;
-        mCallback = params.getProjectCallback().getActionBarCallback();
+        mCallback = callback;
         mContext = context;
     }
 
+    /** A call to setup any custom properties. */
     protected void setupActionBar() {
-        // Do the things that are common to all implementations.
-        RenderResources res = mContext.getRenderResources();
+        // Nothing to do here.
+    }
 
-        String title = mParams.getAppLabel();
-        ResourceValue titleValue = res.findResValue(title, false);
-        if (titleValue != null && titleValue.getValue() != null) {
-            mActionBar.setTitle(titleValue.getValue());
-        } else {
-            mActionBar.setTitle(title);
-        }
+    public void setTitle(CharSequence title) {
+        mActionBar.setTitle(title);
+    }
 
-        String subTitle = mCallback.getSubTitle();
+    public void setSubTitle(CharSequence subTitle) {
         if (subTitle != null) {
             mActionBar.setSubtitle(subTitle);
         }
+    }
 
-        // Add show home as up icon.
-        if (mCallback.getHomeButtonStyle() == HomeButtonStyle.SHOW_HOME_AS_UP) {
-            mActionBar.setDisplayOptions(0xFF, ActionBar.DISPLAY_HOME_AS_UP);
-        }
+    public void setHomeAsUp(boolean homeAsUp) {
+        mActionBar.setDisplayHomeAsUpEnabled(homeAsUp);
+    }
+
+    public void setIcon(String icon) {
+        // Nothing to do.
     }
 
     protected boolean isSplit() {
@@ -186,15 +182,14 @@ public abstract class CustomActionBarWrapper {
      * Material theme uses {@link Toolbar} as the action bar. This wrapper provides access to
      * Toolbar using a common API.
      */
-    private static class ToolbarWrapper extends CustomActionBarWrapper {
+    private static class ToolbarWrapper extends FrameworkActionBarWrapper {
 
         @NonNull
         private final Toolbar mToolbar;  // This is the view.
 
-        ToolbarWrapper(@NonNull BridgeContext context, @NonNull SessionParams params,
+        ToolbarWrapper(@NonNull BridgeContext context, @NonNull ActionBarCallback callback,
                 @NonNull Toolbar toolbar) {
-            super(context, params, new ToolbarActionBar(toolbar, "", new WindowCallback())
-            );
+            super(context, callback, new ToolbarActionBar(toolbar, "", new WindowCallback()));
             mToolbar = toolbar;
         }
 
@@ -248,19 +243,17 @@ public abstract class CustomActionBarWrapper {
      * Holo theme uses {@link WindowDecorActionBar} as the action bar. This wrapper provides
      * access to it using a common API.
      */
-    private static class WindowActionBarWrapper extends CustomActionBarWrapper {
+    private static class WindowActionBarWrapper extends FrameworkActionBarWrapper {
 
-        @NonNull
-        private final WindowDecorActionBar mActionBar;
-        @NonNull
-        private final ActionBarView mActionBarView;
-        @NonNull
-        private final View mDecorContentRoot;
+        @NonNull private final WindowDecorActionBar mActionBar;
+        @NonNull private final ActionBarView mActionBarView;
+        @NonNull private final View mDecorContentRoot;
         private MenuBuilder mMenuBuilder;
 
-        public WindowActionBarWrapper(@NonNull BridgeContext context, @NonNull SessionParams params,
-                @NonNull View decorContentRoot, @NonNull ActionBarView actionBarView) {
-            super(context, params, new WindowDecorActionBar(decorContentRoot));
+        public WindowActionBarWrapper(@NonNull BridgeContext context,
+                @NonNull ActionBarCallback callback, @NonNull View decorContentRoot,
+                @NonNull ActionBarView actionBarView) {
+            super(context, callback, new WindowDecorActionBar(decorContentRoot));
             mActionBarView = actionBarView;
             mActionBar = ((WindowDecorActionBar) super.mActionBar);
             mDecorContentRoot = decorContentRoot;
@@ -268,7 +261,6 @@ public abstract class CustomActionBarWrapper {
 
         @Override
         protected void setupActionBar() {
-            super.setupActionBar();
 
             // Set the navigation mode.
             int navMode = mCallback.getNavigationMode();
@@ -276,16 +268,6 @@ public abstract class CustomActionBarWrapper {
             //noinspection deprecation
             if (navMode == ActionBar.NAVIGATION_MODE_TABS) {
                 setupTabs(3);
-            }
-
-            String icon = mParams.getAppIcon();
-            // If the action bar style doesn't specify an icon, set the icon obtained from the
-            // session params.
-            if (!mActionBar.hasIcon() && icon != null) {
-                Drawable iconDrawable = getDrawable(icon, false);
-                if (iconDrawable != null) {
-                    mActionBar.setIcon(iconDrawable);
-                }
             }
 
             // Set action bar to be split, if needed.
@@ -296,6 +278,17 @@ public abstract class CustomActionBarWrapper {
                 boolean split = res.getBoolean(R.bool.split_action_bar_is_narrow)
                         && mCallback.getSplitActionBarWhenNarrow();
                 mActionBarView.setSplitToolbar(split);
+            }
+        }
+
+        @Override
+        public void setIcon(String icon) {
+            // Set the icon only if the action bar doesn't specify an icon.
+            if (!mActionBar.hasIcon() && icon != null) {
+                Drawable iconDrawable = getDrawable(icon, false);
+                if (iconDrawable != null) {
+                    mActionBar.setIcon(iconDrawable);
+                }
             }
         }
 
@@ -340,7 +333,7 @@ public abstract class CustomActionBarWrapper {
 
         @Override
         int getMenuPopupMargin() {
-            return -ActionBarLayout.getPixelValue("10dp", mContext.getMetrics());
+            return -FrameworkActionBar.getPixelValue("10dp", mContext.getMetrics());
         }
 
         // TODO: Use an adapter, like List View to set up tabs.
