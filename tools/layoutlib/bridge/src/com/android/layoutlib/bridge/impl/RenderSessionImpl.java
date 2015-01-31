@@ -51,11 +51,13 @@ import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.android.SessionParamsFlags;
+import com.android.layoutlib.bridge.bars.BridgeActionBar;
+import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.Config;
 import com.android.layoutlib.bridge.bars.NavigationBar;
 import com.android.layoutlib.bridge.bars.StatusBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
-import com.android.layoutlib.bridge.bars.ActionBarLayout;
+import com.android.layoutlib.bridge.bars.FrameworkActionBar;
 import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
 import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.Density;
@@ -354,7 +356,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
-                    ActionBarLayout actionBar = createActionBar(context, params, backgroundLayout);
+                    BridgeActionBar actionBar = createActionBar(context, params, backgroundLayout);
                     actionBar.createMenuPopup();
                     mContentRoot = actionBar.getContentRoot();
                 } else if (mTitleBarSize > 0) {
@@ -1190,8 +1192,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         // android.support.v7.app.ActionBarActivity, and not care about the theme name at all.
         if (mIsThemeAppCompat == null) {
             StyleResourceValue defaultTheme = resources.getDefaultTheme();
-            StyleResourceValue val = resources.getStyle("Theme.AppCompat", false);
-            mIsThemeAppCompat = defaultTheme == val || resources.themeIsParentOf(val, defaultTheme);
+          // We can't simply check for parent using resources.themeIsParentOf() since the
+          // inheritance structure isn't really what one would expect. The first common parent
+          // between Theme.AppCompat.Light and Theme.AppCompat is Theme.Material (for v21).
+            boolean isThemeAppCompat = false;
+            for (int i = 0; i < 50; i++) {
+                // for loop ensures that we don't run into cyclic theme inheritance.
+                if (defaultTheme.getName().startsWith("Theme.AppCompat")) {
+                    isThemeAppCompat = true;
+                    break;
+                }
+                defaultTheme = resources.getParent(defaultTheme);
+                if (defaultTheme == null) {
+                    break;
+                }
+            }
+            mIsThemeAppCompat = isThemeAppCompat;
         }
         return mIsThemeAppCompat;
     }
@@ -1647,9 +1663,13 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     /**
      * Creates the action bar. Also queries the project callback for missing information.
      */
-    private ActionBarLayout createActionBar(BridgeContext context, SessionParams params,
+    private BridgeActionBar createActionBar(BridgeContext context, SessionParams params,
             ViewGroup parentView) {
-        return new ActionBarLayout(context, params, parentView);
+        if (mIsThemeAppCompat == Boolean.TRUE) {
+            return new AppCompatActionBar(context, params, parentView);
+        } else {
+            return new FrameworkActionBar(context, params, parentView);
+        }
     }
 
     public BufferedImage getImage() {

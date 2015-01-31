@@ -31,7 +31,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
+import android.view.InflateException;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
@@ -44,70 +44,30 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
-public class ActionBarLayout {
+/**
+ * Creates the ActionBar as done by the framework.
+ */
+public class FrameworkActionBar extends BridgeActionBar {
 
     private static final String LAYOUT_ATTR_NAME = "windowActionBarFullscreenDecorLayout";
 
     // The Action Bar
-    @NonNull
-    private CustomActionBarWrapper mActionBar;
-
-    // Store another reference to the context so that we don't have to cast it repeatedly.
-    @NonNull
-    private final BridgeContext mBridgeContext;
-
-    @NonNull
-    private FrameLayout mContentRoot;
+    @NonNull private FrameworkActionBarWrapper mActionBar;
 
     // A fake parent for measuring views.
-    @Nullable
-    private ViewGroup mMeasureParent;
-
-    // A Layout that contains the inflated action bar. The menu popup is added to this layout.
-    @NonNull
-    private final RelativeLayout mEnclosingLayout;
+    @Nullable private ViewGroup mMeasureParent;
 
     /**
      * Inflate the action bar and attach it to {@code parentView}
      */
-    public ActionBarLayout(@NonNull BridgeContext context, @NonNull SessionParams params,
+    public FrameworkActionBar(@NonNull BridgeContext context, @NonNull SessionParams params,
             @NonNull ViewGroup parentView) {
+        super(context, params, parentView);
 
-        mBridgeContext = context;
+        View decorContent = getDecorContent();
 
-        ResourceValue layoutName = context.getRenderResources()
-                .findItemInTheme(LAYOUT_ATTR_NAME, true);
-        if (layoutName != null) {
-            // We may need to resolve the reference obtained.
-            layoutName = context.getRenderResources().findResValue(layoutName.getValue(),
-                    layoutName.isFramework());
-        }
-        int layoutId = 0;
-        String error = null;
-        if (layoutName == null) {
-            error = "Unable to find action bar layout (" + LAYOUT_ATTR_NAME
-                    + ") in the current theme.";
-        } else {
-            layoutId = context.getFrameworkResourceValue(layoutName.getResourceType(),
-                    layoutName.getName(), 0);
-            if (layoutId == 0) {
-                error = String.format("Unable to resolve attribute \"%s\" of type \"%s\"",
-                        layoutName.getName(), layoutName.getResourceType());
-            }
-        }
-        if (layoutId == 0) {
-            throw new RuntimeException(error);
-        }
-        // Create a RelativeLayout to hold the action bar. The layout is needed so that we may
-        // add the menu popup to it.
-        mEnclosingLayout = new RelativeLayout(mBridgeContext);
-        setMatchParent(mEnclosingLayout);
-        parentView.addView(mEnclosingLayout);
-
-        // Inflate action bar layout.
-        View decorContent = LayoutInflater.from(context).inflate(layoutId, mEnclosingLayout, true);
-
-        mActionBar = CustomActionBarWrapper.getActionBarWrapper(context, params, decorContent);
+        mActionBar = FrameworkActionBarWrapper.getActionBarWrapper(context, getCallBack(),
+                decorContent);
 
         FrameLayout contentRoot = (FrameLayout) mEnclosingLayout.findViewById(android.R.id.content);
 
@@ -117,27 +77,62 @@ public class ActionBarLayout {
             contentRoot = new FrameLayout(context);
             setMatchParent(contentRoot);
             mEnclosingLayout.addView(contentRoot);
-            mContentRoot = contentRoot;
+            setContentRoot(contentRoot);
         } else {
-            mContentRoot = contentRoot;
-            mActionBar.setupActionBar();
+            setContentRoot(contentRoot);
+            setupActionBar();
             mActionBar.inflateMenus();
         }
     }
 
-    private void setMatchParent(View view) {
-        view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
+    @Override
+    protected ResourceValue getLayoutResource(BridgeContext context) {
+        ResourceValue layoutName =
+                context.getRenderResources().findItemInTheme(LAYOUT_ATTR_NAME, true);
+        if (layoutName != null) {
+            // We may need to resolve the reference obtained.
+            layoutName = context.getRenderResources().findResValue(layoutName.getValue(),
+                    layoutName.isFramework());
+        }
+        if (layoutName == null) {
+             throw new InflateException("Unable to find action bar layout (" + LAYOUT_ATTR_NAME
+                    + ") in the current theme.");
+        }
+        return layoutName;
+    }
+
+    @Override
+    protected void setupActionBar() {
+        super.setupActionBar();
+        mActionBar.setupActionBar();
+    }
+
+    @Override
+    protected void setHomeAsUp(boolean homeAsUp) {
+        mActionBar.setHomeAsUp(homeAsUp);
+    }
+
+    @Override
+    protected void setTitle(CharSequence title) {
+        mActionBar.setTitle(title);
+    }
+
+    @Override
+    protected void setSubtitle(CharSequence subtitle) {
+        mActionBar.setSubTitle(subtitle);
+    }
+
+    @Override
+    protected void setIcon(String icon) {
+        mActionBar.setIcon(icon);
     }
 
     /**
      * Creates a Popup and adds it to the content frame. It also adds another {@link FrameLayout} to
      * the content frame which shall serve as the new content root.
      */
+    @Override
     public void createMenuPopup() {
-        assert mEnclosingLayout.getChildCount() == 1
-                : "Action Bar Menus have already been created.";
-
         if (!isOverflowPopupNeeded()) {
             return;
         }
@@ -191,11 +186,6 @@ public class ActionBarLayout {
             }
         }
         return needed;
-    }
-
-    @NonNull
-    public FrameLayout getContentRoot() {
-        return mContentRoot;
     }
 
     // Copied from com.android.internal.view.menu.MenuPopHelper.measureContentWidth()
