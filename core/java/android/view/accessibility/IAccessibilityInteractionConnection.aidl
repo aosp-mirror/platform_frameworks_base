@@ -54,8 +54,4 @@ oneway interface IAccessibilityInteractionConnection {
     void performAccessibilityAction(long accessibilityNodeId, int action, in Bundle arguments,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, int flags,
         int interrogatingPid, long interrogatingTid);
-
-    void computeClickPointInScreen(long accessibilityNodeId, in Region bounds, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
-        long interrogatingTid, in MagnificationSpec spec);
 }
