@@ -614,15 +614,27 @@ public final class BridgeTypedArray extends TypedArray {
 
             int pos = value.indexOf('/');
             String idName = value.substring(pos + 1);
+            boolean create = value.startsWith("@+");
+            boolean isFrameworkId =
+                    mPlatformFile || value.startsWith("@android") || value.startsWith("@+android");
 
-            // if this is a framework id
-            if (mPlatformFile || value.startsWith("@android") || value.startsWith("@+android")) {
-                // look for idName in the android R classes
-                return mContext.getFrameworkResourceValue(ResourceType.ID, idName, defValue);
+            // Look for the idName in project or android R class depending on isPlatform.
+            if (create) {
+                Integer idValue;
+                if (isFrameworkId) {
+                    idValue = Bridge.getResourceId(ResourceType.ID, idName);
+                } else {
+                    idValue = mContext.getProjectCallback().getResourceId(ResourceType.ID, idName);
+                }
+                return idValue == null ? defValue : idValue;
             }
-
-            // look for idName in the project R class.
-            return mContext.getProjectResourceValue(ResourceType.ID, idName, defValue);
+            // This calls the same method as in if(create), but doesn't create a dynamic id, if
+            // one is not found.
+            if (isFrameworkId) {
+                return mContext.getFrameworkResourceValue(ResourceType.ID, idName, defValue);
+            } else {
+                return mContext.getProjectResourceValue(ResourceType.ID, idName, defValue);
+            }
         }
 
         // not a direct id valid reference? resolve it
