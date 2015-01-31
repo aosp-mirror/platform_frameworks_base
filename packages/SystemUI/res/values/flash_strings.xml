@@ -49,4 +49,7 @@
     <string name="accessibility_quick_settings_network_adb_on">ADB over network on.</string>
     <string name="accessibility_quick_settings_network_adb_changed_off">ADB over network turned off.</string>
     <string name="accessibility_quick_settings_network_adb_changed_on">ADB over network turned on.</string>
+
+    <!-- Screenshot QS tile -->
+    <string name="quick_settings_screenshot_label">Screenshot</string>
 </resources>
