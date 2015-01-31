@@ -288,13 +288,17 @@ public final class BridgeContext extends Context {
             value = mRenderResources.resolveResValue(value);
         }
 
+        if (value == null) {
+            // unable to find the attribute.
+            return false;
+        }
+
         // check if this is a style resource
         if (value instanceof StyleResourceValue) {
             // get the id that will represent this style.
             outValue.resourceId = getDynamicIdByStyle((StyleResourceValue)value);
             return true;
         }
-
 
         int a;
         // if this is a framework value.
