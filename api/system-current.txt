@@ -30466,6 +30466,7 @@ package android.telecom {
     method public final void setDisconnected(android.telecom.DisconnectCause);
     method public final void setInitialized();
     method public final void setInitializing();
+    method public final void setNextPostDialChar(char);
     method public final void setOnHold();
     method public final void setPostDialWait(java.lang.String);
     method public final void setRingbackRequested(boolean);
