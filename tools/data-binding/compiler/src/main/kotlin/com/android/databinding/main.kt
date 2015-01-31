@@ -51,6 +51,7 @@ import com.android.databinding.LayoutBinder
 import com.android.databinding.DataBinder
 import com.android.databinding.writer.DataBinderWriter
 import com.android.databinding.ClassAnalyzer
+import com.android.databinding.util.ParserHelper
 
 
 public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Iterable<File>,
@@ -99,14 +100,14 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         //viewBinderRenderers.clear()
         for (xml in xmlFiles) {
             log("xmlFile $xml")
-            val layoutBinder = parseAndStripXml(xml)
+            val layoutBinder = parseAndStripXml(xml, "$appPkg.generated")
             if (layoutBinder == null) {
                 log("no bindings in $xml, skipping")
                 continue
             }
             layoutBinder.setProjectPackage("$appPkg");
             layoutBinder.setPackage("$appPkg.generated")
-            layoutBinder.setBaseClassName("${toClassName(xml.name)}Binder")
+            layoutBinder.setBaseClassName("${ParserHelper.toClassName(xml.name)}Binder")
             layoutBinder.setLayoutname(toLayoutId(xml.name))
 
         }
@@ -155,9 +156,6 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         file.writeText(contents)
     }
 
-    private fun toClassName(name:String) : String =
-        name.substring(0, name.indexOf(".")).split("_").map { "${it.substring(0,1).toUpperCase()}${it.substring(1)}" }.join("")
-
     private fun toLayoutId(name:String) : String =
             name.substring(0, name.indexOf("."))
 
@@ -202,12 +200,12 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         return actualFile
     }
 
-    private fun parseAndStripXml(xml : File) : LayoutBinder? {
+    private fun parseAndStripXml(xml : File, pkg : String) : LayoutBinder? {
         val original = stripFileAndGetOriginal(xml)
         return if (original == null) {
             null
         } else {
-            jDataBinder.parseXml(original)
+            jDataBinder.parseXml(original, pkg)
         }
     }
 

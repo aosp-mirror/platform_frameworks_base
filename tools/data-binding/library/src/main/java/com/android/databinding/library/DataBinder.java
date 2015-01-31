@@ -109,6 +109,10 @@ public class DataBinder {
         return (T) createBinder(context, layoutId, parent);
     }
 
+    public static <T> T createBinder(View view, int layoutId) {
+        return (T) getMapper().getDataBinder(view, layoutId);
+    }
+
     public ViewDataBinder getDataBinder(int layoutId) {
         WeakReference<ViewDataBinder> weakReference = mDataBinderById.get(layoutId);
         if (weakReference == null) {

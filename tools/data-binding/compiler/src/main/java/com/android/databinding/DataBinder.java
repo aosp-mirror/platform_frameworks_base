@@ -16,7 +16,10 @@
 
 package com.android.databinding;
 
+import com.google.common.base.Preconditions;
+
 import com.android.databinding.util.L;
+import com.android.databinding.util.ParserHelper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -48,10 +51,11 @@ public class DataBinder {
     private static final String XPATH_BINDING_2_EXPR = "//@*[starts-with(., '{') and substring(., string-length(.)) = '}']";
     private static final String XPATH_BINDING_ELEMENTS = XPATH_BINDING_2_EXPR + "/..";
     private static final String XPATH_IMPORT_DEFINITIONS = "//import";
+    final String LAYOUT_PREFIX = "@layout/";
 
     List<LayoutBinder> mLayoutBinders = new ArrayList<>();
 
-    public LayoutBinder parseXml(File xml)
+    public LayoutBinder parseXml(File xml, String pkg)
             throws ParserConfigurationException, IOException, SAXException,
             XPathExpressionException {
         L.d("parsing file %s", xml.getAbsolutePath());
@@ -98,9 +102,26 @@ public class DataBinder {
             NamedNodeMap attributes = parent.getAttributes();
             Node id = attributes.getNamedItem("android:id");
             if (id != null) {
+                String nodeName = parent.getNodeName();
+                String layoutName = null;
+                final String fullClassName;
+                if ("include".equals(nodeName)) {
+                    // get the layout attribute
+                    final Node includedLayout = attributes.getNamedItem("layout");
+                    Preconditions.checkNotNull(includedLayout, "must include a layout");
+                    final String includeValue = includedLayout.getNodeValue();
+                    Preconditions.checkArgument(includeValue.startsWith(LAYOUT_PREFIX));
+                    // if user is binding something there, there MUST be a layout file to be
+                    // generated.
+                    layoutName = includeValue.substring(LAYOUT_PREFIX.length());
+                    L.d("replaced node name to " + nodeName);
+                    fullClassName = pkg + "." + ParserHelper.INSTANCE$.toClassName(layoutName) + "Binder";
+                } else {
+                    fullClassName = getFullViewClassName(nodeName);
+                }
                 final BindingTarget bindingTarget = layoutBinder
-                        .createBindingTarget(parent, id.getNodeValue(),
-                                getFullViewClassName(parent.getNodeName()));
+                        .createBindingTarget(parent, id.getNodeValue(), fullClassName);
+                bindingTarget.setIncludedLayout(layoutName);
                 int attrCount = attributes.getLength();
                 for (int i = 0; i < attrCount; i ++) {
                     final Node attr = attributes.item(i);
@@ -110,6 +131,8 @@ public class DataBinder {
                         bindingTarget.addBinding(attr.getNodeName(), layoutBinder.parse(strippedValue));
                     }
                 }
+            } else {
+                throw new RuntimeException("data binding requires id for now.");
             }
         }
 

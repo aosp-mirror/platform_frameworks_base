@@ -37,6 +37,7 @@ public class ClassAnalyzer {
     private static final String OBSERVABLE_LIST_CLASS_NAME = "android.binding.ObservableList";
     private static final String OBSERVABLE_MAP_CLASS_NAME = "android.binding.ObservableMap";
     private static final String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
+    private static final String I_VIEW_DATA_BINDER = "com.android.databinding.library.IViewDataBinder";
 
     private static Map<String, String> sTestClassNameMapping = ImmutableMap.of(
             OBSERVABLE_CLASS_NAME, "com.android.databinding.MockObservable",
@@ -63,10 +64,13 @@ public class ClassAnalyzer {
 
     private final boolean mTestMode;
 
+    private final Class mIViewDataBinder;
+
     private ClassAnalyzer(ClassLoader classLoader, boolean testMode) {
         mClassLoader = classLoader;
         mTestMode = testMode;
         try {
+            mIViewDataBinder = classLoader.loadClass(getClassName(I_VIEW_DATA_BINDER));
             mObservable = classLoader.loadClass(getClassName(OBSERVABLE_CLASS_NAME));
             mObservableList = classLoader.loadClass(getClassName(OBSERVABLE_LIST_CLASS_NAME));
             mObservableMap = classLoader.loadClass(getClassName(OBSERVABLE_MAP_CLASS_NAME));
@@ -99,6 +103,10 @@ public class ClassAnalyzer {
             return sTestClassNameMapping.get(name);
         }
         return name;
+    }
+
+    public boolean isDataBinder(Class klass) {
+        return mIViewDataBinder.isAssignableFrom(klass);
     }
 
     static String toCodeName(Class klass) {

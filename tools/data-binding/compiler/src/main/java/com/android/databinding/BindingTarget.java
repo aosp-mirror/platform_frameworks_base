@@ -31,6 +31,7 @@ public class BindingTarget {
     List<Binding> mBindings = new ArrayList<>();
     ExprModel mModel;
     Class mResolvedClass;
+    String mIncludedLayout;
 
     public BindingTarget(Node node, String id, String viewClass) {
         mNode = node;
@@ -59,6 +60,18 @@ public class BindingTarget {
             mResolvedClass = ClassAnalyzer.getInstance().findClass(mViewClass);
         }
         return mResolvedClass;
+    }
+
+    public String getIncludedLayout() {
+        return mIncludedLayout;
+    }
+
+    public boolean isBinder() {
+        return mIncludedLayout != null;
+    }
+
+    public void setIncludedLayout(String includedLayout) {
+        mIncludedLayout = includedLayout;
     }
 
     public List<Binding> getBindings() {

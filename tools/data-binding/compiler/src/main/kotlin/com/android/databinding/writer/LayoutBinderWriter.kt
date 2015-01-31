@@ -85,6 +85,7 @@ val BindingTarget.readableUniqueName by Delegates.lazy {(target: BindingTarget) 
     val stripped = target.getId().androidId().stripNonJava()
     target.getModel().ext.getUniqueFieldName(stripped)
 }
+
 val BindingTarget.fieldName by Delegates.lazy { (target : BindingTarget) ->
     "m${target.readableUniqueName.capitalize()}"
 }
@@ -314,6 +315,10 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
 
     val interfaceName = "${layoutBinder.getInterfaceName()}"
 
+    val includedBinders by Delegates.lazy {
+        layoutBinder.getBindingTargets().filter { it.isBinder() }
+    }
+
     val variables by Delegates.lazy {
         model.getExprMap().values().filterIsInstance(javaClass<IdentifierExpr>()).filter { it.isVariable() }
     }
@@ -346,7 +351,11 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
         nl("public ${className}(View root) {") {
             tab("super(root, ${model.getObservables().size()});")
             layoutBinder.getBindingTargets().forEach {
-                tab("this.${it.fieldName} = (${it.getViewClass()}) root.findViewById(${it.androidId});")
+                if (it.isBinder()) {
+                    tab("this.${it.fieldName} = com.android.databinding.library.DataBinder.createBinder(root.findViewById(${it.androidId}), R.layout.${it.getIncludedLayout()});")
+                } else {
+                    tab("this.${it.fieldName} = (${it.getViewClass()}) root.findViewById(${it.androidId});")
+                }
             }
             tab("invalidateAll();");
         }
@@ -354,12 +363,16 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     }
 
     fun declareInvalidateAll() = kcode("") {
-        nl("protected void invalidateAll() {") {
+        nl("@Override")
+        nl("public void invalidateAll() {") {
             val bs = BitSet()
             bs.set(0, model.getInvalidateableFieldLimit())
             val fs = FlagSet(bs, mDirtyFlags.buckets.size())
             for (i in (0..(mDirtyFlags.buckets.size() - 1))) {
                 tab("${mDirtyFlags.localValue(i)} = ${fs.localValue(i)};")
+            }
+            includedBinders.forEach { binder ->
+                tab("${binder.fieldName}.invalidateAll();")
             }
         }
         nl("}")
@@ -548,6 +561,10 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                         }
                         tab("}")
                     }
+            //
+            includedBinders.forEach { binder ->
+                tab("${binder.fieldName}.rebindDirty();")
+            }
         }
         nl("}")
 
