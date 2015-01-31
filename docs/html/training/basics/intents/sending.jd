@@ -153,7 +153,8 @@ java.util.List} is not empty, you can safely use the intent. For example:</p>
 
 <pre>
 PackageManager packageManager = {@link android.content.Context#getPackageManager()};
-List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(intent, 0);
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
 boolean isIntentSafe = activities.size() > 0;
 </pre>
 
