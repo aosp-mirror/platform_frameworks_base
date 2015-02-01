@@ -48,6 +48,7 @@ import com.android.systemui.qs.tiles.NightDisplayTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.SyncTile;
 import com.android.systemui.qs.tiles.UiModeNightTile;
+import com.android.systemui.qs.tiles.UsbTetherTile;
 import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.VolumeTile;
 import com.android.systemui.qs.tiles.WifiTile;
@@ -87,6 +88,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<CaffeineTile> mCaffeineTileProvider;
     private final Provider<HeadsUpTile> mHeadsUpTileProvider;
     private final Provider<SyncTile> mSyncTileProvider;
+    private final Provider<UsbTetherTile> mUsbTetherTileProvider;
     private final Provider<VolumeTile> mVolumeTileProvider;
 
     private QSTileHost mHost;
@@ -116,6 +118,7 @@ public class QSFactoryImpl implements QSFactory {
             Provider<CaffeineTile> caffeineTileProvider,
             Provider<HeadsUpTile> headsUpTileProvider,
             Provider<SyncTile> syncTileProvider,
+            Provider<UsbTetherTile> usbTetherTileProvider,
             Provider<VolumeTile> volumeTileProvider) {
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
@@ -141,6 +144,7 @@ public class QSFactoryImpl implements QSFactory {
         mCaffeineTileProvider = caffeineTileProvider;
         mHeadsUpTileProvider = headsUpTileProvider;
         mSyncTileProvider = syncTileProvider;
+        mUsbTetherTileProvider = usbTetherTileProvider;
         mVolumeTileProvider = volumeTileProvider;
     }
 
@@ -206,6 +210,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mHeadsUpTileProvider.get();
             case "sync":
                 return mSyncTileProvider.get();
+            case "usb_tether":
+                return mUsbTetherTileProvider.get();
             case "volume_panel":
                 return mVolumeTileProvider.get();
         }
