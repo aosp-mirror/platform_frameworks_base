@@ -143,7 +143,9 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
 
         EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
-        button.setCallback(this);
+        if (button != null) {
+            button.setCallback(this);
+        }
     }
 
     public void onEmergencyButtonClickedWhenInCall() {
