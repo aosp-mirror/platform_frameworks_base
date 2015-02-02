@@ -111,6 +111,14 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         }
     }
 
+    public CharSequence getCurrentSecurityModeContentDescription() {
+        View v = (View) getSecurityView(mCurrentSecuritySelection);
+        if (v != null) {
+            return v.getContentDescription();
+        }
+        return "";
+    }
+
     private KeyguardSecurityView getSecurityView(SecurityMode securityMode) {
         final int securityViewIdForMode = getSecurityViewIdForMode(securityMode);
         KeyguardSecurityView view = null;

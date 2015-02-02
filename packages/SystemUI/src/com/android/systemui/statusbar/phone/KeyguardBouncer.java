@@ -22,6 +22,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
@@ -85,6 +86,7 @@ public class KeyguardBouncer {
             mKeyguardView.onResume();
             mKeyguardView.startAppearAnimation();
             mShowingSoon = false;
+            mKeyguardView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
     };
 

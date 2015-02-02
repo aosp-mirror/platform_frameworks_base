@@ -29,6 +29,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -151,6 +152,16 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            event.getText().add(mSecurityContainer.getCurrentSecurityModeContentDescription());
+            return true;
+        } else {
+            return super.dispatchPopulateAccessibilityEvent(event);
+        }
     }
 
     protected KeyguardSecurityContainer getSecurityContainer() {
