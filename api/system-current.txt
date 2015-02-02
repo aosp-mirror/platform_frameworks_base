@@ -30037,6 +30037,7 @@ package android.telecom {
     method public final int getState();
     method public final android.telecom.StatusHints getStatusHints();
     method public final boolean isRingbackRequested();
+    method protected void notifyConferenceStarted();
     method public void onAbort();
     method public void onAnswer();
     method public void onAudioStateChanged(android.telecom.AudioState);
