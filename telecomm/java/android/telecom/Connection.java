@@ -260,6 +260,7 @@ public abstract class Connection implements IConferenceable {
         /** @hide */
         public void onConferenceParticipantsChanged(Connection c,
                 List<ConferenceParticipant> participants) {}
+        public void onConferenceStarted() {}
     }
 
     /** @hide */
@@ -1420,6 +1421,15 @@ public abstract class Connection implements IConferenceable {
             List<ConferenceParticipant> conferenceParticipants) {
         for (Listener l : mListeners) {
             l.onConferenceParticipantsChanged(this, conferenceParticipants);
+        }
+    }
+
+    /**
+     * Notifies listeners that a conference call has been started.
+     */
+    protected void notifyConferenceStarted() {
+        for (Listener l : mListeners) {
+            l.onConferenceStarted();
         }
     }
 }
