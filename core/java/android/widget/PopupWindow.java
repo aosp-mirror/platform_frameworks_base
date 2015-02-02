@@ -1020,23 +1020,24 @@ public class PopupWindow {
             return;
         }
 
+        TransitionManager.endTransitions(mDecorView);
+
         unregisterForScrollChanged();
 
         mIsShowing = true;
         mIsDropdown = false;
 
-        WindowManager.LayoutParams p = createPopupLayout(token);
-        p.windowAnimations = computeAnimationResource();
-
+        final WindowManager.LayoutParams p = createPopupLayoutParams(token);
         preparePopup(p);
-        if (gravity == Gravity.NO_GRAVITY) {
-            gravity = Gravity.TOP | Gravity.START;
+
+        // Only override the default if some gravity was specified.
+        if (gravity != Gravity.NO_GRAVITY) {
+            p.gravity = gravity;
         }
-        p.gravity = gravity;
+
         p.x = x;
         p.y = y;
-        if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
-        if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
+
         invokePopup(p);
     }
 
@@ -1102,20 +1103,18 @@ public class PopupWindow {
             return;
         }
 
+        TransitionManager.endTransitions(mDecorView);
+
         registerForScrollChanged(anchor, xoff, yoff, gravity);
 
         mIsShowing = true;
         mIsDropdown = true;
 
-        WindowManager.LayoutParams p = createPopupLayout(anchor.getWindowToken());
+        final WindowManager.LayoutParams p = createPopupLayoutParams(anchor.getWindowToken());
         preparePopup(p);
 
-        updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff, gravity));
-
-        if (mHeightMode < 0) p.height = mLastHeight = mHeightMode;
-        if (mWidthMode < 0) p.width = mLastWidth = mWidthMode;
-
-        p.windowAnimations = computeAnimationResource();
+        final boolean aboveAnchor = findDropDownPosition(anchor, p, xoff, yoff, gravity);
+        updateAboveAnchor(aboveAnchor);
 
         invokePopup(p);
     }
@@ -1157,10 +1156,9 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Prepare the popup by embedding in into a new ViewGroup if the
-     * background drawable is not null. If embedding is required, the layout
-     * parameters' height is modified to take into account the background's
-     * padding.</p>
+     * Prepare the popup by embedding it into a new ViewGroup if the background
+     * drawable is not null. If embedding is required, the layout parameters'
+     * height is modified to take into account the background's padding.
      *
      * @param p the layout parameters of the popup's content view
      */
@@ -1293,26 +1291,39 @@ public class PopupWindow {
      *
      * @return the layout parameters to pass to the window manager
      */
-    private WindowManager.LayoutParams createPopupLayout(IBinder token) {
-        // generates the layout parameters for the drop down
-        // we want a fixed size view located at the bottom left of the anchor
-        WindowManager.LayoutParams p = new WindowManager.LayoutParams();
-        // these gravity settings put the view at the top left corner of the
-        // screen. The view is then positioned to the appropriate location
-        // by setting the x and y offsets to match the anchor's bottom
-        // left corner
+    private WindowManager.LayoutParams createPopupLayoutParams(IBinder token) {
+        final WindowManager.LayoutParams p = new WindowManager.LayoutParams();
+
+        // These gravity settings put the view at the top left corner of the
+        // screen. The view is then positioned to the appropriate location by
+        // setting the x and y offsets to match the anchor's bottom-left
+        // corner.
         p.gravity = Gravity.START | Gravity.TOP;
-        p.width = mLastWidth = mWidth;
-        p.height = mLastHeight = mHeight;
+        p.flags = computeFlags(p.flags);
+        p.type = mWindowLayoutType;
+        p.token = token;
+        p.softInputMode = mSoftInputMode;
+        p.windowAnimations = computeAnimationResource();
+
         if (mBackground != null) {
             p.format = mBackground.getOpacity();
         } else {
             p.format = PixelFormat.TRANSLUCENT;
         }
-        p.flags = computeFlags(p.flags);
-        p.type = mWindowLayoutType;
-        p.token = token;
-        p.softInputMode = mSoftInputMode;
+
+        if (mHeightMode < 0) {
+            p.height = mLastHeight = mHeightMode;
+        } else {
+            p.height = mLastHeight = mHeight;
+        }
+
+        if (mWidthMode < 0) {
+            p.width = mLastWidth = mWidthMode;
+        } else {
+            p.width = mLastWidth = mWidth;
+        }
+
+        // Used for debugging.
         p.setTitle("PopupWindow:" + Integer.toHexString(hashCode()));
 
         return p;
@@ -1569,30 +1580,32 @@ public class PopupWindow {
      * @see #showAsDropDown(android.view.View)
      */
     public void dismiss() {
-        if (isShowing() && mDecorView != null) {
-            mIsShowing = false;
+        if (!isShowing()) {
+            return;
+        }
 
-            unregisterForScrollChanged();
+        unregisterForScrollChanged();
 
-            if (mExitTransition != null) {
-                mExitTransition.addTarget(mBackgroundView);
-                mExitTransition.addListener(new Transition.TransitionListenerAdapter() {
-                    @Override
-                    public void onTransitionEnd(Transition transition) {
-                        transition.removeListener(this);
-                        transition.removeTarget(mBackgroundView);
+        mIsShowing = false;
 
-                        dismissImmediate();
-                    }
-                });
+        if (mExitTransition != null) {
+            mExitTransition.addTarget(mBackgroundView);
+            mExitTransition.addListener(new Transition.TransitionListenerAdapter() {
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    transition.removeListener(this);
+                    transition.removeTarget(mBackgroundView);
 
-                TransitionManager.beginDelayedTransition(mDecorView, mExitTransition);
+                    dismissImmediate();
+                }
+            });
 
-                // Transition to invisible.
-                mBackgroundView.setVisibility(View.INVISIBLE);
-            } else {
-                dismissImmediate();
-            }
+            TransitionManager.beginDelayedTransition(mDecorView, mExitTransition);
+
+            // Transition to invisible.
+            mBackgroundView.setVisibility(View.INVISIBLE);
+        } else {
+            dismissImmediate();
         }
     }
 
@@ -1851,15 +1864,13 @@ public class PopupWindow {
     }
 
     private void unregisterForScrollChanged() {
-        WeakReference<View> anchorRef = mAnchor;
-        View anchor = null;
-        if (anchorRef != null) {
-            anchor = anchorRef.get();
-        }
+        final WeakReference<View> anchorRef = mAnchor;
+        final View anchor = anchorRef == null ? null : anchorRef.get();
         if (anchor != null) {
-            ViewTreeObserver vto = anchor.getViewTreeObserver();
+            final ViewTreeObserver vto = anchor.getViewTreeObserver();
             vto.removeOnScrollChangedListener(mOnScrollChangedListener);
         }
+
         mAnchor = null;
     }
 
@@ -1867,7 +1878,8 @@ public class PopupWindow {
         unregisterForScrollChanged();
 
         mAnchor = new WeakReference<>(anchor);
-        ViewTreeObserver vto = anchor.getViewTreeObserver();
+
+        final ViewTreeObserver vto = anchor.getViewTreeObserver();
         if (vto != null) {
             vto.addOnScrollChangedListener(mOnScrollChangedListener);
         }
