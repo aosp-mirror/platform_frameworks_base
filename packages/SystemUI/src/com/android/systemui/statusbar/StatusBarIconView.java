@@ -147,6 +147,9 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     private boolean updateDrawable(boolean withClear) {
+        if (mIcon == null) {
+            return false;
+        }
         Drawable drawable = getIcon(mIcon);
         if (drawable == null) {
             Log.w(TAG, "No icon for slot " + mSlot);
@@ -223,6 +226,12 @@ public class StatusBarIconView extends AnimatedImageView {
         if (mNumberBackground != null) {
             placeNumber();
         }
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+        updateDrawable();
     }
 
     @Override

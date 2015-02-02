@@ -507,7 +507,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
-        mSettingsObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mSettingsObserver);
@@ -557,6 +556,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         createAndAddWindows();
 
+        mSettingsObserver.onChange(false); // set up
         disable(switches[0], false /* animate */);
         setSystemUiVisibility(switches[1], 0xffffffff);
         topAppWindowChanged(switches[2] != 0);
