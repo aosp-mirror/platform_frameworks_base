@@ -3857,7 +3857,7 @@
     <!-- title for this message -->
     <string name="wifi_connect_alert_title">Allow connection?</string>
     <!-- message explaining who is connecting to what -->
-    <string name="wifi_connect_alert_message">%1$s would like to connect to %2$s</string>
+    <string name="wifi_connect_alert_message">Application %1$s would like to connect to Wifi Network %2$s</string>
     <!-- default application in case name can not be found -->
     <string name="wifi_connect_default_application">An application</string>
 
