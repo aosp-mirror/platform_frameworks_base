@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"1시간 전"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g>시간 전"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"지난 <xliff:g id="COUNT">%d</xliff:g>일"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"지난 달"</string>
     <string name="older" msgid="5211975022815554840">"이전"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android가 시작되는 중…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"저장소 최적화 중"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개 최적화 중"</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"부팅 완료"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
@@ -1881,4 +1881,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS 요청이 DIAL 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 요청이 USSD 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 요청이 새로운 SS 요청으로 수정됩니다."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

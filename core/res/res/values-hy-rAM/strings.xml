@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"Բ"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Կբ"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Մբ"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Գբ"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"ՄԲ"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Տբ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Պբ"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"1 ժամ առաջ"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ժամ առաջ"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Վերջին <xliff:g id="COUNT">%d</xliff:g> օրերին"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Անցյալ ամիս"</string>
     <string name="older" msgid="5211975022815554840">"Ավելի հին"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android-ը մեկնարկում է…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Պահեստի օպտիմալացում:"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Օպտիմալացվում է հավելված <xliff:g id="NUMBER_0">%1$d</xliff:g>-ը <xliff:g id="NUMBER_1">%2$d</xliff:g>-ից:"</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Հավելվածները մեկնարկում են:"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Բեռնումն ավարտվում է:"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>-ն աշխատում է"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS հարցումը փոխվել է DIAL հարցման:"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS հարցումը փոխվել է USSD հարցման:"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS հարցումը փոխվել է նոր SS հարցման:"</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

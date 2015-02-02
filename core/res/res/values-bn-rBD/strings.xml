@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"১ ঘন্টা আগে"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ঘন্টা আগে"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"গত <xliff:g id="COUNT">%d</xliff:g> দিনে"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"গত মাস"</string>
     <string name="older" msgid="5211975022815554840">"পুরোনো"</string>
   <plurals name="num_days_ago">
@@ -1259,7 +1257,7 @@
     <string name="cancel" msgid="6442560571259935130">"বাতিল করুন"</string>
     <string name="yes" msgid="5362982303337969312">"ঠিক আছে"</string>
     <string name="no" msgid="5141531044935541497">"বাতিল করুন"</string>
-    <string name="dialog_alert_title" msgid="2049658708609043103">"মনোযোগ"</string>
+    <string name="dialog_alert_title" msgid="2049658708609043103">"খেয়াল করুন"</string>
     <string name="loading" msgid="7933681260296021180">"লোড হচ্ছে..."</string>
     <string name="capital_on" msgid="1544682755514494298">"চালু করুন"</string>
     <string name="capital_off" msgid="6815870386972805832">"বন্ধ করুন"</string>
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android চালু হচ্ছে…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"সঞ্চয়স্থান অপ্টিমাইজ করা হচ্ছে৷"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান অপ্টিমাইজ করা হচ্ছে৷"</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> চলছে"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS অনুরোধটিকে ডায়াল অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS অনুরোধটিকে নতুন USSD অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS অনুরোধটিকে নতুন SS অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

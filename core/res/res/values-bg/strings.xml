@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"Преди 1 час"</item>
     <item quantity="other" msgid="2467273239587587569">"Преди <xliff:g id="COUNT">%d</xliff:g> часа"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Последните <xliff:g id="COUNT">%d</xliff:g> дни"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Последният месец"</string>
     <string name="older" msgid="5211975022815554840">"По-стари"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android се стартира…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Хранилището се оптимизира."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизира се приложение <xliff:g id="NUMBER_0">%1$d</xliff:g> от <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Приложенията се стартират."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Зареждането завършва."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS заявката е променена на DIAL заявка."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS заявката е променена на USSD заявка."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS заявката е променена на нова SS заявка."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>
