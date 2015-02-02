@@ -225,7 +225,7 @@
     <string name="start_dreams" msgid="7219575858348719790">"डेड्रीम"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"इथरनेट"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"विमान मोड"</string>
-    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लूटुथ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब (<xliff:g id="NUMBER">%d</xliff:g> डिव्हाइसेस)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब बंद"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोणतेही जोडलेले डिव्हाइसेस उपलब्ध नाहीत"</string>
@@ -282,6 +282,18 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"शोधा"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करणे शक्य झाले नाही."</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"सर्व अनुप्रयोग डिसमिस करा"</string>
+    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
+    <skip />
+    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
+    <skip />
+    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
+    <skip />
+    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
+    <skip />
+    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
+    <skip />
+    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"चार्ज झाली"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"चार्ज होत आहे"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> पूर्ण होईपर्यंत"</string>
