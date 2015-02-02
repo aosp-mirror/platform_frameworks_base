@@ -332,6 +332,16 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
 
     /**
+     * A boolean extra indicating whether device encryption is required as part of Device Owner
+     * provisioning.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_SKIP_ENCRYPTION =
+             "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
+
+    /**
      * This MIME type is used for starting the Device Owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
@@ -361,7 +371,8 @@ public class DevicePolicyManager {
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_HOST}, optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_PORT} (convert to String), optional</li>
      * <li>{@link #EXTRA_PROVISIONING_WIFI_PROXY_BYPASS}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li></ul>
+     * <li>{@link #EXTRA_PROVISIONING_WIFI_PAC_URL}, optional</li>
+     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li></ul>
      *
      * <p> When device owner provisioning has completed, an intent of the type
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
