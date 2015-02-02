@@ -119,6 +119,23 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
         a.recycle();
     }
 
+    private void setDrawable(Drawable dr) {
+        if (mDrawable != null) {
+            mDrawable.setCallback(null);
+        }
+
+        mDrawable = dr;
+
+        if (dr != null) {
+            dr.setCallback(this);
+            dr.setVisible(isVisible(), true);
+            dr.setState(getState());
+            dr.setLevel(getLevel());
+            dr.setBounds(getBounds());
+            dr.setLayoutDirection(getLayoutDirection());
+        }
+    }
+
     private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
             Theme theme) throws XmlPullParserException, IOException {
         // Load inner XML elements.
@@ -133,9 +150,10 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
             }
 
             final Drawable dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
-            mState.mDrawableState = dr.getConstantState();
-            mDrawable = dr;
-            dr.setCallback(this);
+            if (dr != null) {
+                mState.mDrawableState = dr.getConstantState();
+                setDrawable(dr);
+            }
         }
     }
 
@@ -166,8 +184,7 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
                     final Drawable dr = a.getDrawable(attr);
                     if (dr != null) {
                         mState.mDrawableState = dr.getConstantState();
-                        mDrawable = dr;
-                        dr.setCallback(this);
+                        setDrawable(dr);
                     }
                     break;
                 case R.styleable.InsetDrawable_inset:
@@ -510,7 +527,8 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
      */
     private void updateLocalState(Resources res) {
         if (mState.mDrawableState != null) {
-            mDrawable = mState.mDrawableState.newDrawable(res);
+            final Drawable dr = mState.mDrawableState.newDrawable(res);
+            setDrawable(dr);
         }
     }
 }
