@@ -823,7 +823,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 pw.println("User Records:");
                 count = mUserRecords.size();
                 for (int i = 0; i < count; i++) {
-                    UserRecord user = mUserRecords.get(i);
+                    UserRecord user = mUserRecords.get(mUserRecords.keyAt(i));
                     user.dumpLocked(pw, "");
                 }
             }
