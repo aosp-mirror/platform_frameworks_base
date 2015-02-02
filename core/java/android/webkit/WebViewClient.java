@@ -50,7 +50,9 @@ public class WebViewClient {
      * is called once for each main frame load so a page with iframes or
      * framesets will call onPageStarted one time for the main frame. This also
      * means that onPageStarted will not be called when the contents of an
-     * embedded frame changes, i.e. clicking a link whose target is an iframe.
+     * embedded frame changes, i.e. clicking a link whose target is an iframe,
+     * it will also not be called for fragment navigations (navigations to
+     * #fragment_id).
      *
      * @param view The WebView that is initiating the callback.
      * @param url The url to be loaded.
