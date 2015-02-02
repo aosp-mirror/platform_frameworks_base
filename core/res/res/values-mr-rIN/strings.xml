@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;अशीर्षकांकित&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोणताही फोन नंबर नाही)"</string>
     <string name="unknownName" msgid="6867811765370350269">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"व्हॉइसमेल"</string>
@@ -220,7 +218,7 @@
     <string name="permgroupdesc_location" msgid="5704679763124170100">"आपल्या प्रत्यक्ष स्थानाचे परीक्षण करेल."</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"नेटवर्क संप्रेषण"</string>
     <string name="permgroupdesc_network" msgid="4478299413241861987">"विविध नेटवर्क वैशिष्ट्यांवर प्रवेश करेल."</string>
-    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ब"</string>
+    <string name="permgrouplab_bluetoothNetwork" msgid="1585403544162128109">"ब्लूटुथ"</string>
     <string name="permgroupdesc_bluetoothNetwork" msgid="5625288577164282391">"ब द्वारे डिव्हाइसेसवर आणि नेटवर्कवर प्रवेश करेल."</string>
     <string name="permgrouplab_audioSettings" msgid="8329261670151871235">"ऑडिओ सेटिंग्ज"</string>
     <string name="permgroupdesc_audioSettings" msgid="2641515403347568130">"ऑडिओ सेटिंग्ज बदला."</string>

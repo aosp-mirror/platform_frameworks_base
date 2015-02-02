@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"Բ"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"Կբ"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Մբ"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"Գբ"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"ՄԲ"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Տբ"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Պբ"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> վ"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> վ"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Անանուն&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Հեռախոսահամար չկա)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Անհայտ"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Ձայնային փոստ"</string>

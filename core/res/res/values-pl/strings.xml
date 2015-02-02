@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez nazwy&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Brak numeru telefonu)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Nieznana"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Poczta głosowa"</string>
@@ -271,13 +269,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Dostęp do karty SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcje ułatwień dostępu"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcje, których może zażądać technologia ułatwień dostępu."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobierz zawartość okna"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobieranie zawartości okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włącz czytanie dotykiem"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włączenie czytania dotykiem"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Klikane elementy będą wymawiane na głos, a ekran można przeglądać, używając gestów."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Włącz ułatwienia dostępu w internecie"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Włączenie ułatwień dostępu w internecie"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Można zainstalować skrypty, by zawartość aplikacji była łatwiej dostępna."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserwuj wpisywany tekst"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserwowanie wpisywanego tekstu"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obejmuje informacje osobiste, takie jak numery kart kredytowych i hasła."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
@@ -1198,7 +1196,7 @@
     <item quantity="other" msgid="2973062968038355991">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"w dniu <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"o godzinie <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"o godzinie <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"w <xliff:g id="YEAR">%s</xliff:g> r."</string>
     <string name="day" msgid="8144195776058119424">"dzień"</string>
     <string name="days" msgid="4774547661021344602">"dni"</string>

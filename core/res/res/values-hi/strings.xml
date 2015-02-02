@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंड"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंड"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;शीर्षक-रहित&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोई फ़ोन नंबर नहीं)"</string>
     <string name="unknownName" msgid="6867811765370350269">"अज्ञात"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"वॉयस मेल"</string>
@@ -73,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"आउटगोइंग कॉलर ID"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट किया गया लाइन आईडी"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट किया गया लाइन आईडी प्रतिबंध"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"कॉल अग्रेषण"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"कॉल आगे भेजना"</string>
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल बाधित करना"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"पासवर्ड बदलें"</string>

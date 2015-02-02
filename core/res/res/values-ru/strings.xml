@@ -40,8 +40,6 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без названия&gt;"</string>
-    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
-    <string name="ellipsis_two_dots" msgid="1228078994866030736">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Нет номера телефона)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Неизвестно"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Голосовая почта"</string>
@@ -1841,7 +1839,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы заряд батареи расходовался медленнее, режим энергосбережения уменьшает быстродействие устройства и ограничивает количество ресурсов, затрачиваемых на вибрацию, Геолокацию и большинство процессов обработки данных в фоновом режиме. Приложения, которые используют синхронизацию (например, для электронной почты и обмена SMS), могут не обновляться, пока вы их не откроете.\n\nКогда устройство заряжается, режим энергосбережения отключается автоматически."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"До отключения режима (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"До отключения режима"</string>
   <plurals name="zen_mode_duration_minutes_summary">
