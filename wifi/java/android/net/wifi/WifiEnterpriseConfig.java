@@ -54,6 +54,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     /** @hide */
     public static final String SUBJECT_MATCH_KEY   = "subject_match";
     /** @hide */
+    public static final String ALTSUBJECT_MATCH_KEY = "altsubject_match";
+    /** @hide */
     public static final String OPP_KEY_CACHING     = "proactive_key_caching";
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
@@ -93,6 +95,11 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String ENGINE_ID_KEY       = "engine_id";
     /** @hide */
     public static final String PRIVATE_KEY_ID_KEY  = "key_id";
+    /** @hide */
+    public static final String REALM_KEY           = "realm";
+    /** @hide */
+    public static final String PLMN_KEY            = "plmn";
+
 
     private HashMap<String, String> mFields = new HashMap<String, String>();
     private X509Certificate mCaCert;
@@ -530,20 +537,72 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Set subject match. This is the substring to be matched against the subject of the
-     * authentication server certificate.
+     * Set subject match (deprecated). This is the substring to be matched against the subject of
+     * the authentication server certificate.
      * @param subjectMatch substring to be matched
+     * @deprecated in favor of altSubjectMatch
      */
     public void setSubjectMatch(String subjectMatch) {
         setFieldValue(SUBJECT_MATCH_KEY, subjectMatch, "");
     }
 
     /**
-     * Get subject match
+     * Get subject match (deprecated)
      * @return the subject match string
+     * @deprecated in favor of altSubjectMatch
      */
     public String getSubjectMatch() {
         return getFieldValue(SUBJECT_MATCH_KEY, "");
+    }
+
+    /**
+     * Set alternate subject match. This is the substring to be matched against the
+     * alternate subject of the authentication server certificate.
+     * @param altSubjectMatch substring to be matched, for example
+     *                     DNS:server.example.com;EMAIL:server@example.com
+     */
+    public void setAltSubjectMatch(String altSubjectMatch) {
+        setFieldValue(ALTSUBJECT_MATCH_KEY, altSubjectMatch, "");
+    }
+
+    /**
+     * Get alternate subject match
+     * @return the alternate subject match string
+     */
+    public String getAltSubjectMatch() {
+        return getFieldValue(ALTSUBJECT_MATCH_KEY, "");
+    }
+
+    /**
+     * Set realm for passpoint credential
+     * @param realm the realm
+     */
+    public void setRealm(String realm) {
+        setFieldValue(REALM_KEY, realm, "");
+    }
+
+    /**
+     * Get realm for passpoint credential
+     * @return the realm
+     */
+    public String getRealm() {
+        return getFieldValue(REALM_KEY, "");
+    }
+
+    /**
+     * Set plmn for passpoint credential
+     * @param plmn the plmn value derived from mcc & mnc
+     */
+    public void setPlmn(String plmn) {
+        setFieldValue(PLMN_KEY, plmn, "");
+    }
+
+    /**
+     * Set plmn for passpoint credential
+     * @return the plmn
+     */
+    public String getPlmn() {
+        return getFieldValue(PLMN_KEY, "");
     }
 
     /** See {@link WifiConfiguration#getKeyIdForCredentials} @hide */
