@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -149,6 +150,16 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     protected void announceCurrentSecurityMethod() {
         mSecurityContainer.announceCurrentSecurityMethod();
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            event.getText().add(mSecurityContainer.getCurrentSecurityModeContentDescription());
+            return true;
+        } else {
+            return super.dispatchPopulateAccessibilityEvent(event);
+        }
     }
 
     protected KeyguardSecurityContainer getSecurityContainer() {
