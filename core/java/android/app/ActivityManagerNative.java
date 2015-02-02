@@ -2300,6 +2300,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case SET_TASK_RESIZEABLE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int taskId = data.readInt();
+            boolean resizeable = (data.readInt() == 1) ? true : false;
+            setTaskResizeable(taskId, resizeable);
+            reply.writeNoException();
+            return true;
+        }
+
         case GET_TASK_DESCRIPTION_ICON_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             String filename = data.readString();
@@ -5396,6 +5405,19 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(token);
         values.writeToParcel(data, 0);
         mRemote.transact(SET_TASK_DESCRIPTION_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void setTaskResizeable(int taskId, boolean resizeable) throws  RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(taskId);
+        data.writeInt(resizeable ? 1 : 0);
+        mRemote.transact(SET_TASK_RESIZEABLE_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
         reply.recycle();

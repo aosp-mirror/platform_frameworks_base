@@ -1012,6 +1012,20 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="resumeWhilePausing" format="boolean" />
 
+    <!-- Indicates that it is okay for this activity to be resized to any dimension. Intended for a
+         multi-window device where there can be multiple activities of various sizes on the screen
+         at the same time.
+
+         <p>The default value is <code>false</code> for applications with
+         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODE#MNC} and
+         <code>true</code> otherwise.
+
+         <p>NOTE: A task's root activity value is applied to all additional activities launched in
+         the task. That is if the root activity of a task is resizeable then the system will treat
+         all other activities in the task as resizeable and will not if the root activity isn't
+         resizeable. -->
+    <attr name="resizeableActivity" format="boolean" />
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1020,7 +1034,7 @@
          to avoid name collisions.  For example, applications published
          by Google could have names of the form
          <code>com.google.app.<em>appname</em></code>
-         
+
          <p>Inside of the manifest tag, may appear the following tags
          in any order: {@link #AndroidManifestPermission permission},
          {@link #AndroidManifestPermissionGroup permission-group},
@@ -1039,7 +1053,7 @@
         <attr name="sharedUserLabel" />
         <attr name="installLocation" />
     </declare-styleable>
-    
+
     <!-- The <code>application</code> tag describes application-level components
          contained in the package, as well as general application
          attributes.  Many of the attributes you can supply here (such
@@ -1047,7 +1061,7 @@
          and allowTaskReparenting) serve
          as default values for the corresponding attributes of components
          declared inside of the application.
-         
+
          <p>Inside of this element you specify what the application contains,
          using the elements {@link #AndroidManifestProvider provider},
          {@link #AndroidManifestService service},
@@ -1698,6 +1712,7 @@
         <attr name="autoRemoveFromRecents" />
         <attr name="relinquishTaskIdentity" />
         <attr name="resumeWhilePausing" />
+        <attr name="resizeableActivity" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

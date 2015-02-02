@@ -2604,9 +2604,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "resizeStack: stackId " + stackId + " not found.");
             return;
         }
+
+        final ActivityRecord r = stack.topRunningActivityLocked(null);
+        final TaskRecord topTask = r.task;
+        if (!topTask.mResizeable) {
+            Slog.w(TAG, "resizeStack: top task " + topTask + " not resizeable.");
+            return;
+        }
+
         final Configuration overrideConfig = mWindowManager.resizeStack(stackId, bounds);
         if (stack.updateOverrideConfiguration(overrideConfig)) {
-            final ActivityRecord r = stack.topRunningActivityLocked(null);
             if (r != null) {
                 final boolean updated = stack.ensureActivityConfigurationLocked(r, 0);
                 // And we need to make sure at this point that all other activities

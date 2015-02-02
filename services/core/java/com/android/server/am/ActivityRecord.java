@@ -75,7 +75,6 @@ final class ActivityRecord {
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
     final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
-    private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_ID = "id";
     private static final String TAG_INTENT = "intent";
     private static final String ATTR_USERID = "user_id";

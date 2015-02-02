@@ -7830,6 +7830,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void setTaskResizeable(int taskId, boolean resizeable) {
+        synchronized (this) {
+            TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+            if (task == null) {
+                Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
+                return;
+            }
+            task.mResizeable = resizeable;
+        }
+    }
+
+    @Override
     public Bitmap getTaskDescriptionIcon(String filename) {
         if (!FileUtils.isValidExtFilename(filename)
                 || !filename.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {

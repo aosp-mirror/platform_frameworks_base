@@ -49,6 +49,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.TypedValue;
 
+import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
@@ -2946,20 +2947,19 @@ public class PackageParser {
             XmlPullParser parser, AttributeSet attrs, int flags, String[] outError,
             boolean receiver, boolean hardwareAccelerated)
             throws XmlPullParserException, IOException {
-        TypedArray sa = res.obtainAttributes(attrs,
-                com.android.internal.R.styleable.AndroidManifestActivity);
+        TypedArray sa = res.obtainAttributes(attrs, R.styleable.AndroidManifestActivity);
 
         if (mParseActivityArgs == null) {
             mParseActivityArgs = new ParseComponentArgs(owner, outError,
-                    com.android.internal.R.styleable.AndroidManifestActivity_name,
-                    com.android.internal.R.styleable.AndroidManifestActivity_label,
-                    com.android.internal.R.styleable.AndroidManifestActivity_icon,
-                    com.android.internal.R.styleable.AndroidManifestActivity_logo,
-                    com.android.internal.R.styleable.AndroidManifestActivity_banner,
+                    R.styleable.AndroidManifestActivity_name,
+                    R.styleable.AndroidManifestActivity_label,
+                    R.styleable.AndroidManifestActivity_icon,
+                    R.styleable.AndroidManifestActivity_logo,
+                    R.styleable.AndroidManifestActivity_banner,
                     mSeparateProcesses,
-                    com.android.internal.R.styleable.AndroidManifestActivity_process,
-                    com.android.internal.R.styleable.AndroidManifestActivity_description,
-                    com.android.internal.R.styleable.AndroidManifestActivity_enabled);
+                    R.styleable.AndroidManifestActivity_process,
+                    R.styleable.AndroidManifestActivity_description,
+                    R.styleable.AndroidManifestActivity_enabled);
         }
         
         mParseActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
@@ -2972,22 +2972,18 @@ public class PackageParser {
             return null;
         }
 
-        boolean setExported = sa.hasValue(
-                com.android.internal.R.styleable.AndroidManifestActivity_exported);
+        boolean setExported = sa.hasValue(R.styleable.AndroidManifestActivity_exported);
         if (setExported) {
-            a.info.exported = sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_exported, false);
+            a.info.exported = sa.getBoolean(R.styleable.AndroidManifestActivity_exported, false);
         }
 
-        a.info.theme = sa.getResourceId(
-                com.android.internal.R.styleable.AndroidManifestActivity_theme, 0);
+        a.info.theme = sa.getResourceId(R.styleable.AndroidManifestActivity_theme, 0);
 
-        a.info.uiOptions = sa.getInt(
-                com.android.internal.R.styleable.AndroidManifestActivity_uiOptions,
+        a.info.uiOptions = sa.getInt(R.styleable.AndroidManifestActivity_uiOptions,
                 a.info.applicationInfo.uiOptions);
 
         String parentName = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestActivity_parentActivityName,
+                R.styleable.AndroidManifestActivity_parentActivityName,
                 Configuration.NATIVE_CONFIG_VERSION);
         if (parentName != null) {
             String parentClassName = buildClassName(a.info.packageName, parentName, outError);
@@ -3001,8 +2997,7 @@ public class PackageParser {
         }
 
         String str;
-        str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestActivity_permission, 0);
+        str = sa.getNonConfigurationString(R.styleable.AndroidManifestActivity_permission, 0);
         if (str == null) {
             a.info.permission = owner.applicationInfo.permission;
         } else {
@@ -3010,146 +3005,111 @@ public class PackageParser {
         }
 
         str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestActivity_taskAffinity,
+                R.styleable.AndroidManifestActivity_taskAffinity,
                 Configuration.NATIVE_CONFIG_VERSION);
         a.info.taskAffinity = buildTaskAffinityName(owner.applicationInfo.packageName,
                 owner.applicationInfo.taskAffinity, str, outError);
 
         a.info.flags = 0;
         if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_multiprocess,
-                false)) {
+                R.styleable.AndroidManifestActivity_multiprocess, false)) {
             a.info.flags |= ActivityInfo.FLAG_MULTIPROCESS;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_finishOnTaskLaunch,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_finishOnTaskLaunch, false)) {
             a.info.flags |= ActivityInfo.FLAG_FINISH_ON_TASK_LAUNCH;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_clearTaskOnLaunch,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_clearTaskOnLaunch, false)) {
             a.info.flags |= ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_noHistory,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_noHistory, false)) {
             a.info.flags |= ActivityInfo.FLAG_NO_HISTORY;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_alwaysRetainTaskState,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_alwaysRetainTaskState, false)) {
             a.info.flags |= ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_stateNotNeeded,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_stateNotNeeded, false)) {
             a.info.flags |= ActivityInfo.FLAG_STATE_NOT_NEEDED;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_excludeFromRecents,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_excludeFromRecents, false)) {
             a.info.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_allowTaskReparenting,
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_allowTaskReparenting,
                 (owner.applicationInfo.flags&ApplicationInfo.FLAG_ALLOW_TASK_REPARENTING) != 0)) {
             a.info.flags |= ActivityInfo.FLAG_ALLOW_TASK_REPARENTING;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_finishOnCloseSystemDialogs,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_finishOnCloseSystemDialogs, false)) {
             a.info.flags |= ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_showOnLockScreen,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_showOnLockScreen, false)) {
             a.info.flags |= ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_immersive,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_immersive, false)) {
             a.info.flags |= ActivityInfo.FLAG_IMMERSIVE;
         }
 
-        if (sa.getBoolean(
-                com.android.internal.R.styleable.AndroidManifestActivity_primaryUserOnly,
-                false)) {
+        if (sa.getBoolean(R.styleable.AndroidManifestActivity_primaryUserOnly, false)) {
             a.info.flags |= ActivityInfo.FLAG_PRIMARY_USER_ONLY;
         }
 
         if (!receiver) {
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_hardwareAccelerated,
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_hardwareAccelerated,
                     hardwareAccelerated)) {
                 a.info.flags |= ActivityInfo.FLAG_HARDWARE_ACCELERATED;
             }
 
             a.info.launchMode = sa.getInt(
-                    com.android.internal.R.styleable.AndroidManifestActivity_launchMode,
-                    ActivityInfo.LAUNCH_MULTIPLE);
+                    R.styleable.AndroidManifestActivity_launchMode, ActivityInfo.LAUNCH_MULTIPLE);
             a.info.documentLaunchMode = sa.getInt(
-                    com.android.internal.R.styleable.AndroidManifestActivity_documentLaunchMode,
+                    R.styleable.AndroidManifestActivity_documentLaunchMode,
                     ActivityInfo.DOCUMENT_LAUNCH_NONE);
             a.info.maxRecents = sa.getInt(
-                    com.android.internal.R.styleable.AndroidManifestActivity_maxRecents,
+                    R.styleable.AndroidManifestActivity_maxRecents,
                     ActivityManager.getDefaultAppRecentsLimitStatic());
             a.info.screenOrientation = sa.getInt(
-                    com.android.internal.R.styleable.AndroidManifestActivity_screenOrientation,
+                    R.styleable.AndroidManifestActivity_screenOrientation,
                     ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            a.info.configChanges = sa.getInt(
-                    com.android.internal.R.styleable.AndroidManifestActivity_configChanges,
-                    0);
+            a.info.configChanges = sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0);
             a.info.softInputMode = sa.getInt(
-                    com.android.internal.R.styleable.AndroidManifestActivity_windowSoftInputMode,
-                    0);
+                    R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
 
             a.info.persistableMode = sa.getInteger(
-                    com.android.internal.R.styleable.AndroidManifestActivity_persistableMode,
+                    R.styleable.AndroidManifestActivity_persistableMode,
                     ActivityInfo.PERSIST_ROOT_ONLY);
 
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_allowEmbedded,
-                    false)) {
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_allowEmbedded, false)) {
                 a.info.flags |= ActivityInfo.FLAG_ALLOW_EMBEDDED;
             }
 
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_autoRemoveFromRecents,
-                    false)) {
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_autoRemoveFromRecents, false)) {
                 a.info.flags |= ActivityInfo.FLAG_AUTO_REMOVE_FROM_RECENTS;
             }
 
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_relinquishTaskIdentity,
-                    false)) {
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_relinquishTaskIdentity, false)) {
                 a.info.flags |= ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
             }
 
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_resumeWhilePausing,
-                    false)) {
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_resumeWhilePausing, false)) {
                 a.info.flags |= ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
             }
+
+            a.info.resizeable = sa.getBoolean(
+                    R.styleable.AndroidManifestActivity_resizeableActivity,
+                    owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.MNC);
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
-        }
 
-        if (receiver) {
-            if (sa.getBoolean(
-                    com.android.internal.R.styleable.AndroidManifestActivity_singleUser,
-                    false)) {
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_singleUser, false)) {
                 a.info.flags |= ActivityInfo.FLAG_SINGLE_USER;
                 if (a.info.exported && (flags & PARSE_IS_PRIVILEGED) == 0) {
                     Slog.w(TAG, "Activity exported request ignored due to singleUser: "
