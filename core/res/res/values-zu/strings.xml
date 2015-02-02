@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"1 ihora eledlule"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> amahora adlule"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Izinsuku zokugcina ezingu- <xliff:g id="COUNT">%d</xliff:g>"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Inyanga edlule"</string>
     <string name="older" msgid="5211975022815554840">"Okudala kakhulu"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"I-Android iyaqala…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Ikhulisa isitoreji."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ukubeka ezingeni eliphezulu <xliff:g id="NUMBER_0">%1$d</xliff:g> uhlelo lokusebenza <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Qalisa izinhlelo zokusebenza."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Qedela ukuqala kabusha."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> iyasebenza"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Isicelo se-SS siguqulelwe kusicelo se-DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Isicelo se-SS siguqulelwe kusicelo se-USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Isicelo se-SS siguqulelwe kusicelo esisha se-SS."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

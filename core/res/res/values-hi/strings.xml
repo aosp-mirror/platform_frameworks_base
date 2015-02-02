@@ -71,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"आउटगोइंग कॉलर ID"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"कनेक्ट किया गया लाइन आईडी"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"कनेक्ट किया गया लाइन आईडी प्रतिबंध"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"कॉल अग्रेषण"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"कॉल आगे भेजना"</string>
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल बाधित करना"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"पासवर्ड बदलें"</string>
@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"1 घंटे पहले"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> घंटे पहले"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"अंतिम <xliff:g id="COUNT">%d</xliff:g> दिन"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"पिछला माह"</string>
     <string name="older" msgid="5211975022815554840">"इससे पुराना"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android प्रारंभ हो रहा है…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"मेमोरी ऑप्‍टिमाइज़ हो रही है."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> में से <xliff:g id="NUMBER_0">%1$d</xliff:g> ऐप्स  अनुकूलित हो रहा है."</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्‍त हो रहा है."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चल रही है"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS अनुरोध को DIAL अनुरोध में बदल दिया गया है."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS अनुरोध को USSD अनुरोध में बदल दिया गया है."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS अनुरोध को नए SS अनुरोध में बदल दिया गया है."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

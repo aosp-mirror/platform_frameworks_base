@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"1 час назад"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Последние <xliff:g id="COUNT">%d</xliff:g> дн."</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Прошлый месяц"</string>
     <string name="older" msgid="5211975022815554840">"Еще раньше"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Запуск Android…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизация хранилища…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизация приложения <xliff:g id="NUMBER_0">%1$d</xliff:g> из <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Запуск приложений."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Окончание загрузки..."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
@@ -1846,7 +1846,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Запрашивать PIN-код для отключения блокировки"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Запрашивать графический ключ для отключения блокировки"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запрашивать пароль для отключения блокировки"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы заряд батареи расходовался медленнее, режим энергосбережения уменьшает быстродействие устройства и ограничивает количество ресурсов, затрачиваемых на вибрацию, Геолокацию и большинство процессов обработки данных в фоновом режиме. Приложения, которые используют синхронизацию (например, для электронной почты и обмена SMS), могут не обновляться, пока вы их не откроете.\n\nКогда устройство заряжается, режим энергосбережения отключается автоматически."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"До отключения режима (в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"До отключения режима"</string>
   <plurals name="zen_mode_duration_minutes_summary">
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-запрос преобразован в DIAL-запрос."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-запрос преобразован в USSD-запрос."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-запрос преобразован в новый SS-запрос."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

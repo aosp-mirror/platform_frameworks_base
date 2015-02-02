@@ -269,13 +269,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Dostęp do karty SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funkcje ułatwień dostępu"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funkcje, których może zażądać technologia ułatwień dostępu."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobierz zawartość okna"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pobieranie zawartości okna"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Sprawdzanie zawartości okna, z którego korzystasz."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włącz czytanie dotykiem"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Włączenie czytania dotykiem"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Klikane elementy będą wymawiane na głos, a ekran można przeglądać, używając gestów."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Włącz ułatwienia dostępu w internecie"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Włączenie ułatwień dostępu w internecie"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Można zainstalować skrypty, by zawartość aplikacji była łatwiej dostępna."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserwuj wpisywany tekst"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Obserwowanie wpisywanego tekstu"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Obejmuje informacje osobiste, takie jak numery kart kredytowych i hasła."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"godzinę temu"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> godz. temu"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"Ostatnie (<xliff:g id="COUNT">%d</xliff:g>) dni"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Ostatni miesiąc"</string>
     <string name="older" msgid="5211975022815554840">"Starsze"</string>
   <plurals name="num_days_ago">
@@ -1200,7 +1198,7 @@
     <item quantity="other" msgid="2973062968038355991">"za <xliff:g id="COUNT">%d</xliff:g> dni"</item>
   </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"w dniu <xliff:g id="DATE">%s</xliff:g>"</string>
-    <string name="preposition_for_time" msgid="5506831244263083793">"o godzinie <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"o godzinie <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"w <xliff:g id="YEAR">%s</xliff:g> r."</string>
     <string name="day" msgid="8144195776058119424">"dzień"</string>
     <string name="days" msgid="4774547661021344602">"dni"</string>
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android się uruchamia…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optymalizacja pamięci."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optymalizowanie aplikacji <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Uruchamianie aplikacji."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Kończenie uruchamiania."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Działa <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Żądanie SS zostało zmienione na żądanie DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Żądanie SS zostało zmienione na żądanie USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Żądanie SS zostało zmienione na nowe żądanie SS."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>

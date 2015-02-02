@@ -1142,9 +1142,7 @@
     <item quantity="one" msgid="9150797944610821849">"1 jam yang lalu"</item>
     <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> jam yang lalu"</item>
   </plurals>
-  <plurals name="last_num_days">
-    <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> hari terakhir"</item>
-  </plurals>
+    <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Bulan lepas"</string>
     <string name="older" msgid="5211975022815554840">"Lebih lama"</string>
   <plurals name="num_days_ago">
@@ -1303,6 +1301,8 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android sedang dimulakan…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Mengoptimumkan storan."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Mengoptimumkan apl <xliff:g id="NUMBER_0">%1$d</xliff:g> daripada <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
+    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
+    <skip />
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Memulakan apl."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"But akhir."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> dijalankan"</string>
@@ -1879,4 +1879,8 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Permintaan SS diubah kepada permintaan DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Permintaan SS diubah kepada permintaan USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Permintaan SS diubah kepada permintaan SS baharu."</string>
+    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
+    <skip />
+    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
+    <skip />
 </resources>
