@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.Nullable;
 import android.content.SharedPreferences;
 import android.os.FileUtils;
 import android.os.Looper;
@@ -217,7 +218,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
-    public String getString(String key, String defValue) {
+    @Nullable
+    public String getString(String key, @Nullable String defValue) {
         synchronized (this) {
             awaitLoadedLocked();
             String v = (String)mMap.get(key);
@@ -225,7 +227,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
-    public Set<String> getStringSet(String key, Set<String> defValues) {
+    @Nullable
+    public Set<String> getStringSet(String key, @Nullable Set<String> defValues) {
         synchronized (this) {
             awaitLoadedLocked();
             Set<String> v = (Set<String>) mMap.get(key);
@@ -303,13 +306,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
         private final Map<String, Object> mModified = Maps.newHashMap();
         private boolean mClear = false;
 
-        public Editor putString(String key, String value) {
+        public Editor putString(String key, @Nullable String value) {
             synchronized (this) {
                 mModified.put(key, value);
                 return this;
             }
         }
-        public Editor putStringSet(String key, Set<String> values) {
+        public Editor putStringSet(String key, @Nullable Set<String> values) {
             synchronized (this) {
                 mModified.put(key,
                         (values == null) ? null : new HashSet<String>(values));

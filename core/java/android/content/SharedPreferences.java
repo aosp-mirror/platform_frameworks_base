@@ -16,6 +16,8 @@
 
 package android.content;
 
+import android.annotation.Nullable;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -78,7 +80,7 @@ public interface SharedPreferences {
          * @return Returns a reference to the same Editor object, so you can
          * chain put calls together.
          */
-        Editor putString(String key, String value);
+        Editor putString(String key, @Nullable String value);
         
         /**
          * Set a set of String values in the preferences editor, to be written
@@ -91,7 +93,7 @@ public interface SharedPreferences {
          * @return Returns a reference to the same Editor object, so you can
          * chain put calls together.
          */
-        Editor putStringSet(String key, Set<String> values);
+        Editor putStringSet(String key, @Nullable Set<String> values);
         
         /**
          * Set an int value in the preferences editor, to be written back once
@@ -254,7 +256,8 @@ public interface SharedPreferences {
      * 
      * @throws ClassCastException
      */
-    String getString(String key, String defValue);
+    @Nullable
+    String getString(String key, @Nullable String defValue);
     
     /**
      * Retrieve a set of String values from the preferences.
@@ -272,7 +275,8 @@ public interface SharedPreferences {
      * 
      * @throws ClassCastException
      */
-    Set<String> getStringSet(String key, Set<String> defValues);
+    @Nullable
+    Set<String> getStringSet(String key, @Nullable Set<String> defValues);
     
     /**
      * Retrieve an int value from the preferences.
