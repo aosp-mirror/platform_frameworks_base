@@ -1237,8 +1237,14 @@ public class AudioTrack
 
     /**
      * Flushes the audio data currently queued for playback. Any data that has
-     * not been played back will be discarded.  No-op if not stopped or paused,
+     * been written but not yet presented will be discarded.  No-op if not stopped or paused,
      * or if the track's creation mode is not {@link #MODE_STREAM}.
+     * <BR> Note that although data written but not yet presented is discarded, there is no
+     * guarantee that all of the buffer space formerly used by that data
+     * is available for a subsequent write.
+     * For example, a call to {@link #write(byte[], int, int)} with <code>sizeInBytes</code>
+     * less than or equal to the total buffer size
+     * may return a short actual transfer count.
      */
     public void flush() {
         if (mState == STATE_INITIALIZED) {
