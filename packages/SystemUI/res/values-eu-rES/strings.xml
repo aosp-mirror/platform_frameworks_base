@@ -159,7 +159,7 @@
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Baztertu <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> baztertu da."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Azken aplikazioen atala garbitu da."</string>
+    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Azken aplikazio guztiak baztertu da."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> hasten."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Jakinarazpena baztertu da."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Jakinarazpenen panela."</string>
@@ -281,7 +281,19 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pantaila-ainguratzea"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"bilatu"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ezin izan da hasi <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Garbitu aplikazio guztiak"</string>
+    <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Baztertu aplikazio guztiak"</string>
+    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
+    <skip />
+    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
+    <skip />
+    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
+    <skip />
+    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
+    <skip />
+    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
+    <skip />
+    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
+    <skip />
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kargatuta"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Kargatzen"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> falta zaizkio guztiz kargatzeko"</string>
