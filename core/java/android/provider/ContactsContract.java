@@ -1434,9 +1434,9 @@ public final class ContactsContract {
         * and {@link #CONTENT_MULTI_VCARD_URI} to indicate that the returned
         * vcard should not contain a photo.
         *
-        * @hide
+        * This is useful for obtaining a space efficient vcard.
         */
-        public static final String QUERY_PARAMETER_VCARD_NO_PHOTO = "nophoto";
+        public static final String QUERY_PARAMETER_VCARD_NO_PHOTO = "no_photo";
 
         /**
          * Base {@link Uri} for referencing multiple {@link Contacts} entry,
