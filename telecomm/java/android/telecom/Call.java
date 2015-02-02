@@ -159,10 +159,10 @@ public final class Call {
         public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00000400;
 
         /**
-         * Call is using voice over WIFI.
+         * Call is using WIFI.
          * @hide
          */
-        public static final int CAPABILITY_VoWIFI = 0x00000800;
+        public static final int CAPABILITY_WIFI = 0x00000800;
 
         /**
          * Call is able to be separated from its parent {@code Conference}, if any.
@@ -258,8 +258,8 @@ public final class Call {
             if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
                 builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
             }
-            if (can(capabilities, CAPABILITY_VoWIFI)) {
-                builder.append(" CAPABILITY_VoWIFI");
+            if (can(capabilities, CAPABILITY_WIFI)) {
+                builder.append(" CAPABILITY_WIFI");
             }
             if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
                 builder.append(" CAPABILITY_GENERIC_CONFERENCE");
