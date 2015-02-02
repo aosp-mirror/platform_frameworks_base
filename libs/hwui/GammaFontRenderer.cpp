@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "Debug.h"
 #include "GammaFontRenderer.h"
 #include "Properties.h"
@@ -96,7 +94,8 @@ GammaFontRenderer::~GammaFontRenderer() {
 // Shader-based renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma): GammaFontRenderer() {
+ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma)
+        : GammaFontRenderer() {
     INIT_LOGD("Creating shader gamma font renderer");
     mRenderer = nullptr;
     mMultiGamma = multiGamma;
@@ -123,9 +122,9 @@ void ShaderGammaFontRenderer::describe(ProgramDescription& description,
 }
 
 void ShaderGammaFontRenderer::setupProgram(ProgramDescription& description,
-        Program* program) const {
+        Program& program) const {
     if (description.hasGammaCorrection) {
-        glUniform1f(program->getUniform("gamma"), description.gamma);
+        glUniform1f(program.getUniform("gamma"), description.gamma);
     }
 }
 
@@ -139,7 +138,8 @@ void ShaderGammaFontRenderer::endPrecaching() {
 // Lookup-based renderer
 ///////////////////////////////////////////////////////////////////////////////
 
-LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
+LookupGammaFontRenderer::LookupGammaFontRenderer()
+        : GammaFontRenderer() {
     INIT_LOGD("Creating lookup gamma font renderer");
 
     // Compute the gamma tables
@@ -162,7 +162,8 @@ void LookupGammaFontRenderer::endPrecaching() {
 // Lookup-based renderer, using 3 different correction tables
 ///////////////////////////////////////////////////////////////////////////////
 
-Lookup3GammaFontRenderer::Lookup3GammaFontRenderer(): GammaFontRenderer() {
+Lookup3GammaFontRenderer::Lookup3GammaFontRenderer()
+        : GammaFontRenderer() {
     INIT_LOGD("Creating lookup3 gamma font renderer");
 
     // Compute the gamma tables

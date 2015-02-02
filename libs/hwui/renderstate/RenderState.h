@@ -22,11 +22,12 @@
 #include <utils/Mutex.h>
 #include <utils/Functor.h>
 #include <utils/RefBase.h>
-
 #include <private/hwui/DrawGlInfo.h>
 #include <renderstate/Blend.h>
+
 #include "AssetAtlas.h"
 #include "Caches.h"
+#include "Glop.h"
 #include "renderstate/MeshState.h"
 #include "renderstate/PixelBufferState.h"
 #include "renderstate/Scissor.h"
@@ -83,6 +84,8 @@ public:
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
+    void render(const Glop& glop);
+
     AssetAtlas& assetAtlas() { return mAssetAtlas; }
     Blend& blend() { return *mBlend; }
     MeshState& meshState() { return *mMeshState; }
@@ -95,6 +98,9 @@ private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
     void assertOnGLThread();
+
+    void setupVertexAttributes(const Glop& glop);
+    void tearDownVertexAttributes(const Glop& glop);
 
     RenderState(renderthread::RenderThread& thread);
     ~RenderState();

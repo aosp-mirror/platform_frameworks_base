@@ -39,6 +39,9 @@ MeshState::MeshState()
 
     mQuadListIndices = 0;
     mShadowStripsIndices = 0;
+
+    // position attribute always enabled
+    glEnableVertexAttribArray(Program::kBindingPosition);
 }
 
 MeshState::~MeshState() {
@@ -83,21 +86,17 @@ bool MeshState::unbindMeshBuffer() {
 // Vertices
 ///////////////////////////////////////////////////////////////////////////////
 
-void MeshState::bindPositionVertexPointer(const Program* currentProgram, bool force,
-        const GLvoid* vertices, GLsizei stride) {
+void MeshState::bindPositionVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
     if (force || vertices != mCurrentPositionPointer || stride != mCurrentPositionStride) {
-        GLuint slot = currentProgram->position;
-        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
+        glVertexAttribPointer(Program::kBindingPosition, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentPositionPointer = vertices;
         mCurrentPositionStride = stride;
     }
 }
 
-void MeshState::bindTexCoordsVertexPointer(const Program* currentProgram, bool force,
-        const GLvoid* vertices, GLsizei stride) {
+void MeshState::bindTexCoordsVertexPointer(bool force, const GLvoid* vertices, GLsizei stride) {
     if (force || vertices != mCurrentTexCoordsPointer || stride != mCurrentTexCoordsStride) {
-        GLuint slot = currentProgram->texCoords;
-        glVertexAttribPointer(slot, 2, GL_FLOAT, GL_FALSE, stride, vertices);
+        glVertexAttribPointer(Program::kBindingTexCoords, 2, GL_FLOAT, GL_FALSE, stride, vertices);
         mCurrentTexCoordsPointer = vertices;
         mCurrentTexCoordsStride = stride;
     }

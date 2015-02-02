@@ -38,7 +38,7 @@ public:
     virtual uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const = 0;
 
     virtual void describe(ProgramDescription& description, const SkPaint* paint) const = 0;
-    virtual void setupProgram(ProgramDescription& description, Program* program) const = 0;
+    virtual void setupProgram(ProgramDescription& description, Program& program) const = 0;
 
     virtual void endPrecaching() = 0;
 
@@ -86,7 +86,7 @@ public:
     }
 
     void describe(ProgramDescription& description, const SkPaint* paint) const override;
-    void setupProgram(ProgramDescription& description, Program* program) const override;
+    void setupProgram(ProgramDescription& description, Program& program) const override;
 
     void endPrecaching() override;
 
@@ -135,7 +135,7 @@ public:
     void describe(ProgramDescription& description, const SkPaint* paint) const override {
     }
 
-    void setupProgram(ProgramDescription& description, Program* program) const override {
+    void setupProgram(ProgramDescription& description, Program& program) const override {
     }
 
     void endPrecaching() override;
@@ -171,7 +171,7 @@ public:
     void describe(ProgramDescription& description, const SkPaint* paint) const override {
     }
 
-    void setupProgram(ProgramDescription& description, Program* program) const override {
+    void setupProgram(ProgramDescription& description, Program& program) const override {
     }
 
     void endPrecaching() override;

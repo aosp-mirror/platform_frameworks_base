@@ -39,7 +39,7 @@ public:
     Dither(Caches& caches);
 
     void clear();
-    void setupProgram(Program* program, GLuint* textureUnit);
+    void setupProgram(Program& program, GLuint* textureUnit);
 
 private:
     void bindDitherTexture();

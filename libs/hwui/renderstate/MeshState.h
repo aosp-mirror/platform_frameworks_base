@@ -80,15 +80,15 @@ public:
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gTextureVertexStride and a size of 2.
      */
-    void bindPositionVertexPointer(const Program* currentProgram, bool force,
-            const GLvoid* vertices, GLsizei stride = kTextureVertexStride);
+    void bindPositionVertexPointer(bool force, const GLvoid* vertices,
+            GLsizei stride = kTextureVertexStride);
 
     /**
      * Binds an attrib to the specified float vertex pointer.
      * Assumes a stride of gTextureVertexStride and a size of 2.
      */
-    void bindTexCoordsVertexPointer(const Program* currentProgram, bool force,
-            const GLvoid* vertices, GLsizei stride = kTextureVertexStride);
+    void bindTexCoordsVertexPointer(bool force, const GLvoid* vertices,
+            GLsizei stride = kTextureVertexStride);
 
     /**
      * Resets the vertex pointers.

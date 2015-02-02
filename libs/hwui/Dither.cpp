@@ -89,13 +89,13 @@ void Dither::clear() {
 // Program management
 ///////////////////////////////////////////////////////////////////////////////
 
-void Dither::setupProgram(Program* program, GLuint* textureUnit) {
+void Dither::setupProgram(Program& program, GLuint* textureUnit) {
     GLuint textureSlot = (*textureUnit)++;
     mCaches.textureState().activateTexture(textureSlot);
 
     bindDitherTexture();
 
-    glUniform1i(program->getUniform("ditherSampler"), textureSlot);
+    glUniform1i(program.getUniform("ditherSampler"), textureSlot);
 }
 
 }; // namespace uirenderer
