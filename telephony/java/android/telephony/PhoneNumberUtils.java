@@ -2386,11 +2386,11 @@ public class PhoneNumberUtils
 
     private static String getCurrentIdp(boolean useNanp) {
         String ps = null;
-        if(useNanp)
+        if (useNanp) {
             ps = NANP_IDP_STRING;
-        else{
+        } else {
             // in case, there is no IDD is found, we shouldn't convert it.
-            ps = SystemProperties.get(PROPERTY_OPERATOR_IDP_STRING, PLUS_SIGN_STRING);                
+            ps = SystemProperties.get(PROPERTY_OPERATOR_IDP_STRING, PLUS_SIGN_STRING);
         }
         return ps;
     }
