@@ -27264,6 +27264,7 @@ package android.provider {
     field public static final java.lang.String SHOW_PROCESSES = "show_processes";
     field public static final java.lang.String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
     field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_global_version";
+    field public static final java.lang.String THEATER_MODE_ON = "theater_mode_on";
     field public static final java.lang.String TRANSITION_ANIMATION_SCALE = "transition_animation_scale";
     field public static final java.lang.String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
     field public static final java.lang.String USE_GOOGLE_MAIL = "use_google_mail";

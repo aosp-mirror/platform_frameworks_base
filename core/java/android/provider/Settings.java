@@ -18,6 +18,7 @@ package android.provider;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -5104,6 +5105,7 @@ public final class Settings {
          * Whether Theater Mode is on.
          * {@hide}
          */
+        @SystemApi
         public static final String THEATER_MODE_ON = "theater_mode_on";
 
         /**
