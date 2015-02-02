@@ -24,14 +24,9 @@ import android.os.RemoteException;
  * Implementation of a handler for {@link IGpsStatusListener}.
  */
 abstract class GpsStatusListenerHelper extends RemoteListenerHelper<IGpsStatusListener> {
-    public GpsStatusListenerHelper(Handler handler) {
+    protected GpsStatusListenerHelper(Handler handler) {
         super(handler, "GpsStatusListenerHelper");
-
-        Operation nullOperation = new Operation() {
-            @Override
-            public void execute(IGpsStatusListener iGpsStatusListener) throws RemoteException {}
-        };
-        setSupported(GpsLocationProvider.isSupported(), nullOperation);
+        setSupported(GpsLocationProvider.isSupported());
     }
 
     @Override
@@ -47,10 +42,9 @@ abstract class GpsStatusListenerHelper extends RemoteListenerHelper<IGpsStatusLi
         return null;
     }
 
-    @Override
-    protected void handleGpsEnabledChanged(boolean enabled) {
+    public void onStatusChanged(boolean isNavigating) {
         Operation operation;
-        if (enabled) {
+        if (isNavigating) {
             operation = new Operation() {
                 @Override
                 public void execute(IGpsStatusListener listener) throws RemoteException {
@@ -114,5 +108,5 @@ abstract class GpsStatusListenerHelper extends RemoteListenerHelper<IGpsStatusLi
         foreach(operation);
     }
 
-    private abstract class Operation implements ListenerOperation<IGpsStatusListener> { }
+    private interface Operation extends ListenerOperation<IGpsStatusListener> {}
 }

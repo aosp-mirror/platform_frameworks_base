@@ -25,7 +25,6 @@ import com.android.internal.location.ProviderRequest;
 import com.android.internal.R;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.TelephonyIntents;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -72,7 +71,6 @@ import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
-import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
@@ -91,7 +89,6 @@ import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -395,7 +392,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         @Override
-        public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
+        public void addGpsStatusListener(IGpsStatusListener listener) {
             mListenerHelper.addListener(listener);
         }
 
@@ -681,7 +678,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         mListenerHelper = new GpsStatusListenerHelper(mHandler) {
             @Override
             protected boolean isAvailableInPlatform() {
-                return GpsLocationProvider.isSupported();
+                return isSupported();
             }
 
             @Override
@@ -1027,6 +1024,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
             if (mC2KServerHost != null) {
                 native_set_agps_server(AGPS_TYPE_C2K, mC2KServerHost, mC2KServerPort);
             }
+
+            mGpsMeasurementsProvider.onGpsEnabledChanged();
+            mGpsNavigationMessageProvider.onGpsEnabledChanged();
         } else {
             synchronized (mLock) {
                 mEnabled = false;
@@ -1060,6 +1060,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
         // do this before releasing wakelock
         native_cleanup();
+
+        mGpsMeasurementsProvider.onGpsEnabledChanged();
+        mGpsNavigationMessageProvider.onGpsEnabledChanged();
     }
 
     @Override
@@ -1479,9 +1482,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (wasNavigating != mNavigating) {
-            mListenerHelper.onGpsEnabledChanged(mNavigating);
-            mGpsMeasurementsProvider.onGpsEnabledChanged(mNavigating);
-            mGpsNavigationMessageProvider.onGpsEnabledChanged(mNavigating);
+            mListenerHelper.onStatusChanged(mNavigating);
 
             // send an intent to notify that the GPS has been enabled or disabled
             Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
