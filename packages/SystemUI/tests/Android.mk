@@ -36,4 +36,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := mockito-target Keyguard
 # UI it doesn't own. This is necessary to allow screenshots to be taken
 LOCAL_CERTIFICATE := platform
 
+include frameworks/base/packages/SettingsLib/common.mk
+
 include $(BUILD_PACKAGE)
