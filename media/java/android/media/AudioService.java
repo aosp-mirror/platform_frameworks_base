@@ -153,11 +153,11 @@ public class AudioService extends IAudioService.Stub {
     private final AppOpsManager mAppOps;
 
     // the platform has no specific capabilities
-    private static final int PLATFORM_DEFAULT = 0;
+    public static final int PLATFORM_DEFAULT = 0;
     // the platform is voice call capable (a phone)
-    private static final int PLATFORM_VOICE = 1;
+    public static final int PLATFORM_VOICE = 1;
     // the platform is a television or a set-top box
-    private static final int PLATFORM_TELEVISION = 2;
+    public static final int PLATFORM_TELEVISION = 2;
     // the platform type affects volume and silent mode behavior
     private final int mPlatformType;
 
@@ -546,15 +546,7 @@ public class AudioService extends IAudioService.Stub {
         mContentResolver = context.getContentResolver();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
-        if (mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable)) {
-            mPlatformType = PLATFORM_VOICE;
-        } else if (context.getPackageManager().hasSystemFeature(
-                                                            PackageManager.FEATURE_LEANBACK)) {
-            mPlatformType = PLATFORM_TELEVISION;
-        } else {
-            mPlatformType = PLATFORM_DEFAULT;
-        }
+        mPlatformType = getPlatformType(context);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
@@ -665,6 +657,26 @@ public class AudioService extends IAudioService.Stub {
         restoreMasterVolume();
 
         LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
+    }
+
+    /**
+     * Return the platform type that this is running on. One of:
+     * <ul>
+     * <li>{@link #PLATFORM_VOICE}</li>
+     * <li>{@link #PLATFORM_TELEVISION}</li>
+     * <li>{@link #PLATFORM_DEFAULT}</li>
+     * </ul>
+     */
+    public static int getPlatformType(Context context) {
+        if (context.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable)) {
+            return PLATFORM_VOICE;
+        } else if (context.getPackageManager().hasSystemFeature(
+                                                            PackageManager.FEATURE_LEANBACK)) {
+            return PLATFORM_TELEVISION;
+        } else {
+            return PLATFORM_DEFAULT;
+        }
     }
 
     public void systemReady() {
