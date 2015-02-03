@@ -5553,12 +5553,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the location of this view in screen coordintates.
+     * Gets the location of this view in screen coordinates.
      *
      * @param outRect The output location
      * @hide
      */
     public void getBoundsOnScreen(Rect outRect) {
+        getBoundsOnScreen(outRect, false);
+    }
+
+    /**
+     * Gets the location of this view in screen coordinates.
+     *
+     * @param outRect The output location
+     * @param clipToParent Whether to clip child bounds to the parent ones.
+     * @hide
+     */
+    public void getBoundsOnScreen(Rect outRect, boolean clipToParent) {
         if (mAttachInfo == null) {
             return;
         }
@@ -5577,6 +5588,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             View parentView = (View) parent;
 
             position.offset(-parentView.mScrollX, -parentView.mScrollY);
+
+            if (clipToParent) {
+                position.left = Math.max(position.left, 0);
+                position.top = Math.max(position.top, 0);
+                position.right = Math.min(position.right, parentView.getWidth());
+                position.bottom = Math.min(position.bottom, parentView.getHeight());
+            }
 
             if (!parentView.hasIdentityMatrix()) {
                 parentView.getMatrix().mapRect(position);
@@ -5609,7 +5627,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         getDrawingRect(bounds);
         info.setBoundsInParent(bounds);
 
-        getBoundsOnScreen(bounds);
+        getBoundsOnScreen(bounds, true);
         info.setBoundsInScreen(bounds);
 
         ViewParent parent = getParentForAccessibility();
@@ -5802,142 +5820,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return true;
         }
         return false;
-    }
-
-    /**
-     * Computes a point on which a sequence of a down/up event can be sent to
-     * trigger clicking this view. This method is for the exclusive use by the
-     * accessibility layer to determine where to send a click event in explore
-     * by touch mode.
-     *
-     * @param interactiveRegion The interactive portion of this window.
-     * @param outPoint The point to populate.
-     * @return True of such a point exists.
-     */
-    boolean computeClickPointInScreenForAccessibility(Region interactiveRegion,
-            Point outPoint) {
-        // Since the interactive portion of the view is a region but as a view
-        // may have a transformation matrix which cannot be applied to a
-        // region we compute the view bounds rectangle and all interactive
-        // predecessor's and sibling's (siblings of predecessors included)
-        // rectangles that intersect the view bounds. At the
-        // end if the view was partially covered by another interactive
-        // view we compute the view's interactive region and pick a point
-        // on its boundary path as regions do not offer APIs to get inner
-        // points. Note that the the code is optimized to fail early and
-        // avoid unnecessary allocations plus computations.
-
-        // The current approach has edge cases that may produce false
-        // positives or false negatives. For example, a portion of the
-        // view may be covered by an interactive descendant of a
-        // predecessor, which we do not compute. Also a view may be handling
-        // raw touch events instead registering click listeners, which
-        // we cannot compute. Despite these limitations this approach will
-        // work most of the time and it is a huge improvement over just
-        // blindly sending the down and up events in the center of the
-        // view.
-
-        // Cannot click on an unattached view.
-        if (mAttachInfo == null) {
-            return false;
-        }
-
-        // Attached to an invisible window means this view is not visible.
-        if (mAttachInfo.mWindowVisibility != View.VISIBLE) {
-            return false;
-        }
-
-        RectF bounds = mAttachInfo.mTmpTransformRect;
-        bounds.set(0, 0, getWidth(), getHeight());
-        List<RectF> intersections = mAttachInfo.mTmpRectList;
-        intersections.clear();
-
-        if (mParent instanceof ViewGroup) {
-            ViewGroup parentGroup = (ViewGroup) mParent;
-            if (!parentGroup.translateBoundsAndIntersectionsInWindowCoordinates(
-                    this, bounds, intersections)) {
-                intersections.clear();
-                return false;
-            }
-        }
-
-        // Take into account the window location.
-        final int dx = mAttachInfo.mWindowLeft;
-        final int dy = mAttachInfo.mWindowTop;
-        bounds.offset(dx, dy);
-        offsetRects(intersections, dx, dy);
-
-        if (intersections.isEmpty() && interactiveRegion == null) {
-            outPoint.set((int) bounds.centerX(), (int) bounds.centerY());
-        } else {
-            // This view is partially covered by other views, then compute
-            // the not covered region and pick a point on its boundary.
-            Region region = new Region();
-            region.set((int) bounds.left, (int) bounds.top,
-                    (int) bounds.right, (int) bounds.bottom);
-
-            final int intersectionCount = intersections.size();
-            for (int i = intersectionCount - 1; i >= 0; i--) {
-                RectF intersection = intersections.remove(i);
-                region.op((int) intersection.left, (int) intersection.top,
-                        (int) intersection.right, (int) intersection.bottom,
-                        Region.Op.DIFFERENCE);
-            }
-
-            // If the view is completely covered, done.
-            if (region.isEmpty()) {
-                return false;
-            }
-
-            // Take into account the interactive portion of the window
-            // as the rest is covered by other windows. If no such a region
-            // then the whole window is interactive.
-            if (interactiveRegion != null) {
-                region.op(interactiveRegion, Region.Op.INTERSECT);
-            }
-
-            // Take into account the window bounds.
-            final View root = getRootView();
-            if (root != null) {
-                region.op(dx, dy, root.getWidth() + dx, root.getHeight() + dy, Region.Op.INTERSECT);
-            }
-
-            // If the view is completely covered, done.
-            if (region.isEmpty()) {
-                return false;
-            }
-
-            // Try a shortcut here.
-            if (region.isRect()) {
-                Rect regionBounds = mAttachInfo.mTmpInvalRect;
-                region.getBounds(regionBounds);
-                outPoint.set(regionBounds.centerX(), regionBounds.centerY());
-                return true;
-            }
-
-            // Get the a point on the region boundary path.
-            Path path = region.getBoundaryPath();
-            PathMeasure pathMeasure = new PathMeasure(path, false);
-            final float[] coordinates = mAttachInfo.mTmpTransformLocation;
-
-            // Without loss of generality pick a point.
-            final float point = pathMeasure.getLength() * 0.01f;
-            if (!pathMeasure.getPosTan(point, coordinates, null)) {
-                return false;
-            }
-
-            outPoint.set(Math.round(coordinates[0]), Math.round(coordinates[1]));
-        }
-
-        return true;
-    }
-
-    static void offsetRects(List<RectF> rects, float offsetX, float offsetY) {
-        final int rectCount = rects.size();
-        for (int i = 0; i < rectCount; i++) {
-            RectF intersection = rects.get(i);
-            intersection.offset(offsetX, offsetY);
-        }
     }
 
     /**
@@ -8555,6 +8437,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was handled by the view, false otherwise.
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
+        // If the event should be handled by accessibility focus first.
+        if (event.isTargetAccessibilityFocus()) {
+            // We don't have focus or no virtual descendant has it, do not handle the event.
+            if (!isAccessibilityFocused() && !(getViewRootImpl() != null && getViewRootImpl()
+                    .getAccessibilityFocusedHost() == this)) {
+                return false;
+            }
+            // We have focus and got the event, then use normal event dispatch.
+            event.setTargetAccessibilityFocus(false);
+        }
+
         boolean result = false;
 
         if (mInputEventConsistencyVerifier != null) {

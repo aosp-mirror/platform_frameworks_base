@@ -99,8 +99,6 @@ public final class AccessibilityInteractionClient
 
     private boolean mPerformAccessibilityActionResult;
 
-    private Point mComputeClickPointResult;
-
     private Message mSameThreadMessage;
 
     private static final SparseArray<IAccessibilityServiceConnection> sConnectionCache =
@@ -522,43 +520,6 @@ public final class AccessibilityInteractionClient
         return false;
     }
 
-    /**
-     * Computes a point in screen coordinates where sending a down/up events would
-     * perform a click on an {@link AccessibilityNodeInfo}.
-     *
-     * @param connectionId The id of a connection for interacting with the system.
-     * @param accessibilityWindowId A unique window id. Use
-     *     {@link android.view.accessibility.AccessibilityNodeInfo#ACTIVE_WINDOW_ID}
-     *     to query the currently active window.
-     * @param accessibilityNodeId A unique view id or virtual descendant id from
-     *     where to start the search. Use
-     *     {@link android.view.accessibility.AccessibilityNodeInfo#ROOT_NODE_ID}
-     *     to start from the root.
-     * @return Point the click point of null if no such point.
-     */
-    public Point computeClickPointInScreen(int connectionId, int accessibilityWindowId,
-            long accessibilityNodeId) {
-        try {
-            IAccessibilityServiceConnection connection = getConnection(connectionId);
-            if (connection != null) {
-                final int interactionId = mInteractionIdCounter.getAndIncrement();
-                final boolean success = connection.computeClickPointInScreen(
-                        accessibilityWindowId, accessibilityNodeId,
-                        interactionId, this, Thread.currentThread().getId());
-                if (success) {
-                    return getComputeClickPointInScreenResultAndClear(interactionId);
-                }
-            } else {
-                if (DEBUG) {
-                    Log.w(LOG_TAG, "No connection for connection id: " + connectionId);
-                }
-            }
-        } catch (RemoteException re) {
-            Log.w(LOG_TAG, "Error while calling remote computeClickPointInScreen", re);
-        }
-        return null;
-    }
-
     public void clearCache() {
         sAccessibilityCache.clear();
     }
@@ -674,34 +635,6 @@ public final class AccessibilityInteractionClient
     }
 
     /**
-     * Gets the result of a request to compute a point in screen for clicking on a node.
-     *
-     * @param interactionId The interaction id to match the result with the request.
-     * @return The point or null if no such point.
-     */
-    private Point getComputeClickPointInScreenResultAndClear(int interactionId) {
-        synchronized (mInstanceLock) {
-            final boolean success = waitForResultTimedLocked(interactionId);
-            Point result = success ? mComputeClickPointResult : null;
-            clearResultLocked();
-            return result;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void setComputeClickPointInScreenActionResult(Point point, int interactionId) {
-        synchronized (mInstanceLock) {
-            if (interactionId > mInteractionId) {
-                mComputeClickPointResult = point;
-                mInteractionId = interactionId;
-            }
-            mInstanceLock.notifyAll();
-        }
-    }
-
-    /**
      * Clears the result state.
      */
     private void clearResultLocked() {
@@ -709,7 +642,6 @@ public final class AccessibilityInteractionClient
         mFindAccessibilityNodeInfoResult = null;
         mFindAccessibilityNodeInfosResult = null;
         mPerformAccessibilityActionResult = false;
-        mComputeClickPointResult = null;
     }
 
     /**
