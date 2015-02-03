@@ -20,6 +20,7 @@ import com.android.databinding.testapp.vo.ViewBindingObject;
 
 import android.content.res.ColorStateList;
 import android.os.Build;
+import android.test.UiThreadTest;
 import android.view.View;
 
 public class ViewBindingAdapterTest extends BaseDataBinderTest<ViewAdapterTestBinder> {
@@ -33,8 +34,18 @@ public class ViewBindingAdapterTest extends BaseDataBinderTest<ViewAdapterTestBi
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        mBinder.setViewBinding(mViewBindingObject);
-        mBinder.rebindDirty();
+        try {
+            runTestOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBinder.setViewBinding(mViewBindingObject);
+                    mBinder.rebindDirty();
+                }
+            });
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
     }
 
     private void changeValues() throws Throwable {

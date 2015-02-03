@@ -11,13 +11,15 @@
  * limitations under the License.
  */
 
-package com.android.databinding.util
+package com.android.databinding.testapp;
 
-object ParserHelper {
-    public fun toClassName(name:String) : String  {
-        val dot = name.indexOf(".")
-        val stripped = if (dot == -1) name else name.substring(0, name.indexOf("."))
-        return stripped.split("[_-]").map { "${it.substring(0,1).toUpperCase()}${it.substring(1)}" }.join("")
+import com.android.databinding.library.IViewDataBinder;
+
+import android.content.pm.ActivityInfo;
+
+public class BaseLandDataBinderTest<T extends IViewDataBinder> extends BaseDataBinderTest<T> {
+
+    public BaseLandDataBinderTest(Class<T> binderClass, int layoutId) {
+        super(binderClass, layoutId, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
-
 }

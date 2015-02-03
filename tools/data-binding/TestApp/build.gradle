@@ -10,15 +10,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 buildscript {
     repositories {
         jcenter()
         mavenLocal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
-        classpath  'com.android.databinding:dataBinder:0.3-SNAPSHOT'
+        classpath "com.android.tools.build:gradle:$androidPluginVersion"
+        classpath "com.android.databinding:dataBinder:$version"
     }
 }
 apply plugin: 'com.android.application'

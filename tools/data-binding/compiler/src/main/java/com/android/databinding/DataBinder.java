@@ -31,6 +31,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,7 +54,7 @@ public class DataBinder {
     private static final String XPATH_IMPORT_DEFINITIONS = "//import";
     final String LAYOUT_PREFIX = "@layout/";
 
-    List<LayoutBinder> mLayoutBinders = new ArrayList<>();
+    HashMap<String, List<LayoutBinder>> mLayoutBinders = new HashMap<>();
 
     public LayoutBinder parseXml(File xml, String pkg)
             throws ParserConfigurationException, IOException, SAXException,
@@ -120,7 +121,7 @@ public class DataBinder {
                     fullClassName = getFullViewClassName(nodeName);
                 }
                 final BindingTarget bindingTarget = layoutBinder
-                        .createBindingTarget(parent, id.getNodeValue(), fullClassName);
+                        .createBindingTarget(id.getNodeValue(), fullClassName, true);
                 bindingTarget.setIncludedLayout(layoutName);
                 int attrCount = attributes.getLength();
                 for (int i = 0; i < attrCount; i ++) {
@@ -137,7 +138,10 @@ public class DataBinder {
         }
 
         if (!layoutBinder.isEmpty()) {
-            mLayoutBinders.add(layoutBinder);
+            if (!mLayoutBinders.containsKey(xml.getName())) {
+                mLayoutBinders.put(xml.getName(), new ArrayList<LayoutBinder>());
+            }
+            mLayoutBinders.get(xml.getName()).add(layoutBinder);
         }
         return layoutBinder;
     }
@@ -178,7 +182,7 @@ public class DataBinder {
         return viewName;
     }
 
-    public List<LayoutBinder> getLayoutBinders() {
+    public HashMap<String, List<LayoutBinder>> getLayoutBinders() {
         return mLayoutBinders;
     }
 }

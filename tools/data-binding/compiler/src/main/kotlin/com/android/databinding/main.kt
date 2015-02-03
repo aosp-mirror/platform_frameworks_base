@@ -52,6 +52,7 @@ import com.android.databinding.DataBinder
 import com.android.databinding.writer.DataBinderWriter
 import com.android.databinding.ClassAnalyzer
 import com.android.databinding.util.ParserHelper
+import com.google.common.base.Preconditions
 
 
 public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Iterable<File>,
@@ -97,26 +98,109 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
                 findXmlFiles(it, xmlFiles)
             }
         }
-        //viewBinderRenderers.clear()
+        var layoutId = 0
         for (xml in xmlFiles) {
             log("xmlFile $xml")
-            val layoutBinder = parseAndStripXml(xml, "$appPkg.generated")
+            val layoutBinder = parseAndStripXml(xml, "$appPkg.generated", layoutId.toString())
             if (layoutBinder == null) {
                 log("no bindings in $xml, skipping")
                 continue
             }
+            layoutBinder.setId(layoutId)
             layoutBinder.setProjectPackage("$appPkg");
             layoutBinder.setPackage("$appPkg.generated")
             layoutBinder.setBaseClassName("${ParserHelper.toClassName(xml.name)}Binder")
             layoutBinder.setLayoutname(toLayoutId(xml.name))
-
+            layoutBinder.setFile(xml)
+            layoutId ++
         }
+        validateMultiResFiles()
         dbr = DataBinderWriter("com.android.databinding.library", appPkg,
                 "GeneratedDataBinderRenderer", jDataBinder.getLayoutBinders())
     }
 
+    /**
+     * checks which layout fields are defined in multiple places. Ensures their
+     * variables do not conflict
+     */
+    public fun validateMultiResFiles() {
+        jDataBinder.getLayoutBinders()
+            .filter { it.getValue().size() > 1 }
+            .forEach { layout ->
+                // validate all ids are in correct view types
+                // and all variables have the same name
+                val variableTypes = hashMapOf<String, String>()
+                val importTypes = hashMapOf<String, String>()
+
+                layout.getValue().forEach {
+                    it.setHasVariations(true)
+                    it.getUserDefinedVariables().forEach {
+                        Preconditions.checkState(variableTypes.getOrPut(it.getKey(), {it.getValue()}).equals(it.getValue()),
+                                "inconsistent variable types for %s for layout %s", it.getKey(), layout.key)
+                    }
+                    it.getUserDefinedImports().forEach {
+                        Preconditions.checkState(importTypes.getOrPut(it.getKey(), {it.getValue()}).equals(it.getValue()),
+                                "inconsistent import types for %s for layout %s", it.getKey(), layout.key)
+                    }
+                }
+                // now add missing ones to each to ensure they can be referenced
+                Log.d { "checking for missing variables in ${layout.getKey()}" }
+                layout.getValue().forEach { binder ->
+                    // TODO need to remove unused variables while generating the code.
+                    variableTypes.filterNot { binder.getUserDefinedVariables().containsKey(it.key) }
+                        .forEach {
+                            binder.addVariable(it.key, it.value)
+                            Log.d {"adding missing variable ${it.key} / ${it.value} to binder ${binder.getId()}"}
+                        }
+                    importTypes.filterNot { binder.getUserDefinedImports().containsKey(it.key) }
+                            .forEach {
+                                binder.addImport(it.key, it.value)
+                                Log.d {"adding missing import ${it.key} / ${it.value} to binder ${binder.getId()}"}
+                            }
+                }
+                val includeBindingIds = hashSetOf<String>()
+                val viewBindingIds = hashSetOf<String>()
+                val viewTypes = hashMapOf<String, String>()
+                layout.getValue().forEach {
+                    it.getBindingTargets().forEach {
+                        if (it.isBinder()) {
+                            Preconditions.checkState(!viewBindingIds.contains(it.mViewClass),
+                                    """Cannot use the same id for a View and an include tag. Error
+                                    for layout file ${layout.key}""")
+                            includeBindingIds.add(it.mViewClass)
+                        } else {
+                            Preconditions.checkState(!includeBindingIds.contains(it.mViewClass),
+                                    """Cannot use the same id for a View and an include tag. Error
+                                    for layout file ${layout.key}""")
+                            viewBindingIds.add(it.mViewClass)
+                        }
+                        if (it.mViewClass != viewTypes.getOrPut(it.getId(), {it.mViewClass})) {
+                            if (it.isBinder()) {
+                                viewTypes.put(it.getId(), "com.android.databinding.library.IViewDataBinder")
+                            } else {
+                                viewTypes.put(it.getId(), "android.view.View")
+                            }
+
+                        }
+                    }
+                }
+                layout.getValue().forEach {  binder ->
+                    viewTypes.forEach { common ->
+                        val target = binder.getBindingTargets().firstOrNull { it.mId == common.key }
+                        if (target == null) {
+                            // undefined, just define
+                            binder.createBindingTarget(common.key, common.value, false)
+                        } else {
+                            // set type
+                            target.setInterfaceType(common.value)
+                        }
+                    }
+                }
+            }
+    }
+
     public fun generatedCode() : Boolean {
-        return jDataBinder.getLayoutBinders().isNotEmpty()
+        return jDataBinder.getLayoutBinders().size() > 0
     }
 
     public fun writeAttrFile() {
@@ -127,7 +211,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     public fun writeDbrFile() : Unit = writeDbrFile(dbrOutputDir)
     public fun writeDbrFile(dir : File) : Unit {
         dir.mkdirs()
-        if (dbr.layoutBinders.isNotEmpty()) {
+        if (dbr.layoutBinders.size() > 0) {
             writeToFile(File(dir, "${dbr.className}.java"), dbr.write())
         }
     }
@@ -137,7 +221,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     public fun writeViewBinderInterfaces(dir : File) : Unit {
         dir.mkdirs()
         jDataBinder.getLayoutBinders().forEach {
-            writeToFile(File(dir, "${it.getInterfaceName()}.java"), it.writeViewBinderInterface())
+            writeToFile(File(dir, "${it.value.first!!.getInterfaceName()}.java"), it.value.first!!.writeViewBinderInterface())
         }
     }
 
@@ -146,7 +230,9 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     public fun writeViewBinders(dir : File) : Unit {
         dir.mkdirs()
         jDataBinder.getLayoutBinders().forEach {
-            writeToFile(File(dir, "${it.getClassName()}.java"), it.writeViewBinder())
+            it.getValue().forEach {
+                writeToFile(File(dir, "${it.getClassName()}.java"), it.writeViewBinder())
+            }
         }
 
     }
@@ -159,15 +245,15 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     private fun toLayoutId(name:String) : String =
             name.substring(0, name.indexOf("."))
 
-    private fun stripBindingTags(xml  : File) {
-        val res = XmlEditor.strip(xml)
+    private fun stripBindingTags(xml  : File, newTag : String? = null) {
+        val res = XmlEditor.strip(xml, newTag)
         if (res != null) {
             Log.d{"file ${xml.getName()} has changed, overwriting ${xml.getAbsolutePath()}"}
             xml.writeText(res)
         }
     }
 
-    private fun stripFileAndGetOriginal(xml : File) : File? {
+    private fun stripFileAndGetOriginal(xml : File, binderId : String) : File? {
         System.out.println("parsing resourceY file ${xml.getAbsolutePath()}")
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
@@ -194,14 +280,13 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         val variableNodes = getVariableNodes(doc, xPath)
         var changed = variableNodes.getLength() > 0 //TODO do we need to check more?
         if (changed) {
-            stripBindingTags(xml)
+            stripBindingTags(xml, binderId)
         }
-
         return actualFile
     }
 
-    private fun parseAndStripXml(xml : File, pkg : String) : LayoutBinder? {
-        val original = stripFileAndGetOriginal(xml)
+    private fun parseAndStripXml(xml : File, pkg : String, binderId : String) : LayoutBinder? {
+        val original = stripFileAndGetOriginal(xml, binderId)
         return if (original == null) {
             null
         } else {

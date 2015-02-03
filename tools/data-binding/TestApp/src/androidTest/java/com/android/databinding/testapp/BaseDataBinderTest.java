@@ -16,6 +16,7 @@ package com.android.databinding.testapp;
 import com.android.databinding.library.DataBinder;
 import com.android.databinding.library.IViewDataBinder;
 
+import android.content.pm.ActivityInfo;
 import android.os.Looper;
 import android.test.ActivityInstrumentationTestCase2;
 
@@ -23,17 +24,24 @@ public class BaseDataBinderTest<T extends IViewDataBinder>
         extends ActivityInstrumentationTestCase2<TestActivity> {
     private Class<T> mBinderClass;
     private int mLayoutId;
+    private int mOrientation;
     protected T mBinder;
 
     public BaseDataBinderTest(final Class<T> binderClass, final int layoutId) {
+        this(binderClass, layoutId, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    public BaseDataBinderTest(final Class<T> binderClass, final int layoutId, final int orientation) {
         super(TestActivity.class);
         mBinderClass = binderClass;
         mLayoutId = layoutId;
+        mOrientation = orientation;
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        getActivity().setRequestedOrientation(mOrientation);
         createBinder();
     }
 
@@ -47,11 +55,30 @@ public class BaseDataBinderTest<T extends IViewDataBinder>
             @Override
             public void run() {
                 mBinder = DataBinder.createBinder(mBinderClass, getActivity(), mLayoutId, null);
+                getActivity().setContentView(mBinder.getRoot());
             }
         });
         if (!isMainThread()) {
             getInstrumentation().waitForIdleSync();
         }
         assertNotNull(mBinder);
+    }
+
+    protected void assertMethod(Class<?> klass, String methodName) throws NoSuchMethodException {
+        assertEquals(klass, mBinder.getClass().getDeclaredMethod(methodName).getReturnType());
+    }
+
+    protected void assertField(Class<?> klass, String fieldName) throws NoSuchFieldException {
+        assertEquals(klass, mBinder.getClass().getDeclaredField(fieldName).getType());
+    }
+
+    protected void assertNoField(String fieldName) {
+        Exception[] ex = new Exception[1];
+        try {
+            mBinder.getClass().getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            ex[0] = e;
+        }
+        assertNotNull(ex[0]);
     }
 }

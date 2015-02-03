@@ -25,26 +25,39 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BindingTarget {
-    Node mNode;
     String mId;
     String mViewClass;
     List<Binding> mBindings = new ArrayList<>();
     ExprModel mModel;
     Class mResolvedClass;
     String mIncludedLayout;
+    // if this target presents itself in multiple layout files with different view types,
+    // it receives an interface type and should use it in the getter instead.
+    String mInterfaceType;
+    // if this target is inherited from a common layout interface, used is false so that we don't
+    // create find view by id etc for it.
+    boolean mUsed;
 
-    public BindingTarget(Node node, String id, String viewClass) {
-        mNode = node;
+    public BindingTarget(String id, String viewClass, boolean used) {
         mId = id;
         mViewClass = viewClass;
+        mUsed = used;
+    }
+
+    public boolean isUsed() {
+        return mUsed;
     }
 
     public void addBinding(String name, Expr expr) {
         mBindings.add(new Binding(this, name, expr));
     }
 
-    public Node getNode() {
-        return mNode;
+    public void setInterfaceType(String interfaceType) {
+        mInterfaceType = interfaceType;
+    }
+
+    public String getInterfaceType() {
+        return mInterfaceType == null ? mViewClass : mInterfaceType;
     }
 
     public String getId() {

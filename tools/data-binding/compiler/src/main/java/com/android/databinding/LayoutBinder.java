@@ -17,7 +17,11 @@
 package com.android.databinding;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
 
+import com.android.databinding.expr.Dependency;
+import com.android.databinding.util.Log;
+import com.android.databinding.util.ParserHelper;
 import com.android.databinding.writer.LayoutBinderWriter;
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
@@ -27,8 +31,13 @@ import com.android.databinding.util.L;
 
 import org.w3c.dom.Node;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Keeps all information about the bindings per layout file
@@ -45,8 +54,15 @@ public class LayoutBinder {
     private String mProjectPackage;
     private String mBaseClassName;
     private String mLayoutname;
+    private File mFile;
+    private int id;
+    private final HashMap<String, String> mUserDefinedVariables = new HashMap<>();
+    private final HashMap<String, String> mUserDefinedImports = new HashMap<>();
 
     private LayoutBinderWriter mWriter;
+
+    // layout has different definitions in different configurations
+    private boolean mHasVariations = false;
 
     public LayoutBinder(Node root) {
         mRoot = root;
@@ -55,22 +71,55 @@ public class LayoutBinder {
         mBindingTargets = new ArrayList<>();
     }
 
+    public void resolveWhichExpressionsAreUsed() {
+        List<Expr> used = new ArrayList<>();
+        for (BindingTarget target : mBindingTargets) {
+            for (Binding binding : target.getBindings()) {
+                binding.getExpr().setIsUsed(true);
+                used.add(binding.getExpr());
+            }
+        }
+        while (!used.isEmpty()) {
+            Expr e = used.remove(used.size() - 1);
+            for (Dependency dep : e.getDependencies()) {
+                if (!dep.getOther().isUsed()) {
+                    used.add(dep.getOther());
+                    dep.getOther().setIsUsed(true);
+                }
+            }
+        }
+    }
+
     public IdentifierExpr addVariable(String name, String type) {
+        Preconditions.checkState(!mUserDefinedVariables.containsKey(name),
+                "%s has already been defined as %s", name, type);
         final IdentifierExpr id = mExprModel.identifier(name);
         id.setUserDefinedType(type);
         id.enableDirectInvalidation();
+        mUserDefinedVariables.put(name, type);
         return id;
     }
 
     public StaticIdentifierExpr addImport(String alias, String type) {
+        Preconditions.checkState(!mUserDefinedImports.containsKey(alias),
+                "%s has already been defined as %s", alias, type);
         final StaticIdentifierExpr id = mExprModel.staticIdentifier(alias);
         L.d("adding import %s as %s klass: %s", type, alias, id.getClass().getSimpleName());
         id.setUserDefinedType(type);
+        mUserDefinedImports.put(alias, type);
         return id;
     }
 
-    public BindingTarget createBindingTarget(Node parent, String nodeValue, String viewClassName) {
-        final BindingTarget target = new BindingTarget(parent, nodeValue, viewClassName);
+    public HashMap<String, String> getUserDefinedVariables() {
+        return mUserDefinedVariables;
+    }
+
+    public HashMap<String, String> getUserDefinedImports() {
+        return mUserDefinedImports;
+    }
+
+    public BindingTarget createBindingTarget(String nodeValue, String viewClassName, boolean used) {
+        final BindingTarget target = new BindingTarget(nodeValue, viewClassName, used);
         mBindingTargets.add(target);
         target.setModel(mExprModel);
         return target;
@@ -147,10 +196,48 @@ public class LayoutBinder {
     }
 
     public String getClassName() {
-        return mBaseClassName + "Impl";
+        final String suffix;
+        if (hasVariations()) {
+            // append configuration specifiers.
+            final String parentFileName = mFile.getParentFile().getName();
+            L.d("parent file for %s is %s", mFile.getName(), parentFileName);
+            if ("layout".equals(parentFileName)) {
+                suffix = "";
+            } else {
+                suffix = ParserHelper.INSTANCE$.toClassName(parentFileName.substring("layout-".length()));
+            }
+        } else {
+            suffix = "";
+        }
+        return mBaseClassName + suffix + "Impl";
+
     }
 
     public String getInterfaceName() {
         return mBaseClassName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public File getFile() {
+        return mFile;
+    }
+
+    public void setFile(File file) {
+        mFile = file;
+    }
+
+    public boolean hasVariations() {
+        return mHasVariations;
+    }
+
+    public void setHasVariations(boolean hasVariations) {
+        mHasVariations = hasVariations;
     }
 }

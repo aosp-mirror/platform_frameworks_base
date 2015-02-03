@@ -28,7 +28,7 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.android.tools.build:gradle:0.14.2'
+    compile "com.android.tools.build:gradle:$androidPluginVersion"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile gradleApi()
     compile 'commons-io:commons-io:2.4'

@@ -87,6 +87,7 @@ abstract public class Expr {
      * Used by generators when this expression is resolved.
      */
     private boolean mRead;
+    private boolean mIsUsed = false;
 
     Expr(Iterable<Expr> children) {
         for (Expr expr : children) {
@@ -553,6 +554,14 @@ abstract public class Expr {
 
     public boolean isEqualityCheck() {
         return false;
+    }
+
+    public void setIsUsed(boolean isUsed) {
+        mIsUsed = isUsed;
+    }
+
+    public boolean isUsed() {
+        return mIsUsed;
     }
 
     static class Node {

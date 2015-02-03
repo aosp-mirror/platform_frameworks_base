@@ -1,6 +1,7 @@
 ext.kotlinVersion = '0.10.195'
 ext.releaseVersion = "0.3"
 ext.snapshotVersion = "0.3-SNAPSHOT"
+ext.androidPluginVersion = "1.0.0"
 
 subprojects {
     group = 'com.android.databinding'
