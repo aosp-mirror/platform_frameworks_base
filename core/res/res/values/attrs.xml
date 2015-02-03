@@ -5078,14 +5078,31 @@
 
     <!-- Describes an item (or child) of a LayerDrawable. -->
     <declare-styleable name="LayerDrawableItem">
-        <!-- Left coordinate of the layer. -->
+        <!-- Left inset to apply to the layer. -->
         <attr name="left" />
-        <!-- Top coordinate of the layer. -->
+        <!-- Top inset to apply to the layer. -->
         <attr name="top" />
-        <!-- Right coordinate of the layer. -->
+        <!-- Right inset to apply to the layer. -->
         <attr name="right" />
-        <!-- Bottom coordinate of the layer. -->
+        <!-- Bottom inset to apply to the layer. -->
         <attr name="bottom" />
+        <!-- Start inset to apply to the layer. Overrides {@code left} or
+             {@code right} depending on layout direction. -->
+        <attr name="start" format="dimension" />
+        <!-- End inset to apply to the layer. Overrides {@code left} or
+             {@code right} depending on layout direction. -->
+        <attr name="end" format="dimension" />
+        <!-- Width of the layer. Defaults to the layer's intrinsic width. -->
+        <attr name="width" />
+        <!-- Height of the layer. Defaults to the layer's intrinsic height -->
+        <attr name="height" />
+        <!-- Gravity used to align the layer within its container. If no value
+             is specified, the default behavior depends on whether an explicit
+             width or height has been set, If no dimension is set, gravity in
+             that direction defaults to {@code fill_horizontal} or
+             {@code fill_vertical}; otherwise, it defaults to {@code left} or
+             {@code top}. -->
+        <attr name="gravity" />
         <!-- Drawable used to render the layer. -->
         <attr name="drawable" />
         <!-- Identifier of the layer. This can be used to retrieve the layer
