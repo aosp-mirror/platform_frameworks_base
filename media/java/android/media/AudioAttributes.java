@@ -709,7 +709,13 @@ public final class AudioAttributes implements Parcelable {
         }
     }
 
-    /** @hide */
+    /**
+     * @hide
+     * Only use to get which stream type should be used for volume control, NOT for audio playback
+     * (all audio playback APIs are supposed to take AudioAttributes as input parameters)
+     * @param aa non-null AudioAttributes.
+     * @return a valid stream type for volume control that matches the attributes.
+     */
     public static int toLegacyStreamType(AudioAttributes aa) {
         // flags to stream type mapping
         if ((aa.getFlags() & FLAG_AUDIBILITY_ENFORCED) == FLAG_AUDIBILITY_ENFORCED) {
