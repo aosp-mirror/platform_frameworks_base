@@ -15535,30 +15535,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     // BROADCASTS
     // =========================================================
 
-    private final List getStickiesLocked(String action, IntentFilter filter,
-            List cur, int userId) {
-        final ContentResolver resolver = mContext.getContentResolver();
-        ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
-        if (stickies == null) {
-            return cur;
-        }
-        final ArrayList<Intent> list = stickies.get(action);
-        if (list == null) {
-            return cur;
-        }
-        int N = list.size();
-        for (int i=0; i<N; i++) {
-            Intent intent = list.get(i);
-            if (filter.match(resolver, intent, true, TAG) >= 0) {
-                if (cur == null) {
-                    cur = new ArrayList<Intent>();
-                }
-                cur.add(intent);
-            }
-        }
-        return cur;
-    }
-
     boolean isPendingBroadcastProcessLocked(int pid) {
         return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
                 || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid);
@@ -15583,10 +15559,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission, int userId) {
         enforceNotIsolatedCaller("registerReceiver");
+        ArrayList<Intent> stickyIntents = null;
+        ProcessRecord callerApp = null;
         int callingUid;
         int callingPid;
         synchronized(this) {
-            ProcessRecord callerApp = null;
             if (caller != null) {
                 callerApp = getRecordForAppLocked(caller);
                 if (callerApp == null) {
@@ -15609,39 +15586,66 @@ public final class ActivityManagerService extends ActivityManagerNative
                 callingPid = Binder.getCallingPid();
             }
 
-            userId = this.handleIncomingUser(callingPid, callingUid, userId,
+            userId = handleIncomingUser(callingPid, callingUid, userId,
                     true, ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
-            List allSticky = null;
+            Iterator<String> actions = filter.actionsIterator();
+            if (actions == null) {
+                ArrayList<String> noAction = new ArrayList<String>(1);
+                noAction.add(null);
+                actions = noAction.iterator();
+            }
 
-            // Look for any matching sticky broadcasts...
-            Iterator actions = filter.actionsIterator();
-            if (actions != null) {
-                while (actions.hasNext()) {
-                    String action = (String)actions.next();
-                    allSticky = getStickiesLocked(action, filter, allSticky,
-                            UserHandle.USER_ALL);
-                    allSticky = getStickiesLocked(action, filter, allSticky,
-                            UserHandle.getUserId(callingUid));
+            // Collect stickies of users
+            int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
+            while (actions.hasNext()) {
+                String action = actions.next();
+                for (int id : userIds) {
+                    ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(id);
+                    if (stickies != null) {
+                        ArrayList<Intent> intents = stickies.get(action);
+                        if (intents != null) {
+                            if (stickyIntents == null) {
+                                stickyIntents = new ArrayList<Intent>();
+                            }
+                            stickyIntents.addAll(intents);
+                        }
+                    }
                 }
-            } else {
-                allSticky = getStickiesLocked(null, filter, allSticky,
-                        UserHandle.USER_ALL);
-                allSticky = getStickiesLocked(null, filter, allSticky,
-                        UserHandle.getUserId(callingUid));
             }
+        }
 
-            // The first sticky in the list is returned directly back to
-            // the client.
-            Intent sticky = allSticky != null ? (Intent)allSticky.get(0) : null;
-
-            if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter
-                    + ": " + sticky);
-
-            if (receiver == null) {
-                return sticky;
+        ArrayList<Intent> allSticky = null;
+        if (stickyIntents != null) {
+            final ContentResolver resolver = mContext.getContentResolver();
+            // Look for any matching sticky broadcasts...
+            for (int i = 0, N = stickyIntents.size(); i < N; i++) {
+                Intent intent = stickyIntents.get(i);
+                // If intent has scheme "content", it will need to acccess
+                // provider that needs to lock mProviderMap in ActivityThread
+                // and also it may need to wait application response, so we
+                // cannot lock ActivityManagerService here.
+                if (filter.match(resolver, intent, true, TAG) >= 0) {
+                    if (allSticky == null) {
+                        allSticky = new ArrayList<Intent>();
+                    }
+                    allSticky.add(intent);
+                }
             }
+        }
 
+        // The first sticky in the list is returned directly back to the client.
+        Intent sticky = allSticky != null ? allSticky.get(0) : null;
+        if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter + ": " + sticky);
+        if (receiver == null) {
+            return sticky;
+        }
+
+        synchronized (this) {
+            if (callerApp != null && callerApp.pid == 0) {
+                // Caller already died
+                return null;
+            }
             ReceiverList rl
                 = (ReceiverList)mRegisteredReceivers.get(receiver.asBinder());
             if (rl == null) {
