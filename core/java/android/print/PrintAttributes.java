@@ -45,11 +45,22 @@ public final class PrintAttributes implements Parcelable {
     private static final int VALID_COLOR_MODES =
             COLOR_MODE_MONOCHROME | COLOR_MODE_COLOR;
 
+    /** Duplex mode: No duplexing. */
+    public static final int DUPLEX_MODE_NONE = 1 << 0;
+    /** Duplex mode: Pages are turned sideways along the long edge - like a book. */
+    public static final int DUPLEX_MODE_LONG_EDGE = 1 << 1;
+    /** Duplex mode: Pages are turned upwards along the short edge - like a notpad. */
+    public static final int DUPLEX_MODE_SHORT_EDGE = 1 << 2;
+
+    private static final int VALID_DUPLEX_MODES =
+            DUPLEX_MODE_NONE | DUPLEX_MODE_LONG_EDGE | DUPLEX_MODE_SHORT_EDGE;
+
     private MediaSize mMediaSize;
     private Resolution mResolution;
     private Margins mMinMargins;
 
     private int mColorMode;
+    private int mDuplexMode = DUPLEX_MODE_NONE;
 
     PrintAttributes() {
         /* hide constructor */
@@ -60,6 +71,7 @@ public final class PrintAttributes implements Parcelable {
         mResolution = (parcel.readInt() ==  1) ? Resolution.createFromParcel(parcel) : null;
         mMinMargins = (parcel.readInt() ==  1) ? Margins.createFromParcel(parcel) : null;
         mColorMode = parcel.readInt();
+        mDuplexMode = parcel.readInt();
     }
 
     /**
@@ -74,7 +86,7 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Sets the media size.
      *
-     * @param The media size.
+     * @param mediaSize The media size.
      *
      * @hide
      */
@@ -94,7 +106,7 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Sets the resolution.
      *
-     * @param The resolution.
+     * @param resolution The resolution.
      *
      * @hide
      */
@@ -130,7 +142,7 @@ public final class PrintAttributes implements Parcelable {
      * </strong>
      * </p>
      *
-     * @param The margins.
+     * @param margins The margins.
      *
      * @hide
      */
@@ -153,7 +165,7 @@ public final class PrintAttributes implements Parcelable {
     /**
      * Sets the color mode.
      *
-     * @param The color mode.
+     * @param colorMode The color mode.
      *
      * @see #COLOR_MODE_MONOCHROME
      * @see #COLOR_MODE_COLOR
@@ -176,6 +188,35 @@ public final class PrintAttributes implements Parcelable {
      */
     public boolean isPortrait() {
         return mMediaSize.isPortrait();
+    }
+
+    /**
+     * Gets the duplex mode.
+     *
+     * @return The duplex mode.
+     *
+     * @see #DUPLEX_MODE_NONE
+     * @see #DUPLEX_MODE_LONG_EDGE
+     * @see #DUPLEX_MODE_SHORT_EDGE
+     */
+    public int getDuplexMode() {
+        return mDuplexMode;
+    }
+
+    /**
+     * Sets the duplex mode.
+     *
+     * @param duplexMode The duplex mode.
+     *
+     * @see #DUPLEX_MODE_NONE
+     * @see #DUPLEX_MODE_LONG_EDGE
+     * @see #DUPLEX_MODE_SHORT_EDGE
+     *
+     * @hide
+     */
+    public void setDuplexMode(int duplexMode) {
+        enforceValidDuplexMode(duplexMode);
+        mDuplexMode = duplexMode;
     }
 
     /**
@@ -211,6 +252,7 @@ public final class PrintAttributes implements Parcelable {
         attributes.setMinMargins(getMinMargins());
 
         attributes.setColorMode(getColorMode());
+        attributes.setDuplexMode(getDuplexMode());
 
         return attributes;
     }
@@ -248,6 +290,7 @@ public final class PrintAttributes implements Parcelable {
         attributes.setMinMargins(getMinMargins());
 
         attributes.setColorMode(getColorMode());
+        attributes.setDuplexMode(getDuplexMode());
 
         return attributes;
     }
@@ -273,6 +316,7 @@ public final class PrintAttributes implements Parcelable {
             parcel.writeInt(0);
         }
         parcel.writeInt(mColorMode);
+        parcel.writeInt(mDuplexMode);
     }
 
     @Override
@@ -285,6 +329,7 @@ public final class PrintAttributes implements Parcelable {
         final int prime = 31;
         int result = 1;
         result = prime * result + mColorMode;
+        result = prime * result + mDuplexMode;
         result = prime * result + ((mMinMargins == null) ? 0 : mMinMargins.hashCode());
         result = prime * result + ((mMediaSize == null) ? 0 : mMediaSize.hashCode());
         result = prime * result + ((mResolution == null) ? 0 : mResolution.hashCode());
@@ -304,6 +349,9 @@ public final class PrintAttributes implements Parcelable {
         }
         PrintAttributes other = (PrintAttributes) obj;
         if (mColorMode != other.mColorMode) {
+            return false;
+        }
+        if (mDuplexMode != other.mDuplexMode) {
             return false;
         }
         if (mMinMargins == null) {
@@ -344,6 +392,7 @@ public final class PrintAttributes implements Parcelable {
         builder.append(", resolution: ").append(mResolution);
         builder.append(", minMargins: ").append(mMinMargins);
         builder.append(", colorMode: ").append(colorModeToString(mColorMode));
+        builder.append(", duplexMode: ").append(duplexModeToString(mDuplexMode));
         builder.append("}");
         return builder.toString();
     }
@@ -354,6 +403,7 @@ public final class PrintAttributes implements Parcelable {
         mResolution = null;
         mMinMargins = null;
         mColorMode = 0;
+        mDuplexMode = DUPLEX_MODE_NONE;
     }
 
     /**
@@ -364,6 +414,7 @@ public final class PrintAttributes implements Parcelable {
         mResolution = other.mResolution;
         mMinMargins = other.mMinMargins;
         mColorMode = other.mColorMode;
+        mDuplexMode = other.mDuplexMode;
     }
 
     /**
@@ -1270,14 +1321,38 @@ public final class PrintAttributes implements Parcelable {
             case COLOR_MODE_COLOR: {
                 return "COLOR_MODE_COLOR";
             }
-            default:
+            default: {
                 return "COLOR_MODE_UNKNOWN";
+            }
+        }
+    }
+
+    static String duplexModeToString(int duplexMode) {
+        switch (duplexMode) {
+            case DUPLEX_MODE_NONE: {
+                return "DUPLEX_MODE_NONE";
+            }
+            case DUPLEX_MODE_LONG_EDGE: {
+                return "DUPLEX_MODE_LONG_EDGE";
+            }
+            case DUPLEX_MODE_SHORT_EDGE: {
+                return "DUPLEX_MODE_SHORT_EDGE";
+            }
+            default: {
+                return "DUPLEX_MODE_UNKNOWN";
+            }
         }
     }
 
     static void enforceValidColorMode(int colorMode) {
-        if ((colorMode & VALID_COLOR_MODES) == 0 && Integer.bitCount(colorMode) == 1) {
+        if ((colorMode & VALID_COLOR_MODES) == 0 || Integer.bitCount(colorMode) != 1) {
             throw new IllegalArgumentException("invalid color mode: " + colorMode);
+        }
+    }
+
+    static void enforceValidDuplexMode(int duplexMode) {
+        if ((duplexMode & VALID_DUPLEX_MODES) == 0 || Integer.bitCount(duplexMode) != 1) {
+            throw new IllegalArgumentException("invalid duplex mode: " + duplexMode);
         }
     }
 
@@ -1331,15 +1406,31 @@ public final class PrintAttributes implements Parcelable {
          * @see PrintAttributes#COLOR_MODE_COLOR
          */
         public Builder setColorMode(int colorMode) {
-            if (Integer.bitCount(colorMode) > 1) {
-                throw new IllegalArgumentException("can specify at most one colorMode bit.");
-            }
             mAttributes.setColorMode(colorMode);
             return this;
         }
 
         /**
+         * Sets the duplex mode.
+         *
+         * @param duplexMode A valid duplex mode or zero.
+         * @return This builder.
+         *
+         * @see PrintAttributes#DUPLEX_MODE_NONE
+         * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
+         * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
+         */
+        public Builder setDuplexMode(int duplexMode) {
+            mAttributes.setDuplexMode(duplexMode);
+            return this;
+        }
+
+        /**
          * Creates a new {@link PrintAttributes} instance.
+         * <p>
+         * If you do not specify a duplex mode, the default
+         * {@link #DUPLEX_MODE_NONE} will be used.
+         * </p>
          *
          * @return The new instance.
          */

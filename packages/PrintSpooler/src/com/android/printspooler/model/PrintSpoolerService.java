@@ -695,6 +695,7 @@ public final class PrintSpoolerService extends Service {
         private static final String TAG_MARGINS = "margins";
 
         private static final String ATTR_COLOR_MODE = "colorMode";
+        private static final String ATTR_DUPLEX_MODE = "duplexMode";
 
         private static final String ATTR_LOCAL_ID = "localId";
         private static final String ATTR_SERVICE_NAME = "serviceName";
@@ -822,6 +823,10 @@ public final class PrintSpoolerService extends Service {
                         final int colorMode = attributes.getColorMode();
                         serializer.attribute(null, ATTR_COLOR_MODE,
                                 String.valueOf(colorMode));
+
+                        final int duplexMode = attributes.getDuplexMode();
+                        serializer.attribute(null, ATTR_DUPLEX_MODE,
+                                String.valueOf(duplexMode));
 
                         MediaSize mediaSize = attributes.getMediaSize();
                         if (mediaSize != null) {
@@ -1056,6 +1061,12 @@ public final class PrintSpoolerService extends Service {
 
                 String colorMode = parser.getAttributeValue(null, ATTR_COLOR_MODE);
                 builder.setColorMode(Integer.parseInt(colorMode));
+
+                String duplexMode = parser.getAttributeValue(null, ATTR_DUPLEX_MODE);
+                // Duplex mode was added later, so null check is needed.
+                if (duplexMode != null) {
+                    builder.setDuplexMode(Integer.parseInt(duplexMode));
+                }
 
                 parser.next();
 

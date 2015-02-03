@@ -47,7 +47,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     private static final int PROPERTY_MEDIA_SIZE = 0;
     private static final int PROPERTY_RESOLUTION = 1;
     private static final int PROPERTY_COLOR_MODE = 2;
-    private static final int PROPERTY_COUNT = 3;
+    private static final int PROPERTY_DUPLEX_MODE = 3;
+    private static final int PROPERTY_COUNT = 4;
 
     private static final Margins DEFAULT_MARGINS = new Margins(0,  0,  0,  0);
 
@@ -56,6 +57,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     private List<Resolution> mResolutions;
 
     private int mColorModes;
+    private int mDuplexModes;
 
     private final int[] mDefaults = new int[PROPERTY_COUNT];
 
@@ -106,6 +108,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         }
 
         mColorModes = other.mColorModes;
+        mDuplexModes = other.mDuplexModes;
 
         final int defaultCount = other.mDefaults.length;
         for (int i = 0; i < defaultCount; i++) {
@@ -154,6 +157,19 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     }
 
     /**
+     * Gets the bit mask of supported duplex modes.
+     *
+     * @return The bit mask of supported duplex modes.
+     *
+     * @see PrintAttributes#DUPLEX_MODE_NONE
+     * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
+     * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
+     */
+    public int getDuplexModes() {
+        return mDuplexModes;
+    }
+
+    /**
      * Gets the default print attributes.
      *
      * @return The default attributes.
@@ -178,6 +194,11 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
             builder.setColorMode(colorMode);
         }
 
+        final int duplexMode = mDefaults[PROPERTY_DUPLEX_MODE];
+        if (duplexMode > 0) {
+            builder.setDuplexMode(duplexMode);
+        }
+
         return builder.build();
     }
 
@@ -187,6 +208,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         readResolutions(parcel);
 
         mColorModes = parcel.readInt();
+        mDuplexModes = parcel.readInt();
 
         readDefaults(parcel);
     }
@@ -203,6 +225,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         writeResolutions(parcel);
 
         parcel.writeInt(mColorModes);
+        parcel.writeInt(mDuplexModes);
 
         writeDefaults(parcel);
     }
@@ -215,6 +238,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         result = prime * result + ((mMediaSizes == null) ? 0 : mMediaSizes.hashCode());
         result = prime * result + ((mResolutions == null) ? 0 : mResolutions.hashCode());
         result = prime * result + mColorModes;
+        result = prime * result + mDuplexModes;
         result = prime * result + Arrays.hashCode(mDefaults);
         return result;
     }
@@ -255,6 +279,9 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         if (mColorModes != other.mColorModes) {
             return false;
         }
+        if (mDuplexModes != other.mDuplexModes) {
+            return false;
+        }
         if (!Arrays.equals(mDefaults, other.mDefaults)) {
             return false;
         }
@@ -269,6 +296,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         builder.append(", mediaSizes=").append(mMediaSizes);
         builder.append(", resolutions=").append(mResolutions);
         builder.append(", colorModes=").append(colorModesToString());
+        builder.append(", duplexModes=").append(duplexModesToString());
         builder.append("\"}");
         return builder.toString();
     }
@@ -284,6 +312,22 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
                 builder.append(", ");
             }
             builder.append(PrintAttributes.colorModeToString(colorMode));
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
+    private String duplexModesToString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        int duplexModes = mDuplexModes;
+        while (duplexModes != 0) {
+            final int duplexMode = 1 << Integer.numberOfTrailingZeros(duplexModes);
+            duplexModes &= ~duplexMode;
+            if (builder.length() > 1) {
+                builder.append(", ");
+            }
+            builder.append(PrintAttributes.duplexModeToString(duplexMode));
         }
         builder.append(']');
         return builder.toString();
@@ -495,12 +539,39 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
                 currentModes &= ~currentMode;
                 PrintAttributes.enforceValidColorMode(currentMode);
             }
-            if ((colorModes & defaultColorMode) == 0) {
-                throw new IllegalArgumentException("Default color mode not in color modes.");
-            }
-            PrintAttributes.enforceValidColorMode(colorModes);
+            PrintAttributes.enforceValidColorMode(defaultColorMode);
             mPrototype.mColorModes = colorModes;
             mPrototype.mDefaults[PROPERTY_COLOR_MODE] = defaultColorMode;
+            return this;
+        }
+
+        /**
+         * Sets the duplex modes.
+         * <p>
+         * <strong>Required:</strong> No
+         * </p>
+         *
+         * @param duplexModes The duplex mode bit mask.
+         * @param defaultDuplexMode The default duplex mode.
+         * @return This builder.
+         *
+         * @throws IllegalArgumentException If duplex modes contains an invalid
+         *         mode bit or if the default duplex mode is invalid.
+         *
+         * @see PrintAttributes#DUPLEX_MODE_NONE
+         * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
+         * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
+         */
+        public Builder setDuplexModes(int duplexModes, int defaultDuplexMode) {
+            int currentModes = duplexModes;
+            while (currentModes > 0) {
+                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
+                currentModes &= ~currentMode;
+                PrintAttributes.enforceValidDuplexMode(currentMode);
+            }
+            PrintAttributes.enforceValidDuplexMode(defaultDuplexMode);
+            mPrototype.mDuplexModes = duplexModes;
+            mPrototype.mDefaults[PROPERTY_DUPLEX_MODE] = defaultDuplexMode;
             return this;
         }
 
@@ -508,6 +579,11 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
          * Crates a new {@link PrinterCapabilitiesInfo} enforcing that all
          * required properties have been specified. See individual methods
          * in this class for reference about required attributes.
+         * <p>
+         * <strong>Note:</strong> If you do not add supported duplex modes,
+         * {@link android.print.PrintAttributes#DUPLEX_MODE_NONE} will set
+         * as the only supported mode and also as the default duplex mode.
+         * </p>
          *
          * @return A new {@link PrinterCapabilitiesInfo}.
          *
@@ -531,6 +607,10 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
             }
             if (mPrototype.mDefaults[PROPERTY_COLOR_MODE] == DEFAULT_UNDEFINED) {
                 throw new IllegalStateException("No default color mode specified.");
+            }
+            if (mPrototype.mDuplexModes == 0) {
+                setDuplexModes(PrintAttributes.DUPLEX_MODE_NONE,
+                        PrintAttributes.DUPLEX_MODE_NONE);
             }
             if (mPrototype.mMinMargins == null) {
                 throw new IllegalArgumentException("margins cannot be null");
@@ -558,4 +638,3 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         }
     };
 }
-

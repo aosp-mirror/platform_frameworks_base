@@ -40,6 +40,9 @@
     <!-- Label of the color mode widget. [CHAR LIMIT=20] -->
     <string name="label_color">Color</string>
 
+    <!-- Label of the duplex mode widget. [CHAR LIMIT=20] -->
+    <string name="label_duplex">Duplex</string>
+
     <!-- Label of the orientation widget. [CHAR LIMIT=20] -->
     <string name="label_orientation">Orientation</string>
 
@@ -188,10 +191,20 @@
 
     <!-- Color mode labels. -->
     <string-array name="color_mode_labels">
-        <!-- Color modelabel: Monochrome color scheme, e.g. one color is used. [CHAR LIMIT=20] -->
+        <!-- Color mode label: Monochrome color scheme, e.g. one color is used. [CHAR LIMIT=20] -->
         <item>Black &amp; White</item>
         <!-- Color mode label: Color color scheme, e.g. many colors are used. [CHAR LIMIT=20] -->
         <item>Color</item>
+    </string-array>
+
+    <!-- Duplex mode labels. -->
+    <string-array name="duplex_mode_labels">
+        <!-- Duplex mode label: No duplex supported. [CHAR LIMIT=20] -->
+        <item>None</item>
+        <!-- Duplex mode label: Turn page sideways along the long edge like a book. [CHAR LIMIT=20] -->
+        <item>Long edge</item>
+        <!-- Duplex mode label: Turn page upwards along the short edge like a notepad. [CHAR LIMIT=20] -->
+        <item>Short edge</item>
     </string-array>
 
     <!-- Orientation labels. -->

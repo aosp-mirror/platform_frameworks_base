@@ -184,6 +184,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private Spinner mColorModeSpinner;
     private ArrayAdapter<SpinnerItem<Integer>> mColorModeSpinnerAdapter;
 
+    private Spinner mDuplexModeSpinner;
+    private ArrayAdapter<SpinnerItem<Integer>> mDuplexModeSpinnerAdapter;
+
     private Spinner mOrientationSpinner;
     private ArrayAdapter<SpinnerItem<Integer>> mOrientationSpinnerAdapter;
 
@@ -767,6 +770,21 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     }
                 }
             }
+
+            // Take the duplex mode only if the current printer supports it.
+            final int currDuplexMode = currAttributes.getDuplexMode();
+            final int newDuplexMode = newAttributes.getDuplexMode();
+            if (currDuplexMode != newDuplexMode) {
+                final int duplexModeCount = mDuplexModeSpinner.getCount();
+                for (int i = 0; i < duplexModeCount; i++) {
+                    final int supportedDuplexMode = mDuplexModeSpinnerAdapter.getItem(i).value;
+                    if (supportedDuplexMode == newDuplexMode) {
+                        currAttributes.setDuplexMode(newDuplexMode);
+                        mDuplexModeSpinner.setSelection(i);
+                        break;
+                    }
+                }
+            }
         }
 
         // Handle selected page changes making sure they are in the doc.
@@ -985,6 +1003,12 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             attributes.setColorMode(defaults.getColorMode());
         }
 
+        // Duplex mode.
+        final int duplexMode = attributes.getDuplexMode();
+        if ((capabilities.getDuplexModes() & duplexMode) == 0) {
+            attributes.setDuplexMode(defaults.getDuplexMode());
+        }
+
         // Resolution
         Resolution resolution = attributes.getResolution();
         if (resolution == null || !capabilities.getResolutions().contains(resolution)) {
@@ -1111,6 +1135,13 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         mColorModeSpinner.setAdapter(mColorModeSpinnerAdapter);
         mColorModeSpinner.setOnItemSelectedListener(itemSelectedListener);
 
+        // Duplex mode.
+        mDuplexModeSpinnerAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
+        mDuplexModeSpinner = (Spinner) findViewById(R.id.duplex_spinner);
+        mDuplexModeSpinner.setAdapter(mDuplexModeSpinnerAdapter);
+        mDuplexModeSpinner.setOnItemSelectedListener(itemSelectedListener);
+
         // Orientation
         mOrientationSpinnerAdapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
@@ -1187,6 +1218,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mCopiesEditText.setFocusable(false);
             mMediaSizeSpinner.setEnabled(false);
             mColorModeSpinner.setEnabled(false);
+            mDuplexModeSpinner.setEnabled(false);
             mOrientationSpinner.setEnabled(false);
             mRangeOptionsSpinner.setEnabled(false);
             mPageRangeEditText.setEnabled(false);
@@ -1202,6 +1234,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mCopiesEditText.setFocusable(false);
             mMediaSizeSpinner.setEnabled(false);
             mColorModeSpinner.setEnabled(false);
+            mDuplexModeSpinner.setEnabled(false);
             mOrientationSpinner.setEnabled(false);
             mRangeOptionsSpinner.setEnabled(false);
             mPageRangeEditText.setEnabled(false);
@@ -1317,7 +1350,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 final int colorMode = 1 << colorBitOffset;
                 if (colorMode == oldColorMode) {
                     // Update the index of the old selection.
-                    oldColorModeNewIndex = colorBitOffset;
+                    oldColorModeNewIndex = mColorModeSpinnerAdapter.getCount();
                 }
                 remainingColorModes &= ~colorMode;
                 mColorModeSpinnerAdapter.add(new SpinnerItem<>(colorMode,
@@ -1339,10 +1372,80 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                             mColorModeSpinner.setSelection(i);
                         }
                         attributes.setColorMode(selectedColorMode);
+                        break;
                     }
                 }
             }
         }
+
+        // Duplex mode.
+        mDuplexModeSpinner.setEnabled(true);
+        final int duplexModes = capabilities.getDuplexModes();
+
+        // If the duplex modes changed, we update the adapter and the spinner.
+        // Note that we use bit count +1 to account for the no duplex option.
+        boolean duplexModesChanged = false;
+        if (Integer.bitCount(duplexModes) != mDuplexModeSpinnerAdapter.getCount()) {
+            duplexModesChanged = true;
+        } else {
+            int remainingDuplexModes = duplexModes;
+            int adapterIndex = 0;
+            while (remainingDuplexModes != 0) {
+                final int duplexBitOffset = Integer.numberOfTrailingZeros(remainingDuplexModes);
+                final int duplexMode = 1 << duplexBitOffset;
+                remainingDuplexModes &= ~duplexMode;
+                if (duplexMode != mDuplexModeSpinnerAdapter.getItem(adapterIndex).value) {
+                    duplexModesChanged = true;
+                    break;
+                }
+                adapterIndex++;
+            }
+        }
+        if (duplexModesChanged) {
+            // Remember the old duplex mode to try selecting it again. Also the fallback
+            // is no duplexing which is always the first item in the dropdown.
+            int oldDuplexModeNewIndex = AdapterView.INVALID_POSITION;
+            final int oldDuplexMode = attributes.getDuplexMode();
+
+            // Rebuild the adapter data.
+            mDuplexModeSpinnerAdapter.clear();
+            String[] duplexModeLabels = getResources().getStringArray(R.array.duplex_mode_labels);
+            int remainingDuplexModes = duplexModes;
+            while (remainingDuplexModes != 0) {
+                final int duplexBitOffset = Integer.numberOfTrailingZeros(remainingDuplexModes);
+                final int duplexMode = 1 << duplexBitOffset;
+                if (duplexMode == oldDuplexMode) {
+                    // Update the index of the old selection.
+                    oldDuplexModeNewIndex = mDuplexModeSpinnerAdapter.getCount();
+                }
+                remainingDuplexModes &= ~duplexMode;
+                mDuplexModeSpinnerAdapter.add(new SpinnerItem<>(duplexMode,
+                        duplexModeLabels[duplexBitOffset]));
+            }
+
+            if (oldDuplexModeNewIndex != AdapterView.INVALID_POSITION) {
+                // Select the old duplex mode - nothing really changed.
+                if (mDuplexModeSpinner.getSelectedItemPosition() != oldDuplexModeNewIndex) {
+                    mDuplexModeSpinner.setSelection(oldDuplexModeNewIndex);
+                }
+            } else {
+                // Select the default.
+                final int selectedDuplexMode = defaultAttributes.getDuplexMode();
+                final int itemCount = mDuplexModeSpinnerAdapter.getCount();
+                for (int i = 0; i < itemCount; i++) {
+                    SpinnerItem<Integer> item = mDuplexModeSpinnerAdapter.getItem(i);
+                    if (selectedDuplexMode == item.value) {
+                        if (mDuplexModeSpinner.getSelectedItemPosition() != i) {
+                            mDuplexModeSpinner.setSelection(i);
+                        }
+                        attributes.setDuplexMode(selectedDuplexMode);
+                        break;
+                    }
+                }
+            }
+        }
+
+        mDuplexModeSpinner.setEnabled(mDuplexModeSpinnerAdapter.getCount() > 1);
 
         // Orientation
         mOrientationSpinner.setEnabled(true);
@@ -2173,6 +2276,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             } else if (spinner == mColorModeSpinner) {
                 SpinnerItem<Integer> colorModeItem = mColorModeSpinnerAdapter.getItem(position);
                 mPrintJob.getAttributes().setColorMode(colorModeItem.value);
+            } else if (spinner == mDuplexModeSpinner) {
+                SpinnerItem<Integer> duplexModeItem = mDuplexModeSpinnerAdapter.getItem(position);
+                mPrintJob.getAttributes().setDuplexMode(duplexModeItem.value);
             } else if (spinner == mOrientationSpinner) {
                 SpinnerItem<Integer> orientationItem = mOrientationSpinnerAdapter.getItem(position);
                 PrintAttributes attributes = mPrintJob.getAttributes();

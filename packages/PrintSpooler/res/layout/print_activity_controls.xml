@@ -159,6 +159,34 @@
                 android:layout_marginEnd="16dip"
                 android:orientation="vertical">
 
+                <!-- Duplex -->
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dip"
+                    android:layout_marginStart="12dip"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:labelFor="@+id/duplex_spinner"
+                    android:text="@string/label_duplex">
+                </TextView>
+
+                <Spinner
+                    android:id="@+id/duplex_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dip">
+                </Spinner>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dip"
+                android:layout_marginEnd="16dip"
+                android:orientation="vertical">
+
                 <!-- Range options -->
 
                 <TextView

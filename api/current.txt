@@ -23234,6 +23234,7 @@ package android.print {
   public final class PrintAttributes implements android.os.Parcelable {
     method public int describeContents();
     method public int getColorMode();
+    method public int getDuplexMode();
     method public android.print.PrintAttributes.MediaSize getMediaSize();
     method public android.print.PrintAttributes.Margins getMinMargins();
     method public android.print.PrintAttributes.Resolution getResolution();
@@ -23241,12 +23242,16 @@ package android.print {
     field public static final int COLOR_MODE_COLOR = 2; // 0x2
     field public static final int COLOR_MODE_MONOCHROME = 1; // 0x1
     field public static final android.os.Parcelable.Creator<android.print.PrintAttributes> CREATOR;
+    field public static final int DUPLEX_MODE_LONG_EDGE = 2; // 0x2
+    field public static final int DUPLEX_MODE_NONE = 1; // 0x1
+    field public static final int DUPLEX_MODE_SHORT_EDGE = 4; // 0x4
   }
 
   public static final class PrintAttributes.Builder {
     ctor public PrintAttributes.Builder();
     method public android.print.PrintAttributes build();
     method public android.print.PrintAttributes.Builder setColorMode(int);
+    method public android.print.PrintAttributes.Builder setDuplexMode(int);
     method public android.print.PrintAttributes.Builder setMediaSize(android.print.PrintAttributes.MediaSize);
     method public android.print.PrintAttributes.Builder setMinMargins(android.print.PrintAttributes.Margins);
     method public android.print.PrintAttributes.Builder setResolution(android.print.PrintAttributes.Resolution);
@@ -23464,6 +23469,7 @@ package android.print {
     method public int describeContents();
     method public int getColorModes();
     method public android.print.PrintAttributes getDefaults();
+    method public int getDuplexModes();
     method public java.util.List<android.print.PrintAttributes.MediaSize> getMediaSizes();
     method public android.print.PrintAttributes.Margins getMinMargins();
     method public java.util.List<android.print.PrintAttributes.Resolution> getResolutions();
@@ -23477,6 +23483,7 @@ package android.print {
     method public android.print.PrinterCapabilitiesInfo.Builder addResolution(android.print.PrintAttributes.Resolution, boolean);
     method public android.print.PrinterCapabilitiesInfo build();
     method public android.print.PrinterCapabilitiesInfo.Builder setColorModes(int, int);
+    method public android.print.PrinterCapabilitiesInfo.Builder setDuplexModes(int, int);
     method public android.print.PrinterCapabilitiesInfo.Builder setMinMargins(android.print.PrintAttributes.Margins);
   }
 
