@@ -160,7 +160,22 @@ public class PopupWindow {
     private final EpicenterCallback mEpicenterCallback = new EpicenterCallback() {
         @Override
         public Rect onGetEpicenter(Transition transition) {
-            return mAnchorBounds;
+            final View anchor = mAnchor.get();
+            final View decor = mDecorView;
+            if (anchor == null || decor == null) {
+                return null;
+            }
+
+            final Rect anchorBounds = mAnchorBounds;
+            final int[] anchorLocation = mAnchor.get().getLocationOnScreen();
+            final int[] popupLocation = mDecorView.getLocationOnScreen();
+
+            // Compute the position of the anchor relative to the popup.
+            anchorBounds.set(0, 0, anchor.getWidth(), anchor.getHeight());
+            anchorBounds.offset(anchorLocation[0] - popupLocation[0],
+                    anchorLocation[1] - popupLocation[1]);
+
+            return anchorBounds;
         }
     };
 
@@ -1494,10 +1509,6 @@ public class PopupWindow {
 
         p.gravity |= Gravity.DISPLAY_CLIP_VERTICAL;
 
-        // Compute the position of the anchor relative to the popup.
-        mAnchorBounds.set(0, 0, anchorWidth, anchorHeight);
-        mAnchorBounds.offset(mDrawingLocation[0] - p.x, mDrawingLocation[1] - p.y);
-
         return onTop;
     }
 
@@ -1573,9 +1584,9 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Dispose of the popup window. This method can be invoked only after
-     * {@link #showAsDropDown(android.view.View)} has been executed. Failing that, calling
-     * this method will have no effect.</p>
+     * Disposes of the popup window. This method can be invoked only after
+     * {@link #showAsDropDown(android.view.View)} has been executed. Failing
+     * that, calling this method will have no effect.
      *
      * @see #showAsDropDown(android.view.View)
      */
@@ -1589,6 +1600,9 @@ public class PopupWindow {
         mIsShowing = false;
 
         if (mExitTransition != null) {
+            // Cache the content view, since it may change without notice.
+            final View contentView = mContentView;
+
             mExitTransition.addTarget(mBackgroundView);
             mExitTransition.addListener(new Transition.TransitionListenerAdapter() {
                 @Override
@@ -1596,7 +1610,7 @@ public class PopupWindow {
                     transition.removeListener(this);
                     transition.removeTarget(mBackgroundView);
 
-                    dismissImmediate();
+                    dismissImmediate(contentView);
                 }
             });
 
@@ -1605,7 +1619,11 @@ public class PopupWindow {
             // Transition to invisible.
             mBackgroundView.setVisibility(View.INVISIBLE);
         } else {
-            dismissImmediate();
+            dismissImmediate(mContentView);
+        }
+
+        if (mOnDismissListener != null) {
+            mOnDismissListener.onDismiss();
         }
     }
 
@@ -1613,21 +1631,17 @@ public class PopupWindow {
      * Removes the popup from the window manager and tears down the supporting
      * view hierarchy, if necessary.
      */
-    private void dismissImmediate() {
+    private void dismissImmediate(View contentView) {
         try {
             mWindowManager.removeViewImmediate(mDecorView);
         } finally {
             mDecorView.removeView(mBackgroundView);
             mDecorView = null;
 
-            if (mBackgroundView != mContentView) {
-                ((ViewGroup) mBackgroundView).removeView(mContentView);
+            if (mBackgroundView != contentView) {
+                ((ViewGroup) mBackgroundView).removeView(contentView);
             }
             mBackgroundView = null;
-
-            if (mOnDismissListener != null) {
-                mOnDismissListener.onDismiss();
-            }
         }
     }
 
