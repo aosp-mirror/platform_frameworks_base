@@ -46,7 +46,7 @@ Program::Program(const ProgramDescription& description, const char* vertex, cons
             glAttachShader(mProgramId, mVertexShader);
             glAttachShader(mProgramId, mFragmentShader);
 
-            position = bindAttrib("position", kBindingPosition);
+            bindAttrib("position", kBindingPosition);
             if (description.hasTexture || description.hasExternalTexture) {
                 texCoords = bindAttrib("texCoords", kBindingTexCoords);
             } else {

@@ -366,12 +366,7 @@ public:
     void setColor(const float r, const float g, const float b, const float a);
 
     /**
-     * Name of the position attribute.
-     */
-    int position;
-
-    /**
-     * Name of the texCoords attribute if it exists, -1 otherwise.
+     * Name of the texCoords attribute if it exists (kBindingTexCoords), -1 otherwise.
      */
     int texCoords;
 

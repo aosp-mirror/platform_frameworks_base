@@ -129,12 +129,7 @@ void RenderState::invokeFunctor(Functor* functor, DrawGlInfo::Mode mode, DrawGlI
 }
 
 void RenderState::interruptForFunctorInvoke() {
-    if (mCaches->currentProgram) {
-        if (mCaches->currentProgram->isInUse()) {
-            mCaches->currentProgram->remove();
-            mCaches->currentProgram = nullptr;
-        }
-    }
+    mCaches->setProgram(nullptr);
     mCaches->textureState().resetActiveTexture();
     meshState().unbindMeshBuffer();
     meshState().unbindIndicesBuffer();
@@ -181,7 +176,6 @@ void RenderState::assertOnGLThread() {
     LOG_ALWAYS_FATAL_IF(!pthread_equal(mThreadId, curr), "Wrong thread!");
 }
 
-
 class DecStrongTask : public renderthread::RenderTask {
 public:
     DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
@@ -198,6 +192,83 @@ private:
 
 void RenderState::postDecStrong(VirtualLightRefBase* object) {
     mRenderThread.queue(new DecStrongTask(object));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Render
+///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Not yet supported:
+ *
+ * Textures + coordinates
+ * SkiaShader
+ * ColorFilter
+ *
+    // TODO: texture coord
+    // TODO: texture support
+    // TODO: skiashader support
+    // TODO: color filter support
+ */
+
+void RenderState::render(const Glop& glop) {
+    const Glop::Mesh& mesh = glop.mesh;
+    const Glop::Fill& shader = glop.fill;
+
+    // ---------- Shader + uniform setup ----------
+    mCaches->setProgram(shader.program);
+
+    Glop::Fill::Color color = shader.color;
+    shader.program->setColor(color.a, color.r, color.g, color.b);
+
+    shader.program->set(glop.transform.ortho,
+            glop.transform.modelView,
+            glop.transform.canvas,
+            glop.transform.offset);
+
+    // ---------- Mesh setup ----------
+    if (glop.mesh.vertexFlags & kTextureCoord_Attrib) {
+        // TODO: support textures
+        LOG_ALWAYS_FATAL("textures not yet supported");
+    } else {
+        meshState().disableTexCoordsVertexArray();
+    }
+    if (glop.mesh.vertexFlags & kColor_Attrib) {
+        LOG_ALWAYS_FATAL("color attribute not yet supported");
+        // TODO: enable color, disable when done
+    }
+    if (glop.mesh.vertexFlags & kAlpha_Attrib) {
+        LOG_ALWAYS_FATAL("alpha attribute not yet supported");
+        // TODO: enable alpha attribute, disable when done
+    }
+
+    /**
+    * Hard-coded vertex assumptions:
+     *     - required
+     *     - xy floats
+     *     - 0 offset
+     *     - in VBO
+     */
+    bool force = meshState().bindMeshBuffer(mesh.vertexBufferObject);
+    meshState().bindPositionVertexPointer(force, nullptr, mesh.stride);
+
+    /**
+     * Hard-coded index assumptions:
+     *     - optional
+     *     - 0 offset
+     *     - in IBO
+     */
+    meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
+
+    // ---------- GL state setup ----------
+
+    if (glop.blend.mode != Glop::Blend::kDisable) {
+        blend().enable(glop.blend.mode, glop.blend.swapSrcDst);
+    } else {
+        blend().disable();
+    }
+
+    glDrawElements(glop.mesh.primitiveMode, glop.mesh.vertexCount, GL_UNSIGNED_BYTE, nullptr);
 }
 
 } /* namespace uirenderer */

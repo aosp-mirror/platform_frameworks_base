@@ -162,8 +162,6 @@ public:
     void registerFunctors(uint32_t functorCount);
     void unregisterFunctors(uint32_t functorCount);
 
-    Program* currentProgram;
-
     bool drawDeferDisabled;
     bool drawReorderDisabled;
 
@@ -219,6 +217,10 @@ public:
     int propertyAmbientShadowStrength;
     int propertySpotShadowStrength;
 
+    void setProgram(const ProgramDescription& description);
+    void setProgram(Program* program);
+
+    Program& program() { return *mProgram; }
     PixelBufferState& pixelBufferState() { return *mPixelBufferState; }
     TextureState& textureState() { return *mTextureState; }
 
@@ -246,10 +248,6 @@ private:
     }
 
     RenderState* mRenderState;
-
-    PixelBufferState* mPixelBufferState = nullptr; // TODO: move to RenderState
-    TextureState* mTextureState = nullptr; // TODO: move to RenderState
-
     Extensions& mExtensions;
 
     // Used to render layers
@@ -264,6 +262,12 @@ private:
     uint32_t mFunctorsCount;
 
     OverdrawColorSet mOverdrawDebugColorSet;
+
+    // TODO: move below to RenderState
+    PixelBufferState* mPixelBufferState = nullptr;
+    TextureState* mTextureState = nullptr;
+    Program* mProgram = nullptr; // note: object owned by ProgramCache
+
 }; // class Caches
 
 }; // namespace uirenderer

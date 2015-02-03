@@ -191,11 +191,11 @@ void SkiaLayerShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
     layer->setWrap(GL_CLAMP_TO_EDGE);
     layer->setFilter(GL_LINEAR);
 
-    Program* program = caches->currentProgram;
-    glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
-    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
+    Program& program = caches->program();
+    glUniform1i(program.getUniform("bitmapSampler"), textureSlot);
+    glUniformMatrix4fv(program.getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);
-    glUniform2f(program->getUniform("textureDimension"), 1.0f / width, 1.0f / height);
+    glUniform2f(program.getUniform("textureDimension"), 1.0f / width, 1.0f / height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -277,7 +277,7 @@ void SkiaBitmapShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
         return;
     }
 
-    Program* program = caches->currentProgram;
+    Program& program = caches->program();
     Texture* texture = shaderInfo.texture;
 
     const AutoTexture autoCleanup(texture);
@@ -290,10 +290,10 @@ void SkiaBitmapShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
     bindTexture(caches, texture, shaderInfo.wrapS, shaderInfo.wrapT);
     texture->setFilter(GL_LINEAR);
 
-    glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
-    glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
+    glUniform1i(program.getUniform("bitmapSampler"), textureSlot);
+    glUniformMatrix4fv(program.getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);
-    glUniform2f(program->getUniform("textureDimension"), 1.0f / shaderInfo.width,
+    glUniform2f(program.getUniform("textureDimension"), 1.0f / shaderInfo.width,
             1.0f / shaderInfo.height);
 }
 
@@ -381,7 +381,7 @@ void SkiaGradientShader::setupProgram(Caches* caches, const mat4& modelViewMatri
 
     SkShader::GradientType gradType = shader.asAGradient(&gradInfo);
 
-    Program* program = caches->currentProgram;
+    Program& program = caches->program();
     if (CC_UNLIKELY(!isSimpleGradient(gradInfo))) {
         if (gradInfo.fColorCount > COLOR_COUNT) {
             // There was not enough room in our arrays for all the colors and offsets. Try again,
@@ -402,10 +402,10 @@ void SkiaGradientShader::setupProgram(Caches* caches, const mat4& modelViewMatri
 
         // Uniforms
         bindTexture(caches, texture, gTileModes[gradInfo.fTileMode], gTileModes[gradInfo.fTileMode]);
-        glUniform1i(program->getUniform("gradientSampler"), textureSlot);
+        glUniform1i(program.getUniform("gradientSampler"), textureSlot);
     } else {
-        bindUniformColor(program->getUniform("startColor"), gradInfo.fColors[0]);
-        bindUniformColor(program->getUniform("endColor"), gradInfo.fColors[1]);
+        bindUniformColor(program.getUniform("startColor"), gradInfo.fColors[0]);
+        bindUniformColor(program.getUniform("endColor"), gradInfo.fColors[1]);
     }
 
     caches->dither.setupProgram(program, textureUnit);
@@ -428,7 +428,7 @@ void SkiaGradientShader::setupProgram(Caches* caches, const mat4& modelViewMatri
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, unitMatrix, shader.getLocalMatrix(), modelViewMatrix);
-    glUniformMatrix4fv(program->getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
+    glUniformMatrix4fv(program.getUniform("screenSpace"), 1, GL_FALSE, &screenSpace.data[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

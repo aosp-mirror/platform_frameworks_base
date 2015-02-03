@@ -72,9 +72,8 @@ bool Caches::init() {
 
     ATRACE_NAME("Caches::init");
 
-
     mRegionMesh = nullptr;
-    currentProgram = nullptr;
+    mProgram = nullptr;
 
     mFunctorsCount = 0;
 
@@ -200,7 +199,7 @@ void Caches::terminate() {
     fboCache.clear();
 
     programCache.clear();
-    currentProgram = nullptr;
+    setProgram(nullptr);
 
     patchCache.clear();
 
@@ -211,6 +210,22 @@ void Caches::terminate() {
     delete mTextureState;
     mTextureState = nullptr;
     mInitialized = false;
+}
+
+void Caches::setProgram(const ProgramDescription& description) {
+    setProgram(programCache.get(description));
+}
+
+void Caches::setProgram(Program* program) {
+    if (!program || !program->isInUse()) {
+        if (mProgram) {
+            mProgram->remove();
+        }
+        if (program) {
+            program->use();
+        }
+        mProgram = program;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

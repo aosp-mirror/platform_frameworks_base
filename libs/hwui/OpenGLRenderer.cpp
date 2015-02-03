@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include "OpenGLRenderer.h"
 
 #include "DeferredDisplayList.h"
@@ -136,8 +134,6 @@ void OpenGLRenderer::initLight(const Vector3& lightCenter, float lightRadius,
 void OpenGLRenderer::onViewportInitialized() {
     glDisable(GL_DITHER);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    glEnableVertexAttribArray(Program::kBindingPosition);
     mFirstFrameAfterResize = true;
 }
 
@@ -1714,20 +1710,20 @@ void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool sw
 }
 
 void OpenGLRenderer::setupDrawProgram() {
-    useProgram(mCaches.programCache.get(mDescription));
+    mCaches.setProgram(mDescription);
     if (mDescription.hasRoundRectClip) {
         // TODO: avoid doing this repeatedly, stashing state pointer in program
         const RoundRectClipState* state = writableSnapshot()->roundRectClipState;
         const Rect& innerRect = state->innerRect;
-        glUniform4f(mCaches.currentProgram->getUniform("roundRectInnerRectLTRB"),
+        glUniform4f(mCaches.program().getUniform("roundRectInnerRectLTRB"),
                 innerRect.left, innerRect.top,
                 innerRect.right, innerRect.bottom);
-        glUniformMatrix4fv(mCaches.currentProgram->getUniform("roundRectInvTransform"),
+        glUniformMatrix4fv(mCaches.program().getUniform("roundRectInvTransform"),
                 1, GL_FALSE, &state->matrix.data[0]);
 
         // add half pixel to round out integer rect space to cover pixel centers
         float roundedOutRadius = state->radius + 0.5f;
-        glUniform1f(mCaches.currentProgram->getUniform("roundRectRadius"),
+        glUniform1f(mCaches.program().getUniform("roundRectRadius"),
                 roundedOutRadius);
     }
 }
@@ -1745,7 +1741,8 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
 
     bool dirty = right - left > 0.0f && bottom - top > 0.0f;
     const Matrix4& transformMatrix = ignoreTransform ? Matrix4::identity() : *currentTransform();
-    mCaches.currentProgram->set(writableSnapshot()->getOrthoMatrix(),
+
+    mCaches.program().set(currentSnapshot()->getOrthoMatrix(),
             mModelViewMatrix, transformMatrix, offset);
     if (dirty && mTrackDirtyRegions) {
         if (!ignoreTransform) {
@@ -1758,13 +1755,13 @@ void OpenGLRenderer::setupDrawModelView(ModelViewMode mode, bool offset,
 
 void OpenGLRenderer::setupDrawColorUniforms(bool hasShader) {
     if ((mColorSet && !hasShader) || (hasShader && mSetShaderColor)) {
-        mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
+        mCaches.program().setColor(mColorR, mColorG, mColorB, mColorA);
     }
 }
 
 void OpenGLRenderer::setupDrawPureColorUniforms() {
     if (mSetShaderColor) {
-        mCaches.currentProgram->setColor(mColorR, mColorG, mColorB, mColorA);
+        mCaches.program().setColor(mColorR, mColorG, mColorB, mColorA);
     }
 }
 
@@ -1799,7 +1796,7 @@ void OpenGLRenderer::setupDrawColorFilterUniforms(const SkColorFilter* filter) {
         const GLfloat r = a * SkColorGetR(color) / 255.0f;
         const GLfloat g = a * SkColorGetG(color) / 255.0f;
         const GLfloat b = a * SkColorGetB(color) / 255.0f;
-        glUniform4f(mCaches.currentProgram->getUniform("colorBlend"), r, g, b, a);
+        glUniform4f(mCaches.program().getUniform("colorBlend"), r, g, b, a);
         return;
     }
 
@@ -1820,9 +1817,9 @@ void OpenGLRenderer::setupDrawColorFilterUniforms(const SkColorFilter* filter) {
         colorVector[2] = srcColorMatrix[14] / 255.0f;
         colorVector[3] = srcColorMatrix[19] / 255.0f;
 
-        glUniformMatrix4fv(mCaches.currentProgram->getUniform("colorMatrix"), 1,
+        glUniformMatrix4fv(mCaches.program().getUniform("colorMatrix"), 1,
                 GL_FALSE, colorMatrix);
-        glUniform4fv(mCaches.currentProgram->getUniform("colorMatrixVector"), 1, colorVector);
+        glUniform4fv(mCaches.program().getUniform("colorMatrixVector"), 1, colorVector);
         return;
     }
 
@@ -1830,12 +1827,12 @@ void OpenGLRenderer::setupDrawColorFilterUniforms(const SkColorFilter* filter) {
 }
 
 void OpenGLRenderer::setupDrawTextGammaUniforms() {
-    mCaches.fontRenderer->setupProgram(mDescription, mCaches.currentProgram);
+    mCaches.fontRenderer->setupProgram(mDescription, mCaches.program());
 }
 
 void OpenGLRenderer::setupDrawSimpleMesh() {
     bool force = mRenderState.meshState().bindMeshBuffer();
-    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force, nullptr);
+    mRenderState.meshState().bindPositionVertexPointer(force, nullptr);
     mRenderState.meshState().unbindIndicesBuffer();
 }
 
@@ -1856,7 +1853,7 @@ void OpenGLRenderer::setupDrawTextureTransform() {
 }
 
 void OpenGLRenderer::setupDrawTextureTransformUniforms(mat4& transform) {
-    glUniformMatrix4fv(mCaches.currentProgram->getUniform("mainTextureTransform"), 1,
+    glUniformMatrix4fv(mCaches.program().getUniform("mainTextureTransform"), 1,
             GL_FALSE, &transform.data[0]);
 }
 
@@ -1869,9 +1866,9 @@ void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
         force = mRenderState.meshState().unbindMeshBuffer();
     }
 
-    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force, vertices);
-    if (mCaches.currentProgram->texCoords >= 0) {
-        mRenderState.meshState().bindTexCoordsVertexPointer(mCaches.currentProgram, force, texCoords);
+    mRenderState.meshState().bindPositionVertexPointer(force, vertices);
+    if (mCaches.program().texCoords >= 0) {
+        mRenderState.meshState().bindTexCoordsVertexPointer(force, texCoords);
     }
 
     mRenderState.meshState().unbindIndicesBuffer();
@@ -1882,13 +1879,11 @@ void OpenGLRenderer::setupDrawMesh(const GLvoid* vertices,
     bool force = mRenderState.meshState().unbindMeshBuffer();
     GLsizei stride = sizeof(ColorTextureVertex);
 
-    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force,
-            vertices, stride);
-    if (mCaches.currentProgram->texCoords >= 0) {
-        mRenderState.meshState().bindTexCoordsVertexPointer(mCaches.currentProgram, force,
-                texCoords, stride);
+    mRenderState.meshState().bindPositionVertexPointer(force, vertices, stride);
+    if (mCaches.program().texCoords >= 0) {
+        mRenderState.meshState().bindTexCoordsVertexPointer(force, texCoords, stride);
     }
-    int slot = mCaches.currentProgram->getAttrib("colors");
+    int slot = mCaches.program().getAttrib("colors");
     if (slot >= 0) {
         glEnableVertexAttribArray(slot);
         glVertexAttribPointer(slot, 4, GL_FLOAT, GL_FALSE, stride, colors);
@@ -1910,18 +1905,16 @@ void OpenGLRenderer::setupDrawMeshIndices(const GLvoid* vertices,
     }
     mRenderState.meshState().bindQuadIndicesBuffer();
 
-    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force, vertices);
-    if (mCaches.currentProgram->texCoords >= 0) {
-        mRenderState.meshState().bindTexCoordsVertexPointer(mCaches.currentProgram,
-                force, texCoords);
+    mRenderState.meshState().bindPositionVertexPointer(force, vertices);
+    if (mCaches.program().texCoords >= 0) {
+        mRenderState.meshState().bindTexCoordsVertexPointer(force, texCoords);
     }
 }
 
 void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
     bool force = mRenderState.meshState().unbindMeshBuffer();
     mRenderState.meshState().bindQuadIndicesBuffer();
-    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram, force,
-            vertices, kVertexStride);
+    mRenderState.meshState().bindPositionVertexPointer(force, vertices, kVertexStride);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2143,7 +2136,7 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
 
     glDrawArrays(GL_TRIANGLES, 0, count);
 
-    int slot = mCaches.currentProgram->getAttrib("colors");
+    int slot = mCaches.program().getAttrib("colors");
     if (slot >= 0) {
         glDisableVertexAttribArray(slot);
     }
@@ -2359,14 +2352,14 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
 
     const void* vertices = vertexBuffer.getBuffer();
     mRenderState.meshState().unbindMeshBuffer();
-    mRenderState.meshState().bindPositionVertexPointer(mCaches.currentProgram,
-            true, vertices, isAA ? kAlphaVertexStride : kVertexStride);
+    mRenderState.meshState().bindPositionVertexPointer(true, vertices,
+            isAA ? kAlphaVertexStride : kVertexStride);
     mRenderState.meshState().resetTexCoordsVertexPointer();
 
     int alphaSlot = -1;
     if (isAA) {
         void* alphaCoords = ((GLbyte*) vertices) + kVertexAlphaOffset;
-        alphaSlot = mCaches.currentProgram->getAttrib("vtxAlpha");
+        alphaSlot = mCaches.program().getAttrib("vtxAlpha");
         // TODO: avoid enable/disable in back to back uses of the alpha attribute
         glEnableVertexAttribArray(alphaSlot);
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, kAlphaVertexStride, alphaCoords);
@@ -3437,16 +3430,6 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
     } else {
         mRenderState.blend().disable();
     }
-}
-
-bool OpenGLRenderer::useProgram(Program* program) {
-    if (!program->isInUse()) {
-        if (mCaches.currentProgram != nullptr) mCaches.currentProgram->remove();
-        program->use();
-        mCaches.currentProgram = program;
-        return false;
-    }
-    return true;
 }
 
 void OpenGLRenderer::resetDrawTextureTexCoords(float u1, float v1, float u2, float v2) {

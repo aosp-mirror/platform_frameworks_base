@@ -853,18 +853,6 @@ private:
             bool swapSrcDst = false);
 
     /**
-     * Use the specified program with the current GL context. If the program is already
-     * in use, it will not be bound again. If it is not in use, the current program is
-     * marked unused and the specified program becomes used and becomes the new
-     * current program.
-     *
-     * @param program The program to use
-     *
-     * @return true If the specified program was already in use, false otherwise.
-     */
-    inline bool useProgram(Program* program);
-
-    /**
      * Invoked before any drawing operation. This sets required state.
      */
     void setupDraw(bool clear = true);

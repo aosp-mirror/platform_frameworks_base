@@ -516,9 +516,8 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
 
             TextureVertex* mesh = texture->mesh();
             MeshState& meshState = renderState.meshState();
-            Program* program = caches.currentProgram;
-            meshState.bindPositionVertexPointer(program, forceRebind, &mesh[0].x);
-            meshState.bindTexCoordsVertexPointer(program, forceRebind, &mesh[0].u);
+            meshState.bindPositionVertexPointer(forceRebind, &mesh[0].x);
+            meshState.bindTexCoordsVertexPointer(forceRebind, &mesh[0].u);
 
             glDrawElements(GL_TRIANGLES, texture->meshElementCount(),
                     GL_UNSIGNED_SHORT, texture->indices());
