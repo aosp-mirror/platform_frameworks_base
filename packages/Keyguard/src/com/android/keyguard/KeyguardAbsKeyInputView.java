@@ -87,7 +87,9 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
 
         EmergencyButton button = (EmergencyButton) findViewById(R.id.emergency_call_button);
-        button.setCallback(this);
+        if (button != null) {
+            button.setCallback(this);
+        }
     }
 
     public void onEmergencyButtonClickedWhenInCall() {
