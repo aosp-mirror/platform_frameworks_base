@@ -16328,7 +16328,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private static final boolean shouldShowDialogs(Configuration config) {
         return !(config.keyboard == Configuration.KEYBOARD_NOKEYS
-                && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH);
+                && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
+                && config.navigation == Configuration.NAVIGATION_NONAV);
     }
 
     /**
