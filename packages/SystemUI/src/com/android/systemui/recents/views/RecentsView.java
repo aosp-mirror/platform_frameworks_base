@@ -74,7 +74,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     RecentsViewLayoutAlgorithm mLayoutAlgorithm;
 
     ArrayList<TaskStack> mStacks;
-    List<TaskStackView> mImmutableTaskStackViews = new ArrayList<TaskStackView>();
+    List<TaskStackView> mTaskStackViews = new ArrayList<>();
     View mSearchBar;
     RecentsViewCallbacks mCb;
 
@@ -133,24 +133,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     public void setTaskStacks(ArrayList<TaskStack> stacks) {
         int numStacks = stacks.size();
 
-        // Make a list of the stack view children only
-        ArrayList<TaskStackView> stackViewsList = new ArrayList<TaskStackView>();
-        List<TaskStackView> stackViews = getTaskStackViews();
-
         // Remove all/extra stack views
         int numTaskStacksToKeep = 0; // Keep no tasks if we are recreating the layout
         if (mConfig.launchedReuseTaskStackViews) {
-            numTaskStacksToKeep = Math.min(stackViews.size(), numStacks);
+            numTaskStacksToKeep = Math.min(mTaskStackViews.size(), numStacks);
         }
-        for (int i = stackViews.size() - 1; i >= numTaskStacksToKeep; i--) {
-            removeView(stackViews.get(i));
-            stackViews.remove(i);
+        for (int i = mTaskStackViews.size() - 1; i >= numTaskStacksToKeep; i--) {
+            removeView(mTaskStackViews.remove(i));
         }
-        stackViewsList.addAll(stackViews);
 
         // Update the stack views that we are keeping
         for (int i = 0; i < numTaskStacksToKeep; i++) {
-            TaskStackView tsv = stackViews.get(i);
+            TaskStackView tsv = mTaskStackViews.get(i);
             // If onRecentsHidden is not triggered, we need to the stack view again here
             tsv.reset();
             tsv.setStack(stacks.get(i));
@@ -158,21 +152,18 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Add remaining/recreate stack views
         mStacks = stacks;
-        for (int i = stackViews.size(); i < numStacks; i++) {
+        for (int i = mTaskStackViews.size(); i < numStacks; i++) {
             TaskStack stack = stacks.get(i);
             TaskStackView stackView = new TaskStackView(getContext(), stack);
             stackView.setCallbacks(this);
             addView(stackView);
-            stackViewsList.add(stackView);
+            mTaskStackViews.add(stackView);
         }
-
-        // Set the immutable stack views list
-        mImmutableTaskStackViews = Collections.unmodifiableList(stackViewsList);
 
         // Enable debug mode drawing on all the stacks if necessary
         if (mConfig.debugModeEnabled) {
-            for (int i = mImmutableTaskStackViews.size() - 1; i >= 0; i--) {
-                TaskStackView stackView = mImmutableTaskStackViews.get(i);
+            for (int i = mTaskStackViews.size() - 1; i >= 0; i--) {
+                TaskStackView stackView = mTaskStackViews.get(i);
                 stackView.setDebugOverlay(mDebugOverlay);
             }
         }
@@ -188,7 +179,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Gets the list of task views */
     List<TaskStackView> getTaskStackViews() {
-        return mImmutableTaskStackViews;
+        return mTaskStackViews;
     }
 
     /** Launches the focused task from the first stack if possible */
