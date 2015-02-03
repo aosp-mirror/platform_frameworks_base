@@ -644,6 +644,7 @@ public class ActivityInfo extends ComponentInfo
     /**
      * Value indicating if the activity is resizeable to any dimension.
      * See {@link android.R.attr#resizeableActivity}.
+     * @hide
      */
     public boolean resizeable;
 

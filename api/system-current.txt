@@ -8640,7 +8640,6 @@ package android.content.pm {
     field public java.lang.String parentActivityName;
     field public java.lang.String permission;
     field public int persistableMode;
-    field public boolean resizeable;
     field public int screenOrientation;
     field public int softInputMode;
     field public java.lang.String targetActivity;

@@ -1017,7 +1017,7 @@
          at the same time.
 
          <p>The default value is <code>false</code> for applications with
-         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODE#MNC} and
+         <code>targetSdkVersion</code> lesser than {@link android.os.Build.VERSION_CODES#MNC} and
          <code>true</code> otherwise.
 
          <p>NOTE: A task's root activity value is applied to all additional activities launched in
