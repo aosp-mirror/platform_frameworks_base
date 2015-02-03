@@ -530,9 +530,9 @@ public final class DngCreator implements AutoCloseable {
         int uPixStride = uPlane.getPixelStride();
 
         byte[] yuvPixel = { 0, 0, 0 };
-        byte[] yFullRow = new byte[yPixStride * width];
-        byte[] uFullRow = new byte[uPixStride * width / 2];
-        byte[] vFullRow = new byte[vPixStride * width / 2];
+        byte[] yFullRow = new byte[yPixStride * (width - 1) + 1];
+        byte[] uFullRow = new byte[uPixStride * (width / 2 - 1) + 1];
+        byte[] vFullRow = new byte[vPixStride * (width / 2 - 1) + 1];
         byte[] finalRow = new byte[BYTES_PER_RGB_PIX * width];
         for (int i = 0; i < height; i++) {
             int halfH = i / 2;
