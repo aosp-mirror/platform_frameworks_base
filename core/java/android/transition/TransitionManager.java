@@ -268,7 +268,12 @@ public class TransitionManager {
         @Override
         public boolean onPreDraw() {
             removeListeners();
-            sPendingTransitions.remove(mSceneRoot);
+
+            // Don't start the transition if it's no longer pending.
+            if (!sPendingTransitions.remove(mSceneRoot)) {
+                return true;
+            }
+
             // Add to running list, handle end to remove it
             final ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
                     getRunningTransitions();
@@ -416,5 +421,25 @@ public class TransitionManager {
             Scene.setCurrentScene(sceneRoot, null);
             sceneChangeRunTransition(sceneRoot, transitionClone);
         }
+    }
+
+    /**
+     * Ends all pending and ongoing transitions on the specified scene root.
+     *
+     * @param sceneRoot The root of the View hierarchy to end transitions on.
+     * @hide
+     */
+    public static void endTransitions(final ViewGroup sceneRoot) {
+        sPendingTransitions.remove(sceneRoot);
+
+        final ArrayList<Transition> runningTransitions = getRunningTransitions().get(sceneRoot);
+        if (runningTransitions != null) {
+            final int count = runningTransitions.size();
+            for (int i = 0; i < count; i++) {
+                final Transition transition = runningTransitions.get(i);
+                transition.end();
+            }
+        }
+
     }
 }
