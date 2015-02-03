@@ -18,7 +18,6 @@ package com.android.internal.widget;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
-import android.app.AlarmManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
@@ -37,24 +36,20 @@ import android.os.UserManager;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
-import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 
-import com.android.internal.R;
 import com.google.android.collect.Lists;
 
 import java.nio.charset.StandardCharsets;
-import libcore.util.HexEncoding;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import libcore.util.HexEncoding;
 
 /**
  * Utilities for the lock pattern and its settings.
@@ -1070,21 +1065,6 @@ public class LockPatternUtils {
         return deadline;
     }
 
-    public boolean isEmergencyCallCapable() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable);
-    }
-
-    public boolean isPukUnlockScreenEnable() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enable_puk_unlock_screen);
-    }
-
-    public boolean isEmergencyCallEnabledWhileSimLocked() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enable_emergency_call_while_sim_locked);
-    }
-
     private boolean getBoolean(String secureSettingKey, boolean defaultValue, int userId) {
         try {
             return getLockSettings().getBoolean(secureSettingKey, defaultValue, userId);
@@ -1134,58 +1114,6 @@ public class LockPatternUtils {
             // What can we do?
             Log.e(TAG, "Couldn't write string " + secureSettingKey + re);
         }
-    }
-
-    /**
-     * Sets the emergency button visibility based on isEmergencyCallCapable().
-     *
-     * If the emergency button is visible, sets the text on the emergency button
-     * to indicate what action will be taken.
-     *
-     * If there's currently a call in progress, the button will take them to the call
-     * @param button The button to update
-     * @param shown Indicates whether the given screen wants the emergency button to show at all
-     * @param showIcon Indicates whether to show a phone icon for the button.
-     */
-    public void updateEmergencyCallButtonState(Button button, boolean shown, boolean showIcon) {
-        if (isEmergencyCallCapable() && shown) {
-            button.setVisibility(View.VISIBLE);
-        } else {
-            button.setVisibility(View.GONE);
-            return;
-        }
-
-        int textId;
-        if (isInCall()) {
-            // show "return to call" text and show phone icon
-            textId = R.string.lockscreen_return_to_call;
-            int phoneCallIcon = showIcon ? R.drawable.stat_sys_phone_call : 0;
-            button.setCompoundDrawablesWithIntrinsicBounds(phoneCallIcon, 0, 0, 0);
-        } else {
-            textId = R.string.lockscreen_emergency_call;
-            int emergencyIcon = showIcon ? R.drawable.ic_emergency : 0;
-            button.setCompoundDrawablesWithIntrinsicBounds(emergencyIcon, 0, 0, 0);
-        }
-        button.setText(textId);
-    }
-
-    /**
-     * Resumes a call in progress. Typically launched from the EmergencyCall button
-     * on various lockscreens.
-     */
-    public void resumeCall() {
-        getTelecommManager().showInCallScreen(false);
-    }
-
-    /**
-     * @return {@code true} if there is a call currently in progress, {@code false} otherwise.
-     */
-    public boolean isInCall() {
-        return getTelecommManager().isInCall();
-    }
-
-    private TelecomManager getTelecommManager() {
-        return (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
     }
 
     public void setPowerButtonInstantlyLocks(boolean enabled) {

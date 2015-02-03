@@ -21,7 +21,7 @@ import android.content.Intent;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.telephony.TelephonyManager;
+import android.telecom.TelecomManager;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -59,12 +59,19 @@ public class EmergencyButton extends Button {
     private PowerManager mPowerManager;
     private EmergencyButtonCallback mEmergencyButtonCallback;
 
+    private final boolean mIsVoiceCapable;
+    private final boolean mEnableEmergencyCallWhileSimLocked;
+
     public EmergencyButton(Context context) {
         this(context, null);
     }
 
     public EmergencyButton(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mIsVoiceCapable = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable);
+        mEnableEmergencyCallWhileSimLocked = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enable_emergency_call_while_sim_locked);
     }
 
     @Override
@@ -99,8 +106,8 @@ public class EmergencyButton extends Button {
         // TODO: implement a shorter timeout once new PowerManager API is ready.
         // should be the equivalent to the old userActivity(EMERGENCY_CALL_TIMEOUT)
         mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
-        if (mLockPatternUtils.isInCall()) {
-            mLockPatternUtils.resumeCall();
+        if (isInCall()) {
+            resumeCall();
             if (mEmergencyButtonCallback != null) {
                 mEmergencyButtonCallback.onEmergencyButtonClickedWhenInCall();
             }
@@ -116,24 +123,57 @@ public class EmergencyButton extends Button {
     }
 
     private void updateEmergencyCallButton() {
-        boolean enabled = false;
-        if (mLockPatternUtils.isInCall()) {
-            enabled = true; // always show "return to call" if phone is off-hook
-        } else if (mLockPatternUtils.isEmergencyCallCapable()) {
-            final boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext).isSimPinVoiceSecure();
-            if (simLocked) {
-                // Some countries can't handle emergency calls while SIM is locked.
-                enabled = mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
+        boolean visible = false;
+        if (mIsVoiceCapable) {
+            // Emergency calling requires voice capability.
+            if (isInCall()) {
+                visible = true; // always show "return to call" if phone is off-hook
             } else {
-                // True if we need to show a secure screen (pin/pattern/SIM pin/SIM puk);
-                // hides emergency button on "Slide" screen if device is not secure.
-                enabled = mLockPatternUtils.isSecure();
+                final boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext)
+                        .isSimPinVoiceSecure();
+                if (simLocked) {
+                    // Some countries can't handle emergency calls while SIM is locked.
+                    visible = mEnableEmergencyCallWhileSimLocked;
+                } else {
+                    // Only show if there is a secure screen (pin/pattern/SIM pin/SIM puk);
+                    visible = mLockPatternUtils.isSecure();
+                }
             }
         }
-        mLockPatternUtils.updateEmergencyCallButtonState(this, enabled, false);
+        if (visible) {
+            setVisibility(View.VISIBLE);
+
+            int textId;
+            if (isInCall()) {
+                textId = com.android.internal.R.string.lockscreen_return_to_call;
+            } else {
+                textId = com.android.internal.R.string.lockscreen_emergency_call;
+            }
+            setText(textId);
+        } else {
+            setVisibility(View.GONE);
+        }
     }
 
     public void setCallback(EmergencyButtonCallback callback) {
         mEmergencyButtonCallback = callback;
+    }
+
+    /**
+     * Resumes a call in progress.
+     */
+    private void resumeCall() {
+        getTelecommManager().showInCallScreen(false);
+    }
+
+    /**
+     * @return {@code true} if there is a call currently in progress.
+     */
+    private boolean isInCall() {
+        return getTelecommManager().isInCall();
+    }
+
+    private TelecomManager getTelecommManager() {
+        return (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
     }
 }
