@@ -54,10 +54,6 @@ interface IAccessibilityServiceConnection {
         int action, in Bundle arguments, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
 
-    boolean computeClickPointInScreen(int accessibilityWindowId, long accessibilityNodeId,
-        int interactionId, IAccessibilityInteractionConnectionCallback callback,
-        long threadId);
-
     AccessibilityWindowInfo getWindow(int windowId);
 
     List<AccessibilityWindowInfo> getWindows();
