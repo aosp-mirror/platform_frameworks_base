@@ -16,24 +16,25 @@
 
 package android.view;
 
-import android.annotation.Nullable;
-import android.graphics.Canvas;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Trace;
-import android.util.TypedValue;
-import android.widget.FrameLayout;
+import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.graphics.Canvas;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.util.Xml;
+import android.widget.FrameLayout;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -925,6 +926,14 @@ public abstract class LayoutInflater {
                                 inheritContext);
                         final ViewGroup group = (ViewGroup) parent;
 
+                        final TypedArray a = context.obtainStyledAttributes(
+                                attrs, R.styleable.Include);
+                        final int id = a.getResourceId(R.styleable.Include_id, View.NO_ID);
+                        final int visibility = a.getInt(R.styleable.Include_visibility, -1);
+                        final boolean hasWidth = a.hasValue(R.styleable.Include_layout_width);
+                        final boolean hasHeight = a.hasValue(R.styleable.Include_layout_height);
+                        a.recycle();
+
                         // We try to load the layout params set in the <include /> tag. If
                         // they don't exist, we will rely on the layout params set in the
                         // included XML file.
@@ -934,26 +943,20 @@ public abstract class LayoutInflater {
                         // successfully loaded layout params from the <include /> tag,
                         // false means we need to rely on the included layout params.
                         ViewGroup.LayoutParams params = null;
-                        try {
-                            params = group.generateLayoutParams(attrs);
-                        } catch (RuntimeException e) {
-                            params = group.generateLayoutParams(childAttrs);
-                        } finally {
-                            if (params != null) {
-                                view.setLayoutParams(params);
+                        if (hasWidth && hasHeight) {
+                            try {
+                                params = group.generateLayoutParams(attrs);
+                            } catch (RuntimeException e) {
+                                // Ignore, just fail over to child attrs.
                             }
                         }
+                        if (params == null) {
+                            params = group.generateLayoutParams(childAttrs);
+                        }
+                        view.setLayoutParams(params);
 
                         // Inflate all children.
                         rInflate(childParser, view, childAttrs, true, true);
-
-                        final TypedArray a = context.obtainStyledAttributes(
-                                attrs, com.android.internal.R.styleable.Include);
-                        final int id = a.getResourceId(
-                                com.android.internal.R.styleable.Include_id, View.NO_ID);
-                        final int visibility = a.getInt(
-                                com.android.internal.R.styleable.Include_visibility, -1);
-                        a.recycle();
 
                         if (id != View.NO_ID) {
                             view.setId(id);
