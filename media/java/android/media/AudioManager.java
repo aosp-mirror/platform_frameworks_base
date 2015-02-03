@@ -46,9 +46,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import java.util.HashMap;
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -3598,11 +3598,13 @@ public class AudioManager {
                     newPorts.clear();
                     status = AudioSystem.listAudioPorts(newPorts, portGeneration);
                     if (status != SUCCESS) {
+                        Log.w(TAG, "updateAudioPortCache: listAudioPorts failed");
                         return status;
                     }
                     newPatches.clear();
                     status = AudioSystem.listAudioPatches(newPatches, patchGeneration);
                     if (status != SUCCESS) {
+                        Log.w(TAG, "updateAudioPortCache: listAudioPatches failed");
                         return status;
                     }
                 } while (patchGeneration[0] != portGeneration[0]);
@@ -3611,18 +3613,33 @@ public class AudioManager {
                     for (int j = 0; j < newPatches.get(i).sources().length; j++) {
                         AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sources()[j],
                                                                    newPorts);
-                        if (portCfg == null) {
-                            return ERROR;
-                        }
                         newPatches.get(i).sources()[j] = portCfg;
                     }
                     for (int j = 0; j < newPatches.get(i).sinks().length; j++) {
                         AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sinks()[j],
                                                                    newPorts);
-                        if (portCfg == null) {
-                            return ERROR;
-                        }
                         newPatches.get(i).sinks()[j] = portCfg;
+                    }
+                }
+                for (Iterator<AudioPatch> i = newPatches.iterator(); i.hasNext(); ) {
+                    AudioPatch newPatch = i.next();
+                    boolean hasInvalidPort = false;
+                    for (AudioPortConfig portCfg : newPatch.sources()) {
+                        if (portCfg == null) {
+                            hasInvalidPort = true;
+                            break;
+                        }
+                    }
+                    for (AudioPortConfig portCfg : newPatch.sinks()) {
+                        if (portCfg == null) {
+                            hasInvalidPort = true;
+                            break;
+                        }
+                    }
+                    if (hasInvalidPort) {
+                        // Temporarily remove patches with invalid ports. One who created the patch
+                        // is responsible for dealing with the port change.
+                        i.remove();
                     }
                 }
 
