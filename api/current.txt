@@ -529,6 +529,7 @@ package android {
     field public static final int ellipsize = 16842923; // 0x10100ab
     field public static final int ems = 16843096; // 0x1010158
     field public static final int enabled = 16842766; // 0x101000e
+    field public static final int end = 16843997; // 0x10104dd
     field public static final int endColor = 16843166; // 0x101019e
     field public static final deprecated int endYear = 16843133; // 0x101017d
     field public static final int enterFadeDuration = 16843532; // 0x101030c
@@ -1128,6 +1129,7 @@ package android {
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
+    field public static final int start = 16843996; // 0x10104dc
     field public static final int startColor = 16843165; // 0x101019d
     field public static final int startDelay = 16843746; // 0x10103e2
     field public static final int startOffset = 16843198; // 0x10101be
@@ -11946,6 +11948,9 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable findDrawableByLayerId(int);
     method public android.graphics.drawable.Drawable getDrawable(int);
     method public int getId(int);
+    method public int getLayerGravity(int);
+    method public int getLayerHeight(int);
+    method public int getLayerWidth(int);
     method public int getNumberOfLayers();
     method public int getOpacity();
     method public int getPaddingMode();
@@ -11955,7 +11960,10 @@ package android.graphics.drawable {
     method public void setColorFilter(android.graphics.ColorFilter);
     method public boolean setDrawableByLayerId(int, android.graphics.drawable.Drawable);
     method public void setId(int, int);
+    method public void setLayerGravity(int, int);
     method public void setLayerInset(int, int, int, int, int);
+    method public void setLayerInsetRelative(int, int, int, int, int);
+    method public void setLayerSize(int, int, int);
     method public void setOpacity(int);
     method public void setPaddingMode(int);
     method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
