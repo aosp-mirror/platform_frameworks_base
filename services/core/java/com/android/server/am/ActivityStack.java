@@ -239,6 +239,9 @@ final class ActivityStack {
     final ActivityStackSupervisor mStackSupervisor;
 
     Configuration mOverrideConfig;
+    /** True if the stack was forced to full screen because {@link TaskRecord#mResizeable} is false
+     * and the stack was previously resized. */
+    private boolean mForcedFullscreen = false;
 
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
@@ -3646,6 +3649,24 @@ final class ActivityStack {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                 "Ensuring correct configuration: " + r);
 
+        // Make sure the current stack override configuration is supported by the top task
+        // before continuing.
+        final TaskRecord topTask = topTask();
+        if (topTask != null && ((topTask.mResizeable && mForcedFullscreen)
+                    || (!topTask.mResizeable && !mFullscreen))) {
+            final boolean prevFullscreen = mFullscreen;
+            final Configuration newOverrideConfig =
+                    mWindowManager.forceStackToFullscreen(mStackId, !topTask.mResizeable);
+            updateOverrideConfiguration(newOverrideConfig);
+            mForcedFullscreen = !prevFullscreen && mFullscreen;
+            if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
+                    "Updated stack config to support task=" + topTask
+                            + " resizeable=" + topTask.mResizeable
+                            + " mForcedFullscreen=" + mForcedFullscreen
+                            + " prevFullscreen=" + prevFullscreen
+                            + " mFullscreen=" + mFullscreen);
+        }
+
         // Short circuit: if the two configurations are the exact same
         // object (the common case), then there is nothing to do.
         Configuration newConfig = mService.mConfiguration;
@@ -4121,7 +4142,7 @@ final class ActivityStack {
     }
 
     ArrayList<TaskRecord> getAllTasks() {
-        return new ArrayList<TaskRecord>(mTaskHistory);
+        return new ArrayList<>(mTaskHistory);
     }
 
     void addTask(final TaskRecord task, final boolean toTop, boolean moving) {
@@ -4153,9 +4174,9 @@ final class ActivityStack {
     boolean updateOverrideConfiguration(Configuration newConfig) {
         Configuration oldConfig = mOverrideConfig;
         mOverrideConfig = (newConfig == null) ? Configuration.EMPTY : newConfig;
-        // we override the configuration only when the stack's dimensions are different from
-        // the display. in this manner, we know that if the override configuration is empty,
-        // the stack is necessarily full screen
+        // We override the configuration only when the stack's dimensions are different from
+        // the display. In this manner, we know that if the override configuration is empty,
+        // the stack is necessarily full screen.
         mFullscreen = Configuration.EMPTY.equals(mOverrideConfig);
         return !mOverrideConfig.equals(oldConfig);
     }

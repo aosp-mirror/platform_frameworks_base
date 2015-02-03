@@ -134,8 +134,9 @@ public class Am extends BaseCommand {
                 "       am stack resize <STACK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am stack list\n" +
                 "       am stack info <STACK_ID>\n" +
-                "       am lock-task <TASK_ID>\n" +
-                "       am lock-task stop\n" +
+                "       am task lock <TASK_ID>\n" +
+                "       am task lock stop\n" +
+                "       am task resizeable <TASK_ID> [true|false]\n" +
                 "       am get-config\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
@@ -250,7 +251,11 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stack info: display the information about activity stack <STACK_ID>.\n" +
                 "\n" +
-                "am lock-task: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
+                "am task lock: bring <TASK_ID> to the front and don't allow other tasks to run\n" +
+                "\n" +
+                "am task lock stop: end the current task lock\n" +
+                "\n" +
+                "am task resizeable: change if <TASK_ID> is resizeable (true) or not (false).\n" +
                 "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device\n" +
@@ -351,8 +356,8 @@ public class Am extends BaseCommand {
             runStopUser();
         } else if (op.equals("stack")) {
             runStack();
-        } else if (op.equals("lock-task")) {
-            runLockTask();
+        } else if (op.equals("task")) {
+            runTask();
         } else if (op.equals("get-config")) {
             runGetConfig();
         } else {
@@ -1778,7 +1783,19 @@ public class Am extends BaseCommand {
         }
     }
 
-    private void runLockTask() throws Exception {
+    private void runTask() throws Exception {
+        String op = nextArgRequired();
+        if (op.equals("lock")) {
+            runTaskLock();
+        } else if (op.equals("resizeable")) {
+            runTaskResizeable();
+        } else {
+            showError("Error: unknown command '" + op + "'");
+            return;
+        }
+    }
+
+    private void runTaskLock() throws Exception {
         String taskIdStr = nextArgRequired();
         try {
             if (taskIdStr.equals("stop")) {
@@ -1789,6 +1806,18 @@ public class Am extends BaseCommand {
             }
             System.err.println("Activity manager is " + (mAm.isInLockTaskMode() ? "" : "not ") +
                     "in lockTaskMode");
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runTaskResizeable() throws Exception {
+        final String taskIdStr = nextArgRequired();
+        final int taskId = Integer.valueOf(taskIdStr);
+        final String resizeableStr = nextArgRequired();
+        final boolean resizeable = Boolean.valueOf(resizeableStr);
+
+        try {
+            mAm.setTaskResizeable(taskId, resizeable);
         } catch (RemoteException e) {
         }
     }

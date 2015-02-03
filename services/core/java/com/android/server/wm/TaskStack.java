@@ -84,11 +84,18 @@ public class TaskStack {
     // Contains configurations settings that are different from the global configuration due to
     // stack specific operations. E.g. {@link #setBounds}.
     Configuration mOverrideConfig;
+    // True if the stack was forced to fullscreen disregarding the override configuration.
+    private boolean mForceFullscreen;
+    // The {@link #mBounds} before the stack was forced to fullscreen. Will be restored as the
+    // stack bounds once the stack is no longer forced to fullscreen.
+    final private Rect mPreForceFullscreenBounds;
 
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
         mOverrideConfig = Configuration.EMPTY;
+        mForceFullscreen = false;
+        mPreForceFullscreenBounds = new Rect();
         // TODO: remove bounds from log, they are always 0.
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
                 mBounds.right, mBounds.bottom);
@@ -123,14 +130,24 @@ public class TaskStack {
         }
     }
 
+    /** Set the stack bounds. Passing in null sets the bounds to fullscreen. */
     boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
-            bounds.intersect(mTmpRect); // ensure bounds are entirely within the display rect
-            mFullscreen = mTmpRect.equals(bounds);
+            if (bounds == null) {
+                bounds = mTmpRect;
+                mFullscreen = true;
+            } else {
+                bounds.intersect(mTmpRect); // ensure bounds are entirely within the display rect
+                mFullscreen = mTmpRect.equals(bounds);
+            }
         }
 
+        if (bounds == null) {
+            // Can set to fullscreen if we don't have a display to get bounds from...
+            return false;
+        }
         if (mBounds.equals(bounds) && oldFullscreen == mFullscreen) {
             return false;
         }
@@ -146,7 +163,7 @@ public class TaskStack {
         out.set(mBounds);
     }
 
-    void updateOverrideConfiguration() {
+    private void updateOverrideConfiguration() {
         final Configuration serviceConfig = mService.mCurConfiguration;
         if (mFullscreen) {
             mOverrideConfig = Configuration.EMPTY;
@@ -176,6 +193,28 @@ public class TaskStack {
 
     boolean isFullscreen() {
         return mFullscreen;
+    }
+
+    /** Forces the stack to fullscreen if input is true, else un-forces the stack from fullscreen.
+     * Returns true if something happened.
+     */
+    boolean forceFullscreen(boolean forceFullscreen) {
+        if (mForceFullscreen == forceFullscreen) {
+            return false;
+        }
+        mForceFullscreen = forceFullscreen;
+        if (forceFullscreen) {
+            if (mFullscreen) {
+                return false;
+            }
+            mPreForceFullscreenBounds.set(mBounds);
+            return setBounds(null);
+        } else {
+            if (!mFullscreen || mPreForceFullscreenBounds.isEmpty()) {
+                return false;
+            }
+            return setBounds(mPreForceFullscreenBounds);
+        }
     }
 
     boolean isAnimating() {

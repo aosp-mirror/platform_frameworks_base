@@ -284,12 +284,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // The name of the boot animation service in init.rc.
     private static final String BOOT_ANIMATION_SERVICE = "bootanim";
 
-    /** Minimum value for attachStack and resizeStack weight value */
-    public static final float STACK_WEIGHT_MIN = 0.2f;
-
-    /** Maximum value for attachStack and resizeStack weight value */
-    public static final float STACK_WEIGHT_MAX = 0.8f;
-
     static final int UPDATE_FOCUS_NORMAL = 0;
     static final int UPDATE_FOCUS_WILL_ASSIGN_LAYERS = 1;
     static final int UPDATE_FOCUS_PLACING_SURFACES = 2;
@@ -5121,6 +5115,26 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         bounds.setEmpty();
+    }
+
+    /** Forces the stack to fullscreen if input is true, else un-forces the stack from fullscreen.
+     * Returns a {@link Configuration} object that contains configurations settings
+     * that should be overridden due to the operation.
+     */
+    public Configuration forceStackToFullscreen(int stackId, boolean forceFullscreen) {
+        synchronized (mWindowMap) {
+            final TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                throw new IllegalArgumentException("resizeStack: stackId " + stackId
+                        + " not found.");
+            }
+            if (stack.forceFullscreen(forceFullscreen)) {
+                stack.resizeWindows();
+                stack.getDisplayContent().layoutNeeded = true;
+                performLayoutAndPlaceSurfacesLocked();
+            }
+            return new Configuration(stack.mOverrideConfig);
+        }
     }
 
     // -------------------------------------------------------------
