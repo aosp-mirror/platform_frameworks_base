@@ -2712,7 +2712,7 @@ public final class ViewRootImpl implements ViewParent,
 
         final AccessibilityNodeProvider provider = host.getAccessibilityNodeProvider();
         if (provider == null) {
-            host.getBoundsOnScreen(bounds);
+            host.getBoundsOnScreen(bounds, true);
         } else if (mAccessibilityFocusedVirtualView != null) {
             mAccessibilityFocusedVirtualView.getBoundsInScreen(bounds);
         } else {
@@ -6837,26 +6837,6 @@ public final class ViewRootImpl implements ViewParent,
                 // We cannot make the call and notify the caller so it does not wait.
                 try {
                     callback.setPerformAccessibilityActionResult(false, interactionId);
-                } catch (RemoteException re) {
-                    /* best effort - ignore */
-                }
-            }
-        }
-
-        @Override
-        public void computeClickPointInScreen(long accessibilityNodeId, Region interactiveRegion,
-                int interactionId, IAccessibilityInteractionConnectionCallback callback,
-                int interrogatingPid, long interrogatingTid, MagnificationSpec spec) {
-            ViewRootImpl viewRootImpl = mViewRootImpl.get();
-            if (viewRootImpl != null && viewRootImpl.mView != null) {
-                viewRootImpl.getAccessibilityInteractionController()
-                        .computeClickPointInScreenClientThread(accessibilityNodeId,
-                                interactiveRegion, interactionId, callback, interrogatingPid,
-                                interrogatingTid, spec);
-            } else {
-                // We cannot make the call and notify the caller so it does not wait.
-                try {
-                    callback.setComputeClickPointInScreenActionResult(null, interactionId);
                 } catch (RemoteException re) {
                     /* best effort - ignore */
                 }

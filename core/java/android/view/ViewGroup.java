@@ -474,9 +474,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "layout")
     private int mChildCountWithTransientState = 0;
 
-    // Iterator over the children in decreasing Z order (top children first).
-    private OrderedChildIterator mOrderedChildIterator;
-
     /**
      * Currently registered axes for nested scrolling. Flag set consisting of
      * {@link #SCROLL_AXIS_HORIZONTAL} {@link #SCROLL_AXIS_VERTICAL} or {@link #SCROLL_AXIS_NONE}
@@ -779,144 +776,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
         return true;
-    }
-
-    /**
-     * Translates the given bounds and intersections from child coordinates to
-     * local coordinates. In case any interactive sibling of the calling child
-     * covers the latter, a new intersections is added to the intersection list.
-     * This method is for the exclusive use by the accessibility layer to compute
-     * a point where a sequence of down and up events would click on a view.
-     *
-     * @param child The child making the call.
-     * @param bounds The bounds to translate in child coordinates.
-     * @param intersections The intersections of interactive views covering the child.
-     * @return True if the bounds and intersections were computed, false otherwise.
-     */
-    boolean translateBoundsAndIntersectionsInWindowCoordinates(View child,
-            RectF bounds, List<RectF> intersections) {
-        // Not attached, done.
-        if (mAttachInfo == null) {
-            return false;
-        }
-
-        if (getAlpha() <= 0 || getTransitionAlpha() <= 0 ||
-                getVisibility() != VISIBLE) {
-            // Cannot click on a view with an invisible predecessor.
-            return false;
-        }
-
-        // Compensate for the child transformation.
-        if (!child.hasIdentityMatrix()) {
-            Matrix matrix = child.getMatrix();
-            matrix.mapRect(bounds);
-            final int intersectionCount = intersections.size();
-            for (int i = 0; i < intersectionCount; i++) {
-                RectF intersection = intersections.get(i);
-                matrix.mapRect(intersection);
-            }
-        }
-
-        // Translate the bounds from child to parent coordinates.
-        final int dx = child.mLeft - mScrollX;
-        final int dy = child.mTop - mScrollY;
-        bounds.offset(dx, dy);
-        offsetRects(intersections, dx, dy);
-
-        // If the bounds do not intersect our bounds, done.
-        if (!bounds.intersects(0, 0, getWidth(), getHeight())) {
-            return false;
-        }
-
-        // Clip the bounds by our bounds.
-        bounds.left = Math.max(bounds.left, 0);
-        bounds.top = Math.max(bounds.top, 0);
-        bounds.right = Math.min(bounds.right, getWidth());
-        bounds.bottom = Math.min(bounds.bottom, getHeight());
-
-        Iterator<View> iterator = obtainOrderedChildIterator();
-        while (iterator.hasNext()) {
-            View sibling = iterator.next();
-
-            // We care only about siblings over the child.
-            if (sibling == child) {
-                break;
-            }
-
-            // Ignore invisible views as they are not interactive.
-            if (!isVisible(sibling)) {
-                continue;
-            }
-
-            // Compute the sibling bounds in its coordinates.
-            RectF siblingBounds = mAttachInfo.mTmpTransformRect1;
-            siblingBounds.set(0, 0, sibling.getWidth(), sibling.getHeight());
-
-            // Translate the sibling bounds to our coordinates.
-            offsetChildRectToMyCoords(siblingBounds, sibling);
-
-            // Compute the intersection between the child and the sibling.
-            if (siblingBounds.intersect(bounds)) {
-                // Conservatively we consider an overlapping sibling to be
-                // interactive and ignore it. This is not ideal as if the
-                // sibling completely covers the view despite handling no
-                // touch events we will not be able to click on the view.
-                intersections.add(siblingBounds);
-            }
-        }
-
-        releaseOrderedChildIterator();
-
-        if (mParent instanceof ViewGroup) {
-            ViewGroup parentGroup = (ViewGroup) mParent;
-            return parentGroup.translateBoundsAndIntersectionsInWindowCoordinates(
-                    this, bounds, intersections);
-        }
-
-        return true;
-    }
-
-    private void offsetChildRectToMyCoords(RectF rect, View child) {
-        if (!child.hasIdentityMatrix()) {
-            child.getMatrix().mapRect(rect);
-        }
-        final int childDx = child.mLeft - mScrollX;
-        final int childDy = child.mTop - mScrollY;
-        rect.offset(childDx, childDy);
-    }
-
-    private static boolean isVisible(View view) {
-        return (view.getAlpha() > 0 && view.getTransitionAlpha() > 0 &&
-                view.getVisibility() == VISIBLE);
-    }
-
-    /**
-     * Obtains the iterator to traverse the children in a descending Z order.
-     * Only one party can use the iterator at any given time and you cannot
-     * modify the children while using this iterator. Acquisition if already
-     * obtained is an error.
-     *
-     * @return The child iterator.
-     */
-    OrderedChildIterator obtainOrderedChildIterator() {
-        if (mOrderedChildIterator == null) {
-            mOrderedChildIterator = new OrderedChildIterator();
-        } else if (mOrderedChildIterator.isInitialized()) {
-            throw new IllegalStateException("Already obtained");
-        }
-        mOrderedChildIterator.initialize();
-        return mOrderedChildIterator;
-    }
-
-    /**
-     * Releases the iterator to traverse the children in a descending Z order.
-     * Release if not obtained is an error.
-     */
-    void releaseOrderedChildIterator() {
-        if (mOrderedChildIterator == null || !mOrderedChildIterator.isInitialized()) {
-            throw new IllegalStateException("Not obtained");
-        }
-        mOrderedChildIterator.release();
     }
 
     /**
@@ -2074,6 +1933,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onTouchEvent(ev, 1);
         }
 
+        // Whether this event should be handled by the accessibility focus first.
+        final boolean targetAccessibilityFocus = ev.isTargetAccessibilityFocus();
+
         boolean handled = false;
         if (onFilterTouchEventForSecurity(ev)) {
             final int action = ev.getAction();
@@ -2090,19 +1952,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
-            if (actionMasked == MotionEvent.ACTION_DOWN
-                    || mFirstTouchTarget != null) {
-                final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-                if (!disallowIntercept) {
-                    intercepted = onInterceptTouchEvent(ev);
-                    ev.setAction(action); // restore action in case it was changed
+            if (!targetAccessibilityFocus) {
+                if (actionMasked == MotionEvent.ACTION_DOWN
+                        || mFirstTouchTarget != null) {
+                    final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
+                    if (!disallowIntercept) {
+                        intercepted = onInterceptTouchEvent(ev);
+                        ev.setAction(action); // restore action in case it was changed
+                    } else {
+                        intercepted = false;
+                    }
                 } else {
-                    intercepted = false;
+                    // There are no touch targets and this action is not an initial down
+                    // so this view group continues to intercept touches.
+                    intercepted = true;
                 }
             } else {
-                // There are no touch targets and this action is not an initial down
-                // so this view group continues to intercept touches.
-                intercepted = true;
+                // If event should reach the accessibility focus first, do not intercept it.
+                intercepted = false;
             }
 
             // Check for cancelation.
@@ -2116,7 +1983,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (!canceled && !intercepted) {
                 if (actionMasked == MotionEvent.ACTION_DOWN
                         || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
-                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE
+                        || targetAccessibilityFocus) {
                     final int actionIndex = ev.getActionIndex(); // always 0 for down
                     final int idBitsToAssign = split ? 1 << ev.getPointerId(actionIndex)
                             : TouchTarget.ALL_POINTER_IDS;
@@ -7407,58 +7275,5 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         sDebugLines[15] = y1;
 
         canvas.drawLines(sDebugLines, paint);
-    }
-
-    private final class OrderedChildIterator implements Iterator<View> {
-        private List<View> mOrderedChildList;
-        private boolean mUseCustomOrder;
-        private int mCurrentIndex;
-        private boolean mInitialized;
-
-        public void initialize() {
-            mOrderedChildList = buildOrderedChildList();
-            mUseCustomOrder = (mOrderedChildList == null)
-                    && isChildrenDrawingOrderEnabled();
-            mCurrentIndex = mChildrenCount - 1;
-            mInitialized = true;
-        }
-
-        public void release() {
-            if (mOrderedChildList != null) {
-                mOrderedChildList.clear();
-            }
-            mUseCustomOrder = false;
-            mCurrentIndex = 0;
-            mInitialized = false;
-        }
-
-        public boolean isInitialized() {
-            return mInitialized;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return (mCurrentIndex >= 0);
-        }
-
-        @Override
-        public View next() {
-            if (!hasNext()) {
-                throw new NoSuchElementException("No such element");
-            }
-            return getChild(mCurrentIndex--);
-        }
-
-        private View getChild(int index) {
-            final int childIndex = mUseCustomOrder
-                    ? getChildDrawingOrder(mChildrenCount, index) : index;
-            return (mOrderedChildList == null)
-                    ? mChildren[childIndex] : mOrderedChildList.get(childIndex);
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
     }
 }
