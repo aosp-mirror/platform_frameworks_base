@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
-   @hide Pending Android public API approval.
- */
-/**
 
 ******************************
 You have tried to change the API from what has been previously approved.
@@ -240,12 +237,10 @@ public class ScriptGroup2 extends BaseObj {
     for (int i = 0; i < closureIDs.length; i++) {
       closureIDs[i] = closures.get(i).getID(rs);
     }
-    long id = rs.nScriptGroup2Create(closureIDs);
+    long id = rs.nScriptGroup2Create(ScriptC.mCachePath, closureIDs);
     setID(id);
   }
 
-  // TODO: If this was reflected method, we could enforce the number of
-  // arguments.
   public Object[] execute(Object... inputs) {
     if (inputs.length < mInputs.size()) {
       Log.e(TAG, this.toString() + " receives " + inputs.length + " inputs, " +
@@ -309,8 +304,6 @@ public class ScriptGroup2 extends BaseObj {
     }
 
     public ScriptGroup2 create(Future... outputs) {
-      // TODO: Save all script groups that have been created and return one that was
-      // saved and matches the outputs.
       ScriptGroup2 ret = new ScriptGroup2(mRS, mClosures, mInputs, outputs);
       return ret;
     }
