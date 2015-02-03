@@ -170,6 +170,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPermissionController;
+import android.os.IProcessInfoService;
 import android.os.IRemoteCallback;
 import android.os.IUserManager;
 import android.os.Looper;
@@ -1920,6 +1921,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ServiceManager.addService("cpuinfo", new CpuBinder(this));
             }
             ServiceManager.addService("permission", new PermissionController(this));
+            ServiceManager.addService("processinfo", new ProcessInfoService(this));
 
             ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
                     "android", STOCK_PM_FLAGS);
@@ -6287,7 +6289,46 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
-    
+
+    // =========================================================
+    // PROCESS INFO
+    // =========================================================
+
+    static class ProcessInfoService extends IProcessInfoService.Stub {
+        final ActivityManagerService mActivityManagerService;
+        ProcessInfoService(ActivityManagerService activityManagerService) {
+            mActivityManagerService = activityManagerService;
+        }
+
+        @Override
+        public void getProcessStatesFromPids(/*in*/ int[] pids, /*out*/ int[] states) {
+            mActivityManagerService.getProcessStatesForPIDs(/*in*/ pids, /*out*/ states);
+        }
+    }
+
+    /**
+     * For each PID in the given input array, write the current process state
+     * for that process into the output array, or -1 to indicate that no
+     * process with the given PID exists.
+     */
+    public void getProcessStatesForPIDs(/*in*/ int[] pids, /*out*/ int[] states) {
+        if (pids == null) {
+            throw new NullPointerException("pids");
+        } else if (states == null) {
+            throw new NullPointerException("states");
+        } else if (pids.length != states.length) {
+            throw new IllegalArgumentException("input and output arrays have different lengths!");
+        }
+
+        synchronized (mPidsSelfLocked) {
+            for (int i = 0; i < pids.length; i++) {
+                ProcessRecord pr = mPidsSelfLocked.get(pids[i]);
+                states[i] = (pr == null) ? ActivityManager.PROCESS_STATE_NONEXISTENT :
+                        pr.curProcState;
+            }
+        }
+    }
+
     // =========================================================
     // PERMISSIONS
     // =========================================================
