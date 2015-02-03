@@ -366,6 +366,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
     public String toSafeString() {
         String scheme = getScheme();
         String ssp = getSchemeSpecificPart();
+        String authority = null;
         if (scheme != null) {
             if (scheme.equalsIgnoreCase("tel") || scheme.equalsIgnoreCase("sip")
                     || scheme.equalsIgnoreCase("sms") || scheme.equalsIgnoreCase("smsto")
@@ -384,6 +385,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                     }
                 }
                 return builder.toString();
+            } else if (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")) {
+                ssp = null;
+                authority = "//" + getAuthority() + "/...";
             }
         }
         // Not a sensitive scheme, but let's still be conservative about
@@ -396,6 +400,9 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
         if (ssp != null) {
             builder.append(ssp);
+        }
+        if (authority != null) {
+            builder.append(authority);
         }
         return builder.toString();
     }
@@ -1742,7 +1749,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      *
      * @return normalized Uri (never null)
      * @see {@link android.content.Intent#setData}
-     * @see {@link #setNormalizedData}
+     * @see {@link android.content.Intent#setDataAndNormalize}
      */
     public Uri normalizeScheme() {
         String scheme = getScheme();
