@@ -4742,6 +4742,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     msg.setAsynchronous(true);
                     msg.sendToTarget();
                 }
+                break;
             }
         }
 
