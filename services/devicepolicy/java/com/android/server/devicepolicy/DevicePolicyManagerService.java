@@ -78,6 +78,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
+import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
@@ -2978,6 +2979,59 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Binder.restoreCallingIdentity(id);
         }
         return false;
+    }
+
+    @Override
+    public void choosePrivateKeyAlias(final String host, int port, final String url,
+            final String alias, final IBinder response) {
+        final ComponentName profileOwner = getProfileOwner(UserHandle.getCallingUserId());
+        final UserHandle caller = Binder.getCallingUserHandle();
+        final int callerUid = Binder.getCallingUid();
+
+        if (profileOwner == null) {
+            sendPrivateKeyAliasResponse(null, response);
+            return;
+        }
+
+        Intent intent = new Intent(DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS);
+        intent.setComponent(profileOwner);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, callerUid);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_HOST, host);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_PORT, port);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URL, url);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_ALIAS, alias);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE, response);
+
+        final long id = Binder.clearCallingIdentity();
+        try {
+            mContext.sendOrderedBroadcastAsUser(intent, caller, null, new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    final String chosenAlias = getResultData();
+                    sendPrivateKeyAliasResponse(chosenAlias, response);
+                }
+            }, null, Activity.RESULT_OK, null, null);
+        } finally {
+            Binder.restoreCallingIdentity(id);
+        }
+    }
+
+    private void sendPrivateKeyAliasResponse(final String alias, final IBinder responseBinder) {
+        final IKeyChainAliasCallback keyChainAliasResponse =
+                IKeyChainAliasCallback.Stub.asInterface(responseBinder);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... unused) {
+                try {
+                    keyChainAliasResponse.alias(alias);
+                } catch (Exception e) {
+                    // Catch everything (not just RemoteException): caller could throw a
+                    // RuntimeException back across processes.
+                    Log.e(LOG_TAG, "error while responding to callback", e);
+                }
+                return null;
+            }
+        }.execute();
     }
 
     private void wipeDataLocked(boolean wipeExtRequested, String reason) {
