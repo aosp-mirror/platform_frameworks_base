@@ -32,7 +32,7 @@ const uint32_t kMaxNumberOfQuads = 2048;
 
 // This array is never used directly but used as a memcpy source in the
 // OpenGLRenderer constructor
-const TextureVertex kMeshVertices[] = {
+const TextureVertex kUnitQuadVertices[] = {
         { 0, 0, 0, 0 },
         { 1, 0, 1, 0 },
         { 0, 1, 0, 1 },
@@ -110,12 +110,16 @@ public:
     bool bindShadowIndicesBuffer();
     bool unbindIndicesBuffer();
 
+    ///////////////////////////////////////////////////////////////////////////////
+    // Getters - for use in Glop building
+    ///////////////////////////////////////////////////////////////////////////////
+    GLuint getUnitQuadVBO() { return mUnitQuadBuffer; }
 private:
     MeshState();
     bool bindIndicesBufferInternal(const GLuint buffer);
 
     // VBO to draw with
-    GLuint meshBuffer;
+    GLuint mUnitQuadBuffer;
 
     GLuint mCurrentBuffer;
     GLuint mCurrentIndicesBuffer;

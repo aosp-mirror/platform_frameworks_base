@@ -217,7 +217,7 @@ void RenderState::render(const Glop& glop) {
     mCaches->setProgram(shader.program);
 
     Glop::Fill::Color color = shader.color;
-    shader.program->setColor(color.a, color.r, color.g, color.b);
+    shader.program->setColor(color.r, color.g, color.b, color.a);
 
     shader.program->set(glop.transform.ortho,
             glop.transform.modelView,
@@ -259,14 +259,13 @@ void RenderState::render(const Glop& glop) {
     meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
 
     // ---------- GL state setup ----------
+    blend().setFactors(glop.blend.src, glop.blend.dst);
 
-    if (glop.blend.mode != Glop::Blend::kDisable) {
-        blend().enable(glop.blend.mode, glop.blend.swapSrcDst);
+    if (mesh.indexBufferObject) {
+        glDrawElements(glop.mesh.primitiveMode, glop.mesh.vertexCount, GL_UNSIGNED_BYTE, nullptr);
     } else {
-        blend().disable();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, glop.mesh.vertexCount);
     }
-
-    glDrawElements(glop.mesh.primitiveMode, glop.mesh.vertexCount, GL_UNSIGNED_BYTE, nullptr);
 }
 
 } /* namespace uirenderer */

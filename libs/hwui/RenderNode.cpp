@@ -836,7 +836,6 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
  */
 template <class T>
 void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
-    const int level = handler.level();
     if (mDisplayListData->isEmpty()) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, getName());
         return;
@@ -860,7 +859,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
 #if DEBUG_DISPLAY_LIST
     const Rect& clipRect = renderer.getLocalClipBounds();
     DISPLAY_LIST_LOGD("%*sStart display list (%p, %s), localClipBounds: %.0f, %.0f, %.0f, %.0f",
-            level * 2, "", this, getName(),
+            handler.level() * 2, "", this, getName(),
             clipRect.left, clipRect.top, clipRect.right, clipRect.bottom);
 #endif
 
@@ -900,7 +899,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                 for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
                     DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
 #if DEBUG_DISPLAY_LIST
-                    op->output(level + 1);
+                    op->output(handler.level() + 1);
 #endif
                     handler(op, saveCountOffset, properties().getClipToBounds());
 

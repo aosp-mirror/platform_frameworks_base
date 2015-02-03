@@ -20,10 +20,13 @@
 #include "DisplayListRenderer.h"
 #include "Fence.h"
 #include "GammaFontRenderer.h"
+#include "Glop.h"
+#include "GlopBuilder.h"
 #include "Patch.h"
 #include "PathTessellator.h"
 #include "Properties.h"
 #include "RenderNode.h"
+#include "renderstate/MeshState.h"
 #include "renderstate/RenderState.h"
 #include "ShadowTessellator.h"
 #include "SkiaShader.h"
@@ -101,7 +104,7 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
     memset(&mDrawModifiers, 0, sizeof(mDrawModifiers));
     mDrawModifiers.mOverrideLayerAlpha = 1.0f;
 
-    memcpy(mMeshVertices, kMeshVertices, sizeof(kMeshVertices));
+    memcpy(mMeshVertices, kUnitQuadVertices, sizeof(kUnitQuadVertices));
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -1704,9 +1707,9 @@ void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool sw
     // When the blending mode is kClear_Mode, we need to use a modulate color
     // argb=1,0,0,0
     accountForClear(mode);
-    blend |= (mColorSet && mColorA < 1.0f) ||
-            (getShader(paint) && !getShader(paint)->isOpaque()) ||
-            PaintUtils::isBlendedColorFilter(getColorFilter(paint));
+    blend |= (mColorSet && mColorA < 1.0f)
+            || (getShader(paint) && !getShader(paint)->isOpaque())
+            || PaintUtils::isBlendedColorFilter(getColorFilter(paint));
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 

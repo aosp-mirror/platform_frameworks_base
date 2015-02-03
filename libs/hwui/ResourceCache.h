@@ -81,7 +81,7 @@ private:
     uint32_t mPixelRefStableID;
 
     friend class ResourceCache;
-    friend class android::key_value_pair_t<BitmapKey, SkBitmap*>;
+    friend struct android::key_value_pair_t<BitmapKey, SkBitmap*>;
 };
 
 class ANDROID_API ResourceCache: public Singleton<ResourceCache> {

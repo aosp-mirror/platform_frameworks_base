@@ -23,9 +23,12 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <SkXfermode.h>
 
 namespace android {
 namespace uirenderer {
+
+class Program;
 
 /*
  * Enumerates optional vertex attributes
@@ -53,18 +56,16 @@ struct Glop {
     Rect bounds;
 
     struct Mesh {
-        VertexAttribFlags vertexFlags = static_cast<VertexAttribFlags>(0);
+        VertexAttribFlags vertexFlags;
         GLuint primitiveMode; // GL_TRIANGLES and GL_TRIANGLE_STRIP supported
-        GLuint vertexBufferObject = 0;
-        GLuint indexBufferObject = 0;
+        GLuint vertexBufferObject;
+        GLuint indexBufferObject;
         int vertexCount;
         GLsizei stride;
     } mesh;
 
     struct Fill {
         Program* program;
-        GLuint shaderId;
-        GLuint textureId;
 
         struct Color {
             float a, r, g, b;
@@ -89,10 +90,8 @@ struct Glop {
     } transform;
 
     struct Blend {
-        static const SkXfermode::Mode kDisable =
-                static_cast<SkXfermode::Mode>(SkXfermode::kLastMode + 1);
-        SkXfermode::Mode mode;
-        bool swapSrcDst;
+        GLenum src;
+        GLenum dst;
     } blend;
 
     /**

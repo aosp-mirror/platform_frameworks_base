@@ -79,21 +79,10 @@ Blend::Blend()
 }
 
 void Blend::enable(SkXfermode::Mode mode, bool swapSrcDst) {
-    // enable
-    if (!mEnabled) {
-        glEnable(GL_BLEND);
-        mEnabled = true;
-    }
-
-    // select blend mode
-    GLenum sourceMode = swapSrcDst ? kBlendsSwap[mode].src : kBlends[mode].src;
-    GLenum destMode = swapSrcDst ? kBlendsSwap[mode].dst : kBlends[mode].dst;
-
-    if (sourceMode != mSrcMode || destMode != mSrcMode) {
-        glBlendFunc(sourceMode, destMode);
-        mSrcMode = sourceMode;
-        mDstMode = destMode;
-    }
+    GLenum srcMode;
+    GLenum dstMode;
+    getFactors(mode, swapSrcDst, &srcMode, &dstMode);
+    setFactors(srcMode, dstMode);
 }
 
 void Blend::disable() {
@@ -113,6 +102,28 @@ void Blend::syncEnabled() {
         glEnable(GL_BLEND);
     } else {
         glDisable(GL_BLEND);
+    }
+}
+
+void Blend::getFactors(SkXfermode::Mode mode, bool swapSrcDst, GLenum* outSrc, GLenum* outDst) {
+    *outSrc = swapSrcDst ? kBlendsSwap[mode].src : kBlends[mode].src;
+    *outDst = swapSrcDst ? kBlendsSwap[mode].dst : kBlends[mode].dst;
+}
+
+void Blend::setFactors(GLenum srcMode, GLenum dstMode) {
+    if (srcMode == GL_ZERO && dstMode == GL_ZERO) {
+        disable();
+    } else {
+        if (!mEnabled) {
+            glEnable(GL_BLEND);
+            mEnabled = true;
+        }
+
+        if (srcMode != mSrcMode || dstMode != mSrcMode) {
+            glBlendFunc(srcMode, dstMode);
+            mSrcMode = srcMode;
+            mDstMode = dstMode;
+        }
     }
 }
 
