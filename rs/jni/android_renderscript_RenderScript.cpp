@@ -258,7 +258,9 @@ nClosureSetGlobal(JNIEnv *_env, jobject _this, jlong con, jlong closureID,
 
 static long
 nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con,
-                    jlongArray closureArray) {
+                    jstring cacheDir, jlongArray closureArray) {
+  AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
+
   jlong* jClosures = _env->GetLongArrayElements(closureArray, nullptr);
   jsize numClosures = _env->GetArrayLength(closureArray);
   RsClosure* closures = (RsClosure*)alloca(sizeof(RsClosure) * numClosures);
@@ -266,8 +268,9 @@ nScriptGroup2Create(JNIEnv *_env, jobject _this, jlong con,
     closures[i] = (RsClosure)jClosures[i];
   }
 
-  return (jlong)(uintptr_t)rsScriptGroup2Create((RsContext)con, closures,
-                                                numClosures);
+  return (jlong)(uintptr_t)rsScriptGroup2Create(
+      (RsContext)con, cacheDirUTF.c_str(), cacheDirUTF.length(),
+      closures, numClosures);
 }
 
 static void
@@ -2008,7 +2011,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptKernelIDCreate",          "(JJII)J",                               (void*)nScriptKernelIDCreate },
 {"rsnScriptFieldIDCreate",           "(JJI)J",                                (void*)nScriptFieldIDCreate },
 {"rsnScriptGroupCreate",             "(J[J[J[J[J[J)J",                        (void*)nScriptGroupCreate },
-{"rsnScriptGroup2Create",            "(J[J)J",                                (void*)nScriptGroup2Create },
+{"rsnScriptGroup2Create",            "(JLjava/lang/String;[J)J",               (void*)nScriptGroup2Create },
 {"rsnScriptGroupSetInput",           "(JJJJ)V",                               (void*)nScriptGroupSetInput },
 {"rsnScriptGroupSetOutput",          "(JJJJ)V",                               (void*)nScriptGroupSetOutput },
 {"rsnScriptGroupExecute",            "(JJ)V",                                 (void*)nScriptGroupExecute },
