@@ -34654,6 +34654,7 @@ package android.view {
     method public java.lang.Object getTag();
     method public abstract java.lang.CharSequence getTitle();
     method public boolean getTitleOptionalHint();
+    method public int getType();
     method public abstract void invalidate();
     method public boolean isTitleOptional();
     method public abstract void setCustomView(android.view.View);
@@ -34663,6 +34664,9 @@ package android.view {
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract void setTitle(int);
     method public void setTitleOptionalHint(boolean);
+    method public void setType(int);
+    field public static final int TYPE_FLOATING = 1; // 0x1
+    field public static final int TYPE_PRIMARY = 0; // 0x0
   }
 
   public static abstract interface ActionMode.Callback {

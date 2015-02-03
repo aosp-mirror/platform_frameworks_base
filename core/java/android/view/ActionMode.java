@@ -29,8 +29,21 @@ package android.view;
  * </div>
  */
 public abstract class ActionMode {
+
+    /**
+     * The action mode is treated as a Primary mode. This is the default.
+     * Use with {@link #setType}.
+     */
+    public static final int TYPE_PRIMARY = 0;
+    /**
+     * The action mode is treated as a Floating Toolbar.
+     * Use with {@link #setType}.
+     */
+    public static final int TYPE_FLOATING = 1;
+
     private Object mTag;
     private boolean mTitleOptionalHint;
+    private int mType = TYPE_PRIMARY;
 
     /**
      * Set a tag object associated with this ActionMode.
@@ -152,6 +165,25 @@ public abstract class ActionMode {
      * @see #setSubtitle(CharSequence)
      */
     public abstract void setCustomView(View view);
+
+    /**
+     * Set a type for this action mode. This will affect how the system renders the action mode if
+     * it has to.
+     *
+     * @param type One of {@link #TYPE_PRIMARY} or {@link #TYPE_FLOATING}.
+     */
+    public void setType(int type) {
+        mType = type;
+    }
+
+    /**
+     * Returns the type for this action mode.
+     *
+     * @return One of {@link #TYPE_PRIMARY} or {@link #TYPE_FLOATING}.
+     */
+    public int getType() {
+        return mType;
+    }
 
     /**
      * Invalidate the action mode and refresh menu content. The mode's
