@@ -28,6 +28,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
+import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
@@ -656,12 +657,36 @@ public class NetworkMonitor extends StateMachine {
         int httpResponseCode = 599;
         try {
             URL url = new URL("http", mServer, "/generate_204");
+            // On networks with a PAC instead of fetching a URL that should result in a 204
+            // reponse, we instead simply fetch the PAC script.  This is done for a few reasons:
+            // 1. At present our PAC code does not yet handle multiple PACs on multiple networks
+            //    until something like https://android-review.googlesource.com/#/c/115180/ lands.
+            //    Network.openConnection() will ignore network-specific PACs and instead fetch
+            //    using NO_PROXY.  If a PAC is in place, the only fetch we know will succeed with
+            //    NO_PROXY is the fetch of the PAC itself.
+            // 2. To proxy the generate_204 fetch through a PAC would require a number of things
+            //    happen before the fetch can commence, namely:
+            //        a) the PAC script be fetched
+            //        b) a PAC script resolver service be fired up and resolve mServer
+            //    Network validation could be delayed until these prerequisities are satisifed or
+            //    could simply be left to race them.  Neither is an optimal solution.
+            // 3. PAC scripts are sometimes used to block or restrict Internet access and may in
+            //    fact block fetching of the generate_204 URL which would lead to false negative
+            //    results for network validation.
+            boolean fetchPac = false;
+            {
+                final ProxyInfo proxyInfo = mNetworkAgentInfo.linkProperties.getHttpProxy();
+                if (proxyInfo != null && !Uri.EMPTY.equals(proxyInfo.getPacFileUrl())) {
+                    url = new URL(proxyInfo.getPacFileUrl().toString());
+                    fetchPac = true;
+                }
+            }
             if (DBG) {
                 log("Checking " + url.toString() + " on " +
                         mNetworkAgentInfo.networkInfo.getExtraInfo());
             }
             urlConnection = (HttpURLConnection) mNetworkAgentInfo.network.openConnection(url);
-            urlConnection.setInstanceFollowRedirects(false);
+            urlConnection.setInstanceFollowRedirects(fetchPac);
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
@@ -692,6 +717,11 @@ public class NetworkMonitor extends StateMachine {
             // See http://b/9972012.
             if (httpResponseCode == 200 && urlConnection.getContentLength() == 0) {
                 if (DBG) log("Empty 200 response interpreted as 204 response.");
+                httpResponseCode = 204;
+            }
+
+            if (httpResponseCode == 200 && fetchPac) {
+                if (DBG) log("PAC fetch 200 response interpreted as 204 response.");
                 httpResponseCode = 204;
             }
 
