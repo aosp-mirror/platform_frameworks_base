@@ -756,8 +756,9 @@ public final class TvContract {
          * </p><p>
          * Note that this sub-directory also supports opening the logo as an asset file in write
          * mode.  Callers can create or replace the primary logo associated with this channel by
-         * opening the asset file and writing the full-size photo contents into it.  When the file
-         * is closed, the image will be parsed, sized down if necessary, and stored.
+         * opening the asset file and writing the full-size photo contents into it. (Make sure there
+         * is no padding around the logo image.) When the file is closed, the image will be parsed,
+         * sized down if necessary, and stored.
          * </p><p>
          * Usage example:
          * <pre>
