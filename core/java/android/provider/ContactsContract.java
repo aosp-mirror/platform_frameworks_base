@@ -8061,8 +8061,10 @@ public final class ContactsContract {
         public static final String EXTRA_TARGET_RECT = "android.provider.extra.TARGET_RECT";
 
         /**
-         * Extra used to specify size of pivot dialog.
-         * @hide
+         * Extra used to specify size of QuickContacts. Not all implementations of QuickContacts
+         * will respect this extra's value.
+         *
+         * One of {@link #MODE_SMALL}, {@link #MODE_MEDIUM}, or {@link #MODE_LARGE}.
          */
         public static final String EXTRA_MODE = "android.provider.extra.MODE";
 

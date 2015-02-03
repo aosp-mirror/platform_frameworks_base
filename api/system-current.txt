@@ -26567,6 +26567,7 @@ package android.provider {
     method public static void showQuickContact(android.content.Context, android.graphics.Rect, android.net.Uri, int, java.lang.String[]);
     field public static final java.lang.String ACTION_QUICK_CONTACT = "android.provider.action.QUICK_CONTACT";
     field public static final java.lang.String EXTRA_EXCLUDE_MIMES = "android.provider.extra.EXCLUDE_MIMES";
+    field public static final java.lang.String EXTRA_MODE = "android.provider.extra.MODE";
     field public static final int MODE_LARGE = 3; // 0x3
     field public static final int MODE_MEDIUM = 2; // 0x2
     field public static final int MODE_SMALL = 1; // 0x1
