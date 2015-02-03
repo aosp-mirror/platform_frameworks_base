@@ -40,13 +40,17 @@ public final class GpsSatellite {
      * cached GpsStatus instance to the client's copy.
      */
     void setStatus(GpsSatellite satellite) {
-        mValid = satellite.mValid;
-        mHasEphemeris = satellite.mHasEphemeris;
-        mHasAlmanac = satellite.mHasAlmanac;
-        mUsedInFix = satellite.mUsedInFix;
-        mSnr = satellite.mSnr;
-        mElevation = satellite.mElevation;
-        mAzimuth = satellite.mAzimuth;
+        if (satellite == null) {
+            mValid = false;
+        } else {
+            mValid = satellite.mValid;
+            mHasEphemeris = satellite.mHasEphemeris;
+            mHasAlmanac = satellite.mHasAlmanac;
+            mUsedInFix = satellite.mUsedInFix;
+            mSnr = satellite.mSnr;
+            mElevation = satellite.mElevation;
+            mAzimuth = satellite.mAzimuth;
+        }
     }
 
     /**

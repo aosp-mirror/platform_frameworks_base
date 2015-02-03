@@ -16,6 +16,8 @@
 
 package android.location;
 
+import android.util.SparseArray;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -29,20 +31,24 @@ public final class GpsStatus {
 
     /* These package private values are modified by the LocationManager class */
     private int mTimeToFirstFix;
-    private GpsSatellite mSatellites[] = new GpsSatellite[NUM_SATELLITES];
+    private final SparseArray<GpsSatellite> mSatellites = new SparseArray<>();
 
     private final class SatelliteIterator implements Iterator<GpsSatellite> {
 
-        private GpsSatellite[] mSatellites;
-        int mIndex = 0;
+        private final SparseArray<GpsSatellite> mSatellites;
+        private final int mSatellitesCount;
 
-        SatelliteIterator(GpsSatellite[] satellites) {
+        private int mIndex = 0;
+
+        SatelliteIterator(SparseArray<GpsSatellite> satellites) {
             mSatellites = satellites;
+            mSatellitesCount = satellites.size();
         }
 
         public boolean hasNext() {
-            for (int i = mIndex; i < mSatellites.length; i++) {
-                if (mSatellites[i].mValid) {
+            for (; mIndex < mSatellitesCount; ++mIndex) {
+                GpsSatellite satellite = mSatellites.valueAt(mIndex);
+                if (satellite.mValid) {
                     return true;
                 }
             }
@@ -50,8 +56,9 @@ public final class GpsStatus {
         }
 
         public GpsSatellite next() {
-            while (mIndex < mSatellites.length) {
-                GpsSatellite satellite = mSatellites[mIndex++];
+            while (mIndex < mSatellitesCount) {
+                GpsSatellite satellite = mSatellites.valueAt(mIndex);
+                ++mIndex;
                 if (satellite.mValid) {
                     return satellite;
                 }
@@ -106,7 +113,7 @@ public final class GpsStatus {
          * <li> {@link GpsStatus#GPS_EVENT_SATELLITE_STATUS}
          * </ul>
          *
-         * When this method is called, the client should call 
+         * When this method is called, the client should call
          * {@link LocationManager#getGpsStatus} to get additional
          * status information.
          *
@@ -127,11 +134,8 @@ public final class GpsStatus {
         void onNmeaReceived(long timestamp, String nmea);
     }
 
-    GpsStatus() {
-        for (int i = 0; i < mSatellites.length; i++) {
-            mSatellites[i] = new GpsSatellite(i + 1);
-        }
-    }
+    // For API-compat a public ctor() is not available
+    GpsStatus() {}
 
     /**
      * Used internally within {@link LocationManager} to copy GPS status
@@ -141,18 +145,17 @@ public final class GpsStatus {
     synchronized void setStatus(int svCount, int[] prns, float[] snrs,
             float[] elevations, float[] azimuths, int ephemerisMask,
             int almanacMask, int usedInFixMask) {
-        int i;
+        clearSatellites();
+        for (int i = 0; i < svCount; i++) {
+            int prn = prns[i];
+            int prnShift = (1 << (prn - 1));
+            if (prn > 0 && prn <= NUM_SATELLITES) {
+                GpsSatellite satellite = mSatellites.get(prn);
+                if (satellite == null) {
+                    satellite = new GpsSatellite(prn);
+                    mSatellites.put(prn, satellite);
+                }
 
-        for (i = 0; i < mSatellites.length; i++) {
-            mSatellites[i].mValid = false;
-        }
-        
-        for (i = 0; i < svCount; i++) {
-            int prn = prns[i] - 1;
-            int prnShift = (1 << prn);
-            if (prn >= 0 && prn < mSatellites.length) {
-                GpsSatellite satellite = mSatellites[prn];
-    
                 satellite.mValid = true;
                 satellite.mSnr = snrs[i];
                 satellite.mElevation = elevations[i];
@@ -172,10 +175,38 @@ public final class GpsStatus {
      */
     void setStatus(GpsStatus status) {
         mTimeToFirstFix = status.getTimeToFirstFix();
+        clearSatellites();
 
-        for (int i = 0; i < mSatellites.length; i++) {
-            mSatellites[i].setStatus(status.mSatellites[i]);
-        } 
+        SparseArray<GpsSatellite> otherSatellites = status.mSatellites;
+        int otherSatellitesCount = otherSatellites.size();
+        int satelliteIndex = 0;
+        // merge both sparse arrays, note that we have already invalidated the elements in the
+        // receiver array
+        for (int i = 0; i < otherSatellitesCount; ++i) {
+            GpsSatellite otherSatellite = otherSatellites.valueAt(i);
+            int otherSatellitePrn = otherSatellite.getPrn();
+
+            int satellitesCount = mSatellites.size();
+            while (satelliteIndex < satellitesCount
+                    && mSatellites.valueAt(satelliteIndex).getPrn() < otherSatellitePrn) {
+                ++satelliteIndex;
+            }
+
+            if (satelliteIndex < mSatellites.size()) {
+                GpsSatellite satellite = mSatellites.valueAt(satelliteIndex);
+                if (satellite.getPrn() == otherSatellitePrn) {
+                    satellite.setStatus(otherSatellite);
+                } else {
+                    satellite = new GpsSatellite(otherSatellitePrn);
+                    satellite.setStatus(otherSatellite);
+                    mSatellites.put(otherSatellitePrn, satellite);
+                }
+            } else {
+                GpsSatellite satellite = new GpsSatellite(otherSatellitePrn);
+                satellite.setStatus(otherSatellite);
+                mSatellites.append(otherSatellitePrn, satellite);
+            }
+        }
     }
 
     void setTimeToFirstFix(int ttff) {
@@ -183,7 +214,7 @@ public final class GpsStatus {
     }
 
     /**
-     * Returns the time required to receive the first fix since the most recent 
+     * Returns the time required to receive the first fix since the most recent
      * restart of the GPS engine.
      *
      * @return time to first fix in milliseconds
@@ -210,5 +241,13 @@ public final class GpsStatus {
      */
     public int getMaxSatellites() {
         return NUM_SATELLITES;
+    }
+
+    private void clearSatellites() {
+        int satellitesCount = mSatellites.size();
+        for (int i = 0; i < satellitesCount; i++) {
+            GpsSatellite satellite = mSatellites.valueAt(i);
+            satellite.mValid = false;
+        }
     }
 }
