@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl;
+package com.android.server.policy;
 
 import android.content.ComponentName;
 import android.content.Context;

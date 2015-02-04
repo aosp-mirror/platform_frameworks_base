@@ -42,10 +42,8 @@ import android.view.accessibility.AccessibilityEvent;
  * area, default key processing, etc.
  *
  * <p>The only existing implementation of this abstract class is
- * android.policy.PhoneWindow, which you should instantiate when needing a
- * Window.  Eventually that class will be refactored and a factory method
- * added for creating Window instances without knowing about a particular
- * implementation.
+ * android.view.PhoneWindow, which you should instantiate when needing a
+ * Window.
  */
 public abstract class Window {
     /** Flag for the "options panel" feature.  This is enabled by default. */

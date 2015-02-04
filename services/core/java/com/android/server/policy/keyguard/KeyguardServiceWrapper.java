@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl.keyguard;
+package com.android.server.policy.keyguard;
 
 import android.content.Context;
 import android.os.Bundle;

@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.android.internal.policy.impl;
+package com.android.server.policy;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;

@@ -37,6 +37,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.PhoneWindow;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -46,7 +47,6 @@ import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 import android.util.MathUtils;
 
-import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.DumpUtils.Dump;
 
@@ -945,7 +945,7 @@ public class DreamService extends Service implements Window.Callback {
             throw new IllegalStateException("Only doze dreams can be windowless");
         }
         if (!mWindowless) {
-            mWindow = PolicyManager.makeNewWindow(this);
+            mWindow = new PhoneWindow(this);
             mWindow.setCallback(this);
             mWindow.requestFeature(Window.FEATURE_NO_TITLE);
             mWindow.setBackgroundDrawable(new ColorDrawable(0xFF000000));

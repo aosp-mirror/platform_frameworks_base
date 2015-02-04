@@ -1,4 +1,4 @@
-package com.android.internal.policy.impl.keyguard;
+package com.android.server.policy.keyguard;
 
 import android.content.ComponentName;
 import android.content.Context;

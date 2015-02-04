@@ -227,6 +227,7 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/com/android/internal/widget/ILockSettingsObserver.java)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/SystemUI_intermediates/)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/Keyguard_intermediates/)
+$(call add-clean-step, rm -f $(OUT_DIR)/target/product/*/system/framework/android.policy.jar)
 
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER

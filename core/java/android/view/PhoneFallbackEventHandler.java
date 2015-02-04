@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl;
+package android.view;
 
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -23,19 +23,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.media.AudioManager;
-import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.util.Slog;
-import android.view.View;
-import android.view.HapticFeedbackConstants;
-import android.view.FallbackEventHandler;
-import android.view.KeyEvent;
 
+/**
+ * @hide
+ */
 public class PhoneFallbackEventHandler implements FallbackEventHandler {
     private static String TAG = "PhoneFallbackEventHandler";
     private static final boolean DEBUG = false;
@@ -283,7 +278,7 @@ public class PhoneFallbackEventHandler implements FallbackEventHandler {
     }
 
     void sendCloseSystemWindows() {
-        PhoneWindowManager.sendCloseSystemWindows(mContext, null);
+        PhoneWindow.sendCloseSystemWindows(mContext, null);
     }
 
     private void handleMediaKeyEvent(KeyEvent keyEvent) {

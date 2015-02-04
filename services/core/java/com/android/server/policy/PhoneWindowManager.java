@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl;
+package com.android.server.policy;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -89,6 +89,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.PhoneWindow;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -104,12 +105,11 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 
 import com.android.internal.R;
-import com.android.internal.policy.PolicyManager;
-import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate;
-import com.android.internal.policy.impl.keyguard.KeyguardServiceDelegate.ShowListener;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate;
+import com.android.server.policy.keyguard.KeyguardServiceDelegate.ShowListener;
 
 import java.io.File;
 import java.io.FileReader;
@@ -2041,7 +2041,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
 
-            Window win = PolicyManager.makeNewWindow(context);
+            Window win = new PhoneWindow(context);
             final TypedArray ta = win.getWindowStyle();
             if (ta.getBoolean(
                         com.android.internal.R.styleable.Window_windowDisablePreview, false)
@@ -5334,20 +5334,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void sendCloseSystemWindows() {
-        sendCloseSystemWindows(mContext, null);
+        PhoneWindow.sendCloseSystemWindows(mContext, null);
     }
 
     void sendCloseSystemWindows(String reason) {
-        sendCloseSystemWindows(mContext, reason);
-    }
-
-    static void sendCloseSystemWindows(Context context, String reason) {
-        if (ActivityManagerNative.isSystemReady()) {
-            try {
-                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
-            } catch (RemoteException e) {
-            }
-        }
+        PhoneWindow.sendCloseSystemWindows(mContext, reason);
     }
 
     @Override

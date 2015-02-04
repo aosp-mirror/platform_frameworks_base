@@ -2473,7 +2473,7 @@ public final class Settings {
 
         /**
          * Log raw orientation data from
-         * {@link com.android.internal.policy.impl.WindowOrientationListener} for use with the
+         * {@link com.android.server.policy.WindowOrientationListener} for use with the
          * orientationplot.py tool.
          * 0 = no
          * 1 = yes
@@ -6545,7 +6545,7 @@ public final class Settings {
         /**
          * Defines global runtime overrides to window policy.
          *
-         * See {@link com.android.internal.policy.impl.PolicyControl} for value format.
+         * See {@link com.android.server.policy.PolicyControl} for value format.
          *
          * @hide
          */

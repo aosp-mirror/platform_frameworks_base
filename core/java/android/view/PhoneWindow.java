@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl;
+package android.view;
 
 import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.EXACTLY;
@@ -22,6 +22,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.*;
 
+import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.UserHandle;
 import com.android.internal.R;
@@ -72,31 +73,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.ActionMode;
-import android.view.ContextThemeWrapper;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.IRotationWatcher;
-import android.view.IWindowManager;
-import android.view.InputEvent;
-import android.view.InputQueue;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.ViewGroup;
-import android.view.ViewManager;
-import android.view.ViewParent;
-import android.view.ViewRootImpl;
-import android.view.ViewStub;
-import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -116,6 +92,8 @@ import java.util.ArrayList;
  * <p>
  * todo: need to pull the generic functionality out into a base class
  * in android.widget.
+ *
+ * @hide
  */
 public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
@@ -4754,11 +4732,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     void sendCloseSystemWindows() {
-        PhoneWindowManager.sendCloseSystemWindows(getContext(), null);
+        sendCloseSystemWindows(getContext(), null);
     }
 
     void sendCloseSystemWindows(String reason) {
-        PhoneWindowManager.sendCloseSystemWindows(getContext(), reason);
+        sendCloseSystemWindows(getContext(), reason);
+    }
+
+    public static void sendCloseSystemWindows(Context context, String reason) {
+        if (ActivityManagerNative.isSystemReady()) {
+            try {
+                ActivityManagerNative.getDefault().closeSystemDialogs(reason);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     @Override

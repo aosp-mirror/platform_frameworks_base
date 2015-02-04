@@ -29,8 +29,6 @@ import android.view.IWindowId;
 import android.view.IWindowSessionCallback;
 import android.view.WindowContentFrameStats;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.policy.PolicyManager;
-import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
@@ -45,6 +43,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.input.InputManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.policy.PhoneWindowManager;
 
 import android.Manifest;
 import android.app.ActivityManagerNative;
@@ -338,7 +337,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mLimitedAlphaCompositing;
 
-    final WindowManagerPolicy mPolicy = PolicyManager.makeNewWindowManager();
+    final WindowManagerPolicy mPolicy = new PhoneWindowManager();
 
     final IActivityManager mActivityManager;
 

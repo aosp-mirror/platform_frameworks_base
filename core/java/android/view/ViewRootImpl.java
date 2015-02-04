@@ -76,7 +76,6 @@ import android.widget.Scroller;
 
 import com.android.internal.R;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.policy.PolicyManager;
 import com.android.internal.view.BaseSurfaceHolder;
 import com.android.internal.view.RootViewSurfaceTaker;
 
@@ -386,7 +385,7 @@ public final class ViewRootImpl implements ViewParent,
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
-        mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
+        mFallbackEventHandler = new PhoneFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         loadSystemProperties();

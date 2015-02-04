@@ -28,6 +28,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.PhoneWindow;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -35,8 +36,6 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-
-import com.android.internal.policy.PolicyManager;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -128,7 +127,7 @@ public class MediaController extends FrameLayout {
 
     private void initFloatingWindow() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
-        mWindow = PolicyManager.makeNewWindow(mContext);
+        mWindow = new PhoneWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
         mDecor = mWindow.getDecorView();

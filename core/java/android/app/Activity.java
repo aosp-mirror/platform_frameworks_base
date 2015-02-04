@@ -27,7 +27,6 @@ import android.widget.Toolbar;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.app.ToolbarActionBar;
-import com.android.internal.policy.PolicyManager;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -84,6 +83,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.PhoneWindow;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
@@ -5929,7 +5929,7 @@ public class Activity extends ContextThemeWrapper
 
         mFragments.attachActivity(this, mContainer, null);
 
-        mWindow = PolicyManager.makeNewWindow(this);
+        mWindow = new PhoneWindow(this);
         mWindow.setCallback(this);
         mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
