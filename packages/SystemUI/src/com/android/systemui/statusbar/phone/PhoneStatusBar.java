@@ -2531,6 +2531,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mSecurityController != null) {
             mSecurityController.dump(fd, pw, args);
         }
+        if (mHeadsUpNotificationView != null) {
+            mHeadsUpNotificationView.dump(fd, pw, args);
+        } else {
+            pw.println("  mHeadsUpNotificationView: null");
+        }
+
         pw.println("SharedPreferences:");
         for (Map.Entry<String, ?> entry : mContext.getSharedPreferences(mContext.getPackageName(),
                 Context.MODE_PRIVATE).getAll().entrySet()) {
