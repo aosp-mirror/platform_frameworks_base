@@ -1139,15 +1139,15 @@
     <item quantity="other" msgid="2176942008915455116">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora."</item>
-    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas."</item>
+    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora"</item>
+    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
     <!-- no translation found for last_num_days:one (7555846096746489821) -->
     <string name="last_month" msgid="3959346739979055432">"Último mes"</string>
     <string name="older" msgid="5211975022815554840">"Antiguos"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ayer"</item>
-    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días."</item>
+    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
   </plurals>
   <plurals name="in_num_seconds">
     <item quantity="one" msgid="2729745560954905102">"en 1 segundo"</item>
@@ -1174,7 +1174,7 @@
     <item quantity="other" msgid="851164968597150710">"Hace <xliff:g id="COUNT">%d</xliff:g> minutos."</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora."</item>
+    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora"</item>
     <item quantity="other" msgid="6889970745748538901">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
@@ -1348,7 +1348,8 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" tiene una mala conexión a Internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"¿Permitir la conexión?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s quiere conectarse a %2$s."</string>
+    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
+    <skip />
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Una aplicación"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Iniciar Wi-Fi Direct. Se desactivará el funcionamiento de la zona o del cliente Wi-Fi."</string>

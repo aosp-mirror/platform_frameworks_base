@@ -424,7 +424,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"Lotu ahots bidezko elkarrekintzako zerbitzuei"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Ahots bidezko elkarrekintzako zerbitzu baten goi-mailako interfazeari lotzea baimentzen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"kudeatu ahozko gako-esaldiak"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ahoz esandako gako-hitzak hautemateko gako-esaldiak kudeatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete behar."</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ahozko pasahitzak hautemateko gako-esaldiak kudeatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete behar."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"Lotu urruneko pantaila batera"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Urruneko pantaila baten goi-mailako interfazera lotzeko aukera ematen dio titularrari. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"lotu widget-zerbitzu batekin"</string>
@@ -559,7 +559,7 @@
     <string name="permdesc_controlVpn" msgid="762852603315861214">"Sare pribatu birtualen behe-mailako eginbideak kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"Grabatu audio-irteera"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Audio-irteera grabatzeko eta birbideratzeko aukera ematen die aplikazioei."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hauteman Hotword"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hauteman ahozko pasahitza"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Hotword bidez hauteman daitekeen audioa grabatzeko aukera ematen die aplikazioei. Atzeko planoan grabatzeak ez du bestelako audio-grabazioak (adibidez, bideokamera bidezkoak) egitea eragozten."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Audio-bideratzea"</string>
     <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Audio-bideratzea zuzenean kontrolatzea eta audio-gidalerroei gainjartzea baimentzen die aplikazioei."</string>
@@ -1301,8 +1301,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android abiarazten ari da…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Memoria optimizatzen."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> aplikazio optimizatzen."</string>
-    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
-    <skip />
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> prestatzen."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikazioak abiarazten."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Bertsio-berritzea amaitzen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> exekutatzen"</string>
@@ -1348,7 +1347,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ezin izan da Wi-Fi sarera konektatu"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" Interneteko konexio txarra du."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Konektatzea baimendu nahi diozu?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s aplikazioak %2$s sarera konektatu nahi du"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%1$s aplikazioak %2$s Wi-Fi sarera konektatu nahi du"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikazio bat"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Hasi Wi-Fi Direct. Wi-Fi bezeroa edo sare publikoa desaktibatuko da."</string>
@@ -1879,8 +1878,6 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS eskaera DIAL eskaerara aldatu da."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS eskaera USSD eskaerara aldatu da."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS eskaera SS eskaera berrira aldatu da."</string>
-    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
-    <skip />
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB ataka periferikoa"</string>
 </resources>

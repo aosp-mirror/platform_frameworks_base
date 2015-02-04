@@ -1348,8 +1348,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi에 연결할 수 없습니다"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" 인터넷 연결 상태가 좋지 않습니다."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"연결을 허용하시겠습니까?"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for wifi_connect_alert_message (8930084523889618078) -->
+    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
     <skip />
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"앱"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>

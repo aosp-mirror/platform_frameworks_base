@@ -1348,7 +1348,8 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није могуће повезати са Wi-Fi мрежом"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" има лошу интернет везу."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Желите ли да дозволите повезивање?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s жели да се повеже са мрежом %2$s"</string>
+    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
+    <skip />
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Апликација"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Покрените Wi-Fi Direct. Тиме ћете искључити клијента/хотспот за Wi-Fi."</string>
