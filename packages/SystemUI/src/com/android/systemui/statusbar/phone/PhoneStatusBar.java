@@ -2230,8 +2230,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
 
             if ((diff & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0 || sbModeChanged) {
-                boolean allowLight = (sbMode == MODE_TRANSPARENT
-                        || sbMode == MODE_LIGHTS_OUT_TRANSPARENT);
+                boolean isTransparentBar = (mStatusBarMode == MODE_TRANSPARENT
+                        || mStatusBarMode == MODE_LIGHTS_OUT_TRANSPARENT);
+                boolean allowLight = isTransparentBar && !mBatteryController.isPowerSave();
                 boolean light = (vis & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR) != 0;
 
                 mIconController.setIconTint(

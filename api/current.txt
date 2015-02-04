@@ -1412,7 +1412,7 @@ package android {
     field public static final int windowExitTransition = 16843832; // 0x1010438
     field public static final int windowFrame = 16842837; // 0x1010055
     field public static final int windowFullscreen = 16843277; // 0x101020d
-    field public static final int windowHasLightStatusBar = 16843995; // 0x10104db
+    field public static final int windowHasLightStatusBar = 16843998; // 0x10104de
     field public static final int windowHideAnimation = 16842935; // 0x10100b7
     field public static final int windowIsFloating = 16842839; // 0x1010057
     field public static final int windowIsTranslucent = 16842840; // 0x1010058
