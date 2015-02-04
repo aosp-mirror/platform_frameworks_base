@@ -81,6 +81,9 @@ public final class BluetoothEventManager {
 
         // Bluetooth on/off broadcasts
         addHandler(BluetoothAdapter.ACTION_STATE_CHANGED, new AdapterStateChangedHandler());
+        // Generic connected/not broadcast
+        addHandler(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED,
+                new ConnectionStateChangedHandler());
 
         // Discovery broadcasts
         addHandler(BluetoothAdapter.ACTION_DISCOVERY_STARTED, new ScanningStateChangedHandler(true));
@@ -183,8 +186,6 @@ public final class BluetoothEventManager {
                 cachedDevice = mDeviceManager.addDevice(mLocalAdapter, mProfileManager, device);
                 Log.d(TAG, "DeviceFoundHandler created new CachedBluetoothDevice: "
                         + cachedDevice);
-                // callback to UI to create Preference for new device
-                dispatchDeviceAdded(cachedDevice);
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setBtClass(btClass);
@@ -193,7 +194,25 @@ public final class BluetoothEventManager {
         }
     }
 
-    private void dispatchDeviceAdded(CachedBluetoothDevice cachedDevice) {
+    private class ConnectionStateChangedHandler implements Handler {
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+                    BluetoothAdapter.ERROR);
+            dispatchConnectionStateChanged(cachedDevice, state);
+        }
+    }
+
+    private void dispatchConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onConnectionStateChanged(cachedDevice, state);
+            }
+        }
+    }
+
+    void dispatchDeviceAdded(CachedBluetoothDevice cachedDevice) {
         synchronized (mCallbacks) {
             for (BluetoothCallback callback : mCallbacks) {
                 callback.onDeviceAdded(cachedDevice);

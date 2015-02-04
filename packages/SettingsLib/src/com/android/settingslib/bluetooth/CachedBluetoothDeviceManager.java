@@ -35,9 +35,11 @@ public final class CachedBluetoothDeviceManager {
     private Context mContext;
     private final List<CachedBluetoothDevice> mCachedDevices =
             new ArrayList<CachedBluetoothDevice>();
+    private final LocalBluetoothManager mBtManager;
 
-    CachedBluetoothDeviceManager(Context context) {
+    CachedBluetoothDeviceManager(Context context, LocalBluetoothManager localBtManager) {
         mContext = context;
+        mBtManager = localBtManager;
     }
 
     public synchronized Collection<CachedBluetoothDevice> getCachedDevicesCopy() {
@@ -88,6 +90,7 @@ public final class CachedBluetoothDeviceManager {
             profileManager, device);
         synchronized (mCachedDevices) {
             mCachedDevices.add(newDevice);
+            mBtManager.getEventManager().dispatchDeviceAdded(newDevice);
         }
         return newDevice;
     }
