@@ -25,13 +25,13 @@
     android:id="@+id/root"
     android:focusable="true"
     android:gravity="center_vertical"
-    bind:onClickListener="{clickListener}"
+    bind:onClickListener="@{clickListener}"
     android:layout_height="match_parent">
     <variable name="user" type="com.android.example.bindingdemo.vo.User"/>
     <variable name="clickListener" type="android.view.View.OnClickListener"/>
     <ImageView
         android:id="@+id/user_photo"
-        android:backgroundResource="{user.photoResource}"
+        android:backgroundResource="@{user.photoResource}"
         android:scaleType="fitCenter"
         android:layout_width="@dimen/user_photo"
         android:layout_height="@dimen/user_photo" />
@@ -40,7 +40,7 @@
         android:layout_marginLeft="@dimen/user_name_margin_left"
         android:id="@+id/fullname"
         android:gravity="center"
-        android:text="{user.name.substring(0,1).toUpperCase() + &quot;. &quot; + user.lastName}"
+        android:text="@{user.name.substring(0,1).toUpperCase() + &quot;. &quot; + user.lastName}"
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 </android.support.v7.widget.CardView>

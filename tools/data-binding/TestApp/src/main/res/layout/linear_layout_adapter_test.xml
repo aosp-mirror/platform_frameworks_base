@@ -8,7 +8,7 @@
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
             android:orientation="horizontal"
-            android:divider="{obj.divider}"
-            android:measureWithLargestChild="{obj.measureWithLargestChild}"
+            android:divider="@{obj.divider}"
+            android:measureWithLargestChild="@{obj.measureWithLargestChild}"
             />
 </LinearLayout>

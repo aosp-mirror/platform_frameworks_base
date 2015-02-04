@@ -7,5 +7,5 @@
     <CheckBox
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:buttonTint="{obj.buttonTint}"/>
+            android:buttonTint="@{obj.buttonTint}"/>
 </LinearLayout>

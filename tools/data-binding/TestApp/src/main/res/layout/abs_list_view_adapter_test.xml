@@ -3,9 +3,9 @@
           android:id="@+id/view"
           android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:listSelector="{obj.listSelector}"
-          android:scrollingCache="{obj.scrollingCache}"
-          android:smoothScrollbar="{obj.smoothScrollbar}"
+          android:listSelector="@{obj.listSelector}"
+          android:scrollingCache="@{obj.scrollingCache}"
+          android:smoothScrollbar="@{obj.smoothScrollbar}"
         >
     <variable name="obj" type="com.android.databinding.testapp.vo.AbsListViewBindingObject"/>
 </ListView>

@@ -7,8 +7,8 @@
     <ProgressBar
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:indeterminateTint="{obj.indeterminateTint}"
-            android:progressTint="{obj.progressTint}"
-            android:secondaryProgressTint="{obj.secondaryProgressTint}"
+            android:indeterminateTint="@{obj.indeterminateTint}"
+            android:progressTint="@{obj.progressTint}"
+            android:secondaryProgressTint="@{obj.secondaryProgressTint}"
             />
 </LinearLayout>

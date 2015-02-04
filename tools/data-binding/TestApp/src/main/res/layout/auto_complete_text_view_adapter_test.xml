@@ -6,6 +6,6 @@
     <variable name="obj" type="com.android.databinding.testapp.vo.AutoCompleteTextViewBindingObject"/>
     <AutoCompleteTextView android:layout_width="match_parent" android:layout_height="match_parent"
                           android:id="@+id/view"
-                          android:completionThreshold="{obj.completionThreshold}"
-                          android:popupBackground="{obj.popupBackground}"/>
+                          android:completionThreshold="@{obj.completionThreshold}"
+                          android:popupBackground="@{obj.popupBackground}"/>
 </LinearLayout>

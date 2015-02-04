@@ -11,7 +11,7 @@
     <variable name="cond2" type="boolean"/>
     <TextView
             android:id="@+id/textView"
-            android:text="{cond1 ? cond2 ? obj1.stringValue : obj2.stringValue : obj3.stringValue}"
+            android:text="@{cond1 ? cond2 ? obj1.stringValue : obj2.stringValue : obj3.stringValue}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 </LinearLayout>

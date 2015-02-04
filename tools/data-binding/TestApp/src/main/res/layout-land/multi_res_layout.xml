@@ -20,22 +20,22 @@
     <variable name="objectInLand" type="com.android.databinding.testapp.vo.NotBindableVo"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/objectInLandTextView"
-              android:text="{objectInLand.stringValue}"/>
+              android:text="@{objectInLand.stringValue}"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/objectInDefaultTextView"
-              android:text="{objectInDefault.stringValue}"/>
+              android:text="@{objectInDefault.stringValue}"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/objectInDefaultTextView2"
-              android:text="{objectInDefault.stringValue}"/>
+              android:text="@{objectInDefault.stringValue}"/>
 
     <include layout="@layout/included_layout" android:id="@+id/includedLayoutConflict"
-             bind:innerObject="{objectInLand}"
-             bind:innerValue="{`modified ` + objectInLand.intValue}"
+             bind:innerObject="@{objectInLand}"
+             bind:innerValue="@{`modified ` + objectInLand.intValue}"
             />
     <include layout="@layout/basic_binding" android:id="@+id/includedLayoutShared"
-             bind:a="{objectInDefault.stringValue}"
+             bind:a="@{objectInDefault.stringValue}"
             />
     <include layout="@layout/conditional_binding" android:id="@+id/includedLayoutLand"
-             bind:obj2="{objectInDefault}"
+             bind:obj2="@{objectInDefault}"
             />
 </LinearLayout>

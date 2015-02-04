@@ -21,7 +21,7 @@
     <variable name="b" type="java.lang.String"/>
     <TextView
             android:id="@+id/textView"
-            android:text="{a + b}"
+            android:text="@{a + b}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 </LinearLayout>

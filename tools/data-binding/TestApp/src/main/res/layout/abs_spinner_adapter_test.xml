@@ -6,5 +6,5 @@
     <variable name="obj" type="com.android.databinding.testapp.vo.AbsSpinnerBindingObject"/>
     <Spinner android:layout_width="match_parent" android:layout_height="match_parent"
              android:id="@+id/view"
-            android:entries="{obj.entries}"/>
+            android:entries="@{obj.entries}"/>
 </LinearLayout>

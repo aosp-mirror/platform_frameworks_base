@@ -6,5 +6,5 @@
     <variable name="obj" type="com.android.databinding.testapp.vo.ViewStubBindingObject"/>
     <ViewStub android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:layout="{obj.layout}"/>
+            android:layout="@{obj.layout}"/>
 </LinearLayout>

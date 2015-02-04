@@ -7,9 +7,9 @@
     <FrameLayout android:layout_width="match_parent"
                  android:layout_height="match_parent"
                  android:id="@+id/view"
-                 android:alwaysDrawnWithCache="{obj.alwaysDrawnWithCache}"
-                 android:animationCache="{obj.animationCache}"
-                 android:splitMotionEvents="{obj.splitMotionEvents}"
-                 android:animateLayoutChanges="{obj.animateLayoutChanges}"
+                 android:alwaysDrawnWithCache="@{obj.alwaysDrawnWithCache}"
+                 android:animationCache="@{obj.animationCache}"
+                 android:splitMotionEvents="@{obj.splitMotionEvents}"
+                 android:animateLayoutChanges="@{obj.animateLayoutChanges}"
             />
 </LinearLayout>

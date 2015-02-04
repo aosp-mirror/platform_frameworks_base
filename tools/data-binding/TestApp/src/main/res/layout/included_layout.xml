@@ -21,6 +21,6 @@
     <variable name="innerValue" type="java.lang.String"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/innerTextView"
-              android:text="{innerValue + innerObject.stringValue}"
+              android:text="@{innerValue + innerObject.stringValue}"
             />
 </LinearLayout>

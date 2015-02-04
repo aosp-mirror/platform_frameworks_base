@@ -7,7 +7,7 @@
     <RadioGroup
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:checkedButton="{obj.checkedButton}"
+            android:checkedButton="@{obj.checkedButton}"
             >
         <RadioButton android:layout_width="match_parent" android:layout_height="wrap_content"
                      android:text="One" android:id="@+id/choiceOne"/>

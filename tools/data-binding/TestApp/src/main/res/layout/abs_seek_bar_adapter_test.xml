@@ -6,5 +6,5 @@
     <variable name="obj" type="com.android.databinding.testapp.vo.AbsSeekBarBindingObject"/>
     <SeekBar android:layout_width="match_parent" android:layout_height="match_parent"
              android:id="@+id/view"
-             android:thumbTint="{obj.thumbTint}"/>
+             android:thumbTint="@{obj.thumbTint}"/>
 </LinearLayout>

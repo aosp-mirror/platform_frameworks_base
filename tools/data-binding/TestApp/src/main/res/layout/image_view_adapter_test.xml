@@ -7,8 +7,8 @@
     <ImageView
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:src="{obj.src}"
-            android:tint="{obj.tint}"
-            android:tintMode="{obj.tintMode}"
+            android:src="@{obj.src}"
+            android:tint="@{obj.tint}"
+            android:tintMode="@{obj.tintMode}"
             />
 </LinearLayout>

@@ -7,7 +7,7 @@
     <CheckedTextView
             android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:checkMark="{obj.checkMark}"
-            android:checkMarkTint="{obj.checkMarkTint}"/>
+            android:checkMark="@{obj.checkMark}"
+            android:checkMarkTint="@{obj.checkMarkTint}"/>
 
 </LinearLayout>

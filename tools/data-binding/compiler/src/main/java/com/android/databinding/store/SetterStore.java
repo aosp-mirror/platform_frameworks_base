@@ -304,17 +304,25 @@ public class SetterStore {
 
         if (adapters != null) {
             for (AccessorKey key : adapters.keySet()) {
-                Class<?> adapterViewType = mClassAnalyzer.findClass(key.viewType);
-                if (adapterViewType.isAssignableFrom(viewType)) {
-                    Class<?> adapterValueType = mClassAnalyzer.findClass(key.valueType);
-                    boolean isBetterView = bestViewType == null ||
-                            bestValueType.isAssignableFrom(adapterValueType);
-                    if (isBetterParameter(valueType, adapterValueType, bestValueType,
-                            isBetterView)) {
-                        bestViewType = adapterViewType;
-                        bestValueType = adapterValueType;
-                        adapter = adapters.get(key);
+                try {
+                    Class<?> adapterViewType = mClassAnalyzer.findClass(key.viewType);
+                    if (adapterViewType.isAssignableFrom(viewType)) {
+                        try {
+                            Class<?> adapterValueType = mClassAnalyzer.findClass(key.valueType);
+                            boolean isBetterView = bestViewType == null ||
+                                    bestValueType.isAssignableFrom(adapterValueType);
+                            if (isBetterParameter(valueType, adapterValueType, bestValueType,
+                                    isBetterView)) {
+                                bestViewType = adapterViewType;
+                                bestValueType = adapterValueType;
+                                adapter = adapters.get(key);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Unknown class: " + key.valueType);
+                        }
                     }
+                } catch (Exception e) {
+                    System.out.println("Unknown class: " + key.viewType);
                 }
             }
         }
@@ -341,10 +349,14 @@ public class SetterStore {
         HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed != null) {
             for (String className : renamed.keySet()) {
-                Class<?> renamedViewType = mClassAnalyzer.findClass(className);
-                if (renamedViewType.isAssignableFrom(viewType)) {
-                    setterName = renamed.get(className).method;
-                    break;
+                try {
+                    Class<?> renamedViewType = mClassAnalyzer.findClass(className);
+                    if (renamedViewType.isAssignableFrom(viewType)) {
+                        setterName = renamed.get(className).method;
+                        break;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Unknown class: " + className);
                 }
             }
         }
@@ -437,16 +449,24 @@ public class SetterStore {
     private MethodDescription getConversionMethod(Class<?> from, Class<?> to) {
         if (from != null && to != null) {
             for (String fromClassName : mStore.conversionMethods.keySet()) {
-                Class<?> convertFrom = mClassAnalyzer.findClass(fromClassName);
-                if (canUseForConversion(from, convertFrom)) {
-                    HashMap<String, MethodDescription> conversion =
-                            mStore.conversionMethods.get(fromClassName);
-                    for (String toClassName : conversion.keySet()) {
-                        Class<?> convertTo = mClassAnalyzer.findClass(toClassName);
-                        if (canUseForConversion(convertTo, to)) {
-                            return conversion.get(toClassName);
+                try {
+                    Class<?> convertFrom = mClassAnalyzer.findClass(fromClassName);
+                    if (canUseForConversion(from, convertFrom)) {
+                        HashMap<String, MethodDescription> conversion =
+                                mStore.conversionMethods.get(fromClassName);
+                        for (String toClassName : conversion.keySet()) {
+                            try {
+                                Class<?> convertTo = mClassAnalyzer.findClass(toClassName);
+                                if (canUseForConversion(convertTo, to)) {
+                                    return conversion.get(toClassName);
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Unknown class: " + toClassName);
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    System.out.println("Unknown class: " + fromClassName);
                 }
             }
         }
@@ -542,7 +562,6 @@ public class SetterStore {
         InputStream inputStream = null;
         JarFile jarFile = null;
         try {
-            System.out.println("merging " + nextUrl);
             inputStream = nextUrl.openStream();
             ObjectInputStream in = new ObjectInputStream(inputStream);
             Intermediate intermediate = (Intermediate) in.readObject();

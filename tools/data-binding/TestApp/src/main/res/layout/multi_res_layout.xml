@@ -20,19 +20,19 @@
     <variable name="objectInDefault" type="com.android.databinding.testapp.vo.NotBindableVo"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/objectInDefaultTextView"
-              android:text="{objectInDefault.stringValue}"/>
+              android:text="@{objectInDefault.stringValue}"/>
     <EditText android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/objectInDefaultTextView2"
-              android:text="{objectInDefault.stringValue}"/>
+              android:text="@{objectInDefault.stringValue}"/>
 
     <include layout="@layout/basic_binding" android:id="@+id/includedLayoutConflict"
-             bind:a="{objectInDefault.stringValue}"
+             bind:a="@{objectInDefault.stringValue}"
             />
     <include layout="@layout/basic_binding" android:id="@+id/includedLayoutShared"
-             bind:a="{objectInDefault.stringValue}"
+             bind:a="@{objectInDefault.stringValue}"
             />
     <include layout="@layout/conditional_binding" android:id="@+id/includedLayoutPort"
-             bind:cond1="{objectInDefault == null}"
+             bind:cond1="@{objectInDefault == null}"
             />
 
 </LinearLayout>

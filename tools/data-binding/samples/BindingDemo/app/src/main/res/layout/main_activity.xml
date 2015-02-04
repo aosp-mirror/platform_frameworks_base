@@ -27,7 +27,7 @@
     android:id="@+id/activityRoot"
     tools:activity=".MainActivity"
     android:clickable="true"
-    android:onClickListener="{activity.onUnselect}">
+    android:onClickListener="@{activity.onUnselect}">
     <variable name="activity" type="com.android.example.bindingdemo.MainActivity"/>
     <!---->
     <import
@@ -40,7 +40,7 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="{activity.getString(Strings.toolkitties, activity.tkAdapter.itemCount)}">
+        android:text="@{activity.getString(Strings.toolkitties, activity.tkAdapter.itemCount)}">
 
     </TextView>
 
@@ -48,24 +48,24 @@
         android:id="@+id/toolkittyList"
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_height"
-        bind:adapter="{activity.tkAdapter}"
+        bind:adapter="@{activity.tkAdapter}"
         ></android.support.v7.widget.RecyclerView>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
-    <TextView android:text="{activity.selected2 == activity.selected ? `same` : `different`}"
+    <TextView android:text="@{activity.selected2 == activity.selected ? `same` : `different`}"
               android:id="@+id/deleteme"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"/>
 
     <android.support.v7.widget.CardView
         android:id="@+id/selected_card"
-        bind:contentPadding="{activity.selected == null ? 5 : activity.selected.name.length()}"
+        bind:contentPadding="@{activity.selected == null ? 5 : activity.selected.name.length()}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        bind:visibility="{activity.selected == null ? View.INVISIBLE : View.VISIBLE}">
+        bind:visibility="@{activity.selected == null ? View.INVISIBLE : View.VISIBLE}">
 
         <GridLayout
             android:layout_width="match_parent"
@@ -81,7 +81,7 @@
                 android:layout_row="0"
                 android:layout_rowSpan="2"
                 android:scaleType="fitCenter"
-                android:backgroundResource="{activity.selected.photoResource}" />
+                android:backgroundResource="@{activity.selected.photoResource}" />
 
             <EditText
                 android:id="@+id/selected_name"
@@ -92,7 +92,7 @@
                 android:layout_row="0"
                 android:background="@android:color/holo_blue_dark"
                 android:gravity="center"
-                android:text="{activity.selected.name}" />
+                android:text="@{activity.selected.name}" />
 
             <EditText
                 android:id="@+id/selected_lastname"
@@ -103,11 +103,11 @@
                 android:layout_row="1"
                 android:background="@android:color/holo_blue_bright"
                 android:gravity="center"
-                android:text="{activity.selected.lastName}" />
+                android:text="@{activity.selected.lastName}" />
             <Button
                 android:id="@+id/edit_button"
-                bind:onClickListener="{activity.onSave}"
-                android:text="{`Save changes to ` + activity.selected.name}"
+                bind:onClickListener="@{activity.onSave}"
+                android:text="@{`Save changes to ` + activity.selected.name}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
@@ -116,8 +116,8 @@
 
             <Button
                 android:id="@+id/delete_button"
-                bind:onClickListener="{activity.onDelete}"
-                android:text="{activity.getString(activity.selected.group == User.TOOLKITTY ? Strings.became_robot : Strings.became_kitten, activity.selected.name)}"
+                bind:onClickListener="@{activity.onDelete}"
+                android:text="@{activity.getString(activity.selected.group == User.TOOLKITTY ? Strings.became_robot : Strings.became_kitten, activity.selected.name)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
@@ -133,9 +133,9 @@
         android:id="@+id/robotsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="{activity.robotAdapter.itemCount + &quot; Robots &quot;}" />
+        android:text="@{activity.robotAdapter.itemCount + &quot; Robots &quot;}" />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/robotList"
-        android:layout_width="match_parent" bind:adapter="{activity.robotAdapter}"  android:layout_height="@dimen/list_height"
+        android:layout_width="match_parent" bind:adapter="@{activity.robotAdapter}"  android:layout_height="@dimen/list_height"
         ></android.support.v7.widget.RecyclerView>
 </LinearLayout>

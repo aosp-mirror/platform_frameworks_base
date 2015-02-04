@@ -9,65 +9,65 @@
             android:id="@+id/padding"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:padding="{obj.padding}"
+            android:padding="@{obj.padding}"
             />
     <View
             android:id="@+id/paddingStartEnd"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:paddingEnd="{obj.paddingEnd}"
-            android:paddingStart="{obj.paddingStart}"
+            android:paddingEnd="@{obj.paddingEnd}"
+            android:paddingStart="@{obj.paddingStart}"
             />
     <View
             android:id="@+id/paddingTopBottom"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:paddingBottom="{obj.paddingBottom}"
-            android:paddingTop="{obj.paddingTop}"
+            android:paddingBottom="@{obj.paddingBottom}"
+            android:paddingTop="@{obj.paddingTop}"
             />
     <View
             android:id="@+id/paddingLeftRight"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:paddingLeft="{obj.paddingLeft}"
-            android:paddingRight="{obj.paddingRight}"
+            android:paddingLeft="@{obj.paddingLeft}"
+            android:paddingRight="@{obj.paddingRight}"
             />
     <View
             android:id="@+id/backgroundTint"
-            android:backgroundTint="{obj.backgroundTint}"
+            android:backgroundTint="@{obj.backgroundTint}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/fadeScrollbars"
-            android:fadeScrollbars="{obj.fadeScrollbars}"
+            android:fadeScrollbars="@{obj.fadeScrollbars}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/nextFocus"
-            android:nextFocusForward="{obj.nextFocusForward}"
-            android:nextFocusLeft="{obj.nextFocusLeft}"
-            android:nextFocusRight="{obj.nextFocusRight}"
-            android:nextFocusUp="{obj.nextFocusUp}"
-            android:nextFocusDown="{obj.nextFocusDown}"
+            android:nextFocusForward="@{obj.nextFocusForward}"
+            android:nextFocusLeft="@{obj.nextFocusLeft}"
+            android:nextFocusRight="@{obj.nextFocusRight}"
+            android:nextFocusUp="@{obj.nextFocusUp}"
+            android:nextFocusDown="@{obj.nextFocusDown}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/requiresFadingEdge"
-            android:requiresFadingEdge="{obj.requiresFadingEdge}"
+            android:requiresFadingEdge="@{obj.requiresFadingEdge}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/scrollbar"
-            android:scrollbarDefaultDelayBeforeFade="{obj.scrollbarDefaultDelayBeforeFade}"
-            android:scrollbarFadeDuration="{obj.scrollbarFadeDuration}"
-            android:scrollbarSize="{obj.scrollbarSize}"
-            android:scrollbarStyle="{obj.scrollbarStyle}"
+            android:scrollbarDefaultDelayBeforeFade="@{obj.scrollbarDefaultDelayBeforeFade}"
+            android:scrollbarFadeDuration="@{obj.scrollbarFadeDuration}"
+            android:scrollbarSize="@{obj.scrollbarSize}"
+            android:scrollbarStyle="@{obj.scrollbarStyle}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/transformPivot"
-            android:transformPivotX="{obj.transformPivotX}"
-            android:transformPivotY="{obj.transformPivotY}"
+            android:transformPivotX="@{obj.transformPivotX}"
+            android:transformPivotY="@{obj.transformPivotY}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
 </LinearLayout>

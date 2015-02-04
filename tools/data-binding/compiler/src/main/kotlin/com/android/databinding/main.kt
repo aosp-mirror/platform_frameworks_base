@@ -78,7 +78,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         val XPATH_IMPORT_DEFINITIONS = "//import"
         //val XPATH_BINDING_EXPR = "//@*[starts-with(name(), 'bind')]"
         val XPATH_STATIC_BINDING_EXPR = "//@*[starts-with(name(), 'bind')]"
-        val XPATH_BINDING_2_EXPR = "//@*[starts-with(., '{') and substring(., string-length(.)) = '}']"
+        val XPATH_BINDING_2_EXPR = "//@*[starts-with(., '@{') and substring(., string-length(.)) = '}']"
         val XPATH_BINDING_ELEMENTS = "$XPATH_BINDING_2_EXPR/.."
     }
 

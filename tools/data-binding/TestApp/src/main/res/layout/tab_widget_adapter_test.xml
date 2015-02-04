@@ -6,9 +6,9 @@
     <variable name="obj" type="com.android.databinding.testapp.vo.TabWidgetBindingObject"/>
     <TabWidget android:layout_width="match_parent" android:layout_height="match_parent"
             android:id="@+id/view"
-            android:divider="{obj.divider}"
-            android:tabStripEnabled="{obj.tabStripEnabled}"
-            android:tabStripLeft="{obj.tabStripLeft}"
-            android:tabStripRight="{obj.tabStripRight}"
+            android:divider="@{obj.divider}"
+            android:tabStripEnabled="@{obj.tabStripEnabled}"
+            android:tabStripLeft="@{obj.tabStripLeft}"
+            android:tabStripRight="@{obj.tabStripRight}"
             />
 </LinearLayout>

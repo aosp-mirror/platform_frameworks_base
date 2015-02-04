@@ -20,10 +20,10 @@
     <variable name="outerObject" type="com.android.databinding.testapp.vo.NotBindableVo"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/outerTextView"
-              android:text="{outerObject.stringValue}"/>
+              android:text="@{outerObject.stringValue}"/>
     <!-- TODO test id collision-->
     <include layout="@layout/included_layout" android:id="@+id/includedLayout"
-             bind:innerObject="{outerObject}"
-             bind:innerValue="{`modified ` + outerObject.intValue}"
+             bind:innerObject="@{outerObject}"
+             bind:innerValue="@{`modified ` + outerObject.intValue}"
             />
 </LinearLayout>

@@ -49,7 +49,7 @@ import javax.xml.xpath.XPathFactory;
  */
 public class DataBinder {
     private static final String XPATH_VARIABLE_DEFINITIONS = "//variable";
-    private static final String XPATH_BINDING_2_EXPR = "//@*[starts-with(., '{') and substring(., string-length(.)) = '}']";
+    private static final String XPATH_BINDING_2_EXPR = "//@*[starts-with(., '@{') and substring(., string-length(.)) = '}']";
     private static final String XPATH_BINDING_ELEMENTS = XPATH_BINDING_2_EXPR + "/..";
     private static final String XPATH_IMPORT_DEFINITIONS = "//import";
     final String LAYOUT_PREFIX = "@layout/";
@@ -127,8 +127,9 @@ public class DataBinder {
                 for (int i = 0; i < attrCount; i ++) {
                     final Node attr = attributes.item(i);
                     String value = attr.getNodeValue();
-                    if (value.charAt(0) == '{' && value.charAt(value.length() - 1) == '}') {
-                        final String strippedValue = value.substring(1, value.length() - 1);
+                    if (value.charAt(0) == '@' && value.charAt(1) == '{' &&
+                            value.charAt(value.length() - 1) == '}') {
+                        final String strippedValue = value.substring(2, value.length() - 1);
                         bindingTarget.addBinding(attr.getNodeName(), layoutBinder.parse(strippedValue));
                     }
                 }

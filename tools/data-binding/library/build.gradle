@@ -60,6 +60,8 @@ dependencies {
     compile project(":baseLibrary")
     compile 'com.android.support:support-v4:+'
     provided project(":annotationprocessor")
+    provided 'com.android.support:cardview-v7:+'
+    provided 'com.android.support:appcompat-v7:+'
 }
 //create jar tasks
 android.libraryVariants.all { variant ->

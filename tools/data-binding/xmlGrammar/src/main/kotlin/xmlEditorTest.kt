@@ -46,7 +46,7 @@ fun antlrTest(f: File) : String? {
             if (ctx.attrName.getText().startsWith("bind:")) {
 
                 return arrayListOf(Pair(ctx.getStart().toPosition(), ctx.getStop().toEndPosition()))
-            } else if (ctx.attrValue.getText().startsWith("\"{") && ctx.attrValue.getText().endsWith("}\"")) {
+            } else if (ctx.attrValue.getText().startsWith("\"@{") && ctx.attrValue.getText().endsWith("}\"")) {
                 return arrayListOf(Pair(ctx.getStart().toPosition(), ctx.getStop().toEndPosition()))
             }
 
