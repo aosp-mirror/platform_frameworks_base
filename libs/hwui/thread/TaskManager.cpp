@@ -105,6 +105,8 @@ bool TaskManager::WorkerThread::threadLoop() {
 bool TaskManager::WorkerThread::addTask(TaskWrapper task) {
     if (!isRunning()) {
         run(mName.string(), PRIORITY_DEFAULT);
+    } else if (exitPending()) {
+        return false;
     }
 
     Mutex::Autolock l(mLock);
@@ -120,10 +122,6 @@ size_t TaskManager::WorkerThread::getTaskCount() const {
 }
 
 void TaskManager::WorkerThread::exit() {
-    {
-        Mutex::Autolock l(mLock);
-        mTasks.clear();
-    }
     requestExit();
     mSignal.signal();
 }
