@@ -1301,8 +1301,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"ಸಂಗ್ರಹಣೆಯನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="NUMBER_0">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ."</string>
-    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
-    <skip />
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> ರನ್ ಆಗುತ್ತಿದೆ"</string>
@@ -1348,7 +1347,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ಕಳಪೆ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿದೆ."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"ಸಂಪರ್ಕವನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s ಅವರು %2$s ಗೆ ಸಂಪರ್ಕಿಸಲು ಬಯಸುತ್ತಾರೆ"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"%2$s ವೈಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು %1$s ಅಪ್ಲಿಕೇಶನ್‌ ಬಯಸುತ್ತದೆ"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"ಅಪ್ಲಿಕೇಶನ್"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ಡೈರೆಕ್ಟ್"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi ಡೈರೆಕ್ಟ್ ಪ್ರಾರಂಭಿಸಿ. ಇದು Wi-Fi ಕ್ಲೈಂಟ್‌/ಹಾಟ್‌ಸ್ಪಾಟ್ ಅನ್ನು ಆಫ್ ಮಾಡುತ್ತದೆ."</string>
@@ -1879,8 +1878,6 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS ವಿನಂತಿಯನ್ನು DIAL ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ವಿನಂತಿಯನ್ನು ಹೊಸ SS ವಿನಂತಿಗೆ ಮಾರ್ಪಡಿಸಲಾಗಿದೆ."</string>
-    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
-    <skip />
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB ಹೊರಭಾಗದ ಪೋರ್ಟ್"</string>
 </resources>

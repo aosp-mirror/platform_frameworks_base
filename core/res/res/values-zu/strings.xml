@@ -1348,7 +1348,8 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ayikwazanga ukuxhuma kwi-Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" inoxhumano oluphansi lwe-inthanethi."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vumela ukuxhumeka?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"U-%1$s angathanda ukuxhumeka ku-%2$s"</string>
+    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
+    <skip />
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Uhlelo lokusebenza"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"I-Wi-Fi Eqondile"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Qala ukusebenza kwe-Wi-Fi Okuqondile. Lokhu kuzocima ikhasimende le-Wi-Fi/Ukusebenza okwe-hotspot"</string>

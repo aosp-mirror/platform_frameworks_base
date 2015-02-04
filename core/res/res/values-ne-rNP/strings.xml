@@ -1307,8 +1307,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android शुरू हुँदैछ..."</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"भण्डारण अनुकूलन गर्दै।"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"अनुप्रयोग अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
-    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
-    <skip />
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयारी गर्दै।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"सुरुवात अनुप्रयोगहरू।"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बुट पुरा हुँदै।"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चलिरहेको छ"</string>
@@ -1354,7 +1353,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"वाइ-फाइसँग जडान गर्न सकेन"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" कमजोर इन्टरनेट जडान छ।"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"जडान अनुमति दिने हो?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s ले %2$s मा जडान गर्न चाहन्छ"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"अनुप्रयोग %1$s वाइफाइ नेटवर्क %2$s मा जडान गर्न चाहन्छ"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"एउटा अनुप्रयोग"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"वाइफाइ प्रत्यक्ष"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"वाइफाइ सिधा सुरु गर्नुहोस्। यसले वाइफाइ ग्राहक/हट्स्पटलाई बन्द गराउने छ।"</string>
@@ -1885,8 +1884,6 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS अनुरोध  DIAL अनुरोधमा परिमार्जन गरिएको छ।"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS अनुरोध USSD अनुरोधमा परिमार्जन गरिएको छ।"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS अनुरोध नयाँ SS अनुरोधमा परिमार्जन गरिएको छ।"</string>
-    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
-    <skip />
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB परिधीय पोर्ट"</string>
 </resources>

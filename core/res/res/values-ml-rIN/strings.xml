@@ -1301,8 +1301,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"സംഭരണം ഒപ്‌റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> അപ്ലിക്കേഷൻ ഓപ്റ്റിമൈസ് ചെയ്യുന്നു."</string>
-    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
-    <skip />
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> തയ്യാറാക്കുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> പ്രവർത്തിക്കുന്നു"</string>
@@ -1348,7 +1347,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi-ലേക്ക് കണക്‌റ്റുചെയ്യാൻ കഴിഞ്ഞില്ല"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" മോശം ഇന്റർനെറ്റ് കണക്ഷനാണുള്ളത്."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"കണക്ഷൻ അനുവദിക്കണോ?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s, %2$s എന്നതിലേക്ക് കണക്‌റ്റുചെയ്യാൻ ആഗ്രഹിക്കുന്നു"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"അപ്ലിക്കേഷൻ %1$s Wifi നെറ്റ്‌വർക്കിലേക്ക് കണക്‌റ്റുചെയ്യാൻ താൽപ്പര്യപ്പെടുന്നു %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"ഒരു അപ്ലിക്കേഷൻ"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi ഡയറക്‌ട്"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Wi-Fi ഡയറക്റ്റ് ആരംഭിക്കുക. ഇത് Wi-Fi ക്ലയന്റ്/ഹോട്ട്‌സ്‌പോട്ട് ഓഫാക്കും."</string>
@@ -1877,8 +1876,6 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS അഭ്യർത്ഥന, DIAL അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS അഭ്യർത്ഥന, USSD അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS അഭ്യർത്ഥന, പുതിയ SS അഭ്യർത്ഥനയായി പരിഷ്‌ക്കരിച്ചു."</string>
-    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
-    <skip />
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB പെരിഫറൽ പോർട്ട്"</string>
 </resources>

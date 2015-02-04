@@ -55,7 +55,7 @@
     <string name="mmiComplete" msgid="8232527495411698359">"MMI tamamlandı."</string>
     <string name="badPin" msgid="9015277645546710014">"Yazdığınız eski PIN doğru değil."</string>
     <string name="badPuk" msgid="5487257647081132201">"Yazdığınız PUK doğru değil."</string>
-    <string name="mismatchPin" msgid="609379054496863419">"Girdiğiniz PIN kodları eşleşmiyor"</string>
+    <string name="mismatchPin" msgid="609379054496863419">"Girdiğiniz PIN\'ler eşleşmiyor"</string>
     <string name="invalidPin" msgid="3850018445187475377">"4 ila 8 rakamdan oluşan bir PIN girin."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"8 veya daha uzun basamaklı bir PUK kodu yazın."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM kartınızın PUK kilidi devrede. Kilidi açmak için PUK kodunu yazın."</string>
@@ -192,7 +192,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Kapat"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Hata raporu"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Hata raporu al"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Bu rapor, e-posta iletisi olarak göndermek üzere mevcut cihazınızın durumuyla ilgili bilgi toplar. Hata raporu başlatıldıktan sonra hazır olması biraz zaman alabilir, lütfen sabırlı olun."</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Bu rapor, e-posta iletisi olarak göndermek üzere cihazınızın şu anki durumuyla ilgili bilgi toplar. Hata raporu başlatıldıktan sonra hazır olması biraz zaman alabilir, lütfen sabırlı olun."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Sessiz mod"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Ses KAPALI"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Ses AÇIK"</string>
@@ -269,13 +269,13 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"SD karta erişin."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Erişilebilirlik özellikleri"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Engelli kullanıcılara yardımcı olan teknolojinin istekte bulunabileceği özellikler."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pencere içeriğini alın"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Etkileşim kurduğunuz pencerenin içeriğini inceleyin."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Dokunarak Keşfet\'i açın"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Pencere içeriğini alma"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Etkileşim kurduğunuz pencerenin içeriğini inceler."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Dokunarak Keşfet\'i açma"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Dokunulan öğeler sesli olarak okunur ve ekranı keşfetmek için hareketler kullanılabilir."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Gelişmiş web erişilebilirliğini açın"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Gelişmiş web erişilebilirliğini açma"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Uygulamanın erişilebilirliğini artırmak için komut dosyaları yüklenebilir."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Yazdığınız metni izleyin"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Yazdığınız metni izleme"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Kredi kartı ve şifre gibi kişisel bilgiler içerir."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"durum çubuğunu devre dışı bırak veya değiştir"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Uygulamaya, durum çubuğunu devre dışı bırakma ve sistem simgelerini ekleyip kaldırma izni verir."</string>
@@ -817,11 +817,11 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Ekran kilidini açarken yapılan yanlış şifre girme denemelerini izle ve çok fazla sayıda yanlış şifre girme denemesi yapılmışsa tableti kilitle veya tabletteki tüm verileri sil."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip etme ve çok fazla sayıda hatalı şifre girildiğinde TV\'yi kilitleme veya TV\'nin tüm verilerini silme."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Ekran kilidini açarken yapılan yanlış şifre girişi denemelerini izle ve çok sayıda yanlış şifre girişi denemesi yapılmışsa telefonu kilitle veya telefonun tüm verilerini sil."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Ekran kilidini açma şifresini değiştir"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Ekran kilidini açma şifresini değiştirme"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Ekran kilidini açma şifresini değiştirme."</string>
-    <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranı kilitle"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranı kilitleme"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranın nasıl ve ne zaman kilitlendiğini denetleme."</string>
-    <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri sil"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri silme"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan silme."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Fabrika ayarlarına sıfırlama yoluyla TV\'nin verilerini uyarı vermeksizin silme."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silme."</string>
@@ -1348,12 +1348,13 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kablosuz bağlantısı kurulamadı"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" İnternet bağlantısı zayıf."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Bağlantıya izin verilsin mi?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s, %2$s ile bağlantı kurmak istiyor"</string>
+    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
+    <skip />
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Bir uygulama"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Kablosuz Doğrudan Bağlantı"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Kablosuz Doğrudan Bağlantıyı başlat. Bu işlem, Kablosuz istemci/hotspot kullanımını kapatacak."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Kablosuz Doğrudan bağlantı başlatılamadı."</string>
-    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Kablosuz Doğrudan özelliği açık"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Kablosuz Doğrudan Bağlantı\'yı başlat. Bu işlem, Kablosuz istemci/hotspot kullanımını kapatacak."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Kablosuz Doğrudan Bağlantı başlatılamadı."</string>
+    <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Kablosuz Doğrudan Bağlantı özelliği açık"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Ayarlar için dokunun"</string>
     <string name="accept" msgid="1645267259272829559">"Kabul et"</string>
     <string name="decline" msgid="2112225451706137894">"Reddet"</string>
@@ -1524,7 +1525,7 @@
     <string name="submit" msgid="1602335572089911941">"Gönder"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Araba modu etkin"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Araba modundan çıkmak için dokunun."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Doğrudan bağlantı veya ortak erişim noktası etkin"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering veya hotspot etkin"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Kurulum için dokunun."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Geri"</string>
     <string name="next_button_label" msgid="1080555104677992408">"İleri"</string>

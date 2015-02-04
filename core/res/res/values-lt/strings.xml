@@ -1348,7 +1348,8 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepavyko prisijungti prie „Wi-Fi“"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" turi prastą interneto ryšį."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Leisti prisijungti?"</string>
-    <string name="wifi_connect_alert_message" msgid="8930084523889618078">"„%1$s“ nori prisijungti prie „%2$s“"</string>
+    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
+    <skip />
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Programa"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Tiesioginis „Wi-Fi“ ryšys"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Paleiskite „Wi-Fi Direct“. Bus išjungta „Wi-Fi“ programa / viešosios interneto prieigos taškas."</string>
