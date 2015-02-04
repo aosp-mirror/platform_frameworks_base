@@ -60,11 +60,16 @@ final class RemoteConnectionService {
                 mPendingConnections.remove(connection);
                 // Unconditionally initialize the connection ...
                 connection.setConnectionCapabilities(parcel.getConnectionCapabilities());
-                connection.setAddress(
-                        parcel.getHandle(), parcel.getHandlePresentation());
-                connection.setCallerDisplayName(
-                        parcel.getCallerDisplayName(),
-                        parcel.getCallerDisplayNamePresentation());
+                if (parcel.getHandle() != null
+                    || parcel.getState() != Connection.STATE_DISCONNECTED) {
+                    connection.setAddress(parcel.getHandle(), parcel.getHandlePresentation());
+                }
+                if (parcel.getCallerDisplayName() != null
+                    || parcel.getState() != Connection.STATE_DISCONNECTED) {
+                    connection.setCallerDisplayName(
+                            parcel.getCallerDisplayName(),
+                            parcel.getCallerDisplayNamePresentation());
+                }
                 // Set state after handle so that the client can identify the connection.
                 if (parcel.getState() == Connection.STATE_DISCONNECTED) {
                     connection.setDisconnected(parcel.getDisconnectCause());
