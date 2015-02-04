@@ -15262,8 +15262,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         synchronized (this) {
-            if (callerApp != null && callerApp.pid == 0) {
-                // Caller already died
+            if (callerApp != null && (callerApp.thread == null
+                    || callerApp.thread.asBinder() != caller.asBinder())) {
+                // Original caller already died
                 return null;
             }
             ReceiverList rl
