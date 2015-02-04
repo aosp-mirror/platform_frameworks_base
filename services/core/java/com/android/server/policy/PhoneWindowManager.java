@@ -74,6 +74,7 @@ import android.telecom.TelecomManager;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -103,6 +104,8 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
+import android.view.animation.TranslateAnimation;
 
 import com.android.internal.R;
 import com.android.internal.statusbar.IStatusBarService;
@@ -724,12 +727,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     MyOrientationListener mOrientationListener;
 
-    private final BarController mStatusBarController = new BarController("StatusBar",
-            View.STATUS_BAR_TRANSIENT,
-            View.STATUS_BAR_UNHIDE,
-            View.STATUS_BAR_TRANSLUCENT,
-            StatusBarManager.WINDOW_STATUS_BAR,
-            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+    private final StatusBarController mStatusBarController = new StatusBarController();
 
     private final BarController mNavigationBarController = new BarController("NavigationBar",
             View.NAVIGATION_BAR_TRANSIENT,
@@ -1359,6 +1357,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mPowerManager.isInteractive()) {
             goingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
         }
+
+        mWindowManagerInternal.registerAppTransitionListener(
+                mStatusBarController.getAppTransitionListener());
     }
 
     /**

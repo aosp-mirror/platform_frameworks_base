@@ -454,6 +454,35 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
+    @Override
+    public void appTransitionPending() {
+        if (mBar != null) {
+            try {
+                mBar.appTransitionPending();
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void appTransitionCancelled() {
+        if (mBar != null) {
+            try {
+                mBar.appTransitionCancelled();
+            } catch (RemoteException ex) {}
+        }
+    }
+
+    @Override
+    public void appTransitionStarting(long statusBarAnimationsStartTime,
+            long statusBarAnimationsDuration) {
+        if (mBar != null) {
+            try {
+                mBar.appTransitionStarting(
+                        statusBarAnimationsStartTime, statusBarAnimationsDuration);
+            } catch (RemoteException ex) {}
+        }
+    }
+
     private void enforceStatusBar() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR,
                 "StatusBarManagerService");
@@ -624,7 +653,6 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
             Binder.restoreCallingIdentity(identity);
         }
     }
-
 
     // ================================================================================
     // Can be called from any thread

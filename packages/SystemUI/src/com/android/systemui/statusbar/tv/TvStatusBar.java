@@ -170,4 +170,16 @@ public class TvStatusBar extends BaseStatusBar {
     @Override
     public void showScreenPinningRequest() {
     }
+
+    @Override
+    public void appTransitionPending() {
+    }
+
+    @Override
+    public void appTransitionCancelled() {
+    }
+
+    @Override
+    public void appTransitionStarting(long startTime, long duration) {
+    }
 }

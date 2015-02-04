@@ -11619,5 +11619,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 WindowManagerService.this.removeWindowToken(token);
             }
         }
+
+        @Override
+        public void registerAppTransitionListener(AppTransitionListener listener) {
+            synchronized (mWindowMap) {
+                mAppTransition.registerListenerLocked(listener);
+            }
+        }
     }
 }

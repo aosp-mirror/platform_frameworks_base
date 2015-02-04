@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Pair;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -57,6 +58,9 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_NOTIFICATION_LIGHT_OFF     = 16 << MSG_SHIFT;
     private static final int MSG_NOTIFICATION_LIGHT_PULSE   = 17 << MSG_SHIFT;
     private static final int MSG_SHOW_SCREEN_PIN_REQUEST    = 18 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_PENDING     = 19 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_CANCELLED   = 20 << MSG_SHIFT;
+    private static final int MSG_APP_TRANSITION_STARTING    = 21 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -99,6 +103,9 @@ public class CommandQueue extends IStatusBar.Stub {
         public void notificationLightOff();
         public void notificationLightPulse(int argb, int onMillis, int offMillis);
         public void showScreenPinningRequest();
+        public void appTransitionPending();
+        public void appTransitionCancelled();
+        public void appTransitionStarting(long startTime, long duration);
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -246,6 +253,28 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void appTransitionPending() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_PENDING);
+            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_PENDING);
+        }
+    }
+
+    public void appTransitionCancelled() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_PENDING);
+            mHandler.sendEmptyMessage(MSG_APP_TRANSITION_PENDING);
+        }
+    }
+
+    public void appTransitionStarting(long startTime, long duration) {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_APP_TRANSITION_STARTING);
+            mHandler.obtainMessage(MSG_APP_TRANSITION_STARTING, Pair.create(startTime, duration))
+                    .sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -327,6 +356,16 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_SCREEN_PIN_REQUEST:
                     mCallbacks.showScreenPinningRequest();
+                    break;
+                case MSG_APP_TRANSITION_PENDING:
+                    mCallbacks.appTransitionPending();
+                    break;
+                case MSG_APP_TRANSITION_CANCELLED:
+                    mCallbacks.appTransitionCancelled();
+                    break;
+                case MSG_APP_TRANSITION_STARTING:
+                    Pair<Long, Long> data = (Pair<Long, Long>) msg.obj;
+                    mCallbacks.appTransitionStarting(data.first, data.second);
                     break;
             }
         }

@@ -43,15 +43,15 @@ public class BarController {
 
     private static final int TRANSLUCENT_ANIMATION_DELAY_MS = 1000;
 
-    private final String mTag;
+    protected final String mTag;
     private final int mTransientFlag;
     private final int mUnhideFlag;
     private final int mTranslucentFlag;
     private final int mStatusBarManagerId;
     private final int mTranslucentWmFlag;
-    private final Handler mHandler;
+    protected final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
-    private IStatusBarService mStatusBarService;
+    protected IStatusBarService mStatusBarService;
 
     private WindowState mWin;
     private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
@@ -254,7 +254,7 @@ public class BarController {
         }
     }
 
-    private IStatusBarService getStatusBarService() {
+    protected IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
             if (mStatusBarService == null) {
                 mStatusBarService = IStatusBarService.Stub.asInterface(

@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -48,9 +50,12 @@ import java.util.ArrayList;
  */
 public class StatusBarIconController {
 
+    private static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
+
     private Context mContext;
     private PhoneStatusBar mPhoneStatusBar;
     private Interpolator mLinearOutSlowIn;
+    private Interpolator mFastOutSlowIn;
     private DemoStatusIcons mDemoStatusIcons;
     private NotificationColorUtil mNotificationColorUtil;
 
@@ -69,6 +74,11 @@ public class StatusBarIconController {
 
     private int mIconTint = Color.WHITE;
 
+    private boolean mTransitionPending;
+    private boolean mTintChangePending;
+    private int mPendingIconTint;
+    private ValueAnimator mTintAnimator;
+
     public StatusBarIconController(Context context, View statusBar, View keyguardStatusBar,
             PhoneStatusBar phoneStatusBar) {
         mContext = context;
@@ -86,6 +96,8 @@ public class StatusBarIconController {
         mClock = (TextView) statusBar.findViewById(R.id.clock);
         mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.linear_out_slow_in);
+        mFastOutSlowIn = AnimationUtils.loadInterpolator(mContext,
+                android.R.interpolator.fast_out_slow_in);
         updateResources();
     }
 
@@ -268,8 +280,43 @@ public class StatusBarIconController {
     }
 
     public void setIconTint(int tint) {
+        if (mTransitionPending) {
+            deferIconTintChange(tint);
+        } else {
+            animateIconTint(tint, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
+        }
+    }
+
+    private void animateIconTint(int targetTint, long delay, long duration) {
+        if (mTintAnimator != null) {
+            mTintAnimator.cancel();
+        }
+        if (mIconTint == targetTint) {
+            return;
+        }
+        mTintAnimator = ValueAnimator.ofArgb(mIconTint, targetTint);
+        mTintAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                setIconTintInternal((Integer) animation.getAnimatedValue());
+            }
+        });
+        mTintAnimator.setDuration(duration);
+        mTintAnimator.setStartDelay(delay);
+        mTintAnimator.setInterpolator(mFastOutSlowIn);
+        mTintAnimator.start();
+    }
+    private void setIconTintInternal(int tint) {
         mIconTint = tint;
         applyIconTint();
+    }
+
+    private void deferIconTintChange(int tint) {
+        if (mTintChangePending && tint == mPendingIconTint) {
+            return;
+        }
+        mTintChangePending = true;
+        mPendingIconTint = tint;
     }
 
     private void applyIconTint() {
@@ -304,5 +351,27 @@ public class StatusBarIconController {
         boolean grayscale = mNotificationColorUtil.isGrayscaleIcon(v.getDrawable());
         v.setTag(R.id.icon_is_grayscale, grayscale);
         return grayscale;
+    }
+
+    public void appTransitionPending() {
+        mTransitionPending = true;
+    }
+
+    public void appTransitionCancelled() {
+        if (mTransitionPending && mTintChangePending) {
+            mTintChangePending = false;
+            animateIconTint(mPendingIconTint, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
+        }
+        mTransitionPending = false;
+    }
+
+    public void appTransitionStarting(long startTime, long duration) {
+        if (mTransitionPending && mTintChangePending) {
+            mTintChangePending = false;
+            animateIconTint(mPendingIconTint,
+                    Math.max(0, startTime - SystemClock.uptimeMillis()),
+                    duration);
+        }
+        mTransitionPending = false;
     }
 }

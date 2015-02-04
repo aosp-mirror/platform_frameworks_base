@@ -224,4 +224,11 @@ public abstract class WindowManagerInternal {
      * @param removeWindows Whether to also remove the windows associated with the token.
      */
     public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows);
+
+    /**
+     * Registers a listener to be notified about app transition events.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerAppTransitionListener(AppTransitionListener listener);
 }
