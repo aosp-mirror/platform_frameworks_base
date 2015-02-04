@@ -22,7 +22,7 @@ import android.binding.Bindable;
 import android.binding.adapters.ViewBindingAdapter;
 import android.view.View;
 
-public class ViewBindingObject extends BaseObservable {
+public class ViewBindingObject extends BindingAdapterBindingObject {
     @Bindable
     private int mBackgroundTint = 0xFF00FF00;
     @Bindable

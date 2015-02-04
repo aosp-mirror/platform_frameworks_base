@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.binding.adapters;
+package com.android.databinding.testapp.vo;
 
-import android.binding.BindingMethod;
-import android.binding.BindingMethods;
+import com.android.databinding.library.BaseObservable;
 
-@BindingMethods({
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:src", method = "setImageDrawable"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tint", method = "setImageTintList"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tintMode", method = "setImageTintMode"),
-})
-public class ImageViewBindingAdapter {
+import android.binding.Bindable;
 
+public class SpinnerBindingObject extends BindingAdapterBindingObject {
+    @Bindable
+    private int mPopupBackground = 0xFF123456;
+
+    public int getPopupBackground() {
+        return mPopupBackground;
+    }
+
+    public void changeValues() {
+        mPopupBackground = 0xFF111111;
+        notifyChange();
+    }
 }

@@ -21,6 +21,7 @@ import android.binding.BindingMethods;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.method.DialerKeyListener;
 import android.text.method.DigitsKeyListener;
 import android.text.method.KeyListener;
@@ -57,22 +58,24 @@ public class TextViewBindingAdapter {
 
         TextKeyListener.Capitalize capitalize = TextKeyListener.Capitalize.NONE;
 
-        if (listener instanceof AutoCapKeyListener) {
-            capitalize = ((AutoCapKeyListener) listener).getCapitalize();
+        int inputType = listener != null ? listener.getInputType() : 0;
+        if ((inputType & InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS) != 0) {
+            capitalize = TextKeyListener.Capitalize.CHARACTERS;
+        } else if ((inputType & InputType.TYPE_TEXT_FLAG_CAP_WORDS) != 0) {
+            capitalize = TextKeyListener.Capitalize.WORDS;
+        } else if ((inputType & InputType.TYPE_TEXT_FLAG_CAP_SENTENCES) != 0) {
+            capitalize = TextKeyListener.Capitalize.SENTENCES;
         }
-        view.setKeyListener(new AutoCapKeyListener(capitalize, autoText));
+        view.setKeyListener(TextKeyListener.getInstance(autoText, capitalize));
     }
 
     @BindingAdapter("android:capitalize")
-    public static void setAutoText(TextView view, TextKeyListener.Capitalize capitalize) {
+    public static void setCapitalize(TextView view, TextKeyListener.Capitalize capitalize) {
         KeyListener listener = view.getKeyListener();
 
-        boolean autoText = false;
-
-        if (listener instanceof AutoCapKeyListener) {
-            autoText = ((AutoCapKeyListener) listener).isAutoText();
-        }
-        view.setKeyListener(new AutoCapKeyListener(capitalize, autoText));
+        int inputType = listener.getInputType();
+        boolean autoText = (inputType & InputType.TYPE_TEXT_FLAG_AUTO_CORRECT) != 0;
+        view.setKeyListener(TextKeyListener.getInstance(autoText, capitalize));
     }
 
     @BindingAdapter("android:bufferType")
@@ -134,7 +137,7 @@ public class TextViewBindingAdapter {
             setDrawableLeft(view, drawable);
         } else {
             Drawable[] drawables = view.getCompoundDrawablesRelative();
-            view.setCompoundDrawables(drawable, drawables[1], drawables[2], drawables[3]);
+            view.setCompoundDrawablesRelative(drawable, drawables[1], drawables[2], drawables[3]);
         }
     }
 
@@ -144,7 +147,7 @@ public class TextViewBindingAdapter {
             setDrawableRight(view, drawable);
         } else {
             Drawable[] drawables = view.getCompoundDrawablesRelative();
-            view.setCompoundDrawables(drawables[0], drawables[1], drawable, drawables[3]);
+            view.setCompoundDrawablesRelative(drawables[0], drawables[1], drawable, drawables[3]);
         }
     }
 
@@ -276,26 +279,5 @@ public class TextViewBindingAdapter {
     @BindingAdapter("android:textSize")
     public static void setTextSize(TextView view, float size) {
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
-    }
-
-    private static class AutoCapKeyListener extends TextKeyListener {
-
-        private final Capitalize mCapitalize;
-
-        private final boolean mAutoText;
-
-        public AutoCapKeyListener(Capitalize cap, boolean autoText) {
-            super(cap, autoText);
-            mCapitalize = cap;
-            mAutoText = autoText;
-        }
-
-        public Capitalize getCapitalize() {
-            return mCapitalize;
-        }
-
-        public boolean isAutoText() {
-            return mAutoText;
-        }
     }
 }

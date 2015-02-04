@@ -158,6 +158,20 @@ public class ClassAnalyzer {
 
             }
         }
+        for (String methodName :
+                new String[]{"is" + StringUtils.capitalize(name), name}) {
+            try {
+                Method method = klass.getMethod(methodName);
+                Field backingField = findField(klass, name);
+
+                if (Modifier.isPublic(method.getModifiers())) {
+                    return new Callable(Callable.Type.METHOD, methodName, method.getReturnType(),
+                            true, isBindable(method) || (backingField != null && isBindable(backingField)) );
+                }
+            } catch (Throwable t) {
+
+            }
+        }
         try {
             Field field = klass.getField(name);
             if (Modifier.isPublic(field.getModifiers())) {
@@ -175,8 +189,21 @@ public class ClassAnalyzer {
         try {
             return klass.getDeclaredField(name);
         } catch (Throwable t){}
+        String capitalizedName = StringUtils.capitalize(name);
         try {
-            return klass.getField("m" + StringUtils.capitalize(name));
+            return klass.getField("m" + capitalizedName);
+        } catch (Throwable t){}
+        try {
+            return klass.getField("_" + name);
+        } catch (Throwable t){}
+        try {
+            return klass.getField("_" + capitalizedName);
+        } catch (Throwable t){}
+        try {
+            return klass.getField("m_" + name);
+        } catch (Throwable t){}
+        try {
+            return klass.getField("m_" + capitalizedName);
         } catch (Throwable t){}
         return null;
     }

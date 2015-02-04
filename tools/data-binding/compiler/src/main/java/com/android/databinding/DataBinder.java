@@ -174,7 +174,8 @@ public class DataBinder {
 
     private String getFullViewClassName(String viewName) {
         if (viewName.indexOf('.') == -1) {
-            if (Objects.equals(viewName, "View") || Objects.equals(viewName, "ViewGroup")) {
+            if (Objects.equals(viewName, "View") || Objects.equals(viewName, "ViewGroup") ||
+                    Objects.equals(viewName, "ViewStub")) {
                 return "android.view." + viewName;
             }
             return "android.widget." + viewName;

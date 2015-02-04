@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+          android:id="@+id/view"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:listSelector="{obj.listSelector}"
+          android:scrollingCache="{obj.scrollingCache}"
+          android:smoothScrollbar="{obj.smoothScrollbar}"
+        >
+    <variable name="obj" type="com.android.databinding.testapp.vo.AbsListViewBindingObject"/>
+</ListView>

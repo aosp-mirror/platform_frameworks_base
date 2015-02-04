@@ -4,70 +4,70 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
         >
-        <variable name="viewBinding" type="com.android.databinding.testapp.vo.ViewBindingObject"/>
+        <variable name="obj" type="com.android.databinding.testapp.vo.ViewBindingObject"/>
     <View
             android:id="@+id/padding"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:padding="{viewBinding.padding}"
+            android:padding="{obj.padding}"
             />
     <View
             android:id="@+id/paddingStartEnd"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:paddingEnd="{viewBinding.paddingEnd}"
-            android:paddingStart="{viewBinding.paddingStart}"
+            android:paddingEnd="{obj.paddingEnd}"
+            android:paddingStart="{obj.paddingStart}"
             />
     <View
             android:id="@+id/paddingTopBottom"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:paddingBottom="{viewBinding.paddingBottom}"
-            android:paddingTop="{viewBinding.paddingTop}"
+            android:paddingBottom="{obj.paddingBottom}"
+            android:paddingTop="{obj.paddingTop}"
             />
     <View
             android:id="@+id/paddingLeftRight"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:paddingLeft="{viewBinding.paddingLeft}"
-            android:paddingRight="{viewBinding.paddingRight}"
+            android:paddingLeft="{obj.paddingLeft}"
+            android:paddingRight="{obj.paddingRight}"
             />
     <View
             android:id="@+id/backgroundTint"
-            android:backgroundTint="{viewBinding.backgroundTint}"
+            android:backgroundTint="{obj.backgroundTint}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/fadeScrollbars"
-            android:fadeScrollbars="{viewBinding.fadeScrollbars}"
+            android:fadeScrollbars="{obj.fadeScrollbars}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/nextFocus"
-            android:nextFocusForward="{viewBinding.nextFocusForward}"
-            android:nextFocusLeft="{viewBinding.nextFocusLeft}"
-            android:nextFocusRight="{viewBinding.nextFocusRight}"
-            android:nextFocusUp="{viewBinding.nextFocusUp}"
-            android:nextFocusDown="{viewBinding.nextFocusDown}"
+            android:nextFocusForward="{obj.nextFocusForward}"
+            android:nextFocusLeft="{obj.nextFocusLeft}"
+            android:nextFocusRight="{obj.nextFocusRight}"
+            android:nextFocusUp="{obj.nextFocusUp}"
+            android:nextFocusDown="{obj.nextFocusDown}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/requiresFadingEdge"
-            android:requiresFadingEdge="{viewBinding.requiresFadingEdge}"
+            android:requiresFadingEdge="{obj.requiresFadingEdge}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/scrollbar"
-            android:scrollbarDefaultDelayBeforeFade="{viewBinding.scrollbarDefaultDelayBeforeFade}"
-            android:scrollbarFadeDuration="{viewBinding.scrollbarFadeDuration}"
-            android:scrollbarSize="{viewBinding.scrollbarSize}"
-            android:scrollbarStyle="{viewBinding.scrollbarStyle}"
+            android:scrollbarDefaultDelayBeforeFade="{obj.scrollbarDefaultDelayBeforeFade}"
+            android:scrollbarFadeDuration="{obj.scrollbarFadeDuration}"
+            android:scrollbarSize="{obj.scrollbarSize}"
+            android:scrollbarStyle="{obj.scrollbarStyle}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
     <View
             android:id="@+id/transformPivot"
-            android:transformPivotX="{viewBinding.transformPivotX}"
-            android:transformPivotY="{viewBinding.transformPivotY}"
+            android:transformPivotX="{obj.transformPivotX}"
+            android:transformPivotY="{obj.transformPivotY}"
             android:layout_width="10dp"
             android:layout_height="10dp"/>
 </LinearLayout>

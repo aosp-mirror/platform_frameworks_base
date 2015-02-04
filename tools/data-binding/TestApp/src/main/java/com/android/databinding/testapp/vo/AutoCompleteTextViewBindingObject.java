@@ -13,16 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.binding.adapters;
+package com.android.databinding.testapp.vo;
 
-import android.binding.BindingMethod;
-import android.binding.BindingMethods;
+import com.android.databinding.library.BaseObservable;
 
-@BindingMethods({
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:src", method = "setImageDrawable"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tint", method = "setImageTintList"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tintMode", method = "setImageTintMode"),
-})
-public class ImageViewBindingAdapter {
+import android.binding.Bindable;
 
+public class AutoCompleteTextViewBindingObject extends BindingAdapterBindingObject {
+    @Bindable
+    private int mPopupBackground;
+
+    @Bindable
+    private int mCompletionThreshold = 1;
+
+    public int getCompletionThreshold() {
+        return mCompletionThreshold;
+    }
+
+    public int getPopupBackground() {
+        return mPopupBackground;
+    }
+
+    public void changeValues() {
+        mPopupBackground = 0xFF23456;
+        mCompletionThreshold = 5;
+        notifyChange();
+    }
 }

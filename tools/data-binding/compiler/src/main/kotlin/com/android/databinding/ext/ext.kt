@@ -34,7 +34,30 @@ private class LazyExt<K, T>(private val initializer: (k : K) -> T) : ReadOnlyPro
 
 fun Delegates.lazy<K, T>(initializer: (k : K) -> T): ReadOnlyProperty<K, T> = LazyExt(initializer)
 
-public fun Class<*>.toJavaCode() : String = getName().replace("$", ".")
+public fun Class<*>.toJavaCode() : String {
+    val name = getName();
+    if (name.startsWith('[')) {
+        val numArray = name.lastIndexOf('[') + 1;
+        val isClass = name.endsWith(';') && name.charAt(numArray) == 'L';
+        val componentType : String;
+        when (name.charAt(numArray)) {
+            'Z' -> componentType = "boolean"
+            'B' -> componentType = "byte"
+            'C' -> componentType = "char"
+            'L' -> componentType = name.substring(numArray + 1, name.length() - 1).replace('$', '.');
+            'D' -> componentType = "double"
+            'F' -> componentType = "float"
+            'I' -> componentType = "int"
+            'J' -> componentType = "long"
+            'S' -> componentType = "short"
+            else -> componentType = name.substring(numArray)
+        }
+        val arrayComp = name.substring(0, numArray).replace("[", "[]");
+        return componentType + arrayComp;
+    } else {
+        return name.replace("$", ".")
+    }
+}
 
 public fun String.androidId() : String = this.split("/")[1]
 

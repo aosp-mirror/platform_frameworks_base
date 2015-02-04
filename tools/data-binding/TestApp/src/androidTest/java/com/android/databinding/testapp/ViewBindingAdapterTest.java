@@ -23,89 +23,65 @@ import android.os.Build;
 import android.test.UiThreadTest;
 import android.view.View;
 
-public class ViewBindingAdapterTest extends BaseDataBinderTest<ViewAdapterTestBinder> {
-
-    ViewBindingObject mViewBindingObject = new ViewBindingObject();
+public class ViewBindingAdapterTest extends BindingAdapterTestBase<ViewAdapterTestBinder, ViewBindingObject> {
 
     public ViewBindingAdapterTest() {
-        super(ViewAdapterTestBinder.class, R.layout.view_adapter_test);
+        super(ViewAdapterTestBinder.class, ViewBindingObject.class, R.layout.view_adapter_test);
     }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        try {
-            runTestOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mBinder.setViewBinding(mViewBindingObject);
-                    mBinder.rebindDirty();
-                }
-            });
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-
-    }
-
-    private void changeValues() throws Throwable {
-        runTestOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mViewBindingObject.changeValues();
-                mBinder.rebindDirty();
-            }
-        });
     }
 
     public void testPadding() throws Throwable {
         View view = mBinder.getPadding();
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingBottom());
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingTop());
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingRight());
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingLeft());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingBottom());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingTop());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingRight());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingLeft());
 
         changeValues();
 
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingBottom());
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingTop());
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingRight());
-        assertEquals(mViewBindingObject.getPadding(), view.getPaddingLeft());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingBottom());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingTop());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingRight());
+        assertEquals(mBindingObject.getPadding(), view.getPaddingLeft());
     }
 
     public void testPaddingLeftRight() throws Throwable {
         View view = mBinder.getPaddingLeftRight();
-        assertEquals(mViewBindingObject.getPaddingLeft(), view.getPaddingLeft());
-        assertEquals(mViewBindingObject.getPaddingRight(), view.getPaddingRight());
+        assertEquals(mBindingObject.getPaddingLeft(), view.getPaddingLeft());
+        assertEquals(mBindingObject.getPaddingRight(), view.getPaddingRight());
 
         changeValues();
 
-        assertEquals(mViewBindingObject.getPaddingLeft(), view.getPaddingLeft());
-        assertEquals(mViewBindingObject.getPaddingRight(), view.getPaddingRight());
+        assertEquals(mBindingObject.getPaddingLeft(), view.getPaddingLeft());
+        assertEquals(mBindingObject.getPaddingRight(), view.getPaddingRight());
     }
 
     public void testPaddingStartEnd() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             View view = mBinder.getPaddingStartEnd();
-            assertEquals(mViewBindingObject.getPaddingStart(), view.getPaddingStart());
-            assertEquals(mViewBindingObject.getPaddingEnd(), view.getPaddingEnd());
+            assertEquals(mBindingObject.getPaddingStart(), view.getPaddingStart());
+            assertEquals(mBindingObject.getPaddingEnd(), view.getPaddingEnd());
 
             changeValues();
 
-            assertEquals(mViewBindingObject.getPaddingStart(), view.getPaddingStart());
-            assertEquals(mViewBindingObject.getPaddingEnd(), view.getPaddingEnd());
+            assertEquals(mBindingObject.getPaddingStart(), view.getPaddingStart());
+            assertEquals(mBindingObject.getPaddingEnd(), view.getPaddingEnd());
         }
     }
 
     public void testPaddingTopBottom() throws Throwable {
         View view = mBinder.getPaddingTopBottom();
-        assertEquals(mViewBindingObject.getPaddingTop(), view.getPaddingTop());
-        assertEquals(mViewBindingObject.getPaddingBottom(), view.getPaddingBottom());
+        assertEquals(mBindingObject.getPaddingTop(), view.getPaddingTop());
+        assertEquals(mBindingObject.getPaddingBottom(), view.getPaddingBottom());
 
         changeValues();
 
-        assertEquals(mViewBindingObject.getPaddingTop(), view.getPaddingTop());
-        assertEquals(mViewBindingObject.getPaddingBottom(), view.getPaddingBottom());
+        assertEquals(mBindingObject.getPaddingTop(), view.getPaddingTop());
+        assertEquals(mBindingObject.getPaddingBottom(), view.getPaddingBottom());
     }
 
     public void testBackgroundTint() throws Throwable {
@@ -113,44 +89,44 @@ public class ViewBindingAdapterTest extends BaseDataBinderTest<ViewAdapterTestBi
             View view = mBinder.getBackgroundTint();
             assertNotNull(view.getBackgroundTintList());
             ColorStateList colorStateList = view.getBackgroundTintList();
-            assertEquals(mViewBindingObject.getBackgroundTint(), colorStateList.getDefaultColor());
+            assertEquals(mBindingObject.getBackgroundTint(), colorStateList.getDefaultColor());
 
             changeValues();
 
             assertNotNull(view.getBackgroundTintList());
             colorStateList = view.getBackgroundTintList();
-            assertEquals(mViewBindingObject.getBackgroundTint(), colorStateList.getDefaultColor());
+            assertEquals(mBindingObject.getBackgroundTint(), colorStateList.getDefaultColor());
         }
     }
 
     public void testFadeScrollbars() throws Throwable {
         View view = mBinder.getFadeScrollbars();
-        assertEquals(mViewBindingObject.getFadeScrollbars(), view.isScrollbarFadingEnabled());
+        assertEquals(mBindingObject.getFadeScrollbars(), view.isScrollbarFadingEnabled());
 
         changeValues();
 
-        assertEquals(mViewBindingObject.getFadeScrollbars(), view.isScrollbarFadingEnabled());
+        assertEquals(mBindingObject.getFadeScrollbars(), view.isScrollbarFadingEnabled());
     }
 
     public void testNextFocus() throws Throwable {
         View view = mBinder.getNextFocus();
 
-        assertEquals(mViewBindingObject.getNextFocusDown(), view.getNextFocusDownId());
-        assertEquals(mViewBindingObject.getNextFocusUp(), view.getNextFocusUpId());
-        assertEquals(mViewBindingObject.getNextFocusLeft(), view.getNextFocusLeftId());
-        assertEquals(mViewBindingObject.getNextFocusRight(), view.getNextFocusRightId());
+        assertEquals(mBindingObject.getNextFocusDown(), view.getNextFocusDownId());
+        assertEquals(mBindingObject.getNextFocusUp(), view.getNextFocusUpId());
+        assertEquals(mBindingObject.getNextFocusLeft(), view.getNextFocusLeftId());
+        assertEquals(mBindingObject.getNextFocusRight(), view.getNextFocusRightId());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            assertEquals(mViewBindingObject.getNextFocusForward(), view.getNextFocusForwardId());
+            assertEquals(mBindingObject.getNextFocusForward(), view.getNextFocusForwardId());
         }
 
         changeValues();
 
-        assertEquals(mViewBindingObject.getNextFocusDown(), view.getNextFocusDownId());
-        assertEquals(mViewBindingObject.getNextFocusUp(), view.getNextFocusUpId());
-        assertEquals(mViewBindingObject.getNextFocusLeft(), view.getNextFocusLeftId());
-        assertEquals(mViewBindingObject.getNextFocusRight(), view.getNextFocusRightId());
+        assertEquals(mBindingObject.getNextFocusDown(), view.getNextFocusDownId());
+        assertEquals(mBindingObject.getNextFocusUp(), view.getNextFocusUpId());
+        assertEquals(mBindingObject.getNextFocusLeft(), view.getNextFocusLeftId());
+        assertEquals(mBindingObject.getNextFocusRight(), view.getNextFocusRightId());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            assertEquals(mViewBindingObject.getNextFocusForward(), view.getNextFocusForwardId());
+            assertEquals(mBindingObject.getNextFocusForward(), view.getNextFocusForwardId());
         }
     }
 
@@ -170,35 +146,35 @@ public class ViewBindingAdapterTest extends BaseDataBinderTest<ViewAdapterTestBi
         View view = mBinder.getScrollbar();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            assertEquals(mViewBindingObject.getScrollbarDefaultDelayBeforeFade(),
+            assertEquals(mBindingObject.getScrollbarDefaultDelayBeforeFade(),
                     view.getScrollBarDefaultDelayBeforeFade());
-            assertEquals(mViewBindingObject.getScrollbarFadeDuration(), view.getScrollBarFadeDuration());
-            assertEquals(mViewBindingObject.getScrollbarSize(), view.getScrollBarSize());
+            assertEquals(mBindingObject.getScrollbarFadeDuration(), view.getScrollBarFadeDuration());
+            assertEquals(mBindingObject.getScrollbarSize(), view.getScrollBarSize());
         }
-        assertEquals(mViewBindingObject.getScrollbarStyle(), view.getScrollBarStyle());
+        assertEquals(mBindingObject.getScrollbarStyle(), view.getScrollBarStyle());
 
         changeValues();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            assertEquals(mViewBindingObject.getScrollbarDefaultDelayBeforeFade(),
+            assertEquals(mBindingObject.getScrollbarDefaultDelayBeforeFade(),
                     view.getScrollBarDefaultDelayBeforeFade());
-            assertEquals(mViewBindingObject.getScrollbarFadeDuration(), view.getScrollBarFadeDuration());
-            assertEquals(mViewBindingObject.getScrollbarSize(), view.getScrollBarSize());
+            assertEquals(mBindingObject.getScrollbarFadeDuration(), view.getScrollBarFadeDuration());
+            assertEquals(mBindingObject.getScrollbarSize(), view.getScrollBarSize());
         }
-        assertEquals(mViewBindingObject.getScrollbarStyle(), view.getScrollBarStyle());
+        assertEquals(mBindingObject.getScrollbarStyle(), view.getScrollBarStyle());
     }
 
     public void testTransformPivot() throws Throwable {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             View view = mBinder.getTransformPivot();
 
-            assertEquals(mViewBindingObject.getTransformPivotX(), view.getPivotX());
-            assertEquals(mViewBindingObject.getTransformPivotY(), view.getPivotY());
+            assertEquals(mBindingObject.getTransformPivotX(), view.getPivotX());
+            assertEquals(mBindingObject.getTransformPivotY(), view.getPivotY());
 
             changeValues();
 
-            assertEquals(mViewBindingObject.getTransformPivotX(), view.getPivotX());
-            assertEquals(mViewBindingObject.getTransformPivotY(), view.getPivotY());
+            assertEquals(mBindingObject.getTransformPivotX(), view.getPivotX());
+            assertEquals(mBindingObject.getTransformPivotY(), view.getPivotY());
         }
     }
 }

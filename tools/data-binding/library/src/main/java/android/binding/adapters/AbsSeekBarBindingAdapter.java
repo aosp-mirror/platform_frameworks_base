@@ -19,7 +19,7 @@ import android.binding.BindingMethod;
 import android.binding.BindingMethods;
 
 @BindingMethods({
-        @BindingMethod(type = "android.widget.AbsSeekBar", attribute = "android:thumbTint", method = "setThumbTintTintList"),
+        @BindingMethod(type = "android.widget.AbsSeekBar", attribute = "android:thumbTint", method = "setThumbTintList"),
 
 })
 public class AbsSeekBarBindingAdapter {

@@ -58,8 +58,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(":baseLibrary")
-    provided 'com.android.support:cardview-v7:+'
-    provided 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:support-v4:+'
     provided project(":annotationprocessor")
 }
 //create jar tasks

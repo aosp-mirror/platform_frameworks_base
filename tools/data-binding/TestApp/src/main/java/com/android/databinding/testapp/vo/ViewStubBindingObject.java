@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.binding.adapters;
+package com.android.databinding.testapp.vo;
 
-import android.binding.BindingMethod;
-import android.binding.BindingMethods;
+import com.android.databinding.library.BaseObservable;
+import com.android.databinding.testapp.R;
 
-@BindingMethods({
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:src", method = "setImageDrawable"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tint", method = "setImageTintList"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tintMode", method = "setImageTintMode"),
-})
-public class ImageViewBindingAdapter {
+import android.binding.Bindable;
 
+public class ViewStubBindingObject extends BindingAdapterBindingObject {
+    @Bindable
+    private int mLayout = R.layout.table_layout_adapter_test;
+
+    public int getLayout() {
+        return mLayout;
+    }
+
+    public void changeValues() {
+        mLayout = R.layout.auto_complete_text_view_adapter_test;
+        notifyChange();
+    }
 }

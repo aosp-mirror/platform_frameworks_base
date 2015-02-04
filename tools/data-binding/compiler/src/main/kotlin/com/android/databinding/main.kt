@@ -344,7 +344,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
 
     fun getFullViewClassName(viewName: String): String {
         if (viewName.indexOf('.') == -1) {
-            if (viewName == "View"  || viewName == "ViewGroup") {
+            if (viewName == "View"  || viewName == "ViewGroup" || viewName == "ViewStub") {
                 return "android.view.$viewName"
             }
             return "android.widget.$viewName"

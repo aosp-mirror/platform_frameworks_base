@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.binding.adapters;
+package com.android.databinding.testapp.vo;
 
-import android.binding.BindingMethod;
-import android.binding.BindingMethods;
+import com.android.databinding.library.BaseObservable;
 
-@BindingMethods({
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:src", method = "setImageDrawable"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tint", method = "setImageTintList"),
-        @BindingMethod(type = "android.widget.ImageView", attribute = "android:tintMode", method = "setImageTintMode"),
-})
-public class ImageViewBindingAdapter {
+import android.binding.Bindable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 
+public class AbsSeekBarBindingObject extends BindingAdapterBindingObject {
+    @Bindable
+    private int mThumbTint = 0xFFFF0000;
+
+    public int getThumbTint() {
+        return mThumbTint;
+    }
+
+    public void changeValues() {
+        mThumbTint = 0xFF00FF00;
+        notifyChange();
+    }
 }

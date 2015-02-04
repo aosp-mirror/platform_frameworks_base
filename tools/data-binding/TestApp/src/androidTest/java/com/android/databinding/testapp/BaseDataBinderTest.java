@@ -22,7 +22,7 @@ import android.test.ActivityInstrumentationTestCase2;
 
 public class BaseDataBinderTest<T extends IViewDataBinder>
         extends ActivityInstrumentationTestCase2<TestActivity> {
-    private Class<T> mBinderClass;
+    protected Class<T> mBinderClass;
     private int mLayoutId;
     private int mOrientation;
     protected T mBinder;

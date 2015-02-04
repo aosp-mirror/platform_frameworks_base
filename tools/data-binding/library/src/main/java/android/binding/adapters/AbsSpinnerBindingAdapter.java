@@ -30,7 +30,7 @@ public class AbsSpinnerBindingAdapter {
             if (oldAdapter.getCount() == entries.length) {
                 changed = false;
                 for (int i = 0; i < entries.length; i++) {
-                    if (!entries[i].toString().equals(oldAdapter.getItem(i))) {
+                    if (!entries[i].equals(oldAdapter.getItem(i))) {
                         changed = true;
                         break;
                     }

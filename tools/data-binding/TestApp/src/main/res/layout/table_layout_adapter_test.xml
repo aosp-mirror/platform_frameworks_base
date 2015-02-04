@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <variable name="obj" type="com.android.databinding.testapp.vo.TableLayoutBindingObject"/>
+    <TableLayout
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:id="@+id/view"
+            android:divider="{obj.divider}"
+            android:collapseColumns="{obj.collapseColumns}"
+            android:shrinkColumns="{obj.shrinkColumns}"
+            android:stretchColumns="{obj.stretchColumns}"
+            >
+        <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Hello"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:text="Happy"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:text="World"/>
+        </TableRow>
+        <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:text="Goodbye"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:text="Cruel"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                      android:text="World"/>
+        </TableRow>
+    </TableLayout>
+</LinearLayout>

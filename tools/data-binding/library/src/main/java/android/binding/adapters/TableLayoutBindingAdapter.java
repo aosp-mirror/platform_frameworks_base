@@ -23,9 +23,9 @@ import java.util.regex.Pattern;
 
 public class TableLayoutBindingAdapter {
 
-    private static final int MAX_COLUMNS = 20;
-
     private static Pattern sColumnPattern = Pattern.compile("\\s*,\\s*");
+
+    private static final int MAX_COLUMNS = 20;
 
     @BindingAdapter("android:collapseColumns")
     public static void setCollapseColumns(TableLayout view, CharSequence columnsStr) {
@@ -40,15 +40,17 @@ public class TableLayoutBindingAdapter {
 
     @BindingAdapter("android:shrinkColumns")
     public static void setShrinkColumns(TableLayout view, CharSequence columnsStr) {
-        if (columnsStr.charAt(0) == '*') {
+        if (columnsStr != null && columnsStr.length() > 0 && columnsStr.charAt(0) == '*') {
             view.setShrinkAllColumns(true);
         } else {
             view.setShrinkAllColumns(false);
             SparseBooleanArray columns = parseColumns(columnsStr);
-            for (int i = 0; i < MAX_COLUMNS; i++) {
-                boolean shrinkable = columns.get(i, false);
-                if (shrinkable != view.isColumnShrinkable(i)) {
-                    view.setColumnShrinkable(i, shrinkable);
+            int columnCount = columns.size();
+            for (int i = 0; i < columnCount; i++) {
+                int column = columns.keyAt(i);
+                boolean shrinkable = columns.valueAt(i);
+                if (shrinkable) {
+                    view.setColumnShrinkable(column, shrinkable);
                 }
             }
         }
@@ -56,15 +58,17 @@ public class TableLayoutBindingAdapter {
 
     @BindingAdapter("android:stretchColumns")
     public static void setStretchColumns(TableLayout view, CharSequence columnsStr) {
-        if (columnsStr.charAt(0) == '*') {
+        if (columnsStr != null && columnsStr.length() > 0 && columnsStr.charAt(0) == '*') {
             view.setStretchAllColumns(true);
         } else {
             view.setStretchAllColumns(false);
             SparseBooleanArray columns = parseColumns(columnsStr);
-            for (int i = 0; i < MAX_COLUMNS; i++) {
-                boolean stretchable = columns.get(i, false);
-                if (stretchable != view.isColumnStretchable(i)) {
-                    view.setColumnStretchable(i, stretchable);
+            int columnCount = columns.size();
+            for (int i = 0; i < columnCount; i++) {
+                int column = columns.keyAt(i);
+                boolean stretchable = columns.valueAt(i);
+                if (stretchable) {
+                    view.setColumnStretchable(column, stretchable);
                 }
             }
         }
@@ -72,6 +76,9 @@ public class TableLayoutBindingAdapter {
 
     private static SparseBooleanArray parseColumns(CharSequence sequence) {
         SparseBooleanArray columns = new SparseBooleanArray();
+        if (sequence == null) {
+            return columns;
+        }
         String[] columnDefs = sColumnPattern.split(sequence);
 
         for (String columnIdentifier : columnDefs) {
