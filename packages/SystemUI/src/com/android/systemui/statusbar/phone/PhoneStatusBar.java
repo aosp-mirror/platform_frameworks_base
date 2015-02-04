@@ -3115,6 +3115,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 mLaunchTransitionFadingAway = false;
                             }
                         });
+                mIconController.appTransitionStarting(SystemClock.uptimeMillis(),
+                        StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
             }
         };
         if (mNotificationPanel.isLaunchTransitionRunning()) {
@@ -3182,16 +3184,31 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     /**
+     * Notifies the status bar that Keyguard is going away very soon.
+     */
+    public void keyguardGoingAway() {
+
+        // Treat Keyguard exit animation as an app transition to achieve nice transition for status
+        // bar.
+        mIconController.appTransitionPending();
+    }
+
+    /**
      * Notifies the status bar the Keyguard is fading away with the specified timings.
      *
-     * @param delay the animation delay in miliseconds
+     * @param startTime the start time of the animations in uptime millis
+     * @param delay the precalculated animation delay in miliseconds
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    public void setKeyguardFadingAway(long delay, long fadeoutDuration) {
+    public void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration) {
         mKeyguardFadingAway = true;
         mKeyguardFadingAwayDelay = delay;
         mKeyguardFadingAwayDuration = fadeoutDuration;
         mWaitingForKeyguardExit = false;
+        mIconController.appTransitionStarting(
+                startTime + fadeoutDuration
+                        - StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION,
+                StatusBarIconController.DEFAULT_TINT_ANIMATION_DURATION);
         disable(mDisabledUnmodified, true /* animate */);
     }
 
@@ -3207,8 +3224,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     private void updatePublicMode() {
-        setLockscreenPublicMode(mStatusBarKeyguardViewManager.isShowing()
-                && mStatusBarKeyguardViewManager.isSecure(mCurrentUserId));
+        setLockscreenPublicMode(
+                mStatusBarKeyguardViewManager.isShowing() && mStatusBarKeyguardViewManager
+                        .isSecure(mCurrentUserId));
     }
 
     private void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
@@ -3637,7 +3655,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void appTransitionPending() {
-        mIconController.appTransitionPending();
+
+        // Use own timings when Keyguard is going away, see keyguardGoingAway and
+        // setKeyguardFadingAway
+        if (!mKeyguardFadingAway) {
+            mIconController.appTransitionPending();
+        }
     }
 
     @Override
@@ -3647,7 +3670,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void appTransitionStarting(long startTime, long duration) {
-        mIconController.appTransitionStarting(startTime, duration);
+
+        // Use own timings when Keyguard is going away, see keyguardGoingAway and
+        // setKeyguardFadingAway
+        if (!mKeyguardFadingAway) {
+            mIconController.appTransitionStarting(startTime, duration);
+        }
     }
 
     private final class ShadeUpdates {

@@ -1300,6 +1300,8 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void run() {
             try {
+                mStatusBarKeyguardViewManager.keyguardGoingAway();
+
                 // Don't actually hide the Keyguard at the moment, wait for window
                 // manager until it tells us it's safe to do so with
                 // startKeyguardExitAnimation.

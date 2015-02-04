@@ -257,7 +257,7 @@ public class StatusBarKeyguardViewManager {
                 }
             });
         } else {
-            mPhoneStatusBar.setKeyguardFadingAway(delay, fadeoutDuration);
+            mPhoneStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
             boolean staying = mPhoneStatusBar.hideKeyguard();
             if (!staying) {
                 mStatusBarWindowManager.setKeyguardFadingAway(true);
@@ -434,5 +434,9 @@ public class StatusBarKeyguardViewManager {
 
     public boolean isInputRestricted() {
         return mViewMediatorCallback.isInputRestricted();
+    }
+
+    public void keyguardGoingAway() {
+        mPhoneStatusBar.keyguardGoingAway();
     }
 }

@@ -22,7 +22,9 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -50,7 +52,7 @@ import java.util.ArrayList;
  */
 public class StatusBarIconController {
 
-    private static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
+    public static final long DEFAULT_TINT_ANIMATION_DURATION = 120;
 
     private Context mContext;
     private PhoneStatusBar mPhoneStatusBar;
@@ -79,6 +81,18 @@ public class StatusBarIconController {
     private int mPendingIconTint;
     private ValueAnimator mTintAnimator;
 
+    private final Handler mHandler;
+    private boolean mTransitionDeferring;
+    private long mTransitionDeferringStartTime;
+    private long mTransitionDeferringDuration;
+
+    private final Runnable mTransitionDeferringDoneRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mTransitionDeferring = false;
+        }
+    };
+
     public StatusBarIconController(Context context, View statusBar, View keyguardStatusBar,
             PhoneStatusBar phoneStatusBar) {
         mContext = context;
@@ -98,6 +112,7 @@ public class StatusBarIconController {
                 android.R.interpolator.linear_out_slow_in);
         mFastOutSlowIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.fast_out_slow_in);
+        mHandler = new Handler();
         updateResources();
     }
 
@@ -282,6 +297,10 @@ public class StatusBarIconController {
     public void setIconTint(int tint) {
         if (mTransitionPending) {
             deferIconTintChange(tint);
+        } else if (mTransitionDeferring) {
+            animateIconTint(tint,
+                    Math.max(0, mTransitionDeferringStartTime - SystemClock.uptimeMillis()),
+                    mTransitionDeferringDuration);
         } else {
             animateIconTint(tint, 0 /* delay */, DEFAULT_TINT_ANIMATION_DURATION);
         }
@@ -371,6 +390,16 @@ public class StatusBarIconController {
             animateIconTint(mPendingIconTint,
                     Math.max(0, startTime - SystemClock.uptimeMillis()),
                     duration);
+
+        } else if (mTransitionPending) {
+
+            // If we don't have a pending tint change yet, the change might come in the future until
+            // startTime is reached.
+            mTransitionDeferring = true;
+            mTransitionDeferringStartTime = startTime;
+            mTransitionDeferringDuration = duration;
+            mHandler.removeCallbacks(mTransitionDeferringDoneRunnable);
+            mHandler.postAtTime(mTransitionDeferringDoneRunnable, startTime);
         }
         mTransitionPending = false;
     }
