@@ -5430,7 +5430,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         event.setSource(this);
-        event.setClassName(View.class.getName());
+        event.setClassName(getAccessibilityClassName());
         event.setPackageName(getContext().getPackageName());
         event.setEnabled(isEnabled());
         event.setContentDescription(mContentDescription);
@@ -5600,6 +5600,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return the class name of this object to be used for accessibility purposes.
+     * Subclasses should only override this if they are implementing something that
+     * should be seen as a completely new class of view when used by accessibility,
+     * unrelated to the class it is deriving from.  This is used to fill in
+     * {@link AccessibilityNodeInfo#setClassName AccessibilityNodeInfo.setClassName}.
+     */
+    public CharSequence getAccessibilityClassName() {
+        return View.class.getName();
+    }
+
+    /**
+     * Called when assist data is being retrieved from a view as part of
+     * {@link android.app.Activity#onProvideAssistData Activity.onProvideAssistData}.
+     * @param data
+     * @param extras
+     */
+    public void onProvideAssistData(ViewAssistData data, Bundle extras) {
+    }
+
+    /**
      * @see #onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)
      *
      * Note: Called from the default {@link AccessibilityDelegate}.
@@ -5681,7 +5701,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setVisibleToUser(isVisibleToUser());
 
         info.setPackageName(mContext.getPackageName());
-        info.setClassName(View.class.getName());
+        info.setClassName(getAccessibilityClassName());
         info.setContentDescription(getContentDescription());
 
         info.setEnabled(isEnabled());

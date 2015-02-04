@@ -470,17 +470,8 @@ public abstract class AbsSpinner extends AdapterView<SpinnerAdapter> {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(AbsSpinner.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(AbsSpinner.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AbsSpinner.class.getName();
     }
 }

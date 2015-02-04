@@ -466,16 +466,6 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         event.getText().add(selectedDate);
     }
 
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        event.setClassName(TimePicker.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        info.setClassName(TimePicker.class.getName());
-    }
-
     /**
      * Set whether in keyboard mode or not.
      *

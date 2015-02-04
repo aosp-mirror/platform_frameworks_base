@@ -1190,18 +1190,9 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(GridLayout.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(GridLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return GridLayout.class.getName();
     }
 
     // Inner classes

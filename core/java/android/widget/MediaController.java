@@ -625,18 +625,9 @@ public class MediaController extends FrameLayout {
         super.setEnabled(enabled);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(MediaController.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(MediaController.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return MediaController.class.getName();
     }
 
     private View.OnClickListener mRewListener = new View.OnClickListener() {

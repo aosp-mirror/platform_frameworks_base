@@ -304,18 +304,9 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(QuickContactBadge.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(QuickContactBadge.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return QuickContactBadge.class.getName();
     }
 
     /**

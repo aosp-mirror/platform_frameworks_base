@@ -708,19 +708,9 @@ public class FrameLayout extends ViewGroup {
         return new LayoutParams(p);
     }
 
-
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(FrameLayout.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(FrameLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return FrameLayout.class.getName();
     }
 
     /**

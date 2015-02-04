@@ -296,18 +296,9 @@ public class DatePicker extends FrameLayout {
         mDelegate.onPopulateAccessibilityEvent(event);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        mDelegate.onInitializeAccessibilityEvent(event);
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        mDelegate.onInitializeAccessibilityNodeInfo(info);
+    public CharSequence getAccessibilityClassName() {
+        return DatePicker.class.getName();
     }
 
     @Override
@@ -476,8 +467,6 @@ public class DatePicker extends FrameLayout {
 
         boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event);
         void onPopulateAccessibilityEvent(AccessibilityEvent event);
-        void onInitializeAccessibilityEvent(AccessibilityEvent event);
-        void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info);
     }
 
     /**
@@ -890,16 +879,6 @@ public class DatePicker extends FrameLayout {
             String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                     mCurrentDate.getTimeInMillis(), flags);
             event.getText().add(selectedDateUtterance);
-        }
-
-        @Override
-        public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-            event.setClassName(DatePicker.class.getName());
-        }
-
-        @Override
-        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-            info.setClassName(DatePicker.class.getName());
         }
 
         /**

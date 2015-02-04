@@ -435,11 +435,15 @@ public class CheckedTextView extends TextView implements Checkable {
         }
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return CheckedTextView.class.getName();
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(CheckedTextView.class.getName());
         event.setChecked(mChecked);
     }
 
@@ -447,7 +451,6 @@ public class CheckedTextView extends TextView implements Checkable {
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(CheckedTextView.class.getName());
         info.setCheckable(true);
         info.setChecked(mChecked);
     }

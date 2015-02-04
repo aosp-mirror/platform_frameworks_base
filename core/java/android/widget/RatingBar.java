@@ -330,18 +330,9 @@ public class RatingBar extends AbsSeekBar {
         
         super.setMax(max);
     }
-    
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(RatingBar.class.getName());
-    }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(RatingBar.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return RatingBar.class.getName();
     }
 }

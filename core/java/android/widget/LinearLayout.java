@@ -1806,18 +1806,9 @@ public class LinearLayout extends ViewGroup {
         return p instanceof LinearLayout.LayoutParams;
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(LinearLayout.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(LinearLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return LinearLayout.class.getName();
     }
 
     /**

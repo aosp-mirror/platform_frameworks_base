@@ -103,17 +103,8 @@ public class ZoomButton extends ImageButton implements OnLongClickListener {
         return super.dispatchUnhandledMove(focused, direction);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ZoomButton.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ZoomButton.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ZoomButton.class.getName();
     }
 }

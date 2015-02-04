@@ -56,17 +56,8 @@ public class ImageSwitcher extends ViewSwitcher
         showNext();
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ImageSwitcher.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ImageSwitcher.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ImageSwitcher.class.getName();
     }
 }

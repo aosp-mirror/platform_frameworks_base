@@ -415,11 +415,15 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         return false;
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return TabWidget.class.getName();
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(TabWidget.class.getName());
         event.setItemCount(getTabCount());
         event.setCurrentItemIndex(mSelectedTab);
     }
@@ -434,13 +438,6 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
             return;
         }
         super.sendAccessibilityEventUncheckedInternal(event);
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(TabWidget.class.getName());
     }
 
     /**

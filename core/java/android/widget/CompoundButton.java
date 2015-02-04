@@ -324,11 +324,15 @@ public abstract class CompoundButton extends Button implements Checkable {
         }
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return CompoundButton.class.getName();
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(CompoundButton.class.getName());
         event.setChecked(mChecked);
     }
 
@@ -336,7 +340,6 @@ public abstract class CompoundButton extends Button implements Checkable {
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(CompoundButton.class.getName());
         info.setCheckable(true);
         info.setChecked(mChecked);
     }

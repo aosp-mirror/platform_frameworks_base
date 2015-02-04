@@ -3920,6 +3920,46 @@ package android.app {
     field public java.lang.String serviceDetails;
   }
 
+  public final class AssistData implements android.os.Parcelable {
+    method public int describeContents();
+    method public static android.app.AssistData getAssistData(android.os.Bundle);
+    method public void getWindowAt(int, android.app.AssistData.ViewNode);
+    method public int getWindowCount();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final java.lang.String ASSIST_KEY = "android:assist";
+    field public static final android.os.Parcelable.Creator<android.app.AssistData> CREATOR;
+  }
+
+  public static class AssistData.ViewNode {
+    ctor public AssistData.ViewNode();
+    method public void getChildAt(int, android.app.AssistData.ViewNode);
+    method public int getChildCount();
+    method public java.lang.String getClassName();
+    method public java.lang.String getContentDescription();
+    method public android.os.Bundle getExtras();
+    method public int getHeight();
+    method public java.lang.String getHint();
+    method public int getLeft();
+    method public int getScrollX();
+    method public int getScrollY();
+    method public java.lang.String getText();
+    method public int getTextSelectionEnd();
+    method public int getTextSelectionStart();
+    method public int getTop();
+    method public int getVisibility();
+    method public int getWidth();
+    method public boolean isAccessibilityFocused();
+    method public boolean isActivated();
+    method public boolean isCheckable();
+    method public boolean isChecked();
+    method public boolean isClickable();
+    method public boolean isEnabled();
+    method public boolean isFocusable();
+    method public boolean isFocused();
+    method public boolean isLongClickable();
+    method public boolean isSelected();
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(android.content.Context, android.app.DatePickerDialog.OnDateSetListener, int, int, int);
     ctor public DatePickerDialog(android.content.Context, int, android.app.DatePickerDialog.OnDateSetListener, int, int, int);
@@ -33923,6 +33963,7 @@ package android.view {
     method public android.view.View focusSearch(int);
     method public void forceLayout();
     method public static int generateViewId();
+    method public java.lang.CharSequence getAccessibilityClassName();
     method public int getAccessibilityLiveRegion();
     method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider();
     method public int getAccessibilityTraversalAfter();
@@ -34148,6 +34189,7 @@ package android.view {
     method protected void onMeasure(int, int);
     method protected void onOverScrolled(int, int, boolean, boolean);
     method public void onPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+    method public void onProvideAssistData(android.view.ViewAssistData, android.os.Bundle);
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method public void onRtlPropertiesChanged(int);
     method protected android.os.Parcelable onSaveInstanceState();
@@ -34548,6 +34590,17 @@ package android.view {
 
   public final class ViewAnimationUtils {
     method public static android.animation.Animator createCircularReveal(android.view.View, int, int, float, float);
+  }
+
+  public abstract class ViewAssistData {
+    ctor public ViewAssistData();
+    method public abstract java.lang.CharSequence getHint();
+    method public abstract java.lang.CharSequence getText();
+    method public abstract int getTextSelectionEnd();
+    method public abstract int getTextSelectionStart();
+    method public abstract void setHint(java.lang.CharSequence);
+    method public abstract void setText(java.lang.CharSequence);
+    method public abstract void setText(java.lang.CharSequence, int, int);
   }
 
   public class ViewConfiguration {

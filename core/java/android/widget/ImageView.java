@@ -1419,17 +1419,8 @@ public class ImageView extends View {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ImageView.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ImageView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ImageView.class.getName();
     }
 }

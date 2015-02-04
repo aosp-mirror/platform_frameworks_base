@@ -92,17 +92,8 @@ public class ImageButton extends ImageView {
         return false;
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ImageButton.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ImageButton.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ImageButton.class.getName();
     }
 }

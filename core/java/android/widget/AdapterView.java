@@ -955,11 +955,15 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         return false;
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return AdapterView.class.getName();
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(AdapterView.class.getName());
         info.setScrollable(isScrollableForAccessibility());
         View selectedView = getSelectedView();
         if (selectedView != null) {
@@ -971,7 +975,6 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(AdapterView.class.getName());
         event.setScrollable(isScrollableForAccessibility());
         View selectedView = getSelectedView();
         if (selectedView != null) {

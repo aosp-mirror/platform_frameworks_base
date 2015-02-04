@@ -715,18 +715,15 @@ public abstract class AbsSeekBar extends ProgressBar {
         return super.onKeyDown(keyCode, event);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(AbsSeekBar.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AbsSeekBar.class.getName();
     }
 
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(AbsSeekBar.class.getName());
 
         if (isEnabled()) {
             final int progress = getProgress();

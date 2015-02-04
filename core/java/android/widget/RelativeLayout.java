@@ -1103,18 +1103,9 @@ public class RelativeLayout extends ViewGroup {
         return false;
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(RelativeLayout.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(RelativeLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return RelativeLayout.class.getName();
     }
 
     /**

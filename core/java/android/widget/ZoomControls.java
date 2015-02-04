@@ -109,17 +109,8 @@ public class ZoomControls extends LinearLayout {
         return mZoomIn.hasFocus() || mZoomOut.hasFocus();
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ZoomControls.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ZoomControls.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ZoomControls.class.getName();
     }
 }

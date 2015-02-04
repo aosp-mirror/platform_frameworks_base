@@ -153,17 +153,8 @@ public class ToggleButton extends CompoundButton {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ToggleButton.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ToggleButton.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ToggleButton.class.getName();
     }
 }

@@ -1534,13 +1534,17 @@ public class Activity extends ContextThemeWrapper
      * {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
      * application.  You can override this method to place into the bundle anything
      * you would like to appear in the {@link Intent#EXTRA_ASSIST_CONTEXT} part
-     * of the assist Intent.  The default implementation does nothing.
+     * of the assist Intent.  The default implementation automatically generates a
+     * {@link AssistData} from your activity and places it in to the Bundle; if you
+     * don't want your UI reported to the assistant, don't call this default
+     * implementation.
      *
      * <p>This function will be called after any global assist callbacks that had
      * been registered with {@link Application#registerOnProvideAssistDataListener
      * Application.registerOnProvideAssistDataListener}.
      */
     public void onProvideAssistData(Bundle data) {
+        data.putParcelable(AssistData.ASSIST_KEY, new AssistData(this));
     }
 
     /**

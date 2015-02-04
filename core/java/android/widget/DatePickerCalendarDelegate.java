@@ -584,14 +584,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         event.getText().add(mCurrentDate.getTime().toString());
     }
 
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        event.setClassName(DatePicker.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        info.setClassName(DatePicker.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return DatePicker.class.getName();
     }
 
     @Override

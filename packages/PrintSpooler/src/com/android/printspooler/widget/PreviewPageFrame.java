@@ -48,16 +48,19 @@ public final class PreviewPageFrame extends LinearLayout {
     }
 
     @Override
+    public CharSequence getAccessibilityClassName() {
+        return CompoundButton.class.getName();
+    }
+
+    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-        event.setClassName(CompoundButton.class.getName());
         event.setChecked(isSelected());
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(CompoundButton.class.getName());
         info.setSelected(false);
         info.setCheckable(true);
         info.setChecked(isSelected());

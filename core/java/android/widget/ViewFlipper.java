@@ -149,18 +149,9 @@ public class ViewFlipper extends ViewAnimator {
         updateRunning();
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ViewFlipper.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ViewFlipper.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ViewFlipper.class.getName();
     }
 
     /**

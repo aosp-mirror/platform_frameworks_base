@@ -3878,18 +3878,15 @@ public class ListView extends AbsListView {
         return false;
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ListView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ListView.class.getName();
     }
 
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ListView.class.getName());
 
         final int rowsCount = getCount();
         final int selectionMode = getSelectionModeForAccessibility();

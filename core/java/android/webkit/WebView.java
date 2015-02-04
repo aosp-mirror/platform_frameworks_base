@@ -2387,11 +2387,14 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().shouldDelayChildPressedState();
     }
 
+    public CharSequence getAccessibilityClassName() {
+        return WebView.class.getName();
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(WebView.class.getName());
         mProvider.getViewDelegate().onInitializeAccessibilityNodeInfo(info);
     }
 
@@ -2399,7 +2402,6 @@ public class WebView extends AbsoluteLayout
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(WebView.class.getName());
         mProvider.getViewDelegate().onInitializeAccessibilityEvent(event);
     }
 
