@@ -578,6 +578,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private boolean mIsChildViewEnabled;
 
     /**
+     * The cached drawable state for the selector. Accounts for child enabled
+     * state, but otherwise identical to the view's own drawable state.
+     */
+    private int[] mSelectorState;
+
+    /**
      * The last scroll state reported to clients through {@link OnScrollListener}.
      */
     private int mLastScrollState = OnScrollListener.SCROLL_STATE_IDLE;
@@ -2789,7 +2795,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     void updateSelectorState() {
         if (mSelector != null) {
             if (shouldShowSelector()) {
-                mSelector.setState(getDrawableState());
+                mSelector.setState(getDrawableStateForSelector());
             } else {
                 mSelector.setState(StateSet.NOTHING);
             }
@@ -2802,12 +2808,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         updateSelectorState();
     }
 
-    @Override
-    protected int[] onCreateDrawableState(int extraSpace) {
+    private int[] getDrawableStateForSelector() {
         // If the child view is enabled then do the default behavior.
         if (mIsChildViewEnabled) {
             // Common case
-            return super.onCreateDrawableState(extraSpace);
+            return super.getDrawableState();
         }
 
         // The selector uses this View's drawable state. The selected child view
@@ -2815,10 +2820,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // states.
         final int enabledState = ENABLED_STATE_SET[0];
 
-        // If we don't have any extra space, it will return one of the static state arrays,
-        // and clearing the enabled state on those arrays is a bad thing!  If we specify
-        // we need extra space, it will create+copy into a new array that safely mutable.
-        int[] state = super.onCreateDrawableState(extraSpace + 1);
+        // If we don't have any extra space, it will return one of the static
+        // state arrays, and clearing the enabled state on those arrays is a
+        // bad thing! If we specify we need extra space, it will create+copy
+        // into a new array that is safely mutable.
+        final int[] state = onCreateDrawableState(1);
+
         int enabledPos = -1;
         for (int i = state.length - 1; i >= 0; i--) {
             if (state[i] == enabledState) {
