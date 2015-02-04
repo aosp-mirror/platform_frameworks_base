@@ -30,9 +30,6 @@ public:
     TaskProcessorBase() { }
     virtual ~TaskProcessorBase() { };
 
-private:
-    friend class TaskManager;
-
     virtual void process(const sp<TaskBase>& task) = 0;
 };
 
@@ -44,15 +41,14 @@ public:
 
     bool add(const sp<Task<T> >& task);
 
-    virtual void onProcess(const sp<Task<T> >& task) = 0;
-
-private:
     virtual void process(const sp<TaskBase>& task) {
         sp<Task<T> > realTask = static_cast<Task<T>* >(task.get());
         // This is the right way to do it but sp<> doesn't play nice
         // sp<Task<T> > realTask = static_cast<sp<Task<T> > >(task);
         onProcess(realTask);
     }
+
+    virtual void onProcess(const sp<Task<T> >& task) = 0;
 
     TaskManager* mManager;
 };
