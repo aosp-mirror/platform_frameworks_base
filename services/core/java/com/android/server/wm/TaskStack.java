@@ -90,12 +90,17 @@ public class TaskStack {
     // stack bounds once the stack is no longer forced to fullscreen.
     final private Rect mPreForceFullscreenBounds;
 
+    // When true this stack is at the top of the screen and should be layed out to extend under
+    // the status bar.
+    boolean mUnderStatusBar;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
         mOverrideConfig = Configuration.EMPTY;
         mForceFullscreen = false;
         mPreForceFullscreenBounds = new Rect();
+        mUnderStatusBar = true;
         // TODO: remove bounds from log, they are always 0.
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
                 mBounds.right, mBounds.bottom);
@@ -110,8 +115,6 @@ public class TaskStack {
     }
 
     void resizeWindows() {
-        final boolean underStatusBar = mBounds.top == 0;
-
         final ArrayList<WindowState> resizingWindows = mService.mResizingWindows;
         for (int taskNdx = mTasks.size() - 1; taskNdx >= 0; --taskNdx) {
             final ArrayList<AppWindowToken> activities = mTasks.get(taskNdx).mAppTokens;
@@ -124,7 +127,6 @@ public class TaskStack {
                                 "setBounds: Resizing " + win);
                         resizingWindows.add(win);
                     }
-                    win.mUnderStatusBar = underStatusBar;
                 }
             }
         }
@@ -155,6 +157,7 @@ public class TaskStack {
         mDimLayer.setBounds(bounds);
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
+        mUnderStatusBar = (mBounds.top == 0);
         updateOverrideConfiguration();
         return true;
     }
