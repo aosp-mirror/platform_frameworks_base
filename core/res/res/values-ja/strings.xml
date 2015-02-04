@@ -1411,7 +1411,7 @@
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"カメラとして接続"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"インストーラとして接続"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
-    <string name="usb_notification_message" msgid="2290859399983720271">"他のUSBオプションをタップしてください。"</string>
+    <string name="usb_notification_message" msgid="2290859399983720271">"USB接続方法を変更するにはタップしてください。"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"USBストレージをフォーマットしますか？"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"SDカードをフォーマットしますか？"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"USBストレージに保存されているファイルはすべて消去されます。この操作は元に戻せません。"</string>
@@ -1840,7 +1840,7 @@
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンロードが終わるまで"</string>
+    <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンタイムが終わるまで"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"ダウンタイム終了まで"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"1分間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>

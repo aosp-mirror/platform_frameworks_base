@@ -424,7 +424,7 @@
     <string name="permlab_bindVoiceInteraction" msgid="5334852580713715068">"Lotu ahots bidezko elkarrekintzako zerbitzuei"</string>
     <string name="permdesc_bindVoiceInteraction" msgid="2345721766501778101">"Ahots bidezko elkarrekintzako zerbitzu baten goi-mailako interfazeari lotzea baimentzen die titularrei. Aplikazio normalek ez lukete beharko."</string>
     <string name="permlab_manageVoiceKeyphrases" msgid="1252285102392793548">"kudeatu ahozko gako-esaldiak"</string>
-    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ahoz esandako gako-hitzak hautemateko gako-esaldiak kudeatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete behar."</string>
+    <string name="permdesc_manageVoiceKeyphrases" msgid="8476560722907530008">"Ahozko pasahitzak hautemateko gako-esaldiak kudeatzea baimentzen die aplikazioei. Aplikazio normalek ez lukete behar."</string>
     <string name="permlab_bindRemoteDisplay" msgid="1782923938029941960">"Lotu urruneko pantaila batera"</string>
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Urruneko pantaila baten goi-mailako interfazera lotzeko aukera ematen dio titularrari. Aplikazio normalek ez dute baimen hau behar."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"lotu widget-zerbitzu batekin"</string>
@@ -557,7 +557,7 @@
     <string name="permdesc_controlVpn" msgid="762852603315861214">"Sare pribatu birtualen behe-mailako eginbideak kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"Grabatu audio-irteera"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Audio-irteera grabatzeko eta birbideratzeko aukera ematen die aplikazioei."</string>
-    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hauteman Hotword"</string>
+    <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hauteman ahozko pasahitza"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Hotword bidez hauteman daitekeen audioa grabatzeko aukera ematen die aplikazioei. Atzeko planoan grabatzeak ez du bestelako audio-grabazioak (adibidez, bideokamera bidezkoak) egitea eragozten."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Audio-bideratzea"</string>
     <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Audio-bideratzea zuzenean kontrolatzea eta audio-gidalerroei gainjartzea baimentzen die aplikazioei."</string>

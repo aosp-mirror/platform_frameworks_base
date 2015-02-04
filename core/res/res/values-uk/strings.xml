@@ -875,9 +875,9 @@
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Указати"</string>
-    <string name="phoneTypeHome" msgid="2570923463033985887">"Дом."</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Домашній"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобільний"</string>
-    <string name="phoneTypeWork" msgid="8863939667059911633">"Роб."</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Робочий"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Роб. факс"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Дом. факс"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Пейджер"</string>

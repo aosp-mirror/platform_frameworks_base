@@ -1135,8 +1135,8 @@
     <item quantity="other" msgid="2176942008915455116">"hace <xliff:g id="COUNT">%d</xliff:g> minutos"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora."</item>
-    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas."</item>
+    <item quantity="one" msgid="9150797944610821849">"Hace 1 hora"</item>
+    <item quantity="other" msgid="2467273239587587569">"Hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Últimos <xliff:g id="COUNT">%d</xliff:g> días"</item>
@@ -1145,7 +1145,7 @@
     <string name="older" msgid="5211975022815554840">"Antiguos"</string>
   <plurals name="num_days_ago">
     <item quantity="one" msgid="861358534398115820">"ayer"</item>
-    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días."</item>
+    <item quantity="other" msgid="2479586466153314633">"Hace <xliff:g id="COUNT">%d</xliff:g> días"</item>
   </plurals>
   <plurals name="in_num_seconds">
     <item quantity="one" msgid="2729745560954905102">"en 1 segundo"</item>
@@ -1172,7 +1172,7 @@
     <item quantity="other" msgid="851164968597150710">"Hace <xliff:g id="COUNT">%d</xliff:g> minutos."</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora."</item>
+    <item quantity="one" msgid="4796212039724722116">"Hace 1 hora"</item>
     <item quantity="other" msgid="6889970745748538901">"hace <xliff:g id="COUNT">%d</xliff:g> horas"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">

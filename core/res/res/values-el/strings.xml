@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;Χωρίς τίτλο&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Δεν υπάρχει τηλεφωνικός αριθμός)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Άγνωστο"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτόματος τηλεφωνητής"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Αυτ/τος τηλεφωνητής"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Πρόβλημα σύνδεσης ή μη έγκυρος κώδικας MMI."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"Η λειτουργία περιορίζεται μόνο σε προκαθορισμένους αριθμούς κλήσης."</string>
