@@ -2641,6 +2641,8 @@
     <declare-styleable name="Include">
         <attr name="id" />
         <attr name="visibility" />
+        <attr name="layout_width" />
+        <attr name="layout_height" />
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
