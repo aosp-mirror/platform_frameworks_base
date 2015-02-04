@@ -232,28 +232,28 @@ status_t ConvertMessageToMap(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-left", key).c_str(),
+                        AStringPrintf("%s-left", key).c_str(),
                         left);
 
                 SetMapInt32(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-top", key).c_str(),
+                        AStringPrintf("%s-top", key).c_str(),
                         top);
 
                 SetMapInt32(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-right", key).c_str(),
+                        AStringPrintf("%s-right", key).c_str(),
                         right);
 
                 SetMapInt32(
                         env,
                         hashMap,
                         hashMapPutID,
-                        StringPrintf("%s-bottom", key).c_str(),
+                        AStringPrintf("%s-bottom", key).c_str(),
                         bottom);
                 break;
             }
