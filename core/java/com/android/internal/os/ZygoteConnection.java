@@ -800,7 +800,7 @@ class ZygoteConnection {
             if (args.niceName != null) {
                 String property = "wrap." + args.niceName;
                 if (property.length() > 31) {
-                    // Avoid creating an illegal property name when truncating.
+                    // Properties with a trailing "." are illegal.
                     if (property.charAt(30) != '.') {
                         property = property.substring(0, 31);
                     } else {
