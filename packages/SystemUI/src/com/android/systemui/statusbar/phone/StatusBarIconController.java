@@ -16,20 +16,26 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.app.Notification;
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.internal.util.NotificationColorUtil;
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
 
 import java.io.PrintWriter;
@@ -46,28 +52,37 @@ public class StatusBarIconController {
     private PhoneStatusBar mPhoneStatusBar;
     private Interpolator mLinearOutSlowIn;
     private DemoStatusIcons mDemoStatusIcons;
+    private NotificationColorUtil mNotificationColorUtil;
 
     private LinearLayout mSystemIconArea;
     private LinearLayout mStatusIcons;
+    private SignalClusterView mSignalCluster;
     private LinearLayout mStatusIconsKeyguard;
     private IconMerger mNotificationIcons;
     private View mNotificationIconArea;
+    private ImageView mMoreIcon;
+    private BatteryMeterView mBatteryMeterView;
     private TextView mClock;
 
     private int mIconSize;
     private int mIconHPadding;
 
+    private int mIconTint = Color.WHITE;
+
     public StatusBarIconController(Context context, View statusBar, View keyguardStatusBar,
             PhoneStatusBar phoneStatusBar) {
         mContext = context;
         mPhoneStatusBar = phoneStatusBar;
+        mNotificationColorUtil = NotificationColorUtil.getInstance(context);
         mSystemIconArea = (LinearLayout) statusBar.findViewById(R.id.system_icon_area);
         mStatusIcons = (LinearLayout) statusBar.findViewById(R.id.statusIcons);
+        mSignalCluster = (SignalClusterView) statusBar.findViewById(R.id.signal_cluster);
         mNotificationIconArea = statusBar.findViewById(R.id.notification_icon_area_inner);
         mNotificationIcons = (IconMerger) statusBar.findViewById(R.id.notificationIcons);
-        View moreIcon = statusBar.findViewById(R.id.moreIcon);
-        mNotificationIcons.setOverflowIndicator(moreIcon);
+        mMoreIcon = (ImageView) statusBar.findViewById(R.id.moreIcon);
+        mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mStatusIconsKeyguard = (LinearLayout) keyguardStatusBar.findViewById(R.id.statusIcons);
+        mBatteryMeterView = (BatteryMeterView) statusBar.findViewById(R.id.battery);
         mClock = (TextView) statusBar.findViewById(R.id.clock);
         mLinearOutSlowIn = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.linear_out_slow_in);
@@ -91,6 +106,7 @@ public class StatusBarIconController {
         view.set(icon);
         mStatusIconsKeyguard.addView(view, viewIndex, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, mIconSize));
+        applyIconTint();
     }
 
     public void updateSystemIcon(String slot, int index, int viewIndex,
@@ -99,6 +115,7 @@ public class StatusBarIconController {
         view.set(icon);
         view = (StatusBarIconView) mStatusIconsKeyguard.getChildAt(viewIndex);
         view.set(icon);
+        applyIconTint();
     }
 
     public void removeSystemIcon(String slot, int index, int viewIndex) {
@@ -156,6 +173,8 @@ public class StatusBarIconController {
             mNotificationIcons.removeView(expected);
             mNotificationIcons.addView(expected, i);
         }
+
+        applyNotificationIconsTint();
     }
 
     public void hideSystemIconArea(boolean animate) {
@@ -246,5 +265,44 @@ public class StatusBarIconController {
                     .setStartDelay(mPhoneStatusBar.getKeyguardFadingAwayDelay())
                     .start();
         }
+    }
+
+    public void setIconTint(int tint) {
+        mIconTint = tint;
+        applyIconTint();
+    }
+
+    private void applyIconTint() {
+        for (int i = 0; i < mStatusIcons.getChildCount(); i++) {
+            StatusBarIconView v = (StatusBarIconView) mStatusIcons.getChildAt(i);
+            v.setImageTintList(ColorStateList.valueOf(mIconTint));
+        }
+        mSignalCluster.setIconTint(mIconTint);
+        mMoreIcon.setImageTintList(ColorStateList.valueOf(mIconTint));
+        mBatteryMeterView.setIconTint(mIconTint);
+        mClock.setTextColor(mIconTint);
+        applyNotificationIconsTint();
+    }
+
+    private void applyNotificationIconsTint() {
+        for (int i = 0; i < mNotificationIcons.getChildCount(); i++) {
+            StatusBarIconView v = (StatusBarIconView) mNotificationIcons.getChildAt(i);
+            boolean isPreL = Boolean.TRUE.equals(v.getTag(R.id.icon_is_pre_L));
+            boolean colorize = !isPreL || isGrayscale(v);
+            if (colorize) {
+                v.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
+                v.setImageTintList(ColorStateList.valueOf(mIconTint));
+            }
+        }
+    }
+
+    private boolean isGrayscale(StatusBarIconView v) {
+        Object isGrayscale = v.getTag(R.id.icon_is_grayscale);
+        if (isGrayscale != null) {
+            return Boolean.TRUE.equals(isGrayscale);
+        }
+        boolean grayscale = mNotificationColorUtil.isGrayscaleIcon(v.getDrawable());
+        v.setTag(R.id.icon_is_grayscale, grayscale);
+        return grayscale;
     }
 }

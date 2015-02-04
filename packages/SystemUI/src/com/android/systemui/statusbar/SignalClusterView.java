@@ -17,6 +17,9 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.telephony.SubscriptionInfo;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -55,6 +58,7 @@ public class SignalClusterView
     private int mAirplaneContentDescription;
     private String mWifiDescription;
     private ArrayList<PhoneState> mPhoneStates = new ArrayList<PhoneState>();
+    private int mIconTint = Color.WHITE;
 
     ViewGroup mWifiGroup;
     ImageView mVpn, mWifi, mAirplane, mNoSims;
@@ -121,6 +125,7 @@ public class SignalClusterView
         }
 
         apply();
+        applyIconTint();
     }
 
     @Override
@@ -186,6 +191,9 @@ public class SignalClusterView
         final int n = subs.size();
         for (int i = 0; i < n; i++) {
             inflatePhoneState(subs.get(i).getSubscriptionId());
+        }
+        if (isAttachedToWindow()) {
+            applyIconTint();
         }
     }
 
@@ -315,6 +323,29 @@ public class SignalClusterView
         setPaddingRelative(0, 0, anythingVisible ? mEndPadding : mEndPaddingNothingVisible, 0);
     }
 
+    public void setIconTint(int tint) {
+        boolean changed = tint != mIconTint;
+        mIconTint = tint;
+        if (changed && isAttachedToWindow()) {
+            applyIconTint();
+        }
+    }
+
+    private void applyIconTint() {
+        setTint(mVpn, mIconTint);
+        setTint(mWifi, mIconTint);
+        setTint(mNoSims, mIconTint);
+        setTint(mAirplane, mIconTint);
+        for (int i = 0; i < mPhoneStates.size(); i++) {
+            mPhoneStates.get(i).setIconTint(mIconTint);
+        }
+    }
+
+    private void setTint(ImageView v, int tint) {
+        v.setImageTintMode(PorterDuff.Mode.SRC_ATOP);
+        v.setImageTintList(ColorStateList.valueOf(tint));
+    }
+
     private class PhoneState {
         private final int mSubId;
         private boolean mMobileVisible = false;
@@ -368,6 +399,11 @@ public class SignalClusterView
                     && mMobileGroup.getContentDescription() != null) {
                 event.getText().add(mMobileGroup.getContentDescription());
             }
+        }
+
+        public void setIconTint(int tint) {
+            setTint(mMobile, tint);
+            setTint(mMobileType, tint);
         }
     }
 }

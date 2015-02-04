@@ -40,5 +40,11 @@
     <item type="id" name="notification_power"/>
     <item type="id" name="notification_screenshot"/>
     <item type="id" name="notification_hidden"/>
+
+    <!-- Whether the icon is from a notification for which targetSdk < L -->
+    <item type="id" name="icon_is_pre_L"/>
+
+    <!-- For notification icons for which targetSdk < L, this caches whether the icon is grayscale -->
+    <item type="id" name="icon_is_grayscale" />
 </resources>
 
