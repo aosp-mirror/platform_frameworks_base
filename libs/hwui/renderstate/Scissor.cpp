@@ -15,6 +15,8 @@
  */
 #include "renderstate/Scissor.h"
 
+#include <utils/Log.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -77,6 +79,11 @@ void Scissor::invalidate() {
     mEnabled = glIsEnabled(GL_SCISSOR_TEST);
     setEnabled(true);
     reset();
+}
+
+void Scissor::dump() {
+    ALOGD("Scissor: enabled %d, %d %d %d %d",
+            mEnabled, mScissorX, mScissorY, mScissorWidth, mScissorHeight);
 }
 
 } /* namespace uirenderer */

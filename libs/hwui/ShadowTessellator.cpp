@@ -113,33 +113,6 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
 #endif
 }
 
-void ShadowTessellator::generateShadowIndices(uint16_t* shadowIndices) {
-    int currentIndex = 0;
-    const int rays = SHADOW_RAY_COUNT;
-    // For the penumbra area.
-    for (int layer = 0; layer < 2; layer ++) {
-        int baseIndex = layer * rays;
-        for (int i = 0; i < rays; i++) {
-            shadowIndices[currentIndex++] = i + baseIndex;
-            shadowIndices[currentIndex++] = rays + i + baseIndex;
-        }
-        // To close the loop, back to the ray 0.
-        shadowIndices[currentIndex++] = 0 + baseIndex;
-         // Note this is the same as the first index of next layer loop.
-        shadowIndices[currentIndex++] = rays + baseIndex;
-    }
-
-#if DEBUG_SHADOW
-    if (currentIndex != MAX_SHADOW_INDEX_COUNT) {
-        ALOGW("vertex index count is wrong. current %d, expected %d",
-                currentIndex, MAX_SHADOW_INDEX_COUNT);
-    }
-    for (int i = 0; i < MAX_SHADOW_INDEX_COUNT; i++) {
-        ALOGD("vertex index is (%d, %d)", i, shadowIndices[i]);
-    }
-#endif
-}
-
 /**
  * Calculate the centroid of a 2d polygon.
  *

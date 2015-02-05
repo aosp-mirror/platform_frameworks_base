@@ -178,14 +178,18 @@ public:
         kStencilShowRegion
     };
     StencilClipDebug debugStencilClip;
-
+private:
+    // Declared before gradientCache and programCache which need this to initialize.
+    // TODO: cleanup / move elsewhere
+    Extensions mExtensions;
+public:
     TextureCache textureCache;
     LayerCache layerCache;
     RenderBufferCache renderBufferCache;
     GradientCache gradientCache;
-    ProgramCache programCache;
-    PathCache pathCache;
     PatchCache patchCache;
+    PathCache pathCache;
+    ProgramCache programCache;
     TessellationCache tessellationCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
@@ -220,6 +224,7 @@ public:
     void setProgram(const ProgramDescription& description);
     void setProgram(Program* program);
 
+    Extensions& extensions() { return mExtensions; }
     Program& program() { return *mProgram; }
     PixelBufferState& pixelBufferState() { return *mPixelBufferState; }
     TextureState& textureState() { return *mTextureState; }
@@ -248,7 +253,6 @@ private:
     }
 
     RenderState* mRenderState;
-    Extensions& mExtensions;
 
     // Used to render layers
     std::unique_ptr<TextureVertex[]> mRegionMesh;

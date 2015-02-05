@@ -16,17 +16,15 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
+#include "Extensions.h"
+
+#include "Debug.h"
+#include "Properties.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-
+#include <GLES2/gl2ext.h>
 #include <utils/Log.h>
-
-#include "Debug.h"
-#include "Extensions.h"
-#include "Properties.h"
 
 namespace android {
 
@@ -50,7 +48,7 @@ namespace uirenderer {
 // Constructors
 ///////////////////////////////////////////////////////////////////////////////
 
-Extensions::Extensions(): Singleton<Extensions>() {
+Extensions::Extensions() {
     // Query GL extensions
     findExtensions((const char*) glGetString(GL_EXTENSIONS), mGlExtensionList);
     mHasNPot = hasGlExtension("GL_OES_texture_npot");
@@ -91,9 +89,6 @@ Extensions::Extensions(): Singleton<Extensions>() {
         mVersionMajor = 2;
         mVersionMinor = 0;
     }
-}
-
-Extensions::~Extensions() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

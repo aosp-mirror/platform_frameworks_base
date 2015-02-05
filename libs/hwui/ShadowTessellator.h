@@ -78,8 +78,6 @@ public:
             const mat4& receiverTransform, const Vector3& lightCenter, int lightRadius,
             const Rect& casterBounds, const Rect& localClip, VertexBuffer& shadowVertexBuffer);
 
-    static void generateShadowIndices(uint16_t*  shadowIndices);
-
     static Vector2 centroid2d(const Vector2* poly, int polyLength);
 
     static bool isClockwise(const Vector2* polygon, int len);

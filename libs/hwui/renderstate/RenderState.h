@@ -91,6 +91,8 @@ public:
     MeshState& meshState() { return *mMeshState; }
     Scissor& scissor() { return *mScissor; }
     Stencil& stencil() { return *mStencil; }
+
+    void dump();
 private:
     friend class renderthread::RenderThread;
     friend class Caches;
@@ -98,9 +100,6 @@ private:
     void interruptForFunctorInvoke();
     void resumeFromFunctorInvoke();
     void assertOnGLThread();
-
-    void setupVertexAttributes(const Glop& glop);
-    void tearDownVertexAttributes(const Glop& glop);
 
     RenderState(renderthread::RenderThread& thread);
     ~RenderState();

@@ -18,10 +18,12 @@
 #include "Caches.h"
 #include "Glop.h"
 #include "Matrix.h"
-#include "Texture.h"
 #include "renderstate/MeshState.h"
 #include "renderstate/RenderState.h"
+#include "SkiaShader.h"
+#include "Texture.h"
 #include "utils/PaintUtils.h"
+#include "VertexBuffer.h"
 
 #include <GLES2/gl2.h>
 #include <SkPaint.h>
@@ -29,42 +31,82 @@
 namespace android {
 namespace uirenderer {
 
+#define TRIGGER_STAGE(stageFlag) \
+    LOG_ALWAYS_FATAL_IF(stageFlag & mStageFlags, "Stage %d cannot be run twice"); \
+    mStageFlags = static_cast<StageFlags>(mStageFlags | stageFlag)
+
 GlopBuilder::GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop)
         : mRenderState(renderState)
         , mCaches(caches)
         , mOutGlop(outGlop){
+    mStageFlags = kInitialStage;
+}
+
+GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp) {
+    TRIGGER_STAGE(kMeshStage);
+
+    const VertexBuffer::MeshFeatureFlags flags = vertexBuffer.getMeshFeatureFlags();
+
+    bool alphaVertex = flags & VertexBuffer::kAlpha;
+    bool indices = flags & VertexBuffer::kIndices;
+    mOutGlop->mesh.vertexFlags = alphaVertex ? kAlpha_Attrib : kNone_Attrib;
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
+    mOutGlop->mesh.vertexBufferObject = 0;
+    mOutGlop->mesh.vertices = vertexBuffer.getBuffer();
+    mOutGlop->mesh.indexBufferObject = 0;
+    mOutGlop->mesh.indices = vertexBuffer.getIndices();
+    mOutGlop->mesh.vertexCount = indices
+            ? vertexBuffer.getIndexCount() : vertexBuffer.getVertexCount();
+    mOutGlop->mesh.stride = alphaVertex ? kAlphaVertexStride : kVertexStride;
+
+    mDescription.hasVertexAlpha = alphaVertex;
+    mDescription.useShadowAlphaInterp = shadowInterp;
+    return *this;
 }
 
 GlopBuilder& GlopBuilder::setMeshUnitQuad() {
-    mOutGlop->mesh.vertexFlags = static_cast<VertexAttribFlags>(0);
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.vertexFlags = kNone_Attrib;
     mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
     mOutGlop->mesh.vertexBufferObject = mRenderState.meshState().getUnitQuadVBO();
+    mOutGlop->mesh.vertices = nullptr;
     mOutGlop->mesh.indexBufferObject = 0;
+    mOutGlop->mesh.indices = nullptr;
     mOutGlop->mesh.vertexCount = 4;
     mOutGlop->mesh.stride = kTextureVertexStride;
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setTransformAndRect(ModelViewMode mode,
-        const Matrix4& ortho, const Matrix4& transform,
-        float left, float top, float right, float bottom, bool offset) {
+GlopBuilder& GlopBuilder::setTransform(const Matrix4& ortho,
+        const Matrix4& transform, bool fudgingOffset) {
+    TRIGGER_STAGE(kTransformStage);
+
     mOutGlop->transform.ortho.load(ortho);
-
-    mOutGlop->transform.modelView.loadTranslate(left, top, 0.0f);
-    if (mode == kModelViewMode_TranslateAndScale) {
-        mOutGlop->transform.modelView.scale(right - left, bottom - top, 1.0f);
-    }
-
     mOutGlop->transform.canvas.load(transform);
+    mOutGlop->transform.fudgingOffset = fudgingOffset;
+    return *this;
+}
 
-    mOutGlop->transform.offset = offset;
+GlopBuilder& GlopBuilder::setModelViewMapUnitToRect(const Rect destination) {
+    TRIGGER_STAGE(kModelViewStage);
+    mOutGlop->transform.modelView.loadTranslate(destination.left, destination.top, 0.0f);
+    mOutGlop->transform.modelView.scale(destination.getWidth(), destination.getHeight(), 1.0f);
+    mOutGlop->bounds = destination;
+    return *this;
+}
 
-    mOutGlop->bounds.set(left, top, right, bottom);
-    mOutGlop->transform.canvas.mapRect(mOutGlop->bounds);
+GlopBuilder& GlopBuilder::setModelViewOffsetRect(float offsetX, float offsetY, const Rect source) {
+    TRIGGER_STAGE(kModelViewStage);
+    mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
+    mOutGlop->bounds = source;
+    mOutGlop->bounds.translate(offsetX, offsetY);
     return *this;
 }
 
 GlopBuilder& GlopBuilder::setPaint(const SkPaint* paint, float alphaScale) {
+    TRIGGER_STAGE(kFillStage);
+
     // TODO: support null paint
     const SkShader* shader = paint->getShader();
     const SkColorFilter* colorFilter = paint->getColorFilter();
@@ -73,25 +115,25 @@ GlopBuilder& GlopBuilder::setPaint(const SkPaint* paint, float alphaScale) {
     if (mode != SkXfermode::kClear_Mode) {
         int color = paint->getColor();
         float alpha = (SkColorGetA(color) / 255.0f) * alphaScale;
-        if (shader) {
-            // shader discards color channels
-            color |= 0x00FFFFFF;
+        if (!shader) {
+            float colorScale = alpha / 255.0f;
+            mOutGlop->fill.color = {
+                    alpha,
+                    colorScale * SkColorGetR(color),
+                    colorScale * SkColorGetG(color),
+                    colorScale * SkColorGetB(color)
+            };
+        } else {
+            mOutGlop->fill.color = { alpha, 1, 1, 1 };
         }
-        mOutGlop->fill.color = {
-                alpha,
-                alpha * SkColorGetR(color),
-                alpha * SkColorGetG(color),
-                alpha * SkColorGetB(color)
-        };
     } else {
         mOutGlop->fill.color = { 1, 0, 0, 0 };
     }
     const bool SWAP_SRC_DST = false;
-    const bool HAS_FRAMEBUFFER_FETCH = false; //mExtensions.hasFramebufferFetch();
 
-    mOutGlop->blend = {GL_ZERO, GL_ZERO};
+    mOutGlop->blend = { GL_ZERO, GL_ZERO };
     if (mOutGlop->fill.color.a < 1.0f
-            || (shader && !shader->isOpaque())
+            || PaintUtils::isBlendedShader(shader)
             || PaintUtils::isBlendedColorFilter(colorFilter)
             || mode != SkXfermode::kSrcOver_Mode) {
         if (CC_LIKELY(mode <= SkXfermode::kScreen_Mode)) {
@@ -103,7 +145,7 @@ GlopBuilder& GlopBuilder::setPaint(const SkPaint* paint, float alphaScale) {
             // the blending, don't enable GL blending off here
             // If the blend mode cannot be implemented using shaders, fall
             // back to the default SrcOver blend mode instead
-            if (CC_UNLIKELY(HAS_FRAMEBUFFER_FETCH)) {
+            if (CC_UNLIKELY(mCaches.extensions().hasFramebufferFetch())) {
                 mDescription.framebufferMode = mode;
                 mDescription.swapSrcDst = SWAP_SRC_DST;
                 // blending in shader, don't enable
@@ -115,17 +157,58 @@ GlopBuilder& GlopBuilder::setPaint(const SkPaint* paint, float alphaScale) {
         }
     }
 
-    return *this;
-}
+    if (shader) {
+        SkiaShader::describe(&mCaches, mDescription, mCaches.extensions(), *shader);
+        // TODO: store shader data
+        LOG_ALWAYS_FATAL("shaders not yet supported");
+    }
 
-GlopBuilder& GlopBuilder::setTexture(Texture* texture) {
-    LOG_ALWAYS_FATAL("not yet supported");
+    if (colorFilter) {
+        SkColor color;
+        SkXfermode::Mode mode;
+        SkScalar srcColorMatrix[20];
+        if (colorFilter->asColorMode(&color, &mode)) {
+            mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::kColorBlend;
+            mDescription.colorMode = mode;
+
+            const float alpha = SkColorGetA(color) / 255.0f;
+            float colorScale = alpha / 255.0f;
+            mOutGlop->fill.filter.color = {
+                    alpha,
+                    colorScale * SkColorGetR(color),
+                    colorScale * SkColorGetG(color),
+                    colorScale * SkColorGetB(color),
+            };
+        } else if (colorFilter->asColorMatrix(srcColorMatrix)) {
+            mOutGlop->fill.filterMode = mDescription.colorOp = ProgramDescription::kColorMatrix;
+
+            float* colorMatrix = mOutGlop->fill.filter.matrix.matrix;
+            memcpy(colorMatrix, srcColorMatrix, 4 * sizeof(float));
+            memcpy(&colorMatrix[4], &srcColorMatrix[5], 4 * sizeof(float));
+            memcpy(&colorMatrix[8], &srcColorMatrix[10], 4 * sizeof(float));
+            memcpy(&colorMatrix[12], &srcColorMatrix[15], 4 * sizeof(float));
+
+            // Skia uses the range [0..255] for the addition vector, but we need
+            // the [0..1] range to apply the vector in GLSL
+            float* colorVector = mOutGlop->fill.filter.matrix.vector;
+            colorVector[0] = srcColorMatrix[4] / 255.0f;
+            colorVector[1] = srcColorMatrix[9] / 255.0f;
+            colorVector[2] = srcColorMatrix[14] / 255.0f;
+            colorVector[3] = srcColorMatrix[19] / 255.0f;
+        }
+    } else {
+        mOutGlop->fill.filterMode = ProgramDescription::kColorNone;
+    }
+
     return *this;
 }
 
 void GlopBuilder::build() {
+    LOG_ALWAYS_FATAL_IF(mStageFlags != kAllStages, "glop not fully prepared!");
+
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     mOutGlop->fill.program = mCaches.programCache.get(mDescription);
+    mOutGlop->transform.canvas.mapRect(mOutGlop->bounds);
 }
 
 } /* namespace uirenderer */

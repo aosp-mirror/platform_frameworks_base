@@ -179,7 +179,7 @@ inline bool needsExtraForEdge(float firstAlpha, float secondAlpha) {
 void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
         const Vector3* casterVertices, int casterVertexCount, const Vector3& centroid3d,
         float heightFactor, float geomFactor, VertexBuffer& shadowVertexBuffer) {
-    shadowVertexBuffer.setMode(VertexBuffer::kIndices);
+    shadowVertexBuffer.setMeshFeatureFlags(VertexBuffer::kAlpha | VertexBuffer::kIndices);
 
     // In order to computer the outer vertices in one loop, we need pre-compute
     // the normal by the vertex (n - 1) to vertex 0, and the spike and alpha value

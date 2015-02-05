@@ -35,6 +35,8 @@ public:
 
     static void getFactors(SkXfermode::Mode mode, bool swapSrcDst, GLenum* outSrc, GLenum* outDst);
     void setFactors(GLenum src, GLenum dst);
+
+    void dump();
 private:
     Blend();
     void invalidate();

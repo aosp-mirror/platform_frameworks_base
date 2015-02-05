@@ -57,6 +57,7 @@ namespace android {
 namespace uirenderer {
 
 class DeferredDisplayState;
+struct Glop;
 class RenderState;
 class RenderNode;
 class TextSetupFunctor;
@@ -529,10 +530,11 @@ protected:
 
     CanvasState mState;
     Caches& mCaches;
-    Extensions& mExtensions; // TODO: move to RenderState
     RenderState& mRenderState;
 
 private:
+    void renderGlop(const Glop& glop);
+
     /**
      * Discards the content of the framebuffer if supported by the driver.
      * This method should be called at the beginning of a frame to optimize

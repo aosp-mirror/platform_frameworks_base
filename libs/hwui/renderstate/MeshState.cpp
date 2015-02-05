@@ -23,22 +23,20 @@ namespace android {
 namespace uirenderer {
 
 MeshState::MeshState()
-        : mCurrentPositionPointer(this)
+        : mCurrentIndicesBuffer(0)
+        , mCurrentPixelBuffer(0)
+        , mCurrentPositionPointer(this)
         , mCurrentPositionStride(0)
         , mCurrentTexCoordsPointer(this)
         , mCurrentTexCoordsStride(0)
-        , mTexCoordsArrayEnabled(false) {
+        , mTexCoordsArrayEnabled(false)
+        , mQuadListIndices(0) {
 
     glGenBuffers(1, &mUnitQuadBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, mUnitQuadBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(kUnitQuadVertices), kUnitQuadVertices, GL_STATIC_DRAW);
 
     mCurrentBuffer = mUnitQuadBuffer;
-    mCurrentIndicesBuffer = 0;
-    mCurrentPixelBuffer = 0;
-
-    mQuadListIndices = 0;
-    mShadowStripsIndices = 0;
 
     // position attribute always enabled
     glEnableVertexAttribArray(Program::kBindingPosition);
@@ -50,9 +48,10 @@ MeshState::~MeshState() {
 
     glDeleteBuffers(1, &mQuadListIndices);
     mQuadListIndices = 0;
+}
 
-    glDeleteBuffers(1, &mShadowStripsIndices);
-    mShadowStripsIndices = 0;
+void MeshState::dump() {
+    ALOGD("MeshState vertices: unitQuad %d, current %d", mUnitQuadBuffer, mCurrentBuffer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,18 +64,17 @@ bool MeshState::bindMeshBuffer() {
 
 bool MeshState::bindMeshBuffer(GLuint buffer) {
     if (!buffer) buffer = mUnitQuadBuffer;
-    if (mCurrentBuffer != buffer) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
-        mCurrentBuffer = buffer;
-        return true;
-    }
-    return false;
+    return bindMeshBufferInternal(buffer);
 }
 
 bool MeshState::unbindMeshBuffer() {
-    if (mCurrentBuffer) {
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        mCurrentBuffer = 0;
+    return bindMeshBufferInternal(0);
+}
+
+bool MeshState::bindMeshBufferInternal(GLuint buffer) {
+    if (mCurrentBuffer != buffer) {
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        mCurrentBuffer = buffer;
         return true;
     }
     return false;
@@ -161,20 +159,6 @@ bool MeshState::bindQuadIndicesBuffer() {
     }
 
     return bindIndicesBufferInternal(mQuadListIndices);
-}
-
-bool MeshState::bindShadowIndicesBuffer() {
-    if (!mShadowStripsIndices) {
-        std::unique_ptr<uint16_t[]> shadowIndices(new uint16_t[MAX_SHADOW_INDEX_COUNT]);
-        ShadowTessellator::generateShadowIndices(shadowIndices.get());
-        glGenBuffers(1, &mShadowStripsIndices);
-        bool force = bindIndicesBufferInternal(mShadowStripsIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_SHADOW_INDEX_COUNT * sizeof(uint16_t),
-            shadowIndices.get(), GL_STATIC_DRAW);
-        return force;
-    }
-
-    return bindIndicesBufferInternal(mShadowStripsIndices);
 }
 
 bool MeshState::unbindIndicesBuffer() {

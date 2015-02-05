@@ -1031,7 +1031,7 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
     ShadowTessellator::checkOverflow(vertexBufferIndex, totalVertexCount, "Spot Vertex Buffer");
     ShadowTessellator::checkOverflow(indexBufferIndex, totalIndexCount, "Spot Index Buffer");
 
-    shadowTriangleStrip.setMode(VertexBuffer::kIndices);
+    shadowTriangleStrip.setMeshFeatureFlags(VertexBuffer::kAlpha | VertexBuffer::kIndices);
     shadowTriangleStrip.computeBounds<AlphaVertex>();
 }
 

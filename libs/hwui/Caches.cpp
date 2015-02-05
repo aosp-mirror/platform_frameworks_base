@@ -48,10 +48,11 @@ Caches* Caches::sInstance = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Caches::Caches(RenderState& renderState)
-        : patchCache(renderState)
+        : gradientCache(mExtensions)
+        , patchCache(renderState)
+        , programCache(mExtensions)
         , dither(*this)
         , mRenderState(&renderState)
-        , mExtensions(Extensions::getInstance())
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
     init();
@@ -187,9 +188,9 @@ bool Caches::initProperties() {
         INIT_LOGD("  Draw reorder enabled");
     }
 
-    return (prevDebugLayersUpdates != debugLayersUpdates) ||
-            (prevDebugOverdraw != debugOverdraw) ||
-            (prevDebugStencilClip != debugStencilClip);
+    return (prevDebugLayersUpdates != debugLayersUpdates)
+            || (prevDebugOverdraw != debugOverdraw)
+            || (prevDebugStencilClip != debugStencilClip);
 }
 
 void Caches::terminate() {

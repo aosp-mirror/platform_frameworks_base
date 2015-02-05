@@ -62,9 +62,12 @@ int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCac
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-GradientCache::GradientCache():
-        mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE)) {
+GradientCache::GradientCache(Extensions& extensions)
+        : mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE))
+        , mUseFloatTexture(extensions.hasFloatTextures())
+        , mHasNpot(extensions.hasNPot()){
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting gradient cache size to %sMB", property);
@@ -75,16 +78,6 @@ GradientCache::GradientCache():
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
-    mCache.setOnEntryRemovedListener(this);
-
-    const Extensions& extensions = Extensions::getInstance();
-    mUseFloatTexture = extensions.hasFloatTextures();
-    mHasNpot = extensions.hasNPot();
-}
-
-GradientCache::GradientCache(uint32_t maxByteSize):
-        mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }
 

@@ -27,22 +27,35 @@ namespace uirenderer {
 
 class Caches;
 struct Glop;
+class Matrix4;
 class RenderState;
 class Texture;
-class Matrix4;
+class VertexBuffer;
 
 class GlopBuilder {
     PREVENT_COPY_AND_ASSIGN(GlopBuilder);
 public:
     GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop);
     GlopBuilder& setMeshUnitQuad();
-    GlopBuilder& setTransformAndRect(ModelViewMode mode,
-            const Matrix4& ortho, const Matrix4& transform,
-            float left, float top, float right, float bottom, bool offset);
+    GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
+
+    GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
+
+    GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
+    GlopBuilder& setModelViewOffsetRect(float offsetX, float offsetY, const Rect source);
+
     GlopBuilder& setPaint(const SkPaint* paint, float alphaScale);
-    GlopBuilder& setTexture(Texture* texture);
     void build();
 private:
+    enum StageFlags {
+        kInitialStage = 0,
+        kMeshStage = 1 << 0,
+        kTransformStage = 1 << 1,
+        kModelViewStage = 1 << 2,
+        kFillStage = 1 << 3,
+        kAllStages = kMeshStage | kTransformStage | kModelViewStage | kFillStage,
+    } mStageFlags;
+
     ProgramDescription mDescription;
     RenderState& mRenderState;
     Caches& mCaches;

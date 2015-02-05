@@ -127,6 +127,10 @@ void Blend::setFactors(GLenum srcMode, GLenum dstMode) {
     }
 }
 
+void Blend::dump() {
+    ALOGD("Blend: enabled %d, func src %d, dst %d", mEnabled, mSrcMode, mDstMode);
+}
+
 } /* namespace uirenderer */
 } /* namespace android */
 
