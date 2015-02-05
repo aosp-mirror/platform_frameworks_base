@@ -106,7 +106,6 @@ public class TelecomManager {
      * {@link VideoProfile.VideoState#BIDIRECTIONAL},
      * {@link VideoProfile.VideoState#RX_ENABLED},
      * {@link VideoProfile.VideoState#TX_ENABLED}.
-     * @hide
      */
     public static final String EXTRA_START_CALL_WITH_VIDEO_STATE =
             "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
@@ -117,9 +116,7 @@ public class TelecomManager {
      * {@link PhoneAccountHandle} to use when making the call.
      * <p class="note">
      * Retrieve with {@link android.content.Intent#getParcelableExtra(String)}.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_PHONE_ACCOUNT_HANDLE =
             "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
 
@@ -139,10 +136,7 @@ public class TelecomManager {
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} containing a {@link Bundle}
      * which contains metadata about the call. This {@link Bundle} will be saved into
      * {@code Call.Details}.
-     *
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_OUTGOING_CALL_EXTRAS =
             "android.telecom.extra.OUTGOING_CALL_EXTRAS";
 
@@ -554,9 +548,7 @@ public class TelecomManager {
      *
      * @param account The {@link PhoneAccountHandle}.
      * @return The {@link PhoneAccount} object.
-     * @hide
      */
-    @SystemApi
     public PhoneAccount getPhoneAccount(PhoneAccountHandle account) {
         try {
             if (isServiceConnected()) {

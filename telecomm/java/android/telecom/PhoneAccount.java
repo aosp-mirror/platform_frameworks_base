@@ -40,15 +40,13 @@ import java.util.MissingResourceException;
 /**
  * Represents a distinct method to place or receive a phone call. Apps which can place calls and
  * want those calls to be integrated into the dialer and in-call UI should build an instance of
- * this class and register it with the system using {@link TelecomManager#registerPhoneAccount}.
+ * this class and register it with the system using {@link TelecomManager}.
  * <p>
  * {@link TelecomManager} uses registered {@link PhoneAccount}s to present the user with
  * alternative options when placing a phone call. When building a {@link PhoneAccount}, the app
- * should supply a valid {@link PhoneAccountHandle} that references the {@link ConnectionService}
+ * should supply a valid {@link PhoneAccountHandle} that references the connection service
  * implementation Telecom will use to interact with the app.
- * @hide
  */
-@SystemApi
 public class PhoneAccount implements Parcelable {
 
     /**
@@ -62,7 +60,9 @@ public class PhoneAccount implements Parcelable {
      * if the user has explicitly selected it to be used as the default connection manager.
      * <p>
      * See {@link #getCapabilities}
+     * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_CONNECTION_MANAGER = 0x1;
 
     /**
@@ -76,6 +76,7 @@ public class PhoneAccount implements Parcelable {
      * <p>
      * {@hide}
      */
+    @SystemApi
     public static final int CAPABILITY_CALL_PROVIDER = 0x2;
 
     /**
@@ -94,6 +95,7 @@ public class PhoneAccount implements Parcelable {
      * See {@link #getCapabilities}
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_VIDEO_CALLING = 0x8;
 
     /**
@@ -111,6 +113,7 @@ public class PhoneAccount implements Parcelable {
      * See {@link #getCapabilities}
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_MULTI_USER = 0x20;
 
     /**
@@ -203,6 +206,7 @@ public class PhoneAccount implements Parcelable {
         }
 
         /** @hide */
+        @SystemApi
         public Builder setAccountHandle(PhoneAccountHandle accountHandle) {
             mAccountHandle = accountHandle;
             return this;
@@ -333,6 +337,7 @@ public class PhoneAccount implements Parcelable {
          * @return The builder.
          * @hide
          */
+        @SystemApi
         public Builder addSupportedUriScheme(String uriScheme) {
             if (!TextUtils.isEmpty(uriScheme) && !mSupportedUriSchemes.contains(uriScheme)) {
                 this.mSupportedUriSchemes.add(uriScheme);
@@ -423,6 +428,7 @@ public class PhoneAccount implements Parcelable {
      * @return The builder.
      * @hide
      */
+    @SystemApi
     public Builder toBuilder() { return new Builder(this); }
 
     /**
