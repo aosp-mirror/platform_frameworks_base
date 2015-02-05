@@ -190,6 +190,7 @@ public class QSDetailItems extends FrameLayout {
         title.setText(item.line1);
         final TextView summary = (TextView) view.findViewById(android.R.id.summary);
         final boolean twoLines = !TextUtils.isEmpty(item.line2);
+        title.setMaxLines(twoLines ? 1 : 2);
         summary.setVisibility(twoLines ? VISIBLE : GONE);
         summary.setText(twoLines ? item.line2 : null);
         view.setMinimumHeight(mContext.getResources() .getDimensionPixelSize(
