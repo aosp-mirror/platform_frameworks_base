@@ -356,6 +356,12 @@ public class AudioService extends IAudioService.Stub {
             "STREAM_TTS"
     };
 
+    public static final int DEFAULT_MUTE_STREAMS_AFFECTED =
+            (1 << AudioSystem.STREAM_MUSIC) |
+            (1 << AudioSystem.STREAM_RING) |
+            (1 << AudioSystem.STREAM_NOTIFICATION) |
+            (1 << AudioSystem.STREAM_SYSTEM);
+
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
             switch (error) {
@@ -899,11 +905,8 @@ public class AudioService extends IAudioService.Stub {
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
-                System.MUTE_STREAMS_AFFECTED,
-                ((1 << AudioSystem.STREAM_MUSIC)|
-                 (1 << AudioSystem.STREAM_RING)|
-                 (1 << AudioSystem.STREAM_SYSTEM)),
-                 UserHandle.USER_CURRENT);
+                System.MUTE_STREAMS_AFFECTED, DEFAULT_MUTE_STREAMS_AFFECTED,
+                UserHandle.USER_CURRENT);
 
         boolean masterMute = System.getIntForUser(cr, System.VOLUME_MASTER_MUTE,
                                                   0, UserHandle.USER_CURRENT) == 1;
