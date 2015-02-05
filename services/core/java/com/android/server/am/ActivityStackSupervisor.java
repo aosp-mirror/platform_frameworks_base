@@ -2606,9 +2606,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
 
         final ActivityRecord r = stack.topRunningActivityLocked(null);
-        final TaskRecord topTask = r.task;
-        if (!topTask.mResizeable) {
-            Slog.w(TAG, "resizeStack: top task " + topTask + " not resizeable.");
+        if (r != null && !r.task.mResizeable) {
+            Slog.w(TAG, "resizeStack: top task " + r.task + " not resizeable.");
             return;
         }
 
