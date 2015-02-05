@@ -148,6 +148,7 @@ public class SubtitleView extends View {
         mHasMeasurements = false;
 
         requestLayout();
+        invalidate();
     }
 
     public void setForegroundColor(int color) {
