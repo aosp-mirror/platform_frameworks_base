@@ -199,7 +199,7 @@ void Caches::terminate() {
     fboCache.clear();
 
     programCache.clear();
-    setProgram(nullptr);
+    mProgram = nullptr;
 
     patchCache.clear();
 
