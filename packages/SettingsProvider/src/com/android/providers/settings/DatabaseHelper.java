@@ -2236,10 +2236,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ringerModeAffectedStreams);
 
             loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
-                    ((1 << AudioManager.STREAM_MUSIC) |
-                     (1 << AudioManager.STREAM_RING) |
-                     (1 << AudioManager.STREAM_NOTIFICATION) |
-                     (1 << AudioManager.STREAM_SYSTEM)));
+                    AudioService.DEFAULT_MUTE_STREAMS_AFFECTED);
         } finally {
             if (stmt != null) stmt.close();
         }
