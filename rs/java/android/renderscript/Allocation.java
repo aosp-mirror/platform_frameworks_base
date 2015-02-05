@@ -1882,4 +1882,15 @@ public class Allocation extends BaseObj {
         }
     }
 
+    /**
+     * For USAGE_IO_OUTPUT, destroy() implies setSurface(null).
+     *
+     */
+    @Override
+    public void destroy() {
+        if((mUsage & USAGE_IO_OUTPUT) != 0) {
+            setSurface(null);
+        }
+        super.destroy();
+    }
 }
