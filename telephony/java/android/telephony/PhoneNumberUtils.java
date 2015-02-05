@@ -1815,7 +1815,7 @@ public class PhoneNumberUtils
         // to the list.
         number = extractNetworkPortionAlt(number);
 
-        Rlog.d(LOG_TAG, "subId:" + subId + ", number: " +  number + ", defaultCountryIso:" +
+        Rlog.d(LOG_TAG, "subId:" + subId + ", defaultCountryIso:" +
                 ((defaultCountryIso == null) ? "NULL" : defaultCountryIso));
 
         String emergencyNumbers = "";
