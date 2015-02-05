@@ -20,6 +20,7 @@ import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContextView;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -41,13 +42,15 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
     private MenuBuilder mMenu;
 
     public StandaloneActionMode(Context context, ActionBarContextView view,
-            ActionMode.Callback callback, boolean isFocusable) {
+            ActionMode.Callback callback, boolean isFocusable, @Nullable MenuBuilder menuBuilder) {
         mContext = context;
         mContextView = view;
         mCallback = callback;
 
-        mMenu = new MenuBuilder(view.getContext()).setDefaultShowAsAction(
-                MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        mMenu = (menuBuilder != null)
+                ? menuBuilder
+                : new MenuBuilder(view.getContext()).setDefaultShowAsAction(
+                        MenuItem.SHOW_AS_ACTION_IF_ROOM);
         mMenu.setCallback(this);
         mFocusable = isFocusable;
     }
@@ -64,12 +67,12 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
 
     @Override
     public void setTitle(int resId) {
-        setTitle(mContext.getString(resId));
+        setTitle(resId != 0 ? mContext.getString(resId) : null);
     }
 
     @Override
     public void setSubtitle(int resId) {
-        setSubtitle(mContext.getString(resId));
+        setSubtitle(resId != 0 ? mContext.getString(resId) : null);
     }
 
     @Override

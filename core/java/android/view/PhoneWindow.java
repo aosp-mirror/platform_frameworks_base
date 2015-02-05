@@ -25,7 +25,9 @@ import static android.view.WindowManager.LayoutParams.*;
 import android.app.ActivityManagerNative;
 import android.app.SearchManager;
 import android.os.UserHandle;
+
 import com.android.internal.R;
+import com.android.internal.view.ActionModeWrapper;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -2689,72 +2691,78 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (mode != null) {
                 mActionMode = mode;
             } else {
-                if (mActionModeView == null) {
-                    if (isFloating()) {
-                        // Use the action bar theme.
-                        final TypedValue outValue = new TypedValue();
-                        final Theme baseTheme = mContext.getTheme();
-                        baseTheme.resolveAttribute(R.attr.actionBarTheme, outValue, true);
-
-                        final Context actionBarContext;
-                        if (outValue.resourceId != 0) {
-                            final Theme actionBarTheme = mContext.getResources().newTheme();
-                            actionBarTheme.setTo(baseTheme);
-                            actionBarTheme.applyStyle(outValue.resourceId, true);
-
-                            actionBarContext = new ContextThemeWrapper(mContext, 0);
-                            actionBarContext.getTheme().setTo(actionBarTheme);
-                        } else {
-                            actionBarContext = mContext;
-                        }
-
-                        mActionModeView = new ActionBarContextView(actionBarContext);
-                        mActionModePopup = new PopupWindow(actionBarContext, null,
-                                R.attr.actionModePopupWindowStyle);
-                        mActionModePopup.setWindowLayoutType(
-                                WindowManager.LayoutParams.TYPE_APPLICATION);
-                        mActionModePopup.setContentView(mActionModeView);
-                        mActionModePopup.setWidth(MATCH_PARENT);
-
-                        actionBarContext.getTheme().resolveAttribute(
-                                R.attr.actionBarSize, outValue, true);
-                        final int height = TypedValue.complexToDimensionPixelSize(outValue.data,
-                                actionBarContext.getResources().getDisplayMetrics());
-                        mActionModeView.setContentHeight(height);
-                        mActionModePopup.setHeight(WRAP_CONTENT);
-                        mShowActionModePopup = new Runnable() {
-                            public void run() {
-                                mActionModePopup.showAtLocation(
-                                        mActionModeView.getApplicationWindowToken(),
-                                        Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
-                            }
-                        };
-                    } else {
-                        ViewStub stub = (ViewStub) findViewById(
-                                R.id.action_mode_bar_stub);
-                        if (stub != null) {
-                            mActionModeView = (ActionBarContextView) stub.inflate();
-                        }
-                    }
-                }
-
                 if (mActionModeView != null) {
                     mActionModeView.killMode();
-                    mode = new StandaloneActionMode(mActionModeView.getContext(), mActionModeView,
-                            wrappedCallback, mActionModePopup == null);
-                    if (callback.onCreateActionMode(mode, mode.getMenu())) {
-                        mode.invalidate();
-                        mActionModeView.initForMode(mode);
-                        mActionModeView.setVisibility(View.VISIBLE);
-                        mActionMode = mode;
-                        if (mActionModePopup != null) {
-                            post(mShowActionModePopup);
+                }
+                ActionModeWrapper wrapperMode =
+                        new ActionModeWrapper(mContext, wrappedCallback);
+                if (callback.onCreateActionMode(wrapperMode, wrapperMode.getMenu())) {
+                    if (wrapperMode.getType() == ActionMode.TYPE_PRIMARY) {
+                        if (mActionModeView == null) {
+                            if (isFloating()) {
+                                // Use the action bar theme.
+                                final TypedValue outValue = new TypedValue();
+                                final Theme baseTheme = mContext.getTheme();
+                                baseTheme.resolveAttribute(R.attr.actionBarTheme, outValue, true);
+
+                                final Context actionBarContext;
+                                if (outValue.resourceId != 0) {
+                                    final Theme actionBarTheme = mContext.getResources().newTheme();
+                                    actionBarTheme.setTo(baseTheme);
+                                    actionBarTheme.applyStyle(outValue.resourceId, true);
+
+                                    actionBarContext = new ContextThemeWrapper(mContext, 0);
+                                    actionBarContext.getTheme().setTo(actionBarTheme);
+                                } else {
+                                    actionBarContext = mContext;
+                                }
+
+                                mActionModeView = new ActionBarContextView(actionBarContext);
+                                mActionModePopup = new PopupWindow(actionBarContext, null,
+                                        R.attr.actionModePopupWindowStyle);
+                                mActionModePopup.setWindowLayoutType(
+                                        WindowManager.LayoutParams.TYPE_APPLICATION);
+                                mActionModePopup.setContentView(mActionModeView);
+                                mActionModePopup.setWidth(MATCH_PARENT);
+
+                                actionBarContext.getTheme().resolveAttribute(
+                                        R.attr.actionBarSize, outValue, true);
+                                final int height = TypedValue.complexToDimensionPixelSize(outValue.data,
+                                        actionBarContext.getResources().getDisplayMetrics());
+                                mActionModeView.setContentHeight(height);
+                                mActionModePopup.setHeight(WRAP_CONTENT);
+                                mShowActionModePopup = new Runnable() {
+                                    public void run() {
+                                        mActionModePopup.showAtLocation(
+                                                mActionModeView.getApplicationWindowToken(),
+                                                Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
+                                    }
+                                };
+                            } else {
+                                ViewStub stub = (ViewStub) findViewById(
+                                        R.id.action_mode_bar_stub);
+                                if (stub != null) {
+                                    mActionModeView = (ActionBarContextView) stub.inflate();
+                                }
+                            }
                         }
-                        mActionModeView.sendAccessibilityEvent(
-                                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-                    } else {
-                        mActionMode = null;
+                        if (mActionModeView != null) {
+                            wrapperMode.setActionModeView(mActionModeView);
+                            wrapperMode.setFocusable(mActionModePopup == null);
+                            wrapperMode.lockType();
+                            wrapperMode.invalidate();
+                            mActionModeView.initForMode(wrapperMode);
+                            mActionModeView.setVisibility(View.VISIBLE);
+                            mActionMode = wrapperMode;
+                            if (mActionModePopup != null) {
+                                post(mShowActionModePopup);
+                            }
+                            mActionModeView.sendAccessibilityEvent(
+                                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                        }
                     }
+                } else {
+                    mActionMode = null;
                 }
             }
             if (mActionMode != null && getCallback() != null && !isDestroyed()) {
