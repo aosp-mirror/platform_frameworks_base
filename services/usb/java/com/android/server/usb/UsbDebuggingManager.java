@@ -31,6 +31,8 @@ import android.os.FileUtils;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.Base64;
 import com.android.server.FgThread;
@@ -206,6 +208,12 @@ public class UsbDebuggingManager implements Runnable {
                     break;
 
                 case MESSAGE_ADB_CONFIRM: {
+                    if ("trigger_restart_min_framework".equals(
+                            SystemProperties.get("vold.decrypt"))) {
+                        Slog.d(TAG, "Deferring adb confirmation until after vold decrypt");
+                        sendResponse("NO");
+                        break;
+                    }
                     String key = (String)msg.obj;
                     String fingerprints = getFingerprints(key);
                     if ("".equals(fingerprints)) {
@@ -279,7 +287,7 @@ public class UsbDebuggingManager implements Runnable {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
             try {
-                mContext.startActivity(intent);
+                mContext.startActivityAsUser(intent, UserHandle.OWNER);
                 return true;
             } catch (ActivityNotFoundException e) {
                 Slog.e(TAG, "unable to start adb whitelist activity: " + componentName, e);
