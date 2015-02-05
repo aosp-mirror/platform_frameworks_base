@@ -104,6 +104,9 @@ public class ImsReasonInfo implements Parcelable {
     // MT : No action from user after alerting the call
     public static final int CODE_TIMEOUT_NO_ANSWER_CALL_UPDATE = 203;
 
+    //Call was blocked by call barring
+    public static final int CODE_CALL_BARRED = 240;
+
     //Call failures for FDN
     public static final int CODE_FDN_BLOCKED = 241;
 
