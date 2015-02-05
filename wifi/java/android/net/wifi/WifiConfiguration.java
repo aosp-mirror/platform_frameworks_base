@@ -62,8 +62,6 @@ public class WifiConfiguration implements Parcelable {
     public static final String updateIdentiferVarName = "update_identifier";
     /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
-    /**{@hide}*/
-    private static Random mRandom = new Random(Calendar.getInstance().getTimeInMillis());
 
     /**
      * Recognized key management schemes.
@@ -1336,18 +1334,6 @@ public class WifiConfiguration implements Parcelable {
             dest.writeInt(nextSetBit);
         }
     }
-
-    public static int chooseApChannel(int apBand) {
-        int apChannel;
-        if (apBand == 0) {
-            apChannel = 1 + mRandom.nextInt(11);
-        } else {
-            int channel[] = {36,40,44,48,149,153,157,161,165};
-            apChannel = channel[mRandom.nextInt(channel.length)];
-        }
-        Log.d(TAG, "AP set on channel " +  apChannel);
-        return apChannel;
-     }
 
     /** @hide */
     public int getAuthType() {

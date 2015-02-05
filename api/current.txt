@@ -17899,7 +17899,6 @@ package android.net.wifi {
 
   public class WifiConfiguration implements android.os.Parcelable {
     ctor public WifiConfiguration();
-    method public static int chooseApChannel(int);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public java.lang.String BSSID;
