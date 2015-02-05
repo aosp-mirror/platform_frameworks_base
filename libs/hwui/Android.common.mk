@@ -34,9 +34,9 @@ LOCAL_SRC_FILES := \
     CanvasState.cpp \
     ClipArea.cpp \
     DamageAccumulator.cpp \
-    DisplayList.cpp \
     DeferredDisplayList.cpp \
     DeferredLayerUpdater.cpp \
+    DisplayList.cpp \
     DisplayListRenderer.cpp \
     Dither.cpp \
     DrawProfiler.cpp \
@@ -44,6 +44,7 @@ LOCAL_SRC_FILES := \
     FboCache.cpp \
     FontRenderer.cpp \
     GammaFontRenderer.cpp \
+    GlopBuilder.cpp \
     GradientCache.cpp \
     Image.cpp \
     Interpolator.cpp \
@@ -70,9 +71,9 @@ LOCAL_SRC_FILES := \
     Snapshot.cpp \
     SpotShadow.cpp \
     TessellationCache.cpp \
+    TextDropShadowCache.cpp \
     Texture.cpp \
-    TextureCache.cpp \
-    TextDropShadowCache.cpp
+    TextureCache.cpp
 
 intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
 

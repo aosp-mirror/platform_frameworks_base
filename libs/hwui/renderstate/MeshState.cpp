@@ -29,11 +29,11 @@ MeshState::MeshState()
         , mCurrentTexCoordsStride(0)
         , mTexCoordsArrayEnabled(false) {
 
-    glGenBuffers(1, &meshBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(kMeshVertices), kMeshVertices, GL_STATIC_DRAW);
+    glGenBuffers(1, &mUnitQuadBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, mUnitQuadBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(kUnitQuadVertices), kUnitQuadVertices, GL_STATIC_DRAW);
 
-    mCurrentBuffer = meshBuffer;
+    mCurrentBuffer = mUnitQuadBuffer;
     mCurrentIndicesBuffer = 0;
     mCurrentPixelBuffer = 0;
 
@@ -45,7 +45,7 @@ MeshState::MeshState()
 }
 
 MeshState::~MeshState() {
-    glDeleteBuffers(1, &meshBuffer);
+    glDeleteBuffers(1, &mUnitQuadBuffer);
     mCurrentBuffer = 0;
 
     glDeleteBuffers(1, &mQuadListIndices);
@@ -60,11 +60,11 @@ MeshState::~MeshState() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool MeshState::bindMeshBuffer() {
-    return bindMeshBuffer(meshBuffer);
+    return bindMeshBuffer(mUnitQuadBuffer);
 }
 
 bool MeshState::bindMeshBuffer(GLuint buffer) {
-    if (!buffer) buffer = meshBuffer;
+    if (!buffer) buffer = mUnitQuadBuffer;
     if (mCurrentBuffer != buffer) {
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
         mCurrentBuffer = buffer;

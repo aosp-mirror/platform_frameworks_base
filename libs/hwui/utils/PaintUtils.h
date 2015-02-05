@@ -16,6 +16,9 @@
 #ifndef PAINT_UTILS_H
 #define PAINT_UTILS_H
 
+#include <SkColorFilter.h>
+#include <SkXfermode.h>
+
 namespace android {
 namespace uirenderer {
 
