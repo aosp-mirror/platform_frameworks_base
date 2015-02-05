@@ -584,11 +584,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             y = mAttrs.y;
         }
 
+        // Make sure window fits in containing frame required by {@link Gravity#apply} call.
+        w = Math.min(w, pw);
+        h = Math.min(h, ph);
         Gravity.apply(mAttrs.gravity, w, h, mContainingFrame,
                 (int) (x + mAttrs.horizontalMargin * pw),
                 (int) (y + mAttrs.verticalMargin * ph), mFrame);
-
-        //System.out.println("Out: " + mFrame);
 
         // Now make sure the window fits in the overall display.
         Gravity.applyDisplay(mAttrs.gravity, df, mFrame);
@@ -1464,7 +1465,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        final TaskStack stack = getStack();
         pw.print(prefix); pw.print("mDisplayId="); pw.print(getDisplayId());
+                if (stack != null) {
+                    pw.print(" stackId="); pw.print(stack.mStackId);
+                }
                 pw.print(" mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
         pw.print(prefix); pw.print("mOwnerUid="); pw.print(mOwnerUid);
