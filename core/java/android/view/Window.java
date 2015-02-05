@@ -102,10 +102,12 @@ public abstract class Window {
      */
     public static final int FEATURE_SWIPE_TO_DISMISS = 11;
     /**
-     * Flag for requesting that window content changes should be represented
-     * with scenes and transitions.
+     * Flag for requesting that window content changes should be animated using a
+     * TransitionManager.
      *
-     * TODO Add docs
+     * <p>The TransitionManager is set using
+     * {@link #setTransitionManager(android.transition.TransitionManager)}. If none is set,
+     * a default TransitionManager will be used.</p>
      *
      * @see #setContentView
      */
@@ -1019,10 +1021,16 @@ public abstract class Window {
      * <p>Note that calling this function "locks in" various characteristics
      * of the window that can not, from this point forward, be changed: the
      * features that have been requested with {@link #requestFeature(int)},
-     * and certain window flags as described in {@link #setFlags(int, int)}.
+     * and certain window flags as described in {@link #setFlags(int, int)}.</p>
+     *
+     * <p>If {@link #FEATURE_CONTENT_TRANSITIONS} is set, the window's
+     * TransitionManager will be used to animate content from the current
+     * content View to view.</p>
      *
      * @param view The desired content to display.
      * @param params Layout parameters for the view.
+     * @see #getTransitionManager()
+     * @see #setTransitionManager(android.transition.TransitionManager)
      */
     public abstract void setContentView(View view, ViewGroup.LayoutParams params);
 
@@ -1467,6 +1475,7 @@ public abstract class Window {
      * {@link #setContentView}) if {@link #FEATURE_CONTENT_TRANSITIONS} has been granted.</p>
      *
      * @return This window's content TransitionManager or null if none is set.
+     * @attr ref android.R.styleable#Window_windowContentTransitionManager
      */
     public TransitionManager getTransitionManager() {
         return null;
@@ -1477,6 +1486,7 @@ public abstract class Window {
      * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
      *
      * @param tm The TransitionManager to use for scene changes.
+     * @attr ref android.R.styleable#Window_windowContentTransitionManager
      */
     public void setTransitionManager(TransitionManager tm) {
         throw new UnsupportedOperationException();
