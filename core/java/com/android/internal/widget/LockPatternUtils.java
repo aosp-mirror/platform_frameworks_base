@@ -95,6 +95,11 @@ public class LockPatternUtils {
     public static final int MIN_LOCK_PATTERN_SIZE = 4;
 
     /**
+     * The minimum size of a valid password.
+     */
+    public static final int MIN_LOCK_PASSWORD_SIZE = 4;
+
+    /**
      * The minimum number of dots the user must include in a wrong pattern
      * attempt for it to be counted against the counts that affect
      * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
@@ -484,8 +489,9 @@ public class LockPatternUtils {
      */
     public void saveLockPattern(List<LockPatternView.Cell> pattern, int userId) {
         try {
-            if (pattern == null) {
-                throw new IllegalArgumentException("pattern must not be null");
+            if (pattern == null || pattern.size() < MIN_LOCK_PATTERN_SIZE) {
+                throw new IllegalArgumentException("pattern must not be null and at least "
+                        + MIN_LOCK_PATTERN_SIZE + " dots long.");
             }
 
             getLockSettings().setLockPattern(patternToString(pattern), userId);
@@ -696,8 +702,9 @@ public class LockPatternUtils {
     public void saveLockPassword(String password, int quality, int userHandle) {
         try {
             DevicePolicyManager dpm = getDevicePolicyManager();
-            if (TextUtils.isEmpty(password)) {
-                throw new IllegalArgumentException("password must not be null nor empty");
+            if (password == null || password.length() < MIN_LOCK_PASSWORD_SIZE) {
+                throw new IllegalArgumentException("password must not be null and at least "
+                        + "of length " + MIN_LOCK_PASSWORD_SIZE);
             }
 
             getLockSettings().setLockPassword(password, userHandle);
