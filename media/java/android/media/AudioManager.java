@@ -1191,7 +1191,11 @@ public class AudioManager {
     public boolean isStreamMute(int streamType) {
         IAudioService service = getService();
         try {
-            return service.isStreamMute(streamType);
+            if (mUseMasterVolume) {
+                return service.isMasterMute();
+            } else {
+                return service.isStreamMute(streamType);
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in isStreamMute", e);
             return false;
