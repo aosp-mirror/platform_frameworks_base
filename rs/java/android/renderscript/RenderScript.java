@@ -313,6 +313,15 @@ public class RenderScript {
           sizes, depClosures, depFieldIDs);
     }
 
+    native long rsnInvokeClosureCreate(long con, long invokeID, byte[] params,
+        long[] fieldIDs, long[] values, int[] sizes);
+    synchronized long nInvokeClosureCreate(long invokeID, byte[] params,
+        long[] fieldIDs, long[] values, int[] sizes) {
+      validate();
+      return rsnInvokeClosureCreate(mContext, invokeID, params, fieldIDs,
+          values, sizes);
+    }
+
     native void rsnClosureSetArg(long con, long closureID, int index,
       long value, int size);
     synchronized void nClosureSetArg(long closureID, int index, long value,
@@ -743,6 +752,12 @@ public class RenderScript {
     synchronized long nScriptKernelIDCreate(long sid, int slot, int sig) {
         validate();
         return rsnScriptKernelIDCreate(mContext, sid, slot, sig);
+    }
+
+    native long  rsnScriptInvokeIDCreate(long con, long sid, int slot);
+    synchronized long nScriptInvokeIDCreate(long sid, int slot) {
+        validate();
+        return rsnScriptInvokeIDCreate(mContext, sid, slot);
     }
 
     native long  rsnScriptFieldIDCreate(long con, long sid, int slot);
