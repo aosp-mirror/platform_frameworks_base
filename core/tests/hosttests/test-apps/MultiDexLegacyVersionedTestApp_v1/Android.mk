@@ -32,7 +32,8 @@ mainDexList:= \
 LOCAL_DX_FLAGS := --multi-dex --main-dex-list=$(mainDexList) --minimal-main-dex
 LOCAL_JACK_FLAGS := -D jack.dex.output.policy=minimal-multidex -D jack.preprocessor=true\
     -D jack.preprocessor.file=$(LOCAL_PATH)/test.jpp -D jack.dex.output.multidex.legacy=true
-ifeq ($(LOCAL_USE_JACK),true)
+
+ifdef LOCAL_USE_JACK
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/test.jpp
 endif
 
@@ -40,9 +41,11 @@ LOCAL_DEX_PREOPT := false
 
 include $(BUILD_PACKAGE)
 
+ifndef LOCAL_USE_JACK
 $(mainDexList): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
 	$(hide) mkdir -p $(dir $@)
 	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
 	echo "com/android/framework/multidexlegacyversionedtestapp/MultiDexUpdateTest.class" >> $@
 
 $(built_dex_intermediate): $(mainDexList)
+endif
