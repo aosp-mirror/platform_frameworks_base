@@ -1241,7 +1241,7 @@ public class ProgressBar extends View {
     private synchronized void doRefreshProgress(int id, int progress, boolean fromUser,
             boolean callBackToApp) {
         float scale = mMax > 0 ? (float) progress / (float) mMax : 0;
-        final Drawable d = mCurrentDrawable;
+        final Drawable d = mCurrentDrawable.getCurrent();
         if (d != null) {
             Drawable progressDrawable = null;
 
