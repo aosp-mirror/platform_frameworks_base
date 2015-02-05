@@ -34,6 +34,8 @@ public class ScriptGroup2 extends BaseObj {
     private Future mReturnFuture;
     private Map<Script.FieldID, Future> mGlobalFuture;
 
+    private FieldPacker mFP;
+
     private static final String TAG = "Closure";
 
     public Closure(long id, RenderScript rs) {
@@ -89,6 +91,44 @@ public class ScriptGroup2 extends BaseObj {
       setID(id);
     }
 
+    public Closure(RenderScript rs, Script.InvokeID invokeID,
+        Object[] args, Map<Script.FieldID, Object> globals) {
+      super(0, rs);
+      mFP = FieldPacker.createFieldPack(args);
+
+      mBindings = new HashMap<Script.FieldID, Object>();
+      mGlobalFuture = new HashMap<Script.FieldID, Future>();
+
+      int numValues = globals.size();
+
+      long[] fieldIDs = new long[numValues];
+      long[] values = new long[numValues];
+      int[] sizes = new int[numValues];
+      long[] depClosures = new long[numValues];
+      long[] depFieldIDs = new long[numValues];
+
+      int i = 0;
+      for (Map.Entry<Script.FieldID, Object> entry : globals.entrySet()) {
+        Object obj = entry.getValue();
+        Script.FieldID fieldID = entry.getKey();
+        fieldIDs[i] = fieldID.getID(rs);
+        if (obj instanceof UnboundValue) {
+          UnboundValue unbound = (UnboundValue)obj;
+          unbound.addReference(this, fieldID);
+        } else {
+          // TODO(yangni): Verify obj not a future.
+          retrieveValueAndDependenceInfo(rs, i, obj, values,
+              sizes, depClosures, depFieldIDs);
+        }
+        i++;
+      }
+
+      long id = rs.nInvokeClosureCreate(invokeID.getID(rs), mFP.getData(), fieldIDs,
+          values, sizes);
+
+      setID(id);
+    }
+
     private static void retrieveValueAndDependenceInfo(RenderScript rs,
         int index, Object obj, long[] values, int[] sizes, long[] depClosures,
         long[] depFieldIDs) {
@@ -99,6 +139,12 @@ public class ScriptGroup2 extends BaseObj {
         depClosures[index] = f.getClosure().getID(rs);
         Script.FieldID fieldID = f.getFieldID();
         depFieldIDs[index] = fieldID != null ? fieldID.getID(rs) : 0;
+        if (obj == null) {
+          // Value is originally created by the owner closure
+          values[index] = 0;
+          sizes[index] = 0;
+          return;
+        }
       } else {
         depClosures[index] = 0;
         depFieldIDs[index] = 0;
@@ -121,6 +167,10 @@ public class ScriptGroup2 extends BaseObj {
       Future f = mGlobalFuture.get(field);
 
       if (f == null) {
+        // If the field is not bound to this closure, this will return a future
+        // without an associated value (reference). So this is not working for
+        // cross-module (cross-script) linking in this case where a field not
+        // explicitly bound.
         f = new Future(this, field, mBindings.get(field));
         mGlobalFuture.put(field, f);
       }
@@ -160,7 +210,6 @@ public class ScriptGroup2 extends BaseObj {
           size = 8;
         }
       }
-
       public long value;
       public int size;
     }
@@ -293,6 +342,13 @@ public class ScriptGroup2 extends BaseObj {
     public Closure addKernel(Script.KernelID k, Type returnType, Object[] args,
         Map<Script.FieldID, Object> globalBindings) {
       Closure c = new Closure(mRS, k, returnType, args, globalBindings);
+      mClosures.add(c);
+      return c;
+    }
+
+    public Closure addInvoke(Script.InvokeID invoke, Object[] args,
+        Map<Script.FieldID, Object> globalBindings) {
+      Closure c = new Closure(mRS, invoke, args, globalBindings);
       mClosures.add(c);
       return c;
     }

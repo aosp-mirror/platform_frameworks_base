@@ -242,6 +242,37 @@ nClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong kernelID,
       depFieldIDs, (size_t)depFieldIDs_length);
 }
 
+static jlong
+nInvokeClosureCreate(JNIEnv *_env, jobject _this, jlong con, jlong invokeID,
+                     jbyteArray paramArray, jlongArray fieldIDArray, jlongArray valueArray,
+                     jintArray sizeArray) {
+  jbyte* jParams = _env->GetByteArrayElements(paramArray, nullptr);
+  jsize jParamLength = _env->GetArrayLength(paramArray);
+
+  jlong* jFieldIDs = _env->GetLongArrayElements(fieldIDArray, nullptr);
+  jsize fieldIDs_length = _env->GetArrayLength(fieldIDArray);
+  RsScriptFieldID* fieldIDs =
+      (RsScriptFieldID*)alloca(sizeof(RsScriptFieldID) * fieldIDs_length);
+  for (int i = 0; i< fieldIDs_length; i++) {
+    fieldIDs[i] = (RsScriptFieldID)jFieldIDs[i];
+  }
+
+  jlong* jValues = _env->GetLongArrayElements(valueArray, nullptr);
+  jsize values_length = _env->GetArrayLength(valueArray);
+  uintptr_t* values = (uintptr_t*)alloca(sizeof(uintptr_t) * values_length);
+  for (int i = 0; i < values_length; i++) {
+    values[i] = (uintptr_t)jValues[i];
+  }
+
+  jint* sizes = _env->GetIntArrayElements(sizeArray, nullptr);
+  jsize sizes_length = _env->GetArrayLength(sizeArray);
+
+  return (jlong)(uintptr_t)rsInvokeClosureCreate(
+      (RsContext)con, (RsScriptInvokeID)invokeID, jParams, jParamLength,
+      fieldIDs, (size_t)fieldIDs_length, values, (size_t)values_length,
+      (size_t*)sizes, (size_t)sizes_length);
+}
+
 static void
 nClosureSetArg(JNIEnv *_env, jobject _this, jlong con, jlong closureID,
                jint index, jlong value, jint size) {
@@ -1488,6 +1519,16 @@ nScriptKernelIDCreate(JNIEnv *_env, jobject _this, jlong con, jlong sid, jint sl
 }
 
 static jlong
+nScriptInvokeIDCreate(JNIEnv *_env, jobject _this, jlong con, jlong sid, jint slot)
+{
+    if (kLogApi) {
+        ALOGD("nScriptInvokeIDCreate, con(%p) script(%p), slot(%i), sig(%i)", (RsContext)con,
+              (void *)sid, slot);
+    }
+    return (jlong)(uintptr_t)rsScriptInvokeIDCreate((RsContext)con, (RsScript)sid, slot);
+}
+
+static jlong
 nScriptFieldIDCreate(JNIEnv *_env, jobject _this, jlong con, jlong sid, jint slot)
 {
     if (kLogApi) {
@@ -1935,6 +1976,7 @@ static JNINativeMethod methods[] = {
 {"rsnContextResume",                 "(J)V",                                  (void*)nContextResume },
 {"rsnContextSendMessage",            "(JI[I)V",                               (void*)nContextSendMessage },
 {"rsnClosureCreate",                 "(JJJ[J[J[I[J[J)J",                      (void*)nClosureCreate },
+{"rsnInvokeClosureCreate",           "(JJ[B[J[J[I)J",                         (void*)nInvokeClosureCreate },
 {"rsnClosureSetArg",                 "(JJIJI)V",                              (void*)nClosureSetArg },
 {"rsnClosureSetGlobal",              "(JJJJI)V",                              (void*)nClosureSetGlobal },
 {"rsnAssignName",                    "(JJ[B)V",                               (void*)nAssignName },
@@ -2009,6 +2051,7 @@ static JNINativeMethod methods[] = {
 {"rsnScriptCCreate",                 "(JLjava/lang/String;Ljava/lang/String;[BI)J",  (void*)nScriptCCreate },
 {"rsnScriptIntrinsicCreate",         "(JIJ)J",                                (void*)nScriptIntrinsicCreate },
 {"rsnScriptKernelIDCreate",          "(JJII)J",                               (void*)nScriptKernelIDCreate },
+{"rsnScriptInvokeIDCreate",          "(JJI)J",                                (void*)nScriptInvokeIDCreate },
 {"rsnScriptFieldIDCreate",           "(JJI)J",                                (void*)nScriptFieldIDCreate },
 {"rsnScriptGroupCreate",             "(J[J[J[J[J[J)J",                        (void*)nScriptGroupCreate },
 {"rsnScriptGroup2Create",            "(JLjava/lang/String;[J)J",               (void*)nScriptGroup2Create },
