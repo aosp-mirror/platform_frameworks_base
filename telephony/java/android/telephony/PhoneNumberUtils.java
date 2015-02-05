@@ -34,11 +34,11 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.telephony.Rlog;
 import android.text.style.TtsSpan;
 import android.util.SparseIntArray;
 
-import static com.android.internal.telephony.PhoneConstants.SUBSCRIPTION_KEY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ISO_COUNTRY;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY;
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
 
 import java.util.Locale;
@@ -2337,15 +2337,13 @@ public class PhoneNumberUtils
      *
      * @param phoneNumber A {@code CharSequence} the entirety of which represents a phone number.
      * @return A {@code CharSequence} with appropriate annotations.
-     *
-     * @hide
      */
-    public static CharSequence ttsSpanAsPhoneNumber(CharSequence phoneNumber) {
+    public static CharSequence getPhoneTtsSpannable(CharSequence phoneNumber) {
         if (phoneNumber == null) {
             return null;
         }
         Spannable spannable = Spannable.Factory.getInstance().newSpannable(phoneNumber);
-        PhoneNumberUtils.ttsSpanAsPhoneNumber(spannable, 0, spannable.length());
+        PhoneNumberUtils.addPhoneTtsSpan(spannable, 0, spannable.length());
         return spannable;
     }
 
@@ -2356,17 +2354,81 @@ public class PhoneNumberUtils
      * @param s A {@code Spannable} to annotate.
      * @param start The starting character position of the phone number in {@code s}.
      * @param end The ending character position of the phone number in {@code s}.
-     *
-     * @hide
      */
-    public static void ttsSpanAsPhoneNumber(Spannable s, int start, int end) {
-        s.setSpan(
-                new TtsSpan.TelephoneBuilder()
-                        .setNumberParts(splitAtNonNumerics(s.subSequence(start, end)))
-                        .build(),
+    public static void addPhoneTtsSpan(Spannable s, int start, int end) {
+        s.setSpan(getPhoneTtsSpan(s.subSequence(start, end).toString()),
                 start,
                 end,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    /**
+     * Wrap the supplied {@code CharSequence} with a {@code TtsSpan}, annotating it as
+     * containing a phone number in its entirety.
+     *
+     * @param phoneNumber A {@code CharSequence} the entirety of which represents a phone number.
+     * @return A {@code CharSequence} with appropriate annotations.
+     * @deprecated Renamed {@link #getPhoneTtsSpannable}.
+     *
+     * @hide
+     */
+    @Deprecated
+    public static CharSequence ttsSpanAsPhoneNumber(CharSequence phoneNumber) {
+        return getPhoneTtsSpannable(phoneNumber);
+    }
+
+    /**
+     * Attach a {@link TtsSpan} to the supplied {@code Spannable} at the indicated location,
+     * annotating that location as containing a phone number.
+     *
+     * @param s A {@code Spannable} to annotate.
+     * @param start The starting character position of the phone number in {@code s}.
+     * @param end The ending character position of the phone number in {@code s}.
+     *
+     * @deprecated Renamed {@link #addPhoneTtsSpan}.
+     *
+     * @hide
+     */
+    @Deprecated
+    public static void ttsSpanAsPhoneNumber(Spannable s, int start, int end) {
+        addPhoneTtsSpan(s, start, end);
+    }
+
+    /**
+     * Create a {@code TtsSpan} for the supplied {@code String}.
+     *
+     * @param phoneNumberString A {@code String} the entirety of which represents a phone number.
+     * @return A {@code TtsSpan} for {@param phoneNumberString}.
+     */
+    public static TtsSpan getPhoneTtsSpan(String phoneNumberString) {
+        if (phoneNumberString == null) {
+            return null;
+        }
+
+        // Parse the phone number
+        final PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.getInstance();
+        PhoneNumber phoneNumber = null;
+        try {
+            // Don't supply a defaultRegion so this fails for non-international numbers because
+            // we don't want to TalkBalk to read a country code (e.g. +1) if it is not already
+            // present
+            phoneNumber = phoneNumberUtil.parse(phoneNumberString, /* defaultRegion */ null);
+        } catch (NumberParseException ignored) {
+        }
+
+        // Build a telephone tts span
+        final TtsSpan.TelephoneBuilder builder = new TtsSpan.TelephoneBuilder();
+        if (phoneNumber == null) {
+            // Strip separators otherwise TalkBack will be silent
+            // (this behavior was observed with TalkBalk 4.0.2 from their alpha channel)
+            builder.setNumberParts(splitAtNonNumerics(phoneNumberString));
+        } else {
+            if (phoneNumber.hasCountryCode()) {
+                builder.setCountryCode(Integer.toString(phoneNumber.getCountryCode()));
+            }
+            builder.setNumberParts(Long.toString(phoneNumber.getNationalNumber()));
+        }
+        return builder.build();
     }
 
     // Split a phone number like "+20(123)-456#" using spaces, ignoring anything that is not
