@@ -241,8 +241,7 @@ public class FieldPacker {
                 addI64(0);
                 addI64(0);
                 addI64(0);
-            }
-            else {
+            } else {
                 addI32((int)obj.getID(null));
             }
         } else {
@@ -617,6 +616,289 @@ public class FieldPacker {
      */
     public int getPos() {
         return mPos;
+    }
+
+    private static void addToPack(FieldPacker fp, Object obj) {
+        if (obj instanceof Boolean) {
+            fp.addBoolean(((Boolean)obj).booleanValue());
+            return;
+        }
+
+        if (obj instanceof Byte) {
+            fp.addI8(((Byte)obj).byteValue());
+            return;
+        }
+
+        if (obj instanceof Short) {
+            fp.addI16(((Short)obj).shortValue());
+            return;
+        }
+
+        if (obj instanceof Integer) {
+            fp.addI32(((Integer)obj).intValue());
+            return;
+        }
+
+        if (obj instanceof Long) {
+            fp.addI64(((Long)obj).longValue());
+            return;
+        }
+
+        if (obj instanceof Float) {
+            fp.addF32(((Float)obj).floatValue());
+            return;
+        }
+
+        if (obj instanceof Double) {
+            fp.addF64(((Double)obj).doubleValue());
+            return;
+        }
+
+        if (obj instanceof Byte2) {
+            fp.addI8((Byte2)obj);
+            return;
+        }
+
+        if (obj instanceof Byte3) {
+            fp.addI8((Byte3)obj);
+            return;
+        }
+
+        if (obj instanceof Byte4) {
+            fp.addI8((Byte4)obj);
+            return;
+        }
+
+        if (obj instanceof Short2) {
+            fp.addI16((Short2)obj);
+            return;
+        }
+
+        if (obj instanceof Short3) {
+            fp.addI16((Short3)obj);
+            return;
+        }
+
+        if (obj instanceof Short4) {
+            fp.addI16((Short4)obj);
+            return;
+        }
+
+        if (obj instanceof Int2) {
+            fp.addI32((Int2)obj);
+            return;
+        }
+
+        if (obj instanceof Int3) {
+            fp.addI32((Int3)obj);
+            return;
+        }
+
+        if (obj instanceof Int4) {
+            fp.addI32((Int4)obj);
+            return;
+        }
+
+        if (obj instanceof Long2) {
+            fp.addI64((Long2)obj);
+            return;
+        }
+
+        if (obj instanceof Long3) {
+            fp.addI64((Long3)obj);
+            return;
+        }
+
+        if (obj instanceof Long4) {
+            fp.addI64((Long4)obj);
+            return;
+        }
+
+        if (obj instanceof Float2) {
+            fp.addF32((Float2)obj);
+            return;
+        }
+
+        if (obj instanceof Float3) {
+            fp.addF32((Float3)obj);
+            return;
+        }
+
+        if (obj instanceof Float4) {
+            fp.addF32((Float4)obj);
+            return;
+        }
+
+        if (obj instanceof Double2) {
+            fp.addF64((Double2)obj);
+            return;
+        }
+
+        if (obj instanceof Double3) {
+            fp.addF64((Double3)obj);
+            return;
+        }
+
+        if (obj instanceof Double4) {
+            fp.addF64((Double4)obj);
+            return;
+        }
+
+        if (obj instanceof Matrix2f) {
+            fp.addMatrix((Matrix2f)obj);
+            return;
+        }
+
+        if (obj instanceof Matrix3f) {
+            fp.addMatrix((Matrix3f)obj);
+            return;
+        }
+
+        if (obj instanceof Matrix4f) {
+            fp.addMatrix((Matrix4f)obj);
+            return;
+        }
+
+        if (obj instanceof BaseObj) {
+            fp.addObj((BaseObj)obj);
+            return;
+        }
+    }
+
+    private static int getPackedSize(Object obj) {
+        if (obj instanceof Boolean) {
+            return 1;
+        }
+
+        if (obj instanceof Byte) {
+            return 1;
+        }
+
+        if (obj instanceof Short) {
+            return 2;
+        }
+
+        if (obj instanceof Integer) {
+            return 4;
+        }
+
+        if (obj instanceof Long) {
+            return 8;
+        }
+
+        if (obj instanceof Float) {
+            return 4;
+        }
+
+        if (obj instanceof Double) {
+            return 8;
+        }
+
+        if (obj instanceof Byte2) {
+            return 2;
+        }
+
+        if (obj instanceof Byte3) {
+            return 3;
+        }
+
+        if (obj instanceof Byte4) {
+            return 4;
+        }
+
+        if (obj instanceof Short2) {
+            return 4;
+        }
+
+        if (obj instanceof Short3) {
+            return 6;
+        }
+
+        if (obj instanceof Short4) {
+            return 8;
+        }
+
+        if (obj instanceof Int2) {
+            return 8;
+        }
+
+        if (obj instanceof Int3) {
+            return 12;
+        }
+
+        if (obj instanceof Int4) {
+            return 16;
+        }
+
+        if (obj instanceof Long2) {
+            return 16;
+        }
+
+        if (obj instanceof Long3) {
+            return 24;
+        }
+
+        if (obj instanceof Long4) {
+            return 32;
+        }
+
+        if (obj instanceof Float2) {
+            return 8;
+        }
+
+        if (obj instanceof Float3) {
+            return 12;
+        }
+
+        if (obj instanceof Float4) {
+            return 16;
+        }
+
+        if (obj instanceof Double2) {
+            return 16;
+        }
+
+        if (obj instanceof Double3) {
+            return 24;
+        }
+
+        if (obj instanceof Double4) {
+            return 32;
+        }
+
+        if (obj instanceof Matrix2f) {
+            return 16;
+        }
+
+        if (obj instanceof Matrix3f) {
+            return 36;
+        }
+
+        if (obj instanceof Matrix4f) {
+            return 64;
+        }
+
+        if (obj instanceof BaseObj) {
+            if (RenderScript.sPointerSize == 8) {
+                return 32;
+            } else {
+                return 4;
+            }
+        }
+
+        return 0;
+    }
+
+    static FieldPacker createFieldPack(Object[] args) {
+        int len = 0;
+        for (Object arg : args) {
+            len += getPackedSize(arg);
+        }
+        FieldPacker fp = new FieldPacker(len);
+        for (Object arg : args) {
+            addToPack(fp, arg);
+        }
+        return fp;
     }
 
     private final byte mData[];
