@@ -338,13 +338,15 @@ android_media_AudioSystem_error_callback(status_t err)
 }
 
 static jint
-android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address)
+android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address, jstring device_name)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
+    const char *c_name = env->GetStringUTFChars(device_name, NULL);
     int status = check_AudioSystem_Command(AudioSystem::setDeviceConnectionState(static_cast <audio_devices_t>(device),
                                           static_cast <audio_policy_dev_state_t>(state),
-                                          c_address));
+                                          c_address, c_name));
     env->ReleaseStringUTFChars(device_address, c_address);
+    env->ReleaseStringUTFChars(device_name, c_name);
     return (jint) status;
 }
 
@@ -788,10 +790,11 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     jintArray jFormats = NULL;
     jobjectArray jGains = NULL;
     jobject jHandle = NULL;
+    jstring jDeviceName = NULL;
     bool useInMask;
 
-    ALOGV("convertAudioPortFromNative id %d role %d type %d",
-                                  nAudioPort->id, nAudioPort->role, nAudioPort->type);
+    ALOGV("convertAudioPortFromNative id %d role %d type %d name %s",
+        nAudioPort->id, nAudioPort->role, nAudioPort->type, nAudioPort->name);
 
     jSamplingRates = env->NewIntArray(nAudioPort->num_sample_rates);
     if (jSamplingRates == NULL) {
@@ -871,17 +874,21 @@ static jint convertAudioPortFromNative(JNIEnv *env,
         goto exit;
     }
 
+    jDeviceName = env->NewStringUTF(nAudioPort->name);
+
     if (nAudioPort->type == AUDIO_PORT_TYPE_DEVICE) {
         ALOGV("convertAudioPortFromNative is a device %08x", nAudioPort->ext.device.type);
         jstring jAddress = env->NewStringUTF(nAudioPort->ext.device.address);
         *jAudioPort = env->NewObject(gAudioDevicePortClass, gAudioDevicePortCstor,
-                                     jHandle, jSamplingRates, jChannelMasks, jFormats, jGains,
+                                     jHandle, jDeviceName,
+                                     jSamplingRates, jChannelMasks, jFormats, jGains,
                                      nAudioPort->ext.device.type, jAddress);
         env->DeleteLocalRef(jAddress);
     } else if (nAudioPort->type == AUDIO_PORT_TYPE_MIX) {
         ALOGV("convertAudioPortFromNative is a mix");
         *jAudioPort = env->NewObject(gAudioMixPortClass, gAudioMixPortCstor,
-                                     jHandle, nAudioPort->role, jSamplingRates, jChannelMasks,
+                                     jHandle, nAudioPort->role, jDeviceName,
+                                     jSamplingRates, jChannelMasks,
                                      jFormats, jGains);
     } else {
         ALOGE("convertAudioPortFromNative unknown nAudioPort type %d", nAudioPort->type);
@@ -905,6 +912,9 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     env->SetObjectField(*jAudioPort, gAudioPortFields.mActiveConfig, jAudioPortConfig);
 
 exit:
+    if (jDeviceName != NULL) {
+        env->DeleteLocalRef(jDeviceName);
+    }
     if (jSamplingRates != NULL) {
         env->DeleteLocalRef(jSamplingRates);
     }
@@ -1496,7 +1506,7 @@ static JNINativeMethod gMethods[] = {
     {"isStreamActiveRemotely","(II)Z",  (void *)android_media_AudioSystem_isStreamActiveRemotely},
     {"isSourceActive",      "(I)Z",     (void *)android_media_AudioSystem_isSourceActive},
     {"newAudioSessionId",   "()I",      (void *)android_media_AudioSystem_newAudioSessionId},
-    {"setDeviceConnectionState", "(IILjava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
+    {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;)I", (void *)android_media_AudioSystem_setDeviceConnectionState},
     {"getDeviceConnectionState", "(ILjava/lang/String;)I",  (void *)android_media_AudioSystem_getDeviceConnectionState},
     {"setPhoneState",       "(I)I",     (void *)android_media_AudioSystem_setPhoneState},
     {"setForceUse",         "(II)I",    (void *)android_media_AudioSystem_setForceUse},
@@ -1556,7 +1566,7 @@ int register_android_media_AudioSystem(JNIEnv *env)
     jclass audioPortClass = FindClassOrDie(env, "android/media/AudioPort");
     gAudioPortClass = MakeGlobalRefOrDie(env, audioPortClass);
     gAudioPortCstor = GetMethodIDOrDie(env, audioPortClass, "<init>",
-            "(Landroid/media/AudioHandle;I[I[I[I[Landroid/media/AudioGain;)V");
+            "(Landroid/media/AudioHandle;ILjava/lang/String;[I[I[I[Landroid/media/AudioGain;)V");
     gAudioPortFields.mHandle = GetFieldIDOrDie(env, audioPortClass, "mHandle",
                                                "Landroid/media/AudioHandle;");
     gAudioPortFields.mRole = GetFieldIDOrDie(env, audioPortClass, "mRole", "I");
@@ -1594,12 +1604,12 @@ int register_android_media_AudioSystem(JNIEnv *env)
     jclass audioDevicePortClass = FindClassOrDie(env, "android/media/AudioDevicePort");
     gAudioDevicePortClass = MakeGlobalRefOrDie(env, audioDevicePortClass);
     gAudioDevicePortCstor = GetMethodIDOrDie(env, audioDevicePortClass, "<init>",
-            "(Landroid/media/AudioHandle;[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V");
+            "(Landroid/media/AudioHandle;Ljava/lang/String;[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V");
 
     jclass audioMixPortClass = FindClassOrDie(env, "android/media/AudioMixPort");
     gAudioMixPortClass = MakeGlobalRefOrDie(env, audioMixPortClass);
     gAudioMixPortCstor = GetMethodIDOrDie(env, audioMixPortClass, "<init>",
-            "(Landroid/media/AudioHandle;I[I[I[I[Landroid/media/AudioGain;)V");
+            "(Landroid/media/AudioHandle;ILjava/lang/String;[I[I[I[Landroid/media/AudioGain;)V");
 
     jclass audioGainClass = FindClassOrDie(env, "android/media/AudioGain");
     gAudioGainClass = MakeGlobalRefOrDie(env, audioGainClass);

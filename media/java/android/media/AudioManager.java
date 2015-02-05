@@ -3199,10 +3199,10 @@ public class AudioManager {
      * @param name   device name
      * {@hide}
      */
-    public void setWiredDeviceConnectionState(int device, int state, String name) {
+    public void setWiredDeviceConnectionState(int type, int state, String address, String name) {
         IAudioService service = getService();
         try {
-            service.setWiredDeviceConnectionState(device, state, name);
+            service.setWiredDeviceConnectionState(type, state, address, name);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setWiredDeviceConnectionState "+e);
         }

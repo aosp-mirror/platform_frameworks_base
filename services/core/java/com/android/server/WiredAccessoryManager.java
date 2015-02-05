@@ -219,6 +219,7 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
 
         mWakeLock.acquire();
 
+        Log.i(TAG, "MSG_NEW_DEVICE_STATE ");
         Message msg = mHandler.obtainMessage(MSG_NEW_DEVICE_STATE, headsetState,
                 mHeadsetState, newName);
         mHandler.sendMessage(msg);
@@ -286,14 +287,16 @@ final class WiredAccessoryManager implements WiredAccessoryCallbacks {
                 return;
             }
 
-            if (LOG)
-                Slog.v(TAG, "device "+headsetName+((state == 1) ? " connected" : " disconnected"));
+            if (LOG) {
+                Slog.v(TAG, "headsetName: " + headsetName +
+                        (state == 1 ? " connected" : " disconnected"));
+            }
 
             if (outDevice != 0) {
-              mAudioManager.setWiredDeviceConnectionState(outDevice, state, headsetName);
+              mAudioManager.setWiredDeviceConnectionState(outDevice, state, "", headsetName);
             }
             if (inDevice != 0) {
-              mAudioManager.setWiredDeviceConnectionState(inDevice, state, headsetName);
+              mAudioManager.setWiredDeviceConnectionState(inDevice, state, "", headsetName);
             }
         }
     }

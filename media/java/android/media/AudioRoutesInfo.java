@@ -30,6 +30,7 @@ public class AudioRoutesInfo implements Parcelable {
     static final int MAIN_HEADPHONES = 1<<1;
     static final int MAIN_DOCK_SPEAKERS = 1<<2;
     static final int MAIN_HDMI = 1<<3;
+    static final int MAIN_USB = 1<<4;
 
     CharSequence mBluetoothName;
     int mMainType = MAIN_SPEAKER;

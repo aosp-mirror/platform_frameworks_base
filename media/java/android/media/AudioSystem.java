@@ -534,7 +534,8 @@ public class AudioSystem
     public static final int SYNC_EVENT_NONE = 0;
     public static final int SYNC_EVENT_PRESENTATION_COMPLETE = 1;
 
-    public static native int setDeviceConnectionState(int device, int state, String device_address);
+    public static native int setDeviceConnectionState(int device, int state,
+                                                      String device_address, String device_name);
     public static native int getDeviceConnectionState(int device, String device_address);
     public static native int setPhoneState(int state);
     public static native int setForceUse(int usage, int config);

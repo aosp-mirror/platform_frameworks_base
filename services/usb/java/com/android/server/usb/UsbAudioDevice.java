@@ -53,7 +53,6 @@ public final class UsbAudioDevice {
         sb.append("UsbAudioDevice: [card: " + mCard);
         sb.append(", device: " + mDevice);
         sb.append(", name: " + mDeviceName);
-        sb.append(", description: " + mDeviceDescription);
         sb.append(", hasPlayback: " + mHasPlayback);
         sb.append(", hasCapture: " + mHasCapture);
         sb.append(", class: 0x" + Integer.toHexString(mDeviceClass) + "]");

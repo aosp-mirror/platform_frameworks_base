@@ -80,8 +80,11 @@ public class AlsaCardsParser {
               } else if (lineIndex == 1) {
                   tokenIndex = mTokenizer.nextToken(line, 0);
                   if (tokenIndex != -1) {
-                      mCardDescription = line.substring(tokenIndex);
-                      mIsUsb = mCardDescription.contains(kUsbCardKeyStr);
+                      int keyIndex = line.indexOf(kUsbCardKeyStr);
+                      mIsUsb = keyIndex != -1;
+                      if (mIsUsb) {
+                          mCardDescription = line.substring(tokenIndex, keyIndex - 1);
+                      }
                   }
             }
 
