@@ -3049,7 +3049,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             mHandler.post(new Runnable() {
                 public void run() {
                     try {
-                        ActivityManagerNative.getDefault().switchUser(UserHandle.USER_OWNER);
+                        IActivityManager am = ActivityManagerNative.getDefault();
+                        if (am.getCurrentUser().id == userHandle) {
+                            am.switchUser(UserHandle.USER_OWNER);
+                        }
                         if (!mUserManager.removeUser(userHandle)) {
                             Slog.w(LOG_TAG, "Couldn't remove user " + userHandle);
                         }
