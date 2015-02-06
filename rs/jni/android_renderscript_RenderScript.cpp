@@ -1522,7 +1522,7 @@ static jlong
 nScriptInvokeIDCreate(JNIEnv *_env, jobject _this, jlong con, jlong sid, jint slot)
 {
     if (kLogApi) {
-        ALOGD("nScriptInvokeIDCreate, con(%p) script(%p), slot(%i), sig(%i)", (RsContext)con,
+        ALOGD("nScriptInvokeIDCreate, con(%p) script(%p), slot(%i)", (RsContext)con,
               (void *)sid, slot);
     }
     return (jlong)(uintptr_t)rsScriptInvokeIDCreate((RsContext)con, (RsScript)sid, slot);
