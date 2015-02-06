@@ -30,10 +30,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.input.InputManagerInternal;
-import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.Looper;
@@ -79,8 +75,7 @@ final class Notifier {
 
     private static final int MSG_USER_ACTIVITY = 1;
     private static final int MSG_BROADCAST = 2;
-    private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
-    private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 4;
+    private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 3;
 
     private final Object mLock = new Object();
 
@@ -547,11 +542,6 @@ final class Notifier {
         if (DEBUG) {
             Slog.d(TAG, "onWirelessChargingStarted");
         }
-
-        mSuspendBlocker.acquire();
-        Message msg = mHandler.obtainMessage(MSG_WIRELESS_CHARGING_STARTED);
-        msg.setAsynchronous(true);
-        mHandler.sendMessage(msg);
     }
 
     private void updatePendingBroadcastLocked() {
@@ -689,25 +679,6 @@ final class Notifier {
         }
     };
 
-    private void playWirelessChargingStartedSound() {
-        final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.CHARGING_SOUNDS_ENABLED, 1) != 0;
-        final String soundPath = Settings.Global.getString(mContext.getContentResolver(),
-                Settings.Global.WIRELESS_CHARGING_STARTED_SOUND);
-        if (enabled && soundPath != null) {
-            final Uri soundUri = Uri.parse("file://" + soundPath);
-            if (soundUri != null) {
-                final Ringtone sfx = RingtoneManager.getRingtone(mContext, soundUri);
-                if (sfx != null) {
-                    sfx.setStreamType(AudioManager.STREAM_SYSTEM);
-                    sfx.play();
-                }
-            }
-        }
-
-        mSuspendBlocker.release();
-    }
-
     private final class NotifierHandler extends Handler {
         public NotifierHandler(Looper looper) {
             super(looper, null, true /*async*/);
@@ -722,10 +693,6 @@ final class Notifier {
 
                 case MSG_BROADCAST:
                     sendNextBroadcast();
-                    break;
-
-                case MSG_WIRELESS_CHARGING_STARTED:
-                    playWirelessChargingStartedSound();
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
