@@ -666,7 +666,7 @@ class CCParser {
             if (pac.isIndentPAC()) {
                 moveCursorTo(pac.getRow(), pac.getCol());
             } else {
-                moveCursorToRow(pac.getRow());
+                moveCursorTo(pac.getRow(), 1);
             }
             getLineBuffer(mRow).setPACAt(mCol, pac);
         }
