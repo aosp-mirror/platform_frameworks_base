@@ -2299,8 +2299,13 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>List of tonemapping modes for {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} that are supported by this camera
      * device.</p>
-     * <p>Camera devices that support the MANUAL_POST_PROCESSING capability will always list
-     * CONTRAST_CURVE and FAST. This includes all FULL level devices.</p>
+     * <p>Camera devices that support the MANUAL_POST_PROCESSING capability will always contain
+     * at least one of below mode combinations:</p>
+     * <ul>
+     * <li>CONTRAST_CURVE and FAST</li>
+     * <li>GAMMA_VALUE, PRESET_CURVE, and FAST</li>
+     * </ul>
+     * <p>This includes all FULL level devices.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
