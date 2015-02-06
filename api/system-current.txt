@@ -5371,6 +5371,7 @@ package android.app {
 
   public class WallpaperManager {
     method public void clear() throws java.io.IOException;
+    method public void clearWallpaper();
     method public void clearWallpaperOffsets(android.os.IBinder);
     method public void forgetLoadedWallpaper();
     method public android.graphics.drawable.Drawable getBuiltInDrawable();
@@ -5391,6 +5392,7 @@ package android.app {
     method public void setDisplayPadding(android.graphics.Rect);
     method public void setResource(int) throws java.io.IOException;
     method public void setStream(java.io.InputStream) throws java.io.IOException;
+    method public boolean setWallpaperComponent(android.content.ComponentName);
     method public void setWallpaperOffsetSteps(float, float);
     method public void setWallpaperOffsets(android.os.IBinder, float, float);
     method public void suggestDesiredDimensions(int, int);
