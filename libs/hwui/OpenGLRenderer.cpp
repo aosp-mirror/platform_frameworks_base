@@ -1581,7 +1581,12 @@ void OpenGLRenderer::renderGlop(const Glop& glop) {
         setStencilFromClip();
     }
     mRenderState.render(glop);
-    dirtyLayer(glop.bounds.left, glop.bounds.top, glop.bounds.right, glop.bounds.bottom);
+
+    if (!mRenderState.stencil().isWriteEnabled()) {
+        // TODO: specify more clearly when a draw should dirty the layer.
+        // is writing to the stencil the only time we should ignore this?
+        dirtyLayer(glop.bounds.left, glop.bounds.top, glop.bounds.right, glop.bounds.bottom);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2353,12 +2358,11 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         aBuilder.setMeshVertexBuffer(vertexBuffer, shadowInterp)
                 .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), fudgeOffset)
                 .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
-                .setPaint(paint, currentSnapshot()->alpha)
+                .setPaint(*paint, currentSnapshot()->alpha)
                 .build();
         renderGlop(glop);
         return;
     }
-
 
     const VertexBuffer::MeshFeatureFlags meshFeatureFlags = vertexBuffer.getMeshFeatureFlags();
     Rect bounds(vertexBuffer.getBounds());
@@ -3218,12 +3222,6 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
         return;
     }
 
-    int color = paint->getColor();
-    // If a shader is set, preserve only the alpha
-    if (getShader(paint)) {
-        color |= 0x00ffffff;
-    }
-
     float left = FLT_MAX;
     float top = FLT_MAX;
     float right = FLT_MIN;
@@ -3251,6 +3249,25 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
 
     if (clip && quickRejectSetupScissor(left, top, right, bottom)) {
         return;
+    }
+
+    if (!paint->getShader() && !currentSnapshot()->roundRectClipState) {
+        const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshIndexedQuads(&mesh[0], count / 4)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
+                .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
+                .setPaint(*paint, currentSnapshot()->alpha)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
+    int color = paint->getColor();
+    // If a shader is set, preserve only the alpha
+    if (getShader(paint)) {
+        color |= 0x00ffffff;
     }
 
     setupDraw();
@@ -3286,7 +3303,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
         aBuilder.setMeshUnitQuad()
                 .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
                 .setModelViewMapUnitToRect(Rect(left, top, right, bottom))
-                .setPaint(paint, currentSnapshot()->alpha)
+                .setPaint(*paint, currentSnapshot()->alpha)
                 .build();
         renderGlop(glop);
         return;

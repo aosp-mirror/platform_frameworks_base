@@ -98,6 +98,10 @@ public:
         return mState == kTest;
     }
 
+    bool isWriteEnabled() {
+        return mState == kWrite;
+    }
+
     void dump();
 
 private:

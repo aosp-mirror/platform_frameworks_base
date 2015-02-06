@@ -114,6 +114,7 @@ public:
     // Getters - for use in Glop building
     ///////////////////////////////////////////////////////////////////////////////
     GLuint getUnitQuadVBO() { return mUnitQuadBuffer; }
+    GLuint getQuadListIBO() { return mQuadListIndices; }
 private:
     MeshState();
     bool bindMeshBufferInternal(const GLuint buffer);

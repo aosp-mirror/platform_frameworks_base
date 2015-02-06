@@ -204,12 +204,7 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
  *
  * Textures + coordinates
  * SkiaShader
- * ColorFilter
- *
-    // TODO: texture coord
-    // TODO: texture support
-    // TODO: skiashader support
-    // TODO: color filter support
+ * RoundRect clipping
  */
 
 void RenderState::render(const Glop& glop) {
@@ -251,18 +246,18 @@ void RenderState::render(const Glop& glop) {
     // indices
     meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
 
-    if (glop.mesh.vertexFlags & kTextureCoord_Attrib) {
+    if (mesh.vertexFlags & kTextureCoord_Attrib) {
         // TODO: support textures
         LOG_ALWAYS_FATAL("textures not yet supported");
     } else {
         meshState().disableTexCoordsVertexArray();
     }
-    if (glop.mesh.vertexFlags & kColor_Attrib) {
+    if (mesh.vertexFlags & kColor_Attrib) {
         LOG_ALWAYS_FATAL("color vertex attribute not yet supported");
         // TODO: enable color, disable when done
     }
     int alphaSlot = -1;
-    if (glop.mesh.vertexFlags & kAlpha_Attrib) {
+    if (mesh.vertexFlags & kAlpha_Attrib) {
         const void* alphaCoords = ((const GLbyte*) glop.mesh.vertices) + kVertexAlphaOffset;
         alphaSlot = shader.program->getAttrib("vtxAlpha");
         glEnableVertexAttribArray(alphaSlot);
@@ -275,15 +270,31 @@ void RenderState::render(const Glop& glop) {
     blend().setFactors(glop.blend.src, glop.blend.dst);
 
     // ------------------------------------
-    // ---------- GL state setup ----------
+    // ---------- Actual drawing ----------
     // ------------------------------------
-    if (mesh.indexBufferObject || mesh.indices) {
-        glDrawElements(glop.mesh.primitiveMode, glop.mesh.vertexCount,
-                GL_UNSIGNED_SHORT, mesh.indices);
+    if (mesh.indexBufferObject == meshState().getQuadListIBO()) {
+        // Since the indexed quad list is of limited length, we loop over
+        // the glDrawXXX method while updating the vertex pointer
+        GLsizei elementsCount = mesh.vertexCount;
+        const GLbyte* vertices = static_cast<const GLbyte*>(mesh.vertices);
+        while (elementsCount > 0) {
+            GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+
+            // TODO: this double binds on first pass
+            meshState().bindPositionVertexPointer(true, vertices, mesh.stride);
+            glDrawElements(mesh.primitiveMode, drawCount, GL_UNSIGNED_SHORT, nullptr);
+            elementsCount -= drawCount;
+            vertices += (drawCount / 6) * 4 * mesh.stride;
+        }
+    } else if (mesh.indexBufferObject || mesh.indices) {
+        glDrawElements(mesh.primitiveMode, mesh.vertexCount, GL_UNSIGNED_SHORT, mesh.indices);
     } else {
-        glDrawArrays(glop.mesh.primitiveMode, 0, glop.mesh.vertexCount);
+        glDrawArrays(mesh.primitiveMode, 0, mesh.vertexCount);
     }
 
+    // -----------------------------------
+    // ---------- Mesh teardown ----------
+    // -----------------------------------
     if (glop.mesh.vertexFlags & kAlpha_Attrib) {
         glDisableVertexAttribArray(alphaSlot);
     }
