@@ -28,7 +28,6 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.R;
@@ -95,50 +94,6 @@ public class MobileSignalController extends SignalController<
         mConfig = config;
         mapIconSets();
         updateTelephony();
-    }
-
-    /**
-     * Get (the mobile parts of) the carrier string.
-     *
-     * @param currentLabel can be used for concatenation, currently just empty
-     * @param connected whether the device has connection to the internet at all
-     * @param isMobileLabel whether to always return the network or just when data is connected
-     */
-    public String getLabel(String currentLabel, boolean connected, boolean isMobileLabel) {
-        if (!mCurrentState.enabled) {
-            return "";
-        } else {
-            String mobileLabel = "";
-            // We want to show the carrier name if in service and either:
-            // - We are connected to mobile data, or
-            // - We are not connected to mobile data, as long as the *reason* packets are not
-            //   being routed over that link is that we have better connectivity via wifi.
-            // If data is disconnected for some other reason but wifi (or ethernet/bluetooth)
-            // is connected, we show nothing.
-            // Otherwise (nothing connected) we show "No internet connection".
-            if (mCurrentState.dataConnected) {
-                mobileLabel = mCurrentState.networkName;
-            } else if (connected || mCurrentState.isEmergency) {
-                if (mCurrentState.connected || mCurrentState.isEmergency) {
-                    // The isEmergencyOnly test covers the case of a phone with no SIM
-                    mobileLabel = mCurrentState.networkName;
-                }
-            } else {
-                mobileLabel = mContext.getString(
-                        R.string.status_bar_settings_signal_meter_disconnected);
-            }
-
-            if (currentLabel.length() != 0) {
-                currentLabel = currentLabel + mNetworkNameSeparator;
-            }
-            // Now for things that should only be shown when actually using mobile data.
-            if (isMobileLabel) {
-                return currentLabel + mobileLabel;
-            } else {
-                return currentLabel
-                        + (mCurrentState.dataConnected ? mobileLabel : currentLabel);
-            }
-        }
     }
 
     public int getDataContentDescription() {

@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
-import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
-import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -84,12 +82,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final AccessPointControllerImpl mAccessPoints;
     private final MobileDataControllerImpl mMobileDataController;
 
-    // Network types that replace the carrier label if the device does not support mobile data.
-    private boolean mBluetoothTethered = false;
-    private boolean mEthernetConnected = false;
-
-    // state of inet connection
-    private boolean mConnected = false;
     private boolean mInetCondition; // Used for Logging and demo.
 
     // BitSets indicating which network transport types (e.g., TRANSPORT_WIFI, TRANSPORT_MOBILE) are
@@ -107,8 +99,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     // All the callbacks.
     private ArrayList<EmergencyListener> mEmergencyListeners = new ArrayList<EmergencyListener>();
-    private ArrayList<CarrierLabelListener> mCarrierListeners =
-            new ArrayList<CarrierLabelListener>();
     private ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
     private ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks =
             new ArrayList<NetworkSignalChangedCallback>();
@@ -221,11 +211,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         listener.setEmergencyCallsOnly(isEmergencyOnly());
     }
 
-    public void addCarrierLabel(CarrierLabelListener listener) {
-        mCarrierListeners.add(listener);
-        refreshCarrierLabel();
-    }
-
     private void notifyMobileDataEnabled(boolean enabled) {
         final int length = mSignalsChangedCallbacks.size();
         for (int i = 0; i < length; i++) {
@@ -287,9 +272,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (int i = 0; i < length; i++) {
             mEmergencyListeners.get(i).setEmergencyCallsOnly(emergencyOnly);
         }
-        // If the emergency has a chance to change, then so does the carrier
-        // label.
-        refreshCarrierLabel();
     }
 
     public void addSignalCluster(SignalCluster cluster) {
@@ -341,7 +323,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mCurrentUserId = newUserId;
         mAccessPoints.onUserSwitched(newUserId);
         updateConnectivity();
-        refreshCarrierLabel();
     }
 
     @Override
@@ -353,14 +334,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE) ||
                 action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
             updateConnectivity();
-            refreshCarrierLabel();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
             mConfig = Config.readConfig(mContext);
             handleConfigurationChanged();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
             refreshLocale();
             updateAirplaneMode(false);
-            refreshCarrierLabel();
         } else if (action.equals(TelephonyIntents.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED)) {
             // We are using different subs now, we might be able to make calls.
             recalculateEmergency();
@@ -396,7 +375,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mobileSignalController.setConfiguration(mConfig);
         }
         refreshLocale();
-        refreshCarrierLabel();
     }
 
     private void updateMobileControllers() {
@@ -502,7 +480,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mobileSignalController.setAirplaneMode(mAirplaneMode);
             }
             notifyListeners();
-            refreshCarrierLabel();
         }
     }
 
@@ -566,10 +543,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "updateConnectivity: mValidatedTransports=" + mValidatedTransports);
         }
 
-        mConnected = !mConnectedTransports.isEmpty();
         mInetCondition = !mValidatedTransports.isEmpty();
-        mBluetoothTethered = mConnectedTransports.get(TRANSPORT_BLUETOOTH);
-        mEthernetConnected = mConnectedTransports.get(TRANSPORT_ETHERNET);
 
         pushConnectivityToSignals();
     }
@@ -588,69 +562,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mValidatedTransports.get(mWifiSignalController.getTransportType()) ? 1 : 0);
     }
 
-    /**
-     * Recalculate and update the carrier label.
-     */
-    void refreshCarrierLabel() {
-        Context context = mContext;
-
-        WifiSignalController.WifiState wifiState = mWifiSignalController.getState();
-        String label = "";
-        for (MobileSignalController controller : mMobileSignalControllers.values()) {
-            label = controller.getLabel(label, mConnected, mHasMobileDataFeature);
-        }
-
-        // TODO Simplify this ugliness, some of the flows below shouldn't be possible anymore
-        // but stay for the sake of history.
-        if (mBluetoothTethered && !mHasMobileDataFeature) {
-            label = mContext.getString(R.string.bluetooth_tethered);
-        }
-
-        if (mEthernetConnected && !mHasMobileDataFeature) {
-            label = context.getString(R.string.ethernet_label);
-        }
-
-        if (mAirplaneMode && !isEmergencyOnly()) {
-            // combined values from connected wifi take precedence over airplane mode
-            if (wifiState.connected && mHasMobileDataFeature) {
-                // Suppress "No internet connection." from mobile if wifi connected.
-                label = "";
-            } else {
-                 if (!mHasMobileDataFeature) {
-                      label = context.getString(
-                              R.string.status_bar_settings_signal_meter_disconnected);
-                 }
-            }
-        } else if (!isMobileDataConnected() && !wifiState.connected && !mBluetoothTethered &&
-                 !mEthernetConnected && !mHasMobileDataFeature) {
-            // Pretty much no connection.
-            label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-        }
-
-        // for mobile devices, we always show mobile connection info here (SPN/PLMN)
-        // for other devices, we show whatever network is connected
-        // This is determined above by references to mHasMobileDataFeature.
-        int length = mCarrierListeners.size();
-        for (int i = 0; i < length; i++) {
-            mCarrierListeners.get(i).setCarrierLabel(label);
-        }
-    }
-
-    private boolean isMobileDataConnected() {
-        MobileSignalController controller = getDataController();
-        return controller != null ? controller.getState().dataConnected : false;
-    }
-
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
 
         pw.println("  - telephony ------");
         pw.print("  hasVoiceCallingFeature()=");
         pw.println(hasVoiceCallingFeature());
-
-        pw.println("  - Bluetooth ----");
-        pw.print("  mBtReverseTethered=");
-        pw.println(mBluetoothTethered);
 
         pw.println("  - connectivity ------");
         pw.print("  mConnectedTransports=");
@@ -696,7 +613,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mWifiSignalController.resetLastState();
             registerListeners();
             notifyAllListeners();
-            refreshCarrierLabel();
         } else if (mDemoMode && command.equals(COMMAND_NETWORK)) {
             String airplane = args.getString("airplane");
             if (airplane != null) {
@@ -788,7 +704,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 controller.getState().enabled = show;
                 controller.notifyListeners();
             }
-            refreshCarrierLabel();
         }
     }
 

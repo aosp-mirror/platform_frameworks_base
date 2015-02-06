@@ -167,7 +167,6 @@ public abstract class SignalController<T extends SignalController.State,
         if (isDirty()) {
             saveLastState();
             notifyListeners();
-            mNetworkController.refreshCarrierLabel();
         }
     }
 
