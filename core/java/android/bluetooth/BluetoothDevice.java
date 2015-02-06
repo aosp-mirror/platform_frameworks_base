@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -65,6 +66,14 @@ import java.util.UUID;
 public final class BluetoothDevice implements Parcelable {
     private static final String TAG = "BluetoothDevice";
     private static final boolean DBG = false;
+
+    /**
+     * Connection state bitmask as returned by getConnectionState.
+     */
+    private static final int CONNECTION_STATE_DISCONNECTED = 0;
+    private static final int CONNECTION_STATE_CONNECTED = 1;
+    private static final int CONNECTION_STATE_ENCRYPTED_BREDR = 2;
+    private static final int CONNECTION_STATE_ENCRYPTED_LE = 4;
 
     /**
      * Sentinel error value for this class. Guaranteed to not equal any other
@@ -940,13 +949,36 @@ public final class BluetoothDevice implements Parcelable {
      * @return True if there is at least one open connection to this device.
      * @hide
      */
+    @SystemApi
     public boolean isConnected() {
         if (sService == null) {
             // BT is not enabled, we cannot be connected.
             return false;
         }
         try {
-            return sService.isConnected(this);
+            return sService.getConnectionState(this) != CONNECTION_STATE_DISCONNECTED;
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
+    }
+
+    /**
+     * Returns whether there is an open connection to this device
+     * that has been encrypted.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
+     *
+     * @return True if there is at least one encrypted connection to this device.
+     * @hide
+     */
+    @SystemApi
+    public boolean isEncrypted() {
+        if (sService == null) {
+            // BT is not enabled, we cannot be connected.
+            return false;
+        }
+        try {
+            return sService.getConnectionState(this) > CONNECTION_STATE_CONNECTED;
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
             return false;
