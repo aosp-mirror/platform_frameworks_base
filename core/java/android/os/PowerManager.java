@@ -835,6 +835,21 @@ public final class PowerManager {
     }
 
     /**
+     * Turn off the device.
+     *
+     * @param confirm If true, shows a shutdown confirmation dialog.
+     * @param wait If true, this call waits for the shutdown to complete and does not return.
+     *
+     * @hide
+     */
+    public void shutdown(boolean confirm, boolean wait) {
+        try {
+            mService.shutdown(confirm, wait);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Intent that is broadcast when the state of {@link #isPowerSaveMode()} changes.
      * This broadcast is only sent to registered receivers.
      */
