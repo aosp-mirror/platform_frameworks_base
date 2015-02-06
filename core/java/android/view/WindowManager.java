@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.annotation.SystemApi;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -1594,19 +1593,7 @@ public interface WindowManager extends ViewManager {
         public final CharSequence getTitle() {
             return mTitle;
         }
-
-        /** @hide */
-        @SystemApi
-        public final void setUserActivityTimeout(long timeout) {
-            userActivityTimeout = timeout;
-        }
-
-        /** @hide */
-        @SystemApi
-        public final long getUserActivityTimeout() {
-            return userActivityTimeout;
-        }
-
+    
         public int describeContents() {
             return 0;
         }
