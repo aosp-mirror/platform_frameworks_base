@@ -192,7 +192,7 @@ public abstract class PrintService extends Service {
 
     /**
      * If you declared an optional activity with advanced print options via the
-     * {@link R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
      * attribute, this extra is used to pass in the currently constructed {@link
      * PrintJobInfo} to your activity allowing you to modify it. After you are
      * done, you must return the modified {@link PrintJobInfo} via the same extra.
@@ -224,7 +224,7 @@ public abstract class PrintService extends Service {
 
     /**
      * If you declared an optional activity with advanced print options via the
-     * {@link R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
+     * {@link android.R.attr#advancedPrintOptionsActivity advancedPrintOptionsActivity}
      * attribute, this extra is used to pass in the currently selected printer's
      * {@link android.print.PrinterInfo} to your activity allowing you to inspect it.
      *
