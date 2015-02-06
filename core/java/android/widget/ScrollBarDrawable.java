@@ -44,6 +44,7 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
     private boolean mRangeChanged;
     private boolean mAlwaysDrawHorizontalTrack;
     private boolean mAlwaysDrawVerticalTrack;
+    private boolean mMutated;
 
     private int mAlpha = 255;
     private boolean mHasSetAlpha;
@@ -266,6 +267,10 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
 
     private void propagateCurrentState(Drawable d) {
         if (d != null) {
+            if (mMutated) {
+                d.mutate();
+            }
+
             d.setState(getState());
             d.setCallback(this);
 
@@ -287,6 +292,26 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
             return mHorizontalTrack != null ? mHorizontalTrack.getIntrinsicHeight() :
                     mHorizontalThumb != null ? mHorizontalThumb.getIntrinsicHeight() : 0;
         }
+    }
+
+    @Override
+    public ScrollBarDrawable mutate() {
+        if (!mMutated && super.mutate() == this) {
+            if (mVerticalTrack != null) {
+                mVerticalTrack.mutate();
+            }
+            if (mVerticalThumb != null) {
+                mVerticalThumb.mutate();
+            }
+            if (mHorizontalTrack != null) {
+                mHorizontalTrack.mutate();
+            }
+            if (mHorizontalThumb != null) {
+                mHorizontalThumb.mutate();
+            }
+            mMutated = true;
+        }
+        return this;
     }
 
     @Override
