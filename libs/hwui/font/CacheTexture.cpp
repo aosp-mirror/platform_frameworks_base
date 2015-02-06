@@ -120,7 +120,7 @@ CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint3
     // OpenGL ES 3.0+ lets us specify the row length for unpack operations such
     // as glTexSubImage2D(). This allows us to upload a sub-rectangle of a texture.
     // With OpenGL ES 2.0 we have to upload entire stripes instead.
-    mHasUnpackRowLength = Extensions::getInstance().hasUnpackRowLength();
+    mHasUnpackRowLength = mCaches.extensions().hasUnpackRowLength();
 }
 
 CacheTexture::~CacheTexture() {

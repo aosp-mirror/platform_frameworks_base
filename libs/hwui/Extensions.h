@@ -23,6 +23,8 @@
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
 
+#include <GLES2/gl2.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -30,8 +32,10 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
-class ANDROID_API Extensions: public Singleton<Extensions> {
+class ANDROID_API Extensions {
 public:
+    Extensions();
+
     inline bool hasNPot() const { return mHasNPot; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
@@ -55,12 +59,7 @@ public:
     void dump() const;
 
 private:
-    Extensions();
-    ~Extensions();
-
     void findExtensions(const char* extensions, SortedVector<String8>& list) const;
-
-    friend class Singleton<Extensions>;
 
     SortedVector<String8> mGlExtensionList;
     SortedVector<String8> mEglExtensionList;

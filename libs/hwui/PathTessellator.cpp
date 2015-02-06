@@ -783,6 +783,7 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
     Rect bounds(path.getBounds());
     paintInfo.expandBoundsForStroke(&bounds);
     vertexBuffer.setBounds(bounds);
+    vertexBuffer.setMeshFeatureFlags(paintInfo.isAA ? VertexBuffer::kAlpha : VertexBuffer::kNone);
 }
 
 template <class TYPE>
@@ -840,6 +841,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
     // expand bounds from vertex coords to pixel data
     paintInfo.expandBoundsForStroke(&bounds);
     vertexBuffer.setBounds(bounds);
+    vertexBuffer.setMeshFeatureFlags(paintInfo.isAA ? VertexBuffer::kAlpha : VertexBuffer::kNone);
 }
 
 void PathTessellator::tessellateLines(const float* points, int count, const SkPaint* paint,
@@ -890,6 +892,7 @@ void PathTessellator::tessellateLines(const float* points, int count, const SkPa
     // expand bounds from vertex coords to pixel data
     paintInfo.expandBoundsForStroke(&bounds);
     vertexBuffer.setBounds(bounds);
+    vertexBuffer.setMeshFeatureFlags(paintInfo.isAA ? VertexBuffer::kAlpha : VertexBuffer::kNone);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

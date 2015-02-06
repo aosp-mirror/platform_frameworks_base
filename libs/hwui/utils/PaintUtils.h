@@ -52,6 +52,13 @@ public:
                 && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
     }
 
+    static bool isBlendedShader(const SkShader* shader) {
+        if (shader == nullptr) {
+            return false;
+        }
+        return !shader->isOpaque();
+    }
+
     static bool isBlendedColorFilter(const SkColorFilter* filter) {
         if (filter == nullptr) {
             return false;

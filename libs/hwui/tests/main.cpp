@@ -201,6 +201,45 @@ private:
     }
 };
 
+class OvalAnimation : public TreeContentAnimation {
+public:
+    sp<RenderNode> card;
+    void createContent(int width, int height, DisplayListRenderer* renderer) override {
+        android::uirenderer::Rect DUMMY;
+
+        renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
+        renderer->insertReorderBarrier(true);
+
+        card = createCard(40, 40, 200, 200);
+        renderer->drawRenderNode(card.get(), DUMMY, 0);
+
+        renderer->insertReorderBarrier(false);
+    }
+
+    void doFrame(int frameNr) override {
+        card->mutateStagingProperties().setTranslationX(frameNr);
+        card->mutateStagingProperties().setTranslationY(frameNr);
+        card->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+    }
+private:
+    sp<RenderNode> createCard(int x, int y, int width, int height) {
+        sp<RenderNode> node = new RenderNode();
+        node->mutateStagingProperties().setLeftTopRightBottom(x, y, x + width, y + height);
+        node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
+
+        DisplayListRenderer* renderer = startRecording(node.get());
+        renderer->drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
+
+        SkPaint paint;
+        paint.setAntiAlias(true);
+        paint.setColor(0xFF00FFFF);
+        renderer->drawOval(0, 0, width, height, paint);
+
+        endRecording(renderer, node.get());
+        return node;
+    }
+};
+
 struct cstr_cmp {
     bool operator()(const char *a, const char *b) const {
         return std::strcmp(a, b) < 0;
@@ -212,6 +251,7 @@ typedef void (*testProc)();
 std::map<const char*, testProc, cstr_cmp> gTestMap {
     {"shadowgrid", TreeContentAnimation::run<ShadowGridAnimation>},
     {"rectgrid", TreeContentAnimation::run<RectGridAnimation> },
+    {"oval", TreeContentAnimation::run<OvalAnimation> },
 };
 
 int main(int argc, char* argv[]) {

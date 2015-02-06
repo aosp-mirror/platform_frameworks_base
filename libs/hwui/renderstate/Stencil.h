@@ -98,6 +98,8 @@ public:
         return mState == kTest;
     }
 
+    void dump();
+
 private:
     void enable();
 

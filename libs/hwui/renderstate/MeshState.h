@@ -47,7 +47,7 @@ const GLsizei kMeshTextureOffset = 2 * sizeof(float);
 const GLsizei kVertexAlphaOffset = 2 * sizeof(float);
 const GLsizei kVertexAAWidthOffset = 2 * sizeof(float);
 const GLsizei kVertexAALengthOffset = 3 * sizeof(float);
-const GLsizei kMeshCount = 4;
+const GLsizei kUnitQuadCount = 4;
 
 class MeshState {
 private:
@@ -55,6 +55,7 @@ private:
 
 public:
     ~MeshState();
+    void dump();
     ///////////////////////////////////////////////////////////////////////////////
     // Buffer objects
     ///////////////////////////////////////////////////////////////////////////////
@@ -107,7 +108,6 @@ public:
      * gMaxNumberOfQuads quads.
      */
     bool bindQuadIndicesBuffer();
-    bool bindShadowIndicesBuffer();
     bool unbindIndicesBuffer();
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -116,9 +116,9 @@ public:
     GLuint getUnitQuadVBO() { return mUnitQuadBuffer; }
 private:
     MeshState();
+    bool bindMeshBufferInternal(const GLuint buffer);
     bool bindIndicesBufferInternal(const GLuint buffer);
 
-    // VBO to draw with
     GLuint mUnitQuadBuffer;
 
     GLuint mCurrentBuffer;
@@ -134,7 +134,6 @@ private:
 
     // Global index buffer
     GLuint mQuadListIndices;
-    GLuint mShadowStripsIndices;
 };
 
 } /* namespace uirenderer */

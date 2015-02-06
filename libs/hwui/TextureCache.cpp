@@ -38,10 +38,12 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-TextureCache::TextureCache():
-        mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
-        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE), mAssetAtlas(nullptr) {
+TextureCache::TextureCache()
+        : mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity)
+        , mSize(0)
+        , mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE))
+        , mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE)
+        , mAssetAtlas(nullptr) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting texture cache size to %sMB", property);
@@ -59,26 +61,16 @@ TextureCache::TextureCache():
                 DEFAULT_TEXTURE_CACHE_FLUSH_RATE * 100.0f);
     }
 
-    init();
-}
-
-TextureCache::TextureCache(uint32_t maxByteSize):
-        mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize), mAssetAtlas(nullptr) {
-    init();
-}
-
-TextureCache::~TextureCache() {
-    mCache.clear();
-}
-
-void TextureCache::init() {
     mCache.setOnEntryRemovedListener(this);
 
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
     INIT_LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
 
     mDebugEnabled = readDebugLevel() & kDebugCaches;
+}
+
+TextureCache::~TextureCache() {
+    mCache.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -280,7 +272,7 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
 
     // We could also enable mipmapping if both bitmap dimensions are powers
     // of 2 but we'd have to deal with size changes. Let's keep this simple
-    const bool canMipMap = Extensions::getInstance().hasNPot();
+    const bool canMipMap = Caches::getInstance().extensions().hasNPot();
 
     // If the texture had mipmap enabled but not anymore,
     // force a glTexImage2D to discard the mipmap levels
@@ -355,7 +347,8 @@ void TextureCache::uploadLoFiTexture(bool resize, const SkBitmap* bitmap,
 void TextureCache::uploadToTexture(bool resize, GLenum format, GLsizei stride, GLsizei bpp,
         GLsizei width, GLsizei height, GLenum type, const GLvoid * data) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, bpp);
-    const bool useStride = stride != width && Extensions::getInstance().hasUnpackRowLength();
+    const bool useStride = stride != width
+            && Caches::getInstance().extensions().hasUnpackRowLength();
     if ((stride == width) || useStride) {
         if (useStride) {
             glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);

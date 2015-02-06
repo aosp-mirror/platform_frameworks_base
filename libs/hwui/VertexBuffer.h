@@ -24,11 +24,10 @@ namespace uirenderer {
 
 class VertexBuffer {
 public:
-    enum Mode {
-        kStandard = 0,
-        kOnePolyRingShadow = 1,
-        kTwoPolyRingShadow = 2,
-        kIndices = 3
+    enum MeshFeatureFlags {
+        kNone = 0,
+        kAlpha = 1 << 0,
+        kIndices = 1 << 1,
     };
 
     VertexBuffer()
@@ -39,7 +38,7 @@ public:
             , mAllocatedVertexCount(0)
             , mAllocatedIndexCount(0)
             , mByteCount(0)
-            , mMode(kStandard)
+            , mMeshFeatureFlags(kNone)
             , mReallocBuffer(nullptr)
             , mCleanupMethod(nullptr)
             , mCleanupIndexMethod(nullptr)
@@ -135,10 +134,12 @@ public:
     void updateVertexCount(unsigned int newCount)  {
         mVertexCount = MathUtils::min(newCount, mAllocatedVertexCount);
     }
-    Mode getMode() const { return mMode; }
+    MeshFeatureFlags getMeshFeatureFlags() const { return mMeshFeatureFlags; }
+    void setMeshFeatureFlags(int flags) {
+        mMeshFeatureFlags = static_cast<MeshFeatureFlags>(flags);
+    }
 
     void setBounds(Rect bounds) { mBounds = bounds; }
-    void setMode(Mode mode) { mMode = mode; }
 
     template <class TYPE>
     void createDegenerateSeparators(int allocSize) {
@@ -166,7 +167,7 @@ private:
     unsigned int mAllocatedIndexCount;
     unsigned int mByteCount;
 
-    Mode mMode;
+    MeshFeatureFlags mMeshFeatureFlags;
 
     void* mReallocBuffer; // used for multi-allocation
 

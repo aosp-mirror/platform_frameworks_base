@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
+#include "renderstate/Stencil.h"
+
+#include "Caches.h"
 #include "Debug.h"
 #include "Extensions.h"
 #include "Properties.h"
-#include "renderstate/Stencil.h"
 
 #include <GLES2/gl2ext.h>
 
@@ -42,7 +44,7 @@ uint8_t Stencil::getStencilSize() {
 
 GLenum Stencil::getSmallestStencilFormat() {
 #if !DEBUG_STENCIL
-    const Extensions& extensions = Extensions::getInstance();
+    const Extensions& extensions = Caches::getInstance().extensions();
     if (extensions.has1BitStencil()) {
         return GL_STENCIL_INDEX1_OES;
     } else if (extensions.has4BitStencil()) {
@@ -121,6 +123,10 @@ void Stencil::disable() {
         glDisable(GL_STENCIL_TEST);
         mState = kDisabled;
     }
+}
+
+void Stencil::dump() {
+    ALOGD("Stencil: state %d", mState);
 }
 
 }; // namespace uirenderer

@@ -337,7 +337,7 @@ void LayerRenderer::flushLayer(RenderState& renderState, Layer* layer) {
     if (fbo) {
         // If possible, discard any enqueud operations on deferred
         // rendering architectures
-        if (Extensions::getInstance().hasDiscardFramebuffer()) {
+        if (Caches::getInstance().extensions().hasDiscardFramebuffer()) {
             GLuint previousFbo = renderState.getFramebuffer();
             if (fbo != previousFbo) {
                 renderState.bindFramebuffer(fbo);

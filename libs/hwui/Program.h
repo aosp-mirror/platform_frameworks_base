@@ -102,7 +102,7 @@ typedef uint64_t programid;
  * A ProgramDescription must be used in conjunction with a ProgramCache.
  */
 struct ProgramDescription {
-    enum ColorModifier {
+    enum ColorFilterMode {
         kColorNone = 0,
         kColorMatrix,
         kColorBlend
@@ -148,7 +148,7 @@ struct ProgramDescription {
     GLenum bitmapWrapT;
 
     // Color operations
-    ColorModifier colorOp;
+    ColorFilterMode colorOp;
     SkXfermode::Mode colorMode;
 
     // Framebuffer blending (requires Extensions.hasFramebufferFetch())

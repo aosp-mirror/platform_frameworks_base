@@ -32,8 +32,6 @@ Dither::Dither(Caches& caches)
 
 void Dither::bindDitherTexture() {
     if (!mInitialized) {
-        bool useFloatTexture = Extensions::getInstance().hasFloatTextures();
-
         glGenTextures(1, &mDitherTexture);
         mCaches.textureState().bindTexture(mDitherTexture);
 
@@ -43,7 +41,7 @@ void Dither::bindDitherTexture() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-        if (useFloatTexture) {
+        if (mCaches.extensions().hasFloatTextures()) {
             // We use a R16F texture, let's remap the alpha channel to the
             // red channel to avoid changing the shader sampling code on GL ES 3.0+
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_RED);

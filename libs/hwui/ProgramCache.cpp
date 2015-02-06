@@ -404,7 +404,8 @@ const char* gBlendOps[18] = {
 // Constructors/destructors
 ///////////////////////////////////////////////////////////////////////////////
 
-ProgramCache::ProgramCache(): mHasES3(Extensions::getInstance().getMajorGlVersion() >= 3) {
+ProgramCache::ProgramCache(Extensions& extensions)
+        : mHasES3(extensions.getMajorGlVersion() >= 3) {
 }
 
 ProgramCache::~ProgramCache() {

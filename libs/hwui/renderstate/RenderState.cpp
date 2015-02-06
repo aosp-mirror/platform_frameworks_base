@@ -17,6 +17,7 @@
 
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
+#include "utils/GLUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -215,18 +216,41 @@ void RenderState::render(const Glop& glop) {
     const Glop::Mesh& mesh = glop.mesh;
     const Glop::Fill& shader = glop.fill;
 
+    // --------------------------------------------
     // ---------- Shader + uniform setup ----------
+    // --------------------------------------------
     mCaches->setProgram(shader.program);
 
-    Glop::Fill::Color color = shader.color;
+    Glop::FloatColor color = shader.color;
     shader.program->setColor(color.r, color.g, color.b, color.a);
 
     shader.program->set(glop.transform.ortho,
             glop.transform.modelView,
             glop.transform.canvas,
-            glop.transform.offset);
+            glop.transform.fudgingOffset);
 
+    if (glop.fill.filterMode == ProgramDescription::kColorBlend) {
+        const Glop::FloatColor& color = glop.fill.filter.color;
+        glUniform4f(mCaches->program().getUniform("colorBlend"),
+                color.r, color.g, color.b, color.a);
+    } else if (glop.fill.filterMode == ProgramDescription::kColorMatrix) {
+        glUniformMatrix4fv(mCaches->program().getUniform("colorMatrix"), 1, GL_FALSE,
+                glop.fill.filter.matrix.matrix);
+        glUniform4fv(mCaches->program().getUniform("colorMatrixVector"), 1,
+                glop.fill.filter.matrix.vector);
+    }
+
+    // --------------------------------
     // ---------- Mesh setup ----------
+    // --------------------------------
+    // vertices
+    bool force = meshState().bindMeshBufferInternal(mesh.vertexBufferObject)
+            || (mesh.vertices != nullptr);
+    meshState().bindPositionVertexPointer(force, mesh.vertices, mesh.stride);
+
+    // indices
+    meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
+
     if (glop.mesh.vertexFlags & kTextureCoord_Attrib) {
         // TODO: support textures
         LOG_ALWAYS_FATAL("textures not yet supported");
@@ -234,40 +258,42 @@ void RenderState::render(const Glop& glop) {
         meshState().disableTexCoordsVertexArray();
     }
     if (glop.mesh.vertexFlags & kColor_Attrib) {
-        LOG_ALWAYS_FATAL("color attribute not yet supported");
+        LOG_ALWAYS_FATAL("color vertex attribute not yet supported");
         // TODO: enable color, disable when done
     }
+    int alphaSlot = -1;
     if (glop.mesh.vertexFlags & kAlpha_Attrib) {
-        LOG_ALWAYS_FATAL("alpha attribute not yet supported");
-        // TODO: enable alpha attribute, disable when done
+        const void* alphaCoords = ((const GLbyte*) glop.mesh.vertices) + kVertexAlphaOffset;
+        alphaSlot = shader.program->getAttrib("vtxAlpha");
+        glEnableVertexAttribArray(alphaSlot);
+        glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, kAlphaVertexStride, alphaCoords);
     }
 
-    /**
-    * Hard-coded vertex assumptions:
-     *     - required
-     *     - xy floats
-     *     - 0 offset
-     *     - in VBO
-     */
-    bool force = meshState().bindMeshBuffer(mesh.vertexBufferObject);
-    meshState().bindPositionVertexPointer(force, nullptr, mesh.stride);
-
-    /**
-     * Hard-coded index assumptions:
-     *     - optional
-     *     - 0 offset
-     *     - in IBO
-     */
-    meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
-
+    // ------------------------------------
     // ---------- GL state setup ----------
+    // ------------------------------------
     blend().setFactors(glop.blend.src, glop.blend.dst);
 
-    if (mesh.indexBufferObject) {
-        glDrawElements(glop.mesh.primitiveMode, glop.mesh.vertexCount, GL_UNSIGNED_BYTE, nullptr);
+    // ------------------------------------
+    // ---------- GL state setup ----------
+    // ------------------------------------
+    if (mesh.indexBufferObject || mesh.indices) {
+        glDrawElements(glop.mesh.primitiveMode, glop.mesh.vertexCount,
+                GL_UNSIGNED_SHORT, mesh.indices);
     } else {
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, glop.mesh.vertexCount);
+        glDrawArrays(glop.mesh.primitiveMode, 0, glop.mesh.vertexCount);
     }
+
+    if (glop.mesh.vertexFlags & kAlpha_Attrib) {
+        glDisableVertexAttribArray(alphaSlot);
+    }
+}
+
+void RenderState::dump() {
+    blend().dump();
+    meshState().dump();
+    scissor().dump();
+    stencil().dump();
 }
 
 } /* namespace uirenderer */

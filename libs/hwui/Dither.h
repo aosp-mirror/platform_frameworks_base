@@ -23,6 +23,7 @@ namespace android {
 namespace uirenderer {
 
 class Caches;
+class Extensions;
 class Program;
 
 // Must be a power of two

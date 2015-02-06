@@ -29,6 +29,7 @@ public:
     bool set(GLint x, GLint y, GLint width, GLint height);
     void reset();
     bool isEnabled() { return mEnabled; }
+    void dump();
 private:
     Scissor();
     void invalidate();
