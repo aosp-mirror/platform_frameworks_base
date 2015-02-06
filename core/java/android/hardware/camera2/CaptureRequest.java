@@ -2090,6 +2090,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #SHADING_MODE_FAST FAST}</li>
      *   <li>{@link #SHADING_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
      * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#SHADING_AVAILABLE_MODES android.shading.availableModes}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
@@ -2098,6 +2100,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#SHADING_AVAILABLE_MODES
      * @see CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see #SHADING_MODE_OFF
@@ -2160,12 +2163,15 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #STATISTICS_LENS_SHADING_MAP_MODE_OFF OFF}</li>
      *   <li>{@link #STATISTICS_LENS_SHADING_MAP_MODE_ON ON}</li>
      * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES android.statistics.info.availableLensShadingMapModes}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
      */
