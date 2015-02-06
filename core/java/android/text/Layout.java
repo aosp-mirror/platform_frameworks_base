@@ -1754,8 +1754,8 @@ public abstract class Layout {
 
     private char getEllipsisChar(TextUtils.TruncateAt method) {
         return (method == TextUtils.TruncateAt.END_SMALL) ?
-                ELLIPSIS_TWO_DOTS[0] :
-                ELLIPSIS_NORMAL[0];
+                TextUtils.ELLIPSIS_TWO_DOTS[0] :
+                TextUtils.ELLIPSIS_NORMAL[0];
     }
 
     private void ellipsize(int start, int end, int line,
@@ -1952,6 +1952,4 @@ public abstract class Layout {
     /* package */ static final Directions DIRS_ALL_RIGHT_TO_LEFT =
         new Directions(new int[] { 0, RUN_LENGTH_MASK | RUN_RTL_FLAG });
 
-    /* package */ static final char[] ELLIPSIS_NORMAL = { '\u2026' }; // this is "..."
-    /* package */ static final char[] ELLIPSIS_TWO_DOTS = { '\u2025' }; // this is ".."
 }
