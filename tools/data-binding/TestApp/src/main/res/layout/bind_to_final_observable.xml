@@ -16,11 +16,11 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="obj" type="com.android.databinding.testapp.vo.PublicFinalTestVo"/>
+    <variable name="obj" type="com.android.databinding.testapp.vo.PublicFinalWithObservableTestVo"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:id="@+id/text_view"
             android:text="@{obj.myField}"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
               android:id="@+id/text_view2"
-              android:text="@{obj.myVo.val}"/>
+              android:text="@{obj.myFinalVo.val}"/>
 </LinearLayout>

@@ -14,6 +14,7 @@
 package com.android.databinding.testapp;
 
 import com.android.databinding.testapp.generated.BindToFinalBinder;
+import com.android.databinding.testapp.generated.BindToFinalObservableBinder;
 import com.android.databinding.testapp.vo.PublicFinalTestVo;
 import com.android.databinding.testapp.vo.PublicFinalWithObservableTestVo;
 
@@ -23,7 +24,7 @@ import android.widget.TextView;
 public class BindToFinalObservableFieldTest extends BaseDataBinderTest<BindToFinalObservableBinder>{
 
     public BindToFinalObservableFieldTest() {
-        super(BindToFinalBinder.class, R.layout.bind_to_final_observable);
+        super(BindToFinalObservableBinder.class, R.layout.bind_to_final_observable);
     }
 
     @UiThreadTest
