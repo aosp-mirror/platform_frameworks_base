@@ -17,6 +17,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
           android:alpha="?attr/disabledAlpha"
-          android:color="@color/button_material_dark" />
+          android:color="?attr/colorButtonNormal" />
     <item android:color="?attr/colorAccent" />
 </selector>
