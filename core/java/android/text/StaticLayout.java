@@ -554,7 +554,7 @@ public class StaticLayout extends Layout {
 
         float ellipsisWidth = paint.measureText(
                 (where == TextUtils.TruncateAt.END_SMALL) ?
-                        ELLIPSIS_TWO_DOTS : ELLIPSIS_NORMAL, 0, 1);
+                        TextUtils.ELLIPSIS_TWO_DOTS : TextUtils.ELLIPSIS_NORMAL, 0, 1);
         int ellipsisStart = 0;
         int ellipsisCount = 0;
         int len = lineEnd - lineStart;
