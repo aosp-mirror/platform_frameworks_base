@@ -20,6 +20,8 @@ public class NotBindableVo {
     private int mBoolValueGetCount;
     private String mStringValue;
     private int mStringValueGetCount;
+    private final String mFinalString = "this has final content";
+    public final int publicField = 3;
 
     public NotBindableVo() {
     }
@@ -40,6 +42,10 @@ public class NotBindableVo {
     public int getIntValue() {
         mIntValueGetCount ++;
         return mIntValue;
+    }
+
+    public String getFinalString() {
+        return mFinalString;
     }
 
     public void setIntValue(int intValue) {
