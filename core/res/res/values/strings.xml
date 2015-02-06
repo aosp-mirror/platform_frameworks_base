@@ -482,6 +482,9 @@
     <!-- label for item that launches settings in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_settings">Settings</string>
 
+    <!-- label for item that launches voice assist in phone options dialog [CHAR LIMIT=15]-->
+    <string name="global_action_voice_assist">Voice Assist</string>
+
     <!-- label for item that locks the phone and enforces that it can't be unlocked without entering a credential. [CHAR LIMIT=15] -->
     <string name="global_action_lockdown">Lock now</string>
 
