@@ -1527,6 +1527,7 @@
   <java-symbol type="string" name="global_action_silent_mode_on_status" />
   <java-symbol type="string" name="global_action_toggle_silent_mode" />
   <java-symbol type="string" name="global_action_lockdown" />
+  <java-symbol type="string" name="global_action_voice_assist" />
   <java-symbol type="string" name="invalidPuk" />
   <java-symbol type="string" name="lockscreen_carrier_default" />
   <java-symbol type="style" name="Animation.LockScreen" />
@@ -1614,6 +1615,7 @@
   <java-symbol type="drawable" name="ic_notification_ime_default" />
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="ic_settings" />
+  <java-symbol type="drawable" name="ic_voice_search" />
   <java-symbol type="drawable" name="stat_notify_car_mode" />
   <java-symbol type="drawable" name="stat_notify_disabled_data" />
   <java-symbol type="drawable" name="stat_notify_disk_full" />
