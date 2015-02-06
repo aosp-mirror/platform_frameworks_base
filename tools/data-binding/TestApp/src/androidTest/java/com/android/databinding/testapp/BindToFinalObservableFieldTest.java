@@ -34,8 +34,6 @@ public class BindToFinalObservableFieldTest extends BaseDataBinderTest<BindToFin
         mBinder.rebindDirty();
         final TextView textView = (TextView) mBinder.getRoot().findViewById(R.id.text_view);
         assertEquals(getActivity().getResources().getString(R.string.app_name), textView.getText().toString());
-        final TextView textView2 = (TextView) mBinder.getRoot().findViewById(R.id.text_view2);
-        assertEquals(getActivity().getResources().getString(R.string.app_name), textView2.getText().toString());
     }
 
 
