@@ -111,17 +111,8 @@ public class Button extends TextView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(Button.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(Button.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return Button.class.getName();
     }
 }

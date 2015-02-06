@@ -195,31 +195,15 @@ public class TimePicker extends FrameLayout {
         mDelegate.onRestoreInstanceState(ss);
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return TimePicker.class.getName();
+    }
+
     /** @hide */
     @Override
     public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         return mDelegate.dispatchPopulateAccessibilityEvent(event);
-    }
-
-    /** @hide */
-    @Override
-    public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEventInternal(event);
-        mDelegate.onPopulateAccessibilityEvent(event);
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        mDelegate.onInitializeAccessibilityEvent(event);
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        mDelegate.onInitializeAccessibilityNodeInfo(info);
     }
 
     /**
@@ -252,8 +236,6 @@ public class TimePicker extends FrameLayout {
 
         boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event);
         void onPopulateAccessibilityEvent(AccessibilityEvent event);
-        void onInitializeAccessibilityEvent(AccessibilityEvent event);
-        void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info);
     }
 
     /**

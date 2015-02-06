@@ -501,16 +501,9 @@ public class CalendarView extends FrameLayout {
         mDelegate.onConfigurationChanged(newConfig);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        event.setClassName(CalendarView.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        info.setClassName(CalendarView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return CalendarView.class.getName();
     }
 
     /**

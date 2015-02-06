@@ -1492,18 +1492,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.sendAccessibilityEventInternal(eventType);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(AbsListView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AbsListView.class.getName();
     }
 
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(AbsListView.class.getName());
         if (isEnabled()) {
             if (canScrollUp()) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);

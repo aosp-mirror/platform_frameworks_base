@@ -839,11 +839,15 @@ public class ScrollView extends FrameLayout {
         return false;
     }
 
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return ScrollView.class.getName();
+    }
+
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ScrollView.class.getName());
         if (isEnabled()) {
             final int scrollRange = getScrollRange();
             if (scrollRange > 0) {
@@ -862,7 +866,6 @@ public class ScrollView extends FrameLayout {
     @Override
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ScrollView.class.getName());
         final boolean scrollable = getScrollRange() > 0;
         event.setScrollable(scrollable);
         event.setScrollX(mScrollX);

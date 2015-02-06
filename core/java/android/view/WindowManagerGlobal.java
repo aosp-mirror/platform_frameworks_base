@@ -190,6 +190,39 @@ public final class WindowManagerGlobal {
         }
     }
 
+    public ArrayList<ViewRootImpl> getRootViews(IBinder token) {
+        ArrayList<ViewRootImpl> views = new ArrayList<>();
+        synchronized (mLock) {
+            final int numRoots = mRoots.size();
+            for (int i = 0; i < numRoots; ++i) {
+                WindowManager.LayoutParams params = mParams.get(i);
+                if (params.token == null) {
+                    continue;
+                }
+                if (params.token != token) {
+                    boolean isChild = false;
+                    if (params.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW
+                            && params.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                        for (int j = 0 ; j < numRoots; ++j) {
+                            View viewj = mViews.get(j);
+                            WindowManager.LayoutParams paramsj = mParams.get(j);
+                            if (params.token == viewj.getWindowToken()
+                                    && paramsj.token == token) {
+                                isChild = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!isChild) {
+                        continue;
+                    }
+                }
+                views.add(mRoots.get(i));
+            }
+        }
+        return views;
+    }
+
     public View getRootView(String name) {
         synchronized (mLock) {
             for (int i = mRoots.size() - 1; i >= 0; --i) {

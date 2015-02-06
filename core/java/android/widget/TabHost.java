@@ -384,18 +384,9 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(TabHost.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(TabHost.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return TabHost.class.getName();
     }
 
     public void setCurrentTab(int index) {

@@ -427,16 +427,6 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate {
         event.getText().add(selectedDateUtterance);
     }
 
-    @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        event.setClassName(TimePicker.class.getName());
-    }
-
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        info.setClassName(TimePicker.class.getName());
-    }
-
     private void updateInputState() {
         // Make sure that if the user changes the value and the IME is active
         // for one of the inputs if this widget, the IME is closed. If the user

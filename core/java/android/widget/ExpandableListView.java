@@ -1341,17 +1341,8 @@ public class ExpandableListView extends ListView {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ExpandableListView.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ExpandableListView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ExpandableListView.class.getName();
     }
 }

@@ -1084,17 +1084,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     public void fyiWillBeAdvancedByHostKThx() {
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(AdapterViewAnimator.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(AdapterViewAnimator.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return AdapterViewAnimator.class.getName();
     }
 }

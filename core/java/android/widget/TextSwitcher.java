@@ -91,17 +91,8 @@ public class TextSwitcher extends ViewSwitcher {
         ((TextView)getCurrentView()).setText(text);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(TextSwitcher.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(TextSwitcher.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return TextSwitcher.class.getName();
     }
 }

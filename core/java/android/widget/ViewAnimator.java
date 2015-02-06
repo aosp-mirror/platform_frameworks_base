@@ -357,17 +357,8 @@ public class ViewAnimator extends FrameLayout {
         return (getCurrentView() != null) ? getCurrentView().getBaseline() : super.getBaseline();
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(ViewAnimator.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(ViewAnimator.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ViewAnimator.class.getName();
     }
 }

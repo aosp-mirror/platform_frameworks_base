@@ -1224,18 +1224,15 @@ public class StackView extends AdapterViewAnimator {
         measureChildren();
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(StackView.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return StackView.class.getName();
     }
 
     /** @hide */
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(StackView.class.getName());
         info.setScrollable(getChildCount() > 1);
         if (isEnabled()) {
             if (getDisplayedChild() < getChildCount() - 1) {

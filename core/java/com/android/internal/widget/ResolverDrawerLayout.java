@@ -593,15 +593,13 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
-        event.setClassName(ResolverDrawerLayout.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return ResolverDrawerLayout.class.getName();
     }
 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(ResolverDrawerLayout.class.getName());
         if (isEnabled()) {
             if (mCollapseOffset != 0) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);

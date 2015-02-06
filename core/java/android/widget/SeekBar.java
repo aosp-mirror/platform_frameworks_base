@@ -124,17 +124,8 @@ public class SeekBar extends AbsSeekBar {
         }
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(SeekBar.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(SeekBar.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return SeekBar.class.getName();
     }
 }

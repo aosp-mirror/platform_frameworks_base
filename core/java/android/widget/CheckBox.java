@@ -72,17 +72,8 @@ public class CheckBox extends CompoundButton {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    /** @hide */
     @Override
-    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEventInternal(event);
-        event.setClassName(CheckBox.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfoInternal(info);
-        info.setClassName(CheckBox.class.getName());
+    public CharSequence getAccessibilityClassName() {
+        return CheckBox.class.getName();
     }
 }
