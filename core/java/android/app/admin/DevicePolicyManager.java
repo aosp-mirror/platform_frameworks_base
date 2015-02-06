@@ -2933,9 +2933,9 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of input method package names.
-     * @return true if setting the restriction succeeded. It will fail if there is
-     *     one or more input method enabled, that are not in the list or user if the foreground
-     *     user.
+     * @return true if setting the restriction succeeded. It will fail if there are
+     *     one or more non-system input methods currently enabled that are not in
+     *     the packageNames list.
      */
     public boolean setPermittedInputMethods(ComponentName admin, List<String> packageNames) {
         if (mService != null) {
