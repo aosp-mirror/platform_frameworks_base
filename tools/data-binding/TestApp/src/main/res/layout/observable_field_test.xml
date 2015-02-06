@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <variable name="obj" type="com.android.databinding.testapp.vo.ObservableFieldBindingObject"/>
+    <TextView
+            android:id="@+id/bField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.bField}"/>
+    <TextView
+            android:id="@+id/tField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.tField}"/>
+    <TextView
+            android:id="@+id/sField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.sField}"/>
+    <TextView
+            android:id="@+id/cField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.cField}"/>
+    <TextView
+            android:id="@+id/iField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.iField}"/>
+    <TextView
+            android:id="@+id/lField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.lField}"/>
+    <TextView
+            android:id="@+id/fField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.fField}"/>
+    <TextView
+            android:id="@+id/dField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + obj.dField}"/>
+    <TextView
+            android:id="@+id/oField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{obj.oField}"/>
+</LinearLayout>

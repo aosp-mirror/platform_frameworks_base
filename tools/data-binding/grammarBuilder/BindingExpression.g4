@@ -333,7 +333,7 @@ SingleCharacter
     ;
 // §3.10.5 String Literals
 SingleQuoteString
-    :   '`' SingleQuoteStringCharacter SingleQuoteStringCharacter+ '`'
+    :   '`' SingleQuoteStringCharacter* '`'
     ;
 
 DoubleQuoteString

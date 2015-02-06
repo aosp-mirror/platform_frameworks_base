@@ -327,6 +327,9 @@ public class SetterStore {
             }
         }
 
+        if (Object.class.equals(valueType) && !bestValueType.isAssignableFrom(valueType)) {
+            valueExpression = "(" + bestValueType.getCanonicalName() + ") " + valueExpression;
+        }
         MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType);
         if (conversionMethod != null) {
             valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +

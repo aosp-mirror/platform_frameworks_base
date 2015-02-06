@@ -25,27 +25,23 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MethodCallExpr extends Expr {
-    final Expr mTarget;
     final String mName;
-    final List<Expr> mArgs;
 
     ClassAnalyzer.Callable mGetter;
 
     MethodCallExpr(Expr target, String name, List<Expr> args) {
         super(Iterables.concat(Arrays.asList(target), args));
-        mTarget = target;
         mName = name;
-        mArgs = args;
     }
 
     @Override
     protected Class resolveType(ClassAnalyzer classAnalyzer) {
         if (mGetter == null) {
             List<Class> args = new ArrayList<>();
-            for (Expr expr : mArgs) {
+            for (Expr expr : getArgs()) {
                 args.add(expr.getResolvedType());
             }
-            mGetter = classAnalyzer.findMethod(mTarget.getResolvedType(), mName, args);
+            mGetter = classAnalyzer.findMethod(getTarget().getResolvedType(), mName, args);
         }
         return mGetter.resolvedType;
     }
@@ -54,7 +50,7 @@ public class MethodCallExpr extends Expr {
     protected List<Dependency> constructDependencies() {
         final List<Dependency> dependencies = constructDynamicChildrenDependencies();
         for (Dependency dependency : dependencies) {
-            if (dependency.getOther() == mTarget) {
+            if (dependency.getOther() == getTarget()) {
                 dependency.setMandatory(true);
             }
         }
@@ -63,11 +59,12 @@ public class MethodCallExpr extends Expr {
 
     @Override
     protected String computeUniqueKey() {
-        return sUniqueKeyJoiner.join(mTarget.computeUniqueKey(), mName, super.computeUniqueKey());
+        return sUniqueKeyJoiner.join(getTarget().computeUniqueKey(), mName,
+                super.computeUniqueKey());
     }
 
     public Expr getTarget() {
-        return mTarget;
+        return getChildren().get(0);
     }
 
     public String getName() {
@@ -75,7 +72,7 @@ public class MethodCallExpr extends Expr {
     }
 
     public List<Expr> getArgs() {
-        return mArgs;
+        return getChildren().subList(1, getChildren().size());
     }
 
     public ClassAnalyzer.Callable getGetter() {

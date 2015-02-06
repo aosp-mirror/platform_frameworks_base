@@ -22,30 +22,27 @@ import java.util.List;
 
 public class MathExpr extends Expr {
     final String mOp;
-    final Expr mLeft;
-    final Expr mRight;
     MathExpr(Expr left, String op, Expr right) {
         super(left, right);
         mOp = op;
-        mLeft = left;
-        mRight = right;
     }
 
     @Override
     protected String computeUniqueKey() {
-        return sUniqueKeyJoiner.join(mLeft.getUniqueKey(), mOp, mRight.getUniqueKey());
+        return sUniqueKeyJoiner.join(getLeft().getUniqueKey(), mOp, getRight().getUniqueKey());
     }
 
     @Override
     protected Class resolveType(ClassAnalyzer classAnalyzer) {
         if ("+".equals(mOp)) {
             // TODO we need upper casting etc.
-            if (String.class.equals(mLeft.getResolvedType())
-                    || String.class.equals(mRight.getResolvedType())) {
+            if (String.class.equals(getLeft().getResolvedType())
+                    || String.class.equals(getRight().getResolvedType())) {
                 return String.class;
             }
         }
-        return classAnalyzer.findCommonParentOf(mLeft.getResolvedType(), mRight.getResolvedType());
+        return classAnalyzer.findCommonParentOf(getLeft().getResolvedType(),
+                getRight().getResolvedType());
     }
 
     @Override
@@ -58,10 +55,10 @@ public class MathExpr extends Expr {
     }
 
     public Expr getLeft() {
-        return mLeft;
+        return getChildren().get(0);
     }
 
     public Expr getRight() {
-        return mRight;
+        return getChildren().get(1);
     }
 }

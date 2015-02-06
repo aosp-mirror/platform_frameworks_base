@@ -37,6 +37,17 @@ public class ClassAnalyzer {
     private static final String OBSERVABLE_LIST_CLASS_NAME = "android.binding.ObservableList";
     private static final String OBSERVABLE_MAP_CLASS_NAME = "android.binding.ObservableMap";
     private static final String BINDABLE_ANNOTATION_NAME = "android.binding.Bindable";
+    private static final String[] OBSERVABLE_FIELDS = {
+            "com.android.databinding.library.ObservableBoolean",
+            "com.android.databinding.library.ObservableByte",
+            "com.android.databinding.library.ObservableChar",
+            "com.android.databinding.library.ObservableShort",
+            "com.android.databinding.library.ObservableInt",
+            "com.android.databinding.library.ObservableLong",
+            "com.android.databinding.library.ObservableFloat",
+            "com.android.databinding.library.ObservableDouble",
+            "com.android.databinding.library.ObservableField",
+    };
     private static final String I_VIEW_DATA_BINDER = "com.android.databinding.library.IViewDataBinder";
 
     private static Map<String, String> sTestClassNameMapping = ImmutableMap.of(
@@ -60,6 +71,8 @@ public class ClassAnalyzer {
 
     private final Class mObservableMap;
 
+    private final Class[] mObservableFields;
+
     private final Class mBindable;
 
     private final boolean mTestMode;
@@ -75,6 +88,11 @@ public class ClassAnalyzer {
             mObservableList = classLoader.loadClass(getClassName(OBSERVABLE_LIST_CLASS_NAME));
             mObservableMap = classLoader.loadClass(getClassName(OBSERVABLE_MAP_CLASS_NAME));
             mBindable = classLoader.loadClass(getClassName(BINDABLE_ANNOTATION_NAME));
+            mObservableFields = new Class[OBSERVABLE_FIELDS.length];
+            for (int i = 0; i < OBSERVABLE_FIELDS.length; i++) {
+                mObservableFields[i] = classLoader.loadClass(getClassName(OBSERVABLE_FIELDS[i]));
+            }
+
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -132,6 +150,15 @@ public class ClassAnalyzer {
     public boolean isObservable(Class klass) {
         return mObservable.isAssignableFrom(klass) || mObservableList.isAssignableFrom(klass) ||
             mObservableMap.isAssignableFrom(klass);
+    }
+
+    public boolean isObservableField(Class klass) {
+        for (Class observableField : mObservableFields) {
+            if (observableField.isAssignableFrom(klass)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isBindable(Field field) {
@@ -269,6 +296,12 @@ public class ClassAnalyzer {
         }
         if("boolean".equals(className)) {
             return "false";
+        }
+        if ("char".equals(className)) {
+            return "'\\u0000'";
+        }
+        if ("byte".equals(className)) {
+            return "0";
         }
         return "null";
     }

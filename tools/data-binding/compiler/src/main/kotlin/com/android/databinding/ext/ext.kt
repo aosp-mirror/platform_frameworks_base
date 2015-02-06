@@ -38,7 +38,6 @@ public fun Class<*>.toJavaCode() : String {
     val name = getName();
     if (name.startsWith('[')) {
         val numArray = name.lastIndexOf('[') + 1;
-        val isClass = name.endsWith(';') && name.charAt(numArray) == 'L';
         val componentType : String;
         when (name.charAt(numArray)) {
             'Z' -> componentType = "boolean"

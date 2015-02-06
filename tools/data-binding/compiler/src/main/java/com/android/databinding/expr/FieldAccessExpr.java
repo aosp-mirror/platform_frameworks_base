@@ -17,22 +17,33 @@
 package com.android.databinding.expr;
 
 import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.util.L;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FieldAccessExpr extends Expr {
     String mName;
     ClassAnalyzer.Callable mGetter;
-    Expr mParent;
+    final boolean mIsObservableField;
 
     FieldAccessExpr(Expr parent, String name) {
         super(parent);
         mName = name;
-        mParent = parent;
+        mIsObservableField = false;
+    }
+
+    FieldAccessExpr(Expr parent, String name, boolean isObservableField) {
+        super(parent);
+        mName = name;
+        mIsObservableField = isObservableField;
     }
 
     public Expr getParent() {
-        return mParent;
+        return getChildren().get(0);
     }
 
     public ClassAnalyzer.Callable getGetter() {
@@ -41,7 +52,7 @@ public class FieldAccessExpr extends Expr {
 
     @Override
     public boolean isDynamic() {
-        if (!mParent.isDynamic()) {
+        if (!getParent().isDynamic()) {
             return false;
         }
         if (mGetter == null) {
@@ -55,7 +66,7 @@ public class FieldAccessExpr extends Expr {
     protected List<Dependency> constructDependencies() {
         final List<Dependency> dependencies = constructDynamicChildrenDependencies();
         for (Dependency dependency : dependencies) {
-            if (dependency.getOther() == mParent) {
+            if (dependency.getOther() == getParent()) {
                 dependency.setMandatory(true);
             }
         }
@@ -64,11 +75,36 @@ public class FieldAccessExpr extends Expr {
 
     @Override
     protected String computeUniqueKey() {
+        if (mIsObservableField) {
+            return sUniqueKeyJoiner.join(mName, "..", super.computeUniqueKey());
+        }
         return sUniqueKeyJoiner.join(mName, ".", super.computeUniqueKey());
     }
 
     public String getName() {
         return mName;
+    }
+
+    @Override
+    public void updateExpr(ClassAnalyzer classAnalyzer) {
+        if (mGetter == null) {
+            mGetter = classAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
+            if (classAnalyzer.isObservableField(mGetter.resolvedType)) {
+                // Make this the ".get()" and add an extra field access for the observable field
+                Expr parent = getParent();
+                parent.getParents().remove(this);
+                getChildren().remove(parent);
+
+                FieldAccessExpr observableField = getModel().observableField(parent, mName);
+                observableField.mGetter = mGetter;
+
+                getChildren().add(observableField);
+                observableField.getParents().add(this);
+                mGetter = classAnalyzer.findMethod(mGetter.resolvedType, "get",
+                        Collections.EMPTY_LIST);
+                mName = "";
+            }
+        }
     }
 
     @Override

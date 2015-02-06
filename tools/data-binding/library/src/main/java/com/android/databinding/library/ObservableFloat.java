@@ -13,29 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.databinding.library;
 
-package com.android.databinding.expr;
+public class ObservableFloat extends BaseObservable {
+    private float mValue;
 
-import com.android.databinding.ClassAnalyzer;
-
-import java.util.List;
-
-public class GroupExpr extends Expr {
-    public GroupExpr(Expr wrapped) {
-        super(wrapped);
+    public float get() {
+        return mValue;
     }
 
-    @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
-        return getWrapped().resolveType(classAnalyzer);
-    }
-
-    @Override
-    protected List<Dependency> constructDependencies() {
-        return getWrapped().constructDependencies();
-    }
-
-    public Expr getWrapped() {
-        return getChildren().get(0);
+    public void set(float value) {
+        mValue = value;
+        notifyChange();
     }
 }

@@ -22,13 +22,9 @@ import java.util.List;
 
 public class ComparisonExpr extends Expr {
     final String mOp;
-    final Expr mLeft;
-    final Expr mRight;
     ComparisonExpr(String op, Expr left, Expr right) {
         super(left, right);
         mOp = op;
-        mLeft = left;
-        mRight = right;
     }
 
     @Override
@@ -51,11 +47,11 @@ public class ComparisonExpr extends Expr {
     }
 
     public Expr getLeft() {
-        return mLeft;
+        return getChildren().get(0);
     }
 
     public Expr getRight() {
-        return mRight;
+        return getChildren().get(1);
     }
 
     @Override

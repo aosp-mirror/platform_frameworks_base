@@ -46,8 +46,6 @@ import com.android.databinding.ext.isObservable
 import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
 
-fun Expr.isObservable() = com.android.databinding.ClassAnalyzer.getInstance().isObservable(this.getResolvedType())
-
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
 class ExprModelExt {
@@ -618,7 +616,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                     tab("${expr.localName}").app(" = ", expr.toCode(true)).app(";")
                     //tab("""log("${expr}" + ${expr.localName},0);""")
                 }
-                if (expr.getResolvedType().isObservable()) {
+                if (expr.isObservable()) {
                     tab("updateRegistration(${expr.getId()}, ${expr.localName});")
                 }
             }

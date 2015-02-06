@@ -29,6 +29,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.util.L;
 
 abstract public class Expr {
 
@@ -141,6 +142,10 @@ abstract public class Expr {
 
     public boolean isBindingExpression() {
         return mIsBindingExpression;
+    }
+
+    public boolean isObservable() {
+        return ClassAnalyzer.getInstance().isObservable(getResolvedType());
     }
 
     public BitSet getShouldReadFlags() {
@@ -562,6 +567,9 @@ abstract public class Expr {
 
     public boolean isUsed() {
         return mIsUsed;
+    }
+
+    public void updateExpr(ClassAnalyzer classAnalyzer) {
     }
 
     static class Node {

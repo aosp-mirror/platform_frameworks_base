@@ -29,21 +29,15 @@ public class BracketExpr extends Expr {
         MAP,
     }
 
-    final private Expr mTarget;
-
-    final private Expr mArg;
-
     private BracketAccessor mAccessor;
 
     BracketExpr(Expr target, Expr arg) {
         super(target, arg);
-        mTarget = target;
-        mArg = arg;
     }
 
     @Override
     protected Class resolveType(ClassAnalyzer classAnalyzer) {
-        Class<?> targetType = mTarget.resolveType(classAnalyzer);
+        Class<?> targetType = getTarget().resolveType(classAnalyzer);
         if (targetType.isArray()) {
             mAccessor = BracketAccessor.ARRAY;
         } else if (List.class.isAssignableFrom(targetType)) {
@@ -68,15 +62,15 @@ public class BracketExpr extends Expr {
     }
 
     protected String computeUniqueKey() {
-        return sUniqueKeyJoiner.join(mTarget.computeUniqueKey(), "$", mArg.computeUniqueKey(), "$");
+        return sUniqueKeyJoiner.join(getTarget().computeUniqueKey(), "$", getArg().computeUniqueKey(), "$");
     }
 
     public Expr getTarget() {
-        return mTarget;
+        return getChildren().get(0);
     }
 
     public Expr getArg() {
-        return mArg;
+        return getChildren().get(1);
     }
 
     public BracketAccessor getAccessor() {
@@ -84,6 +78,6 @@ public class BracketExpr extends Expr {
     }
 
     public boolean argCastsInteger() {
-        return Object.class.equals(mArg.getResolvedType());
+        return Object.class.equals(getArg().getResolvedType());
     }
 }

@@ -24,26 +24,20 @@ import java.util.BitSet;
 import java.util.List;
 
 public class TernaryExpr extends Expr {
-    final Expr mIfTrue;
-    final Expr mIfFalse;
-    final Expr mPred;
     TernaryExpr(Expr pred, Expr ifTrue, Expr ifFalse) {
         super(pred, ifTrue, ifFalse);
-        mPred = pred;
-        mIfTrue = ifTrue;
-        mIfFalse = ifFalse;
     }
 
     public Expr getPred() {
-        return mPred;
+        return getChildren().get(0);
     }
 
     public Expr getIfTrue() {
-        return mIfTrue;
+        return getChildren().get(1);
     }
 
     public Expr getIfFalse() {
-        return mIfFalse;
+        return getChildren().get(2);
     }
 
     @Override
@@ -53,29 +47,33 @@ public class TernaryExpr extends Expr {
 
     @Override
     protected Class resolveType(ClassAnalyzer classAnalyzer) {
-        return classAnalyzer.findCommonParentOf(mIfTrue.getResolvedType(), mIfFalse.getResolvedType());
+        return classAnalyzer.findCommonParentOf(getIfTrue().getResolvedType(),
+                getIfFalse().getResolvedType());
     }
 
     @Override
     protected List<Dependency> constructDependencies() {
         List<Dependency> deps = Lists.newArrayList();
-        if (mPred.isDynamic()) {
-            final Dependency pred = new Dependency(this, mPred);
+        Expr predExpr = getPred();
+        if (predExpr.isDynamic()) {
+            final Dependency pred = new Dependency(this, predExpr);
             pred.setMandatory(true);
             deps.add(pred);
         }
-        if (mIfTrue.isDynamic()) {
-            deps.add(new Dependency(this, mIfTrue, mPred, true));
+        Expr ifTrueExpr = getIfTrue();
+        if (ifTrueExpr.isDynamic()) {
+            deps.add(new Dependency(this, ifTrueExpr, predExpr, true));
         }
-        if (mIfFalse.isDynamic()) {
-            deps.add(new Dependency(this, mIfFalse, mPred, false));
+        Expr ifFalseExpr = getIfFalse();
+        if (ifFalseExpr.isDynamic()) {
+            deps.add(new Dependency(this, ifFalseExpr, predExpr, false));
         }
         return deps;
     }
 
     @Override
     protected BitSet getPredicateInvalidFlags() {
-        return mPred.getInvalidFlags();
+        return getPred().getInvalidFlags();
     }
 
     @Override

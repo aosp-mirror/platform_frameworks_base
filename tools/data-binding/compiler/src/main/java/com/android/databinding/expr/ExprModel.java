@@ -101,6 +101,10 @@ public class ExprModel {
         return register(new FieldAccessExpr(parent, name));
     }
 
+    public FieldAccessExpr observableField(Expr parent, String name) {
+        return register(new FieldAccessExpr(parent, name, true));
+    }
+
     public SymbolExpr symbol(String text, Class type) {
         return register(new SymbolExpr(text, type));
     }
@@ -189,6 +193,18 @@ public class ExprModel {
         //ensure class analyzer. We need to know observables at this point
         final ClassAnalyzer classAnalyzer = ClassAnalyzer.getInstance();
 
+        ArrayList<Expr> processedExprs = new ArrayList<>();
+        ArrayList<Expr> exprs = new ArrayList<>();
+        do {
+            exprs.clear();
+            exprs.addAll(mExprMap.values());
+            exprs.removeAll(processedExprs);
+            for (Expr expr: exprs) {
+                expr.updateExpr(classAnalyzer);
+            }
+            processedExprs.addAll(exprs);
+        } while (!exprs.isEmpty());
+
         int counter = 0;
         final Iterable<Expr> observables = filterObservables(classAnalyzer);
         List<String> flagMapping = Lists.newArrayList();
@@ -218,7 +234,8 @@ public class ExprModel {
                     continue;// already has some id, means observable
                 }
                 // only fields earn an id
-                if (parent instanceof FieldAccessExpr && parent.isDynamic()) {
+                if (parent instanceof FieldAccessExpr && parent.isDynamic() &&
+                        !((FieldAccessExpr) parent).getName().isEmpty()) {
                     flagMapping.add(parent.getUniqueKey());
                     parent.setId(counter++);
                     notifiableExpressions.add(parent);
@@ -232,6 +249,9 @@ public class ExprModel {
 
         // non-dynamic binding expressions receive some ids so that they can be invalidated
         for (Expr expr : mBindingExpressions) {
+            if (!(expr.isDynamic() || !expr.hasId())) {
+                L.d("Expr " + expr + " is dynamic? " + expr.isDynamic() + ", has ID? " + expr.hasId());
+            }
             Preconditions.checkState(expr.isDynamic() || !expr.hasId());
             if (!expr.isDynamic()) {
                 // give it an id for invalidateAll
