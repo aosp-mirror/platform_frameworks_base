@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> muốn bật Khám phá bằng cách chạm. Khi Khám phá bằng cách chạm được bật, bạn có thể nghe hoặc xem mô tả dưới ngón tay bạn hoặc thực hiện cử chỉ để tương tác với điện thoại."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 tháng trước"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Trước 1 tháng trước"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 giây trước"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> giây trước"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 phút trước"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> phút trước"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 giờ trước"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> giờ trước"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> ngày trước"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Tháng trước"</string>
     <string name="older" msgid="5211975022815554840">"Cũ hơn"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"hôm qua"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> ngày trước"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"trong 1 giây"</item>
-    <item quantity="other" msgid="1241926116443974687">"trong <xliff:g id="COUNT">%d</xliff:g> giây"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"trong 1 phút"</item>
-    <item quantity="other" msgid="3330713936399448749">"trong <xliff:g id="COUNT">%d</xliff:g> phút"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"trong 1 giờ"</item>
-    <item quantity="other" msgid="547290677353727389">"trong <xliff:g id="COUNT">%d</xliff:g> giờ"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"ngày mai"</item>
-    <item quantity="other" msgid="5109449375100953247">"trong <xliff:g id="COUNT">%d</xliff:g> ngày"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 giây trước"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> giây trước"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 phút trước"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> phút trước"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 giờ trước"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> giờ trước"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"hôm qua"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> ngày trước"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"trong 1 giây"</item>
-    <item quantity="other" msgid="5495880108825805108">"trong <xliff:g id="COUNT">%d</xliff:g> giây"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"trong 1 phút"</item>
-    <item quantity="other" msgid="4216113292706568726">"trong <xliff:g id="COUNT">%d</xliff:g> phút"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"trong 1 giờ"</item>
-    <item quantity="other" msgid="3705373766798013406">"trong <xliff:g id="COUNT">%d</xliff:g> giờ"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"ngày mai"</item>
-    <item quantity="other" msgid="2973062968038355991">"trong <xliff:g id="COUNT">%d</xliff:g> ngày"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"vào <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"vào lúc <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"trong <xliff:g id="YEAR">%s</xliff:g>"</string>

@@ -28,9 +28,11 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import libcore.icu.DateIntervalFormat;
 import libcore.icu.LocaleData;
+import libcore.icu.RelativeDateTimeFormatter;
 
 /**
  * This class contains various date-related utilities for creating text for things like
@@ -242,6 +244,8 @@ public class DateUtils
 
     /**
      * Returns a string describing the elapsed time since startTime.
+     * <p>
+     * The minimum timespan to report is set to {@link #MINUTE_IN_MILLIS}.
      * @param startTime some time in the past.
      * @return a String object containing the elapsed time.
      * @see #getRelativeTimeSpanString(long, long, long)
@@ -289,69 +293,8 @@ public class DateUtils
      */
     public static CharSequence getRelativeTimeSpanString(long time, long now, long minResolution,
             int flags) {
-        Resources r = Resources.getSystem();
-        boolean abbrevRelative = (flags & (FORMAT_ABBREV_RELATIVE | FORMAT_ABBREV_ALL)) != 0;
-
-        boolean past = (now >= time);
-        long duration = Math.abs(now - time);
-
-        int resId;
-        long count;
-        if (duration < MINUTE_IN_MILLIS && minResolution < MINUTE_IN_MILLIS) {
-            count = duration / SECOND_IN_MILLIS;
-            if (past) {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_num_seconds_ago;
-                } else {
-                    resId = com.android.internal.R.plurals.num_seconds_ago;
-                }
-            } else {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_in_num_seconds;
-                } else {
-                    resId = com.android.internal.R.plurals.in_num_seconds;
-                }
-            }
-        } else if (duration < HOUR_IN_MILLIS && minResolution < HOUR_IN_MILLIS) {
-            count = duration / MINUTE_IN_MILLIS;
-            if (past) {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_num_minutes_ago;
-                } else {
-                    resId = com.android.internal.R.plurals.num_minutes_ago;
-                }
-            } else {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_in_num_minutes;
-                } else {
-                    resId = com.android.internal.R.plurals.in_num_minutes;
-                }
-            }
-        } else if (duration < DAY_IN_MILLIS && minResolution < DAY_IN_MILLIS) {
-            count = duration / HOUR_IN_MILLIS;
-            if (past) {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_num_hours_ago;
-                } else {
-                    resId = com.android.internal.R.plurals.num_hours_ago;
-                }
-            } else {
-                if (abbrevRelative) {
-                    resId = com.android.internal.R.plurals.abbrev_in_num_hours;
-                } else {
-                    resId = com.android.internal.R.plurals.in_num_hours;
-                }
-            }
-        } else if (duration < WEEK_IN_MILLIS && minResolution < WEEK_IN_MILLIS) {
-            return getRelativeDayString(r, time, now);
-        } else {
-            // We know that we won't be showing the time, so it is safe to pass
-            // in a null context.
-            return formatDateRange(null, time, time, flags);
-        }
-
-        String format = r.getQuantityString(resId, (int) count);
-        return String.format(format, count);
+        return RelativeDateTimeFormatter.getRelativeTimeSpanString(Locale.getDefault(),
+                TimeZone.getDefault(), time, now, minResolution, flags);
     }
 
     /**
@@ -360,8 +303,8 @@ public class DateUtils
      * <p>
      * Example output strings for the US date format.
      * <ul>
-     * <li>3 mins ago, 10:15 AM</li>
-     * <li>yesterday, 12:20 PM</li>
+     * <li>3 min. ago, 10:15 AM</li>
+     * <li>Yesterday, 12:20 PM</li>
      * <li>Dec 12, 4:12 AM</li>
      * <li>11/14/2007, 8:20 AM</li>
      * </ul>
@@ -374,86 +317,19 @@ public class DateUtils
      * @param transitionResolution the elapsed time (in milliseconds) at which
      *            to stop reporting relative measurements. Elapsed times greater
      *            than this resolution will default to normal date formatting.
-     *            For example, will transition from "6 days ago" to "Dec 12"
+     *            For example, will transition from "7 days ago" to "Dec 12"
      *            when using {@link #WEEK_IN_MILLIS}.
      */
     public static CharSequence getRelativeDateTimeString(Context c, long time, long minResolution,
             long transitionResolution, int flags) {
-        Resources r = Resources.getSystem();
-
-        long now = System.currentTimeMillis();
-        long duration = Math.abs(now - time);
-
-        // getRelativeTimeSpanString() doesn't correctly format relative dates
-        // above a week or exact dates below a day, so clamp
-        // transitionResolution as needed.
-        if (transitionResolution > WEEK_IN_MILLIS) {
-            transitionResolution = WEEK_IN_MILLIS;
-        } else if (transitionResolution < DAY_IN_MILLIS) {
-            transitionResolution = DAY_IN_MILLIS;
+        // Same reason as in formatDateRange() to explicitly indicate 12- or 24-hour format.
+        if ((flags & (FORMAT_SHOW_TIME | FORMAT_12HOUR | FORMAT_24HOUR)) == FORMAT_SHOW_TIME) {
+            flags |= DateFormat.is24HourFormat(c) ? FORMAT_24HOUR : FORMAT_12HOUR;
         }
 
-        CharSequence timeClause = formatDateRange(c, time, time, FORMAT_SHOW_TIME);
-
-        String result;
-        if (duration < transitionResolution) {
-            CharSequence relativeClause = getRelativeTimeSpanString(time, now, minResolution, flags);
-            result = r.getString(com.android.internal.R.string.relative_time, relativeClause, timeClause);
-        } else {
-            CharSequence dateClause = getRelativeTimeSpanString(c, time, false);
-            result = r.getString(com.android.internal.R.string.date_time, dateClause, timeClause);
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns a string describing a day relative to the current day. For example if the day is
-     * today this function returns "Today", if the day was a week ago it returns "7 days ago", and
-     * if the day is in 2 weeks it returns "in 14 days".
-     *
-     * @param r the resources
-     * @param day the relative day to describe in UTC milliseconds
-     * @param today the current time in UTC milliseconds
-     */
-    private static final String getRelativeDayString(Resources r, long day, long today) {
-        Locale locale = r.getConfiguration().locale;
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-
-        // TODO: use TimeZone.getOffset instead.
-        Time startTime = new Time();
-        startTime.set(day);
-        int startDay = Time.getJulianDay(day, startTime.gmtoff);
-
-        Time currentTime = new Time();
-        currentTime.set(today);
-        int currentDay = Time.getJulianDay(today, currentTime.gmtoff);
-
-        int days = Math.abs(currentDay - startDay);
-        boolean past = (today > day);
-
-        // TODO: some locales name other days too, such as de_DE's "Vorgestern" (today - 2).
-        if (days == 1) {
-            if (past) {
-                return LocaleData.get(locale).yesterday;
-            } else {
-                return LocaleData.get(locale).tomorrow;
-            }
-        } else if (days == 0) {
-            return LocaleData.get(locale).today;
-        }
-
-        int resId;
-        if (past) {
-            resId = com.android.internal.R.plurals.num_days_ago;
-        } else {
-            resId = com.android.internal.R.plurals.in_num_days;
-        }
-
-        String format = r.getQuantityString(resId, days);
-        return String.format(format, days);
+        return RelativeDateTimeFormatter.getRelativeDateTimeString(Locale.getDefault(),
+                TimeZone.getDefault(), time, System.currentTimeMillis(), minResolution,
+                transitionResolution, flags);
     }
 
     private static void initFormatStrings() {
