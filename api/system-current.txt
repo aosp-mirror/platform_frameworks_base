@@ -37454,8 +37454,10 @@ package android.view {
     method public java.lang.String debug(java.lang.String);
     method public int describeContents();
     method public final java.lang.CharSequence getTitle();
+    method public final long getUserActivityTimeout();
     method public static boolean mayUseInputMethod(int);
     method public final void setTitle(java.lang.CharSequence);
+    method public final void setUserActivityTimeout(long);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ALPHA_CHANGED = 128; // 0x80
     field public static final int ANIMATION_CHANGED = 16; // 0x10
