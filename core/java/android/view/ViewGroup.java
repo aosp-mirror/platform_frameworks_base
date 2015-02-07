@@ -2691,6 +2691,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
+        if (getAccessibilityNodeProvider() != null) {
+            return;
+        }
         if (mAttachInfo != null) {
             final ArrayList<View> childrenForAccessibility = mAttachInfo.mTempArrayList;
             childrenForAccessibility.clear();
