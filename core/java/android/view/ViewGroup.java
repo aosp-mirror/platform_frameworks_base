@@ -1934,6 +1934,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Whether this event should be handled by the accessibility focus first.
         final boolean targetAccessibilityFocus = ev.isTargetAccessibilityFocus();
 
+        // If the event targets the accessibility focused view and this is it, start
+        // normal event dispatch. Maybe a descendant is what will handle the click.
+        if (targetAccessibilityFocus && isAccessibilityFocusedViewOrHost()) {
+            ev.setTargetAccessibilityFocus(false);
+        }
+
         boolean handled = false;
         if (onFilterTouchEventForSecurity(ev)) {
             final int action = ev.getAction();
