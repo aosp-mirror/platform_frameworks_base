@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -103,6 +104,13 @@ public interface WindowManagerPolicy {
      * plugged in to HDMI, false if not.
      */
     public final static String EXTRA_HDMI_PLUGGED_STATE = "state";
+
+    /**
+     * Set to {@code true} when intent was invoked from pressing the home key.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
 
     /**
      * Pass this event to the user / app.  To be returned from
