@@ -8444,8 +8444,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // If the event should be handled by accessibility focus first.
         if (event.isTargetAccessibilityFocus()) {
             // We don't have focus or no virtual descendant has it, do not handle the event.
-            if (!isAccessibilityFocused() && !(getViewRootImpl() != null && getViewRootImpl()
-                    .getAccessibilityFocusedHost() == this)) {
+            if (!isAccessibilityFocusedViewOrHost()) {
                 return false;
             }
             // We have focus and got the event, then use normal event dispatch.
@@ -8492,6 +8491,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return result;
+    }
+
+    boolean isAccessibilityFocusedViewOrHost() {
+        return isAccessibilityFocused() || (getViewRootImpl() != null && getViewRootImpl()
+                .getAccessibilityFocusedHost() == this);
     }
 
     /**
