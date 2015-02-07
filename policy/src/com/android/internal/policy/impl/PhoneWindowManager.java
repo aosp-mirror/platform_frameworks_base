@@ -153,6 +153,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SHORT_PRESS_POWER_GO_TO_SLEEP = 1;
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP = 2;
     static final int SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME = 3;
+    static final int SHORT_PRESS_POWER_GO_HOME = 4;
 
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
@@ -969,6 +970,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mPowerManager.goToSleep(eventTime,
                             PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                    launchHomeFromHotKey();
+                    break;
+                case SHORT_PRESS_POWER_GO_HOME:
                     launchHomeFromHotKey();
                     break;
             }
@@ -2991,7 +2995,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         } catch (RemoteException e) {
                         }
                         sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                        startDockOrHome();
+                        startDockOrHome(true /*fromHomeKey*/);
                     }
                 }
             });
@@ -3009,7 +3013,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 // Otherwise, just launch Home
                 sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
-                startDockOrHome();
+                startDockOrHome(true /*fromHomeKey*/);
             }
         }
     }
@@ -5822,19 +5826,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return null;
     }
 
-    void startDockOrHome() {
+    void startDockOrHome(boolean fromHomeKey) {
         awakenDreams();
 
         Intent dock = createHomeDockIntent();
         if (dock != null) {
             try {
+                if (fromHomeKey) {
+                    dock.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, fromHomeKey);
+                }
                 mContext.startActivityAsUser(dock, UserHandle.CURRENT);
                 return;
             } catch (ActivityNotFoundException e) {
             }
         }
 
-        mContext.startActivityAsUser(mHomeIntent, UserHandle.CURRENT);
+        Intent intent;
+
+        if (fromHomeKey) {
+            intent = new Intent(mHomeIntent);
+            intent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, fromHomeKey);
+        } else {
+            intent = mHomeIntent;
+        }
+
+        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
     /**
@@ -5849,7 +5865,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } catch (RemoteException e) {
             }
             sendCloseSystemWindows();
-            startDockOrHome();
+            startDockOrHome(false /*fromHomeKey*/);
         } else {
             // This code brings home to the front or, if it is already
             // at the front, puts the device to sleep.
