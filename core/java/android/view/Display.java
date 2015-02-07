@@ -716,7 +716,7 @@ public final class Display {
             updateDisplayInfoLocked();
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
-                    mDisplayAdjustments.getActivityToken());
+                    mDisplayAdjustments.getConfiguration());
         }
     }
 

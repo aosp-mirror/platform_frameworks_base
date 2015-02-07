@@ -2252,7 +2252,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(null, mainThread,
                 packageInfo, null, null, false, null, null);
         context.mResources.updateConfiguration(context.mResourcesManager.getConfiguration(),
-                context.mResourcesManager.getDisplayMetricsLocked(Display.DEFAULT_DISPLAY));
+                context.mResourcesManager.getDisplayMetricsLocked());
         return context;
     }
 
@@ -2263,9 +2263,11 @@ class ContextImpl extends Context {
     }
 
     static ContextImpl createActivityContext(ActivityThread mainThread,
-            LoadedApk packageInfo, Configuration overrideConfiguration) {
+            LoadedApk packageInfo, int displayId, Configuration overrideConfiguration) {
         if (packageInfo == null) throw new IllegalArgumentException("packageInfo");
-        return new ContextImpl(null, mainThread, packageInfo, null, null, false, null,
+        final Display display = ResourcesManager.getInstance().getAdjustedDisplay(
+                displayId, overrideConfiguration);
+        return new ContextImpl(null, mainThread, packageInfo, null, null, false, display,
                 overrideConfiguration);
     }
 
@@ -2296,7 +2298,7 @@ class ContextImpl extends Context {
             compatInfo = packageInfo.getCompatibilityInfo();
         }
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
-        mDisplayAdjustments.setActivityToken(activityToken);
+        mDisplayAdjustments.setConfiguration(overrideConfiguration);
 
         Resources resources = packageInfo.getResources(mainThread);
         if (resources != null) {
