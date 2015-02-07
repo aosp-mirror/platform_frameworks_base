@@ -232,7 +232,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     final Rect mParentFrame = new Rect();
 
-    // The entire screen area of the device.
+    // The entire screen area of the {@link TaskStack} this window is in. Usually equal to the
+    // screen area of the device.
     final Rect mDisplayFrame = new Rect();
 
     // The region of the display frame that the display type supports displaying content on. This
@@ -509,11 +510,11 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (stack.mUnderStatusBar) {
                 mContainingFrame.top = pf.top;
             }
+            mDisplayFrame.set(mContainingFrame);
         } else {
             mContainingFrame.set(pf);
+            mDisplayFrame.set(df);
         }
-
-        mDisplayFrame.set(df);
 
         final int pw = mContainingFrame.width();
         final int ph = mContainingFrame.height();
@@ -572,9 +573,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final int fw = mFrame.width();
         final int fh = mFrame.height();
 
-        //System.out.println("In: w=" + w + " h=" + h + " container=" +
-        //                   container + " x=" + mAttrs.x + " y=" + mAttrs.y);
-
         float x, y;
         if (mEnforceSizeCompat) {
             x = mAttrs.x * mGlobalScale;
@@ -591,8 +589,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 (int) (x + mAttrs.horizontalMargin * pw),
                 (int) (y + mAttrs.verticalMargin * ph), mFrame);
 
-        // Now make sure the window fits in the overall display.
-        Gravity.applyDisplay(mAttrs.gravity, df, mFrame);
+        // Now make sure the window fits in the overall display frame.
+        Gravity.applyDisplay(mAttrs.gravity, mDisplayFrame, mFrame);
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
