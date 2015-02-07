@@ -591,6 +591,20 @@ public class RenderScript {
         rsnAllocationResize1D(mContext, id, dimX);
     }
 
+    native long  rsnAllocationAdapterCreate(long con, long allocId, long typeId);
+    synchronized long nAllocationAdapterCreate(long allocId, long typeId) {
+        validate();
+        return rsnAllocationAdapterCreate(mContext, allocId, typeId);
+    }
+
+    native void  rsnAllocationAdapterOffset(long con, long id, int x, int y, int z,
+                                            int mip, int face, int a1, int a2, int a3, int a4);
+    synchronized void nAllocationAdapterOffset(long id, int x, int y, int z,
+                                               int mip, int face, int a1, int a2, int a3, int a4) {
+        validate();
+        rsnAllocationAdapterOffset(mContext, id, x, y, z, mip, face, a1, a2, a3, a4);
+    }
+
     native long rsnFileA3DCreateFromAssetStream(long con, long assetStream);
     synchronized long nFileA3DCreateFromAssetStream(long assetStream) {
         validate();
