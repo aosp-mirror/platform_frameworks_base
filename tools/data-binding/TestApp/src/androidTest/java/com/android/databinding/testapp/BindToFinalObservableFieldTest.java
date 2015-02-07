@@ -34,6 +34,11 @@ public class BindToFinalObservableFieldTest extends BaseDataBinderTest<BindToFin
         mBinder.rebindDirty();
         final TextView textView = (TextView) mBinder.getRoot().findViewById(R.id.text_view);
         assertEquals(getActivity().getResources().getString(R.string.app_name), textView.getText().toString());
+        vo.myFinalVo.setVal(R.string.rain);
+        mBinder.rebindDirty();
+        assertEquals("The field should be observed and its notify event should've invalidated"
+                        + " binder flags.", getActivity().getResources().getString(R.string.rain),
+                textView.getText().toString());
     }
 
 

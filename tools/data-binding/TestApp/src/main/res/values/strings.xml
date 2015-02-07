@@ -13,4 +13,5 @@
 
 <resources>
     <string name="app_name">TestApp</string>
+    <string name="rain">Rain</string>
 </resources>

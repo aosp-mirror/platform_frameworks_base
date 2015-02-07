@@ -149,7 +149,6 @@ public class ClassAnalyzer {
             try {
                 Method method = klass.getMethod(methodName);
                 Field backingField = findField(klass, name);
-
                 if (Modifier.isPublic(method.getModifiers())) {
                     return new Callable(Callable.Type.METHOD, methodName, method.getReturnType(),
                             true, isBindable(method) || (backingField != null && isBindable(backingField)) );
@@ -176,7 +175,8 @@ public class ClassAnalyzer {
             Field field = klass.getField(name);
             if (Modifier.isPublic(field.getModifiers())) {
                 return new Callable(Callable.Type.FIELD, name, field.getType(),
-                        !Modifier.isFinal(field.getModifiers()), isBindable(field));
+                        !Modifier.isFinal(field.getModifiers())
+                        || isObservable(field.getType()), isBindable(field));
             }
         } catch (Throwable t) {
 
