@@ -63,7 +63,7 @@ public class TelecomLoaderService extends SystemService {
 
     private static final ComponentName SERVICE_COMPONENT = new ComponentName(
             "com.android.server.telecom",
-            "com.android.server.telecom.TelecomService");
+            "com.android.server.telecom.components.TelecomService");
 
     private static final String SERVICE_ACTION = "com.android.ITelecomService";
 
