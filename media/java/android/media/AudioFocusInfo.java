@@ -45,8 +45,9 @@ public final class AudioFocusInfo implements Parcelable {
      * @param gainRequest
      * @param lossReceived
      * @param flags
+     * @hide
      */
-    AudioFocusInfo(AudioAttributes aa, String clientId, String packageName,
+    public AudioFocusInfo(AudioAttributes aa, String clientId, String packageName,
             int gainRequest, int lossReceived, int flags) {
         mAttributes = aa == null ? new AudioAttributes.Builder().build() : aa;
         mClientId = clientId == null ? "" : clientId;
@@ -91,7 +92,7 @@ public final class AudioFocusInfo implements Parcelable {
     public int getLossReceived() { return mLossReceived; }
 
     /** @hide */
-    void clearLossReceived() { mLossReceived = 0; }
+    public void clearLossReceived() { mLossReceived = 0; }
 
     /**
      * The flags set in the audio focus request.

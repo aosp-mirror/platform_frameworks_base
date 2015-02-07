@@ -43,7 +43,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.AudioService;
+import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -1269,7 +1269,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_triplePressOnPowerBehavior);
 
-        mUseTvRouting = AudioService.getPlatformType(mContext) == AudioService.PLATFORM_TELEVISION;
+        mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
         mUseMasterVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useMasterVolume);
 

@@ -171,15 +171,15 @@ public class MediaRouter {
         }
 
         void updateAudioRoutes(AudioRoutesInfo newRoutes) {
-            if (newRoutes.mMainType != mCurAudioRoutesInfo.mMainType) {
-                mCurAudioRoutesInfo.mMainType = newRoutes.mMainType;
+            if (newRoutes.mainType != mCurAudioRoutesInfo.mainType) {
+                mCurAudioRoutesInfo.mainType = newRoutes.mainType;
                 int name;
-                if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_HEADPHONES) != 0
-                        || (newRoutes.mMainType&AudioRoutesInfo.MAIN_HEADSET) != 0) {
+                if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HEADPHONES) != 0
+                        || (newRoutes.mainType&AudioRoutesInfo.MAIN_HEADSET) != 0) {
                     name = com.android.internal.R.string.default_audio_route_name_headphones;
-                } else if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
+                } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                     name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
-                } else if ((newRoutes.mMainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
+                } else if ((newRoutes.mainType&AudioRoutesInfo.MAIN_HDMI) != 0) {
                     name = com.android.internal.R.string.default_media_route_name_hdmi;
                 } else {
                     name = com.android.internal.R.string.default_audio_route_name;
@@ -188,21 +188,21 @@ public class MediaRouter {
                 dispatchRouteChanged(sStatic.mDefaultAudioVideo);
             }
 
-            final int mainType = mCurAudioRoutesInfo.mMainType;
+            final int mainType = mCurAudioRoutesInfo.mainType;
 
-            if (!TextUtils.equals(newRoutes.mBluetoothName, mCurAudioRoutesInfo.mBluetoothName)) {
-                mCurAudioRoutesInfo.mBluetoothName = newRoutes.mBluetoothName;
-                if (mCurAudioRoutesInfo.mBluetoothName != null) {
+            if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
+                mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
+                if (mCurAudioRoutesInfo.bluetoothName != null) {
                     if (sStatic.mBluetoothA2dpRoute == null) {
                         final RouteInfo info = new RouteInfo(sStatic.mSystemCategory);
-                        info.mName = mCurAudioRoutesInfo.mBluetoothName;
+                        info.mName = mCurAudioRoutesInfo.bluetoothName;
                         info.mDescription = sStatic.mResources.getText(
                                 com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
                         sStatic.mBluetoothA2dpRoute = info;
                         addRouteStatic(sStatic.mBluetoothA2dpRoute);
                     } else {
-                        sStatic.mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.mBluetoothName;
+                        sStatic.mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.bluetoothName;
                         dispatchRouteChanged(sStatic.mBluetoothA2dpRoute);
                     }
                 } else if (sStatic.mBluetoothA2dpRoute != null) {

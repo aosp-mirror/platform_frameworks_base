@@ -16,7 +16,10 @@
 
 package android.media;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.audiopolicy.AudioMix;
+
 import java.util.ArrayList;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
@@ -64,6 +67,19 @@ public class AudioSystem
     // Expose only the getter method publicly so we can change it in the future
     private static final int NUM_STREAM_TYPES = 10;
     public static final int getNumStreamTypes() { return NUM_STREAM_TYPES; }
+
+    public static final String[] STREAM_NAMES = new String[] {
+        "STREAM_VOICE_CALL",
+        "STREAM_SYSTEM",
+        "STREAM_RING",
+        "STREAM_MUSIC",
+        "STREAM_ALARM",
+        "STREAM_NOTIFICATION",
+        "STREAM_BLUETOOTH_SCO",
+        "STREAM_SYSTEM_ENFORCED",
+        "STREAM_DTMF",
+        "STREAM_TTS"
+    };
 
     /*
      * Sets the microphone mute on or off.
@@ -570,5 +586,93 @@ public class AudioSystem
     public static native int getAudioHwSyncForSession(int sessionId);
 
     public static native int registerPolicyMixes(ArrayList<AudioMix> mixes, boolean register);
+
+
+    // Items shared with audio service
+
+    /**
+     * The delay before playing a sound. This small period exists so the user
+     * can press another key (non-volume keys, too) to have it NOT be audible.
+     * <p>
+     * PhoneWindow will implement this part.
+     */
+    public static final int PLAY_SOUND_DELAY = 300;
+
+    /**
+     * Constant to identify a focus stack entry that is used to hold the focus while the phone
+     * is ringing or during a call. Used by com.android.internal.telephony.CallManager when
+     * entering and exiting calls.
+     */
+    public final static String IN_VOICE_COMM_FOCUS_ID = "AudioFocus_For_Phone_Ring_And_Calls";
+
+    /**
+     * @see AudioManager#setVibrateSetting(int, int)
+     */
+    public static int getValueForVibrateSetting(int existingValue, int vibrateType,
+            int vibrateSetting) {
+
+        // First clear the existing setting. Each vibrate type has two bits in
+        // the value. Note '3' is '11' in binary.
+        existingValue &= ~(3 << (vibrateType * 2));
+
+        // Set into the old value
+        existingValue |= (vibrateSetting & 3) << (vibrateType * 2);
+
+        return existingValue;
+    }
+
+    public static int getDefaultStreamVolume(int streamType) {
+        return DEFAULT_STREAM_VOLUME[streamType];
+    }
+
+    public static int[] DEFAULT_STREAM_VOLUME = new int[] {
+        4,  // STREAM_VOICE_CALL
+        7,  // STREAM_SYSTEM
+        5,  // STREAM_RING
+        11, // STREAM_MUSIC
+        6,  // STREAM_ALARM
+        5,  // STREAM_NOTIFICATION
+        7,  // STREAM_BLUETOOTH_SCO
+        7,  // STREAM_SYSTEM_ENFORCED
+        11, // STREAM_DTMF
+        11  // STREAM_TTS
+    };
+
+    public static String streamToString(int stream) {
+        if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
+        if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
+        return "UNKNOWN_STREAM_" + stream;
+    }
+
+    /** The platform has no specific capabilities */
+    public static final int PLATFORM_DEFAULT = 0;
+    /** The platform is voice call capable (a phone) */
+    public static final int PLATFORM_VOICE = 1;
+    /** The platform is a television or a set-top box */
+    public static final int PLATFORM_TELEVISION = 2;
+
+    /**
+     * Return the platform type that this is running on. One of:
+     * <ul>
+     * <li>{@link #PLATFORM_VOICE}</li>
+     * <li>{@link #PLATFORM_TELEVISION}</li>
+     * <li>{@link #PLATFORM_DEFAULT}</li>
+     * </ul>
+     */
+    public static int getPlatformType(Context context) {
+        if (context.getResources().getBoolean(com.android.internal.R.bool.config_voice_capable)) {
+            return PLATFORM_VOICE;
+        } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return PLATFORM_TELEVISION;
+        } else {
+            return PLATFORM_DEFAULT;
+        }
+    }
+
+    public static final int DEFAULT_MUTE_STREAMS_AFFECTED =
+            (1 << STREAM_MUSIC) |
+            (1 << STREAM_RING) |
+            (1 << STREAM_NOTIFICATION) |
+            (1 << STREAM_SYSTEM);
 }
 
