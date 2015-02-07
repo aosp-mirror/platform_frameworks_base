@@ -3730,10 +3730,19 @@ final class ActivityStack {
         // we just want to leave the official config object now in the
         // activity and do nothing else.
         int stackChanges = oldStackOverride.diff(mOverrideConfig);
-        if (stackChanges == 0 && !oldStackOverride.equals(mOverrideConfig)) {
-            // Assume size change if diff didn't report any changes,
-            // but configurations are not equal.
-            stackChanges = ActivityInfo.CONFIG_SCREEN_SIZE;
+        if (stackChanges == 0) {
+            // {@link Configuration#diff} doesn't catch changes from unset values.
+            // Check for changes we care about.
+            if (oldStackOverride.orientation != mOverrideConfig.orientation) {
+                stackChanges |= ActivityInfo.CONFIG_ORIENTATION;
+            }
+            if (oldStackOverride.screenHeightDp != mOverrideConfig.screenHeightDp
+                    || oldStackOverride.screenWidthDp != mOverrideConfig.screenWidthDp) {
+                stackChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            }
+            if (oldStackOverride.smallestScreenWidthDp != mOverrideConfig.smallestScreenWidthDp) {
+                stackChanges |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+            }
         }
         final int changes = oldConfig.diff(newConfig) | stackChanges;
         if (changes == 0 && !r.forceNewConfig) {

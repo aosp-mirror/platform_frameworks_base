@@ -3083,9 +3083,6 @@ public class PackageParser {
             a.info.maxRecents = sa.getInt(
                     R.styleable.AndroidManifestActivity_maxRecents,
                     ActivityManager.getDefaultAppRecentsLimitStatic());
-            a.info.screenOrientation = sa.getInt(
-                    R.styleable.AndroidManifestActivity_screenOrientation,
-                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             a.info.configChanges = sa.getInt(R.styleable.AndroidManifestActivity_configChanges, 0);
             a.info.softInputMode = sa.getInt(
                     R.styleable.AndroidManifestActivity_windowSoftInputMode, 0);
@@ -3113,6 +3110,14 @@ public class PackageParser {
             a.info.resizeable = sa.getBoolean(
                     R.styleable.AndroidManifestActivity_resizeableActivity,
                     owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.MNC);
+            if (a.info.resizeable) {
+                // Fixed screen orientation isn't supported with resizeable activities.
+                a.info.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            } else {
+                a.info.screenOrientation = sa.getInt(
+                        R.styleable.AndroidManifestActivity_screenOrientation,
+                        ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            }
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;

@@ -185,6 +185,9 @@ public class TaskStack {
                 Math.min((int)(mBounds.height() / density), serviceConfig.screenHeightDp);
         mOverrideConfig.smallestScreenWidthDp =
                 Math.min(mOverrideConfig.screenWidthDp, mOverrideConfig.screenHeightDp);
+        mOverrideConfig.orientation =
+                (mOverrideConfig.screenWidthDp <= mOverrideConfig.screenHeightDp)
+                        ? Configuration.ORIENTATION_PORTRAIT : Configuration.ORIENTATION_LANDSCAPE;
     }
 
     void updateDisplayInfo() {
