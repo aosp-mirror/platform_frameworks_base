@@ -294,6 +294,8 @@ public final class ActivityThread {
         Configuration newConfig;
         Configuration createdConfig;
         Configuration overrideConfig;
+        // Used for consolidating configs before sending on to Activity.
+        private Configuration tmpConfig = new Configuration();
         ActivityClientRecord nextIdle;
 
         ProfilerInfo profilerInfo;
@@ -555,6 +557,15 @@ public final class ActivityThread {
         IBinder activityToken;
         IBinder requestToken;
         int requestType;
+    }
+
+    static final class ActivityConfigChangeData {
+        final IBinder activityToken;
+        final Configuration overrideConfig;
+        public ActivityConfigChangeData(IBinder token, Configuration config) {
+            activityToken = token;
+            overrideConfig = config;
+        }
     }
 
     private native void dumpGraphicsInfo(FileDescriptor fd);
@@ -888,15 +899,19 @@ public final class ActivityThread {
                     sticky, sendingUser);
         }
 
+        @Override
         public void scheduleLowMemory() {
             sendMessage(H.LOW_MEMORY, null);
         }
 
         @Override
-        public void scheduleActivityConfigurationChanged(IBinder token) {
-            sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
+        public void scheduleActivityConfigurationChanged(
+                IBinder token, Configuration overrideConfig) {
+            sendMessage(H.ACTIVITY_CONFIGURATION_CHANGED,
+                    new ActivityConfigChangeData(token, overrideConfig));
         }
 
+        @Override
         public void profilerControl(boolean start, ProfilerInfo profilerInfo, int profileType) {
             sendMessage(H.PROFILER_CONTROL, profilerInfo, start ? 1 : 0, profileType);
         }
@@ -1456,7 +1471,7 @@ public final class ActivityThread {
                     break;
                 case ACTIVITY_CONFIGURATION_CHANGED:
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
-                    handleActivityConfigurationChanged((IBinder)msg.obj);
+                    handleActivityConfigurationChanged((ActivityConfigChangeData)msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case PROFILER_CONTROL:
@@ -3099,10 +3114,14 @@ public final class ActivityThread {
             if (!r.activity.mFinished && willBeVisible
                     && r.activity.mDecor != null && !r.hideForNow) {
                 if (r.newConfig != null) {
+                    r.tmpConfig.setTo(r.newConfig);
+                    if (r.overrideConfig != null) {
+                        r.tmpConfig.updateFrom(r.overrideConfig);
+                    }
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Resuming activity "
-                            + r.activityInfo.name + " with newConfig " + r.newConfig);
-                    performConfigurationChanged(r.activity, r.newConfig);
-                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.newConfig));
+                            + r.activityInfo.name + " with newConfig " + r.tmpConfig);
+                    performConfigurationChanged(r.activity, r.tmpConfig);
+                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
                     r.newConfig = null;
                 }
                 if (localLOGV) Slog.v(TAG, "Resuming " + r + " with isForward="
@@ -3431,10 +3450,14 @@ public final class ActivityThread {
                     }
                 }
                 if (r.newConfig != null) {
+                    r.tmpConfig.setTo(r.newConfig);
+                    if (r.overrideConfig != null) {
+                        r.tmpConfig.updateFrom(r.overrideConfig);
+                    }
                     if (DEBUG_CONFIGURATION) Slog.v(TAG, "Updating activity vis "
-                            + r.activityInfo.name + " with new config " + r.newConfig);
-                    performConfigurationChanged(r.activity, r.newConfig);
-                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.newConfig));
+                            + r.activityInfo.name + " with new config " + r.tmpConfig);
+                    performConfigurationChanged(r.activity, r.tmpConfig);
+                    freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(r.tmpConfig));
                     r.newConfig = null;
                 }
             } else {
@@ -4164,16 +4187,21 @@ public final class ActivityThread {
         }
     }
 
-    final void handleActivityConfigurationChanged(IBinder token) {
-        ActivityClientRecord r = mActivities.get(token);
+    final void handleActivityConfigurationChanged(ActivityConfigChangeData data) {
+        ActivityClientRecord r = mActivities.get(data.activityToken);
         if (r == null || r.activity == null) {
             return;
         }
 
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                 + r.activityInfo.name);
-        
-        performConfigurationChanged(r.activity, mCompatConfiguration);
+
+        r.tmpConfig.setTo(mCompatConfiguration);
+        if (data.overrideConfig != null) {
+            r.overrideConfig = data.overrideConfig;
+            r.tmpConfig.updateFrom(data.overrideConfig);
+        }
+        performConfigurationChanged(r.activity, r.tmpConfig);
 
         freeTextLayoutCachesIfNeeded(r.activity.mCurrentConfig.diff(mCompatConfiguration));
 
