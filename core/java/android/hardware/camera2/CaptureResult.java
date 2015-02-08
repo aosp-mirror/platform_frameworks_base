@@ -724,9 +724,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * metering sequence when it processes this request.</p>
      * <p>This entry is normally set to IDLE, or is not
      * included at all in the request settings. When included and
-     * set to START, the camera device will trigger the autoexposure
+     * set to START, the camera device will trigger the auto-exposure (AE)
      * precapture metering sequence.</p>
-     * <p>The precapture sequence should triggered before starting a
+     * <p>The precapture sequence should be triggered before starting a
      * high-quality still capture for final metering decisions to
      * be made, and for firing pre-capture flash pulses to estimate
      * scene brightness and required final capture flash power, when
@@ -734,6 +734,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Normally, this entry should be set to START for only a
      * single request, and the application should wait until the
      * sequence completes before starting a new one.</p>
+     * <p>When a precapture metering sequence is finished, the camera device
+     * may lock the auto-exposure routine internally to be able to accurately expose the
+     * subsequent still capture image (<code>{@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} == STILL_CAPTURE</code>).
+     * For this case, the AE may not resume normal scan if no subsequent still capture is
+     * submitted. To ensure that the AE routine restarts normal scan, the application should
+     * submit a request with <code>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} == true</code>, followed by a request
+     * with <code>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} == false</code>, if the application decides not to submit a
+     * still capture request after the precapture sequence completes.</p>
      * <p>The exact effect of auto-exposure (AE) precapture trigger
      * depends on the current AE mode and state; see
      * {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture state transition
@@ -752,7 +760,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CaptureResult#CONTROL_AE_STATE
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_START
