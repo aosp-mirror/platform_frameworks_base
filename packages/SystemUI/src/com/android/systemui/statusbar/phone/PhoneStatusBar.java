@@ -361,7 +361,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (!mUseHeadsUp) {
                     Log.d(TAG, "dismissing any existing heads up notification on disable event");
                     setHeadsUpVisibility(false);
-                    mHeadsUpNotificationView.release();
+                    mHeadsUpNotificationView.releaseImmediately();
                     removeHeadsUpView();
                 } else {
                     addHeadsUpView();
@@ -1213,33 +1213,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     @Override
-    public void resetHeadsUpDecayTimer() {
-        mHandler.removeMessages(MSG_DECAY_HEADS_UP);
-        if (mUseHeadsUp && mHeadsUpNotificationDecay > 0
-                && mHeadsUpNotificationView.isClearable()) {
-            mHandler.sendEmptyMessageDelayed(MSG_DECAY_HEADS_UP, mHeadsUpNotificationDecay);
-        }
-    }
-
-    @Override
-    public void scheduleHeadsUpOpen() {
-        mHandler.removeMessages(MSG_SHOW_HEADS_UP);
-        mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
-    }
-
-    @Override
-    public void scheduleHeadsUpClose() {
-        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
-        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
-    }
-
-    @Override
-    public void scheduleHeadsUpEscalation() {
-        mHandler.removeMessages(MSG_ESCALATE_HEADS_UP);
-        mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
-    }
-
-    @Override
     protected void updateNotificationRanking(RankingMap ranking) {
         mNotificationData.updateRanking(ranking);
         updateNotifications();
@@ -1247,9 +1220,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void removeNotification(String key, RankingMap ranking) {
-        if (ENABLE_HEADS_UP && mHeadsUpNotificationView.getEntry() != null
-                && key.equals(mHeadsUpNotificationView.getEntry().notification.getKey())) {
-            mHeadsUpNotificationView.clear();
+        if (ENABLE_HEADS_UP) {
+            mHeadsUpNotificationView.removeNotification(key);
         }
 
         StatusBarNotification old = removeNotificationViews(key, ranking);
@@ -1870,16 +1842,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 case MSG_SHOW_HEADS_UP:
                     setHeadsUpVisibility(true);
                     break;
-                case MSG_DECAY_HEADS_UP:
-                    mHeadsUpNotificationView.release();
-                    setHeadsUpVisibility(false);
-                    break;
-                case MSG_HIDE_HEADS_UP:
-                    mHeadsUpNotificationView.release();
-                    setHeadsUpVisibility(false);
-                    break;
                 case MSG_ESCALATE_HEADS_UP:
                     escalateHeadsUp();
+                case MSG_HIDE_HEADS_UP:
+                    mHeadsUpNotificationView.releaseImmediately();
                     setHeadsUpVisibility(false);
                     break;
                 case MSG_LAUNCH_TRANSITION_TIMEOUT:
@@ -1889,11 +1855,41 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    @Override
+    public void scheduleHeadsUpDecay(long delay) {
+        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
+        if (mHeadsUpNotificationView.isClearable()) {
+            mHandler.sendEmptyMessageDelayed(MSG_HIDE_HEADS_UP, delay);
+        }
+    }
+
+    @Override
+    public void scheduleHeadsUpOpen() {
+        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
+        mHandler.removeMessages(MSG_SHOW_HEADS_UP);
+        mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
+    }
+
+    @Override
+    public void scheduleHeadsUpClose() {
+        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
+        if (mHeadsUpNotificationView.getVisibility() != View.GONE) {
+            mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+        }
+    }
+
+    @Override
+    public void scheduleHeadsUpEscalation() {
+        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
+        mHandler.removeMessages(MSG_ESCALATE_HEADS_UP);
+        mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
+    }
+
     /**  if the interrupting notification had a fullscreen intent, fire it now.  */
     private void escalateHeadsUp() {
         if (mHeadsUpNotificationView.getEntry() != null) {
             final StatusBarNotification sbn = mHeadsUpNotificationView.getEntry().notification;
-            mHeadsUpNotificationView.release();
+            mHeadsUpNotificationView.releaseImmediately();
             final Notification notification = sbn.getNotification();
             if (notification.fullScreenIntent != null) {
                 if (DEBUG)
@@ -2734,10 +2730,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
     }
 
-    public void onHeadsUpDismissed() {
-        mHeadsUpNotificationView.dismiss();
-    }
-
     /**
      * Reload some of our resources when the configuration changes.
      *
@@ -2772,7 +2764,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
-        mHeadsUpNotificationDecay = res.getInteger(R.integer.heads_up_notification_decay);
         mRowMinHeight =  res.getDimensionPixelSize(R.dimen.notification_min_height);
         mRowMaxHeight =  res.getDimensionPixelSize(R.dimen.notification_max_height);
 

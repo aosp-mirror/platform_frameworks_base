@@ -127,7 +127,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_SHOW_HEADS_UP = 1028;
     protected static final int MSG_HIDE_HEADS_UP = 1029;
     protected static final int MSG_ESCALATE_HEADS_UP = 1030;
-    protected static final int MSG_DECAY_HEADS_UP = 1031;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
@@ -1153,7 +1152,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Do nothing
     }
 
-    public abstract void resetHeadsUpDecayTimer();
+    public abstract void scheduleHeadsUpDecay(long delay);
 
     public abstract void scheduleHeadsUpOpen();
 
@@ -1353,8 +1352,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         PendingIntent contentIntent = sbn.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = makeClicker(contentIntent, sbn.getKey(),
-                    isHeadsUp);
+            final View.OnClickListener listener = makeClicker(contentIntent, sbn.getKey());
             row.setOnClickListener(listener);
         } else {
             row.setOnClickListener(null);
@@ -1515,20 +1513,17 @@ public abstract class BaseStatusBar extends SystemUI implements
         return true;
     }
 
-    public NotificationClicker makeClicker(PendingIntent intent, String notificationKey,
-            boolean forHun) {
-        return new NotificationClicker(intent, notificationKey, forHun);
+    public NotificationClicker makeClicker(PendingIntent intent, String notificationKey) {
+        return new NotificationClicker(intent, notificationKey);
     }
 
     protected class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
         private final String mNotificationKey;
-        private boolean mIsHeadsUp;
 
-        public NotificationClicker(PendingIntent intent, String notificationKey, boolean forHun) {
+        public NotificationClicker(PendingIntent intent, String notificationKey) {
             mIntent = intent;
             mNotificationKey = notificationKey;
-            mIsHeadsUp = forHun;
         }
 
         public void onClick(final View v) {
@@ -1541,12 +1536,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                             mCurrentUserId);
             dismissKeyguardThenExecute(new OnDismissAction() {
                 public boolean onDismiss() {
-                    if (mIsHeadsUp) {
+                    if (mNotificationKey.equals(mHeadsUpNotificationView.getKey())) {
                         // Release the HUN notification to the shade.
                         //
                         // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
                         // become canceled shortly by NoMan, but we can't assume that.
-                        mHeadsUpNotificationView.releaseAndClose();
+                        mHeadsUpNotificationView.releaseImmediately();
                     }
                     new Thread() {
                         @Override
@@ -1893,7 +1888,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         && oldPublicContentView.getLayoutId() == publicContentView.getLayoutId());
 
         final boolean shouldInterrupt = shouldInterrupt(notification);
-        final boolean alertAgain = alertAgain(oldEntry, n);
+        final boolean alertAgain = shouldInterrupt && alertAgain(oldEntry, n);
         boolean updateSuccessful = false;
         if (contentsUnchanged && bigContentsUnchanged && headsUpContentsUnchanged
                 && publicUnchanged) {
@@ -1916,14 +1911,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 }
 
                 if (wasHeadsUp) {
-                    if (shouldInterrupt) {
-                        updateHeadsUpViews(oldEntry, notification);
-                        if (alertAgain) {
-                            resetHeadsUpDecayTimer();
-                        }
-                    } else {
+                    // Release may hang on to the views for a bit, so we should always update them.
+                    updateHeadsUpViews(oldEntry, notification);
+                    mHeadsUpNotificationView.updateNotification(oldEntry, alertAgain);
+                    if (!shouldInterrupt) {
                         // we updated the notification above, so release to build a new shade entry
-                        mHeadsUpNotificationView.releaseAndClose();
+                        mHeadsUpNotificationView.release();
                         return;
                     }
                 } else {
@@ -1946,23 +1939,19 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (!updateSuccessful) {
             if (DEBUG) Log.d(TAG, "not reusing notification for key: " + key);
             if (wasHeadsUp) {
-                if (shouldInterrupt) {
-                    if (DEBUG) Log.d(TAG, "rebuilding heads up for key: " + key);
-                    Entry newEntry = new Entry(notification, null);
-                    ViewGroup holder = mHeadsUpNotificationView.getHolder();
-                    if (inflateViewsForHeadsUp(newEntry, holder)) {
-                        mHeadsUpNotificationView.showNotification(newEntry);
-                        if (alertAgain) {
-                            resetHeadsUpDecayTimer();
-                        }
-                    } else {
-                        Log.w(TAG, "Couldn't create new updated headsup for package "
-                                + contentView.getPackage());
-                    }
+                if (DEBUG) Log.d(TAG, "rebuilding heads up for key: " + key);
+                Entry newEntry = new Entry(notification, null);
+                ViewGroup holder = mHeadsUpNotificationView.getHolder();
+                if (inflateViewsForHeadsUp(newEntry, holder)) {
+                    mHeadsUpNotificationView.updateNotification(newEntry, alertAgain);
                 } else {
+                    Log.w(TAG, "Couldn't create new updated headsup for package "
+                            + contentView.getPackage());
+                }
+                if (!shouldInterrupt) {
                     if (DEBUG) Log.d(TAG, "releasing heads up for key: " + key);
                     oldEntry.notification = notification;
-                    mHeadsUpNotificationView.releaseAndClose();
+                    mHeadsUpNotificationView.release();
                     return;
                 }
             } else {
@@ -2032,8 +2021,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // update the contentIntent
         final PendingIntent contentIntent = notification.getNotification().contentIntent;
         if (contentIntent != null) {
-            final View.OnClickListener listener = makeClicker(contentIntent, notification.getKey(),
-                    isHeadsUp);
+            final View.OnClickListener listener = makeClicker(contentIntent, notification.getKey());
             entry.row.setOnClickListener(listener);
         } else {
             entry.row.setOnClickListener(null);
