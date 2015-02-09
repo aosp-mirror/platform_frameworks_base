@@ -143,10 +143,9 @@ numbers, can cause unexpected version updates and regression incompatibilities.<
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v4:21.0.+
+com.android.support:support-v4:21.0.0
 </pre>
 
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 <h2 id="multidex">Multidex Support Library</h2>
@@ -171,10 +170,9 @@ com.android.support:support-v4:21.0.+
 </p>
 
 <pre>
-com.android.support:multidex:1.0.+
+com.android.support:multidex:1.0.0
 </pre>
 
-<p>This dependency notation specifies the latest release version with the 1.0 prefix.</p>
 
 
 <h2 id="v7">v7 Support Libraries</h2>
@@ -226,10 +224,9 @@ com.android.support:multidex:1.0.+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:appcompat-v7:21.0.+
+com.android.support:appcompat-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 <h3 id="v7-cardview">v7 cardview library</h3>
@@ -249,10 +246,9 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:cardview-v7:21.0.+
+com.android.support:cardview-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 <h3 id="v7-gridlayout">v7 gridlayout library</h3>
@@ -271,10 +267,9 @@ com.android.support:cardview-v7:21.0.+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:gridlayout-v7:21.0.+
+com.android.support:gridlayout-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 <h3 id="v7-mediarouter">v7 mediarouter library</h3>
@@ -308,7 +303,7 @@ script dependency identifier <code>com.android.support:support-v7-mediarouter:&l
 where "&lt;revision&gt;" is the minimum revision at which the library is available. For example:</p>
 
 <pre>
-com.android.support:mediarouter-v7:21.0.+
+com.android.support:mediarouter-v7:21.0.0
 </pre>
 
 <p class="caution">The v7 mediarouter library APIs introduced in Support Library
@@ -335,10 +330,8 @@ title card.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:palette-v7:21.0.+
+com.android.support:palette-v7:21.0.0
 </pre>
-
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 
@@ -360,10 +353,8 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:recyclerview-v7:21.0.+
+com.android.support:recyclerview-v7:21.0.0
 </pre>
-
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 
@@ -405,10 +396,8 @@ com.android.support:recyclerview-v7:21.0.+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v13:18.0.+
+com.android.support:support-v13:18.0.0
 </pre>
-
-<p>This dependency notation specifies the latest release version with the 18.0 prefix.</p>
 
 
 
@@ -448,9 +437,8 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:leanback-v17:21.0.+
+com.android.support:leanback-v17:21.0.0
 </pre>
 
-<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
