@@ -19,7 +19,6 @@ package android.location;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * A class containing a GPS clock timestamp.
@@ -29,7 +28,6 @@ import android.util.Log;
  */
 @SystemApi
 public class GpsClock implements Parcelable {
-    private static final String TAG = "GpsClock";
 
     // The following enumerations must be in sync with the values declared in gps.h
 
@@ -109,17 +107,7 @@ public class GpsClock implements Parcelable {
      * Sets the type of time reported.
      */
     public void setType(byte value) {
-        switch (value) {
-            case TYPE_UNKNOWN:
-            case TYPE_GPS_TIME:
-            case TYPE_LOCAL_HW_TIME:
-                mType = value;
-                break;
-            default:
-                Log.d(TAG, "Sanitizing invalid 'type': " + value);
-                mType = TYPE_UNKNOWN;
-                break;
-        }
+        mType = value;
     }
 
     /**
@@ -135,7 +123,7 @@ public class GpsClock implements Parcelable {
             case TYPE_LOCAL_HW_TIME:
                 return "LocalHwClock";
             default:
-                return "<Invalid>";
+                return "<Invalid:" + mType + ">";
         }
     }
 

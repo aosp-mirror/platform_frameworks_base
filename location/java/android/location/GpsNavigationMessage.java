@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.security.InvalidParameterException;
 
@@ -31,7 +30,7 @@ import java.security.InvalidParameterException;
  */
 @SystemApi
 public class GpsNavigationMessage implements Parcelable {
-    private static final String TAG = "GpsNavigationMessage";
+
     private static final byte[] EMPTY_ARRAY = new byte[0];
 
     // The following enumerations must be in sync with the values declared in gps.h
@@ -102,19 +101,7 @@ public class GpsNavigationMessage implements Parcelable {
      * Sets the type of the navigation message.
      */
     public void setType(byte value) {
-        switch (value) {
-            case TYPE_UNKNOWN:
-            case TYPE_L1CA:
-            case TYPE_L2CNAV:
-            case TYPE_L5CNAV:
-            case TYPE_CNAV2:
-                mType = value;
-                break;
-            default:
-                Log.d(TAG, "Sanitizing invalid 'type': " + value);
-                mType = TYPE_UNKNOWN;
-                break;
-        }
+        mType = value;
     }
 
     /**
@@ -134,7 +121,7 @@ public class GpsNavigationMessage implements Parcelable {
             case TYPE_CNAV2:
                 return "CNAV-2";
             default:
-                return "<Invalid>";
+                return "<Invalid:" + mType + ">";
         }
     }
 
