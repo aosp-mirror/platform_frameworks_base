@@ -174,6 +174,8 @@ public class WebViewClient {
     public static final int ERROR_FILE_NOT_FOUND = -14;
     /** Too many requests during this load */
     public static final int ERROR_TOO_MANY_REQUESTS = -15;
+    /** Request blocked by the browser */
+    public static final int ERROR_BLOCKED = -16;
 
     /**
      * Report an error to the host application. These errors are unrecoverable
@@ -183,9 +185,42 @@ public class WebViewClient {
      * @param errorCode The error code corresponding to an ERROR_* value.
      * @param description A String describing the error.
      * @param failingUrl The url that failed to load.
+     * @deprecated Use {@link #onReceivedError(WebView, WebResourceRequest, WebResourceError)
+     *             onReceivedError(WebView, WebResourceRequest, WebResourceError)} instead.
      */
+    @Deprecated
     public void onReceivedError(WebView view, int errorCode,
             String description, String failingUrl) {
+    }
+
+    /**
+     * Report web resource loading error to the host application. These errors usually indicate
+     * inability to connect to the server. Note that unlike the deprecated version of the callback,
+     * the new version will be called for any resource (iframe, image, etc), not just for the main
+     * page. Thus, it is recommended to perform minimum required work in this callback.
+     * @param view The WebView that is initiating the callback.
+     * @param request The originating request.
+     * @param error Information about the error occured.
+     */
+    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+        if (request.isForMainFrame()) {
+            onReceivedError(view,
+                    error.getErrorCode(), error.getDescription(), request.getUrl().toString());
+        }
+    }
+
+    /**
+     * Notify the host application that an HTTP error has been received from the server while
+     * loading a resource.  HTTP errors have status codes &gt;= 400.  This callback will be called
+     * for any resource (iframe, image, etc), not just for the main page. Thus, it is recommended to
+     * perform minimum required work in this callback. Note that the content of the server
+     * response may not be provided within the <b>errorResponse</b> parameter.
+     * @param view The WebView that is initiating the callback.
+     * @param request The originating request.
+     * @param errorResponse Information about the error occured.
+     */
+    public void onReceivedHttpError(
+            WebView view, WebResourceRequest request, WebResourceResponseBase errorResponse) {
     }
 
     /**

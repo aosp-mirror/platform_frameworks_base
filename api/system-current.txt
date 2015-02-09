@@ -39151,6 +39151,12 @@ package android.webkit {
     method public abstract void onReceivedIcon(java.lang.String, android.graphics.Bitmap);
   }
 
+  public abstract class WebResourceError {
+    ctor public WebResourceError();
+    method public abstract java.lang.String getDescription();
+    method public abstract int getErrorCode();
+  }
+
   public abstract interface WebResourceRequest {
     method public abstract java.lang.String getMethod();
     method public abstract java.util.Map<java.lang.String, java.lang.String> getRequestHeaders();
@@ -39159,7 +39165,7 @@ package android.webkit {
     method public abstract boolean isForMainFrame();
   }
 
-  public class WebResourceResponse {
+  public class WebResourceResponse extends android.webkit.WebResourceResponseBase {
     ctor public WebResourceResponse(java.lang.String, java.lang.String, java.io.InputStream);
     ctor public WebResourceResponse(java.lang.String, java.lang.String, int, java.lang.String, java.util.Map<java.lang.String, java.lang.String>, java.io.InputStream);
     method public java.io.InputStream getData();
@@ -39173,6 +39179,16 @@ package android.webkit {
     method public void setMimeType(java.lang.String);
     method public void setResponseHeaders(java.util.Map<java.lang.String, java.lang.String>);
     method public void setStatusCodeAndReasonPhrase(int, java.lang.String);
+  }
+
+  public abstract class WebResourceResponseBase {
+    ctor public WebResourceResponseBase();
+    method public abstract java.io.InputStream getData();
+    method public abstract java.lang.String getEncoding();
+    method public abstract java.lang.String getMimeType();
+    method public abstract java.lang.String getReasonPhrase();
+    method public abstract java.util.Map<java.lang.String, java.lang.String> getResponseHeaders();
+    method public abstract int getStatusCode();
   }
 
   public abstract class WebSettings {
@@ -39534,8 +39550,10 @@ package android.webkit {
     method public void onPageFinished(android.webkit.WebView, java.lang.String);
     method public void onPageStarted(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
     method public void onReceivedClientCertRequest(android.webkit.WebView, android.webkit.ClientCertRequest);
-    method public void onReceivedError(android.webkit.WebView, int, java.lang.String, java.lang.String);
+    method public deprecated void onReceivedError(android.webkit.WebView, int, java.lang.String, java.lang.String);
+    method public void onReceivedError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceError);
     method public void onReceivedHttpAuthRequest(android.webkit.WebView, android.webkit.HttpAuthHandler, java.lang.String, java.lang.String);
+    method public void onReceivedHttpError(android.webkit.WebView, android.webkit.WebResourceRequest, android.webkit.WebResourceResponseBase);
     method public void onReceivedLoginRequest(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String);
     method public void onReceivedSslError(android.webkit.WebView, android.webkit.SslErrorHandler, android.net.http.SslError);
     method public void onScaleChanged(android.webkit.WebView, float, float);
@@ -39548,6 +39566,7 @@ package android.webkit {
     method public boolean shouldOverrideUrlLoading(android.webkit.WebView, java.lang.String);
     field public static final int ERROR_AUTHENTICATION = -4; // 0xfffffffc
     field public static final int ERROR_BAD_URL = -12; // 0xfffffff4
+    field public static final int ERROR_BLOCKED = -16; // 0xfffffff0
     field public static final int ERROR_CONNECT = -6; // 0xfffffffa
     field public static final int ERROR_FAILED_SSL_HANDSHAKE = -11; // 0xfffffff5
     field public static final int ERROR_FILE = -13; // 0xfffffff3

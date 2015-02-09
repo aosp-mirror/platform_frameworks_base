@@ -25,7 +25,7 @@ import java.util.Map;
  * class from {@link WebViewClient#shouldInterceptRequest} to provide a custom
  * response when the WebView requests a particular resource.
  */
-public class WebResourceResponse {
+public class WebResourceResponse extends WebResourceResponseBase {
     private String mMimeType;
     private String mEncoding;
     private int mStatusCode;
@@ -75,38 +75,36 @@ public class WebResourceResponse {
     }
 
     /**
-     * Sets the resource response's MIME type, for example text/html.
+     * Sets the resource response's MIME type, for example &quot;text/html&quot;.
      *
-     * @param mimeType the resource response's MIME type
+     * @param mimeType The resource response's MIME type
      */
     public void setMimeType(String mimeType) {
         mMimeType = mimeType;
     }
 
     /**
-     * Gets the resource response's MIME type.
-     *
-     * @return the resource response's MIME type
+     * {@inheritDoc}
      */
+    @Override
     public String getMimeType() {
         return mMimeType;
     }
 
     /**
-     * Sets the resource response's encoding, for example UTF-8. This is used
+     * Sets the resource response's encoding, for example &quot;UTF-8&quot;. This is used
      * to decode the data from the input stream.
      *
-     * @param encoding the resource response's encoding
+     * @param encoding The resource response's encoding
      */
     public void setEncoding(String encoding) {
         mEncoding = encoding;
     }
 
     /**
-     * Gets the resource response's encoding.
-     *
-     * @return the resource response's encoding
+     * {@inheritDoc}
      */
+    @Override
     public String getEncoding() {
         return mEncoding;
     }
@@ -142,19 +140,17 @@ public class WebResourceResponse {
     }
 
     /**
-     * Gets the resource response's status code.
-     *
-     * @return the resource response's status code.
+     * {@inheritDoc}
      */
+    @Override
     public int getStatusCode() {
         return mStatusCode;
     }
 
     /**
-     * Gets the description of the resource response's status code.
-     *
-     * @return the description of the resource response's status code.
+     * {@inheritDoc}
      */
+    @Override
     public String getReasonPhrase() {
         return mReasonPhrase;
     }
@@ -162,17 +158,16 @@ public class WebResourceResponse {
     /**
      * Sets the headers for the resource response.
      *
-     * @param headers mapping of header name -> header value.
+     * @param headers Mapping of header name -> header value.
      */
     public void setResponseHeaders(Map<String, String> headers) {
         mResponseHeaders = headers;
     }
 
     /**
-     * Gets the headers for the resource response.
-     *
-     * @return the headers for the resource response.
+     * {@inheritDoc}
      */
+    @Override
     public Map<String, String> getResponseHeaders() {
         return mResponseHeaders;
     }
@@ -190,15 +185,13 @@ public class WebResourceResponse {
             throw new IllegalArgumentException("StringBufferInputStream is deprecated and must " +
                 "not be passed to a WebResourceResponse");
         }
-
         mInputStream = data;
     }
 
     /**
-     * Gets the input stream that provides the resource response's data.
-     *
-     * @return the input stream that provides the resource response's data
+     * {@inheritDoc}
      */
+    @Override
     public InputStream getData() {
         return mInputStream;
     }
