@@ -1758,9 +1758,20 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN: {
-                int direction = keyCode == KeyEvent.KEYCODE_VOLUME_UP ? AudioManager.ADJUST_RAISE
-                        : AudioManager.ADJUST_LOWER;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_MUTE: {
+                int direction = 0;
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_VOLUME_UP:
+                        direction = AudioManager.ADJUST_RAISE;
+                        break;
+                    case KeyEvent.KEYCODE_VOLUME_DOWN:
+                        direction = AudioManager.ADJUST_LOWER;
+                        break;
+                    case KeyEvent.KEYCODE_VOLUME_MUTE:
+                        direction = AudioManager.ADJUST_TOGGLE_MUTE;
+                        break;
+                }
                 // If we have a session send it the volume command, otherwise
                 // use the suggested stream.
                 if (mMediaController != null) {
@@ -1770,10 +1781,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             mVolumeControlStreamType, direction,
                             AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_VIBRATE);
                 }
-                return true;
-            }
-            case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                getAudioManager().handleKeyDown(event, mVolumeControlStreamType);
                 return true;
             }
             // These are all the recognized media key codes in
