@@ -36,15 +36,18 @@ class GlopBuilder {
     PREVENT_COPY_AND_ASSIGN(GlopBuilder);
 public:
     GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop);
+
     GlopBuilder& setMeshUnitQuad();
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
+    GlopBuilder& setMeshIndexedQuads(void* vertexData, int quadCount);
 
     GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewOffsetRect(float offsetX, float offsetY, const Rect source);
 
-    GlopBuilder& setPaint(const SkPaint* paint, float alphaScale);
+    GlopBuilder& setOptionalPaint(const SkPaint* paint, float alphaScale);
+    GlopBuilder& setPaint(const SkPaint& paint, float alphaScale);
     void build();
 private:
     enum StageFlags {

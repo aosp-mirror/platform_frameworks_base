@@ -31,12 +31,28 @@ MeshState::MeshState()
         , mCurrentTexCoordsStride(0)
         , mTexCoordsArrayEnabled(false)
         , mQuadListIndices(0) {
-
     glGenBuffers(1, &mUnitQuadBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, mUnitQuadBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(kUnitQuadVertices), kUnitQuadVertices, GL_STATIC_DRAW);
 
     mCurrentBuffer = mUnitQuadBuffer;
+
+    std::unique_ptr<uint16_t[]> regionIndices(new uint16_t[kMaxNumberOfQuads * 6]);
+    for (uint32_t i = 0; i < kMaxNumberOfQuads; i++) {
+        uint16_t quad = i * 4;
+        int index = i * 6;
+        regionIndices[index    ] = quad;       // top-left
+        regionIndices[index + 1] = quad + 1;   // top-right
+        regionIndices[index + 2] = quad + 2;   // bottom-left
+        regionIndices[index + 3] = quad + 2;   // bottom-left
+        regionIndices[index + 4] = quad + 1;   // top-right
+        regionIndices[index + 5] = quad + 3;   // bottom-right
+    }
+    glGenBuffers(1, &mQuadListIndices);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mQuadListIndices);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, kMaxNumberOfQuads * 6 * sizeof(uint16_t),
+            regionIndices.get(), GL_STATIC_DRAW);
+    mCurrentIndicesBuffer = mQuadListIndices;
 
     // position attribute always enabled
     glEnableVertexAttribArray(Program::kBindingPosition);
@@ -138,26 +154,6 @@ bool MeshState::bindIndicesBufferInternal(const GLuint buffer) {
 }
 
 bool MeshState::bindQuadIndicesBuffer() {
-    if (!mQuadListIndices) {
-        std::unique_ptr<uint16_t[]> regionIndices(new uint16_t[kMaxNumberOfQuads * 6]);
-        for (uint32_t i = 0; i < kMaxNumberOfQuads; i++) {
-            uint16_t quad = i * 4;
-            int index = i * 6;
-            regionIndices[index    ] = quad;       // top-left
-            regionIndices[index + 1] = quad + 1;   // top-right
-            regionIndices[index + 2] = quad + 2;   // bottom-left
-            regionIndices[index + 3] = quad + 2;   // bottom-left
-            regionIndices[index + 4] = quad + 1;   // top-right
-            regionIndices[index + 5] = quad + 3;   // bottom-right
-        }
-
-        glGenBuffers(1, &mQuadListIndices);
-        bool force = bindIndicesBufferInternal(mQuadListIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, kMaxNumberOfQuads * 6 * sizeof(uint16_t),
-                regionIndices.get(), GL_STATIC_DRAW);
-        return force;
-    }
-
     return bindIndicesBufferInternal(mQuadListIndices);
 }
 

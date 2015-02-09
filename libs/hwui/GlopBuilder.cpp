@@ -78,6 +78,21 @@ GlopBuilder& GlopBuilder::setMeshUnitQuad() {
     return *this;
 }
 
+GlopBuilder& GlopBuilder::setMeshIndexedQuads(void* vertexData, int quadCount) {
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.vertexFlags = kNone_Attrib;
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
+    mOutGlop->mesh.vertexBufferObject = 0;
+    mOutGlop->mesh.vertices = vertexData;
+    mOutGlop->mesh.indexBufferObject = mRenderState.meshState().getQuadListIBO();
+    mOutGlop->mesh.indices = nullptr;
+    mOutGlop->mesh.vertexCount = 6 * quadCount;
+    mOutGlop->mesh.stride = kVertexStride;
+
+    return *this;
+}
+
 GlopBuilder& GlopBuilder::setTransform(const Matrix4& ortho,
         const Matrix4& transform, bool fudgingOffset) {
     TRIGGER_STAGE(kTransformStage);
@@ -90,6 +105,7 @@ GlopBuilder& GlopBuilder::setTransform(const Matrix4& ortho,
 
 GlopBuilder& GlopBuilder::setModelViewMapUnitToRect(const Rect destination) {
     TRIGGER_STAGE(kModelViewStage);
+
     mOutGlop->transform.modelView.loadTranslate(destination.left, destination.top, 0.0f);
     mOutGlop->transform.modelView.scale(destination.getWidth(), destination.getHeight(), 1.0f);
     mOutGlop->bounds = destination;
@@ -98,22 +114,42 @@ GlopBuilder& GlopBuilder::setModelViewMapUnitToRect(const Rect destination) {
 
 GlopBuilder& GlopBuilder::setModelViewOffsetRect(float offsetX, float offsetY, const Rect source) {
     TRIGGER_STAGE(kModelViewStage);
+
     mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
     mOutGlop->bounds = source;
     mOutGlop->bounds.translate(offsetX, offsetY);
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setPaint(const SkPaint* paint, float alphaScale) {
+GlopBuilder& GlopBuilder::setOptionalPaint(const SkPaint* paint, float alphaScale) {
+    if (paint) {
+        return setPaint(*paint, alphaScale);
+    }
+
     TRIGGER_STAGE(kFillStage);
 
-    // TODO: support null paint
-    const SkShader* shader = paint->getShader();
-    const SkColorFilter* colorFilter = paint->getColorFilter();
+    mOutGlop->fill.color = { alphaScale, alphaScale, alphaScale, alphaScale };
 
-    SkXfermode::Mode mode = PaintUtils::getXfermode(paint->getXfermode());
+    const bool SWAP_SRC_DST = false;
+    // TODO: account for texture blend
+    if (alphaScale < 1.0f) {
+        Blend::getFactors(SkXfermode::kSrcOver_Mode, SWAP_SRC_DST,
+                &mOutGlop->blend.src, &mOutGlop->blend.dst);
+    } else {
+        mOutGlop->blend = { GL_ZERO, GL_ZERO };
+    }
+
+    return *this;
+}
+GlopBuilder& GlopBuilder::setPaint(const SkPaint& paint, float alphaScale) {
+    TRIGGER_STAGE(kFillStage);
+
+    const SkShader* shader = paint.getShader();
+    const SkColorFilter* colorFilter = paint.getColorFilter();
+
+    SkXfermode::Mode mode = PaintUtils::getXfermode(paint.getXfermode());
     if (mode != SkXfermode::kClear_Mode) {
-        int color = paint->getColor();
+        int color = paint.getColor();
         float alpha = (SkColorGetA(color) / 255.0f) * alphaScale;
         if (!shader) {
             float colorScale = alpha / 255.0f;
@@ -195,6 +231,8 @@ GlopBuilder& GlopBuilder::setPaint(const SkPaint* paint, float alphaScale) {
             colorVector[1] = srcColorMatrix[9] / 255.0f;
             colorVector[2] = srcColorMatrix[14] / 255.0f;
             colorVector[3] = srcColorMatrix[19] / 255.0f;
+        } else {
+            LOG_ALWAYS_FATAL("unsupported ColorFilter");
         }
     } else {
         mOutGlop->fill.filterMode = ProgramDescription::kColorNone;

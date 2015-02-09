@@ -65,7 +65,7 @@ struct Glop {
      * Stores mesh - vertex and index data.
      *
      * buffer objects and void*s are mutually exclusive
-     * indices are optional
+     * indices are optional, currently only GL_UNSIGNED_SHORT supported
      */
     struct Mesh {
         VertexAttribFlags vertexFlags;
