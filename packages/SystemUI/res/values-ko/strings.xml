@@ -262,8 +262,6 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"설정 더보기"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"완료"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"연결됨"</string>
-    <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Wi‑Fi 도우미를 통해 연결됨"</string>
-    <string name="quick_settings_saved" msgid="4758747300943481411">"저장됨"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"연결 중..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"테더링"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"핫스팟"</string>
@@ -282,18 +280,12 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"검색"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g>을(를) 시작할 수 없습니다."</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"모든 애플리케이션 닫기"</string>
-    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
-    <skip />
-    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
-    <skip />
-    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
-    <skip />
+    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
+    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"-"</string>
+    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"[]"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"수평 분할"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"수직 분할"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"맞춤 분할"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"충전됨"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"충전 중"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"완충까지 <xliff:g id="CHARGING_TIME">%s</xliff:g> 남음"</string>

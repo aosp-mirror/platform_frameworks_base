@@ -262,8 +262,6 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"การตั้งค่าเพิ่มเติม"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"เสร็จสิ้น"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"เชื่อมต่อ"</string>
-    <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"เชื่อมต่อผ่านตัวช่วย Wi-Fi อยู่"</string>
-    <string name="quick_settings_saved" msgid="4758747300943481411">"ที่บันทึกไว้"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"กำลังเชื่อมต่อ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"การปล่อยสัญญาณ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ฮอตสปอต"</string>
@@ -282,18 +280,12 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"ค้นหา"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"ไม่สามารถเริ่มใช้ <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"ปิดแอปพลิเคชันทั้งหมด"</string>
-    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
-    <skip />
-    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
-    <skip />
-    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
-    <skip />
+    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
+    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"-"</string>
+    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"[]"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"แยกในแนวนอน"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"แยกในแนวตั้ง"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"แยกแบบกำหนดเอง"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ชาร์จแล้ว"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"กำลังชาร์จ"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"อีก <xliff:g id="CHARGING_TIME">%s</xliff:g> จึงจะเต็ม"</string>

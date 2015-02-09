@@ -262,8 +262,6 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"További beállítások"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Kész"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Csatlakoztatva"</string>
-    <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Csatlakozva Wi‑Fi-segéddel"</string>
-    <string name="quick_settings_saved" msgid="4758747300943481411">"Mentett"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Csatlakozás…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Megosztás"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -282,18 +280,12 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"keresés"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Nem lehet elindítani a következőt: <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Összes alkalmazás elvetése"</string>
-    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
-    <skip />
-    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
-    <skip />
-    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
-    <skip />
+    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
+    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"–"</string>
+    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"[]"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Osztott vízszintes"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Osztott függőleges"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Osztott egyéni"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Feltöltve"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Töltés"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> a teljes töltöttségig"</string>
@@ -338,7 +330,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akkumulátorkímélő mód bekapcsolva"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Akkumulátorkímélő mód kikapcsolása"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalomjegyzék elrejtve"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalom elrejtve"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"A(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> alkalmazás rögzíteni fog mindent, ami megjelenik a képernyőn."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne jelenjen meg többé"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Az összes törlése"</string>
