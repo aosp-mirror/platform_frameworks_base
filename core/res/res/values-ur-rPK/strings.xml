@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ہوائی جہاز وضع آن ہے"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"ہوائی جہاز وضع آف ہے"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"ترتیبات"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"صوتی مدد"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"ابھی مقفل کریں"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"‎999+‎"</string>
     <string name="safeMode" msgid="2788228061547930246">"حفاظتی وضع"</string>
@@ -1879,5 +1880,5 @@
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"‏SS درخواست میں ترمیم کر کے USSD درخواست بنا دی گئی ہے۔"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"‏SS درخواست میں ترمیم کر کے نئی SS درخواست بنا دی گئی ہے۔"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
-    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"‏USB ملحقہ پورٹ"</string>
+    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"‏USB پیرفرل پورٹ"</string>
 </resources>
