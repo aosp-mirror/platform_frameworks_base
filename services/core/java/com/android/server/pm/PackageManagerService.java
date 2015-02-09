@@ -8638,7 +8638,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (DEBUG_INSTALL) Log.v(TAG, "token " + token
                                 + " to BM for possible restore");
                         try {
-                            bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
+                            if (bm.isBackupServiceActive(UserHandle.USER_OWNER)) {
+                                bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
+                            } else {
+                                doRestore = false;
+                            }
                         } catch (RemoteException e) {
                             // can't happen; the backup manager is local
                         } catch (Exception e) {
