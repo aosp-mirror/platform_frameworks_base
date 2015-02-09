@@ -13152,6 +13152,7 @@ package android.hardware.camera2 {
     field public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3; // 0x3
     field public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2; // 0x2
     field public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4; // 0x4
+    field public static final int CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL = 2; // 0x2
     field public static final int CONTROL_AE_PRECAPTURE_TRIGGER_IDLE = 0; // 0x0
     field public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1; // 0x1
     field public static final int CONTROL_AE_STATE_CONVERGED = 2; // 0x2

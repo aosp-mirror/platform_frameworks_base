@@ -1029,6 +1029,14 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1;
 
+    /**
+     * <p>The camera device will cancel any currently active or completed
+     * precapture metering sequence, the auto-exposure routine will return to its
+     * initial state.</p>
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     */
+    public static final int CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL = 2;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_AF_MODE
     //
@@ -2143,7 +2151,10 @@ public abstract class CameraMetadata<TKey> {
      * <p>AE has been asked to do a precapture sequence
      * and is currently executing it.</p>
      * <p>Precapture can be triggered through setting
-     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to START.</p>
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to START. Currently
+     * active and completed (if it causes camera device internal AE lock) precapture
+     * metering sequence can be canceled through setting
+     * {@link CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER android.control.aePrecaptureTrigger} to CANCEL.</p>
      * <p>Once PRECAPTURE completes, AE will transition to CONVERGED
      * or FLASH_REQUIRED as appropriate. This is a transient
      * state, the camera device may skip reporting this state in
