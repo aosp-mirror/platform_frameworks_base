@@ -24,8 +24,7 @@
     <string name="label_paper_size" msgid="908654383827777759">"कागद आकार"</string>
     <string name="label_paper_size_summary" msgid="5668204981332138168">"कागद आकार:"</string>
     <string name="label_color" msgid="1108690305218188969">"रंग"</string>
-    <!-- no translation found for label_duplex (1263181386446435253) -->
-    <skip />
+    <string name="label_duplex" msgid="1263181386446435253">"डुप्लेक्स"</string>
     <string name="label_orientation" msgid="2853142581990496477">"अभिमुखता"</string>
     <string name="label_pages" msgid="7768589729282182230">"पृष्ठे"</string>
     <string name="template_all_pages" msgid="3322235982020148762">"सर्व <xliff:g id="PAGE_COUNT">%1$s</xliff:g>"</string>
@@ -79,9 +78,11 @@
     <item msgid="7602948745415174937">"कृष्‍ण धवल"</item>
     <item msgid="2762241247228983754">"रंग"</item>
   </string-array>
-    <!-- no translation found for duplex_mode_labels:0 (3882302912790928315) -->
-    <!-- no translation found for duplex_mode_labels:1 (7296563835355641719) -->
-    <!-- no translation found for duplex_mode_labels:2 (79513688117503758) -->
+  <string-array name="duplex_mode_labels">
+    <item msgid="3882302912790928315">"काहीही नाही"</item>
+    <item msgid="7296563835355641719">"दीर्घ किनार"</item>
+    <item msgid="79513688117503758">"लघु किनार"</item>
+  </string-array>
   <string-array name="orientation_labels">
     <item msgid="4061931020926489228">"पोट्रेट"</item>
     <item msgid="3199660090246166812">"भूदृश्य"</item>
