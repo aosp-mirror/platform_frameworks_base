@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package android.media;
+package com.android.server.audio;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.media.AudioManager;
+import android.media.IRemoteControlClient;
+import android.media.IRemoteVolumeObserver;
+import android.media.RemoteControlClient;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;

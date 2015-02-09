@@ -25,27 +25,27 @@ import android.text.TextUtils;
  * @hide
  */
 public class AudioRoutesInfo implements Parcelable {
-    static final int MAIN_SPEAKER = 0;
-    static final int MAIN_HEADSET = 1<<0;
-    static final int MAIN_HEADPHONES = 1<<1;
-    static final int MAIN_DOCK_SPEAKERS = 1<<2;
-    static final int MAIN_HDMI = 1<<3;
-    static final int MAIN_USB = 1<<4;
+    public static final int MAIN_SPEAKER = 0;
+    public static final int MAIN_HEADSET = 1<<0;
+    public static final int MAIN_HEADPHONES = 1<<1;
+    public static final int MAIN_DOCK_SPEAKERS = 1<<2;
+    public static final int MAIN_HDMI = 1<<3;
+    public static final int MAIN_USB = 1<<4;
 
-    CharSequence mBluetoothName;
-    int mMainType = MAIN_SPEAKER;
+    public CharSequence bluetoothName;
+    public int mainType = MAIN_SPEAKER;
 
     public AudioRoutesInfo() {
     }
 
     public AudioRoutesInfo(AudioRoutesInfo o) {
-        mBluetoothName = o.mBluetoothName;
-        mMainType = o.mMainType;
+        bluetoothName = o.bluetoothName;
+        mainType = o.mainType;
     }
 
     AudioRoutesInfo(Parcel src) {
-        mBluetoothName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(src);
-        mMainType = src.readInt();
+        bluetoothName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(src);
+        mainType = src.readInt();
     }
 
     @Override
@@ -55,8 +55,8 @@ public class AudioRoutesInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        TextUtils.writeToParcel(mBluetoothName, dest, flags);
-        dest.writeInt(mMainType);
+        TextUtils.writeToParcel(bluetoothName, dest, flags);
+        dest.writeInt(mainType);
     }
 
     public static final Parcelable.Creator<AudioRoutesInfo> CREATOR

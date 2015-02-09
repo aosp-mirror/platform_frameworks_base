@@ -37,7 +37,6 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.AudioService;
 import android.media.AudioSystem;
 import android.media.RingtoneManager;
 import android.media.ToneGenerator;
@@ -88,7 +87,7 @@ public class VolumePanel extends Handler implements DemoMode {
     private static final String TAG = "VolumePanel";
     private static boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int PLAY_SOUND_DELAY = AudioService.PLAY_SOUND_DELAY;
+    private static final int PLAY_SOUND_DELAY = AudioSystem.PLAY_SOUND_DELAY;
 
     /**
      * The delay before vibrating. This small period exists so if the user is
@@ -1012,7 +1011,7 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     private static String streamToString(int stream) {
-        return AudioService.streamToString(stream);
+        return AudioSystem.streamToString(stream);
     }
 
     /**

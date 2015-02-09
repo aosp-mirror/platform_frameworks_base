@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package com.android.server.audio;
 
 import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
@@ -46,8 +46,30 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPlaybackClient;
 import android.hardware.hdmi.HdmiTvClient;
 import android.hardware.usb.UsbManager;
+import android.media.AudioAttributes;
+import android.media.AudioDevicePort;
+import android.media.AudioSystem;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioManagerInternal;
+import android.media.AudioPort;
+import android.media.AudioRoutesInfo;
+import android.media.AudioSystem;
+import android.media.IAudioFocusDispatcher;
+import android.media.IAudioRoutesObserver;
+import android.media.IAudioService;
+import android.media.IRemoteControlDisplay;
+import android.media.IRingtonePlayer;
+import android.media.IVolumeController;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
+import android.media.AudioAttributes.Builder;
+import android.media.AudioManagerInternal.RingerModeDelegate;
+import android.media.AudioSystem.ErrorCallback;
+import android.media.IAudioService.Stub;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.SoundPool.OnLoadCompleteListener;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
@@ -139,14 +161,6 @@ public class AudioService extends IAudioService.Stub {
     private static final int UNMUTE_STREAM_DELAY = 350;
 
     /**
-     * The delay before playing a sound. This small period exists so the user
-     * can press another key (non-volume keys, too) to have it NOT be audible.
-     * <p>
-     * PhoneWindow will implement this part.
-     */
-    public static final int PLAY_SOUND_DELAY = 300;
-
-    /**
      * Only used in the result from {@link #checkForRingerModeChange(int, int, int)}
      */
     private static final int FLAG_ADJUST_VOLUME = 1;
@@ -155,21 +169,15 @@ public class AudioService extends IAudioService.Stub {
     private final ContentResolver mContentResolver;
     private final AppOpsManager mAppOps;
 
-    // the platform has no specific capabilities
-    public static final int PLATFORM_DEFAULT = 0;
-    // the platform is voice call capable (a phone)
-    public static final int PLATFORM_VOICE = 1;
-    // the platform is a television or a set-top box
-    public static final int PLATFORM_TELEVISION = 2;
     // the platform type affects volume and silent mode behavior
     private final int mPlatformType;
 
     private boolean isPlatformVoice() {
-        return mPlatformType == PLATFORM_VOICE;
+        return mPlatformType == AudioSystem.PLATFORM_VOICE;
     }
 
     private boolean isPlatformTelevision() {
-        return mPlatformType == PLATFORM_TELEVISION;
+        return mPlatformType == AudioSystem.PLATFORM_TELEVISION;
     }
 
     /** The controller for the volume UI. */
@@ -267,19 +275,6 @@ public class AudioService extends IAudioService.Stub {
         15  // STREAM_TTS
     };
 
-    private static int[] DEFAULT_STREAM_VOLUME = new int[] {
-        4,  // STREAM_VOICE_CALL
-        7,  // STREAM_SYSTEM
-        5,  // STREAM_RING
-        11, // STREAM_MUSIC
-        6,  // STREAM_ALARM
-        5,  // STREAM_NOTIFICATION
-        7,  // STREAM_BLUETOOTH_SCO
-        7,  // STREAM_SYSTEM_ENFORCED
-        11, // STREAM_DTMF
-        11  // STREAM_TTS
-    };
-
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
@@ -345,26 +340,6 @@ public class AudioService extends IAudioService.Stub {
     };
 
     private final boolean mUseFixedVolume;
-
-    // stream names used by dumpStreamStates()
-    private static final String[] STREAM_NAMES = new String[] {
-            "STREAM_VOICE_CALL",
-            "STREAM_SYSTEM",
-            "STREAM_RING",
-            "STREAM_MUSIC",
-            "STREAM_ALARM",
-            "STREAM_NOTIFICATION",
-            "STREAM_BLUETOOTH_SCO",
-            "STREAM_SYSTEM_ENFORCED",
-            "STREAM_DTMF",
-            "STREAM_TTS"
-    };
-
-    public static final int DEFAULT_MUTE_STREAMS_AFFECTED =
-            (1 << AudioSystem.STREAM_MUSIC) |
-            (1 << AudioSystem.STREAM_RING) |
-            (1 << AudioSystem.STREAM_NOTIFICATION) |
-            (1 << AudioSystem.STREAM_SYSTEM);
 
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
@@ -570,7 +545,7 @@ public class AudioService extends IAudioService.Stub {
         mContentResolver = context.getContentResolver();
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
 
-        mPlatformType = getPlatformType(context);
+        mPlatformType = AudioSystem.getPlatformType(context);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
@@ -583,13 +558,13 @@ public class AudioService extends IAudioService.Stub {
                 MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
         if (maxVolume != MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]) {
             MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = maxVolume;
-            DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = (maxVolume * 3) / 4;
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = (maxVolume * 3) / 4;
         }
         maxVolume = SystemProperties.getInt("ro.config.media_vol_steps",
                 MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
         if (maxVolume != MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]) {
             MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = maxVolume;
-            DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = (maxVolume * 3) / 4;
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = (maxVolume * 3) / 4;
         }
 
         sSoundEffectVolumeDb = context.getResources().getInteger(
@@ -681,26 +656,6 @@ public class AudioService extends IAudioService.Stub {
         restoreMasterVolume();
 
         LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
-    }
-
-    /**
-     * Return the platform type that this is running on. One of:
-     * <ul>
-     * <li>{@link #PLATFORM_VOICE}</li>
-     * <li>{@link #PLATFORM_TELEVISION}</li>
-     * <li>{@link #PLATFORM_DEFAULT}</li>
-     * </ul>
-     */
-    public static int getPlatformType(Context context) {
-        if (context.getResources().getBoolean(
-                com.android.internal.R.bool.config_voice_capable)) {
-            return PLATFORM_VOICE;
-        } else if (context.getPackageManager().hasSystemFeature(
-                                                            PackageManager.FEATURE_LEANBACK)) {
-            return PLATFORM_TELEVISION;
-        } else {
-            return PLATFORM_DEFAULT;
-        }
     }
 
     public void systemReady() {
@@ -819,7 +774,7 @@ public class AudioService extends IAudioService.Stub {
         pw.println("\nStream volumes (device: index)");
         int numStreamTypes = AudioSystem.getNumStreamTypes();
         for (int i = 0; i < numStreamTypes; i++) {
-            pw.println("- "+STREAM_NAMES[i]+":");
+            pw.println("- " + AudioSystem.STREAM_NAMES[i] + ":");
             mStreamStates[i].dump(pw);
             pw.println("");
         }
@@ -827,22 +782,15 @@ public class AudioService extends IAudioService.Stub {
         pw.println(Integer.toHexString(mMuteAffectedStreams));
     }
 
-    /** @hide */
-    public static String streamToString(int stream) {
-        if (stream >= 0 && stream < STREAM_NAMES.length) return STREAM_NAMES[stream];
-        if (stream == AudioManager.USE_DEFAULT_STREAM_TYPE) return "USE_DEFAULT_STREAM_TYPE";
-        return "UNKNOWN_STREAM_" + stream;
-    }
-
     private void updateStreamVolumeAlias(boolean updateVolumes) {
         int dtmfStreamAlias;
 
         switch (mPlatformType) {
-        case PLATFORM_VOICE:
+        case AudioSystem.PLATFORM_VOICE:
             mStreamVolumeAlias = STREAM_VOLUME_ALIAS_VOICE;
             dtmfStreamAlias = AudioSystem.STREAM_RING;
             break;
-        case PLATFORM_TELEVISION:
+        case AudioSystem.PLATFORM_TELEVISION:
             mStreamVolumeAlias = STREAM_VOLUME_ALIAS_TELEVISION;
             dtmfStreamAlias = AudioSystem.STREAM_MUSIC;
             break;
@@ -921,11 +869,11 @@ public class AudioService extends IAudioService.Stub {
             // System.VIBRATE_ON is not used any more but defaults for mVibrateSetting
             // are still needed while setVibrateSetting() and getVibrateSetting() are being
             // deprecated.
-            mVibrateSetting = getValueForVibrateSetting(0,
+            mVibrateSetting = AudioSystem.getValueForVibrateSetting(0,
                                             AudioManager.VIBRATE_TYPE_NOTIFICATION,
                                             mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
                                                             : AudioManager.VIBRATE_SETTING_OFF);
-            mVibrateSetting = getValueForVibrateSetting(mVibrateSetting,
+            mVibrateSetting = AudioSystem.getValueForVibrateSetting(mVibrateSetting,
                                             AudioManager.VIBRATE_TYPE_RINGER,
                                             mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
                                                             : AudioManager.VIBRATE_SETTING_OFF);
@@ -935,7 +883,7 @@ public class AudioService extends IAudioService.Stub {
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
-                System.MUTE_STREAMS_AFFECTED, DEFAULT_MUTE_STREAMS_AFFECTED,
+                System.MUTE_STREAMS_AFFECTED, AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED,
                 UserHandle.USER_CURRENT);
 
         boolean masterMute = System.getIntForUser(cr, System.VOLUME_MASTER_MUTE,
@@ -1746,10 +1694,6 @@ public class AudioService extends IAudioService.Stub {
         return MAX_STREAM_VOLUME[streamType];
     }
 
-    public static int getDefaultStreamVolume(int streamType) {
-        return DEFAULT_STREAM_VOLUME[streamType];
-    }
-
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
@@ -2044,27 +1988,12 @@ public class AudioService extends IAudioService.Stub {
 
         if (!mHasVibrator) return;
 
-        mVibrateSetting = getValueForVibrateSetting(mVibrateSetting, vibrateType, vibrateSetting);
+        mVibrateSetting = AudioSystem.getValueForVibrateSetting(mVibrateSetting, vibrateType,
+                vibrateSetting);
 
         // Broadcast change
         broadcastVibrateSetting(vibrateType);
 
-    }
-
-    /**
-     * @see #setVibrateSetting(int, int)
-     */
-    public static int getValueForVibrateSetting(int existingValue, int vibrateType,
-            int vibrateSetting) {
-
-        // First clear the existing setting. Each vibrate type has two bits in
-        // the value. Note '3' is '11' in binary.
-        existingValue &= ~(3 << (vibrateType * 2));
-
-        // Set into the old value
-        existingValue |= (vibrateSetting & 3) << (vibrateType * 2);
-
-        return existingValue;
     }
 
     private class SetModeDeathHandler implements IBinder.DeathRecipient {
@@ -3245,7 +3174,7 @@ public class AudioService extends IAudioService.Stub {
                                         (1 << AudioSystem.STREAM_SYSTEM);
 
         switch (mPlatformType) {
-            case PLATFORM_TELEVISION:
+            case AudioSystem.PLATFORM_TELEVISION:
                 ringerModeAffectedStreams = 0;
                 break;
             default:
@@ -3338,7 +3267,7 @@ public class AudioService extends IAudioService.Stub {
 
     private int getActiveStreamType(int suggestedStreamType) {
         switch (mPlatformType) {
-        case PLATFORM_VOICE:
+        case AudioSystem.PLATFORM_VOICE:
             if (isInCommunication()) {
                 if (AudioSystem.getForceUse(AudioSystem.FOR_COMMUNICATION)
                         == AudioSystem.FORCE_BT_SCO) {
@@ -3364,7 +3293,7 @@ public class AudioService extends IAudioService.Stub {
                 return AudioSystem.STREAM_MUSIC;
             }
             break;
-        case PLATFORM_TELEVISION:
+        case AudioSystem.PLATFORM_TELEVISION:
             if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
                     // TV always defaults to STREAM_MUSIC
                     return AudioSystem.STREAM_MUSIC;
@@ -3599,7 +3528,7 @@ public class AudioService extends IAudioService.Stub {
                 // only be stale values
                 if ((mStreamType == AudioSystem.STREAM_SYSTEM) ||
                         (mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED)) {
-                    int index = 10 * DEFAULT_STREAM_VOLUME[mStreamType];
+                    int index = 10 * AudioSystem.DEFAULT_STREAM_VOLUME[mStreamType];
                     synchronized (mCameraSoundForced) {
                         if (mCameraSoundForced) {
                             index = mIndexMax;
@@ -3623,7 +3552,7 @@ public class AudioService extends IAudioService.Stub {
                     // if no volume stored for current stream and device, use default volume if default
                     // device, continue otherwise
                     int defaultIndex = (device == AudioSystem.DEVICE_OUT_DEFAULT) ?
-                                            DEFAULT_STREAM_VOLUME[mStreamType] : -1;
+                            AudioSystem.DEFAULT_STREAM_VOLUME[mStreamType] : -1;
                     int index = Settings.System.getIntForUser(
                             mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
                     if (index == -1) {
@@ -4497,8 +4426,8 @@ public class AudioService extends IAudioService.Stub {
         mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         synchronized (mCurAudioRoutes) {
             // Remove A2DP routes as well
-            if (mCurAudioRoutes.mBluetoothName != null) {
-                mCurAudioRoutes.mBluetoothName = null;
+            if (mCurAudioRoutes.bluetoothName != null) {
+                mCurAudioRoutes.bluetoothName = null;
                 sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
                         SENDMSG_NOOP, 0, 0, null, 0);
             }
@@ -4578,8 +4507,8 @@ public class AudioService extends IAudioService.Stub {
                     makeA2dpDeviceUnavailableNow(address);
                 }
                 synchronized (mCurAudioRoutes) {
-                    if (mCurAudioRoutes.mBluetoothName != null) {
-                        mCurAudioRoutes.mBluetoothName = null;
+                    if (mCurAudioRoutes.bluetoothName != null) {
+                        mCurAudioRoutes.bluetoothName = null;
                         sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
                                 SENDMSG_NOOP, 0, 0, null, 0);
                     }
@@ -4600,8 +4529,8 @@ public class AudioService extends IAudioService.Stub {
                 makeA2dpDeviceAvailable(address);
                 synchronized (mCurAudioRoutes) {
                     String name = btDevice.getAliasName();
-                    if (!TextUtils.equals(mCurAudioRoutes.mBluetoothName, name)) {
-                        mCurAudioRoutes.mBluetoothName = name;
+                    if (!TextUtils.equals(mCurAudioRoutes.bluetoothName, name)) {
+                        mCurAudioRoutes.bluetoothName = name;
                         sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
                                 SENDMSG_NOOP, 0, 0, null, 0);
                     }
@@ -4757,14 +4686,14 @@ public class AudioService extends IAudioService.Stub {
 
         synchronized (mCurAudioRoutes) {
             if (connType != 0) {
-                int newConn = mCurAudioRoutes.mMainType;
+                int newConn = mCurAudioRoutes.mainType;
                 if (state != 0) {
                     newConn |= connType;
                 } else {
                     newConn &= ~connType;
                 }
-                if (newConn != mCurAudioRoutes.mMainType) {
-                    mCurAudioRoutes.mMainType = newConn;
+                if (newConn != mCurAudioRoutes.mainType) {
+                    mCurAudioRoutes.mainType = newConn;
                     sendMsg(mAudioHandler, MSG_REPORT_NEW_ROUTES,
                             SENDMSG_NOOP, 0, 0, null, 0);
                 }
@@ -5096,7 +5025,7 @@ public class AudioService extends IAudioService.Stub {
             IAudioPolicyCallback pcb) {
         // permission checks
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) == AudioManager.AUDIOFOCUS_FLAG_LOCK) {
-            if (mMediaFocusControl.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
+            if (AudioSystem.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
                 if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
                             android.Manifest.permission.MODIFY_PHONE_STATE)) {
                     Log.e(TAG, "Invalid permission to (un)lock audio focus", new Exception());
@@ -5564,8 +5493,8 @@ public class AudioService extends IAudioService.Stub {
         dumpStreamStates(pw);
         dumpRingerMode(pw);
         pw.println("\nAudio routes:");
-        pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
-        pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
+        pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mainType));
+        pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.bluetoothName);
 
         pw.println("\nOther state:");
         pw.print("  mVolumeController="); pw.println(mVolumeController);

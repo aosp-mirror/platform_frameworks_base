@@ -28,8 +28,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.media.AudioSystem;
 import android.media.AudioManager;
-import android.media.AudioService;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
@@ -568,7 +568,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 stmt = db.compileStatement("INSERT OR IGNORE INTO system(name,value)"
                         + " VALUES(?,?);");
                 loadSetting(stmt, Settings.System.VOLUME_BLUETOOTH_SCO,
-                        AudioService.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
+                        AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
@@ -2051,11 +2051,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int vibrateSetting = getIntValueFromSystem(db, Settings.System.VIBRATE_ON, 0);
         // If the ringer vibrate value is invalid, set it to the default
         if ((vibrateSetting & 3) == AudioManager.VIBRATE_SETTING_OFF) {
-            vibrateSetting = AudioService.getValueForVibrateSetting(0,
+            vibrateSetting = AudioSystem.getValueForVibrateSetting(0,
                     AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
         }
         // Apply the same setting to the notification vibrate value
-        vibrateSetting = AudioService.getValueForVibrateSetting(vibrateSetting,
+        vibrateSetting = AudioSystem.getValueForVibrateSetting(vibrateSetting,
                 AudioManager.VIBRATE_TYPE_NOTIFICATION, vibrateSetting);
 
         SQLiteStatement stmt = null;
@@ -2199,25 +2199,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + " VALUES(?,?);");
 
             loadSetting(stmt, Settings.System.VOLUME_MUSIC,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_MUSIC));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_MUSIC));
             loadSetting(stmt, Settings.System.VOLUME_RING,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_RING));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_RING));
             loadSetting(stmt, Settings.System.VOLUME_SYSTEM,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_SYSTEM));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_SYSTEM));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_VOICE,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_VOICE_CALL));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_VOICE_CALL));
             loadSetting(stmt, Settings.System.VOLUME_ALARM,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_ALARM));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_ALARM));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_NOTIFICATION,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_NOTIFICATION));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_NOTIFICATION));
             loadSetting(
                     stmt,
                     Settings.System.VOLUME_BLUETOOTH_SCO,
-                    AudioService.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
+                    AudioSystem.getDefaultStreamVolume(AudioManager.STREAM_BLUETOOTH_SCO));
 
             // By default:
             // - ringtones, notification, system and music streams are affected by ringer mode
@@ -2236,7 +2236,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     ringerModeAffectedStreams);
 
             loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
-                    AudioService.DEFAULT_MUTE_STREAMS_AFFECTED);
+                    AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED);
         } finally {
             if (stmt != null) stmt.close();
         }
@@ -2256,10 +2256,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             // Vibrate on by default for ringer, on for notification
             int vibrate = 0;
-            vibrate = AudioService.getValueForVibrateSetting(vibrate,
+            vibrate = AudioSystem.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_NOTIFICATION,
                     AudioManager.VIBRATE_SETTING_ONLY_SILENT);
-            vibrate |= AudioService.getValueForVibrateSetting(vibrate,
+            vibrate |= AudioSystem.getValueForVibrateSetting(vibrate,
                     AudioManager.VIBRATE_TYPE_RINGER, AudioManager.VIBRATE_SETTING_ONLY_SILENT);
             loadSetting(stmt, Settings.System.VIBRATE_ON, vibrate);
         } finally {

@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package android.media;
+package com.android.server.audio;
 
 import android.annotation.NonNull;
-import android.media.MediaFocusControl.AudioFocusDeathHandler;
+import android.media.AudioAttributes;
+import android.media.AudioFocusInfo;
+import android.media.AudioManager;
+import android.media.IAudioFocusDispatcher;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.android.server.audio.MediaFocusControl.AudioFocusDeathHandler;
 
 import java.io.PrintWriter;
 
@@ -29,7 +34,7 @@ import java.io.PrintWriter;
  * instance is managed by android.media.MediaFocusControl, from its addition to the audio focus
  * stack to its release.
  */
-class FocusRequester {
+public class FocusRequester {
 
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
     private static final String TAG = "MediaFocusControl";

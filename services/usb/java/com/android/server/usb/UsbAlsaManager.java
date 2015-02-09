@@ -24,7 +24,6 @@ import android.content.res.Resources;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
-import android.media.AudioService;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.midi.MidiDeviceInfo;
@@ -37,6 +36,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
+
+import com.android.server.audio.AudioService;
 
 import libcore.io.IoUtils;
 

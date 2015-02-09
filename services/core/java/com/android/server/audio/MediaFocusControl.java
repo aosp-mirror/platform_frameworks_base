@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media;
+package com.android.server.audio;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -32,7 +32,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.media.PlayerRecord.RemotePlaybackState;
+import android.media.AudioAttributes;
+import android.media.AudioFocusInfo;
+import android.media.AudioManager;
+import android.media.AudioSystem;
+import android.media.IAudioFocusDispatcher;
+import android.media.IAudioService;
+import android.media.IRemoteControlClient;
+import android.media.IRemoteControlDisplay;
+import android.media.IRemoteVolumeObserver;
+import android.media.RemoteControlClient;
+import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.net.Uri;
 import android.os.Binder;
@@ -52,6 +62,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
+
+import com.android.server.audio.PlayerRecord.RemotePlaybackState;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -391,13 +403,6 @@ public class MediaFocusControl implements OnFinished {
     // AudioFocus
     //==========================================================================================
 
-    /**
-     * Constant to identify a focus stack entry that is used to hold the focus while the phone
-     * is ringing or during a call. Used by com.android.internal.telephony.CallManager when
-     * entering and exiting calls.
-     */
-    protected final static String IN_VOICE_COMM_FOCUS_ID = "AudioFocus_For_Phone_Ring_And_Calls";
-
     private final static Object mAudioFocusLock = new Object();
 
     private final static Object mRingingLock = new Object();
@@ -565,7 +570,7 @@ public class MediaFocusControl implements OnFinished {
     }
 
     private boolean isLockedFocusOwner(FocusRequester fr) {
-        return (fr.hasSameClient(IN_VOICE_COMM_FOCUS_ID) || fr.isLockedFocusOwner());
+        return (fr.hasSameClient(AudioSystem.IN_VOICE_COMM_FOCUS_ID) || fr.isLockedFocusOwner());
     }
 
     /**
