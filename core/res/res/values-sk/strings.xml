@@ -701,7 +701,7 @@
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Umožňuje aplikácii zobraziť informácie o sieťach Wi-Fi. Napríklad o tom, či je sieť Wi-Fi povolená alebo názvy pripojených zariadení Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"pripojiť a odpojiť od siete Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Umožňuje aplikácii pripojiť sa na prístupové body siete Wi-Fi, odpojiť sa od nich a meniť konfiguráciu zariadení pre siete Wi-Fi."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Povoliť príjem viacsmerového vysielania Wi-Fi"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"povoliť príjem Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Umožňuje aplikácii prijímať pakety odoslané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries, nielen pomocou vášho tabletu. Spotrebuje viac energie ako režim bez viacsmerového vysielania."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Umožňuje aplikácii prijímať pakety odosielané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries (a nie iba do vášho televízora). Spotrebúva viac energie ako režim bez viacsmerového vysielania."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Umožňuje aplikácii prijímať pakety odoslané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries, nielen pomocou vášho telefónu. Spotrebuje viac energie ako režim bez viacsmerového vysielania."</string>
