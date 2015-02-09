@@ -1047,6 +1047,37 @@ nAllocationResize1D(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jint di
     rsAllocationResize1D((RsContext)con, (RsAllocation)alloc, dimX);
 }
 
+
+static jlong
+nAllocationAdapterCreate(JNIEnv *_env, jobject _this, jlong con, jlong basealloc, jlong type)
+{
+    if (kLogApi) {
+        ALOGD("nAllocationAdapterCreate, con(%p), base(%p), type(%p)",
+              (RsContext)con, (RsAllocation)basealloc, (RsElement)type);
+    }
+    return (jlong)(uintptr_t) rsAllocationAdapterCreate((RsContext)con, (RsType)type,
+                                                        (RsAllocation)basealloc);
+
+}
+
+static void
+nAllocationAdapterOffset(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
+                        jint x, jint y, jint z, jint face, jint lod,
+                        jint a1, jint a2, jint a3, jint a4)
+{
+    uint32_t params[] = {
+        (uint32_t)x, (uint32_t)y, (uint32_t)z, (uint32_t)face,
+        (uint32_t)lod, (uint32_t)a1, (uint32_t)a2, (uint32_t)a3, (uint32_t)a4
+    };
+    if (kLogApi) {
+        ALOGD("nAllocationAdapterOffset, con(%p), alloc(%p), x(%i), y(%i), z(%i), face(%i), lod(%i), arrays(%i %i %i %i)",
+              (RsContext)con, (RsAllocation)alloc, x, y, z, face, lod, a1, a2, a3, a4);
+    }
+    rsAllocationAdapterOffset((RsContext)con, (RsAllocation)alloc,
+                              params, sizeof(params));
+}
+
+
 // -----------------------------------
 
 static jlong
@@ -2027,6 +2058,9 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationGetType",             "(JJ)J",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(JJI)V",                                (void*)nAllocationResize1D },
 {"rsnAllocationGenerateMipmaps",     "(JJ)V",                                 (void*)nAllocationGenerateMipmaps },
+
+{"rsnAllocationAdapterCreate",       "(JJJ)J",                                (void*)nAllocationAdapterCreate },
+{"rsnAllocationAdapterOffset",       "(JJIIIIIIIII)V",                        (void*)nAllocationAdapterOffset },
 
 {"rsnScriptBindAllocation",          "(JJJI)V",                               (void*)nScriptBindAllocation },
 {"rsnScriptSetTimeZone",             "(JJ[B)V",                               (void*)nScriptSetTimeZone },
