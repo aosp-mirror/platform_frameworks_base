@@ -214,6 +214,10 @@ final class Constants {
     //     values which denotes the device type in HDMI Spec 1.4.
     static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
 
+    // Set to false to allow playback device to go to suspend mode even
+    // when it's an active source. True by default.
+    static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";
+
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
     static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;
