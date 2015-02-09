@@ -264,8 +264,6 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"更多設定"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"完成"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"已連線"</string>
-    <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"已透過 Wi-Fi 小幫手連線"</string>
-    <string name="quick_settings_saved" msgid="4758747300943481411">"已儲存"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"正在連線…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網絡共享"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"熱點"</string>
@@ -284,18 +282,12 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"搜尋"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"無法啟動「<xliff:g id="APP">%s</xliff:g>」。"</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"關閉所有應用程式"</string>
-    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
-    <skip />
-    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
-    <skip />
-    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
-    <skip />
+    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
+    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"-"</string>
+    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"[]"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"已完成充電"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"充電中"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g>後完成充電"</string>

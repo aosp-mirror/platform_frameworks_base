@@ -262,8 +262,6 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Fler inställningar"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Klart"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Ansluten"</string>
-    <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Ansluten via Wi-Fi-assistent"</string>
-    <string name="quick_settings_saved" msgid="4758747300943481411">"Sparad"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Ansluter ..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Internetdelning"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Trådlös surfzon"</string>
@@ -282,18 +280,12 @@
     <string name="recents_search_bar_label" msgid="8074997400187836677">"sök"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Det gick inte att starta appen <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_dismiss_all_message" msgid="8495275386693095768">"Ta bort alla appar"</string>
-    <!-- no translation found for recents_multistack_add_stack (5044995965068125420) -->
-    <skip />
-    <!-- no translation found for recents_multistack_remove_stack (3014058144068028841) -->
-    <skip />
-    <!-- no translation found for recents_multistack_resize_stack (5511174284568497822) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
-    <skip />
+    <string name="recents_multistack_add_stack" msgid="5044995965068125420">"+"</string>
+    <string name="recents_multistack_remove_stack" msgid="3014058144068028841">"-"</string>
+    <string name="recents_multistack_resize_stack" msgid="5511174284568497822">"[]"</string>
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dela horisontellt"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dela vertikalt"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dela anpassad"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Laddar"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> tills batteriet är fulladdat"</string>
