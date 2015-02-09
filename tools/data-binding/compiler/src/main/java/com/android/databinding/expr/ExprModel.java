@@ -234,15 +234,18 @@ public class ExprModel {
                     continue;// already has some id, means observable
                 }
                 // only fields earn an id
-                if (parent instanceof FieldAccessExpr && parent.isDynamic() &&
-                        !((FieldAccessExpr) parent).getName().isEmpty()) {
-                    flagMapping.add(parent.getUniqueKey());
-                    parent.setId(counter++);
-                    notifiableExpressions.add(parent);
-                    L.d("notifiable field %s : %s for %s : %s", parent.getUniqueKey(),
-                            Integer.toHexString(System.identityHashCode(parent)),
-                            expr.getUniqueKey(),
-                            Integer.toHexString(System.identityHashCode(expr)));
+                if (parent instanceof FieldAccessExpr) {
+                    FieldAccessExpr fae = (FieldAccessExpr) parent;
+                    L.d("checking field access expr %s. getter: %s", fae,fae.getGetter());
+                    if (fae.isDynamic() && fae.getGetter().canBeInvalidated) {
+                        flagMapping.add(parent.getUniqueKey());
+                        parent.setId(counter++);
+                        notifiableExpressions.add(parent);
+                        L.d("notifiable field %s : %s for %s : %s", parent.getUniqueKey(),
+                                Integer.toHexString(System.identityHashCode(parent)),
+                                expr.getUniqueKey(),
+                                Integer.toHexString(System.identityHashCode(expr)));
+                    }
                 }
             }
         }

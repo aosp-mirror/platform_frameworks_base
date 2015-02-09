@@ -47,6 +47,9 @@ public class FieldAccessExpr extends Expr {
     }
 
     public ClassAnalyzer.Callable getGetter() {
+        if (mGetter == null) {
+            getResolvedType();
+        }
         return mGetter;
     }
 
@@ -100,8 +103,7 @@ public class FieldAccessExpr extends Expr {
 
                 getChildren().add(observableField);
                 observableField.getParents().add(this);
-                mGetter = classAnalyzer.findMethod(mGetter.resolvedType, "get",
-                        Collections.EMPTY_LIST);
+                mGetter = classAnalyzer.findMethodOrField(mGetter.resolvedType, "get");
                 mName = "";
             }
         }

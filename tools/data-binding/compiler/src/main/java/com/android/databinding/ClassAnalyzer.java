@@ -54,7 +54,8 @@ public class ClassAnalyzer {
             OBSERVABLE_CLASS_NAME, "com.android.databinding.MockObservable",
             BINDABLE_ANNOTATION_NAME, "com.android.databinding.MockBindable",
             OBSERVABLE_LIST_CLASS_NAME, "com.android.databinding.MockObservableLsit",
-            OBSERVABLE_MAP_CLASS_NAME, "com.android.databinding.MockObservableMap"
+            OBSERVABLE_MAP_CLASS_NAME, "com.android.databinding.MockObservableMap",
+            I_VIEW_DATA_BINDER, "com.android.databinding.MockIViewDataBinder"
     );
 
     private static ClassAnalyzer sClassAnalyzer;
@@ -172,34 +173,25 @@ public class ClassAnalyzer {
     public Callable findMethodOrField(Class klass, String name) {
 
         for (String methodName :
-                new String[]{"get" + StringUtils.capitalize(name), name}) {
+                new String[]{"get" + StringUtils.capitalize(name),
+                        "is" + StringUtils.capitalize(name), name}) {
             try {
                 Method method = klass.getMethod(methodName);
-                Field backingField = findField(klass, name);
+                Field backingField = findField(klass, name, true);
                 if (Modifier.isPublic(method.getModifiers())) {
-                    return new Callable(Callable.Type.METHOD, methodName, method.getReturnType(),
-                            true, isBindable(method) || (backingField != null && isBindable(backingField)) );
-                }
-            } catch (Throwable t) {
-
-            }
-        }
-        for (String methodName :
-                new String[]{"is" + StringUtils.capitalize(name), name}) {
-            try {
-                Method method = klass.getMethod(methodName);
-                Field backingField = findField(klass, name);
-
-                if (Modifier.isPublic(method.getModifiers())) {
-                    return new Callable(Callable.Type.METHOD, methodName, method.getReturnType(),
-                            true, isBindable(method) || (backingField != null && isBindable(backingField)) );
+                    final Callable result = new Callable(Callable.Type.METHOD, methodName,
+                            method.getReturnType(),
+                            true, isBindable(method) || (backingField != null && isBindable(
+                            backingField)));
+                    L.d("backing field for %s is %s", result, backingField);
+                    return result;
                 }
             } catch (Throwable t) {
 
             }
         }
         try {
-            Field field = klass.getField(name);
+            Field field = findField(klass, name, false);
             if (Modifier.isPublic(field.getModifiers())) {
                 return new Callable(Callable.Type.FIELD, name, field.getType(),
                         !Modifier.isFinal(field.getModifiers())
@@ -212,27 +204,47 @@ public class ClassAnalyzer {
                 "cannot find " + name + " in " + klass.getCanonicalName());
     }
 
-    private Field findField(Class klass, String name) {
+    private Field findField(Class klass, String name, boolean allowNonPublic) {
         try {
-            return klass.getDeclaredField(name);
-        } catch (Throwable t){}
+            return getField(klass, name, allowNonPublic);
+        } catch (NoSuchFieldException e) {
+
+        }
         String capitalizedName = StringUtils.capitalize(name);
+
         try {
-            return klass.getField("m" + capitalizedName);
+            return getField(klass, "m" + capitalizedName, allowNonPublic);
         } catch (Throwable t){}
         try {
-            return klass.getField("_" + name);
+            return getField(klass, "_" + name, allowNonPublic);
         } catch (Throwable t){}
         try {
-            return klass.getField("_" + capitalizedName);
+            return getField(klass, "_" + capitalizedName, allowNonPublic);
         } catch (Throwable t){}
         try {
-            return klass.getField("m_" + name);
+            return getField(klass, "m_" + name, allowNonPublic);
         } catch (Throwable t){}
         try {
-            return klass.getField("m_" + capitalizedName);
+            return getField(klass, "m_" + capitalizedName, allowNonPublic);
         } catch (Throwable t){}
         return null;
+    }
+
+    private Field getField(Class klass, String exactName, boolean allowNonPublic)
+            throws NoSuchFieldException {
+        try {
+            return klass.getField(exactName);
+        } catch (NoSuchFieldException e) {
+            if (allowNonPublic) {
+                return klass.getDeclaredField(exactName);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private Field findField(Class klass, String name) {
+        return findField(klass, name, false);
     }
 
     public Class findCommonParentOf(Class klass1, Class klass2) {
@@ -391,6 +403,17 @@ public class ClassAnalyzer {
 
         public String getTypeCodeName() {
             return ClassAnalyzer.toCodeName(resolvedType);
+        }
+
+        @Override
+        public String toString() {
+            return "Callable{" +
+                    "type=" + type +
+                    ", name='" + name + '\'' +
+                    ", resolvedType=" + resolvedType +
+                    ", isDynamic=" + isDynamic +
+                    ", canBeInvalidated=" + canBeInvalidated +
+                    '}';
         }
     }
 }

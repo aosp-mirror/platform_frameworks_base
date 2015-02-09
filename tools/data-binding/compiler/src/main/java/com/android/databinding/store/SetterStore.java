@@ -359,7 +359,7 @@ public class SetterStore {
                         break;
                     }
                 } catch (Exception e) {
-                    System.out.println("Unknown class: " + className);
+                    //System.out.println("Unknown class: " + className);
                 }
             }
         }
