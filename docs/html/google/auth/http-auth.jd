@@ -95,7 +95,7 @@ keytool -exportcert -alias &lt;keystore_alias> -keystore &lt;keystore_path> -lis
 </pre>
 <p>For example, you're using a debug-key with Eclipse, then the command looks like this:</p>
 <pre class="no-pretty-print">
-keytool -exportcert -alias androiddebugkey-keystore ~/.android/debug.keystore -list -v
+keytool -exportcert -alias androiddebugkey -keystore ~/.android/debug.keystore -list -v
 </pre>
 <p>Then the keystore password is "android".</p>
 </li>
