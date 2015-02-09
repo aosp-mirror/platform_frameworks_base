@@ -505,15 +505,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             // Header views don't count.
             return;
         }
-        ResolveInfo resolveInfo = mAdapter.resolveInfoForPosition(position, true);
-        if (mResolvingHome && hasManagedProfile()
-                && !supportsManagedProfiles(resolveInfo)) {
-            Toast.makeText(this, String.format(getResources().getString(
-                    com.android.internal.R.string.activity_resolver_work_profiles_support),
-                    resolveInfo.activityInfo.loadLabel(getPackageManager()).toString()),
-                    Toast.LENGTH_LONG).show();
-            return;
-        }
         final int checkedPos = mListView.getCheckedItemPosition();
         final boolean hasValidSelection = checkedPos != ListView.INVALID_POSITION;
         if (mAlwaysUseOption && (!hasValidSelection || mLastSelected != checkedPos)) {
@@ -579,7 +570,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 mListView.getCheckedItemPosition() : mAdapter.getFilteredPosition(),
                 id == R.id.button_always,
                 mAlwaysUseOption);
-        dismiss();
     }
 
     void startSelected(int which, boolean always, boolean filtered) {
@@ -587,6 +577,14 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             return;
         }
         ResolveInfo ri = mAdapter.resolveInfoForPosition(which, filtered);
+        if (mResolvingHome && hasManagedProfile() && !supportsManagedProfiles(ri)) {
+            Toast.makeText(this, String.format(getResources().getString(
+                    com.android.internal.R.string.activity_resolver_work_profiles_support),
+                    ri.activityInfo.loadLabel(getPackageManager()).toString()),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Intent intent = mAdapter.intentForPosition(which, filtered);
         onIntentSelected(ri, intent, always);
         finish();
