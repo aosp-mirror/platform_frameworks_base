@@ -13319,7 +13319,11 @@ package android.hardware.camera2 {
     field public static final int SYNC_MAX_LATENCY_UNKNOWN = -1; // 0xffffffff
     field public static final int TONEMAP_MODE_CONTRAST_CURVE = 0; // 0x0
     field public static final int TONEMAP_MODE_FAST = 1; // 0x1
+    field public static final int TONEMAP_MODE_GAMMA_VALUE = 3; // 0x3
     field public static final int TONEMAP_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int TONEMAP_MODE_PRESET_CURVE = 4; // 0x4
+    field public static final int TONEMAP_PRESET_CURVE_REC709 = 1; // 0x1
+    field public static final int TONEMAP_PRESET_CURVE_SRGB = 0; // 0x0
   }
 
   public class CaptureFailure {
@@ -13387,7 +13391,9 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Boolean> STATISTICS_HOT_PIXEL_MAP_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.TonemapCurve> TONEMAP_CURVE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Float> TONEMAP_GAMMA;
     field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> TONEMAP_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> TONEMAP_PRESET_CURVE;
   }
 
   public static final class CaptureRequest.Builder {
@@ -13475,7 +13481,9 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> STATISTICS_LENS_SHADING_MAP_MODE;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> STATISTICS_SCENE_FLICKER;
     field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.TonemapCurve> TONEMAP_CURVE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> TONEMAP_GAMMA;
     field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> TONEMAP_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> TONEMAP_PRESET_CURVE;
   }
 
   public static final class CaptureResult.Key {

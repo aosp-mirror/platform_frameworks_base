@@ -3601,6 +3601,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #TONEMAP_MODE_CONTRAST_CURVE CONTRAST_CURVE}</li>
      *   <li>{@link #TONEMAP_MODE_FAST FAST}</li>
      *   <li>{@link #TONEMAP_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
+     *   <li>{@link #TONEMAP_MODE_GAMMA_VALUE GAMMA_VALUE}</li>
+     *   <li>{@link #TONEMAP_MODE_PRESET_CURVE PRESET_CURVE}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#TONEMAP_AVAILABLE_TONE_MAP_MODES android.tonemap.availableToneMapModes}</p>
@@ -3616,10 +3618,58 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #TONEMAP_MODE_CONTRAST_CURVE
      * @see #TONEMAP_MODE_FAST
      * @see #TONEMAP_MODE_HIGH_QUALITY
+     * @see #TONEMAP_MODE_GAMMA_VALUE
+     * @see #TONEMAP_MODE_PRESET_CURVE
      */
     @PublicKey
     public static final Key<Integer> TONEMAP_MODE =
             new Key<Integer>("android.tonemap.mode", int.class);
+
+    /**
+     * <p>Tonemapping curve to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
+     * GAMMA_VALUE</p>
+     * <p>The tonemap curve will be defined the following formula:
+     * * OUT = pow(IN, 1.0 / gamma)
+     * where IN and OUT is the input pixel value scaled to range [0.0, 1.0],
+     * pow is the power function and gamma is the gamma value specified by this
+     * key.</p>
+     * <p>The same curve will be applied to all color channels. The camera device
+     * may clip the input gamma value to its supported range. The actual applied
+     * value will be returned in capture result.</p>
+     * <p>The valid range of gamma value varies on different devices, but values
+     * within [1.0, 5.0] are guaranteed not to be clipped.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    @PublicKey
+    public static final Key<Float> TONEMAP_GAMMA =
+            new Key<Float>("android.tonemap.gamma", float.class);
+
+    /**
+     * <p>Tonemapping curve to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
+     * PRESET_CURVE</p>
+     * <p>The tonemap curve will be defined by specified standard.</p>
+     * <p>sRGB (approximated by 16 control points):</p>
+     * <p><img alt="sRGB tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/srgb_tonemap.png" /></p>
+     * <p>Rec. 709 (approximated by 16 control points):</p>
+     * <p><img alt="Rec. 709 tonemapping curve" src="../../../../images/camera2/metadata/android.tonemap.curveRed/rec709_tonemap.png" /></p>
+     * <p>Note that above figures show a 16 control points approximation of preset
+     * curves. Camera devices may apply a different approximation to the curve.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #TONEMAP_PRESET_CURVE_SRGB SRGB}</li>
+     *   <li>{@link #TONEMAP_PRESET_CURVE_REC709 REC709}</li>
+     * </ul></p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#TONEMAP_MODE
+     * @see #TONEMAP_PRESET_CURVE_SRGB
+     * @see #TONEMAP_PRESET_CURVE_REC709
+     */
+    @PublicKey
+    public static final Key<Integer> TONEMAP_PRESET_CURVE =
+            new Key<Integer>("android.tonemap.presetCurve", int.class);
 
     /**
      * <p>This LED is nominally used to indicate to the user
