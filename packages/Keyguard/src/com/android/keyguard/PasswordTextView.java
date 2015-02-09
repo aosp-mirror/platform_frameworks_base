@@ -28,9 +28,15 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
@@ -176,6 +182,7 @@ public class PasswordTextView extends View {
 
     public void append(char c) {
         int visibleChars = mTextChars.size();
+        String textbefore = mText;
         mText = mText + c;
         int newLength = mText.length();
         CharState charState;
@@ -196,6 +203,7 @@ public class PasswordTextView extends View {
             }
         }
         userActivity();
+        sendAccessibilityEventTypeViewTextChanged(textbefore, textbefore.length(), 0, 1);
     }
 
     private void userActivity() {
@@ -204,12 +212,14 @@ public class PasswordTextView extends View {
 
     public void deleteLastChar() {
         int length = mText.length();
+        String textbefore = mText;
         if (length > 0) {
             mText = mText.substring(0, length - 1);
             CharState charState = mTextChars.get(length - 1);
             charState.startRemoveAnimation(0, 0);
         }
         userActivity();
+        sendAccessibilityEventTypeViewTextChanged(textbefore, textbefore.length() - 1, 1, 0);
     }
 
     public String getText() {
@@ -229,6 +239,7 @@ public class PasswordTextView extends View {
     }
 
     public void reset(boolean animated) {
+        String textbefore = mText;
         mText = "";
         int length = mTextChars.size();
         int middleIndex = (length - 1) / 2;
@@ -256,6 +267,71 @@ public class PasswordTextView extends View {
         if (!animated) {
             mTextChars.clear();
         }
+        sendAccessibilityEventTypeViewTextChanged(textbefore, 0, textbefore.length(), 0);
+    }
+
+    void sendAccessibilityEventTypeViewTextChanged(String beforeText, int fromIndex,
+                                                   int removedCount, int addedCount) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled() &&
+                (isFocused() || isSelected() && isShown())) {
+            if (!shouldSpeakPasswordsForAccessibility()) {
+                beforeText = null;
+            }
+            AccessibilityEvent event =
+                    AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
+            event.setFromIndex(fromIndex);
+            event.setRemovedCount(removedCount);
+            event.setAddedCount(addedCount);
+            event.setBeforeText(beforeText);
+            event.setPassword(true);
+            sendAccessibilityEventUnchecked(event);
+        }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+
+        event.setClassName(PasswordTextView.class.getName());
+        event.setPassword(true);
+    }
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+
+        if (shouldSpeakPasswordsForAccessibility()) {
+            final CharSequence text = mText;
+            if (!TextUtils.isEmpty(text)) {
+                event.getText().add(text);
+            }
+        }
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        info.setClassName(PasswordTextView.class.getName());
+        info.setPassword(true);
+
+        if (shouldSpeakPasswordsForAccessibility()) {
+            info.setText(mText);
+        }
+
+        info.setEditable(true);
+
+        info.setInputType(InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+    }
+
+    /**
+     * @return true if the user has explicitly allowed accessibility services
+     * to speak passwords.
+     */
+    private boolean shouldSpeakPasswordsForAccessibility() {
+        return (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
+                UserHandle.USER_CURRENT_OR_SELF) == 1);
     }
 
     private class CharState {
