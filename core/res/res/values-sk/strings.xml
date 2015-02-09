@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Režim v lietadle je ZAPNUTÝ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Režim v lietadle je VYPNUTÝ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Nastavenia"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Hlasový asistent"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Uzamknúť"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Núdzový režim"</string>
@@ -703,7 +704,7 @@
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Umožňuje aplikácii zobraziť informácie o sieťach Wi-Fi. Napríklad o tom, či je sieť Wi-Fi povolená alebo názvy pripojených zariadení Wi-Fi."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"pripojiť a odpojiť od siete Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Umožňuje aplikácii pripojiť sa na prístupové body siete Wi-Fi, odpojiť sa od nich a meniť konfiguráciu zariadení pre siete Wi-Fi."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Povoliť príjem viacsmerového vysielania Wi-Fi"</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"povoliť príjem Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Umožňuje aplikácii prijímať pakety odoslané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries, nielen pomocou vášho tabletu. Spotrebuje viac energie ako režim bez viacsmerového vysielania."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Umožňuje aplikácii prijímať pakety odosielané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries (a nie iba do vášho televízora). Spotrebúva viac energie ako režim bez viacsmerového vysielania."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Umožňuje aplikácii prijímať pakety odoslané na všetky zariadenia v sieti Wi-Fi pomocou viacsmerových adries, nielen pomocou vášho telefónu. Spotrebuje viac energie ako režim bez viacsmerového vysielania."</string>
@@ -1301,8 +1302,7 @@
     <string name="android_start_title" msgid="8418054686415318207">"Systém Android sa spúšťa…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Optimalizuje sa úložisko"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Prebieha optimalizácia aplikácie <xliff:g id="NUMBER_0">%1$d</xliff:g> z <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
-    <!-- no translation found for android_preparing_apk (8162599310274079154) -->
-    <skip />
+    <string name="android_preparing_apk" msgid="8162599310274079154">"Pripravuje sa aplikácia <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Prebieha spúšťanie aplikácií."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Prebieha dokončovanie spúšťania."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Spustená aplikácia: <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -1348,8 +1348,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nepodarilo sa pripojiť k sieti Wi-Fi"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má nekvalitné internetové pripojenie."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Povoliť pripojenie?"</string>
-    <!-- no translation found for wifi_connect_alert_message (6451273376815958922) -->
-    <skip />
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikácia %1$s sa chce pripojiť k sieti Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikácia"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Priame pripojenie Wi-Fi"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Spustiť priame pripojenie siete Wi-Fi. Táto možnosť vypne sieť Wi-Fi v režime klient alebo hotspot."</string>
@@ -1880,8 +1879,6 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Žiadosť SS bola upravená na žiadosť DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Žiadosť SS bola upravená na žiadosť USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Žiadosť SS bola upravená na novú žiadosť SS."</string>
-    <!-- no translation found for usb_midi_peripheral_manufacturer_name (7176526170008970168) -->
-    <skip />
-    <!-- no translation found for usb_midi_peripheral_model_name (1959288763942653301) -->
-    <skip />
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
+    <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"Port USB pre periférne zariadenia"</string>
 </resources>

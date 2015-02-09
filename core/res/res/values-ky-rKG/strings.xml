@@ -305,6 +305,7 @@
     <!-- no translation found for global_actions_airplane_mode_off_status (5075070442854490296) -->
     <skip />
     <string name="global_action_settings" msgid="1756531602592545966">"Жөндөөлөр"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Үн жардамчысы"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Азыр кулпулоо"</string>
     <!-- no translation found for status_bar_notification_info_overflow (5301981741705354993) -->
     <skip />

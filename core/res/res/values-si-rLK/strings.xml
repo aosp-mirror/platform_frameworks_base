@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"අහස්යානා ආකාරය සක්‍රීයයි."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"අහස්යානා අකාරය අක්‍රියයි"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"සැකසීම්"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"හඬ සහායක"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"දැන් අගුළු දමන්න"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"ආරක්‍ෂිත ආකාරය"</string>
@@ -1349,7 +1350,7 @@
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi වෙත සම්බන්ධ විය නොහැක"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" දුබල අන්තර්ජාල සම්බන්ධතාවයක් ඇත."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"සම්බන්ධතාවයට ඉඩ දෙන්නද?"</string>
-    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"යෙදුම් %1$s ක් WiFi ජාලය %2$s වෙත සබැඳීමට කැමතියි"</string>
+    <string name="wifi_connect_alert_message" msgid="6451273376815958922">"යෙදුම් %1$s ක් WiFi ජාලය %2$s වෙත සම්බන්ධ කිරීමට කැමතියි"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"යෙදුම"</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"ඍජු Wi-Fi"</string>
     <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"ඍජු Wi-Fi ආරම්භ කරන්න. මෙය Wi-Fi සේවාදායක/හොට්ස්පොට් එක අක්‍රිය කරනු ඇත."</string>
@@ -1880,6 +1881,6 @@
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS ඉල්ලීම DIAL ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ඉල්ලීම USSD ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ඉල්ලීම නව DIAL ඉල්ලීම වෙත විකරණය කරන ලදී."</string>
-    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"ඇන්ඩ්රොයිඩ්"</string>
+    <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>
     <string name="usb_midi_peripheral_model_name" msgid="1959288763942653301">"USB පර්යන්ත තොට"</string>
 </resources>
