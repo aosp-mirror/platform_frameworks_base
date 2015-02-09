@@ -212,6 +212,9 @@ public abstract class PreferenceFragment extends Fragment implements
 
     @Override
     public void onDestroyView() {
+        if (mList != null) {
+            mList.setOnKeyListener(null);
+        }
         mList = null;
         mHandler.removeCallbacks(mRequestFocus);
         mHandler.removeMessages(MSG_BIND_PREFERENCES);
