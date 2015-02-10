@@ -36,6 +36,7 @@ page.title=GCM Cloud Connection Server (XMPP)
 <h2>See Also</h2>
 
 <ol class="toc">
+<li><a href="server-ref.html">Server Reference</a></li>
 <li><a href="{@docRoot}google/gcm/http.html">HTTP</a></li>
 <li><a href="{@docRoot}google/gcm/gs.html">Getting Started</a></li>
 <li><a href="{@docRoot}google/gcm/server.html">Implementing GCM Server</a></li>
@@ -73,8 +74,8 @@ Play services platform. Upstream messaging is available through the
 APIs. For examples, see
 <a href="#implement">Implementing an XMPP-based App Server</a>.</p>
 
-<p class="note"><strong>Note:</strong> See
-<a href="server.html#params">Implementing GCM Server</a> for a list of all the message
+<p class="note"><strong>Note:</strong> See the
+<a href="server-ref.html">Server Reference</a> for a list of all the message
 parameters and which connection server(s) supports them.</p>
 
 <h2 id="connecting">Establishing a Connection</h2>
@@ -176,8 +177,8 @@ operation and your server needs to resend the messages. See
 <a href="#flow">Flow Control</a> for details.
 </p>
 
-<p class="note"><strong>Note:</strong> See
-<a href="server.html#params">Implementing GCM Server</a> for a list of all the message
+<p class="note"><strong>Note:</strong> See the
+<a href="server-ref.html">Server Reference</a> for a list of all the message
 parameters and which connection server(s) supports them.</p>
 
 <h3 id="request">Request format</h3>
@@ -278,55 +279,10 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 &lt;/message&gt;
 </pre>
 
-<p>The following table lists NACK error codes. Unless otherwise
+<p>See the <a href="server-ref.html#table11">Server Reference</a> for a complete list of the
+NACK error codes. Unless otherwise
 indicated, a NACKed message should not be retried. Unexpected NACK error codes
 should be treated the same as {@code INTERNAL_SERVER_ERROR}.</p>
-
-<p class="table-caption" id="table1">
-  <strong>Table 1.</strong> NACK error codes.</p>
-
-<table border="1">
-<tr>
-<th>Error Code</th>
-<th>Description</th>
-</tr>
-<tr>
-<td>{@code BAD_ACK}</td>
-<td>The ACK message is improperly formed.</td>
-</tr>
-<tr>
-<td>{@code BAD_REGISTRATION}</td>
-<td>The device has a registration ID, but it's invalid or expired.</td>
-</tr>
-<tr>
-<td>{@code CONNECTION_DRAINING}</td>
-<td>The message couldn't be processed because the connection is draining. The
-message should be immediately retried over another connection.</td>
-</tr>
-<tr>
-<td>{@code DEVICE_UNREGISTERED}</td>
-<td>The device is not registered.</td>
-</tr>
-<tr>
-<td>{@code INTERNAL_SERVER_ERROR}</td>
-<td>The server encountered an error while trying to process the request.</td>
-</tr>
-<tr>
-<td>{@code INVALID_JSON}</td>
-<td>The JSON message payload is not valid.</td>
-</tr>
-<td>{@code DEVICE_MESSAGE_RATE_EXCEEDED}</td>
-<td>The rate of messages to a particular device is too high. You should reduce
-the number of messages sent to this device and should not immediately retry
-sending to this device. This error code is replacing {@code QUOTA_EXCEEDED}.</td>
-</tr>
-<tr>
-  <td>{@code SERVICE_UNAVAILABLE}</td>
-  <td>CCS is not currently able to process the message. The
-    message should be retried over the same connection using exponential backoff
-    with an initial delay of 1 second.</td>
-</tr>
-</table>
 
 <h4 id="stanza">Stanza error</h4>
 
