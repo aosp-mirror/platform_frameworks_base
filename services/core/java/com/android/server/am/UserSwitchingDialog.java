@@ -19,6 +19,8 @@ package com.android.server.am;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -26,6 +28,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 /**
  * Dialog to show when a user switch it about to happen. The intent is to snapshot the screen
@@ -37,8 +40,14 @@ final class UserSwitchingDialog extends AlertDialog
         implements ViewTreeObserver.OnWindowShownListener {
     private static final String TAG = "ActivityManagerUserSwitchingDialog";
 
+    // Time to wait for the onWindowShown() callback before continuing the user switch
+    private static final int WINDOW_SHOWN_TIMEOUT_MS = 3000;
+
     private final ActivityManagerService mService;
     private final int mUserId;
+    private static final int MSG_START_USER = 1;
+    @GuardedBy("this")
+    private boolean mStartedUser;
 
     public UserSwitchingDialog(ActivityManagerService service, Context context,
             int userId, String userName, boolean aboveSystem) {
@@ -73,15 +82,40 @@ final class UserSwitchingDialog extends AlertDialog
         if (decorView != null) {
             decorView.getViewTreeObserver().addOnWindowShownListener(this);
         }
+        // Add a timeout as a safeguard, in case a race in screen on/off causes the window
+        // callback to never come.
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_START_USER),
+                WINDOW_SHOWN_TIMEOUT_MS);
     }
 
     @Override
     public void onWindowShown() {
         // Slog.v(TAG, "onWindowShown called");
-        mService.startUserInForeground(mUserId, this);
-        final View decorView = getWindow().getDecorView();
-        if (decorView != null) {
-            decorView.getViewTreeObserver().removeOnWindowShownListener(this);
+        startUser();
+    }
+
+    void startUser() {
+        synchronized (this) {
+            if (!mStartedUser) {
+                mService.startUserInForeground(mUserId, this);
+                mStartedUser = true;
+                final View decorView = getWindow().getDecorView();
+                if (decorView != null) {
+                    decorView.getViewTreeObserver().removeOnWindowShownListener(this);
+                }
+                mHandler.removeMessages(MSG_START_USER);
+            }
         }
     }
+
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_START_USER:
+                    startUser();
+                    break;
+            }
+        }
+    };
 }
