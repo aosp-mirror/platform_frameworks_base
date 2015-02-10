@@ -24,13 +24,6 @@ sdk.platform.apiLevel=21
   <li><a href="#managed_profiles">Support for Managed Profiles</a></li>
 </ol>
 
-<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
-<div>
-    <h3>Video</h3>
-    <p>Notifications</p>
-</div>
-</a>
-
 <h2>API Differences</h2>
 <ol>
 <li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
@@ -47,6 +40,20 @@ sdk.platform.apiLevel=21
 
 </div>
 </div>
+
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=um1S2u022HA">
+<div>
+    <h3>Video</h3>
+    <p>Dev Byte: What's New in Android 5.0</p>
+</div>
+</a>
+
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<div>
+    <h3>Video</h3>
+    <p>Dev Byte: Notifications</p>
+</div>
+</a>
 
 <p>API Level: {@sdkPlatformApiLevel}</p>
 <p>Along with new features and capabilities, Android 5.0 includes a variety of
