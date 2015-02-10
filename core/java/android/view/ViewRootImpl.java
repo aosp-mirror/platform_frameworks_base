@@ -4121,13 +4121,6 @@ public final class ViewRootImpl implements ViewParent,
 
             mAttachInfo.mUnbufferedDispatchRequested = false;
             boolean handled = mView.dispatchPointerEvent(event);
-            if (!handled && event.isTargetAccessibilityFocus()) {
-                // The event was targeting accessibility focused view and is not handled,
-                // it is very rare but possible that a predecessor of the focused view handles
-                // the event but didn't due to special dispatch, perform normal event dispatch.
-                event.setTargetAccessibilityFocus(false);
-                handled = mView.dispatchPointerEvent(event);
-            }
             if (mAttachInfo.mUnbufferedDispatchRequested && !mUnbufferedInputDispatch) {
                 mUnbufferedInputDispatch = true;
                 if (mConsumeBatchedInputScheduled) {
