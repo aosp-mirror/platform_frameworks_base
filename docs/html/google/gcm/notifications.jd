@@ -306,9 +306,3 @@ receive the message:</p>
 <p>In the case of failure, the response has HTTP code 503 and no JSON. When a message
 fails to be delivered to one or more of the regIDs associated with a {@code notification_key},
 the 3rd-party server should retry.</p>
-
-
-
-
-
-
