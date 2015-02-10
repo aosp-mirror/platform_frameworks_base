@@ -67,7 +67,11 @@ MeshState::~MeshState() {
 }
 
 void MeshState::dump() {
-    ALOGD("MeshState vertices: unitQuad %d, current %d", mUnitQuadBuffer, mCurrentBuffer);
+    ALOGD("MeshState VBOs: unitQuad %d, current %d", mUnitQuadBuffer, mCurrentBuffer);
+    ALOGD("MeshState vertices: vertex data %p, stride %d",
+            mCurrentPositionPointer, mCurrentPositionStride);
+    ALOGD("MeshState texCoord: data %p, stride %d",
+            mCurrentTexCoordsPointer, mCurrentTexCoordsStride);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
