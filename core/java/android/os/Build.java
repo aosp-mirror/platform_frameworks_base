@@ -650,15 +650,22 @@ public class Build {
     }
 
     /**
-     * Check that device fingerprint is defined and that it matches across
-     * various partitions.
+     * Verifies the the current flash of the device is consistent with what
+     * was expected at build time.
+     * 1) Checks that device fingerprint is defined and that it matches across
+     *    various partitions.
+     * 2) Verifies radio and bootloader partitions are those expected in the build.
      *
      * @hide
      */
-    public static boolean isFingerprintConsistent() {
+    public static boolean isBuildConsistent() {
         final String system = SystemProperties.get("ro.build.fingerprint");
         final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
         final String bootimage = SystemProperties.get("ro.bootimage.build.fingerprint");
+        final String requiredBootloader = SystemProperties.get("ro.build.expect.bootloader");
+        final String currentBootloader = SystemProperties.get("ro.bootloader");
+        final String requiredRadio = SystemProperties.get("ro.build.expect.baseband");
+        final String currentRadio = SystemProperties.get("gsm.version.baseband");
 
         if (TextUtils.isEmpty(system)) {
             Slog.e(TAG, "Required ro.build.fingerprint is empty!");
@@ -677,6 +684,22 @@ public class Build {
             if (!Objects.equals(system, bootimage)) {
                 Slog.e(TAG, "Mismatched fingerprints; system reported " + system
                         + " but bootimage reported " + bootimage);
+                return false;
+            }
+        }
+
+        if (!TextUtils.isEmpty(requiredBootloader)) {
+            if (!Objects.equals(currentBootloader, requiredBootloader)) {
+                Slog.e(TAG, "Mismatched bootloader version: build requires " + requiredBootloader
+                        + " but runtime reports " + currentBootloader);
+                return false;
+            }
+        }
+
+        if (!TextUtils.isEmpty(requiredRadio)) {
+            if (!Objects.equals(currentRadio, requiredRadio)) {
+                Slog.e(TAG, "Mismatched radio version: build requires " + requiredRadio
+                        + " but runtime reports " + currentRadio);
                 return false;
             }
         }
