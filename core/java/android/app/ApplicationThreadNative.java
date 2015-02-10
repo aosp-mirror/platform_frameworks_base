@@ -409,7 +409,11 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder b = data.readStrongBinder();
-            scheduleActivityConfigurationChanged(b);
+            Configuration overrideConfig = null;
+            if (data.readInt() != 0) {
+                overrideConfig = Configuration.CREATOR.createFromParcel(data);
+            }
+            scheduleActivityConfigurationChanged(b, overrideConfig);
             return true;
         }
 
@@ -1116,6 +1120,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
+    @Override
     public final void scheduleLowMemory() throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1124,15 +1129,24 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public final void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException {
+    @Override
+    public final void scheduleActivityConfigurationChanged(
+            IBinder token, Configuration overrideConfig) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
+        if (overrideConfig != null) {
+            data.writeInt(1);
+            overrideConfig.writeToParcel(data, 0);
+        } else {
+            data.writeInt(0);
+        }
         mRemote.transact(SCHEDULE_ACTIVITY_CONFIGURATION_CHANGED_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
+    @Override
     public void profilerControl(boolean start, ProfilerInfo profilerInfo, int profileType)
             throws RemoteException {
         Parcel data = Parcel.obtain();

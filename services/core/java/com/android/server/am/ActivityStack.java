@@ -3797,15 +3797,15 @@ final class ActivityStack {
             return false;
         }
 
-        // Default case: the activity can handle this new configuration, so
-        // hand it over.  Note that we don't need to give it the new
-        // configuration, since we always send configuration changes to all
-        // process when they happen so it can just use whatever configuration
-        // it last got.
+        // Default case: the activity can handle this new configuration, so hand it over.
+        // NOTE: We only forward the stack override configuration as the system level configuration
+        // changes is always sent to all processes when they happen so it can just use whatever
+        // system level configuration it last got.
         if (r.app != null && r.app.thread != null) {
             try {
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending new config to " + r);
-                r.app.thread.scheduleActivityConfigurationChanged(r.appToken);
+                r.app.thread.scheduleActivityConfigurationChanged(
+                        r.appToken, new Configuration(mOverrideConfig));
             } catch (RemoteException e) {
                 // If process died, whatever.
             }
