@@ -1181,14 +1181,15 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         if (mUsersAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
-            final boolean allowed = 0 != Settings.Secure.getIntForUser(
+            final boolean allowedByUser = 0 != Settings.Secure.getIntForUser(
                     mContext.getContentResolver(),
                     Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, userHandle);
             final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(null /* admin */,
                     userHandle);
             final boolean allowedByDpm = (dpmFlags
                     & DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS) == 0;
-            mUsersAllowingPrivateNotifications.append(userHandle, allowed && allowedByDpm);
+            final boolean allowed = allowedByUser && allowedByDpm;
+            mUsersAllowingPrivateNotifications.append(userHandle, allowed);
             return allowed;
         }
 
