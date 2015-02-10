@@ -35,6 +35,7 @@ import android.util.SparseArray;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.google.android.collect.Lists;
@@ -55,6 +56,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import libcore.io.IoUtils;
 
 /**
  * Cache of registered services. This cache is lazily built by interrogating
@@ -113,13 +116,19 @@ public abstract class RegisteredServicesCache<V> {
 
     public RegisteredServicesCache(Context context, String interfaceName, String metaDataName,
             String attributeName, XmlSerializerAndParser<V> serializerAndParser) {
+        this(context, interfaceName, metaDataName, attributeName, serializerAndParser,
+                Environment.getDataDirectory());
+    }
+
+    @VisibleForTesting
+    protected RegisteredServicesCache(Context context, String interfaceName, String metaDataName,
+            String attributeName, XmlSerializerAndParser<V> serializerAndParser, File dataDir) {
         mContext = context;
         mInterfaceName = interfaceName;
         mMetaDataName = metaDataName;
         mAttributesName = attributeName;
         mSerializerAndParser = serializerAndParser;
 
-        File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         File syncDir = new File(systemDir, "registered_services");
         mPersistentServicesFile = new AtomicFile(new File(syncDir, interfaceName + ".xml"));
@@ -303,7 +312,8 @@ public abstract class RegisteredServicesCache<V> {
         }
     }
 
-    private boolean inSystemImage(int callerUid) {
+    @VisibleForTesting
+    protected boolean inSystemImage(int callerUid) {
         String[] packages = mContext.getPackageManager().getPackagesForUid(callerUid);
         for (String name : packages) {
             try {
@@ -319,6 +329,13 @@ public abstract class RegisteredServicesCache<V> {
         return false;
     }
 
+    @VisibleForTesting
+    protected List<ResolveInfo> queryIntentServices(int userId) {
+        final PackageManager pm = mContext.getPackageManager();
+        return pm.queryIntentServicesAsUser(
+                new Intent(mInterfaceName), PackageManager.GET_META_DATA, userId);
+    }
+
     /**
      * Populate {@link UserServices#services} by scanning installed packages for
      * given {@link UserHandle}.
@@ -331,10 +348,8 @@ public abstract class RegisteredServicesCache<V> {
             Slog.d(TAG, "generateServicesMap() for " + userId + ", changed UIDs = " + changedUids);
         }
 
-        final PackageManager pm = mContext.getPackageManager();
         final ArrayList<ServiceInfo<V>> serviceInfos = new ArrayList<ServiceInfo<V>>();
-        final List<ResolveInfo> resolveInfos = pm.queryIntentServicesAsUser(
-                new Intent(mInterfaceName), PackageManager.GET_META_DATA, userId);
+        final List<ResolveInfo> resolveInfos = queryIntentServices(userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             try {
                 ServiceInfo<V> info = parseServiceInfo(resolveInfo);
@@ -343,9 +358,7 @@ public abstract class RegisteredServicesCache<V> {
                     continue;
                 }
                 serviceInfos.add(info);
-            } catch (XmlPullParserException e) {
-                Log.w(TAG, "Unable to load service info " + resolveInfo.toString(), e);
-            } catch (IOException e) {
+            } catch (XmlPullParserException|IOException e) {
                 Log.w(TAG, "Unable to load service info " + resolveInfo.toString(), e);
             }
         }
@@ -481,7 +494,8 @@ public abstract class RegisteredServicesCache<V> {
         return false;
     }
 
-    private ServiceInfo<V> parseServiceInfo(ResolveInfo service)
+    @VisibleForTesting
+    protected ServiceInfo<V> parseServiceInfo(ResolveInfo service)
             throws XmlPullParserException, IOException {
         android.content.pm.ServiceInfo si = service.serviceInfo;
         ComponentName componentName = new ComponentName(si.packageName, si.name);
@@ -571,12 +585,7 @@ public abstract class RegisteredServicesCache<V> {
         } catch (Exception e) {
             Log.w(TAG, "Error reading persistent services, starting from scratch", e);
         } finally {
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (java.io.IOException e1) {
-                }
-            }
+            IoUtils.closeQuietly(fis);
         }
     }
 
@@ -607,12 +616,17 @@ public abstract class RegisteredServicesCache<V> {
             out.endTag(null, "services");
             out.endDocument();
             mPersistentServicesFile.finishWrite(fos);
-        } catch (java.io.IOException e1) {
+        } catch (IOException e1) {
             Log.w(TAG, "Error writing accounts", e1);
             if (fos != null) {
                 mPersistentServicesFile.failWrite(fos);
             }
         }
+    }
+
+    @VisibleForTesting
+    protected Map<V, Integer> getPersistentServices(int userId) {
+        return findOrCreateUserLocked(userId).persistentServices;
     }
 
     public abstract V parseServiceAttributes(Resources res,
