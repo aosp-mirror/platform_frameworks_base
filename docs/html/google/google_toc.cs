@@ -169,21 +169,14 @@
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="<?cs var:toroot?>google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="<?cs var:toroot?>google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="<?cs var:toroot?>google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="<?cs var:toroot?>google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="<?cs var:toroot ?>reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
