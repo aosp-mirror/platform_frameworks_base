@@ -3054,6 +3054,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #SHADING_MODE_FAST FAST}</li>
      *   <li>{@link #SHADING_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
      * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#SHADING_AVAILABLE_MODES android.shading.availableModes}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
@@ -3062,6 +3064,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#SHADING_AVAILABLE_MODES
      * @see CaptureResult#STATISTICS_LENS_SHADING_CORRECTION_MAP
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      * @see #SHADING_MODE_OFF
@@ -3225,7 +3228,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     /**
      * <p>The shading map is a low-resolution floating-point map
      * that lists the coefficients used to correct for vignetting, for each
-     * Bayer color channel.</p>
+     * Bayer color channel of RAW image data.</p>
      * <p>The least shaded section of the image should have a gain factor
      * of 1; all other sections should have gains above 1.</p>
      * <p>When {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode} = TRANSFORM_MATRIX, the map
@@ -3261,8 +3264,20 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <img alt="Green (odd rows) lens shading map" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/green_o_shading.png" />
      * <img alt="Blue lens shading map" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/blue_shading.png" /></p>
      * <p>As a visualization only, inverting the full-color map to recover an
-     * image of a gray wall (using bicubic interpolation for visual quality) as captured by the sensor gives:</p>
+     * image of a gray wall (using bicubic interpolation for visual quality)
+     * as captured by the sensor gives:</p>
      * <p><img alt="Image of a uniform white wall (inverse shading map)" src="../../../../images/camera2/metadata/android.statistics.lensShadingMap/inv_shading.png" /></p>
+     * <p>Note that the RAW image data might be subject to lens shading
+     * correction not reported on this map. Query
+     * {@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied} to see if RAW image data has subject
+     * to lens shading correction. If {@link CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED android.sensor.info.lensShadingApplied}
+     * is TRUE, the RAW image data is subject to partial or full lens shading
+     * correction. In the case full lens shading correction is applied to RAW
+     * images, the gain factor map reported in this key will contain all 1.0 gains.
+     * In other words, the map reported in this key is the remaining lens shading
+     * that needs to be applied on the RAW image to get images without lens shading
+     * artifacts. See {@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW android.request.maxNumOutputRaw} for a list of RAW image
+     * formats.</p>
      * <p><b>Range of valid values:</b><br>
      * Each gain factor is &gt;= 1</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -3272,6 +3287,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW
+     * @see CameraCharacteristics#SENSOR_INFO_LENS_SHADING_APPLIED
      * @hide
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
@@ -3409,12 +3426,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #STATISTICS_LENS_SHADING_MAP_MODE_OFF OFF}</li>
      *   <li>{@link #STATISTICS_LENS_SHADING_MAP_MODE_ON ON}</li>
      * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES android.statistics.info.availableLensShadingMapModes}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
      * Present on all camera devices that report being {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_FULL HARDWARE_LEVEL_FULL} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_OFF
      * @see #STATISTICS_LENS_SHADING_MAP_MODE_ON
      */

@@ -1943,6 +1943,23 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Integer>("android.sensor.info.timestampSource", int.class);
 
     /**
+     * <p>Whether the RAW images output from this camera device are subject to
+     * lens shading correction.</p>
+     * <p>If TRUE, all images produced by the camera device in the RAW image formats will
+     * have lens shading correction already applied to it. If FALSE, the images will
+     * not be adjusted for lens shading correction.
+     * See {@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW android.request.maxNumOutputRaw} for a list of RAW image formats.</p>
+     * <p>This key will be <code>null</code> for all devices do not report this information.
+     * Devices with RAW capability will always report this information in this key.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_RAW
+     */
+    @PublicKey
+    public static final Key<Boolean> SENSOR_INFO_LENS_SHADING_APPLIED =
+            new Key<Boolean>("android.sensor.info.lensShadingApplied", boolean.class);
+
+    /**
      * <p>The standard reference illuminant used as the scene light source when
      * calculating the {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM1 android.sensor.colorTransform1},
      * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM1 android.sensor.calibrationTransform1}, and
@@ -2233,6 +2250,22 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.sensor.availableTestPatternModes", int[].class);
 
     /**
+     * <p>List of lens shading modes for {@link CaptureRequest#SHADING_MODE android.shading.mode} that are supported by this camera device.</p>
+     * <p>This list contains lens shading modes that can be set for the camera device.
+     * Camera devices that support the MANUAL_POST_PROCESSING capability will always
+     * list OFF and FAST mode. This includes all FULL level devices.
+     * LEGACY devices will always only support FAST mode.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#SHADING_MODE android.shading.mode}</p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureRequest#SHADING_MODE
+     */
+    @PublicKey
+    public static final Key<int[]> SHADING_AVAILABLE_MODES =
+            new Key<int[]>("android.shading.availableModes", int[].class);
+
+    /**
      * <p>List of face detection modes for {@link CaptureRequest#STATISTICS_FACE_DETECT_MODE android.statistics.faceDetectMode} that are
      * supported by this camera device.</p>
      * <p>OFF is always supported.</p>
@@ -2274,6 +2307,23 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<boolean[]> STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES =
             new Key<boolean[]>("android.statistics.info.availableHotPixelMapModes", boolean[].class);
+
+    /**
+     * <p>List of lens shading map output modes for {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode} that
+     * are supported by this camera device.</p>
+     * <p>If no lens shading map output is available for this camera device, this key will
+     * contain only OFF.</p>
+     * <p>ON is always supported on devices with the RAW capability.
+     * LEGACY mode devices will always only support OFF.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE android.statistics.lensShadingMapMode}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
+     */
+    @PublicKey
+    public static final Key<byte[]> STATISTICS_INFO_AVAILABLE_LENS_SHADING_MAP_MODES =
+            new Key<byte[]>("android.statistics.info.availableLensShadingMapModes", byte[].class);
 
     /**
      * <p>Maximum number of supported points in the
