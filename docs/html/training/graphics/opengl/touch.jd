@@ -50,6 +50,10 @@ android.opengl.GLSurfaceView#onTouchEvent onTouchEvent()} to listen for touch ev
 an angle of rotation for a shape.</p>
 
 <pre>
+private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
+private float mPreviousX;
+private float mPreviousY;
+
 &#64;Override
 public boolean onTouchEvent(MotionEvent e) {
     // MotionEvent reports input details from the touch screen
@@ -77,7 +81,7 @@ public boolean onTouchEvent(MotionEvent e) {
 
             mRenderer.setAngle(
                     mRenderer.getAngle() +
-                    ((dx + dy) * TOUCH_SCALE_FACTOR);  // = 180.0f / 320
+                    ((dx + dy) * TOUCH_SCALE_FACTOR));
             requestRender();
     }
 
@@ -108,12 +112,22 @@ public MyGLSurfaceView(Context context) {
 <p>The example code above requires that you expose the rotation angle through your renderer by
 adding a public member. Since the renderer code is running on a separate thread from the main user
 interface thread of your application, you must declare this public variable as {@code volatile}.
-Here is the code to do that:</p>
+Here is the code to declare the variable and expose the getter and setter pair:</p>
 
 <pre>
 public class MyGLRenderer implements GLSurfaceView.Renderer {
     ...
+
     public volatile float mAngle;
+
+    public float getAngle() {
+        return mAngle;
+    }
+
+    public void setAngle(float angle) {
+        mAngle = angle;
+    }
+}
 </pre>
 
 
