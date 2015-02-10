@@ -15,7 +15,7 @@ package com.android.databinding.writer
 
 import com.android.databinding.LayoutBinder
 import com.android.databinding.expr.Expr
-import com.android.databinding.ClassAnalyzer
+import com.android.databinding.reflection.ReflectionAnalyzer
 import kotlin.properties.Delegates
 import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.BindingTarget
@@ -42,9 +42,9 @@ import com.android.databinding.ext.androidId
 import com.android.databinding.ext.lazy
 import com.android.databinding.ext.br
 import com.android.databinding.ext.toJavaCode
-import com.android.databinding.ext.isObservable
 import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
+import com.android.databinding.reflection.Callable
 
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
@@ -160,7 +160,7 @@ fun Expr.toCode(full : Boolean = false) : KCode {
         }
         is FieldAccessExpr -> kcode("") {
             app("", it.getParent().toCode())
-            if (it.getGetter().type == com.android.databinding.ClassAnalyzer.Callable.Type.FIELD) {
+            if (it.getGetter().type == Callable.Type.FIELD) {
                 app(".", it.getGetter().name)
             } else {
                 app(".", it.getGetter().name).app("()")
@@ -602,8 +602,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                 tab("// read ${expr.getUniqueKey()}")
                 // create an if case for all dependencies that might be null
                 val nullables = expr.getDependencies().filter {
-                    it.isMandatory() &&
-                    ClassAnalyzer.isNullable(it.getOther().getResolvedType())
+                    it.isMandatory() && it.getOther().getResolvedType().isNullable()
                 }
                         .map { it.getOther() }
                 if (!expr.isEqualityCheck() && nullables.isNotEmpty()) {

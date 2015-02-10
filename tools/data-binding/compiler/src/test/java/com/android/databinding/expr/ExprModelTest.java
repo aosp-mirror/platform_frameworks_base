@@ -19,7 +19,7 @@ package com.android.databinding.expr;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
 import com.android.databinding.LayoutBinder;
 import com.android.databinding.util.L;
 
@@ -45,7 +45,7 @@ public class ExprModelTest {
         }
 
         @Override
-        protected Class resolveType(ClassAnalyzer classAnalyzer) {
+        protected Class resolveType(ReflectionAnalyzer reflectionAnalyzer) {
             return Integer.class;
         }
 
@@ -77,7 +77,7 @@ public class ExprModelTest {
 
     @Before
     public void setUp() throws Exception {
-        ClassAnalyzer.initForTests();
+        ReflectionAnalyzer.initForTests();
         mExprModel = new ExprModel();
     }
 

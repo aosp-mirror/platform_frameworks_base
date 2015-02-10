@@ -14,13 +14,13 @@
 package com.android.databinding;
 
 
-import com.android.databinding.ClassAnalyzer;
-import com.android.databinding.LayoutBinder;
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
 import com.android.databinding.expr.FieldAccessExpr;
 import com.android.databinding.expr.IdentifierExpr;
 import com.android.databinding.expr.StaticIdentifierExpr;
+import com.android.databinding.reflection.Callable;
+import com.android.databinding.reflection.ReflectionAnalyzer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class LayoutBinderTest {
     ExprModel mExprModel;
     @Before
     public void setUp() throws Exception {
-        ClassAnalyzer.initForTests();
+        ReflectionAnalyzer.initForTests();
         mLayoutBinder = new LayoutBinder(null);
         mExprModel = mLayoutBinder.getModel();
     }
@@ -91,8 +91,8 @@ public class LayoutBinderTest {
         IdentifierExpr id = mExprModel.identifier("user");
         FieldAccessExpr fa = (FieldAccessExpr) item;
         fa.getResolvedType();
-        final ClassAnalyzer.Callable getter = fa.getGetter();
-        assertTrue(getter.type == ClassAnalyzer.Callable.Type.METHOD);
+        final Callable getter = fa.getGetter();
+        assertTrue(getter.type == Callable.Type.METHOD);
         assertSame(id, fa.getParent());
         assertTrue(fa.isDynamic());
     }

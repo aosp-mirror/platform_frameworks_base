@@ -16,18 +16,16 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.ClassAnalyzer;
-import com.android.databinding.util.L;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.Callable;
+import com.android.databinding.reflection.ReflectionClass;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class FieldAccessExpr extends Expr {
     String mName;
-    ClassAnalyzer.Callable mGetter;
+    Callable mGetter;
     final boolean mIsObservableField;
 
     FieldAccessExpr(Expr parent, String name) {
@@ -46,7 +44,7 @@ public class FieldAccessExpr extends Expr {
         return getChildren().get(0);
     }
 
-    public ClassAnalyzer.Callable getGetter() {
+    public Callable getGetter() {
         if (mGetter == null) {
             getResolvedType();
         }
@@ -62,7 +60,7 @@ public class FieldAccessExpr extends Expr {
             getResolvedType();
         }
         // maybe this is just a final field in which case cannot be notified as changed
-        return mGetter.type != ClassAnalyzer.Callable.Type.FIELD || mGetter.isDynamic;
+        return mGetter.type != Callable.Type.FIELD || mGetter.isDynamic;
     }
 
     @Override
@@ -89,10 +87,10 @@ public class FieldAccessExpr extends Expr {
     }
 
     @Override
-    public void updateExpr(ClassAnalyzer classAnalyzer) {
+    public void updateExpr(ReflectionAnalyzer reflectionAnalyzer) {
         if (mGetter == null) {
-            mGetter = classAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
-            if (classAnalyzer.isObservableField(mGetter.resolvedType)) {
+            mGetter = reflectionAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
+            if (reflectionAnalyzer.isObservableField(mGetter.resolvedType)) {
                 // Make this the ".get()" and add an extra field access for the observable field
                 Expr parent = getParent();
                 parent.getParents().remove(this);
@@ -103,16 +101,16 @@ public class FieldAccessExpr extends Expr {
 
                 getChildren().add(observableField);
                 observableField.getParents().add(this);
-                mGetter = classAnalyzer.findMethodOrField(mGetter.resolvedType, "get");
+                mGetter = reflectionAnalyzer.findMethodOrField(mGetter.resolvedType, "get");
                 mName = "";
             }
         }
     }
 
     @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
+    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
         if (mGetter == null) {
-            mGetter = classAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
+            mGetter = reflectionAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
         }
         return mGetter.resolvedType;
     }

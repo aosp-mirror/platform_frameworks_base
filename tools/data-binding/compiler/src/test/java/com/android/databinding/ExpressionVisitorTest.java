@@ -16,8 +16,6 @@
 
 package com.android.databinding;
 
-import com.android.databinding.ClassAnalyzer;
-import com.android.databinding.ExpressionParser;
 import com.android.databinding.expr.ComparisonExpr;
 import com.android.databinding.expr.Dependency;
 import com.android.databinding.expr.Expr;
@@ -27,6 +25,8 @@ import com.android.databinding.expr.IdentifierExpr;
 import com.android.databinding.expr.MethodCallExpr;
 import com.android.databinding.expr.SymbolExpr;
 import com.android.databinding.expr.TernaryExpr;
+import com.android.databinding.reflection.Callable;
+import com.android.databinding.reflection.ReflectionAnalyzer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class ExpressionVisitorTest {
 
     @Before
     public void setUp() throws Exception {
-        ClassAnalyzer.initForTests();
+        ReflectionAnalyzer.initForTests();
     }
 
     private <T extends Expr> T parse(String input, Class<T> klass) {
@@ -69,7 +69,7 @@ public class ExpressionVisitorTest {
 
         @Before
         public void setUp() throws Exception {
-            ClassAnalyzer.initForTests();
+            ReflectionAnalyzer.initForTests();
         }
 
         @Parameterized.Parameters
@@ -143,8 +143,8 @@ public class ExpressionVisitorTest {
         final IdentifierExpr id = (IdentifierExpr) parsed.getParent();
         id.setUserDefinedType("java.lang.String");
         assertSame(int.class, parsed.getResolvedType());
-        ClassAnalyzer.Callable getter = parsed.getGetter();
-        assertEquals(ClassAnalyzer.Callable.Type.METHOD, getter.type);
+        Callable getter = parsed.getGetter();
+        assertEquals(Callable.Type.METHOD, getter.type);
         assertEquals("length", getter.name);
         assertEquals(1, parsed.getDependencies().size());
         final Dependency dep = parsed.getDependencies().get(0);
@@ -159,8 +159,8 @@ public class ExpressionVisitorTest {
         final IdentifierExpr id = (IdentifierExpr) parsed.getParent();
         id.setUserDefinedType("java.lang.String");
         assertSame(byte[].class, parsed.getResolvedType());
-        ClassAnalyzer.Callable getter = parsed.getGetter();
-        assertEquals(ClassAnalyzer.Callable.Type.METHOD, getter.type);
+        Callable getter = parsed.getGetter();
+        assertEquals(Callable.Type.METHOD, getter.type);
         assertEquals("getBytes", getter.name);
         assertEquals(1, parsed.getDependencies().size());
         final Dependency dep = parsed.getDependencies().get(0);

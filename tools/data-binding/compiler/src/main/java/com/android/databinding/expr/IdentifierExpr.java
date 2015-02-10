@@ -19,7 +19,8 @@ package com.android.databinding.expr;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 
 import java.util.List;
 
@@ -57,10 +58,10 @@ public class IdentifierExpr extends Expr {
     }
 
     @Override
-    protected Class resolveType(final ClassAnalyzer classAnalyzer) {
+    protected ReflectionClass resolveType(final ReflectionAnalyzer reflectionAnalyzer) {
         Preconditions.checkNotNull(mUserDefinedType,
                 "Identifiers must have user defined types from the XML file. %s is missing it", mName);
-        return classAnalyzer.findClass(mUserDefinedType);
+        return reflectionAnalyzer.findClass(mUserDefinedType);
     }
 
     @Override

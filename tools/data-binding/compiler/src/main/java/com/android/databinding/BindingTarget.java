@@ -18,8 +18,8 @@ package com.android.databinding;
 
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
-
-import org.w3c.dom.Node;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class BindingTarget {
     String mViewClass;
     List<Binding> mBindings = new ArrayList<>();
     ExprModel mModel;
-    Class mResolvedClass;
+    ReflectionClass mResolvedClass;
     String mIncludedLayout;
     // if this target presents itself in multiple layout files with different view types,
     // it receives an interface type and should use it in the getter instead.
@@ -68,9 +68,9 @@ public class BindingTarget {
         return mViewClass;
     }
 
-    public Class getResolvedType() {
+    public ReflectionClass getResolvedType() {
         if (mResolvedClass == null) {
-            mResolvedClass = ClassAnalyzer.getInstance().findClass(mViewClass);
+            mResolvedClass = ReflectionAnalyzer.getInstance().findClass(mViewClass);
         }
         return mResolvedClass;
     }

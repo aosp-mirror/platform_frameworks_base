@@ -18,7 +18,9 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.Iterables;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.Callable;
+import com.android.databinding.reflection.ReflectionClass;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +29,7 @@ import java.util.List;
 public class MethodCallExpr extends Expr {
     final String mName;
 
-    ClassAnalyzer.Callable mGetter;
+    Callable mGetter;
 
     MethodCallExpr(Expr target, String name, List<Expr> args) {
         super(Iterables.concat(Arrays.asList(target), args));
@@ -35,13 +37,13 @@ public class MethodCallExpr extends Expr {
     }
 
     @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
+    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
         if (mGetter == null) {
-            List<Class> args = new ArrayList<>();
+            List<ReflectionClass> args = new ArrayList<>();
             for (Expr expr : getArgs()) {
                 args.add(expr.getResolvedType());
             }
-            mGetter = classAnalyzer.findMethod(getTarget().getResolvedType(), mName, args);
+            mGetter = reflectionAnalyzer.findMethod(getTarget().getResolvedType(), mName, args);
         }
         return mGetter.resolvedType;
     }
@@ -75,7 +77,7 @@ public class MethodCallExpr extends Expr {
         return getChildren().subList(1, getChildren().size());
     }
 
-    public ClassAnalyzer.Callable getGetter() {
+    public Callable getGetter() {
         return mGetter;
     }
 }

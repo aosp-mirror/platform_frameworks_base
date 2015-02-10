@@ -20,6 +20,7 @@ import com.google.common.base.Preconditions;
 
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
+import com.android.databinding.reflection.ReflectionAnalyzer;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -78,32 +79,38 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
     @Override
     public Expr visitQuestionQuestionOp(@NotNull BindingExpressionParser.QuestionQuestionOpContext ctx) {
         final Expr left = ctx.left.accept(this);
-        return mModel.ternary(
-                mModel.comparison("==", left, mModel.symbol("null", Object.class)),
+        return mModel.ternary(mModel.comparison("==", left, mModel.symbol("null", Object.class)),
                 left, ctx.right.accept(this));
     }
 
     @Override
     public Expr visitTerminal(@NotNull TerminalNode node) {
         final int type = node.getSymbol().getType();
+        Class classType;
         switch (type) {
             case BindingExpressionParser.IntegerLiteral:
-                return mModel.symbol(node.getText(), Integer.class);
+                classType = int.class;
+                break;
             case BindingExpressionParser.FloatingPointLiteral:
-                return mModel.symbol(node.getText(), Float.class);
+                classType = float.class;
+                break;
             case BindingExpressionParser.BooleanLiteral:
-                return mModel.symbol(node.getText(), Boolean.class);
+                classType = boolean.class;
+                break;
             case BindingExpressionParser.CharacterLiteral:
-                return mModel.symbol(node.getText(), Character.class);
+                classType = char.class;
+                break;
             case BindingExpressionParser.SingleQuoteString:
-                return mModel.symbol(node.getText(), String.class);
             case BindingExpressionParser.DoubleQuoteString:
-                return mModel.symbol(node.getText(), String.class);
+                classType = String.class;
+                break;
             case BindingExpressionParser.NullLiteral:
-                return mModel.symbol(node.getText(), Object.class);
+                classType = Object.class;
+                break;
             default:
                 throw new RuntimeException("cannot create expression from terminal node " + node.toString());
         }
+        return mModel.symbol(node.getText(), classType);
     }
 
     @Override
@@ -234,8 +241,8 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
 //                @org.jetbrains.annotations.NotNull
 //                @Override
 //                public Class<? extends Object> resolveValueType(
-//                        @org.jetbrains.annotations.NotNull ClassAnalyzer classAnalyzer) {
-//                    return classAnalyzer.commonParentOf(aggregate.getResolvedClass(), nextResult.getResolvedClass());
+//                        @org.jetbrains.annotations.NotNull ReflectionAnalyzer reflectionAnalyzer) {
+//                    return reflectionAnalyzer.commonParentOf(aggregate.getResolvedClass(), nextResult.getResolvedClass());
 //                }
 //
 //                @org.jetbrains.annotations.NotNull

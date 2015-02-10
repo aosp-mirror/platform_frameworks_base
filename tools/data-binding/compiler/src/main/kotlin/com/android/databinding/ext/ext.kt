@@ -17,7 +17,9 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.Delegates
 import com.android.databinding.ext.joinToCamelCase
 import com.android.databinding.ext.joinToCamelCaseAsVar
-import com.android.databinding.ClassAnalyzer
+import com.android.databinding.reflection.ReflectionAnalyzer
+import com.android.databinding.reflection.ReflectionClass
+import com.android.databinding.reflection.ReflectionAnalyzer
 
 private class LazyExt<K, T>(private val initializer: (k : K) -> T) : ReadOnlyProperty<K, T> {
     private val mapping = hashMapOf<K, T>()
@@ -76,7 +78,3 @@ public fun String.toCamelCaseAsVar() : String {
 
 public fun String.br() : String =
     "android.binding.BR.${if (this == "") "_all" else this}"
-
-public fun Class<*>.getCodeName() : String = getName().replace("$", ".")
-
-public fun Class<*>.isObservable() : Boolean = ClassAnalyzer.getInstance().isObservable(this)

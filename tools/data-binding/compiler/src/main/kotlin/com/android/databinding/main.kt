@@ -50,7 +50,7 @@ import com.android.databinding.util.Log
 import com.android.databinding.LayoutBinder
 import com.android.databinding.DataBinder
 import com.android.databinding.writer.DataBinderWriter
-import com.android.databinding.ClassAnalyzer
+import com.android.databinding.reflection.ReflectionAnalyzer
 import com.android.databinding.util.ParserHelper
 import com.google.common.base.Preconditions
 
@@ -59,7 +59,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         val outputBaseDir : File, val outputResBaseDir : File) {
     var dbr : DataBinderWriter by Delegates.notNull()
     var processed = false
-    public var classAnalyzer : ClassAnalyzer by Delegates.notNull()
+    public var reflectionAnalyzer : ReflectionAnalyzer by Delegates.notNull()
 
     val jDataBinder = DataBinder();
 

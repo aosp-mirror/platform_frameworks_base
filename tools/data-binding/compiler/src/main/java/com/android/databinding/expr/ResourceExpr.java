@@ -17,12 +17,10 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.ImmutableMap;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +60,7 @@ public class ResourceExpr extends Expr {
     }
 
     @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
+    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
         String type;
         switch (mResourceType) {
             case "anim":
@@ -72,43 +70,36 @@ public class ResourceExpr extends Expr {
                 type = "android.animation.Animator";
                 break;
             case "bool":
-                return boolean.class;
+                return reflectionAnalyzer.findClass(boolean.class);
             case "color":
-                return int.class;
+            case "dimenOffset":
+            case "dimenSize":
+            case "id":
+            case "integer":
+            case "layout":
+            case "plurals":
+                return reflectionAnalyzer.findClass(int.class);
             case "colorStateList":
                 type = "android.content.res.ColorStateList";
                 break;
             case "dimen":
-                return float.class;
-            case "dimenOffset":
-                return int.class;
-            case "dimenSize":
-                return int.class;
+            case "fraction":
+                return reflectionAnalyzer.findClass(float.class);
             case "drawable":
                 type = "android.graphics.drawable.Drawable";
                 break;
-            case "fraction":
-                return float.class;
-            case "id":
-                return int.class;
             case "intArray":
-                return int[].class;
-            case "integer":
-                return int.class;
+                return reflectionAnalyzer.findClass(int[].class);
             case "interpolator":
                 type = "";
                 break;
-            case "layout":
-                return int.class;
-            case "plurals":
-                return int.class;
             case "stateListAnimator":
                 type = "android.animation.StateListAnimator";
                 break;
             case "string":
-                return String.class;
+                return reflectionAnalyzer.findClass(String.class);
             case "stringArray":
-                return String[].class;
+                return reflectionAnalyzer.findClass(String[].class);
             case "transition":
                 type = "android.transition.Transition";
                 break;
@@ -119,7 +110,7 @@ public class ResourceExpr extends Expr {
                 type = mResourceType;
                 break;
         }
-        return classAnalyzer.findClass(type);
+        return reflectionAnalyzer.findClass(type);
     }
 
     @Override

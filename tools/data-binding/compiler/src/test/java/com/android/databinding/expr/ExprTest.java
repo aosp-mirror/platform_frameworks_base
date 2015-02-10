@@ -16,7 +16,7 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class ExprTest{
         }
 
         @Override
-        protected Class resolveType(ClassAnalyzer classAnalyzer) {
+        protected Class resolveType(ReflectionAnalyzer reflectionAnalyzer) {
             return Integer.class;
         }
 
@@ -59,14 +59,14 @@ public class ExprTest{
 
     @Before
     public void setUp() throws Exception {
-        ClassAnalyzer.initForTests();
+        ReflectionAnalyzer.initForTests();
     }
 
     @Test(expected=IllegalStateException.class)
     public void testBadExpr() {
         Expr expr = new Expr() {
             @Override
-            protected Class resolveType(ClassAnalyzer classAnalyzer) {
+            protected Class resolveType(ReflectionAnalyzer reflectionAnalyzer) {
                 return Integer.class;
             }
 

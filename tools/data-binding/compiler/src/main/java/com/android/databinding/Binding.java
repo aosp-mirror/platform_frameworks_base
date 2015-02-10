@@ -16,6 +16,8 @@
 
 package com.android.databinding;
 
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 import com.android.databinding.store.SetterStore;
 import com.android.databinding.expr.Expr;
 
@@ -37,15 +39,15 @@ public class Binding {
     }
 
     public String toJavaCode(String targetViewName, String expressionCode) {
-        Class viewType = mTarget.getResolvedType();
-        return SetterStore.get(ClassAnalyzer.getInstance()).getSetterCall(mName, viewType,
+        ReflectionClass viewType = mTarget.getResolvedType();
+        return SetterStore.get(ReflectionAnalyzer.getInstance()).getSetterCall(mName, viewType,
                 mExpr.getResolvedType(), targetViewName, expressionCode);
     }
 
-//    private String resolveJavaCode(ClassAnalyzer classAnalyzer) {
+//    private String resolveJavaCode(ReflectionAnalyzer reflectionAnalyzer) {
 //
 //    }
-////        return classAnalyzer.findMethod(mTarget.getResolvedType(), mName,
+////        return reflectionAnalyzer.findMethod(mTarget.getResolvedType(), mName,
 ////                Arrays.asList(mExpr.getResolvedType()));
 //    //}
 //

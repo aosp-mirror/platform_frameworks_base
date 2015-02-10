@@ -15,7 +15,9 @@
  */
 package com.android.databinding.store;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ReflectionMethod;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,10 +53,10 @@ public class SetterStore {
     private static SetterStore sStore;
 
     private final IntermediateV1 mStore;
-    private final ClassAnalyzer mClassAnalyzer;
+    private final ReflectionAnalyzer mClassAnalyzer;
 
-    private SetterStore(ClassAnalyzer classAnalyzer, IntermediateV1 store) {
-        mClassAnalyzer = classAnalyzer;
+    private SetterStore(ReflectionAnalyzer reflectionAnalyzer, IntermediateV1 store) {
+        mClassAnalyzer = reflectionAnalyzer;
         mStore = store;
     }
 
@@ -91,24 +93,22 @@ public class SetterStore {
         return sStore;
     }
 
-    public static SetterStore get(ClassAnalyzer classAnalyzer) {
+    public static SetterStore get(ReflectionAnalyzer reflectionAnalyzer) {
         if (sStore == null) {
-            sStore = load(classAnalyzer);
+            sStore = load(reflectionAnalyzer);
         }
         return sStore;
     }
 
-    private static SetterStore load(ClassAnalyzer classAnalyzer) {
+    private static SetterStore load(ReflectionAnalyzer reflectionAnalyzer) {
         IntermediateV1 store = new IntermediateV1();
         String resourceName = SetterStore.class.getPackage().getName().replace('.', '/') +
                 "/setter_store.bin";
         try {
-            Enumeration<URL> resources = classAnalyzer.getClassLoader().getResources(resourceName);
-            while (resources.hasMoreElements()) {
-                URL resource = resources.nextElement();
+            for (URL resource : reflectionAnalyzer.getResources(resourceName)) {
                 merge(store, resource);
             }
-            return new SetterStore(classAnalyzer, store);
+            return new SetterStore(reflectionAnalyzer, store);
         } catch (IOException e) {
             System.err.println("Could not read SetterStore intermediate file: " +
                     e.getLocalizedMessage());
@@ -118,7 +118,7 @@ public class SetterStore {
                     e.getLocalizedMessage());
             e.printStackTrace();
         }
-        return new SetterStore(classAnalyzer, store);
+        return new SetterStore(reflectionAnalyzer, store);
     }
 
     private static SetterStore load(InputStream inputStream)
@@ -282,8 +282,8 @@ public class SetterStore {
         }
     }
 
-    public String getSetterCall(String attribute, Class<?> viewType,
-            Class<?> valueType, String viewExpression, String valueExpression) {
+    public String getSetterCall(String attribute, ReflectionClass viewType,
+            ReflectionClass valueType, String viewExpression, String valueExpression) {
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
@@ -293,9 +293,9 @@ public class SetterStore {
         HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
         MethodDescription adapter = null;
         String setterName = null;
-        Method bestSetterMethod = getBestSetter(viewType, valueType, attribute);
-        Class<?> bestViewType = null;
-        Class<?> bestValueType = null;
+        ReflectionMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute);
+        ReflectionClass bestViewType = null;
+        ReflectionClass bestValueType = null;
         if (bestSetterMethod != null) {
             bestViewType = bestSetterMethod.getDeclaringClass();
             bestValueType = bestSetterMethod.getParameterTypes()[0];
@@ -305,10 +305,10 @@ public class SetterStore {
         if (adapters != null) {
             for (AccessorKey key : adapters.keySet()) {
                 try {
-                    Class<?> adapterViewType = mClassAnalyzer.findClass(key.viewType);
+                    ReflectionClass adapterViewType = mClassAnalyzer.findClass(key.viewType);
                     if (adapterViewType.isAssignableFrom(viewType)) {
                         try {
-                            Class<?> adapterValueType = mClassAnalyzer.findClass(key.valueType);
+                            ReflectionClass adapterValueType = mClassAnalyzer.findClass(key.valueType);
                             boolean isBetterView = bestViewType == null ||
                                     bestValueType.isAssignableFrom(adapterValueType);
                             if (isBetterParameter(valueType, adapterValueType, bestValueType,
@@ -327,8 +327,8 @@ public class SetterStore {
             }
         }
 
-        if (Object.class.equals(valueType) && !bestValueType.isAssignableFrom(valueType)) {
-            valueExpression = "(" + bestValueType.getCanonicalName() + ") " + valueExpression;
+        if (valueType.isObject() && !bestValueType.isAssignableFrom(valueType)) {
+            valueExpression = "(" + bestValueType.toJavaCode() + ") " + valueExpression;
         }
         MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType);
         if (conversionMethod != null) {
@@ -346,14 +346,15 @@ public class SetterStore {
         }
     }
 
-    private Method getBestSetter(Class<?> viewType, Class<?> argumentType, String attribute) {
+    private ReflectionMethod getBestSetter(ReflectionClass viewType, ReflectionClass argumentType,
+            String attribute) {
         String setterName = null;
 
         HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed != null) {
             for (String className : renamed.keySet()) {
                 try {
-                    Class<?> renamedViewType = mClassAnalyzer.findClass(className);
+                    ReflectionClass renamedViewType = mClassAnalyzer.findClass(className);
                     if (renamedViewType.isAssignableFrom(viewType)) {
                         setterName = renamed.get(className).method;
                         break;
@@ -366,17 +367,14 @@ public class SetterStore {
         if (setterName == null) {
             setterName = getDefaultSetter(attribute);
         }
-        Method[] methods = viewType.getMethods();
+        ReflectionMethod[] methods = viewType.getMethods(setterName, 1);
 
-        Class<?> bestParameterType = null;
-        Method bestMethod = null;
-        for (Method method : methods) {
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            if (parameterTypes.length == 1 && setterName.equals(method.getName()) &&
-                    void.class.equals(method.getReturnType()) &&
-                    !Modifier.isStatic(method.getModifiers()) &&
-                    Modifier.isPublic(method.getModifiers())) {
-                Class<?> param = parameterTypes[0];
+        ReflectionClass bestParameterType = null;
+        ReflectionMethod bestMethod = null;
+        for (ReflectionMethod method : methods) {
+            ReflectionClass[] parameterTypes = method.getParameterTypes();
+            if (method.getReturnType().isVoid() && !method.isStatic() && method.isPublic()) {
+                ReflectionClass param = parameterTypes[0];
                 if (isBetterParameter(argumentType, param, bestParameterType, true)) {
                     bestParameterType = param;
                     bestMethod = method;
@@ -394,8 +392,8 @@ public class SetterStore {
         return "set" + propertyName;
     }
 
-    private boolean isBetterParameter(Class<?> argument, Class<?> parameter, Class<?> oldParameter,
-            boolean isBetterViewTypeMatch) {
+    private boolean isBetterParameter(ReflectionClass argument, ReflectionClass parameter,
+            ReflectionClass oldParameter, boolean isBetterViewTypeMatch) {
         // Right view type. Check the value
         if (!isBetterViewTypeMatch && oldParameter.equals(argument)) {
             return false;
@@ -430,15 +428,14 @@ public class SetterStore {
                 if (getConversionMethod(argument, oldParameter) != null) {
                     return false;
                 }
-                return argument.equals(Object.class) && !parameter.isPrimitive();
+                return argument.isObject() && !parameter.isPrimitive();
             }
         }
     }
 
-    private static boolean isImplicitConversion(Class<?> from, Class<?> to) {
+    private static boolean isImplicitConversion(ReflectionClass from, ReflectionClass to) {
         if (from != null && to != null && from.isPrimitive() && to.isPrimitive()) {
-            if (from.equals(boolean.class) || to.equals(boolean.class) ||
-                    to.equals(char.class)) {
+            if (from.isBoolean() || to.isBoolean() || to.isChar()) {
                 return false;
             }
             int fromConversionLevel = getConversionLevel(from);
@@ -449,17 +446,17 @@ public class SetterStore {
         }
     }
 
-    private MethodDescription getConversionMethod(Class<?> from, Class<?> to) {
+    private MethodDescription getConversionMethod(ReflectionClass from, ReflectionClass to) {
         if (from != null && to != null) {
             for (String fromClassName : mStore.conversionMethods.keySet()) {
                 try {
-                    Class<?> convertFrom = mClassAnalyzer.findClass(fromClassName);
+                    ReflectionClass convertFrom = mClassAnalyzer.findClass(fromClassName);
                     if (canUseForConversion(from, convertFrom)) {
                         HashMap<String, MethodDescription> conversion =
                                 mStore.conversionMethods.get(fromClassName);
                         for (String toClassName : conversion.keySet()) {
                             try {
-                                Class<?> convertTo = mClassAnalyzer.findClass(toClassName);
+                                ReflectionClass convertTo = mClassAnalyzer.findClass(toClassName);
                                 if (canUseForConversion(convertTo, to)) {
                                     return conversion.get(toClassName);
                                 }
@@ -476,87 +473,37 @@ public class SetterStore {
         return null;
     }
 
-    private static boolean canUseForConversion(Class<?> from, Class<?> to) {
+    private boolean canUseForConversion(ReflectionClass from, ReflectionClass to) {
         return from.equals(to) || isBoxingConversion(from, to) || to.isAssignableFrom(from);
     }
 
-    private static int getConversionLevel(Class<?> primitive) {
-        if (byte.class.equals(primitive)) {
+    private static int getConversionLevel(ReflectionClass primitive) {
+        if (primitive == null) {
+            return -1;
+        } else if (primitive.isByte()) {
             return 0;
-        } else if (char.class.equals(primitive)) {
+        } else if (primitive.isChar()) {
             return 1;
-        } else if (short.class.equals(primitive)) {
+        } else if (primitive.isShort()) {
             return 2;
-        } else if (int.class.equals(primitive)) {
+        } else if (primitive.isInt()) {
             return 3;
-        } else if (long.class.equals(primitive)) {
+        } else if (primitive.isLong()) {
             return 4;
-        } else if (float.class.equals(primitive)) {
+        } else if (primitive.isFloat()) {
             return 5;
-        } else if (double.class.equals(primitive)) {
+        } else if (primitive.isDouble()) {
             return 6;
         } else {
             return -1;
         }
     }
 
-    public static boolean isBoxingConversion(Class<?> class1, Class<?> class2) {
+    public static boolean isBoxingConversion(ReflectionClass class1, ReflectionClass class2) {
         if (class1.isPrimitive() != class2.isPrimitive()) {
-            return (getWrappedType(class1).equals(getWrappedType(class2)));
+            return (class1.box().equals(class2.box()));
         } else {
             return false;
-        }
-    }
-
-    public static Class<?> getWrappedType(Class<?> type) {
-        if (!type.isPrimitive()) {
-            return type;
-        }
-        if (int.class.equals(type)) {
-            return Integer.class;
-        } else if (long.class.equals(type)) {
-            return Long.class;
-        } else if (short.class.equals(type)) {
-            return Short.class;
-        } else if (byte.class.equals(type)) {
-            return Byte.class;
-        } else if (char.class.equals(type)) {
-            return Character.class;
-        } else if (double.class.equals(type)) {
-            return Double.class;
-        } else if (float.class.equals(type)) {
-            return Float.class;
-        } else if (boolean.class.equals(type)) {
-            return Boolean.class;
-        } else {
-            // what type is this?
-            return type;
-        }
-    }
-
-    public static Class<?> getPrimitiveType(Class<?> type) {
-        if (type.isPrimitive()) {
-            return type;
-        }
-        if (Integer.class.equals(type)) {
-            return int.class;
-        } else if (Long.class.equals(type)) {
-            return long.class;
-        } else if (Short.class.equals(type)) {
-            return short.class;
-        } else if (Byte.class.equals(type)) {
-            return byte.class;
-        } else if (Character.class.equals(type)) {
-            return char.class;
-        } else if (Double.class.equals(type)) {
-            return double.class;
-        } else if (Float.class.equals(type)) {
-            return float.class;
-        } else if (Boolean.class.equals(type)) {
-            return boolean.class;
-        } else {
-            // what type is this?
-            return type;
         }
     }
 

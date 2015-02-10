@@ -16,7 +16,8 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 
 import java.util.List;
 
@@ -33,8 +34,8 @@ public class ComparisonExpr extends Expr {
     }
 
     @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
-        return boolean.class;
+    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
+        return reflectionAnalyzer.loadPrimitive("boolean");
     }
 
     @Override

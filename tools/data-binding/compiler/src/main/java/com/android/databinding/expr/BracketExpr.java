@@ -16,7 +16,9 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ClassClass;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 
 import java.util.List;
 import java.util.Map;
@@ -36,24 +38,20 @@ public class BracketExpr extends Expr {
     }
 
     @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
-        Class<?> targetType = getTarget().resolveType(classAnalyzer);
+    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
+        ReflectionClass targetType = getTarget().resolveType(reflectionAnalyzer);
         if (targetType.isArray()) {
             mAccessor = BracketAccessor.ARRAY;
-        } else if (List.class.isAssignableFrom(targetType)) {
+        } else if (targetType.isList()) {
             mAccessor = BracketAccessor.LIST;
-        } else if (Map.class.isAssignableFrom(targetType)) {
+        } else if (targetType.isMap()) {
             mAccessor = BracketAccessor.MAP;
         } else {
             throw new IllegalArgumentException("Cannot determine variable type used in [] " +
                     "expression. Cast the value to List, ObservableList, Map, " +
                     "Cursor, or array.");
         }
-        if (targetType.isArray()) {
-            return targetType.getComponentType();
-        } else {
-            return Object.class;
-        }
+        return targetType.getComponentType();
     }
 
     @Override

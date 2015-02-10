@@ -21,7 +21,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 import com.android.databinding.util.L;
 import com.android.databinding.writer.FlagSet;
 
@@ -191,7 +192,7 @@ public class ExprModel {
     public void seal() {
         List<Expr> notifiableExpressions = new ArrayList<>();
         //ensure class analyzer. We need to know observables at this point
-        final ClassAnalyzer classAnalyzer = ClassAnalyzer.getInstance();
+        final ReflectionAnalyzer reflectionAnalyzer = ReflectionAnalyzer.getInstance();
 
         ArrayList<Expr> processedExprs = new ArrayList<>();
         ArrayList<Expr> exprs = new ArrayList<>();
@@ -200,13 +201,13 @@ public class ExprModel {
             exprs.addAll(mExprMap.values());
             exprs.removeAll(processedExprs);
             for (Expr expr: exprs) {
-                expr.updateExpr(classAnalyzer);
+                expr.updateExpr(reflectionAnalyzer);
             }
             processedExprs.addAll(exprs);
         } while (!exprs.isEmpty());
 
         int counter = 0;
-        final Iterable<Expr> observables = filterObservables(classAnalyzer);
+        final Iterable<Expr> observables = filterObservables(reflectionAnalyzer);
         List<String> flagMapping = Lists.newArrayList();
         mObservables = Lists.newArrayList();
         for (Expr expr : observables) {
@@ -219,7 +220,7 @@ public class ExprModel {
         }
 
         // non-observable identifiers gets next ids
-        final Iterable<Expr> nonObservableIds = filterNonObservableIds(classAnalyzer);
+        final Iterable<Expr> nonObservableIds = filterNonObservableIds(reflectionAnalyzer);
         for (Expr expr : nonObservableIds) {
             flagMapping.add(expr.getUniqueKey());
             expr.setId(counter++);
@@ -336,23 +337,23 @@ public class ExprModel {
         return mFlagMapping[id];
     }
 
-    private Iterable<Expr> filterNonObservableIds(final ClassAnalyzer classAnalyzer) {
+    private Iterable<Expr> filterNonObservableIds(final ReflectionAnalyzer reflectionAnalyzer) {
         return Iterables.filter(mExprMap.values(), new Predicate<Expr>() {
             @Override
             public boolean apply(Expr input) {
                 return input instanceof IdentifierExpr
                         && !input.hasId()
-                        && !classAnalyzer.isObservable(input.getResolvedType())
+                        && !reflectionAnalyzer.isObservable(input.getResolvedType())
                         && input.isDynamic();
             }
         });
     }
 
-    private Iterable<Expr> filterObservables(final ClassAnalyzer classAnalyzer) {
+    private Iterable<Expr> filterObservables(final ReflectionAnalyzer reflectionAnalyzer) {
         return Iterables.filter(mExprMap.values(), new Predicate<Expr>() {
             @Override
             public boolean apply(Expr input) {
-                return classAnalyzer.isObservable(input.getResolvedType());
+                return reflectionAnalyzer.isObservable(input.getResolvedType());
             }
         });
     }

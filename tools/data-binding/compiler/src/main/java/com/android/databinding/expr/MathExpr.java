@@ -16,7 +16,8 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.ClassAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ReflectionClass;
 
 import java.util.List;
 
@@ -33,15 +34,15 @@ public class MathExpr extends Expr {
     }
 
     @Override
-    protected Class resolveType(ClassAnalyzer classAnalyzer) {
+    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
         if ("+".equals(mOp)) {
             // TODO we need upper casting etc.
-            if (String.class.equals(getLeft().getResolvedType())
-                    || String.class.equals(getRight().getResolvedType())) {
-                return String.class;
+            if (getLeft().getResolvedType().isString()
+                    || getRight().getResolvedType().isString()) {
+                return reflectionAnalyzer.findClass(String.class);
             }
         }
-        return classAnalyzer.findCommonParentOf(getLeft().getResolvedType(),
+        return reflectionAnalyzer.findCommonParentOf(getLeft().getResolvedType(),
                 getRight().getResolvedType());
     }
 
