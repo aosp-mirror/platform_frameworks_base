@@ -1933,12 +1933,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onTouchEvent(ev, 1);
         }
 
-        // Whether this event should be handled by the accessibility focus first.
-        final boolean targetAccessibilityFocus = ev.isTargetAccessibilityFocus();
-
         // If the event targets the accessibility focused view and this is it, start
         // normal event dispatch. Maybe a descendant is what will handle the click.
-        if (targetAccessibilityFocus && isAccessibilityFocusedViewOrHost()) {
+        if (ev.isTargetAccessibilityFocus() && isAccessibilityFocusedViewOrHost()) {
             ev.setTargetAccessibilityFocus(false);
         }
 
@@ -1958,24 +1955,25 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
-            if (!targetAccessibilityFocus) {
-                if (actionMasked == MotionEvent.ACTION_DOWN
-                        || mFirstTouchTarget != null) {
-                    final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-                    if (!disallowIntercept) {
-                        intercepted = onInterceptTouchEvent(ev);
-                        ev.setAction(action); // restore action in case it was changed
-                    } else {
-                        intercepted = false;
-                    }
+            if (actionMasked == MotionEvent.ACTION_DOWN
+                    || mFirstTouchTarget != null) {
+                final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
+                if (!disallowIntercept) {
+                    intercepted = onInterceptTouchEvent(ev);
+                    ev.setAction(action); // restore action in case it was changed
                 } else {
-                    // There are no touch targets and this action is not an initial down
-                    // so this view group continues to intercept touches.
-                    intercepted = true;
+                    intercepted = false;
                 }
             } else {
-                // If event should reach the accessibility focus first, do not intercept it.
-                intercepted = false;
+                // There are no touch targets and this action is not an initial down
+                // so this view group continues to intercept touches.
+                intercepted = true;
+            }
+
+            // If intercepted, start normal event dispatch. Also if there is already
+            // a view that is handling the gesture, do normal event dispatch.
+            if (intercepted || mFirstTouchTarget != null) {
+                ev.setTargetAccessibilityFocus(false);
             }
 
             // Check for cancelation.
@@ -1989,8 +1987,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             if (!canceled && !intercepted) {
                 if (actionMasked == MotionEvent.ACTION_DOWN
                         || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
-                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE
-                        || targetAccessibilityFocus) {
+                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
                     final int actionIndex = ev.getActionIndex(); // always 0 for down
                     final int idBitsToAssign = split ? 1 << ev.getPointerId(actionIndex)
                             : TouchTarget.ALL_POINTER_IDS;
