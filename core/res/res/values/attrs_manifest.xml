@@ -1026,7 +1026,7 @@
          resizeable.
 
          <p>NOTE: The value of {@link android.R.attr#screenOrientation} will be ignored for
-         resizeable activities as the system doesn't store fixed orientation on a resizeable
+         resizeable activities as the system doesn't support fixed orientation on a resizeable
          activity. -->
     <attr name="resizeableActivity" format="boolean" />
 
