@@ -79,7 +79,7 @@ page.title=Migration
 
 <h3 id="interop">Relationship between C2DM and GCM</h3>
 
-<p>C2DM and GCM are not interoperable. For example, you cannot post notifications from GCM to C2DM registration IDs, nor can you use C2DM registration IDs as GCM registration IDs. From your server-side application, you must keep keep track of whether a registration ID is from C2DM or GCM and use the proper endpoint. </p>
+<p>C2DM and GCM are not interoperable. For example, you cannot post notifications from GCM to C2DM registration IDs, nor can you use C2DM registration IDs as GCM registration IDs. From your server-side application, you must keep track of whether a registration ID is from C2DM or GCM and use the proper endpoint. </p>
 
 <p>As you transition from C2DM to GCM, your server needs to be aware of whether a given registration ID
 contains an old C2DM sender or a new GCM project number. This is the approach we recommend: have the new app version (the one that uses GCM) send a bit along with the registration ID. This bit tells your server that this registration ID is for GCM. If you don't get the extra bit, you mark the registration ID as C2DM. Once no more valid registration IDs are marked as C2DM, you can complete the migration.</p>
@@ -87,13 +87,11 @@ contains an old C2DM sender or a new GCM project number. This is the approach we
 <h2 id="migrating">Migrating Your Apps</h2>
 <p>This section describes how to move existing C2DM apps to GCM.</p>
 <h3 id="client">Client changes</h3>
-<p>Migration is simple! The only change required in the application is replacing the email account passed in the sender parameter of the registration intent with the project number generated when signing up for the new service. For example:</p>
-<pre class="prettyprint pretty-java">Intent registrationIntent = new Intent(&quot;com.google.android.c2dm.intent.REGISTER&quot;);
-// sets the app name in the intent
-registrationIntent.putExtra(&quot;app&quot;, PendingIntent.getBroadcast(this, 0, new Intent(), 0));
-registrationIntent.putExtra(&quot;sender&quot;, senderID);
-startService(registrationIntent);</pre>
+<p>Migration is simple! Just re-register the client app for your target GCM-enabled platform. For
+  example, see <a href="{@docRoot}google/gcm/client.html#sample-register">Register for GCM</a></p>
+
 <p>After receiving a response from GCM, the registration ID obtained must be sent to the application server. When doing this, the application should indicate that it is sending a GCM registration ID so that the server can distinguish it from existing C2DM registrations.</p>
+
 <h3 id="server">Server changes</h3>
 <p>When the application server receives a GCM registration ID, it should store it and mark it as such.</p>
 <p>Sending messages to GCM devices requires a few changes:</p>
