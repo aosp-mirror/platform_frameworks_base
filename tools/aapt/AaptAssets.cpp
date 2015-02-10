@@ -345,7 +345,8 @@ int AaptLocaleValue::initFromDirName(const Vector<String8>& parts, const int sta
 
         return ++currentIndex;
     } else {
-        if ((part.length() == 2 || part.length() == 3) && isAlpha(part)) {
+        if ((part.length() == 2 || part.length() == 3)
+               && isAlpha(part) && strcmp("car", part.string())) {
             setLanguage(part);
             if (++currentIndex == size) {
                 return size;

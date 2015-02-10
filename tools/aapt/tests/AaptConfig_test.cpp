@@ -76,3 +76,9 @@ TEST(AaptConfigTest, ParseQualifierAddedInApi13) {
     EXPECT_TRUE(TestParse("sw600dp-v8", &config));
     EXPECT_EQ(String8("sw600dp-v13"), config.toString());
 }
+
+TEST(AaptConfigTest, TestParsingOfCarAttribute) {
+    ConfigDescription config;
+    EXPECT_TRUE(TestParse("car", &config));
+    EXPECT_EQ(android::ResTable_config::UI_MODE_TYPE_CAR, config.uiMode);
+}
