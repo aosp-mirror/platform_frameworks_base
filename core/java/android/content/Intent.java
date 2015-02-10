@@ -1760,7 +1760,6 @@ public class Intent implements Parcelable, Cloneable {
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     /**
@@ -3253,7 +3252,6 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide String array of package names.
      */
-    @SystemApi
     public static final String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
 
     /**
