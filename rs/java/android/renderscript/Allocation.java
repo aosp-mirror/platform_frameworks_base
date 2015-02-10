@@ -58,15 +58,13 @@ public class Allocation extends BaseObj {
     Allocation mAdaptedAllocation;
     int mSize;
 
-    boolean mConstrainedLOD;
-    boolean mConstrainedFace;
-    boolean mConstrainedY;
-    boolean mConstrainedZ;
     boolean mReadAllowed = true;
     boolean mWriteAllowed = true;
+    int mSelectedX;
     int mSelectedY;
     int mSelectedZ;
     int mSelectedLOD;
+    int mSelectedArray[];
     Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITIVE_X;
 
     int mCurrentDimX;
