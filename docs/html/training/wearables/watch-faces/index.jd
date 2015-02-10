@@ -21,6 +21,14 @@ page.title=Creating Watch Faces
   </div>
 </a>
 
+<a class="notice-developers-video wide"
+    href="https://www.youtube.com/watch?v=AK38PJZmIW8">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Watch Faces for Android Wear</p>
+</div>
+</a>
+
 <p>Watch faces in Android Wear leverage a dynamic digital canvas to tell time using colors,
 animations, and relevant contextual information. The <a
 href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app">Android
