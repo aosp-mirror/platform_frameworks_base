@@ -2533,22 +2533,17 @@ int doSingleCrunch(Bundle* bundle)
 
 int runInDaemonMode(Bundle* bundle) {
     std::cout << "Ready" << std::endl;
-    for (std::string line; std::getline(std::cin, line);) {
-        if (line == "quit") {
+    for (std::string cmd; std::getline(std::cin, cmd);) {
+        if (cmd == "quit") {
             return NO_ERROR;
-        }
-        std::stringstream ss;
-        ss << line;
-        std::string s;
-
-        std::string command, parameterOne, parameterTwo;
-        std::getline(ss, command, ' ');
-        std::getline(ss, parameterOne, ' ');
-        std::getline(ss, parameterTwo, ' ');
-        if (command[0] == 's') {
-            bundle->setSingleCrunchInputFile(parameterOne.c_str());
-            bundle->setSingleCrunchOutputFile(parameterTwo.c_str());
-            std::cout << "Crunching " << parameterOne << std::endl;
+        } else if (cmd == "s") {
+            // Two argument crunch
+            std::string inputFile, outputFile;
+            std::getline(std::cin, inputFile);
+            std::getline(std::cin, outputFile);
+            bundle->setSingleCrunchInputFile(inputFile.c_str());
+            bundle->setSingleCrunchOutputFile(outputFile.c_str());
+            std::cout << "Crunching " << inputFile << std::endl;
             if (doSingleCrunch(bundle) != NO_ERROR) {
                 std::cout << "Error" << std::endl;
             }
