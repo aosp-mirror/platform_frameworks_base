@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.IntDef;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.content.ContentResolver;
@@ -61,6 +62,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Runnable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Scanner;
@@ -472,6 +475,11 @@ import java.lang.ref.WeakReference;
  *     <td>{} </p></td>
  *     <td>This method can be called in any state and calling it does not change
  *         the object state.  </p></td></tr>
+ * <tr><td>setPlaybackRate</p></td>
+ *     <td>any </p></td>
+ *     <td>{} </p></td>
+ *     <td>This method can be called in any state and calling it does not change
+ *         the object state. </p></td></tr>
  * <tr><td>setVolume </p></td>
  *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
  *          PlaybackCompleted}</p></td>
@@ -1317,6 +1325,59 @@ public class MediaPlayer implements SubtitleController.Listener
      * initialized or has been released.
      */
     public native boolean isPlaying();
+
+    /**
+     * Specifies resampling as audio mode for variable rate playback, i.e.,
+     * resample the waveform based on the requested playback rate to get
+     * a new waveform, and play back the new waveform at the original sampling
+     * frequency.
+     * When rate is larger than 1.0, pitch becomes higher.
+     * When rate is smaller than 1.0, pitch becomes lower.
+     */
+    public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 0;
+
+    /**
+     * Specifies time stretching as audio mode for variable rate playback.
+     * Time stretching changes the duration of the audio samples without
+     * affecting its pitch.
+     * FIXME: implement time strectching.
+     * @hide
+     */
+    public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1;
+
+    /** @hide */
+    @IntDef(
+        value = {
+            PLAYBACK_RATE_AUDIO_MODE_RESAMPLE,
+            PLAYBACK_RATE_AUDIO_MODE_STRETCH })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PlaybackRateAudioMode {}
+
+    /**
+     * Sets playback rate and audio mode.
+     *
+     * <p> The supported audio modes are:
+     * <ul>
+     * <li> {@link #PLAYBACK_RATE_AUDIO_MODE_RESAMPLE}
+     * </ul>
+     *
+     * @param rate the ratio between desired playback rate and normal one.
+     * @param audioMode audio playback mode. Must be one of the supported
+     * audio modes.
+     *
+     * @throws IllegalStateException if the internal player engine has not been
+     * initialized.
+     * @throws IllegalArgumentException if audioMode is not supported.
+     */
+    public void setPlaybackRate(float rate, @PlaybackRateAudioMode int audioMode) {
+        if (!isAudioPlaybackModeSupported(audioMode)) {
+            final String msg = "Audio playback mode " + audioMode + " is not supported";
+            throw new IllegalArgumentException(msg);
+        }
+        _setPlaybackRate(rate);
+    }
+
+    private native void _setPlaybackRate(float rate) throws IllegalStateException;
 
     /**
      * Seeks to specified time position.
@@ -3076,6 +3137,14 @@ public class MediaPlayer implements SubtitleController.Listener
     private boolean isVideoScalingModeSupported(int mode) {
         return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
                 mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
+    }
+
+    /*
+     * Test whether a given audio playback mode is supported.
+     * TODO query supported AudioPlaybackMode from player.
+     */
+    private boolean isAudioPlaybackModeSupported(int mode) {
+        return (mode == PLAYBACK_RATE_AUDIO_MODE_RESAMPLE);
     }
 
     /** @hide */

@@ -402,6 +402,18 @@ android_media_MediaPlayer_isPlaying(JNIEnv *env, jobject thiz)
 }
 
 static void
+android_media_MediaPlayer_setPlaybackRate(JNIEnv *env, jobject thiz, jfloat rate)
+{
+    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+    ALOGV("setPlaybackRate: %f", rate);
+    process_media_player_call(env, thiz, mp->setPlaybackRate(rate), NULL, NULL);
+}
+
+static void
 android_media_MediaPlayer_seekTo(JNIEnv *env, jobject thiz, jint msec)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
@@ -867,6 +879,7 @@ static JNINativeMethod gMethods[] = {
     {"_stop",               "()V",                              (void *)android_media_MediaPlayer_stop},
     {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer_getVideoWidth},
     {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer_getVideoHeight},
+    {"_setPlaybackRate",    "(F)V",                             (void *)android_media_MediaPlayer_setPlaybackRate},
     {"seekTo",              "(I)V",                             (void *)android_media_MediaPlayer_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer_isPlaying},
