@@ -1985,6 +1985,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             TouchTarget newTouchTarget = null;
             boolean alreadyDispatchedToNewTouchTarget = false;
             if (!canceled && !intercepted) {
+
+                // If the event is targeting accessiiblity focus we give it to the
+                // view that has accessibility focus and if it does not handle it
+                // we clear the flag and dispatch the event to all children as usual.
+                // We are looking up the accessibility focused host to avoid keeping
+                // state since these events are very rare.
+                View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()
+                        ? findChildWithAccessibilityFocus() : null;
+
                 if (actionMasked == MotionEvent.ACTION_DOWN
                         || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
                         || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
@@ -2011,8 +2020,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                     ? getChildDrawingOrder(childrenCount, i) : i;
                             final View child = (preorderedList == null)
                                     ? children[childIndex] : preorderedList.get(childIndex);
+
+                            // If there is a view that has accessibility focus we want it
+                            // to get the event first and if not handled we will perform a
+                            // normal dispatch. We may do a double iteration but this is
+                            // safer given the timeframe.
+                            if (childWithAccessibilityFocus != null) {
+                                if (childWithAccessibilityFocus != child) {
+                                    continue;
+                                }
+                                childWithAccessibilityFocus = null;
+                                i = childrenCount - 1;
+                            }
+
                             if (!canViewReceivePointerEvents(child)
                                     || !isTransformedTouchPointInView(x, y, child, null)) {
+                                ev.setTargetAccessibilityFocus(false);
                                 continue;
                             }
 
@@ -2045,6 +2068,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                                 alreadyDispatchedToNewTouchTarget = true;
                                 break;
                             }
+
+                            // The accessibility focus didn't handle the event, so clear
+                            // the flag and do a normal dispatch to all children.
+                            ev.setTargetAccessibilityFocus(false);
                         }
                         if (preorderedList != null) preorderedList.clear();
                     }
@@ -2114,6 +2141,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onUnhandledEvent(ev, 1);
         }
         return handled;
+    }
+
+    /**
+     * Finds the child which has accessibility focus.
+     *
+     * @return The child that has focus.
+     */
+    private View findChildWithAccessibilityFocus() {
+        ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            return null;
+        }
+
+        View current = viewRoot.getAccessibilityFocusedHost();
+        if (current == null) {
+            return null;
+        }
+
+        ViewParent parent = current.getParent();
+        while (parent instanceof View) {
+            if (parent == this) {
+                return current;
+            }
+            current = (View) parent;
+            parent = current.getParent();
+        }
+
+        return null;
     }
 
     /**
