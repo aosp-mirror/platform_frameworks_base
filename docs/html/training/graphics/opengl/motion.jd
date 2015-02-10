@@ -45,15 +45,16 @@ to a shape with rotation.</p>
 
 <h2 id="rotate">Rotate a Shape</h2>
 
-<p>Rotating a drawing object with OpenGL ES 2.0 is relatively simple. You create another
-transformation matrix (a rotation matrix) and then combine it with your projection and
+<p>Rotating a drawing object with OpenGL ES 2.0 is relatively simple. In your renderer, create
+another transformation matrix (a rotation matrix) and then combine it with your projection and
 camera view transformation matrices:</p>
 
 <pre>
 private float[] mRotationMatrix = new float[16];
 public void onDrawFrame(GL10 gl) {
-    ...
     float[] scratch = new float[16];
+
+    ...
 
     // Create a rotation transformation for the triangle
     long time = SystemClock.uptimeMillis() % 4000L;
