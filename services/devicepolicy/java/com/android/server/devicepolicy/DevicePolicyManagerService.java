@@ -5072,6 +5072,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throws RemoteException {
         ApplicationInfo appInfo = pm.getApplicationInfo(packageName, GET_UNINSTALLED_PACKAGES,
                 userId);
+        if (appInfo == null) {
+            throw new IllegalArgumentException("The application " + packageName +
+                    " is not present on this device");
+        }
         return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
