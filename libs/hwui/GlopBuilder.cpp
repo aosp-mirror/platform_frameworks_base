@@ -35,6 +35,10 @@ namespace uirenderer {
     LOG_ALWAYS_FATAL_IF(stageFlag & mStageFlags, "Stage %d cannot be run twice"); \
     mStageFlags = static_cast<StageFlags>(mStageFlags | stageFlag)
 
+#define REQUIRE_STAGES(requiredFlags) \
+    LOG_ALWAYS_FATAL_IF((mStageFlags & requiredFlags) != requiredFlags, \
+            "not prepared for current stage")
+
 GlopBuilder::GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop)
         : mRenderState(renderState)
         , mCaches(caches)
@@ -127,12 +131,14 @@ GlopBuilder& GlopBuilder::setOptionalPaint(const SkPaint* paint, float alphaScal
     }
 
     TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
 
     mOutGlop->fill.color = { alphaScale, alphaScale, alphaScale, alphaScale };
 
     const bool SWAP_SRC_DST = false;
     // TODO: account for texture blend
-    if (alphaScale < 1.0f) {
+    if (alphaScale < 1.0f
+            || (mOutGlop->mesh.vertexFlags & kAlpha_Attrib)) {
         Blend::getFactors(SkXfermode::kSrcOver_Mode, SWAP_SRC_DST,
                 &mOutGlop->blend.src, &mOutGlop->blend.dst);
     } else {
@@ -143,6 +149,7 @@ GlopBuilder& GlopBuilder::setOptionalPaint(const SkPaint* paint, float alphaScal
 }
 GlopBuilder& GlopBuilder::setPaint(const SkPaint& paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
 
     const SkShader* shader = paint.getShader();
     const SkColorFilter* colorFilter = paint.getColorFilter();
@@ -169,6 +176,7 @@ GlopBuilder& GlopBuilder::setPaint(const SkPaint& paint, float alphaScale) {
 
     mOutGlop->blend = { GL_ZERO, GL_ZERO };
     if (mOutGlop->fill.color.a < 1.0f
+            || (mOutGlop->mesh.vertexFlags & kAlpha_Attrib)
             || PaintUtils::isBlendedShader(shader)
             || PaintUtils::isBlendedColorFilter(colorFilter)
             || mode != SkXfermode::kSrcOver_Mode) {
@@ -242,7 +250,7 @@ GlopBuilder& GlopBuilder::setPaint(const SkPaint& paint, float alphaScale) {
 }
 
 void GlopBuilder::build() {
-    LOG_ALWAYS_FATAL_IF(mStageFlags != kAllStages, "glop not fully prepared!");
+    REQUIRE_STAGES(kAllStages);
 
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     mOutGlop->fill.program = mCaches.programCache.get(mDescription);

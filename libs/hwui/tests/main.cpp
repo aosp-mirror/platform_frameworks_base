@@ -210,7 +210,7 @@ public:
         renderer->drawColor(0xFFFFFFFF, SkXfermode::kSrcOver_Mode);
         renderer->insertReorderBarrier(true);
 
-        card = createCard(40, 40, 200, 200);
+        card = createCard(40, 40, 400, 400);
         renderer->drawRenderNode(card.get(), DUMMY, 0);
 
         renderer->insertReorderBarrier(false);
@@ -228,11 +228,10 @@ private:
         node->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
 
         DisplayListRenderer* renderer = startRecording(node.get());
-        renderer->drawColor(0xFFFF00FF, SkXfermode::kSrcOver_Mode);
 
         SkPaint paint;
         paint.setAntiAlias(true);
-        paint.setColor(0xFF00FFFF);
+        paint.setColor(0xFF000000);
         renderer->drawOval(0, 0, width, height, paint);
 
         endRecording(renderer, node.get());
