@@ -38,9 +38,11 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
 
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to
-    // turn them on.
+    // turn them on. True by default, and can be disabled (i.e. device can go to sleep
+    // in active device status) by explicitly setting the system property
+    // persist.sys.hdmi.keep_awake to false.
     // Lazily initialized - should call getWakeLock() to get the instance.
-    private WakeLock mWakeLock;
+    private ActiveWakeLock mWakeLock;
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -142,19 +144,30 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         mIsActiveSource = on;
         if (on) {
             getWakeLock().acquire();
-            HdmiLogger.debug("active source: %b. Wake lock acquired", mIsActiveSource);
         } else {
             getWakeLock().release();
-            HdmiLogger.debug("Wake lock released");
         }
     }
 
     @ServiceThreadOnly
-    private WakeLock getWakeLock() {
+    private ActiveWakeLock getWakeLock() {
         assertRunOnServiceThread();
         if (mWakeLock == null) {
-            mWakeLock = mService.getPowerManager().newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            mWakeLock.setReferenceCounted(false);
+            if (SystemProperties.getBoolean(Constants.PROPERTY_KEEP_AWAKE, true)) {
+                mWakeLock = new SystemWakeLock();
+            } else {
+                // Create a dummy lock object that doesn't do anything about wake lock,
+                // hence allows the device to go to sleep even if it's the active source.
+                mWakeLock = new ActiveWakeLock() {
+                    @Override
+                    public void acquire() { }
+                    @Override
+                    public void release() { }
+                    @Override
+                    public boolean isHeld() { return false; }
+                };
+                HdmiLogger.debug("No wakelock is used to keep the display on.");
+            }
         }
         return mWakeLock;
     }
@@ -257,5 +270,37 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     protected void dump(final IndentingPrintWriter pw) {
         super.dump(pw);
         pw.println("mIsActiveSource: " + mIsActiveSource);
+    }
+
+    // Wrapper interface over PowerManager.WakeLock
+    private interface ActiveWakeLock {
+        void acquire();
+        void release();
+        boolean isHeld();
+    }
+
+    private class SystemWakeLock implements ActiveWakeLock {
+        private final WakeLock mWakeLock;
+        public SystemWakeLock() {
+            mWakeLock = mService.getPowerManager().newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            mWakeLock.setReferenceCounted(false);
+        }
+
+        @Override
+        public void acquire() {
+            mWakeLock.acquire();
+            HdmiLogger.debug("active source: %b. Wake lock acquired", mIsActiveSource);
+        }
+
+        @Override
+        public void release() {
+            mWakeLock.release();
+            HdmiLogger.debug("Wake lock released");
+        }
+
+        @Override
+        public boolean isHeld() {
+            return mWakeLock.isHeld();
+        }
     }
 }
