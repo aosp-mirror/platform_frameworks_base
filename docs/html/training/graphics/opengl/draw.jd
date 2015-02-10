@@ -50,13 +50,21 @@ android.opengl.GLSurfaceView.Renderer#onSurfaceCreated onSurfaceCreated()} metho
 for memory and processing efficiency.</p>
 
 <pre>
-public void onSurfaceCreated(GL10 unused, EGLConfig config) {
-    ...
+public class MyGLRenderer implements GLSurfaceView.Renderer {
 
-    // initialize a triangle
-    mTriangle = new Triangle();
-    // initialize a square
-    mSquare = new Square();
+    ...
+    private Triangle mTriangle;
+    private Square   mSquare;
+
+    public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        ...
+
+        // initialize a triangle
+        mTriangle = new Triangle();
+        // initialize a square
+        mSquare = new Square();
+    }
+    ...
 }
 </pre>
 
@@ -77,21 +85,27 @@ one or more shapes.</li>
 
 <p>You need at least one vertex shader to draw a shape and one fragment shader to color that shape.
 These shaders must be complied and then added to an OpenGL ES program, which is then used to draw
-the shape. Here is an example of how to define basic shaders you can use to draw a shape:</p>
+the shape. Here is an example of how to define basic shaders you can use to draw a shape in the
+<code>Triangle</code> class:</p>
 
 <pre>
-private final String vertexShaderCode =
-    "attribute vec4 vPosition;" +
-    "void main() {" +
-    "  gl_Position = vPosition;" +
-    "}";
+public class Triangle {
 
-private final String fragmentShaderCode =
-    "precision mediump float;" +
-    "uniform vec4 vColor;" +
-    "void main() {" +
-    "  gl_FragColor = vColor;" +
-    "}";
+    private final String vertexShaderCode =
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        "  gl_Position = vPosition;" +
+        "}";
+
+    private final String fragmentShaderCode =
+        "precision mediump float;" +
+        "uniform vec4 vColor;" +
+        "void main() {" +
+        "  gl_FragColor = vColor;" +
+        "}";
+
+    ...
+}
 </pre>
 
 <p>Shaders contain OpenGL Shading Language (GLSL) code that must be compiled prior to using it in
@@ -125,13 +139,28 @@ get created once and then cached for later use.</p>
 public class Triangle() {
     ...
 
-    int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-    int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+    private final int mProgram;
 
-    mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
-    GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-    GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-    GLES20.glLinkProgram(mProgram);                  // creates OpenGL ES program executables
+    public Triangle() {
+        ...
+
+        int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,
+                                        vertexShaderCode);
+        int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
+                                        fragmentShaderCode);
+
+        // create empty OpenGL ES Program
+        mProgram = GLES20.glCreateProgram();
+
+        // add the vertex shader to program
+        GLES20.glAttachShader(mProgram, vertexShader);
+
+        // add the fragment shader to program
+        GLES20.glAttachShader(mProgram, fragmentShader);
+
+        // creates OpenGL ES program executables
+        GLES20.glLinkProgram(mProgram);
+    }
 }
 </pre>
 
@@ -145,6 +174,12 @@ color values to the shape’s vertex shader and fragment shader, and then execut
 function.</p>
 
 <pre>
+private int mPositionHandle;
+private int mColorHandle;
+
+private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;
+private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
 public void draw() {
     // Add program to OpenGL ES environment
     GLES20.glUseProgram(mProgram);
@@ -176,8 +211,17 @@ public void draw() {
 
 <p>Once you have all this code in place, drawing this object just requires a call to the
 {@code draw()} method from within your renderer’s {@link
-android.opengl.GLSurfaceView.Renderer#onDrawFrame onDrawFrame()} method. When you run the
-application, it should look something like this:</p>
+android.opengl.GLSurfaceView.Renderer#onDrawFrame onDrawFrame()} method:
+
+<pre>
+public void onDrawFrame(GL10 unused) {
+    ...
+
+    mTriangle.draw();
+}
+</pre>
+
+<p>When you run the application, it should look something like this:</p>
 
 <img src="{@docRoot}images/opengl/ogl-triangle.png">
 <p class="img-caption">
