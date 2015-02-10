@@ -80,6 +80,9 @@ public class PhoneAccountHandle implements Parcelable {
      * ({@code 0}, {@code 1}, {@code 2}, ...) that are generated locally on each phone and could
      * collide with values generated on other phones or after a data wipe of a given phone.
      *
+     * Important: A non-unique identifier could cause non-deterministic call-log backup/restore
+     * behavior.
+     *
      * @return A service-specific unique identifier for this {@code PhoneAccountHandle}.
      */
     public String getId() {
