@@ -235,7 +235,6 @@ class ContextImpl extends Context {
     private final Resources mResources;
     private final Display mDisplay; // may be null if default display
     private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
-    private final Configuration mOverrideConfiguration;
 
     private final boolean mRestricted;
 
@@ -2149,7 +2148,7 @@ class ContextImpl extends Context {
             final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
                     new UserHandle(UserHandle.getUserId(application.uid)), restricted,
-                    mDisplay, mOverrideConfiguration);
+                    mDisplay, null);
             if (c.mResources != null) {
                 return c;
             }
@@ -2172,14 +2171,14 @@ class ContextImpl extends Context {
         final boolean restricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
         if (packageName.equals("system") || packageName.equals("android")) {
             return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                    user, restricted, mDisplay, mOverrideConfiguration);
+                    user, restricted, mDisplay, null);
         }
 
         LoadedApk pi = mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(),
                 flags | CONTEXT_REGISTER_PACKAGE, user.getIdentifier());
         if (pi != null) {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, mActivityToken,
-                    user, restricted, mDisplay, mOverrideConfiguration);
+                    user, restricted, mDisplay, null);
             if (c.mResources != null) {
                 return c;
             }
@@ -2207,7 +2206,7 @@ class ContextImpl extends Context {
         }
 
         return new ContextImpl(this, mMainThread, mPackageInfo, mActivityToken,
-                mUser, mRestricted, display, mOverrideConfiguration);
+                mUser, mRestricted, display, null);
     }
 
     private int getDisplayId() {
@@ -2287,7 +2286,6 @@ class ContextImpl extends Context {
         mPackageInfo = packageInfo;
         mResourcesManager = ResourcesManager.getInstance();
         mDisplay = display;
-        mOverrideConfiguration = overrideConfiguration;
 
         final int displayId = getDisplayId();
         CompatibilityInfo compatInfo = null;
