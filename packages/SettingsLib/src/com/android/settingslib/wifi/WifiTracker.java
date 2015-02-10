@@ -127,6 +127,7 @@ public class WifiTracker {
     public void pauseScanning() {
         if (mScanner != null) {
             mScanner.pause();
+            mScanner = null;
         }
     }
 
@@ -134,10 +135,10 @@ public class WifiTracker {
      * Resume scanning for wifi networks after it has been paused.
      */
     public void resumeScanning() {
+        if (mScanner == null) {
+            mScanner = new Scanner();
+        }
         if (mWifiManager.isWifiEnabled()) {
-            if (mScanner == null) {
-                mScanner = new Scanner();
-            }
             mScanner.resume();
         }
         updateAccessPoints();
@@ -335,11 +336,17 @@ public class WifiTracker {
 
     private void updateWifiState(int state) {
         if (state == WifiManager.WIFI_STATE_ENABLED) {
-            mScanner.resume();
+            if (mScanner != null) {
+                // We only need to resume if mScanner isn't null because
+                // that means we want to be scanning.
+                mScanner.resume();
+            }
         } else {
             mLastInfo = null;
             mLastNetworkInfo = null;
-            mScanner.pause();
+            if (mScanner != null) {
+                mScanner.pause();
+            }
         }
         if (mListener != null) {
             mListener.onWifiStateChanged(state);
@@ -382,26 +389,34 @@ public class WifiTracker {
 
     @VisibleForTesting
     class Scanner extends Handler {
+        private static final int MSG_SCAN = 0;
+
         private int mRetry = 0;
 
         void resume() {
-            if (!hasMessages(0)) {
-                sendEmptyMessage(0);
+            if (!hasMessages(MSG_SCAN)) {
+                sendEmptyMessage(MSG_SCAN);
             }
         }
 
         void forceScan() {
-            removeMessages(0);
-            sendEmptyMessage(0);
+            removeMessages(MSG_SCAN);
+            sendEmptyMessage(MSG_SCAN);
         }
 
         void pause() {
             mRetry = 0;
-            removeMessages(0);
+            removeMessages(MSG_SCAN);
+        }
+
+        @VisibleForTesting
+        boolean isScanning() {
+            return hasMessages(MSG_SCAN);
         }
 
         @Override
         public void handleMessage(Message message) {
+            if (message.what != MSG_SCAN) return;
             if (mWifiManager.startScan()) {
                 mRetry = 0;
             } else if (++mRetry >= 3) {

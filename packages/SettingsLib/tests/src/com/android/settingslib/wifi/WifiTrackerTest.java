@@ -201,6 +201,29 @@ public class WifiTrackerTest extends BaseTest {
         assertTrue("Connected to wifi", accessPoints.get(0).isActive());
     }
 
+    public void testEnableResumeScanning() {
+        mWifiTracker.mScanner = null;
+
+        Intent i = new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        // Make sure disable/enable cycle works with no scanner (no crashing).
+        i.putExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_DISABLED);
+        mWifiTracker.mReceiver.onReceive(mContext, i);
+        i.putExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_ENABLED);
+        mWifiTracker.mReceiver.onReceive(mContext, i);
+
+        Mockito.when(mWifiManager.isWifiEnabled()).thenReturn(false);
+        i.putExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_DISABLED);
+        mWifiTracker.mReceiver.onReceive(mContext, i);
+        // Now enable scanning while wifi is off, it shouldn't start.
+        mWifiTracker.resumeScanning();
+        assertFalse(mWifiTracker.mScanner.isScanning());
+
+        // Turn on wifi and make sure scanning starts.
+        i.putExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_ENABLED);
+        mWifiTracker.mReceiver.onReceive(mContext, i);
+        assertTrue(mWifiTracker.mScanner.isScanning());
+    }
+
     private String[] generateTestNetworks(List<WifiConfiguration> wifiConfigs,
             List<ScanResult> scanResults, boolean connectedIsEphemeral) {
         String[] expectedSsids = new String[NUM_NETWORKS];
