@@ -24,7 +24,6 @@ import org.gradle.api.Task
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.api.ApplicationVariantImpl
 import com.android.build.gradle.internal.variant.ApplicationVariantData
-import com.android.databinding.KLayoutParser
 import kotlin.properties.Delegates
 import java.net.URLClassLoader
 import groovy.lang.MetaClass
@@ -47,7 +46,7 @@ import org.apache.commons.io.FileUtils
 import com.android.databinding.reflection.ReflectionAnalyzer
 
 class DataBinderPlugin : Plugin<Project> {
-    var parser: KLayoutParser by Delegates.notNull()
+    var chef: CompilerChef by Delegates.notNull()
     var project : Project by Delegates.notNull()
 
     var generatedBinderSrc : File by Delegates.notNull()
@@ -73,7 +72,7 @@ class DataBinderPlugin : Plugin<Project> {
         project.afterEvaluate {
             // TODO read from app
             val variants = arrayListOf("Debug")
-            parser = createKParser(project)
+            chef = createChef(project)
             log("after eval")
             //processDebugResources
             variants.forEach { variant ->
@@ -105,7 +104,7 @@ class DataBinderPlugin : Plugin<Project> {
         System.out.println("PLOG: $s")
     }
 
-    fun createKParser(p: Project): KLayoutParser {
+    fun createChef(p: Project): CompilerChef {
         val ss = p.getExtensions().getByName("android") as AppExtension
         androidJar = File(ss.getSdkDirectory().getAbsolutePath() + "/platforms/${ss.getCompileSdkVersion()}/android.jar")
         log("creating parser!")
@@ -155,7 +154,9 @@ class DataBinderPlugin : Plugin<Project> {
         log("updated dexTask input files ${dexTask.getInputFiles()} vs ${inputFiles} vs dir ${dexTask.getInputDir()}")
 
         dexTask.doFirst(MethodClosure(this, "preDexAnalysis"))
-        return KLayoutParser(packageName, resourceFolders, codeGenTargetFolder, resGenTargetFolder)
+        val compilerChef = CompilerChef()
+        compilerChef.setupForParsing(packageName, resourceFolders, codeGenTargetFolder)
+        return compilerChef
     }
 
 
@@ -179,21 +180,19 @@ class DataBinderPlugin : Plugin<Project> {
         val classLoader = URLClassLoader(urls, androidClassLoader)
         log("created class loader")
         ReflectionAnalyzer.setClassLoader(classLoader)
-        parser.reflectionAnalyzer = ReflectionAnalyzer.getInstance()
-
         project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {
-        log("SSXX: ${parser.generatedCode()}")
-        if (!parser.generatedCode()) {
+        log("compiling generated. ${chef.hasAnythingToGenerate()}")
+        if (!chef.hasAnythingToGenerate()) {
             return
         }
         val compiler = ToolProvider.getSystemJavaCompiler()
         val fileManager = compiler.getStandardFileManager(null, null, null)
         val javaCompileTask = variantData.javaCompileTask
         val dexTask = variantData.dexTask
-        parser.writeViewBinders(viewBinderSource)
-        parser.writeDbrFile(viewBinderSource)
+        chef.writeViewBinders(viewBinderSource)
+        chef.writeDbrFile(viewBinderSource)
 
 
         viewBinderCompileOutput.mkdirs()
@@ -223,9 +222,7 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     fun generateAttr(o: Any?) {
-        parser.processIfNecessary()
-        log("generate attr ${o}")
-        parser.writeAttrFile()
+        chef.processResources()
     }
 
     fun cleanBinderOutFolder(o : Any?) {
@@ -237,9 +234,9 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     fun generateBrFile(o: Any?) {
-        parser.processIfNecessary()
+        chef.processResources()
         log("generating BR ${o}")
-        parser.writeViewBinderInterfaces()
+        chef.writeViewBinderInterfaces(null)
     }
 
     fun generateBinders(o: Any?) {

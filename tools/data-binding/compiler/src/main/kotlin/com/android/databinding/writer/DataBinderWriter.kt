@@ -15,7 +15,7 @@ package com.android.databinding.writer
 
 import com.android.databinding.LayoutBinder
 
-class DataBinderWriter(val pkg: String, val projectPackage: String, val className: String, val layoutBinders : Map<String, List<LayoutBinder>> ) {
+class DataBinderWriter(val pkg: String, val projectPackage: String, val className: String, val layoutBinders : List<LayoutBinder> ) {
     fun write() =
             kcode("") {
                 tab("package $pkg;")
@@ -24,7 +24,7 @@ class DataBinderWriter(val pkg: String, val projectPackage: String, val classNam
                     tab("@Override")
                     tab("public com.android.databinding.library.ViewDataBinder getDataBinder(android.view.View view, int layoutId) {") {
                         tab("switch(layoutId) {") {
-                            layoutBinders.forEach {
+                            layoutBinders.groupBy{it.getLayoutname()}.forEach {
                                 tab("case R.layout.${it.value.first!!.getLayoutname()}:") {
                                     if (it.value.size() == 1) {
                                         tab("return new ${it.value.first!!.getPackage()}.${it.value.first!!.getClassName()}(view);")

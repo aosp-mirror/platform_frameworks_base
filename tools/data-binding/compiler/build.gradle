@@ -33,6 +33,7 @@ buildscript {
 dependencies {
     compile 'junit:junit:4.12'
     compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'org.apache.commons:commons-io:1.3.2'
     compile 'com.google.guava:guava:18.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile project(":baseLibrary")

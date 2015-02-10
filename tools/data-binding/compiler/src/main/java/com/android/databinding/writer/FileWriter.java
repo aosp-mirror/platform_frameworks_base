@@ -11,17 +11,10 @@
  * limitations under the License.
  */
 
-package com.android.databinding.util
+package com.android.databinding.writer;
 
-object ParserHelper {
-    public fun toClassName(name:String) : String  {
+import java.io.File;
 
-        return stripExtension(name).split("[_-]").map { "${it.substring(0,1).toUpperCase()}${it.substring(1)}" }.join("")
-    }
-
-
-    public fun stripExtension(name : String) : String {
-        val dot = name.indexOf(".")
-        return if (dot == -1) name else name.substring(0, name.indexOf("."))
-    }
+public interface FileWriter {
+    public void writeToFile(File file , String contents);
 }

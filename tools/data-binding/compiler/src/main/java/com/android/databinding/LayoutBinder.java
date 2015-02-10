@@ -17,10 +17,9 @@
 package com.android.databinding;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 
 import com.android.databinding.expr.Dependency;
-import com.android.databinding.util.Log;
+import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.util.ParserHelper;
 import com.android.databinding.writer.LayoutBinderWriter;
 import com.android.databinding.expr.Expr;
@@ -29,46 +28,55 @@ import com.android.databinding.expr.IdentifierExpr;
 import com.android.databinding.expr.StaticIdentifierExpr;
 import com.android.databinding.util.L;
 
-import org.w3c.dom.Node;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Keeps all information about the bindings per layout file
  */
 public class LayoutBinder {
+
     /*
     * val pkg: String, val projectPackage: String, val baseClassName: String,
         val layoutName:String, val lb: LayoutExprBinding*/
     private final ExprModel mExprModel;
-    private final Node mRoot;
     private final ExpressionParser mExpressionParser;
     private final List<BindingTarget> mBindingTargets;
     private String mPackage;
     private String mProjectPackage;
     private String mBaseClassName;
-    private String mLayoutname;
-    private File mFile;
-    private int id;
     private final HashMap<String, String> mUserDefinedVariables = new HashMap<>();
     private final HashMap<String, String> mUserDefinedImports = new HashMap<>();
 
     private LayoutBinderWriter mWriter;
+    private ResourceBundle.LayoutFileBundle mBundle;
 
-    // layout has different definitions in different configurations
-    private boolean mHasVariations = false;
-
-    public LayoutBinder(Node root) {
-        mRoot = root;
+    public LayoutBinder(ResourceBundle resourceBundle,
+            ResourceBundle.LayoutFileBundle layoutBundle) {
         mExprModel = new ExprModel();
         mExpressionParser = new ExpressionParser(mExprModel);
         mBindingTargets = new ArrayList<>();
+        mBundle = layoutBundle;
+        mProjectPackage = resourceBundle.getAppPackage();
+        mPackage = mProjectPackage + ".generated";
+        mBaseClassName = ParserHelper.INSTANCE$.toClassName(layoutBundle.getFileName()) + "Binder";
+        // copy over data.
+        for (Map.Entry<String, String> variable : mBundle.getVariables().entrySet()) {
+            addVariable(variable.getKey(), variable.getValue());
+        }
+
+        for (Map.Entry<String, String> userImport : mBundle.getImports().entrySet()) {
+            addImport(userImport.getKey(), userImport.getValue());
+        }
+        for (ResourceBundle.BindingTargetBundle targetBundle : mBundle.getBindingTargetBundles()) {
+            final BindingTarget bindingTarget = createBindingTarget(targetBundle);
+            for (ResourceBundle.BindingTargetBundle.BindingBundle bindingBundle : targetBundle
+                    .getBindingBundleList()) {
+                bindingTarget.addBinding(bindingBundle.getName(), parse(bindingBundle.getExpr()));
+            }
+        }
     }
 
     public void resolveWhichExpressionsAreUsed() {
@@ -118,8 +126,8 @@ public class LayoutBinder {
         return mUserDefinedImports;
     }
 
-    public BindingTarget createBindingTarget(String nodeValue, String viewClassName, boolean used) {
-        final BindingTarget target = new BindingTarget(nodeValue, viewClassName, used);
+    public BindingTarget createBindingTarget(ResourceBundle.BindingTargetBundle targetBundle) {
+        final BindingTarget target = new BindingTarget(targetBundle);
         mBindingTargets.add(target);
         target.setModel(mExprModel);
         return target;
@@ -148,6 +156,7 @@ public class LayoutBinder {
             mWriter = new LayoutBinderWriter(this);
         }
     }
+
     public String writeViewBinderInterface() {
         ensureWriter();
         return mWriter.writeInterface();
@@ -175,69 +184,31 @@ public class LayoutBinder {
         return mProjectPackage;
     }
 
-    public void setProjectPackage(String projectPackage) {
-        mProjectPackage = projectPackage;
-    }
-
-    public String getBaseClassName() {
-        return mBaseClassName;
-    }
-
-    public void setBaseClassName(String baseClassName) {
-        mBaseClassName = baseClassName;
-    }
-
     public String getLayoutname() {
-        return mLayoutname;
-    }
-
-    public void setLayoutname(String layoutname) {
-        mLayoutname = layoutname;
+        return mBundle.getFileName();
     }
 
     public String getClassName() {
         final String suffix;
         if (hasVariations()) {
-            // append configuration specifiers.
-            final String parentFileName = mFile.getParentFile().getName();
-            L.d("parent file for %s is %s", mFile.getName(), parentFileName);
-            if ("layout".equals(parentFileName)) {
-                suffix = "";
-            } else {
-                suffix = ParserHelper.INSTANCE$.toClassName(parentFileName.substring("layout-".length()));
-            }
+            suffix = mBundle.getConfigName();
         } else {
             suffix = "";
         }
         return mBaseClassName + suffix + "Impl";
 
     }
-
+    
     public String getInterfaceName() {
         return mBaseClassName;
     }
 
     public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public File getFile() {
-        return mFile;
-    }
-
-    public void setFile(File file) {
-        mFile = file;
+        return mBundle.getLayoutId();
     }
 
     public boolean hasVariations() {
-        return mHasVariations;
+        return mBundle.hasVariations();
     }
 
-    public void setHasVariations(boolean hasVariations) {
-        mHasVariations = hasVariations;
-    }
 }

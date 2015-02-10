@@ -10,18 +10,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.databinding.writer;
 
-package com.android.databinding.util
+import com.android.databinding.util.L;
 
-object ParserHelper {
-    public fun toClassName(name:String) : String  {
+import org.apache.commons.io.FileUtils;
 
-        return stripExtension(name).split("[_-]").map { "${it.substring(0,1).toUpperCase()}${it.substring(1)}" }.join("")
-    }
+import java.io.File;
+import java.io.IOException;
 
+public class FileWriterImpl implements FileWriter {
 
-    public fun stripExtension(name : String) : String {
-        val dot = name.indexOf(".")
-        return if (dot == -1) name else name.substring(0, name.indexOf("."))
+    @Override
+    public void writeToFile(File file, String contents) {
+
+        try {
+            FileUtils.writeStringToFile(file, contents);
+        } catch (IOException e) {
+            L.e(e, "cannot write to %s", file.getAbsolutePath());
+        }
     }
 }

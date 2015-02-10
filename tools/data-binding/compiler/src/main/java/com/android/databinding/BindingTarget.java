@@ -20,71 +20,56 @@ import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
 import com.android.databinding.reflection.ReflectionAnalyzer;
 import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.store.ResourceBundle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BindingTarget {
-    String mId;
-    String mViewClass;
     List<Binding> mBindings = new ArrayList<>();
     ExprModel mModel;
     ReflectionClass mResolvedClass;
-    String mIncludedLayout;
     // if this target presents itself in multiple layout files with different view types,
     // it receives an interface type and should use it in the getter instead.
-    String mInterfaceType;
-    // if this target is inherited from a common layout interface, used is false so that we don't
-    // create find view by id etc for it.
-    boolean mUsed;
+    private ResourceBundle.BindingTargetBundle mBundle;
 
-    public BindingTarget(String id, String viewClass, boolean used) {
-        mId = id;
-        mViewClass = viewClass;
-        mUsed = used;
+    public BindingTarget(ResourceBundle.BindingTargetBundle bundle) {
+        mBundle = bundle;
     }
 
     public boolean isUsed() {
-        return mUsed;
+        return mBundle.isUsed();
     }
 
     public void addBinding(String name, Expr expr) {
         mBindings.add(new Binding(this, name, expr));
     }
 
-    public void setInterfaceType(String interfaceType) {
-        mInterfaceType = interfaceType;
-    }
-
     public String getInterfaceType() {
-        return mInterfaceType == null ? mViewClass : mInterfaceType;
+        return mBundle.getInterfaceType() == null ? mBundle.getFullClassName() : mBundle.getInterfaceType();
     }
 
     public String getId() {
-        return mId;
+        return mBundle.getId();
     }
 
     public String getViewClass() {
-        return mViewClass;
+        return mBundle.getFullClassName();
     }
 
     public ReflectionClass getResolvedType() {
         if (mResolvedClass == null) {
-            mResolvedClass = ReflectionAnalyzer.getInstance().findClass(mViewClass);
+            mResolvedClass = ReflectionAnalyzer.getInstance().findClass(mBundle.getFullClassName());
         }
         return mResolvedClass;
     }
 
     public String getIncludedLayout() {
-        return mIncludedLayout;
+        return mBundle.getIncludedLayout();
     }
 
     public boolean isBinder() {
-        return mIncludedLayout != null;
-    }
-
-    public void setIncludedLayout(String includedLayout) {
-        mIncludedLayout = includedLayout;
+        return getIncludedLayout() != null;
     }
 
     public List<Binding> getBindings() {
