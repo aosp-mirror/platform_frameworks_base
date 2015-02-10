@@ -71,6 +71,11 @@ projection transformation {@link android.opengl.Matrix} using the {@link
 android.opengl.Matrix#frustumM Matrix.frustumM()} method:</p>
 
 <pre>
+// mMVPMatrix is an abbreviation for "Model View Projection Matrix"
+private final float[] mMVPMatrix = new float[16];
+private final float[] mProjectionMatrix = new float[16];
+private final float[] mViewMatrix = new float[16];
+
 &#64;Override
 public void onSurfaceChanged(GL10 unused, int width, int height) {
     GLES20.glViewport(0, 0, width, height);
@@ -95,10 +100,10 @@ view transformation in order for anything to show up on screen.</p>
 <h2 id="camera-view">Define a Camera View</h2>
 
 <p>Complete the process of transforming your drawn objects by adding a camera view transformation as
-part of the drawing process. In the following example code, the camera view transformation is
-calculated using the {@link android.opengl.Matrix#setLookAtM Matrix.setLookAtM()} method and then
-combined with the previously calculated projection matrix. The combined transformation matrices
-are then passed to the drawn shape.</p>
+part of the drawing process in your renderer. In the following example code, the camera view
+transformation is calculated using the {@link android.opengl.Matrix#setLookAtM Matrix.setLookAtM()}
+method and then combined with the previously calculated projection matrix. The combined
+transformation matrices are then passed to the drawn shape.</p>
 
 <pre>
 &#64;Override
@@ -119,7 +124,32 @@ public void onDrawFrame(GL10 unused) {
 <h2 id="#transform">Apply Projection and Camera Transformations</h2>
 
 <p>In order to use the combined projection and camera view transformation matrix shown in the
-previews sections, modify the {@code draw()} method of your graphic objects to accept the combined
+previews sections, first add a matrix variable to the <em>vertex shader</em> previously defined
+in the <code>Triangle</code> class:</p>
+
+<pre>
+public class Triangle {
+
+    private final String vertexShaderCode =
+        // This matrix member variable provides a hook to manipulate
+        // the coordinates of the objects that use this vertex shader
+        <strong>"uniform mat4 uMVPMatrix;" +</strong>
+        "attribute vec4 vPosition;" +
+        "void main() {" +
+        // the matrix must be included as a modifier of gl_Position
+        // Note that the uMVPMatrix factor *must be first* in order
+        // for the matrix multiplication product to be correct.
+        "  gl_Position = <strong>uMVPMatrix</strong> * vPosition;" +
+        "}";
+
+    // Use to access and set the view transformation
+    private int mMVPMatrixHandle;
+
+    ...
+}
+</pre>
+
+<p>Next, modify the {@code draw()} method of your graphic objects to accept the combined
 transformation matrix and apply it to the shape:</p>
 
 <pre>
@@ -127,14 +157,16 @@ public void draw(float[] mvpMatrix) { // pass in the calculated transformation m
     ...
 
     // get handle to shape's transformation matrix
-    mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+    <strong>mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");</strong>
 
     // Pass the projection and view transformation to the shader
-    GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+    <strong>GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);</strong>
 
     // Draw the triangle
     GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
-    ...
+
+    // Disable vertex array
+    GLES20.glDisableVertexAttribArray(mPositionHandle);
 }
 </pre>
 
