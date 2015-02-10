@@ -63,6 +63,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Display;
+import android.os.SystemProperties;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
@@ -287,7 +288,12 @@ final class ApplicationPackageManager extends PackageManager {
         // depending on what the current runtime's instruction set is.
         if (info.primaryCpuAbi != null && info.secondaryCpuAbi != null) {
             final String runtimeIsa = VMRuntime.getRuntime().vmInstructionSet();
-            final String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+
+            // Get the instruction set that the libraries of secondary Abi is supported.
+            // In presence of a native bridge this might be different than the one secondary Abi used.
+            String secondaryIsa = VMRuntime.getInstructionSet(info.secondaryCpuAbi);
+            final String secondaryDexCodeIsa = SystemProperties.get("ro.dalvik.vm.isa." + secondaryIsa);
+            secondaryIsa = secondaryDexCodeIsa.isEmpty() ? secondaryIsa : secondaryDexCodeIsa;
 
             // If the runtimeIsa is the same as the primary isa, then we do nothing.
             // Everything will be set up correctly because info.nativeLibraryDir will
