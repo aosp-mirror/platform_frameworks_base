@@ -6502,6 +6502,8 @@ package android.bluetooth {
     method public java.lang.String getName();
     method public int getType();
     method public android.os.ParcelUuid[] getUuids();
+    method public boolean isConnected();
+    method public boolean isEncrypted();
     method public boolean setPairingConfirmation(boolean);
     method public boolean setPin(byte[]);
     method public void writeToParcel(android.os.Parcel, int);
