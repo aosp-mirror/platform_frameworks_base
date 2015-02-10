@@ -1,6 +1,7 @@
 #include "AutoDecodeCancel.h"
+#include "SkMutex.h"
 
-static SkMutex  gAutoDecoderCancelMutex;
+SK_DECLARE_STATIC_MUTEX(gAutoDecoderCancelMutex);
 static AutoDecoderCancel* gAutoDecoderCancel;
 #ifdef SK_DEBUG
 static int gAutoDecoderCancelCount;
