@@ -1,0 +1,763 @@
+page.title=Server Reference
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol class="toc">
+  <li><a href="#downstream">Downstream Messages</a></li>
+<ol class="toc">
+      <li><a href="#send-downstream">Sending a downstream message</a></li>
+      <li><a href="#interpret-downstream">Interpreting a downstream message response</a></li>
+    </ol>
+  <li><a href="#upstream">Upstream Messages (XMPP)</a>
+    <ol class="toc">
+      <li><a href="#interpret-upstream">Interpreting an upstream XMPP message</a></li>
+      <li><a href="#upstream-response">Sending an upstream XMPP message response</a></li>
+    </ol>
+  </li>
+<li><a href="#ccs">Cloud Connection Server Messages (XMPP)</a></li>
+<li><a href="#error-codes">Downstream message error response codes (HTTP and XMPP)</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>This document provides a reference for the syntax used to pass
+messages back and forth in GCM. These messages fall into
+the following broad categories:</p>
+
+<ul>
+   <li><a href="#downstream">Downstream messages</a></li>
+   <li><a href="#upstream">Upstream messages</a></li>
+   <li><a href="#ccs">Cloud Connection Server messages (XMPP)</a></li>
+   <li><a href="#error-codes">Downstream message error response codes (HTTP and XMPP)</a></li>
+</ul>
+
+<p>The following sections describe the basic requirements for
+sending messages.</p>
+
+<h2 id="downstream">Downstream Messages</h2>
+<p>This is the message that a 3rd-party app server sends to a client app.
+</p>
+<p>A downstream message includes the following components:</p>
+<ul>
+  <li>Target: specifies the recipient of the message.</li>
+  <li>Options: specifies attributes of the message.</li>
+  <li>Payload: specifies additional content to be included in the message. Optional.</li>
+</ul>
+
+<p>The syntax for each of these components is described in the tables below. </p>
+
+<h3 id="send-downstream">Sending a downstream message</h3>
+
+<p>This section gives the syntax for sending a downstream messages. For JSON,
+these messages can be either HTTP or XMPP. For plain text, these messages can only be HTTP.</p>
+
+<h4>Downstream HTTP or XMPP messages (JSON)</h4>
+
+<p>The following table lists the targets, options, and payload for HTTP or XMPP JSON messages.</p>
+<p class="table-caption" id="table1">
+  <strong>Table 1.</strong> Targets, options, and payload for downstream HTTP or XMPP message (JSON).</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Protocol</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+<tr>
+    <td colspan="4"><strong>Targets</strong></td>
+  </tr>
+  <tr>
+    <td><code>to</code></td>
+    <td>XMPP</td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies the recipient of a message. </p>
+      <p>The value must be a registration ID or notification key.</p>
+    <p>This parameter is used in XMPP in place of {@code registration_ids} or   {@code notification_key} in HTTP.</p></td>
+  </tr>
+  <tr>
+    <td><code>registration_ids</code></td>
+    <td>HTTP</td>
+    <td>Required if {@code notification_key} not present, string array</td>
+    <td><p>This parameter specifies the list of devices (registration IDs)
+receiving the message. It must contain at least 1 and at most 1000 registration IDs.</p>
+      <p>Multicast messages (sending to more than 1 registration IDs) are allowed using HTTP JSON format only.</p>
+    <p>This parameter or {@code notification_key} is used in HTTP in place of {@code to} in XMPP.</p></td>
+  </tr>
+  <tr>
+    <td><code>notification_key</code></td>
+    <td>HTTP</td>
+    <td>Required if {@code registration_ids} not present, string</td>
+    <td><p>This parameter specifies the mapping of a single user to
+multiple registration IDs associated with that user.</p>
+      <p>This allows a 3rd-party app server to send a single message to multiple app instances
+(typically on multiple devices) owned by a single user.</p>
+      <p>A 3rd-party app server can use {@code notification_key} as the target for a
+message instead of an individual registration ID (or array of registration IDs).
+The maximum number of members allowed for a {@code notification_key} is 20.</p>
+      <p>This parameter or {@code registration_ids} is used in HTTP in place of {@code to} in XMPP.</p>
+    <p>See <a href="notifications.html">User Notifications</a> for details.</p></td>
+  </tr>
+<tr>
+    <td colspan="4"><strong>Options</strong></td>
+  </tr>
+  <tr>
+    <td><code>message_id</code></td>
+    <td>XMPP</td>
+    <td>Required, string</td>
+    <td><p>This parameter uniquely identifies a message in an XMPP connection.</p></td>
+  </tr>
+  <tr>
+    <td><code>collapse_key</code></td>
+    <td>HTTP, XMPP</td>
+    <td>Optional, string</td>
+    <td><p>This parameters identifies a group of messages (e.g., with
+{@code collapse_key: "Updates Available"}) that can be collapsed, so that only the
+last message gets sent when delivery can be resumed. This is intended to avoid sending too
+many of the same messages when the device comes back online or becomes active (see {@code delay_while_idle}).</p>
+      <p>Note that there is no guarantee of the order in which messages get sent.</p>
+      <p>Messages with collapse key are also called
+<a href="{@docRoot}google/gcm/server.html#s2s">send-to-sync messages</a> messages.
+</p>
+    <p>Note: A maximum of 4 different collapse keys is allowed at any given time. This means a
+GCM connection server can simultaneously store 4 different send-to-sync messages per client app. If you
+exceed this number, there is no guarantee which 4 collapse keys the GCM connection server will keep. </p></td>
+  </tr>
+  <tr>
+    <td><code>delay_while_idle</code></td>
+    <td>HTTP, XMPP</td>
+    <td>Optional, JSON boolean</td>
+    <td>When this parameter is set to {@code true}, it indicates that the message should not be
+sent until the device becomes active.</p>
+    <p>The default value is {@code false}.</p></td>
+  </tr>
+  <tr>
+    <td><code>time_to_live</code></td>
+    <td>HTTP, XMPP</td>
+    <td>Optional, JSON number</td>
+    <td><p>This parameter specifies how long (in seconds) the message should be kept in GCM storage
+if the device is offline. The maximum time to live supported is 4 weeks.</p>
+    <p>The default value is 4 weeks. </p></td>
+  </tr>
+  <tr>
+    <td><code>delivery_receipt_
+<br>requested</code></td>
+    <td>XMPP</td>
+    <td>Optional, JSON boolean</td>
+    <td><p>This parameter lets 3rd-party app server request confirmation of message delivery.</p>
+      <p>When this parameter is set to {@code true}, CCS sends a delivery receipt
+when the device confirms that it received the message.</p>
+    <p>The default value is {@code false}.</p></td>
+  </tr>
+  <tr>
+    <td><code>restricted_package_
+<br>name</code></td>
+    <td>HTTP</td>
+    <td>Optional, string</td>
+    <td>This parameter specifies the package name of the application where the
+registration IDs must match in order to receive the message.</td>
+  </tr>
+  <tr>
+    <td><code>dry_run</code></td>
+    <td>HTTP</td>
+    <td>Optional, JSON boolean</td>
+    <td><p>This parameter, when set to {@code true}, allows developers to test a
+request without actually sending a message.</p>
+    <p>The default value is {@code false}.</p></td>
+  </tr>
+<tr>
+    <td colspan="4"><strong>Payload</strong></td>
+  </tr>
+  <tr>
+    <td><code>data</code></td>
+    <td>HTTP, XMPP</td>
+    <td>Optional, JSON object</td>
+    <td><p>This parameter specifies the key-value pairs of the message's payload. There is
+no limit on the number of key-value pairs, but there is a total message size limit of 4kb.</p>
+      <p>For instance, in Android, <code>data:{"score":"3x1"}</code> would result in an intent extra
+named {@code score} with the string value {@code 3x1}.</p>
+      <p>The key should not be a reserved word ({@code from} or any word starting with
+{@code google}). It is also not recommended to use words defined in this table
+(such as {@code collapse_key}) because that could yield unpredictable outcomes. </p>
+    <p>Values in string types are recommended. You have to convert values in objects
+or other non-string data types (e.g., integers or booleans) to string.</p></td>
+  </tr>
+</table>
+
+<h3>Downstream HTTP messages (Plain Text)</h3>
+
+<p>The following table lists the syntax for targets, options, and payload in plain
+text downstream HTTP messages.</p>
+
+<p class="table-caption" id="table2">
+  <strong>Table 2.</strong> Targets, options, and payload for downstream plain text HTTP messages.</p>
+
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+<tr>
+    <td colspan="3"><strong>Targets</strong></td>
+  </tr>
+  <tr>
+    <td><code>registration _id</code></td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies the client apps (registration ID) receiving the message.</p>
+    <p>Multicast messaging (sending to more than one registration ID) is allowed using HTTP JSON format only.</p></td>
+  </tr>
+<tr>
+    <td colspan="3"><strong>Options</strong></td>
+  </tr>
+  <tr>
+    <td><code>collapse_key</code></td>
+    <td>Optional, string</td>
+    <td>See <a href="#table1">table 1</a> for details.</td>
+  </tr>
+  <tr>
+    <td><code>delay_while_idle</code></td>
+    <td>Optional, boolean or number</td>
+    <td>See <a href="#table1">table 1</a> for details.</td>
+  </tr>
+  <tr>
+    <td><code>time_to_live</code></td>
+    <td>Optional, number</td>
+    <td>See <a href="#table1">table 1</a> for details.</td>
+  </tr>
+  <tr>
+    <td><code>restricted_package_name</code></td>
+    <td>Optional, string</td>
+    <td>See <a href="#table1">table 1</a> for details.</td>
+  </tr>
+  <tr>
+    <td><code>dry_run </code></td>
+    <td>Optional, boolean</td>
+    <td>See <a href="#table1">table 1</a> for details.</td>
+  </tr>
+<tr>
+    <td colspan="3"><strong>Payload</strong></td>
+  </tr>
+  <tr>
+    <td><code>data.&lt;key&gt;</code></td>
+    <td>Optional, string</td>
+    <td><p>This parameter specifies the key-value pairs of the message's payload.
+There is no limit on the number of key-value parameters,
+but there is a total message size limit of 4kb.</p>
+      <p>For instance, in Android, <code>data:{"score":"3x1"}</code> would result in an intent extra
+named {@code score} with the string value {@code 3x1}.</p>
+    <p>The key should not be a reserved word ({@code from} or any word starting with
+{@code google}). It is also not recommended to use words defined in this table
+(such as {@code collapse_key}) because that could yield unpredictable outcomes.</p></td>
+  </tr>
+</table>
+
+<h3 id="interpret-downstream">Interpreting a Downstream Message Response</h3>
+
+<p>This section describes the syntax of a response to a downstream message. A client
+app or the GCM Connection Server sends the response to 3rd-party app server upon processing
+the message request. </p>
+
+<h4>Interpreting a downstream HTTP message response </h4>
+<p>The 3rd-party app server should look at both the message response header and the body
+to interpret the message response sent from the GCM Connection Server. The following table
+describes the possible responses.</p>
+<p>
+
+<p class="table-caption" id="table3">
+  <strong>Table 3.</strong> Downstream HTTP message response header.</p>
+<table border=1>
+  <tr>
+    <th>Response</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>200</td>
+    <td>Message was processed successfully. The response body will contain more
+details about the message status, but its format will depend whether the request
+was JSON or plain text. See <a href="#table4">table 4</a>
+for more details.</td>
+  </tr>
+  <tr>
+    <td>400</td>
+    <td>Only applies for JSON requests.
+Indicates that the request could not be parsed as JSON, or it contained invalid
+fields (for instance, passing a string where a number was expected). The exact
+failure reason is described in the response and the problem should be addressed
+before the request can be retried.</td>
+  </tr>
+  <tr>
+    <td>401</td>
+    <td>There was an error authenticating the sender account.
+<a href="server.html#auth_error">Troubleshoot</a></td>
+  </tr>
+  <tr>
+    <td>5xx</td>
+    <td>Errors in the 500-599 range (such as 500 or 503) indicate that there was
+an internal error in the GCM server while trying to process the request, or that
+the server is temporarily unavailable (for example, because of timeouts). Sender
+must retry later, honoring any <code>Retry-After</code> header included in the
+response. Application servers must implement exponential back-off.
+<a href="server.html#internal_error">Troubleshoot</a></td>
+  </tr>
+</table>
+
+<p>The following table lists the fields in a downstream message response body
+(JSON).</p>
+
+
+<p class="table-caption" id="table4">
+  <strong>Table 4.</strong> Downstream HTTP message response body (JSON).</p>
+<table>
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>multicast_id</code></td>
+    <td>Required, number</td>
+    <td>Unique ID (number) identifying the multicast message.</td>
+  </tr>
+  <tr>
+    <td><code>success</code></td>
+    <td>Required, number</td>
+    <td>Number of messages that were processed without an error.</td>
+  </tr>
+  <tr>
+    <td><code>failure</code></td>
+    <td>Required, number</td>
+    <td>Number of messages that could not be processed.</td>
+  </tr>
+  <tr>
+    <td><code>canonical_ids</code></td>
+    <td>Required, number</td>
+    <td>Number of results that contain a canonical registration ID. See the
+<a href="{@docRoot}google/gcm/gcm.html#canonical">Overview</a> for more discussion of this topic.</td>
+  </tr>
+  <tr>
+    <td><code>results</code></td>
+    <td>Optional, array object</td>
+    <td>Array of objects representing the status of the messages processed. The
+objects are listed in the same order as the request (i.e., for each registration
+ID in the request, its result is listed in the same index in the response).<br>
+      <ul>
+        <li><code>message_id</code>: String specifying a unique ID for each successfully processed
+          message.</li>
+        <li><code>registration_id</code>: Optional string specifying the canonical registration ID
+          for the client app that the message was processed and sent to. Sender should use this
+          value as the Registration ID for future requests. Otherwise, the messages might
+          be rejected.
+        </li>
+        <li><code>error</code>: String specifying the error that occurred when processing the
+          message for the recipient. The possible values can be found in <a href="#table11">table 11
+        </a>.</li>
+    </ul></td>
+  </tr>
+</table>
+
+
+<p class="table-caption" id="table5">
+  <strong>Table 5.</strong> Success response for downstream HTTP message response body (Plain Text).</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>id</code></td>
+    <td>Required, string</td>
+    <td>This parameter specifies the unique message ID that GCM server processed successfully.</td>
+  </tr>
+  <tr>
+    <td><code>registration_id</code></td>
+    <td>Optional, string</td>
+    <td>This parameter specifies the canonical registration ID for the client app that the message was
+processed and sent to. Sender should replace the registration ID with this value on future requests,
+otherwise, the messages might be rejected.</td>
+  </tr>
+</table>
+
+<p class="table-caption" id="table6">
+  <strong>Table 6.</strong> Error response for downstream HTTP message response body (Plain Text).</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>{@code Error}</td>
+    <td>Required, string</td>
+    <td>This parameter specifies the error value while processing the message for the recipient.
+See <a href="#table11">table 11</a> for details. </td>
+  </tr>
+</table>
+
+<h4>Interpreting a downstream XMPP message response</h4>
+
+<p>The following table lists the fields that appear in a downstream XMPP message response.</p>
+
+<p class="table-caption" id="table7">
+  <strong>Table 7.</strong> Downstream message XMPP message response body.</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>from</code></td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies who sent this response.</p>
+    <p>The value is the registration ID of the client app.</p></td>
+  </tr>
+  <tr>
+    <td><code>message_id</code></td>
+    <td>Required, string</td>
+    <td>This parameter uniquely identifies a message in an XMPP connection.
+The value is a string that uniquely identifies the associated message.</td>
+  </tr>
+  <tr>
+    <td><code>message_type</code></td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies an 'ack' or 'nack' message from XMPP (CCS)
+to the 3rd-party app server.</p>
+    <p>If the value is set to {@code nack}, the 3rd-party app server should look at
+{@code error} and {@code error_description} to get failure information. </p></td>
+  </tr>
+  <tr>
+    <td><code>error</code></td>
+    <td>Optional, string</td>
+    <td>This parameter specifies an error related to the downstream message. It is set when the
+{@code message_type} is {@code nack}. See <a href="#table11">table 6</a> for details.</td>
+  </tr>
+  <tr>
+    <td><code>error_description</code></td>
+    <td>Optional, string</td>
+    <td>This parameter provides descriptive information for the error. It is set
+when the {@code message_type} is {@code nack}.</td>
+  </tr>
+</table>
+<h2 id="upstream">Upstream Messages (XMPP)</h2>
+
+<p>An upstream message is a message the client app sends to the 3rd-party app server.
+Currently only CCS (XMPP) supports upstream messaging.</p>
+
+<h3 id="interpret-upstream">Interpreting an upstream XMPP message </h3>
+<p>The following table describes the fields that appear in an upstream XMPP message.
+
+<p class="table-caption" id="table8">
+  <strong>Table 8.</strong> Upstream XMPP messages.</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>from</code></td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies who sent the message.</p>
+    <p>The value is the registration ID of the client app.</p></td>
+  </tr>
+  <tr>
+    <td><code>category</code></td>
+    <td>Required, string</td>
+    <td>This parameter specifies the application package name of the client app that sent the message. </td>
+  </tr>
+  <tr>
+    <td><code>message_id</code></td>
+    <td>Required, string</td>
+    <td>This parameter specifies the unique ID of the message. </td>
+  </tr>
+  <tr>
+    <td><code>data</code></td>
+    <td>Optional, string</td>
+    <td>This parameter specifies the key-value pairs of the message's payload.</td>
+  </tr>
+</table>
+
+<h3 id="upstream-response">Sending an upstream XMPP message response</h3>
+
+<p>The following table describes the response that 3rd-party app server is expected to send to
+<a href="{@docRoot}google/gcm/ccs.html">XMPP (CCS)</a> in response to an
+upstream message it (the app server) received.</p>
+
+<p class="table-caption" id="table9">
+  <strong>Table 9.</strong> Upstream XMPP message response.</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>to</code></td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies the recipient of a response message. </p>
+    <p>The value must be a registration ID of the client app that sent the upstream message.</p></td>
+  </tr>
+  <tr>
+    <td><code>message_id</code></td>
+    <td>Required, string</td>
+    <td>This parameter specifies which message the response is intended for. The value must be
+the {@code message_id} value from the corresponding upstream message.</td>
+  </tr>
+  <tr>
+    <td><code>message_type</code></td>
+    <td>Required, string</td>
+    <td>This parameter specifies an {@code ack} message from a 3rd-party app server to CCS.</td>
+  </tr>
+</table>
+<h2 id="ccs">Cloud Connection Server Messages (XMPP) </h2>
+<p>This is a message sent from XMPP (CCS) to a 3rd-party app server. Here are the primary types
+of messages that XMPP (CCS) sends to the 3rd-party app server:</p>
+<ul>
+  <li><strong>Delivery Receipt:</strong> If the 3rd-party app server included {@code delivery_receipt_requested}
+in the downstream message, XMPP (CCS) sends a delivery receipt when it receives confirmation
+that the device received the message.</li>
+  <li><strong>Control:</strong> These CCS-generated messages indicate that
+action is required from the 3rd-party app server.</li>
+</ul>
+
+<p>The following table describes the fields included in the messages CCS
+sends to a 3rd-party app server.</p>
+
+<p class="table-caption" id="table10">
+  <strong>Table 10.</strong> GCM Cloud Connection Server messages (XMPP).</p>
+<table border="1">
+  <tr>
+    <th>Parameter</th>
+    <th>Usage</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td colspan="3"><strong>Common Field</strong></td>
+  </tr>
+  <tr>
+    <td><code>message_type</code></td>
+    <td>Required, string</td>
+    <td><p>This parameter specifies the type of the CCS message: either delivery receipt or control.</p>
+      <p>When it is set to {@code receipt}, the message includes {@code from}, {@code message_id},
+        {@code category} and {@code data} fields to provide additional information.</p>
+    <p>When it is set to {@code control}, the message includes {@code control_type} to indicate the
+type of control message.</p></td>
+  </tr>
+  <tr>
+    <td colspan="3"><strong>Delivery receipt-specific</strong></td>
+  </tr>
+  <tr>
+    <td><code>from</code></td>
+    <td>Required, string</td>
+    <td>This parameter is set to {@code gcm.googleapis.com}, indicating that the
+message is sent from CCS.</td>
+  </tr>
+  <tr>
+    <td><code>message_id</code></td>
+    <td>Required, string</td>
+    <td>This parameter specifies the original message ID that the receipt is intended for,
+prefixed with {@code dr2:} to indicate that the message is a delivery receipt. A 3rd-party app
+server must send an {@code ack} message with this message ID to acknowledge that it
+received this delivery receipt. See <a href="#table9">table 9</a> for the 'ack' message format.</td>
+  </tr>
+  <tr>
+    <td><code>category</code></td>
+    <td>Optional, string</td>
+    <td>This parameter specifies the application package name of the client app that
+receives the message that this delivery receipt is reporting. This is available when
+{@code message_type} is {@code receipt}.</td>
+  </tr>
+  <tr>
+    <td><code>data</code></td>
+    <td>Optional, string</td>
+    <td>This parameter specifies the key-value pairs for the delivery receipt message. This is available
+when the {@code message_type} is {@code receipt}.
+      <ul>
+        <li>{@code message_status}: This parameter specifies the status of the receipt message.
+It is set to {@code MESSAGE_SENT_TO_DEVICE} to indicate the device has confirmed its receipt of
+the original message.</li>
+      <li>{@code original_message_id}: This parameter specifies the ID of the original message
+that the 3rd-party app server sent to the client app.</li>
+     <li>{@code device_registration_id}: This parameter specifies the registration ID of the
+client app to which the original message was sent.</li>
+    </ul>
+</td>
+  </tr>
+  <tr>
+    <td colspan="3"><strong>Control-specific</strong></td>
+  </tr>
+  <tr>
+    <td><code>control_type</code></td>
+    <td>Optional, string</td>
+    <td><p>This parameter specifies the type of control message sent from CCS.</p>
+    <p>Currently, only {@code CONNECTION_DRAINING} is supported. XMPP (CCS) sends this control message
+before it closes a connection to perform load balancing. As the connection drains, no more messages
+are allowed to be sent to the connection, but existing messages in the pipeline will
+continue to be processed.</p></td>
+  </tr>
+</table>
+
+<h2 id="error-codes">Downstream message error response codes (HTTP and XMPP)</h2>
+
+<p>The following table lists the error response codes for downstream messages (HTTP and XMPP).</p>
+
+<p class="table-caption" id="table11">
+  <strong>Table 11.</strong> Downstream message error response codes.</p>
+<table border="1">
+  <tr>
+    <th>Error</th>
+    <th>HTTP Code</th>
+    <th>XMPP Code</th>
+    <th>Recommended Action</th>
+  </tr>
+  <tr>
+    <td>Missing Registration ID</td>
+    <td>200 + error:MissingRegistration</td>
+    <td><code>INVALID_JSON</code></td>
+    <td>Check that the request contains a registration ID (either in the
+{@code registration_id} in a plain text message, or in the {@code registration_ids} in JSON).</td>
+  </tr>
+  <tr>
+    <td>Invalid Registration ID</td>
+    <td>200 + error:InvalidRegistration</td>
+    <td><code>BAD_REGISTRATION</code></td>
+    <td>Check the format of the registration ID you pass to the server. Make sure it
+matches the registration ID the client app receives from registering with GCM. Do not
+truncate or add additional characters.</td>
+  </tr>
+  <tr>
+    <td>Unregistered Device</td>
+    <td>200 + error:NotRegistered</td>
+    <td><code>DEVICE_UNREGISTERED</code></td>
+    <td>An existing registration ID may cease to be valid in a number of scenarios, including:<br>
+     <ul>
+      <li>If the client app unregisters with GCM.</li>
+      <li>If the client app is automatically unregistered, which can happen if the user uninstalls the application.</li>
+      <li>If the registration ID expires (for example, Google might decide to refresh registration IDs).</li>
+      <li>If the client app is updated but the new version is not configured to receive messages.</li>
+</ul>
+ For all these cases, remove this registration ID from the 3rd-party app
+server and stop using it to send messages.</td>
+  </tr>
+  <tr>
+    <td>Invalid Package Name</td>
+    <td>200 + error:InvalidPackageName</td>
+    <td></td>
+    <td>Make sure the message was addressed to a registration ID whose package name
+matches the value passed in the request.</td>
+  </tr>
+  <tr>
+    <td>Authentication Error</td>
+    <td>401</td>
+    <td>&nbsp;</td>
+    <td>The sender account used to send a message couldn't be authenticated. Possible causes are:<br>
+<ul>
+      <li>Authorization header missing or with invalid syntax in HTTP request.</li>
+      <li>Invalid project number sent as key.</li>
+      <li>Key valid but with GCM service disabled.</li>
+      <li>Request originated from a server not whitelisted in the Server Key IPs.</li>
+</ul>
+    Check that the token you're sending inside the Authentication header is
+the correct API key associated with your project. See
+<a href="{@docRoot}google/gcm/http.html">GCM HTTP Connection Server</a> for details.</td>
+  </tr>
+  <tr>
+    <td>Mismatched Sender</td>
+    <td>200 + error:MismatchSenderId</td>
+    <td><code>BAD_REGISTRATION</code></td>
+    <td>A registration ID is tied to a certain group of senders. When a client app registers
+for GCM, it must specify which senders are allowed to send messages. You should use one
+of those sender IDs when sending messages to the client app. If you switch to a different
+sender, the existing registration IDs won't work.</td>
+  </tr>
+  <tr>
+    <td>Invalid JSON</td>
+    <td>400</td>
+    <td><code>INVALID_JSON</code></td>
+    <td>Check that the JSON message is properly formatted and contains valid fields
+(for instance, making sure the right data type is passed in).</td>
+  </tr>
+  <tr>
+    <td>Message Too Big</td>
+    <td>200 + error:MessageTooBig</td>
+    <td><code>INVALID_JSON</code></td>
+    <td>Check that the total size of the payload data included in a message does
+not exceed 4096 bytes. This includes both the the keys and the values.</td>
+  </tr>
+  <tr>
+    <td>Invalid Data Key</td>
+    <td>200 + error:
+<br />
+InvalidDataKey</td>
+    <td><code>INVALID_JSON</code></td>
+    <td>Check that the payload data does not contain a key (such as {@code from} or any value
+prefixed by {@code google}) that is used internally by GCM. Note that some words (such as {@code collapse_key})
+are also used by GCM but are allowed in the payload, in which case the payload value
+will be overridden by the GCM value.</td>
+  </tr>
+  <tr>
+    <td>Invalid Time to Live</td>
+    <td>200 + error:InvalidTtl</td>
+    <td><code>INVALID_JSON</code></td>
+    <td>Check that the value used in {@code time_to_live} is an integer representing a
+duration in seconds between 0 and 2,419,200 (4 weeks).</td>
+  </tr>
+  <tr>
+    <td>Bad ACK message</td>
+    <td>N/A</td>
+    <td><code>BAD_ACK</code></td>
+    <td>Check that the 'ack' message is properly formatted before retrying. See
+<a href="#table9">table 9</a> for details.</td>
+  </tr>
+  <tr>
+    <td>Timeout</td>
+    <td>5xx or 200 + error:Unavailable</td>
+    <td><code>SERVICE_UNAVAILABLE</code></td>
+    <td><p>The server couldn't process the request in time. Retry the same request, but you must:<br>
+<ul>
+      <li>For HTTP: Honor the {@code Retry-After} header if it is included in the response from the
+GCM Connection Server.</li>
+      <li>Implement exponential back-off in your retry mechanism. (e.g. if you waited one second
+before the first retry, wait at least two second before the next one, then 4 seconds and so on).
+If you're sending multiple messages, delay each one independently by an additional random amount
+to avoid issuing a new request for all messages at the same time.</li>
+    <li>For CCS: The initial retry delay should be set to 1 second.</li>
+</ul>
+    <p>Senders that cause problems risk being blacklisted.</p></td>
+  </tr>
+  <tr>
+    <td>Internal Server Error</td>
+    <td>500 or 200 + error:InternalServerError</td>
+    <td><code>INTERNAL_SERVER_
+<br />
+ERROR</code></td>
+    <td>The server encountered an error while trying to process the request. You could retry
+the same request following the requirements listed in "Timeout" (see row above). If the error persists, please
+report the problem in the {@code android-gcm group}.</td>
+  </tr>
+  <tr>
+    <td>Device Message Rate Exceeded</td>
+    <td>200 + error:
+<br />DeviceMessageRate
+<br />
+Exceeded</td>
+    <td><code>DEVICE_MESSAGE_RATE<br />
+_EXCEEDED</code></td>
+    <td>The rate of messages to a particular device is too high. Reduce the
+number of messages sent to this device and do not immediately retry sending to this device.</td>
+  </tr>
+  <tr>
+    <td>Connection Draining</td>
+    <td>N/A</td>
+    <td><code>CONNECTION_DRAINING</code></td>
+    <td>The message couldn't be processed because the connection is draining. This happens because
+periodically, XMPP (CCS) needs to close down a connection to perform load balancing. Retry the message over
+another XMPP connection.</td>
+  </tr>
+</table>
