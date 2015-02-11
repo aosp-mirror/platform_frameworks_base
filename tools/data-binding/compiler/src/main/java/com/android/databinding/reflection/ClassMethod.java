@@ -17,6 +17,7 @@ package com.android.databinding.reflection;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 public class ClassMethod implements ReflectionMethod {
 
@@ -48,7 +49,7 @@ public class ClassMethod implements ReflectionMethod {
     }
 
     @Override
-    public ReflectionClass getReturnType() {
+    public ReflectionClass getReturnType(List<ReflectionClass> args) {
         return new ClassClass(mMethod.getReturnType());
     }
 

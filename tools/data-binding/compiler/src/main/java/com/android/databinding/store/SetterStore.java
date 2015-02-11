@@ -25,11 +25,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +48,8 @@ import javax.tools.StandardLocation;
 
 public class SetterStore {
 
+    public static final String SETTER_STORE_FILE_NAME = "setter_store.bin";
+
     private static SetterStore sStore;
 
     private final IntermediateV1 mStore;
@@ -66,7 +66,7 @@ public class SetterStore {
             try {
                 Filer filer = processingEnvironment.getFiler();
                 FileObject resource = filer.getResource(StandardLocation.CLASS_OUTPUT,
-                        SetterStore.class.getPackage().getName(), "setter_store.bin");
+                        SetterStore.class.getPackage().getName(), SETTER_STORE_FILE_NAME);
                 if (resource != null && new File(resource.getName()).exists()) {
                     in = resource.openInputStream();
                     if (in != null) {
@@ -103,7 +103,7 @@ public class SetterStore {
     private static SetterStore load(ReflectionAnalyzer reflectionAnalyzer) {
         IntermediateV1 store = new IntermediateV1();
         String resourceName = SetterStore.class.getPackage().getName().replace('.', '/') +
-                "/setter_store.bin";
+                '/' + SETTER_STORE_FILE_NAME;
         try {
             for (URL resource : reflectionAnalyzer.getResources(resourceName)) {
                 merge(store, resource);
@@ -172,40 +172,13 @@ public class SetterStore {
             case VOID:
                 return type.toString();
             case ARRAY:
-                return "[" + getArrayType(((ArrayType) type).getComponentType());
+                return getQualifiedName(((ArrayType) type).getComponentType()) + "[]";
             case DECLARED:
                 return ((TypeElement) ((DeclaredType) type).asElement()).getQualifiedName()
                         .toString();
             default:
                 return "-- no type --";
         }
-    }
-
-    private static String getArrayType(TypeMirror type) {
-        switch (type.getKind()) {
-            case BOOLEAN:
-                return "Z";
-            case BYTE:
-                return "B";
-            case SHORT:
-                return "S";
-            case INT:
-                return "I";
-            case LONG:
-                return "J";
-            case CHAR:
-                return "C";
-            case FLOAT:
-                return "F";
-            case DOUBLE:
-                return "D";
-            case ARRAY:
-                return "[" + getArrayType(((ArrayType) type).getComponentType());
-            case DECLARED:
-                return "L" + ((TypeElement) ((DeclaredType) type).asElement()).getQualifiedName()
-                        .toString() + ";";
-        }
-        return "-- no type --";
     }
 
     public void addConversionMethod(ExecutableElement conversionMethod) {
@@ -317,6 +290,7 @@ public class SetterStore {
                                 bestValueType = adapterValueType;
                                 adapter = adapters.get(key);
                             }
+
                         } catch (Exception e) {
                             System.out.println("Unknown class: " + key.valueType);
                         }
@@ -327,9 +301,6 @@ public class SetterStore {
             }
         }
 
-        if (valueType.isObject() && !bestValueType.isAssignableFrom(valueType)) {
-            valueExpression = "(" + bestValueType.toJavaCode() + ") " + valueExpression;
-        }
         MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType);
         if (conversionMethod != null) {
             valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +
@@ -371,9 +342,11 @@ public class SetterStore {
 
         ReflectionClass bestParameterType = null;
         ReflectionMethod bestMethod = null;
+        List<ReflectionClass> args = new ArrayList<>();
+        args.add(argumentType);
         for (ReflectionMethod method : methods) {
             ReflectionClass[] parameterTypes = method.getParameterTypes();
-            if (method.getReturnType().isVoid() && !method.isStatic() && method.isPublic()) {
+            if (method.getReturnType(args).isVoid() && !method.isStatic() && method.isPublic()) {
                 ReflectionClass param = parameterTypes[0];
                 if (isBetterParameter(argumentType, param, bestParameterType, true)) {
                     bestParameterType = param;

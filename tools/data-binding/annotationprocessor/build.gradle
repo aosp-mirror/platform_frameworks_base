@@ -39,6 +39,7 @@ sourceSets {
 dependencies {
     compile project(":baseLibrary")
     compile project(":compiler")
+    compile 'commons-codec:commons-codec:1.10'
 }
 
 uploadArchives {

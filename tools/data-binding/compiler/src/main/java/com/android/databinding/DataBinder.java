@@ -17,9 +17,8 @@
 package com.android.databinding;
 import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.util.L;
-import com.android.databinding.writer.FileWriter;
+import com.android.databinding.writer.JavaFileWriter;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +32,7 @@ import java.util.Set;
 public class DataBinder {
     List<LayoutBinder> mLayoutBinders = new ArrayList<>();
 
-    private FileWriter mFileWriter;
+    private JavaFileWriter mFileWriter;
 
     public DataBinder(ResourceBundle resourceBundle) {
         L.d("reading resource bundle into data binder");
@@ -67,11 +66,11 @@ public class DataBinder {
         }
     }
 
-    public void setFileWriter(FileWriter fileWriter) {
+    public void setFileWriter(JavaFileWriter fileWriter) {
         mFileWriter = fileWriter;
     }
 
-    public FileWriter getFileWriter() {
+    public JavaFileWriter getFileWriter() {
         return mFileWriter;
     }
 }

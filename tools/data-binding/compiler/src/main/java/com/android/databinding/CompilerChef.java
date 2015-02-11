@@ -20,7 +20,7 @@ import com.android.databinding.store.LayoutFileParser;
 import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.util.L;
 import com.android.databinding.writer.DataBinderWriter;
-import com.android.databinding.writer.FileWriter;
+import com.android.databinding.writer.JavaFileWriter;
 
 import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
@@ -30,7 +30,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -44,8 +43,8 @@ import javax.xml.xpath.XPathExpressionException;
  * Different build systems can initiate a version of this to handle their work
  */
 public class CompilerChef {
-    public static final String RESOURCE_BUNDLE_FILE_NAME = "binder_bundle.dat";
-    private FileWriter mFileWriter;
+    public static final String RESOURCE_BUNDLE_FILE_NAME = "BinderInfo.java";
+    private JavaFileWriter mFileWriter;
     private LayoutFileParser mLayoutFileParser;
     private ResourceBundle mResourceBundle;
     private DataBinder mDataBinder;
@@ -58,7 +57,7 @@ public class CompilerChef {
     }
 
     public static CompilerChef createChef(String appPkg, List<File> resourceFolders,
-            FileWriter fileWriter) {
+            JavaFileWriter fileWriter) {
         CompilerChef chef = new CompilerChef();
         chef.mAppPackage = appPkg;
         chef.mResourceFolders = resourceFolders;
@@ -66,7 +65,7 @@ public class CompilerChef {
         return chef;
     }
 
-    public static CompilerChef createChef(InputStream inputStream, FileWriter fileWriter)
+    public static CompilerChef createChef(InputStream inputStream, JavaFileWriter fileWriter)
             throws IOException, ClassNotFoundException {
         ObjectInputStream ois = null;
         try {
@@ -77,7 +76,7 @@ public class CompilerChef {
         }
     }
 
-    public static CompilerChef createChef(ResourceBundle resourceBundle, FileWriter fileWriter) {
+    public static CompilerChef createChef(ResourceBundle resourceBundle, JavaFileWriter fileWriter) {
         CompilerChef chef = new CompilerChef();
         chef.mResourceBundle = resourceBundle;
         chef.mFileWriter = fileWriter;

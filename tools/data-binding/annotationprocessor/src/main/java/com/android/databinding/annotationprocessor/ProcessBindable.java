@@ -1,5 +1,8 @@
 package com.android.databinding.annotationprocessor;
 
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ReflectionAnalyzer;
+
 import android.binding.Bindable;
 
 import java.io.File;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -27,6 +31,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
@@ -44,6 +49,12 @@ public class ProcessBindable extends AbstractProcessor {
     private boolean mFileGenerated;
 
     public ProcessBindable() {
+    }
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        ReflectionAnalyzer.setProcessingEnvironment(processingEnv);
     }
 
     @Override

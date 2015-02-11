@@ -586,7 +586,6 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             }
         }
         nl("}")
-
     }
 
     fun readWithDependants(expr : Expr, mJustRead : MutableList<Expr>, batch : MutableList<Expr>, tmpDirtyFlags : FlagSet) : KCode = kcode("") {

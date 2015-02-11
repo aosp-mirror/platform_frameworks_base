@@ -16,5 +16,4 @@
 package com.android.databinding.reflection;
 
 public interface ReflectionField {
-
 }

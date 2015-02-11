@@ -44,14 +44,17 @@ import javax.tools.ToolProvider
 import java.util.Arrays
 import org.apache.commons.io.FileUtils
 import com.android.databinding.reflection.ReflectionAnalyzer
-import com.android.databinding.writer.FileWriter
+import com.android.databinding.writer.JavaFileWriter
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import org.apache.commons.io.IOUtils
+import java.io.FileWriter
+import java.io.ByteArrayOutputStream
+import org.apache.commons.codec.binary.Base64
 
 class DataBinderPlugin : Plugin<Project> {
 
-    inner class GradleFileWriter(var outputBase : String) : FileWriter {
+    inner class GradleFileWriter(var outputBase : String) : JavaFileWriter {
         override fun writeToFile(canonicalName: String, contents: String) {
             val f = File("$outputBase/${canonicalName.replaceAll("\\.", "/")}.java")
             log("Asked to write to ${canonicalName}. outputting to:${f.getAbsolutePath()}")
@@ -204,7 +207,7 @@ class DataBinderPlugin : Plugin<Project> {
         val classLoader = URLClassLoader(urls, androidClassLoader)
         log("created class loader")
         ReflectionAnalyzer.setClassLoader(classLoader)
-        project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
+        //project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {
         val fis = FileInputStream(serializedBinderBundlePath)
@@ -270,9 +273,16 @@ class DataBinderPlugin : Plugin<Project> {
 
     fun saveResourceBundle(chef : CompilerChef) {
         File(serializedBinderBundlePath).getParentFile().mkdirs()
-        val fis = FileOutputStream(serializedBinderBundlePath, false)
-        chef.exportResourceBundle(fis)
-        IOUtils.closeQuietly(fis)
+        val bundleStream = ByteArrayOutputStream();
+        chef.exportResourceBundle(bundleStream)
+        IOUtils.closeQuietly(bundleStream)
+        val fw = FileWriter(serializedBinderBundlePath);
+        fw.write("import android.binding.BinderBundle;\n\n")
+        fw.write("@BinderBundle(\"");
+        fw.write(Base64.encodeBase64String(bundleStream.toByteArray()));
+        fw.write("\")\n");
+        fw.write("public class BinderInfo {}\n");
+        IOUtils.closeQuietly(fw);
     }
 
     fun generateBinders(o: Any?) {

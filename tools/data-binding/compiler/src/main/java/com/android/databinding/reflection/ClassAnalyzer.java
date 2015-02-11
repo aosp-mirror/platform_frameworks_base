@@ -272,31 +272,6 @@ public class ClassAnalyzer extends ReflectionAnalyzer {
         }
     }
 
-    private Field findField(Class klass, String name) {
-        return findField(klass, name, false);
-    }
-
-    @Override
-    public ReflectionClass findCommonParentOf(ReflectionClass reflectionClass1,
-            ReflectionClass reflectionClass2) {
-        ClassClass klass1 = (ClassClass) reflectionClass1;
-        ClassClass klass2 = (ClassClass) reflectionClass2;
-        ClassClass curr = klass1;
-        while (curr != null && !curr.isAssignableFrom(klass2)) {
-            curr = curr.getSuperclass();
-        }
-        if (curr == null) {
-            ClassClass primitive1 = klass1.unbox();
-            ClassClass primitive2 = klass2.unbox();
-            if (!klass1.equals(primitive1) || !klass2.equals(primitive2)) {
-                return findCommonParentOf(primitive1, primitive2);
-            }
-        }
-        Preconditions.checkNotNull(curr,
-                "must be able to find a common parent for " + klass1 + " and " + klass2);
-        return curr;
-    }
-
     public ClassClass loadPrimitive(String className) {
         if ("int".equals(className)) {
             return new ClassClass(int.class);
@@ -349,11 +324,6 @@ public class ClassAnalyzer extends ReflectionAnalyzer {
         Preconditions.checkNotNull(loaded, "Tried to load " + className + " but could not find :/");
         L.d("loaded class %s", loaded.mClass.getCanonicalName());
         return loaded;
-    }
-
-    @Override
-    public boolean isNullable(ReflectionClass reflectionClass) {
-        return false;
     }
 
     @Override

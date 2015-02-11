@@ -15,8 +15,12 @@
  */
 package com.android.databinding.reflection;
 
+import com.google.common.base.Preconditions;
+
 import java.net.URL;
 import java.util.List;
+
+import javax.annotation.processing.ProcessingEnvironment;
 
 public abstract class ReflectionAnalyzer {
     private static ReflectionAnalyzer sAnalyzer;
@@ -34,10 +38,26 @@ public abstract class ReflectionAnalyzer {
 
     public abstract boolean isBindable(ReflectionMethod method);
 
-    public abstract Callable findMethodOrField(ReflectionClass klass, String name);
+    public abstract Callable findMethodOrField(ReflectionClass reflectionClass, String name);
 
-    public abstract ReflectionClass findCommonParentOf(ReflectionClass reflectionClass1,
-            ReflectionClass reflectionClass2);
+    public ReflectionClass findCommonParentOf(ReflectionClass reflectionClass1,
+            ReflectionClass reflectionClass2) {
+        ReflectionClass curr = reflectionClass1;
+        while (curr != null && !curr.isAssignableFrom(reflectionClass2)) {
+            curr = curr.getSuperclass();
+        }
+        if (curr == null) {
+            ReflectionClass primitive1 = reflectionClass1.unbox();
+            ReflectionClass primitive2 = reflectionClass2.unbox();
+            if (!reflectionClass1.equals(primitive1) || !reflectionClass2.equals(primitive2)) {
+                return findCommonParentOf(primitive1, primitive2);
+            }
+        }
+        Preconditions.checkNotNull(curr,
+                "must be able to find a common parent for " + reflectionClass1 + " and " + reflectionClass2);
+        return curr;
+
+    }
 
     public abstract ReflectionClass loadPrimitive(String className);
 
@@ -48,6 +68,11 @@ public abstract class ReflectionAnalyzer {
     public static void setClassLoader(ClassLoader classLoader) {
         ClassAnalyzer.setClassLoader(classLoader);
         sAnalyzer = ClassAnalyzer.getInstance();
+    }
+
+    public static void setProcessingEnvironment(ProcessingEnvironment processingEnvironment) {
+        ModelAnalyzer modelAnalyzer = new ModelAnalyzer(processingEnvironment);
+        sAnalyzer = modelAnalyzer;
     }
 
     public String getDefaultValue(String className) {
@@ -79,8 +104,6 @@ public abstract class ReflectionAnalyzer {
     }
 
     public abstract ReflectionClass findClass(String className);
-
-    public abstract boolean isNullable(ReflectionClass reflectionClass);
 
     public abstract List<URL> getResources(String name);
 
