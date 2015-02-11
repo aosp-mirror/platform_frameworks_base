@@ -4432,10 +4432,16 @@ public final class ActivityThread {
             if (cacheDir != null) {
                 // Provide a usable directory for temporary files
                 System.setProperty("java.io.tmpdir", cacheDir.getAbsolutePath());
-    
-                setupGraphicsSupport(data.info, cacheDir);
             } else {
-                Log.e(TAG, "Unable to setupGraphicsSupport due to missing cache directory");
+                Log.v(TAG, "Unable to initialize \"java.io.tmpdir\" property due to missing cache directory");
+            }
+
+            // Use codeCacheDir to store generated/compiled graphics code
+            final File codeCacheDir = appContext.getCodeCacheDir();
+            if (codeCacheDir != null) {
+                setupGraphicsSupport(data.info, codeCacheDir);
+            } else {
+                Log.e(TAG, "Unable to setupGraphicsSupport due to missing code-cache directory");
             }
         }
 
