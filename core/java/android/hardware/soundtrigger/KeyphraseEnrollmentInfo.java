@@ -104,7 +104,7 @@ public class KeyphraseEnrollmentInfo {
             try {
                 ai = pm.getApplicationInfo(
                         ri.activityInfo.packageName, PackageManager.GET_META_DATA);
-                if ((ai.flags & ApplicationInfo.FLAG_PRIVILEGED) == 0) {
+                if ((ai.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) == 0) {
                     // The application isn't privileged (/system/priv-app).
                     // The enrollment application needs to be a privileged system app.
                     Slog.w(TAG, ai.packageName + "is not a privileged system app");
