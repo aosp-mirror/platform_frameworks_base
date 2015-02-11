@@ -21,13 +21,15 @@ import android.util.ArraySet;
 
 class GrantedPermissions {
     int pkgFlags;
+    int pkgPrivateFlags;
 
     ArraySet<String> grantedPermissions = new ArraySet<String>();
 
     int[] gids;
 
-    GrantedPermissions(int pkgFlags) {
+    GrantedPermissions(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
+        setPrivateFlags(pkgPrivateFlags);
     }
 
     @SuppressWarnings("unchecked")
@@ -43,8 +45,12 @@ class GrantedPermissions {
     void setFlags(int pkgFlags) {
         this.pkgFlags = pkgFlags
                 & (ApplicationInfo.FLAG_SYSTEM
-                        | ApplicationInfo.FLAG_PRIVILEGED
-                        | ApplicationInfo.FLAG_FORWARD_LOCK
                         | ApplicationInfo.FLAG_EXTERNAL_STORAGE);
+    }
+
+    void setPrivateFlags(int pkgPrivateFlags) {
+        this.pkgPrivateFlags = pkgPrivateFlags
+                & (ApplicationInfo.PRIVATE_FLAG_PRIVILEGED
+                        | ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK);
     }
 }

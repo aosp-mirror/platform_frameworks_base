@@ -425,7 +425,7 @@ public class PackageManagerTests extends AndroidTestCase {
             if (rLoc == INSTALL_LOC_INT) {
                 if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                     assertTrue("The application should be installed forward locked",
-                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                     assertStartsWith("The APK path should point to the ASEC",
                             SECURE_CONTAINERS_PREFIX, srcPath);
                     assertStartsWith("The public APK path should point to the ASEC",
@@ -441,7 +441,8 @@ public class PackageManagerTests extends AndroidTestCase {
                         fail("compat check: Can't read " + info.dataDir + "/lib");
                     }
                 } else {
-                    assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                    assertFalse(
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                     assertEquals(appInstallPath, srcPath);
                     assertEquals(appInstallPath, publicSrcPath);
                     assertStartsWith("Native library should point to shared lib directory",
@@ -467,16 +468,16 @@ public class PackageManagerTests extends AndroidTestCase {
             } else if (rLoc == INSTALL_LOC_SD) {
                 if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
                     assertTrue("The application should be installed forward locked",
-                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 } else {
                     assertFalse("The application should not be installed forward locked",
-                            (info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
+                            (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0);
                 }
                 assertTrue("Application flags (" + info.flags
                         + ") should contain FLAG_EXTERNAL_STORAGE",
                         (info.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0);
                 // Might need to check:
-                // ((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0)
+                // ((info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0)
                 assertStartsWith("The APK path should point to the ASEC",
                         SECURE_CONTAINERS_PREFIX, srcPath);
                 assertStartsWith("The public APK path should point to the ASEC",

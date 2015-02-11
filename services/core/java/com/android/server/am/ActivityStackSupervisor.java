@@ -882,7 +882,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final long origId = Binder.clearCallingIdentity();
 
             if (aInfo != null &&
-                    (aInfo.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+                    (aInfo.applicationInfo.privateFlags
+                            &ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {
@@ -1053,8 +1054,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 
                     if (aInfo != null &&
-                            (aInfo.applicationInfo.flags & ApplicationInfo.FLAG_CANT_SAVE_STATE)
-                                    != 0) {
+                            (aInfo.applicationInfo.privateFlags
+                                    & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)  != 0) {
                         throw new IllegalArgumentException(
                                 "FLAG_CANT_SAVE_STATE not supported here");
                     }
@@ -1185,7 +1186,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     r.task.voiceInteractor, app.repProcState, r.icicle, r.persistentState, results,
                     newIntents, !andResume, mService.isNextTransitionForward(), profilerInfo);
 
-            if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+            if ((app.info.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
                 // manager will ensure that only activity can run in the main
                 // process of the .apk, which is the only thing that will be

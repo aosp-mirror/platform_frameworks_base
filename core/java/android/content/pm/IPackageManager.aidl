@@ -111,6 +111,8 @@ interface IPackageManager {
 
     int getFlagsForUid(int uid);
 
+    int getPrivateFlagsForUid(int uid);
+
     boolean isUidPrivileged(int uid);
 
     String[] getAppOpPermissionPackages(String permissionName);

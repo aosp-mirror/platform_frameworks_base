@@ -32,10 +32,10 @@ final class PackageSetting extends PackageSettingBase {
     PackageSetting(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags) {
+            int pVersionCode, int pkgFlags, int privateFlags) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags);
+                pVersionCode, pkgFlags, privateFlags);
     }
 
     /**
@@ -62,6 +62,6 @@ final class PackageSetting extends PackageSettingBase {
     }
 
     public boolean isPrivileged() {
-        return (pkgFlags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
 }
