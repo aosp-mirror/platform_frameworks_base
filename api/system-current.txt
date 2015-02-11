@@ -5460,6 +5460,7 @@ package android.app {
     method public static android.app.WallpaperManager getInstance(android.content.Context);
     method public android.app.WallpaperInfo getWallpaperInfo();
     method public boolean hasResourceWallpaper(int);
+    method public boolean isWallpaperSupported();
     method public android.graphics.drawable.Drawable peekDrawable();
     method public android.graphics.drawable.Drawable peekFastDrawable();
     method public void sendWallpaperCommand(android.os.IBinder, java.lang.String, int, int, int, android.os.Bundle);

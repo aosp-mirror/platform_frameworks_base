@@ -391,6 +391,15 @@ public class UserManager {
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
 
     /**
+     * Hidden user restriction to disallow access to wallpaper manager APIs. This user restriction
+     * is always set for managed profiles.
+     * @hide
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_WALLPAPER = "no_wallpaper";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *

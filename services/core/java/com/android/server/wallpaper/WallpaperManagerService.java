@@ -20,6 +20,7 @@ import static android.os.ParcelFileDescriptor.*;
 
 import android.app.ActivityManagerNative;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.IUserSwitchObserver;
 import android.app.IWallpaperManager;
 import android.app.IWallpaperManagerCallback;
@@ -164,6 +165,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     final IWindowManager mIWindowManager;
     final IPackageManager mIPackageManager;
     final MyPackageMonitor mMonitor;
+    final AppOpsManager mAppOpsManager;
     WallpaperData mLastWallpaper;
 
     /**
@@ -478,6 +480,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         mIPackageManager = AppGlobals.getPackageManager();
+        mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mMonitor = new MyPackageMonitor();
         mMonitor.register(context, null, UserHandle.ALL, true);
         getWallpaperDir(UserHandle.USER_OWNER).mkdirs();
@@ -613,8 +616,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    public void clearWallpaper() {
+    public void clearWallpaper(String callingPackage) {
         if (DEBUG) Slog.v(TAG, "clearWallpaper");
+        checkPermission(android.Manifest.permission.SET_WALLPAPER);
+        if (!isWallpaperSupported(callingPackage)) {
+            return;
+        }
         synchronized (mLock) {
             clearWallpaperLocked(false, UserHandle.getCallingUserId(), null);
         }
@@ -622,6 +629,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     void clearWallpaperLocked(boolean defaultFailed, int userId, IRemoteCallback reply) {
         WallpaperData wallpaper = mWallpaperMap.get(userId);
+        if (wallpaper == null) {
+            return;
+        }
         File f = new File(getWallpaperDir(userId), WALLPAPER);
         if (f.exists()) {
             f.delete();
@@ -668,6 +678,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 Binder.restoreCallingIdentity(ident);
             }
             for (UserInfo user: users) {
+                // ignore managed profiles
+                if (user.isManagedProfile()) {
+                    continue;
+                }
                 WallpaperData wd = mWallpaperMap.get(user.id);
                 if (wd == null) {
                     // User hasn't started yet, so load her settings to peek at the wallpaper
@@ -690,8 +704,12 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         return p;
     }
 
-    public void setDimensionHints(int width, int height) throws RemoteException {
+    public void setDimensionHints(int width, int height, String callingPackage)
+            throws RemoteException {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
+        if (!isWallpaperSupported(callingPackage)) {
+            return;
+        }
         synchronized (mLock) {
             int userId = UserHandle.getCallingUserId();
             WallpaperData wallpaper = mWallpaperMap.get(userId);
@@ -733,19 +751,30 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
     public int getWidthHint() throws RemoteException {
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(UserHandle.getCallingUserId());
-            return wallpaper.width;
+            if (wallpaper != null) {
+                return wallpaper.width;
+            } else {
+                return 0;
+            }
         }
     }
 
     public int getHeightHint() throws RemoteException {
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(UserHandle.getCallingUserId());
-            return wallpaper.height;
+            if (wallpaper != null) {
+                return wallpaper.height;
+            } else {
+                return 0;
+            }
         }
     }
 
-    public void setDisplayPadding(Rect padding) {
+    public void setDisplayPadding(Rect padding, String callingPackage) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_HINTS);
+        if (!isWallpaperSupported(callingPackage)) {
+            return;
+        }
         synchronized (mLock) {
             int userId = UserHandle.getCallingUserId();
             WallpaperData wallpaper = mWallpaperMap.get(userId);
@@ -791,6 +820,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 wallpaperUserId = UserHandle.getUserId(callingUid);
             }
             WallpaperData wallpaper = mWallpaperMap.get(wallpaperUserId);
+            if (wallpaper == null) {
+                return null;
+            }
             try {
                 if (outParams != null) {
                     outParams.putInt("width", wallpaper.width);
@@ -814,15 +846,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         int userId = UserHandle.getCallingUserId();
         synchronized (mLock) {
             WallpaperData wallpaper = mWallpaperMap.get(userId);
-            if (wallpaper.connection != null) {
+            if (wallpaper != null && wallpaper.connection != null) {
                 return wallpaper.connection.mInfo;
             }
             return null;
         }
     }
 
-    public ParcelFileDescriptor setWallpaper(String name) {
+    public ParcelFileDescriptor setWallpaper(String name, String callingPackage) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER);
+        if (!isWallpaperSupported(callingPackage)) {
+            return null;
+        }
         synchronized (mLock) {
             if (DEBUG) Slog.v(TAG, "setWallpaper");
             int userId = UserHandle.getCallingUserId();
@@ -868,6 +903,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         return null;
     }
 
+    public void setWallpaperComponentChecked(ComponentName name, String callingPackage) {
+        if (isWallpaperSupported(callingPackage)) {
+            setWallpaperComponent(name);
+        }
+    }
+
+    // ToDo: Remove this version of the function
     public void setWallpaperComponent(ComponentName name) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT);
         synchronized (mLock) {
@@ -1097,6 +1139,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
+    /**
+     * Certain user types do not support wallpapers (e.g. managed profiles). The check is
+     * implemented through through the OP_WRITE_WALLPAPER AppOp.
+     */
+    public boolean isWallpaperSupported(String callingPackage) {
+        return mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_WRITE_WALLPAPER, Binder.getCallingUid(),
+                callingPackage) == AppOpsManager.MODE_ALLOWED;
+    }
+
     private static JournaledFile makeJournaledFile(int userId) {
         final String base = new File(getWallpaperDir(userId), WALLPAPER_INFO).getAbsolutePath();
         return new JournaledFile(new File(base), new File(base + ".tmp"));
@@ -1174,7 +1225,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
 
     private void loadSettingsLocked(int userId) {
         if (DEBUG) Slog.v(TAG, "loadSettingsLocked");
-        
+
         JournaledFile journal = makeJournaledFile(userId);
         FileInputStream stream = null;
         File file = journal.chooseForRead();

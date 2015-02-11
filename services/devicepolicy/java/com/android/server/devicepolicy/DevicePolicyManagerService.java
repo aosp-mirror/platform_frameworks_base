@@ -180,6 +180,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DEVICE_OWNER_USER_RESTRICTIONS.add(UserManager.DISALLOW_SMS);
     }
 
+    // The following user restrictions cannot be changed by any active admin, including device
+    // owner and profile owner.
+    private static final Set<String> IMMUTABLE_USER_RESTRICTIONS;
+    static {
+        IMMUTABLE_USER_RESTRICTIONS = new HashSet();
+        IMMUTABLE_USER_RESTRICTIONS.add(UserManager.DISALLOW_WALLPAPER);
+    }
+
     private static final Set<String> SECURE_SETTINGS_WHITELIST;
     private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
@@ -4952,6 +4960,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (!isDeviceOwner && userHandle != UserHandle.USER_OWNER
                     && DEVICE_OWNER_USER_RESTRICTIONS.contains(key)) {
                 throw new SecurityException("Profile owners cannot set user restriction " + key);
+            }
+            if (IMMUTABLE_USER_RESTRICTIONS.contains(key)) {
+                throw new SecurityException("User restriction " + key + " cannot be changed");
             }
             boolean alreadyRestricted = mUserManager.hasUserRestriction(key, user);
 

@@ -206,8 +206,10 @@ public class AppOpsManager {
     public static final int OP_PROJECT_MEDIA = 46;
     /** @hide Activate a VPN connection without user intervention. */
     public static final int OP_ACTIVATE_VPN = 47;
+    /** @hide Access the WallpaperManagerAPI to write wallpapers. */
+    public static final int OP_WRITE_WALLPAPER = 48;
     /** @hide */
-    public static final int _NUM_OP = 48;
+    public static final int _NUM_OP = 49;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION =
@@ -285,6 +287,7 @@ public class AppOpsManager {
             OP_TOAST_WINDOW,
             OP_PROJECT_MEDIA,
             OP_ACTIVATE_VPN,
+            OP_WRITE_WALLPAPER,
     };
 
     /**
@@ -340,6 +343,7 @@ public class AppOpsManager {
             null,
             null,
             OPSTR_ACTIVATE_VPN,
+            null,
     };
 
     /**
@@ -395,6 +399,7 @@ public class AppOpsManager {
             "TOAST_WINDOW",
             "PROJECT_MEDIA",
             "ACTIVATE_VPN",
+            "WRITE_WALLPAPER",
     };
 
     /**
@@ -450,6 +455,7 @@ public class AppOpsManager {
             null, // no permission for displaying toasts
             null, // no permission for projecting media
             null, // no permission for activating vpn
+            null, // no permission for supporting wallpaper
     };
 
     /**
@@ -506,6 +512,7 @@ public class AppOpsManager {
             UserManager.DISALLOW_CREATE_WINDOWS, // TOAST_WINDOW
             null, //PROJECT_MEDIA
             UserManager.DISALLOW_CONFIG_VPN, // ACTIVATE_VPN
+            UserManager.DISALLOW_WALLPAPER, // WRITE_WALLPAPER
     };
 
     /**
@@ -561,6 +568,7 @@ public class AppOpsManager {
             true, //TOAST_WINDOW
             false, //PROJECT_MEDIA
             false, //ACTIVATE_VPN
+            false, //WALLPAPER
     };
 
     /**
@@ -615,6 +623,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,
             AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
             AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
+            AppOpsManager.MODE_ALLOWED,
     };
 
     /**
@@ -641,6 +650,7 @@ public class AppOpsManager {
             false,
             false,
             true,      // OP_WRITE_SMS
+            false,
             false,
             false,
             false,
