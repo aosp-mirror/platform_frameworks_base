@@ -3665,12 +3665,12 @@ public class TelephonyManager {
     /** @hide */
     @SystemApi
     public boolean getDataEnabled(int subId) {
-        boolean retVal;
+        boolean retVal = false;
         try {
             retVal = getITelephony().getDataEnabled(subId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
-            retVal = false;
+        } catch (NullPointerException e) {
         }
         Log.d(TAG, "getDataEnabled: retVal=" + retVal);
         return retVal;
