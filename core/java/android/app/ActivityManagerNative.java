@@ -2294,6 +2294,14 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_LOCK_TASK_MODE_STATE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final int lockTaskModeState = getLockTaskModeState();
+            reply.writeNoException();
+            reply.writeInt(lockTaskModeState);
+            return true;
+        }
+
         case SET_TASK_DESCRIPTION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -5417,6 +5425,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return isInLockTaskMode;
+    }
+
+    @Override
+    public int getLockTaskModeState() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_LOCK_TASK_MODE_STATE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int lockTaskModeState = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return lockTaskModeState;
     }
 
     @Override

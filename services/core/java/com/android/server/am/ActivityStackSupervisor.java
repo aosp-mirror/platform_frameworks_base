@@ -267,9 +267,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
     /** If non-null then the task specified remains in front and no other tasks may be started
      * until the task exits or #stopLockTaskMode() is called. */
     TaskRecord mLockTaskModeTask;
-    /** Whether lock task has been entered by an authorized app and cannot
-     * be exited. */
-    private boolean mLockTaskIsLocked;
+    /** Store the current lock task mode. Possible values:
+     * {@link ActivityManager#LOCK_TASK_MODE_NONE}, {@link ActicityManager#LOCK_TASK_MODE_LOCKED},
+     * {@link ActicityManager#LOCK_TASK_MODE_PINNED}
+     */
+    private int mLockTaskModeState;
     /**
      * Notifies the user when entering/exiting lock-task.
      */
@@ -3546,10 +3548,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     void showLockTaskToast() {
-        mLockTaskNotify.showToast(mLockTaskIsLocked);
+        mLockTaskNotify.showToast(mLockTaskModeState);
     }
 
-    void setLockTaskModeLocked(TaskRecord task, boolean isLocked, String reason) {
+    void setLockTaskModeLocked(TaskRecord task, int lockTaskModeState, String reason) {
         if (task == null) {
             // Take out of lock task mode if necessary
             if (mLockTaskModeTask != null) {
@@ -3573,7 +3575,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         lockTaskMsg.obj = mLockTaskModeTask.intent.getComponent().getPackageName();
         lockTaskMsg.arg1 = mLockTaskModeTask.userId;
         lockTaskMsg.what = LOCK_TASK_START_MSG;
-        lockTaskMsg.arg2 = !isLocked ? 1 : 0;
+        lockTaskMsg.arg2 = lockTaskModeState;
         mHandler.sendMessage(lockTaskMsg);
     }
 
@@ -3591,8 +3593,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
-    boolean isInLockTaskMode() {
-        return mLockTaskModeTask != null;
+    int getLockTaskModeState() {
+        return mLockTaskModeState;
     }
 
     private final class ActivityStackSupervisorHandler extends Handler {
@@ -3684,13 +3686,18 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             mLockTaskNotify = new LockTaskNotify(mService.mContext);
                         }
                         mLockTaskNotify.show(true);
-                        mLockTaskIsLocked = msg.arg2 == 0;
+                        mLockTaskModeState = msg.arg2;
                         if (getStatusBarService() != null) {
-                            int flags =
-                                    StatusBarManager.DISABLE_MASK ^ StatusBarManager.DISABLE_BACK;
-                            if (!mLockTaskIsLocked) {
-                                flags ^= StatusBarManager.DISABLE_HOME
-                                        | StatusBarManager.DISABLE_RECENT;
+                            int flags = 0;
+                            if (mLockTaskModeState == ActivityManager.LOCK_TASK_MODE_LOCKED) {
+                                flags = StatusBarManager.DISABLE_MASK
+                                        & (~StatusBarManager.DISABLE_BACK);
+                            } else if (mLockTaskModeState ==
+                                    ActivityManager.LOCK_TASK_MODE_PINNED) {
+                                flags = StatusBarManager.DISABLE_MASK
+                                        & (~StatusBarManager.DISABLE_BACK)
+                                        & (~StatusBarManager.DISABLE_HOME)
+                                        & (~StatusBarManager.DISABLE_RECENT);
                             }
                             getStatusBarService().disable(flags, mToken,
                                     mService.mContext.getPackageName());
@@ -3724,7 +3731,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             boolean shouldLockKeyguard = Settings.Secure.getInt(
                                     mService.mContext.getContentResolver(),
                                     Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
-                            if (!mLockTaskIsLocked && shouldLockKeyguard) {
+                            if (mLockTaskModeState == ActivityManager.LOCK_TASK_MODE_PINNED &&
+                                    shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
                                 mWindowManager.dismissKeyguard();
                                 new LockPatternUtils(mService.mContext)
@@ -3735,6 +3743,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
                     } catch (RemoteException ex) {
                         throw new RuntimeException(ex);
+                    } finally {
+                        mLockTaskModeState = ActivityManager.LOCK_TASK_MODE_NONE;
                     }
                 } break;
                 case CONTAINER_CALLBACK_TASK_LIST_EMPTY: {

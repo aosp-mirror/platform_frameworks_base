@@ -168,8 +168,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Action sent to a device administrator to notify that the device is entering
-     * lock task mode from an authorized package.  The extra {@link #EXTRA_LOCK_TASK_PACKAGE}
-     * will describe the authorized package using lock task mode.
+     * lock task mode.  The extra {@link #EXTRA_LOCK_TASK_PACKAGE}
+     * will describe the package using lock task mode.
      *
      * <p>The calling device admin must be the device owner or profile
      * owner to receive this broadcast.
@@ -182,7 +182,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
 
     /**
      * Action sent to a device administrator to notify that the device is exiting
-     * lock task mode from an authorized package.
+     * lock task mode.
      *
      * <p>The calling device admin must be the device owner or profile
      * owner to receive this broadcast.
@@ -447,8 +447,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called when a device is entering lock task mode by a package authorized
-     * by {@link DevicePolicyManager#isLockTaskPermitted(String)}
+     * Called when a device is entering lock task mode.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
@@ -458,8 +457,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called when a device is exiting lock task mode by a package authorized
-     * by {@link DevicePolicyManager#isLockTaskPermitted(String)}
+     * Called when a device is exiting lock task mode.
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.

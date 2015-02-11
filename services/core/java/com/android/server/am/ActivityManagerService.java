@@ -8347,6 +8347,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             pkg = task.intent.getComponent().getPackageName();
         }
+        // isSystemInitiated is used to distinguish between locked and pinned mode, as pinned mode
+        // is initiated by system after the pinning request was shown and locked mode is initiated
+        // by an authorized app directly
         boolean isSystemInitiated = Binder.getCallingUid() == Process.SYSTEM_UID;
         if (!isSystemInitiated && !isLockTaskAuthorized(pkg)) {
             StatusBarManagerInternal statusBarManager = LocalServices.getService(
@@ -8367,7 +8370,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     || (task != mStackSupervisor.getFocusedStack().topTask()))) {
                         throw new IllegalArgumentException("Invalid task, not in foreground");
                     }
-                    mStackSupervisor.setLockTaskModeLocked(task, !isSystemInitiated,
+                    mStackSupervisor.setLockTaskModeLocked(task, isSystemInitiated ?
+                            ActivityManager.LOCK_TASK_MODE_PINNED :
+                            ActivityManager.LOCK_TASK_MODE_LOCKED,
                             "startLockTask");
                 }
             }
@@ -8453,7 +8458,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             Log.d(TAG, "stopLockTaskMode");
             // Stop lock task
             synchronized (this) {
-                mStackSupervisor.setLockTaskModeLocked(null, false, "stopLockTask");
+                mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
+                        "stopLockTask");
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -8474,8 +8480,13 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public boolean isInLockTaskMode() {
+        return getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE;
+    }
+
+    @Override
+    public int getLockTaskModeState() {
         synchronized (this) {
-            return mStackSupervisor.isInLockTaskMode();
+            return mStackSupervisor.getLockTaskModeState();
         }
     }
 
@@ -18534,7 +18545,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return true;
                 }
 
-                mStackSupervisor.setLockTaskModeLocked(null, false, "startUser");
+                mStackSupervisor.setLockTaskModeLocked(null, ActivityManager.LOCK_TASK_MODE_NONE,
+                        "startUser");
 
                 final UserInfo userInfo = getUserManagerLocked().getUserInfo(userId);
                 if (userInfo == null) {

@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -44,15 +45,20 @@ public class LockTaskNotify {
         mHandler = new H();
     }
 
-    public void showToast(boolean isLocked) {
-        mHandler.obtainMessage(H.SHOW_TOAST, isLocked ? 1 : 0, 0 /* Not used */).sendToTarget();
+    public void showToast(int lockTaskModeState) {
+        mHandler.obtainMessage(H.SHOW_TOAST, lockTaskModeState, 0 /* Not used */).sendToTarget();
     }
 
-    public void handleShowToast(boolean isLocked) {
-        String text = mContext.getString(isLocked
-                ? R.string.lock_to_app_toast_locked : R.string.lock_to_app_toast);
-        if (!isLocked && mAccessibilityManager.isEnabled()) {
-            text = mContext.getString(R.string.lock_to_app_toast_accessible);
+    public void handleShowToast(int lockTaskModeState) {
+        String text = null;
+        if (lockTaskModeState == ActivityManager.LOCK_TASK_MODE_LOCKED) {
+            text = mContext.getString(R.string.lock_to_app_toast_locked);
+        } else if (lockTaskModeState == ActivityManager.LOCK_TASK_MODE_PINNED) {
+            text = mContext.getString(mAccessibilityManager.isEnabled()
+                    ? R.string.lock_to_app_toast_accessible : R.string.lock_to_app_toast);
+        }
+        if (text == null) {
+            return;
         }
         if (mLastToast != null) {
             mLastToast.cancel();
@@ -83,7 +89,7 @@ public class LockTaskNotify {
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case SHOW_TOAST:
-                    handleShowToast(msg.arg1 != 0);
+                    handleShowToast(msg.arg1);
                     break;
             }
         }

@@ -309,6 +309,21 @@ public class ActivityManager {
     /** @hide Process is being cached for later use and is empty. */
     public static final int PROCESS_STATE_CACHED_EMPTY = 13;
 
+    /**
+     * Lock task mode is not active.
+     */
+    public static final int LOCK_TASK_MODE_NONE = 0;
+
+    /**
+     * Full lock task mode is active.
+     */
+    public static final int LOCK_TASK_MODE_LOCKED = 1;
+
+    /**
+     * App pinning mode is active.
+     */
+    public static final int LOCK_TASK_MODE_PINNED = 2;
+
     Point mAppTaskThumbnailSize;
 
     /*package*/ ActivityManager(Context context, Handler handler) {
@@ -2684,12 +2699,25 @@ public class ActivityManager {
      * no new tasks can be created or switched to.
      *
      * @see Activity#startLockTask()
+     *
+     * @deprecated Use {@link #getLockTaskModeState} instead.
      */
     public boolean isInLockTaskMode() {
+        return getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+    }
+
+    /**
+     * Return the current state of task locking. The three possible outcomes
+     * are {@link #LOCK_TASK_MODE_NONE}, {@link #LOCK_TASK_MODE_LOCKED}
+     * and {@link #LOCK_TASK_MODE_PINNED}.
+     *
+     * @see Activity#startLockTask()
+     */
+    public int getLockTaskModeState() {
         try {
-            return ActivityManagerNative.getDefault().isInLockTaskMode();
+            return ActivityManagerNative.getDefault().getLockTaskModeState();
         } catch (RemoteException e) {
-            return false;
+            return ActivityManager.LOCK_TASK_MODE_NONE;
         }
     }
 

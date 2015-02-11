@@ -461,6 +461,8 @@ public interface IActivityManager extends IInterface {
 
     public boolean isInLockTaskMode() throws RemoteException;
 
+    public int getLockTaskModeState() throws RemoteException;
+
     public void setTaskDescription(IBinder token, ActivityManager.TaskDescription values)
             throws RemoteException;
     public void setTaskResizeable(int taskId, boolean resizeable) throws RemoteException;
@@ -810,4 +812,5 @@ public interface IActivityManager extends IInterface {
     int SET_TASK_RESIZEABLE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+283;
     int REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+284;
     int RESIZE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+285;
+    int GET_LOCK_TASK_MODE_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+286;
 }
