@@ -335,11 +335,6 @@
     </family>
     <family>
         <fileset>
-            <file>NotoSansTaiLe-Regular.ttf</file>
-        </fileset>
-    </family>
-    <family>
-        <fileset>
             <file>NotoSansTaiTham-Regular.ttf</file>
         </fileset>
     </family>
@@ -408,10 +403,13 @@
             <file lang="ja">MTLmr3m.ttf</file>
         </fileset>
     </family>
-    <!-- Note: complex scripts (i.e. those requiring shaping in Harfbuzz) have
-         a cumulative limit of 64k glyphs. Thus, if they are placed after the
-         large fonts such as DroidSansFallback, they are likely to render
-         incorrectly. Please use caution when putting fonts toward the end of
-         the list.
+    <!--
+        Noto Sans Tai Le is intentionally kept last, to make sure it doesn't override
+        the East Asian punctuation for Chinese.
     -->
+    <family>
+        <fileset>
+            <file>NotoSansTaiLe-Regular.ttf</file>
+        </fileset>
+    </family>
 </familyset>
