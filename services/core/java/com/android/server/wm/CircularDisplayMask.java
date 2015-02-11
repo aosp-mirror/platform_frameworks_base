@@ -50,9 +50,10 @@ class CircularDisplayMask {
     private int mRotation;
     private boolean mVisible;
     private boolean mDimensionsUnequal = false;
+    private int mMaskThickness;
 
     public CircularDisplayMask(Display display, SurfaceSession session, int zOrder,
-            int screenOffset) {
+            int screenOffset, int maskThickness) {
         mScreenSize = new Point();
         display.getSize(mScreenSize);
         if (mScreenSize.x != mScreenSize.y) {
@@ -84,6 +85,7 @@ class CircularDisplayMask {
         mPaint.setAntiAlias(true);
         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         mScreenOffset = screenOffset;
+        mMaskThickness = maskThickness;
     }
 
     private void drawIfNeeded() {
@@ -121,8 +123,8 @@ class CircularDisplayMask {
         int circleRadius = mScreenSize.x / 2;
         c.drawColor(Color.BLACK);
 
-        // The radius is reduced by 1 to provide an anti aliasing effect on the display edges.
-        c.drawCircle(circleRadius, circleRadius, circleRadius - 1, mPaint);
+        // The radius is reduced by mMaskThickness to provide an anti aliasing effect on the display edges.
+        c.drawCircle(circleRadius, circleRadius, circleRadius - mMaskThickness, mPaint);
         mSurface.unlockCanvasAndPost(c);
     }
 
