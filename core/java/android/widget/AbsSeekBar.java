@@ -381,8 +381,8 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     @Override
-    void onProgressRefresh(float scale, boolean fromUser) {
-        super.onProgressRefresh(scale, fromUser);
+    void onProgressRefresh(float scale, boolean fromUser, int progress) {
+        super.onProgressRefresh(scale, fromUser, progress);
 
         final Drawable thumb = mThumb;
         if (thumb != null) {
