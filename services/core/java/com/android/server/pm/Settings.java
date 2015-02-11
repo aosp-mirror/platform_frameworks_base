@@ -281,11 +281,11 @@ final class Settings {
     PackageSetting getPackageLPw(PackageParser.Package pkg, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbi, String secondaryCpuAbi,
-            int pkgFlags, UserHandle user, boolean add) {
+            int pkgFlags, int pkgPrivateFlags, UserHandle user, boolean add) {
         final String name = pkg.packageName;
         PackageSetting p = getPackageLPw(name, origPackage, realName, sharedUser, codePath,
                 resourcePath, legacyNativeLibraryPathString, primaryCpuAbi, secondaryCpuAbi,
-                pkg.mVersionCode, pkgFlags, user, add, true /* allowInstall */);
+                pkg.mVersionCode, pkgFlags, pkgPrivateFlags, user, add, true /* allowInstall */);
         return p;
     }
 
@@ -311,13 +311,13 @@ final class Settings {
     }
 
     SharedUserSetting getSharedUserLPw(String name,
-            int pkgFlags, boolean create) {
+            int pkgFlags, int pkgPrivateFlags, boolean create) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s == null) {
             if (!create) {
                 return null;
             }
-            s = new SharedUserSetting(name, pkgFlags);
+            s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
             s.userId = newUserIdLPw(s);
             Log.i(PackageManagerService.TAG, "New shared user " + name + ": id=" + s.userId);
             // < 0 means we couldn't assign a userid; fall out and return
@@ -373,7 +373,7 @@ final class Settings {
         PackageSetting ret = addPackageLPw(name, p.realName, p.codePath, p.resourcePath,
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.secondaryCpuAbiString,
-                p.appId, p.versionCode, p.pkgFlags);
+                p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags);
         mDisabledSysPackages.remove(name);
         return ret;
     }
@@ -388,7 +388,7 @@ final class Settings {
 
     PackageSetting addPackageLPw(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString, String secondaryCpuAbiString,
-            String cpuAbiOverrideString, int uid, int vc, int pkgFlags) {
+            String cpuAbiOverrideString, int uid, int vc, int pkgFlags, int pkgPrivateFlags) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -400,7 +400,7 @@ final class Settings {
         }
         p = new PackageSetting(name, realName, codePath, resourcePath,
                 legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                cpuAbiOverrideString, vc, pkgFlags);
+                cpuAbiOverrideString, vc, pkgFlags, pkgPrivateFlags);
         p.appId = uid;
         if (addUserIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -409,7 +409,7 @@ final class Settings {
         return null;
     }
 
-    SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags) {
+    SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s != null) {
             if (s.userId == uid) {
@@ -419,7 +419,7 @@ final class Settings {
                     "Adding duplicate shared user, keeping first: " + name);
             return null;
         }
-        s = new SharedUserSetting(name, pkgFlags);
+        s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
         s.userId = uid;
         if (addUserIdLPw(uid, s, name)) {
             mSharedUsers.put(name, s);
@@ -469,7 +469,7 @@ final class Settings {
     private PackageSetting getPackageLPw(String name, PackageSetting origPackage,
             String realName, SharedUserSetting sharedUser, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString, String secondaryCpuAbiString,
-            int vc, int pkgFlags, UserHandle installUser, boolean add,
+            int vc, int pkgFlags, int pkgPrivateFlags, UserHandle installUser, boolean add,
             boolean allowInstall) {
         PackageSetting p = mPackages.get(name);
         UserManagerService userManager = UserManagerService.getInstance();
@@ -511,9 +511,8 @@ final class Settings {
                 // If what we are scanning is a system (and possibly privileged) package,
                 // then make it so, regardless of whether it was previously installed only
                 // in the data partition.
-                final int sysPrivFlags = pkgFlags
-                        & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_PRIVILEGED);
-                p.pkgFlags |= sysPrivFlags;
+                p.pkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
+                p.pkgPrivateFlags |= pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
             }
         }
         if (p == null) {
@@ -521,7 +520,7 @@ final class Settings {
                 // We are consuming the data from an existing package.
                 p = new PackageSetting(origPackage.name, name, codePath, resourcePath,
                         legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                        null /* cpuAbiOverrideString */, vc, pkgFlags);
+                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags);
                 if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
                         + name + " is adopting original package " + origPackage.name);
                 // Note that we will retain the new package's signature so
@@ -539,7 +538,7 @@ final class Settings {
             } else {
                 p = new PackageSetting(name, realName, codePath, resourcePath,
                         legacyNativeLibraryPathString, primaryCpuAbiString, secondaryCpuAbiString,
-                        null /* cpuAbiOverrideString */, vc, pkgFlags);
+                        null /* cpuAbiOverrideString */, vc, pkgFlags, pkgPrivateFlags);
                 p.setTimeStamp(codePath.lastModified());
                 p.sharedUser = sharedUser;
                 // If this is not a system app, it starts out stopped.
@@ -1818,7 +1817,8 @@ final class Settings {
             serializer.attribute(null, "cpuAbiOverride", pkg.cpuAbiOverrideString);
         }
 
-        serializer.attribute(null, "flags", Integer.toString(pkg.pkgFlags));
+        serializer.attribute(null, "publicFlags", Integer.toString(pkg.pkgFlags));
+        serializer.attribute(null, "privateFlags", Integer.toString(pkg.pkgPrivateFlags));
         serializer.attribute(null, "ft", Long.toHexString(pkg.timeStamp));
         serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
         serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
@@ -2127,8 +2127,8 @@ final class Settings {
                 PackageSetting p = getPackageLPw(pp.name, null, pp.realName,
                         (SharedUserSetting) idObj, pp.codePath, pp.resourcePath,
                         pp.legacyNativeLibraryPathString, pp.primaryCpuAbiString,
-                        pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags, null,
-                        true /* add */, false /* allowInstall */);
+                        pp.secondaryCpuAbiString, pp.versionCode, pp.pkgFlags, pp.pkgPrivateFlags,
+                        null, true /* add */, false /* allowInstall */);
                 if (p == null) {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unable to create application package for " + pp.name);
@@ -2596,14 +2596,15 @@ final class Settings {
         }
 
         int pkgFlags = 0;
+        int pkgPrivateFlags = 0;
         pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
         final File codePathFile = new File(codePathStr);
         if (PackageManagerService.locationIsPrivileged(codePathFile)) {
-            pkgFlags |= ApplicationInfo.FLAG_PRIVILEGED;
+            pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
         PackageSetting ps = new PackageSetting(name, realName, codePathFile,
                 new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiStr,
-                secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags);
+                secondaryCpuAbiStr, cpuAbiOverrideStr, versionCode, pkgFlags, pkgPrivateFlags);
         String timeStampStr = parser.getAttributeValue(null, "ft");
         if (timeStampStr != null) {
             try {
@@ -2662,6 +2663,11 @@ final class Settings {
         mDisabledSysPackages.put(name, ps);
     }
 
+    private static int PRE_M_APP_INFO_FLAG_HIDDEN = 1<<27;
+    private static int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1<<28;
+    private static int PRE_M_APP_INFO_FLAG_FORWARD_LOCK = 1<<29;
+    private static int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1<<30;
+
     private void readPackageLPw(XmlPullParser parser) throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
@@ -2678,6 +2684,7 @@ final class Settings {
         String installerPackageName = null;
         String uidError = null;
         int pkgFlags = 0;
+        int pkgPrivateFlags = 0;
         long timeStamp = 0;
         long firstInstallTime = 0;
         long lastUpdateTime = 0;
@@ -2713,22 +2720,54 @@ final class Settings {
             }
             installerPackageName = parser.getAttributeValue(null, "installer");
 
-            systemStr = parser.getAttributeValue(null, "flags");
+            systemStr = parser.getAttributeValue(null, "publicFlags");
             if (systemStr != null) {
                 try {
                     pkgFlags = Integer.parseInt(systemStr);
                 } catch (NumberFormatException e) {
                 }
-            } else {
-                // For backward compatibility
-                systemStr = parser.getAttributeValue(null, "system");
+                systemStr = parser.getAttributeValue(null, "privateFlags");
                 if (systemStr != null) {
-                    pkgFlags |= ("true".equalsIgnoreCase(systemStr)) ? ApplicationInfo.FLAG_SYSTEM
-                            : 0;
+                    try {
+                        pkgPrivateFlags = Integer.parseInt(systemStr);
+                    } catch (NumberFormatException e) {
+                    }
+                }
+            } else {
+                // Pre-M -- both public and private flags were stored in one "flags" field.
+                systemStr = parser.getAttributeValue(null, "flags");
+                if (systemStr != null) {
+                    try {
+                        pkgFlags = Integer.parseInt(systemStr);
+                    } catch (NumberFormatException e) {
+                    }
+                    if ((pkgFlags & PRE_M_APP_INFO_FLAG_HIDDEN) != 0) {
+                        pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
+                    }
+                    if ((pkgFlags & PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE) != 0) {
+                        pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE;
+                    }
+                    if ((pkgFlags & PRE_M_APP_INFO_FLAG_FORWARD_LOCK) != 0) {
+                        pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK;
+                    }
+                    if ((pkgFlags & PRE_M_APP_INFO_FLAG_PRIVILEGED) != 0) {
+                        pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
+                    }
+                    pkgFlags &= ~(PRE_M_APP_INFO_FLAG_HIDDEN
+                            | PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE
+                            | PRE_M_APP_INFO_FLAG_FORWARD_LOCK
+                            | PRE_M_APP_INFO_FLAG_PRIVILEGED);
                 } else {
-                    // Old settings that don't specify system... just treat
-                    // them as system, good enough.
-                    pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
+                    // For backward compatibility
+                    systemStr = parser.getAttributeValue(null, "system");
+                    if (systemStr != null) {
+                        pkgFlags |= ("true".equalsIgnoreCase(systemStr)) ? ApplicationInfo.FLAG_SYSTEM
+                                : 0;
+                    } else {
+                        // Old settings that don't specify system... just treat
+                        // them as system, good enough.
+                        pkgFlags |= ApplicationInfo.FLAG_SYSTEM;
+                    }
                 }
             }
             String timeStampStr = parser.getAttributeValue(null, "ft");
@@ -2781,7 +2820,8 @@ final class Settings {
             } else if (userId > 0) {
                 packageSetting = addPackageLPw(name.intern(), realName, new File(codePathStr),
                         new File(resourcePathStr), legacyNativeLibraryPathStr, primaryCpuAbiString,
-                        secondaryCpuAbiString, cpuAbiOverrideString, userId, versionCode, pkgFlags);
+                        secondaryCpuAbiString, cpuAbiOverrideString, userId, versionCode, pkgFlags,
+                        pkgPrivateFlags);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -2800,7 +2840,7 @@ final class Settings {
                     packageSetting = new PendingPackage(name.intern(), realName, new File(
                             codePathStr), new File(resourcePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                            userId, versionCode, pkgFlags);
+                            userId, versionCode, pkgFlags, pkgPrivateFlags);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -2967,6 +3007,7 @@ final class Settings {
         String name = null;
         String idStr = null;
         int pkgFlags = 0;
+        int pkgPrivateFlags = 0;
         SharedUserSetting su = null;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
@@ -2985,7 +3026,8 @@ final class Settings {
                                 + " has bad userId " + idStr + " at "
                                 + parser.getPositionDescription());
             } else {
-                if ((su = addSharedUserLPw(name.intern(), userId, pkgFlags)) == null) {
+                if ((su = addSharedUserLPw(name.intern(), userId, pkgFlags, pkgPrivateFlags))
+                        == null) {
                     PackageManagerService
                             .reportSettingsProblem(Log.ERROR, "Occurred while parsing settings at "
                                     + parser.getPositionDescription());
@@ -3302,9 +3344,12 @@ final class Settings {
         ApplicationInfo.FLAG_RESTORE_ANY_VERSION, "RESTORE_ANY_VERSION",
         ApplicationInfo.FLAG_EXTERNAL_STORAGE, "EXTERNAL_STORAGE",
         ApplicationInfo.FLAG_LARGE_HEAP, "LARGE_HEAP",
-        ApplicationInfo.FLAG_PRIVILEGED, "PRIVILEGED",
-        ApplicationInfo.FLAG_FORWARD_LOCK, "FORWARD_LOCK",
-        ApplicationInfo.FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
+    };
+
+    static final Object[] PRIVATE_FLAG_DUMP_SPEC = new Object[] {
+        ApplicationInfo.PRIVATE_FLAG_PRIVILEGED, "PRIVILEGED",
+        ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK, "FORWARD_LOCK",
+        ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE, "CANT_SAVE_STATE",
     };
 
     void dumpPackageLPr(PrintWriter pw, String prefix, String checkinTag, PackageSetting ps,
@@ -3391,6 +3436,8 @@ final class Settings {
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
                     FLAG_DUMP_SPEC); pw.println();
+            pw.print(prefix); pw.print("  priavateFlags="); printFlags(pw,
+                    ps.pkg.applicationInfo.privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             pw.print(prefix); pw.print("  dataDir="); pw.println(ps.pkg.applicationInfo.dataDir);
             if (ps.pkg.mOperationPending) {
                 pw.print(prefix); pw.println("  mOperationPending=true");

@@ -334,44 +334,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_FULL_BACKUP_ONLY = 1<<26;
 
     /**
-     * Value for {@link #flags}: true if the application is hidden via restrictions and for
-     * most purposes is considered as not installed.
-     * {@hide}
-     */
-    public static final int FLAG_HIDDEN = 1<<27;
-
-    /**
-     * Value for {@link #flags}: set to <code>true</code> if the application
-     * has reported that it is heavy-weight, and thus can not participate in
-     * the normal application lifecycle.
-     *
-     * <p>Comes from the
-     * android.R.styleable#AndroidManifestApplication_cantSaveState
-     * attribute of the &lt;application&gt; tag.
-     *
-     * {@hide}
-     */
-    public static final int FLAG_CANT_SAVE_STATE = 1<<28;
-
-    /**
-     * Value for {@link #flags}: Set to true if the application has been
-     * installed using the forward lock option.
-     *
-     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
-     * 
-     * {@hide}
-     */
-    public static final int FLAG_FORWARD_LOCK = 1<<29;
-
-    /**
-     * Value for {@link #flags}: set to {@code true} if the application
-     * is permitted to hold privileged permissions.
-     *
-     * {@hide}
-     */
-    public static final int FLAG_PRIVILEGED = 1<<30;
-
-    /**
      * Value for {@link #flags}: true if code from this application will need to be
      * loaded into other applications' processes. On devices that support multiple
      * instruction sets, this implies the code might be loaded into a process that's
@@ -395,9 +357,58 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_SUPPORTS_LARGE_SCREENS}, {@link #FLAG_SUPPORTS_XLARGE_SCREENS},
      * {@link #FLAG_RESIZEABLE_FOR_SCREENS},
      * {@link #FLAG_SUPPORTS_SCREEN_DENSITIES}, {@link #FLAG_VM_SAFE_MODE},
-     * {@link #FLAG_INSTALLED}, {@link #FLAG_IS_GAME}.
+     * {@link #FLAG_ALLOW_BACKUP}, {@link #FLAG_KILL_AFTER_RESTORE},
+     * {@link #FLAG_RESTORE_ANY_VERSION}, {@link #FLAG_EXTERNAL_STORAGE},
+     * {@link #FLAG_LARGE_HEAP}, {@link #FLAG_STOPPED},
+     * {@link #FLAG_SUPPORTS_RTL}, {@link #FLAG_INSTALLED},
+     * {@link #FLAG_IS_DATA_ONLY}, {@link #FLAG_IS_GAME},
+     * {@link #FLAG_FULL_BACKUP_ONLY}, {@link #FLAG_MULTIARCH}.
      */
     public int flags = 0;
+
+    /**
+     * Value for {@link #privateFlags}: true if the application is hidden via restrictions and for
+     * most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_HIDDEN = 1<<0;
+
+    /**
+     * Value for {@link #privateFlags}: set to <code>true</code> if the application
+     * has reported that it is heavy-weight, and thus can not participate in
+     * the normal application lifecycle.
+     *
+     * <p>Comes from the
+     * android.R.styleable#AndroidManifestApplication_cantSaveState
+     * attribute of the &lt;application&gt; tag.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_CANT_SAVE_STATE = 1<<1;
+
+    /**
+     * Value for {@link #privateFlags}: Set to true if the application has been
+     * installed using the forward lock option.
+     *
+     * NOTE: DO NOT CHANGE THIS VALUE!  It is saved in packages.xml.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_FORWARD_LOCK = 1<<2;
+
+    /**
+     * Value for {@link #privateFlags}: set to {@code true} if the application
+     * is permitted to hold privileged permissions.
+     *
+     * {@hide}
+     */
+    public static final int PRIVATE_FLAG_PRIVILEGED = 1<<3;
+
+    /**
+     * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
+     * {@hide}
+     */
+    public int privateFlags;
 
     /**
      * The required smallest screen width the application can run on.  If 0,
@@ -598,6 +609,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "processName=" + processName);
         pw.println(prefix + "taskAffinity=" + taskAffinity);
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
+                + " privateFlags=0x" + Integer.toHexString(privateFlags)
                 + " theme=0x" + Integer.toHexString(theme));
         pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
                 + " compatibleWidthLimitDp=" + compatibleWidthLimitDp
@@ -680,6 +692,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         className = orig.className;
         theme = orig.theme;
         flags = orig.flags;
+        privateFlags = orig.privateFlags;
         requiresSmallestWidthDp = orig.requiresSmallestWidthDp;
         compatibleWidthLimitDp = orig.compatibleWidthLimitDp;
         largestWidthLimitDp = orig.largestWidthLimitDp;
@@ -730,6 +743,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(className);
         dest.writeInt(theme);
         dest.writeInt(flags);
+        dest.writeInt(privateFlags);
         dest.writeInt(requiresSmallestWidthDp);
         dest.writeInt(compatibleWidthLimitDp);
         dest.writeInt(largestWidthLimitDp);
@@ -779,6 +793,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         className = source.readString();
         theme = source.readInt();
         flags = source.readInt();
+        privateFlags = source.readInt();
         requiresSmallestWidthDp = source.readInt();
         compatibleWidthLimitDp = source.readInt();
         largestWidthLimitDp = source.readInt();

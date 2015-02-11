@@ -813,7 +813,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 .getApplicationInfo(packageName, 0, UserHandle.getUserId(uid));
                         if (appInfo != null) {
                             pkgUid = appInfo.uid;
-                            isPrivileged = (appInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+                            isPrivileged = (appInfo.privateFlags
+                                    & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
                         } else {
                             if ("media".equals(packageName)) {
                                 pkgUid = Process.MEDIA_UID;
@@ -996,7 +997,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     ApplicationInfo appInfo = ActivityThread.getPackageManager()
                             .getApplicationInfo(pkgName, 0, UserHandle.getUserId(uid));
                     if (appInfo != null) {
-                        isPrivileged = (appInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+                        isPrivileged = (appInfo.privateFlags
+                                & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
                     }
                 } else {
                     // Could not load data, don't add to cache so it will be loaded later.

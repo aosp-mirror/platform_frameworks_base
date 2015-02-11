@@ -28,14 +28,16 @@ final class SharedUserSetting extends GrantedPermissions {
 
     // flags that are associated with this uid, regardless of any package flags
     int uidFlags;
+    int uidPrivateFlags;
 
     final ArraySet<PackageSetting> packages = new ArraySet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();
 
-    SharedUserSetting(String _name, int _pkgFlags) {
-        super(_pkgFlags);
+    SharedUserSetting(String _name, int _pkgFlags, int _pkgPrivateFlags) {
+        super(_pkgFlags, _pkgPrivateFlags);
         uidFlags =  _pkgFlags;
+        uidPrivateFlags = _pkgPrivateFlags;
         name = _name;
     }
 
@@ -55,12 +57,20 @@ final class SharedUserSetting extends GrantedPermissions {
                 }
                 setFlags(aggregatedFlags);
             }
+            if ((this.pkgPrivateFlags & packageSetting.pkgPrivateFlags) != 0) {
+                int aggregatedPrivateFlags = uidPrivateFlags;
+                for (PackageSetting ps : packages) {
+                    aggregatedPrivateFlags |= ps.pkgPrivateFlags;
+                }
+                setPrivateFlags(aggregatedPrivateFlags);
+            }
         }
     }
 
     void addPackage(PackageSetting packageSetting) {
         if (packages.add(packageSetting)) {
             setFlags(this.pkgFlags | packageSetting.pkgFlags);
+            setPrivateFlags(this.pkgPrivateFlags | packageSetting.pkgPrivateFlags);
         }
     }
 }

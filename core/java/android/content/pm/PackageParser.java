@@ -799,6 +799,7 @@ public class PackageParser {
                 pkg.splitCodePaths = lite.splitCodePaths;
                 pkg.splitRevisionCodes = lite.splitRevisionCodes;
                 pkg.splitFlags = new int[num];
+                pkg.splitPrivateFlags = new int[num];
 
                 for (int i = 0; i < num; i++) {
                     parseSplitApk(pkg, i, assets, flags);
@@ -1404,7 +1405,7 @@ public class PackageParser {
 
         /* Set the global "forward lock" flag */
         if ((flags & PARSE_FORWARD_LOCK) != 0) {
-            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FORWARD_LOCK;
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK;
         }
 
         /* Set the global "on SD card" flag */
@@ -2607,7 +2608,7 @@ public class PackageParser {
                 if (sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestApplication_cantSaveState,
                         false)) {
-                    ai.flags |= ApplicationInfo.FLAG_CANT_SAVE_STATE;
+                    ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE;
 
                     // A heavy-weight application can not be in a custom process.
                     // We can do direct compare because we intern all strings.
@@ -3162,7 +3163,8 @@ public class PackageParser {
 
         sa.recycle();
 
-        if (receiver && (owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+        if (receiver && (owner.applicationInfo.privateFlags
+                &ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
             // A heavy-weight application can not have receives in its main process
             // We can do direct compare because we intern all strings.
             if (a.info.processName == owner.packageName) {
@@ -3515,7 +3517,8 @@ public class PackageParser {
 
         sa.recycle();
 
-        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+        if ((owner.applicationInfo.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
+                != 0) {
             // A heavy-weight application can not have providers in its main process
             // We can do direct compare because we intern all strings.
             if (p.info.processName == owner.packageName) {
@@ -3794,7 +3797,8 @@ public class PackageParser {
 
         sa.recycle();
 
-        if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
+        if ((owner.applicationInfo.privateFlags&ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE)
+                != 0) {
             // A heavy-weight application can not have services in its main process
             // We can do direct compare because we intern all strings.
             if (s.info.processName == owner.packageName) {
@@ -4211,6 +4215,13 @@ public class PackageParser {
 
         /** Flags of any split APKs; ordered by parsed splitName */
         public int[] splitFlags;
+
+        /**
+         * Private flags of any split APKs; ordered by parsed splitName.
+         *
+         * {@hide}
+         */
+        public int[] splitPrivateFlags;
 
         public boolean baseHardwareAccelerated;
 
@@ -4647,9 +4658,9 @@ public class PackageParser {
             ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
         if (state.hidden) {
-            ai.flags |= ApplicationInfo.FLAG_HIDDEN;
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         } else {
-            ai.flags &= ~ApplicationInfo.FLAG_HIDDEN;
+            ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_HIDDEN;
         }
         if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;

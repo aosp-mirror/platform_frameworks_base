@@ -1592,7 +1592,8 @@ public class UserManagerService extends IUserManager.Stub {
                 try {
                     for (ApplicationInfo appInfo : apps) {
                         if ((appInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0
-                                && (appInfo.flags & ApplicationInfo.FLAG_HIDDEN) != 0) {
+                                && (appInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HIDDEN)
+                                        != 0) {
                             mPm.setApplicationHiddenSettingAsUser(appInfo.packageName, false,
                                     userHandle);
                         }

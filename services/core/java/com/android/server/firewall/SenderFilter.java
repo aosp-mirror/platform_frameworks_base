@@ -45,7 +45,8 @@ class SenderFilter {
 
         IPackageManager pm = AppGlobals.getPackageManager();
         try {
-            return (pm.getFlagsForUid(callerUid) & ApplicationInfo.FLAG_PRIVILEGED) != 0;
+            return (pm.getPrivateFlagsForUid(callerUid) & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
+                    != 0;
         } catch (RemoteException ex) {
             Slog.e(IntentFirewall.TAG, "Remote exception while retrieving uid flags",
                     ex);

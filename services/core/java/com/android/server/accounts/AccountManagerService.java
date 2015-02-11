@@ -3083,7 +3083,8 @@ public class AccountManagerService
             try {
                 PackageInfo packageInfo = userPackageManager.getPackageInfo(name, 0 /* flags */);
                 if (packageInfo != null
-                        && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+                        && (packageInfo.applicationInfo.privateFlags
+                                & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
                     return true;
                 }
             } catch (PackageManager.NameNotFoundException e) {

@@ -112,8 +112,8 @@ class PackageSettingBase extends GrantedPermissions {
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags) {
-        super(pkgFlags);
+            int pVersionCode, int pkgFlags, int pkgPrivateFlags) {
+        super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
         init(codePath, resourcePath, legacyNativeLibraryPathString, primaryCpuAbiString,
