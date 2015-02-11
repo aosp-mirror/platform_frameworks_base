@@ -484,6 +484,7 @@ static status_t decode(int fd, int64_t offset, int64_t length,
     status_t err = AMediaExtractor_setDataSourceFd(ex, fd, offset, length);
 
     if (err != AMEDIA_OK) {
+        AMediaExtractor_delete(ex);
         return err;
     }
 
