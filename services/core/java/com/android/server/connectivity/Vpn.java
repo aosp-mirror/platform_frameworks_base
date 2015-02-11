@@ -846,9 +846,29 @@ public class Vpn {
     /**
      * Start legacy VPN, controlling native daemons as needed. Creates a
      * secondary thread to perform connection work, returning quickly.
+     *
+     * Should only be called to respond to Binder requests as this enforces caller permission. Use
+     * {@link #startLegacyVpnPrivileged(VpnProfile, KeyStore, LinkProperties)} to skip the
+     * permission check only when the caller is trusted (or the call is initiated by the system).
      */
     public void startLegacyVpn(VpnProfile profile, KeyStore keyStore, LinkProperties egress) {
         enforceControlPermission();
+        long token = Binder.clearCallingIdentity();
+        try {
+            startLegacyVpnPrivileged(profile, keyStore, egress);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    /**
+     * Like {@link #startLegacyVpn(VpnProfile, KeyStore, LinkProperties)}, but does not check
+     * permissions under the assumption that the caller is the system.
+     *
+     * Callers are responsible for checking permissions if needed.
+     */
+    public void startLegacyVpnPrivileged(VpnProfile profile, KeyStore keyStore,
+            LinkProperties egress) {
         if (!keyStore.isUnlocked()) {
             throw new IllegalStateException("KeyStore isn't unlocked");
         }
@@ -959,10 +979,10 @@ public class Vpn {
     }
 
     private synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
-        stopLegacyVpn();
+        stopLegacyVpnPrivileged();
 
-        // Prepare for the new request. This also checks the caller.
-        prepare(null, VpnConfig.LEGACY_VPN);
+        // Prepare for the new request.
+        prepareInternal(VpnConfig.LEGACY_VPN);
         updateState(DetailedState.CONNECTING, "startLegacyVpn");
 
         // Start a new LegacyVpnRunner and we are done!
@@ -970,7 +990,8 @@ public class Vpn {
         mLegacyVpnRunner.start();
     }
 
-    public synchronized void stopLegacyVpn() {
+    /** Stop legacy VPN. Permissions must be checked by callers. */
+    public synchronized void stopLegacyVpnPrivileged() {
         if (mLegacyVpnRunner != null) {
             mLegacyVpnRunner.exit();
             mLegacyVpnRunner = null;
