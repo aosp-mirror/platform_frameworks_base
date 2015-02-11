@@ -146,35 +146,6 @@ public class WindowAnimator {
         mDisplayContentsAnimators.delete(displayId);
     }
 
-    void hideWallpapersLocked(final WindowState w) {
-        final WindowState wallpaperTarget = mService.mWallpaperTarget;
-        final WindowState lowerWallpaperTarget = mService.mLowerWallpaperTarget;
-        final ArrayList<WindowToken> wallpaperTokens = mService.mWallpaperTokens;
-
-        if ((wallpaperTarget == w && lowerWallpaperTarget == null) || wallpaperTarget == null) {
-            final int numTokens = wallpaperTokens.size();
-            for (int i = numTokens - 1; i >= 0; i--) {
-                final WindowToken token = wallpaperTokens.get(i);
-                final int numWindows = token.windows.size();
-                for (int j = numWindows - 1; j >= 0; j--) {
-                    final WindowState wallpaper = token.windows.get(j);
-                    final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                    if (!winAnimator.mLastHidden) {
-                        winAnimator.hide();
-                        mService.dispatchWallpaperVisibility(wallpaper, false);
-                        setPendingLayoutChanges(Display.DEFAULT_DISPLAY,
-                                WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER);
-                    }
-                }
-                if (WindowManagerService.DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG,
-                        "Hiding wallpaper " + token + " from " + w
-                        + " target=" + wallpaperTarget + " lower=" + lowerWallpaperTarget
-                        + "\n" + Debug.getCallers(5, "  "));
-                token.hidden = true;
-            }
-        }
-    }
-
     private void updateAppWindowsLocked(int displayId) {
         ArrayList<TaskStack> stacks = mService.getDisplayContentLocked(displayId).getStacks();
         for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
