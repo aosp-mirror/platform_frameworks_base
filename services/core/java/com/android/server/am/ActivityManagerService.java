@@ -7882,7 +7882,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "setTaskResizeable: taskId=" + taskId + " not found");
                 return;
             }
-            task.mResizeable = resizeable;
+            if (task.mResizeable != resizeable) {
+                task.mResizeable = resizeable;
+                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                mStackSupervisor.resumeTopActivitiesLocked();
+            }
         }
     }
 
