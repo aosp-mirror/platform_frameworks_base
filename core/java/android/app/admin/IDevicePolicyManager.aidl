@@ -199,4 +199,10 @@ interface IDevicePolicyManager {
     boolean getAutoTimeRequired();
 
     boolean isRemovingAdmin(in ComponentName adminReceiver, int userHandle);
+
+    boolean setUserEnabled(in ComponentName who);
+    boolean isDeviceInitializer(String packageName);
+    void clearDeviceInitializer(String packageName);
+    boolean setDeviceInitializer(in ComponentName who, in ComponentName initializer, String initializerName);
+    String getDeviceInitializer();
 }
