@@ -14,19 +14,22 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:autoMirrored="true">
-    <item android:state_enabled="false">
-        <nine-patch android:src="@drawable/spinner_mtrl_am_alpha"
-            android:tint="?attr/colorControlNormal"
-            android:alpha="?attr/disabledAlpha" />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+            android:paddingMode="stack">
+    <item android:drawable="@drawable/item_background_borderless_material"
+          android:gravity="end|center_vertical"
+          android:width="24dp"
+          android:height="24dp" />
+    <item android:gravity="end|center_vertical">
+        <vector android:width="24dp"
+                android:height="24dp"
+                android:viewportWidth="24.0"
+                android:viewportHeight="24.0"
+                android:tint="?attr/colorControlNormal">
+            <path android:pathData="M7,10l5,5,5-5z"
+                  android:fillColor="@color/white"/>
+        </vector>
     </item>
-    <item android:state_pressed="false" android:state_focused="false">
-        <nine-patch android:src="@drawable/spinner_mtrl_am_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-    <item>
-        <nine-patch android:src="@drawable/spinner_mtrl_am_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-</selector>
+    <item android:end="48dp"
+          android:drawable="@color/transparent" />
+</layer-list>

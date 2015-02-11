@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2014 The Android Open Source Project
+<!-- Copyright (C) 2015 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false">
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorForeground"
-            android:alpha="0.1" />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="center_vertical|fill_horizontal"
+          android:start="2dp"
+          android:end="2dp">
+        <shape android:shape="rectangle"
+               android:tint="@color/switch_track_material">
+            <corners android:radius="7dp" />
+            <solid android:color="#4dffffff" />
+            <size android:height="14dp" />
+        </shape>
     </item>
-    <item android:state_checked="true">
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorControlActivated"
-            android:alpha="0.3" />
-    </item>
-    <item>
-        <nine-patch android:src="@drawable/switch_track_mtrl_alpha"
-            android:tint="?attr/colorForeground"
-            android:alpha="0.3" />
-    </item>
-</selector>
+</layer-list>

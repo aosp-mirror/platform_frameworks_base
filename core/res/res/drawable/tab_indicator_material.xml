@@ -14,10 +14,14 @@
      limitations under the License.
 -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_selected="true">
-        <nine-patch android:src="@drawable/tab_indicator_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="bottom">
+        <shape android:shape="rectangle"
+               android:tint="?attr/colorControlActivated">
+            <size android:height="2dp" />
+            <solid android:color="@color/tab_indicator_material" />
+        </shape>
     </item>
-    <item android:drawable="@color/transparent" />
-</selector>
+    <item android:bottom="2dp"
+          android:drawable="@color/transparent" />
+</layer-list>

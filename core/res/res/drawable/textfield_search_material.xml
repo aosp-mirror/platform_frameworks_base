@@ -15,28 +15,20 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_window_focused="false" android:state_enabled="true">
-        <nine-patch android:src="@drawable/textfield_search_default_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-    <item android:state_window_focused="false" android:state_enabled="false">
-        <nine-patch android:src="@drawable/textfield_search_default_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
-    </item>
-    <item android:state_enabled="true" android:state_focused="true">
+    <item android:state_window_focused="true"
+          android:state_enabled="true"
+          android:state_focused="true">
         <nine-patch android:src="@drawable/textfield_search_activated_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
+                    android:tint="?attr/colorControlActivated" />
     </item>
-    <item android:state_enabled="true" android:state_activated="true">
+    <item android:state_window_focused="true"
+          android:state_enabled="true"
+          android:state_activated="true">
         <nine-patch android:src="@drawable/textfield_search_activated_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
-    </item>
-    <item android:state_enabled="true">
-        <nine-patch android:src="@drawable/textfield_search_default_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
+                    android:tint="?attr/colorControlActivated" />
     </item>
     <item>
         <nine-patch android:src="@drawable/textfield_search_default_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
+                    android:tint="?attr/colorControlNormal" />
     </item>
 </selector>

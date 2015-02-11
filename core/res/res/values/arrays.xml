@@ -302,7 +302,6 @@
        <item>@drawable/ab_solid_shadow_material</item>
        <item>@drawable/activated_background_material</item>
        <item>@drawable/btn_borderless_material</item>
-       <item>@drawable/btn_cab_done_material</item>
        <item>@drawable/btn_check_material_anim</item>
        <item>@drawable/btn_default_material</item>
        <item>@drawable/btn_radio_material_anim</item>
