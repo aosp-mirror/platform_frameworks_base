@@ -668,7 +668,8 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw bitmap %p at %f %f%s", mBitmap, mLocalBounds.left, mLocalBounds.top,
+        OP_LOG("Draw bitmap %p of size %dx%d%s",
+                mBitmap, mBitmap->width(), mBitmap->height(),
                 mEntry ? " using AssetAtlas" : "");
     }
 

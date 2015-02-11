@@ -25,6 +25,7 @@
 #include <SkXfermode.h>
 
 #include "Debug.h"
+#include "FloatColor.h"
 #include "Matrix.h"
 #include "Properties.h"
 
@@ -363,7 +364,7 @@ public:
     /**
      * Sets the color associated with this shader.
      */
-    void setColor(const float r, const float g, const float b, const float a);
+    void setColor(FloatColor color);
 
     /**
      * Name of the texCoords attribute if it exists (kBindingTexCoords), -1 otherwise.

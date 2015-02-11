@@ -177,12 +177,12 @@ void Program::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
     glUniformMatrix4fv(transform, 1, GL_FALSE, &t.data[0]);
 }
 
-void Program::setColor(const float r, const float g, const float b, const float a) {
+void Program::setColor(FloatColor color) {
     if (!mHasColorUniform) {
         mColorUniform = getUniform("color");
         mHasColorUniform = true;
     }
-    glUniform4f(mColorUniform, r, g, b, a);
+    glUniform4f(mColorUniform, color.r, color.g, color.b, color.a);
 }
 
 void Program::use() {

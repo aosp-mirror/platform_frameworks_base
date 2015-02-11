@@ -38,25 +38,35 @@ public:
     GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop);
 
     GlopBuilder& setMeshUnitQuad();
+    GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper, bool isAlphaMaskTexture);
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
     GlopBuilder& setMeshIndexedQuads(void* vertexData, int quadCount);
 
-    GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
+    GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
+    GlopBuilder& setFillTexturePaint(Texture& texture, bool isAlphaMaskTexture,
+            const SkPaint* paint, float alphaScale);
+
+    GlopBuilder& setTransformClip(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
+    GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
     GlopBuilder& setModelViewOffsetRect(float offsetX, float offsetY, const Rect source);
 
-    GlopBuilder& setOptionalPaint(const SkPaint* paint, float alphaScale);
-    GlopBuilder& setPaint(const SkPaint& paint, float alphaScale);
+    GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
+
     void build();
 private:
+    void setFill(int color, float alphaScale, SkXfermode::Mode mode,
+            const SkShader* shader, const SkColorFilter* colorFilter);
+
     enum StageFlags {
         kInitialStage = 0,
         kMeshStage = 1 << 0,
         kTransformStage = 1 << 1,
         kModelViewStage = 1 << 2,
         kFillStage = 1 << 3,
-        kAllStages = kMeshStage | kTransformStage | kModelViewStage | kFillStage,
+        kRoundRectClipStage = 1 << 4,
+        kAllStages = kMeshStage | kFillStage | kTransformStage | kModelViewStage | kRoundRectClipStage,
     } mStageFlags;
 
     ProgramDescription mDescription;

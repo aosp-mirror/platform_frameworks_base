@@ -697,11 +697,9 @@ private:
      * different compositing rules.
      *
      * @param texture The texture to draw with
-     * @param left The x coordinate of the bitmap
-     * @param top The y coordinate of the bitmap
      * @param paint The paint to render with
      */
-    void drawAlphaBitmap(Texture* texture, float left, float top, const SkPaint* paint);
+    void drawAlphaBitmap(Texture* texture, const SkPaint* paint);
 
     /**
      * Renders a strip of polygons with the specified paint, used for tessellated geometry.
@@ -730,18 +728,12 @@ private:
     void drawConvexPath(const SkPath& path, const SkPaint* paint);
 
     /**
-     * Draws a textured rectangle with the specified texture. The specified coordinates
-     * are transformed by the current snapshot's transform matrix.
+     * Draws a textured rectangle with the specified texture.
      *
-     * @param left The left coordinate of the rectangle
-     * @param top The top coordinate of the rectangle
-     * @param right The right coordinate of the rectangle
-     * @param bottom The bottom coordinate of the rectangle
      * @param texture The texture to use
      * @param paint The paint containing the alpha, blending mode, etc.
      */
-    void drawTextureRect(float left, float top, float right, float bottom,
-            Texture* texture, const SkPaint* paint);
+    void drawTextureRect(Texture* texture, const SkPaint* paint);
 
     /**
      * Draws a textured mesh with the specified texture. If the indices are omitted,
@@ -1010,7 +1002,7 @@ private:
     ProgramDescription mDescription;
     // Color description
     bool mColorSet;
-    float mColorA, mColorR, mColorG, mColorB;
+    FloatColor mColor;
     // Indicates that the shader should get a color
     bool mSetShaderColor;
     // Current texture unit
