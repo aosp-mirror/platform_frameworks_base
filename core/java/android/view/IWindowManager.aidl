@@ -91,6 +91,8 @@ interface IWindowManager
             IRemoteCallback startedCallback);
     void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight);
+    void overridePendingAppTransitionClipReveal(int startX, int startY,
+            int startWidth, int startHeight);
     void overridePendingAppTransitionThumb(in Bitmap srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp);
     void overridePendingAppTransitionAspectScaledThumb(in Bitmap srcThumb, int startX,

@@ -215,6 +215,12 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
+    public void overridePendingAppTransitionClipReveal(int startX, int startY,
+            int startWidth, int startHeight) throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX, int startY,
             IRemoteCallback startedCallback, boolean scaleUp) throws RemoteException {
         // TODO Auto-generated method stub

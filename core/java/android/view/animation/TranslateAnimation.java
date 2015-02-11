@@ -24,7 +24,7 @@ import android.util.AttributeSet;
  * An animation that controls the position of an object. See the
  * {@link android.view.animation full package} description for details and
  * sample code.
- * 
+ *
  */
 public class TranslateAnimation extends Animation {
     private int mFromXType = ABSOLUTE;
@@ -33,20 +33,28 @@ public class TranslateAnimation extends Animation {
     private int mFromYType = ABSOLUTE;
     private int mToYType = ABSOLUTE;
 
-    private float mFromXValue = 0.0f;
-    private float mToXValue = 0.0f;
+    /** @hide */
+    protected float mFromXValue = 0.0f;
+    /** @hide */
+    protected float mToXValue = 0.0f;
 
-    private float mFromYValue = 0.0f;
-    private float mToYValue = 0.0f;
+    /** @hide */
+    protected float mFromYValue = 0.0f;
+    /** @hide */
+    protected float mToYValue = 0.0f;
 
-    private float mFromXDelta;
-    private float mToXDelta;
-    private float mFromYDelta;
-    private float mToYDelta;
+    /** @hide */
+    protected float mFromXDelta;
+    /** @hide */
+    protected float mToXDelta;
+    /** @hide */
+    protected float mFromYDelta;
+    /** @hide */
+    protected float mToYDelta;
 
     /**
      * Constructor used when a TranslateAnimation is loaded from a resource.
-     * 
+     *
      * @param context Application context to use
      * @param attrs Attribute set from which to read values
      */
@@ -81,7 +89,7 @@ public class TranslateAnimation extends Animation {
 
     /**
      * Constructor to use when building a TranslateAnimation from code
-     * 
+     *
      * @param fromXDelta Change in X coordinate to apply at the start of the
      *        animation
      * @param toXDelta Change in X coordinate to apply at the end of the

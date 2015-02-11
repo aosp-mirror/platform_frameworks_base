@@ -712,6 +712,17 @@ final class ActivityRecord {
                             pendingOptions.getCustomExitResId(),
                             pendingOptions.getOnAnimationStartListener());
                     break;
+                case ActivityOptions.ANIM_CLIP_REVEAL:
+                    service.mWindowManager.overridePendingAppTransitionClipReveal(
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getWidth(), pendingOptions.getHeight());
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX()+pendingOptions.getWidth(),
+                                pendingOptions.getStartY()+pendingOptions.getHeight()));
+                    }
+                    break;
                 case ActivityOptions.ANIM_SCALE_UP:
                     service.mWindowManager.overridePendingAppTransitionScaleUp(
                             pendingOptions.getStartX(), pendingOptions.getStartY(),
