@@ -16,7 +16,6 @@
 package android.transition;
 
 import android.graphics.Rect;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,9 +86,9 @@ public class CircularPropagation extends VisibilityPropagation {
             epicenterY = Math.round(loc[1] + (sceneRoot.getHeight() / 2)
                     + sceneRoot.getTranslationY());
         }
-        float distance = distance(viewCenterX, viewCenterY, epicenterX, epicenterY);
-        float maxDistance = distance(0, 0, sceneRoot.getWidth(), sceneRoot.getHeight());
-        float distanceFraction = distance/maxDistance;
+        double distance = distance(viewCenterX, viewCenterY, epicenterX, epicenterY);
+        double maxDistance = distance(0, 0, sceneRoot.getWidth(), sceneRoot.getHeight());
+        double distanceFraction = distance/maxDistance;
 
         long duration = transition.getDuration();
         if (duration < 0) {
@@ -99,9 +98,9 @@ public class CircularPropagation extends VisibilityPropagation {
         return Math.round(duration * directionMultiplier / mPropagationSpeed * distanceFraction);
     }
 
-    private static float distance(float x1, float y1, float x2, float y2) {
-        float x = x2 - x1;
-        float y = y2 - y1;
-        return FloatMath.sqrt((x * x) + (y * y));
+    private static double distance(float x1, float y1, float x2, float y2) {
+        double x = x2 - x1;
+        double y = y2 - y1;
+        return Math.hypot(x, y);
     }
 }
