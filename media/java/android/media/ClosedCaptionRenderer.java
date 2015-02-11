@@ -154,6 +154,7 @@ class CCParser {
 
     private int mMode = MODE_PAINT_ON;
     private int mRollUpSize = 4;
+    private int mPrevCtrlCode = INVALID;
 
     private CCMemory mDisplay = new CCMemory();
     private CCMemory mNonDisplay = new CCMemory();
@@ -260,6 +261,13 @@ class CCParser {
 
     private boolean handleCtrlCode(CCData ccData) {
         int ctrlCode = ccData.getCtrlCode();
+
+        if (mPrevCtrlCode != INVALID && mPrevCtrlCode == ctrlCode) {
+            // discard double ctrl codes (but if there's a 3rd one, we still take that)
+            mPrevCtrlCode = INVALID;
+            return true;
+        }
+
         switch(ctrlCode) {
         case RCL:
             // select pop-on style
@@ -325,9 +333,11 @@ class CCParser {
             break;
         case INVALID:
         default:
-            // not handled
+            mPrevCtrlCode = INVALID;
             return false;
         }
+
+        mPrevCtrlCode = ctrlCode;
 
         // handled
         return true;
