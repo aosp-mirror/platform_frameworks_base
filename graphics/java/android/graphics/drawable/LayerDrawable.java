@@ -92,6 +92,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     private int[] mPaddingB;
 
     private final Rect mTmpRect = new Rect();
+    private final Rect mTmpOutRect = new Rect();
+    private final Rect mTmpContainer = new Rect();
     private Rect mHotspotBounds;
     private boolean mMutated;
 
@@ -945,7 +947,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         int padR = 0;
         int padB = 0;
 
-        final Rect outRect = mTmpRect;
+        final Rect outRect = mTmpOutRect;
         final int layoutDirection = getLayoutDirection();
         final boolean nest = mLayerState.mPaddingMode == PADDING_MODE_NEST;
         final ChildDrawable[] array = mLayerState.mChildren;
@@ -953,7 +955,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         for (int i = 0; i < N; i++) {
             final ChildDrawable r = array[i];
             final Drawable d = r.mDrawable;
-            final Rect container = d.getBounds();
+            final Rect container = mTmpContainer;
+            container.set(d.getBounds());
 
             // Take the resolved layout direction into account. If start / end
             // padding are defined, they will be resolved (hence overriding) to
