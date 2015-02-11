@@ -1823,15 +1823,17 @@ public class Am extends BaseCommand {
                 showError("Error: Unable to create new stack...");
             }
 
-            final StackInfo newStackInfo = mAm.getStackInfo(container.getStackId());
+            final int newStackId = container.getStackId();
 
             if (intent != null) {
                 container.startActivity(intent);
             } else if (currentStackInfo.taskIds != null && currentStackInfo.taskIds.length > 1) {
                 // Move top task over to new stack
                 mAm.moveTaskToStack(currentStackInfo.taskIds[currentStackInfo.taskIds.length - 1],
-                        newStackInfo.stackId, true);
+                        newStackId, true);
             }
+
+            final StackInfo newStackInfo = mAm.getStackInfo(newStackId);
 
             // Make all tasks in the stacks resizeable.
             for (int taskId : currentStackInfo.taskIds) {
