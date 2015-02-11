@@ -16,5 +16,5 @@ package com.android.databinding.writer;
 import java.io.File;
 
 public interface FileWriter {
-    public void writeToFile(File file , String contents);
+    public void writeToFile(String canonicalName, String contents);
 }

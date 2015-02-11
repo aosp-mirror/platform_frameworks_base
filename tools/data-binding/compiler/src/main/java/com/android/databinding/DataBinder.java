@@ -48,24 +48,22 @@ public class DataBinder {
         return mLayoutBinders;
     }
     
-    public void writerBinderInterfaces(File outputDir) {
-        outputDir.mkdirs();
+    public void writerBinderInterfaces() {
         Set<String> writtenFiles = new HashSet<>();
         for (LayoutBinder layoutBinder : mLayoutBinders) {
             String interfaceName = layoutBinder.getInterfaceName();
             if (writtenFiles.contains(interfaceName)) {
                 continue;
             }
-            mFileWriter.writeToFile(new File(outputDir, interfaceName + ".java"),
+            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + layoutBinder.getInterfaceName(),
                     layoutBinder.writeViewBinderInterface());
         }
     }
     
-    public void writeBinders(File outputDir) {
-        L.d("writing binders to %s", outputDir.getAbsoluteFile());
+    public void writeBinders() {
         for (LayoutBinder layoutBinder : mLayoutBinders) {
-            L.d("binder: %s %s %s", layoutBinder.getId(), layoutBinder.getClassName(), layoutBinder.getInterfaceName());
-            mFileWriter.writeToFile(new File(outputDir, layoutBinder.getClassName() + ".java"), layoutBinder.writeViewBinder());
+            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + layoutBinder.getClassName(),
+                    layoutBinder.writeViewBinder());
         }
     }
 

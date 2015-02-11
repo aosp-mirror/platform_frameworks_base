@@ -44,9 +44,23 @@ import javax.tools.ToolProvider
 import java.util.Arrays
 import org.apache.commons.io.FileUtils
 import com.android.databinding.reflection.ReflectionAnalyzer
+import com.android.databinding.writer.FileWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import org.apache.commons.io.IOUtils
 
 class DataBinderPlugin : Plugin<Project> {
-    var chef: CompilerChef by Delegates.notNull()
+
+    inner class GradleFileWriter(var outputBase : String) : FileWriter {
+        override fun writeToFile(canonicalName: String, contents: String) {
+            val f = File("$outputBase/${canonicalName.replaceAll("\\.", "/")}.java")
+            log("Asked to write to ${canonicalName}. outputting to:${f.getAbsolutePath()}")
+            f.getParentFile().mkdirs()
+            f.writeText(contents, "utf-8")
+        }
+    }
+
+    var xmlParserChef: CompilerChef by Delegates.notNull()
     var project : Project by Delegates.notNull()
 
     var generatedBinderSrc : File by Delegates.notNull()
@@ -57,10 +71,20 @@ class DataBinderPlugin : Plugin<Project> {
 
     var variantData : ApplicationVariantData by Delegates.notNull()
 
+    var codeGenTargetFolder : File by Delegates.notNull()
+
     var viewBinderSource : File by Delegates.notNull()
+
+    val serializedBinderBundlePath by Delegates.lazy {
+        "${codeGenTargetFolder.getAbsolutePath()}/${CompilerChef.RESOURCE_BUNDLE_FILE_NAME}"
+    }
     val viewBinderSourceRoot by Delegates.lazy {
         File(project.getBuildDir(), "databinder")
     }
+
+
+    var fileWriter : GradleFileWriter by Delegates.notNull()
+
     val viewBinderCompileOutput by Delegates.lazy { File(viewBinderSourceRoot, "out") }
 
     override fun apply(project: Project?) {
@@ -72,7 +96,7 @@ class DataBinderPlugin : Plugin<Project> {
         project.afterEvaluate {
             // TODO read from app
             val variants = arrayListOf("Debug")
-            chef = createChef(project)
+            xmlParserChef = createChef(project)
             log("after eval")
             //processDebugResources
             variants.forEach { variant ->
@@ -127,7 +151,7 @@ class DataBinderPlugin : Plugin<Project> {
         val resourceFolders = arrayListOf(variantData.mergeResourcesTask.getOutputDir())
         log("MERGE RES OUTPUT ${variantData.mergeResourcesTask.getOutputDir()}")
         //TODO
-        val codeGenTargetFolder = variantData.generateRClassTask.getSourceOutputDir()
+        codeGenTargetFolder = variantData.generateRClassTask.getSourceOutputDir()
         val resGenTargetFolder = variantData.generateRClassTask.getResDir()
         variantData.addJavaSourceFoldersToModel(codeGenTargetFolder)
         variantData.addJavaSourceFoldersToModel(viewBinderSourceRoot)
@@ -136,7 +160,7 @@ class DataBinderPlugin : Plugin<Project> {
         val dexTask = variantData.dexTask
         val options = jCompileTask.getOptions()
         log("compile options: ${options.optionMap()}")
-        viewBinderSource = File(viewBinderSourceRoot.getAbsolutePath() + "/src/" + packageName.split("\\.").join("/"))
+        viewBinderSource = File(viewBinderSourceRoot.getAbsolutePath() + "/src")
         viewBinderSource.mkdirs()
         variantData.registerJavaGeneratingTask(project.task("dataBinderDummySourceGenTask", MethodClosure(this,"dummySourceGenTask" )), File(viewBinderSourceRoot.getAbsolutePath() + "/src/"))
         viewBinderCompileOutput.mkdirs()
@@ -154,9 +178,9 @@ class DataBinderPlugin : Plugin<Project> {
         log("updated dexTask input files ${dexTask.getInputFiles()} vs ${inputFiles} vs dir ${dexTask.getInputDir()}")
 
         dexTask.doFirst(MethodClosure(this, "preDexAnalysis"))
-        val compilerChef = CompilerChef()
-        compilerChef.setupForParsing(packageName, resourceFolders, codeGenTargetFolder)
-        return compilerChef
+        val writerOutBase = codeGenTargetFolder.getAbsolutePath();
+        fileWriter = GradleFileWriter(writerOutBase)
+        return CompilerChef.createChef(packageName, resourceFolders, fileWriter)
     }
 
 
@@ -183,27 +207,31 @@ class DataBinderPlugin : Plugin<Project> {
         project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {
-        log("compiling generated. ${chef.hasAnythingToGenerate()}")
-        if (!chef.hasAnythingToGenerate()) {
+        val fis = FileInputStream(serializedBinderBundlePath)
+        val compilerChef = CompilerChef.createChef(
+                fis, GradleFileWriter(viewBinderSource.getAbsolutePath())
+        )
+        IOUtils.closeQuietly(fis)
+        log("compiling generated. ${compilerChef.hasAnythingToGenerate()}")
+        if (!compilerChef.hasAnythingToGenerate()) {
             return
         }
         val compiler = ToolProvider.getSystemJavaCompiler()
         val fileManager = compiler.getStandardFileManager(null, null, null)
         val javaCompileTask = variantData.javaCompileTask
         val dexTask = variantData.dexTask
-        chef.writeViewBinders(viewBinderSource)
-        chef.writeDbrFile(viewBinderSource)
+        //fileWriter.outputBase = viewBinderSource.getAbsolutePath()
+        compilerChef.writeViewBinders()
+        compilerChef.writeDbrFile()
 
 
         viewBinderCompileOutput.mkdirs()
         val cpFiles = arrayListOf<File>()
-//        val jarUrl = File("/Users/yboyar/android/sdk/platforms/android-21/android.jar")
-//        log ("jarURL ${jarUrl.getAbsolutePath()} vs androidJar: ${androidJar.getAbsolutePath()}")
         cpFiles.addAll(dexTask.getInputFiles())
         cpFiles.addAll(javaCompileTask.getClasspath().getFiles())
         cpFiles.add(javaCompileTask.getDestinationDir())
         cpFiles.add(androidJar)
-        val filesToCompile = viewBinderSource.listFiles().map { it.getAbsolutePath() }
+        val filesToCompile = FileUtils.listFiles(viewBinderSource, array("java"), true).map { (it as File).getAbsolutePath() }
         log("files to compile ${filesToCompile}")
         val fileObjects = fileManager.getJavaFileObjectsFromStrings(filesToCompile)
         val optionList = arrayListOf<String>()
@@ -222,7 +250,7 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     fun generateAttr(o: Any?) {
-        chef.processResources()
+        xmlParserChef.processResources()
     }
 
     fun cleanBinderOutFolder(o : Any?) {
@@ -231,12 +259,20 @@ class DataBinderPlugin : Plugin<Project> {
         FileUtils.cleanDirectory(viewBinderSource)
         viewBinderCompileOutput.mkdirs()
         FileUtils.cleanDirectory(viewBinderCompileOutput)
+        saveResourceBundle(xmlParserChef)
     }
 
     fun generateBrFile(o: Any?) {
-        chef.processResources()
+        xmlParserChef.processResources()
         log("generating BR ${o}")
-        chef.writeViewBinderInterfaces(null)
+        xmlParserChef.writeViewBinderInterfaces()
+    }
+
+    fun saveResourceBundle(chef : CompilerChef) {
+        File(serializedBinderBundlePath).getParentFile().mkdirs()
+        val fis = FileOutputStream(serializedBinderBundlePath, false)
+        chef.exportResourceBundle(fis)
+        IOUtils.closeQuietly(fis)
     }
 
     fun generateBinders(o: Any?) {

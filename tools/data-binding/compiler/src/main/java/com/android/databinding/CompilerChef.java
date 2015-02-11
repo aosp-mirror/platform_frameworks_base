@@ -21,13 +21,18 @@ import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.util.L;
 import com.android.databinding.writer.DataBinderWriter;
 import com.android.databinding.writer.FileWriter;
-import com.android.databinding.writer.FileWriterImpl;
 
+import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,28 +44,62 @@ import javax.xml.xpath.XPathExpressionException;
  * Different build systems can initiate a version of this to handle their work
  */
 public class CompilerChef {
-    private FileWriter mFileWriter = new FileWriterImpl();
+    public static final String RESOURCE_BUNDLE_FILE_NAME = "binder_bundle.dat";
+    private FileWriter mFileWriter;
     private LayoutFileParser mLayoutFileParser;
     private ResourceBundle mResourceBundle;
     private DataBinder mDataBinder;
     
-    private File mOutputBaseDir;
     private String mAppPackage;
     private List<File> mResourceFolders;
 
-    public void setupForParsing(String appPkg, List<File> resourceFolders,
-            File codegenTargetFolder) {
-        mOutputBaseDir = codegenTargetFolder;
-        mResourceFolders = resourceFolders;
-        mAppPackage = appPkg;
+    private CompilerChef() {
 
     }
 
-    public void processResources()
+    public static CompilerChef createChef(String appPkg, List<File> resourceFolders,
+            FileWriter fileWriter) {
+        CompilerChef chef = new CompilerChef();
+        chef.mAppPackage = appPkg;
+        chef.mResourceFolders = resourceFolders;
+        chef.mFileWriter = fileWriter;
+        return chef;
+    }
+
+    public static CompilerChef createChef(InputStream inputStream, FileWriter fileWriter)
+            throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(inputStream);
+            return createChef((ResourceBundle) ois.readObject(), fileWriter);
+        } finally {
+            IOUtils.closeQuietly(ois);
+        }
+    }
+
+    public static CompilerChef createChef(ResourceBundle resourceBundle, FileWriter fileWriter) {
+        CompilerChef chef = new CompilerChef();
+        chef.mResourceBundle = resourceBundle;
+        chef.mFileWriter = fileWriter;
+        chef.mAppPackage = resourceBundle.getAppPackage();
+        return chef;
+    }
+
+    public void exportResourceBundle(OutputStream outputStream) {
+        ObjectOutputStream oos = null;
+        try {
+            oos = new ObjectOutputStream(outputStream);
+            oos.writeObject(mResourceBundle);
+        } catch (IOException e) {
+            IOUtils.closeQuietly(oos);
+        }
+    }
+
+    public boolean processResources()
             throws ParserConfigurationException, SAXException, XPathExpressionException,
             IOException {
         if (mResourceBundle != null) {
-            return; // already processed
+            return false; // already processed
         }
         mResourceBundle = new ResourceBundle();
         mResourceBundle.setAppPackage(mAppPackage);
@@ -79,6 +118,7 @@ public class CompilerChef {
             }
         }
         mResourceBundle.validateMultiResLayouts();
+        return true;
     }
     
     public void ensureDataBinder() {
@@ -94,40 +134,24 @@ public class CompilerChef {
         return mResourceBundle != null && mResourceBundle.getLayoutBundles().size() > 0;
     }
 
-    public void writeDbrFile(File folder) {
+    public void writeDbrFile() {
         ensureDataBinder();
         final String pkg = "com.android.databinding.library";
         DataBinderWriter dbr = new DataBinderWriter(pkg, mResourceBundle.getAppPackage(),
                 "GeneratedDataBinderRenderer", mDataBinder.getLayoutBinders());
-        if (folder == null) {
-            folder = new File(mOutputBaseDir.getAbsolutePath() + "/" + pkg.replace('.','/'));
-        }
-        folder.mkdirs();
         if (dbr.getLayoutBinders().size() > 0) {
-            mFileWriter.writeToFile(new File(folder, dbr.getClassName() + ".java"), dbr.write());
+            mFileWriter.writeToFile(dbr.getPkg() + "." + dbr.getClassName(), dbr.write());
         }
     }
     
-    public void setOutputBaseDir(File baseDir) {
-        mOutputBaseDir = baseDir;
-    }
-
-    public void writeViewBinderInterfaces(File folder) {
+    public void writeViewBinderInterfaces() {
         ensureDataBinder();
-        if (folder == null) {
-            folder = new File(mOutputBaseDir.getAbsolutePath() + "/" + mResourceBundle.getAppPackage().replace(
-                    '.', '/') + "/generated");
-        }
-        mDataBinder.writerBinderInterfaces(folder);
+        mDataBinder.writerBinderInterfaces();
     }
     
-    public void writeViewBinders(File folder) {
+    public void writeViewBinders() {
         ensureDataBinder();
-        if (folder == null) {
-            folder = new File(mOutputBaseDir.getAbsolutePath() + "/" + mResourceBundle.getAppPackage().replace(
-                    '.', '/') + "/generated");
-        }
-        mDataBinder.writeBinders(folder);
+        mDataBinder.writeBinders();
     }
 
     private final Predicate<File> fileExists = new Predicate<File>() {

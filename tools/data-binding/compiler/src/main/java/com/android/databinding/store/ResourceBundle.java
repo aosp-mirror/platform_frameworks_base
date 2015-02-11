@@ -21,6 +21,7 @@ import com.android.databinding.util.L;
 import com.android.databinding.util.ParserHelper;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,7 +32,7 @@ import java.util.Set;
 /**
  * This is a serializable class that can keep the result of parsing layout files.
  */
-public class ResourceBundle {
+public class ResourceBundle implements Serializable {
 
     private String mAppPackage;
 
@@ -182,7 +183,7 @@ public class ResourceBundle {
         }
     }
 
-    public static class LayoutFileBundle {
+    public static class LayoutFileBundle implements Serializable {
         private int mLayoutId;
         private String mFileName;
         private String mConfigName;
@@ -258,7 +259,7 @@ public class ResourceBundle {
         }
     }
 
-    public static class BindingTargetBundle {
+    public static class BindingTargetBundle implements Serializable {
 
         private String mId;
         private String mFullClassName;
@@ -313,7 +314,7 @@ public class ResourceBundle {
             return mInterfaceType;
         }
 
-        public static class BindingBundle {
+        public static class BindingBundle implements Serializable {
 
             private String mName;
             private String mExpr;
