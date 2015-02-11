@@ -27,6 +27,7 @@ import android.hardware.camera2.utils.CameraServiceBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.BinderHolder;
 import android.os.IBinder;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -163,6 +164,15 @@ public final class CameraManager {
      *             no looper.
      */
     public void registerTorchCallback(TorchCallback callback, Handler handler) {
+        if (handler == null) {
+            Looper looper = Looper.myLooper();
+            if (looper == null) {
+                throw new IllegalArgumentException(
+                        "No handler given, and current thread has no looper!");
+            }
+            handler = new Handler(looper);
+        }
+        CameraManagerGlobal.get().registerTorchCallback(callback, handler);
     }
 
     /**
@@ -174,6 +184,7 @@ public final class CameraManager {
      * @param callback The callback to remove from the notification list
      */
     public void unregisterTorchCallback(TorchCallback callback) {
+        CameraManagerGlobal.get().unregisterTorchCallback(callback);
     }
 
     /**
@@ -437,11 +448,11 @@ public final class CameraManager {
      * However, even if turning on the torch mode is successful, the application does not have the
      * exclusive ownership of the flash unit or the camera device. The torch mode will be turned
      * off and becomes unavailable when the camera device that the flash unit belongs to becomes
-     * unavailable ({@link CameraManager.TorchCallback#onTorchModeAvailable} will be
-     * invoked) or when other camera resources to keep the torch on become unavailable (
+     * unavailable or when other camera resources to keep the torch on become unavailable (
      * {@link CameraManager.TorchCallback#onTorchModeUnavailable} will be invoked). Also,
      * other applications are free to call {@link #setTorchMode} to turn off the torch mode (
-     * {@link CameraManager.TorchCallback#onTorchModeChanged} will be invoked).
+     * {@link CameraManager.TorchCallback#onTorchModeChanged} will be invoked). If the latest
+     * application that turned on the torch mode exits, the torch mode will be turned off.
      *
      * @param cameraId
      *             The unique identifier of the camera device that the flash unit belongs to.
@@ -454,13 +465,15 @@ public final class CameraManager {
      *             {@link CameraAccessException#CAMERA_IN_USE} will be thrown if the camera device
      *             is in use. {@link CameraAccessException#MAX_CAMERAS_IN_USE} will be thrown if
      *             other camera resources needed to turn on the torch mode are in use.
+     *             {@link CameraAccessException#CAMERA_DISCONNECTED} will be thrown if camera
+     *             service is not available.
      *
      * @throws IllegalArgumentException if cameraId was null, cameraId doesn't match any currently
      *             or previously available camera device, or the camera device doesn't have a
      *             flash unit.
      */
     public void setTorchMode(String cameraId, boolean enabled) throws CameraAccessException {
-
+        CameraManagerGlobal.get().setTorchMode(cameraId, enabled);
     }
 
     /**
@@ -508,14 +521,19 @@ public final class CameraManager {
     }
 
     /**
-     * A callback for camera flash torch modes becoming available, unavailable, enabled, or
-     * disabled.
+     * A callback for camera flash torch modes becoming unavailable, disabled, or enabled.
      *
-     * <p>The torch mode becomes available when the camera device it belongs to is no longer in use
-     * and other camera resources it needs are no longer busy. It becomes unavailable when the
-     * camera device it belongs to becomes unavailable or other camera resouces it needs become
-     * busy due to other higher priority camera activities. The torch mode changes when an
-     * application calls {@link #setTorchMode} successfully.
+     * <p>The torch mode becomes unavailable when the camera device it belongs to becomes
+     * unavailable or other camera resouces it needs become busy due to other higher priority
+     * camera activities. The torch mode becomes disabled when it was turned off or when the camera
+     * device it belongs to is no longer in use and other camera resources it needs are no longer
+     * busy. A camera's torch mode is turned off when an application calls {@link #setTorchMode} to
+     * turn off the camera's torch mode, or when an application turns on another camera's torch mode
+     * if keeping multiple torch modes on simultaneously is not supported. The torch mode becomes
+     * enabled when it is turned on via {@link #setTorchMode}.</p>
+     *
+     * <p>The torch mode is available to set via {@link #setTorchMode} only when it's in a disabled
+     * or enabled state.</p>
      *
      * <p>Extend this callback and pass an instance of the subclass to
      * {@link CameraManager#registerTorchCallback} to be notified of such status changes.
@@ -525,24 +543,12 @@ public final class CameraManager {
      */
     public static abstract class TorchCallback {
         /**
-         * The torch mode of a camera has become available to use.
-         *
-         * <p>The default implementation of this method does nothing.</p>
-         *
-         * @param cameraId The unique identifier of the camera whose torch mode has become
-         *                 available.
-         */
-        public void onTorchModeAvailable(String cameraId) {
-            // default empty implementation
-        }
-
-        /**
-         * A previously-available torch mode of a camera has become unavailable.
+         * A camera's torch mode has become unavailable to set via {@link #setTorchMode}.
          *
          * <p>If torch mode was previously turned on by calling {@link #setTorchMode}, it will be
          * turned off before {@link CameraManager.TorchCallback#onTorchModeUnavailable} is
-         * invoked. {@link #setTorchMode} will fail until the flash unit becomes available again.
-         * </p>
+         * invoked. {@link #setTorchMode} will fail until the torch mode has entered a disabled or
+         * enabled state again.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -554,15 +560,17 @@ public final class CameraManager {
         }
 
         /**
-         * Torch mode of a camera has been turned on or off through {@link #setTorchMode}.
+         * A camera's torch mode has become enabled or disabled and can be changed via
+         * {@link #setTorchMode}.
          *
          * <p>The default implementation of this method does nothing.</p>
          *
          * @param cameraId The unique identifier of the camera whose torch mode has been changed.
          *
          * @param enabled The state that the torch mode of the camera has been changed to.
-         *                {@code true} when the torch mode has been turned on. {@code false} when
-         *                the torch mode has been turned off.
+         *                {@code true} when the torch mode has become on and available to be turned
+         *                off. {@code false} when the torch mode has becomes off and available to
+         *                be turned on.
          */
         public void onTorchModeChanged(String cameraId, boolean enabled) {
             // default empty implementation
@@ -725,6 +733,27 @@ public final class CameraManager {
         private final ArrayMap<AvailabilityCallback, Handler> mCallbackMap =
             new ArrayMap<AvailabilityCallback, Handler>();
 
+        // Keep up-to-date with ICameraServiceListener.h
+
+        // torch mode has become not available to set via setTorchMode().
+        public static final int TORCH_STATUS_NOT_AVAILABLE = 0;
+        // torch mode is off and available to be turned on via setTorchMode().
+        public static final int TORCH_STATUS_AVAILABLE_OFF = 1;
+        // torch mode is on and available to be turned off via setTorchMode().
+        public static final int TORCH_STATUS_AVAILABLE_ON = 2;
+
+        // End enums shared with ICameraServiceListener.h
+
+        // torch client binder to set the torch mode with.
+        private Binder mTorchClientBinder = new Binder();
+
+        // Camera ID -> Torch status map
+        private final ArrayMap<String, Integer> mTorchStatus = new ArrayMap<String, Integer>();
+
+        // Registered torch callbacks and their handlers
+        private final ArrayMap<TorchCallback, Handler> mTorchCallbackMap =
+                new ArrayMap<TorchCallback, Handler>();
+
         private final Object mLock = new Object();
 
         // Access only through getCameraService to deal with binder death
@@ -810,15 +839,46 @@ public final class CameraManager {
             }
         }
 
+        public void setTorchMode(String cameraId, boolean enabled) throws CameraAccessException {
+            synchronized(mLock) {
+
+                if (cameraId == null) {
+                    throw new IllegalArgumentException("cameraId was null");
+                }
+
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                        "Camera service is currently unavailable");
+                }
+
+                try {
+                    int status = cameraService.setTorchMode(cameraId, enabled, mTorchClientBinder);
+                } catch(CameraRuntimeException e) {
+                    int problem = e.getReason();
+                    switch (problem) {
+                        case CameraAccessException.CAMERA_ERROR:
+                            throw new IllegalArgumentException(
+                                    "the camera device doesn't have a flash unit.");
+                        default:
+                            throw e.asChecked();
+                    }
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable");
+                }
+            }
+        }
+
         private void handleRecoverableSetupErrors(CameraRuntimeException e, String msg) {
             int problem = e.getReason();
             switch (problem) {
-            case CameraAccessException.CAMERA_DISCONNECTED:
-                String errorMsg = CameraAccessException.getDefaultMessage(problem);
-                Log.w(TAG, msg + ": " + errorMsg);
-                break;
-            default:
-                throw new IllegalStateException(msg, e.asChecked());
+                case CameraAccessException.CAMERA_DISCONNECTED:
+                    String errorMsg = CameraAccessException.getDefaultMessage(problem);
+                    Log.w(TAG, msg + ": " + errorMsg);
+                    break;
+                default:
+                    throw new IllegalStateException(msg, e.asChecked());
             }
         }
 
@@ -843,6 +903,17 @@ public final class CameraManager {
             }
         }
 
+        private boolean validTorchStatus(int status) {
+            switch (status) {
+                case TORCH_STATUS_NOT_AVAILABLE:
+                case TORCH_STATUS_AVAILABLE_ON:
+                case TORCH_STATUS_AVAILABLE_OFF:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         private void postSingleUpdate(final AvailabilityCallback callback, final Handler handler,
                 final String id, final int status) {
             if (isAvailable(status)) {
@@ -861,6 +932,32 @@ public final class CameraManager {
                             callback.onCameraUnavailable(id);
                         }
                     });
+            }
+        }
+
+        private void postSingleTorchUpdate(final TorchCallback callback, final Handler handler,
+                final String id, final int status) {
+            switch(status) {
+                case TORCH_STATUS_AVAILABLE_ON:
+                case TORCH_STATUS_AVAILABLE_OFF:
+                    handler.post(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    callback.onTorchModeChanged(id, status ==
+                                            TORCH_STATUS_AVAILABLE_ON);
+                                }
+                            });
+                    break;
+                default:
+                    handler.post(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    callback.onTorchModeUnavailable(id);
+                                }
+                            });
+                    break;
             }
         }
 
@@ -933,6 +1030,44 @@ public final class CameraManager {
             }
         } // onStatusChangedLocked
 
+        private void updateTorchCallbackLocked(TorchCallback callback, Handler handler) {
+            for (int i = 0; i < mTorchStatus.size(); i++) {
+                String id = mTorchStatus.keyAt(i);
+                Integer status = mTorchStatus.valueAt(i);
+                postSingleTorchUpdate(callback, handler, id, status);
+            }
+        }
+
+        private void onTorchStatusChangedLocked(int status, String id) {
+            if (DEBUG) {
+                Log.v(TAG,
+                        String.format("Camera id %s has torch status changed to 0x%x", id, status));
+            }
+
+            if (!validTorchStatus(status)) {
+                Log.e(TAG, String.format("Ignoring invalid device %s torch status 0x%x", id,
+                                status));
+                return;
+            }
+
+            Integer oldStatus = mTorchStatus.put(id, status);
+            if (oldStatus != null && oldStatus == status) {
+                if (DEBUG) {
+                    Log.v(TAG, String.format(
+                        "Torch status changed to 0x%x, which is what it already was",
+                        status));
+                }
+                return;
+            }
+
+            final int callbackCount = mTorchCallbackMap.size();
+            for (int i = 0; i < callbackCount; i++) {
+                final Handler handler = mTorchCallbackMap.valueAt(i);
+                final TorchCallback callback = mTorchCallbackMap.keyAt(i);
+                postSingleTorchUpdate(callback, handler, id, status);
+            }
+        } // onTorchStatusChangedLocked
+
         /**
          * Register a callback to be notified about camera device availability with the
          * global listener singleton.
@@ -962,6 +1097,22 @@ public final class CameraManager {
             }
         }
 
+        public void registerTorchCallback(TorchCallback callback, Handler handler) {
+            synchronized(mLock) {
+                Handler oldHandler = mTorchCallbackMap.put(callback, handler);
+                // For new callbacks, provide initial torch information
+                if (oldHandler == null) {
+                    updateTorchCallbackLocked(callback, handler);
+                }
+            }
+        }
+
+        public void unregisterTorchCallback(TorchCallback callback) {
+            synchronized(mLock) {
+                mTorchCallbackMap.remove(callback);
+            }
+        }
+
         /**
          * Callback from camera service notifying the process about camera availability changes
          */
@@ -969,6 +1120,13 @@ public final class CameraManager {
         public void onStatusChanged(int status, int cameraId) throws RemoteException {
             synchronized(mLock) {
                 onStatusChangedLocked(status, String.valueOf(cameraId));
+            }
+        }
+
+        @Override
+        public void onTorchStatusChanged(int status, String cameraId) throws RemoteException {
+            synchronized (mLock) {
+                onTorchStatusChangedLocked(status, cameraId);
             }
         }
 
@@ -986,9 +1144,9 @@ public final class CameraManager {
 
                 mCameraService = null;
 
-                // Tell listeners that the cameras are _available_, because any existing clients
-                // will have gotten disconnected. This is optimistic under the assumption that
-                // the service will be back shortly.
+                // Tell listeners that the cameras and torch modes are _available_, because any
+                // existing clients will have gotten disconnected. This is optimistic under the
+                // assumption that the service will be back shortly.
                 //
                 // Without this, a camera service crash while a camera is open will never signal
                 // to listeners that previously in-use cameras are now available.
@@ -996,6 +1154,11 @@ public final class CameraManager {
                     String cameraId = mDeviceStatus.keyAt(i);
                     onStatusChangedLocked(STATUS_PRESENT, cameraId);
                 }
+                for (int i = 0; i < mTorchStatus.size(); i++) {
+                    String cameraId = mTorchStatus.keyAt(i);
+                    onTorchStatusChangedLocked(TORCH_STATUS_AVAILABLE_OFF, cameraId);
+                }
+
             }
         }
 

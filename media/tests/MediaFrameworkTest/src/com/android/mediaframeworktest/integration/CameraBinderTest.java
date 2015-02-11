@@ -316,6 +316,11 @@ public class CameraBinderTest extends AndroidTestCase {
                 throws RemoteException {
             Log.v(TAG, String.format("Camera %d has status changed to 0x%x", cameraId, status));
         }
+        public void onTorchStatusChanged(int status, String cameraId)
+                throws RemoteException {
+            Log.v(TAG, String.format("Camera %s has torch status changed to 0x%x",
+                    cameraId, status));
+        }
     }
 
     /**

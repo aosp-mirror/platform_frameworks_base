@@ -12891,7 +12891,6 @@ package android.hardware.camera2 {
 
   public static abstract class CameraManager.TorchCallback {
     ctor public CameraManager.TorchCallback();
-    method public void onTorchModeAvailable(java.lang.String);
     method public void onTorchModeChanged(java.lang.String, boolean);
     method public void onTorchModeUnavailable(java.lang.String);
   }
