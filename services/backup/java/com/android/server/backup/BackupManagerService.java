@@ -1855,7 +1855,8 @@ public class BackupManagerService extends IBackupManager.Stub {
     boolean tryBindTransport(ServiceInfo info) {
         try {
             PackageInfo packInfo = mPackageManager.getPackageInfo(info.packageName, 0);
-            if ((packInfo.applicationInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+            if ((packInfo.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED)
+                    != 0) {
                 return bindTransport(info);
             } else {
                 Slog.w(TAG, "Transport package " + info.packageName + " not privileged");
@@ -3107,7 +3108,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     final boolean isSharedStorage = pkg.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
                     final boolean sendApk = mIncludeApks
                             && !isSharedStorage
-                            && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
+                            && ((app.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) == 0)
                             && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
                                 (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
 

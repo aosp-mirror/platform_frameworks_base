@@ -24,10 +24,10 @@ final class PendingPackage extends PackageSettingBase {
     PendingPackage(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString, int sharedId,
-            int pVersionCode, int pkgFlags) {
+            int pVersionCode, int pkgFlags, int pkgPrivateFlags) {
         super(name, realName, codePath, resourcePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                pVersionCode, pkgFlags);
+                pVersionCode, pkgFlags, pkgPrivateFlags);
         this.sharedId = sharedId;
     }
 }
