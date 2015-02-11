@@ -127,15 +127,16 @@ public class ImageView extends View {
         initImageView();
     }
 
-    public ImageView(Context context, AttributeSet attrs) {
+    public ImageView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public ImageView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         initImageView();
