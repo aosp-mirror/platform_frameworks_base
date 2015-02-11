@@ -5045,15 +5045,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (activitiesToEnable != null) {
                     for (ResolveInfo info : activitiesToEnable) {
                         if (info.activityInfo != null) {
-
-                            if (!isSystemApp(pm, info.activityInfo.packageName, primaryUser.id)) {
-                                throw new IllegalArgumentException(
-                                        "Only system apps can be enabled this way.");
+                            String packageName = info.activityInfo.packageName;
+                            if (isSystemApp(pm, packageName, primaryUser.id)) {
+                                numberOfAppsInstalled++;
+                                pm.installExistingPackageAsUser(packageName, userId);
+                            } else {
+                                Slog.d(LOG_TAG, "Not enabling " + packageName + " since is not a"
+                                        + " system app");
                             }
-
-
-                            numberOfAppsInstalled++;
-                            pm.installExistingPackageAsUser(info.activityInfo.packageName, userId);
                         }
                     }
                 }
