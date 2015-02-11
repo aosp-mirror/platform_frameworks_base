@@ -2474,10 +2474,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Clears the current device initializer.  The caller must be the device initializer.
-     *
-     * This function should be used cautiously as once it is called it cannot
-     * be undone.
+     * Removes the device initializer, so that it will not be invoked on user initialization for any
+     * subsequently created users. This method can be called by either the device owner or device
+     * initializer itself.
      */
     public void clearDeviceInitializerApp() {
         if (mService != null) {
@@ -2586,6 +2585,7 @@ public class DevicePolicyManager {
     }
 
     /**
+     * @hide
      * Checks if the user was already setup.
      */
     public boolean hasUserSetupCompleted() {
