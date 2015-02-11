@@ -984,6 +984,7 @@ public abstract class Window {
      *
      * @return The view if found or null otherwise.
      */
+    @Nullable
     public View findViewById(int id) {
         return getDecorView().findViewById(id);
     }
