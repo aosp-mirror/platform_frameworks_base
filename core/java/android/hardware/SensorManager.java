@@ -451,7 +451,8 @@ public abstract class SensorManager {
         // non_wake-up version.
         if (type == Sensor.TYPE_PROXIMITY || type == Sensor.TYPE_SIGNIFICANT_MOTION ||
                 type == Sensor.TYPE_TILT_DETECTOR || type == Sensor.TYPE_WAKE_GESTURE ||
-                type == Sensor.TYPE_GLANCE_GESTURE || type == Sensor.TYPE_PICK_UP_GESTURE) {
+                type == Sensor.TYPE_GLANCE_GESTURE || type == Sensor.TYPE_PICK_UP_GESTURE ||
+                type == Sensor.TYPE_WRIST_TILT_GESTURE) {
             wakeUpSensor = true;
         }
 
