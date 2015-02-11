@@ -785,9 +785,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (info != null) {
-            boolean dataEnabled = TelephonyManager.getIntWithSubId(mContext.getContentResolver(),
-                    Settings.Global.MOBILE_DATA, SubscriptionManager.getDefaultSubId(),
-                    1) == 1;
+            boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
             boolean networkAvailable = info.isAvailable() && dataEnabled;
             String defaultApn = getSelectedApn();
             if (defaultApn == null) {
