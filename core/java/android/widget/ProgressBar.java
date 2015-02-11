@@ -18,6 +18,7 @@ package android.widget;
 
 import android.annotation.Nullable;
 import android.graphics.PorterDuff;
+
 import com.android.internal.R;
 
 import android.content.Context;
@@ -64,8 +65,8 @@ import java.util.ArrayList;
 /**
  * <p>
  * Visual indicator of progress in some operation.  Displays a bar to the user
- * representing how far the operation has progressed; the application can 
- * change the amount of progress (modifying the length of the bar) as it moves 
+ * representing how far the operation has progressed; the application can
+ * change the amount of progress (modifying the length of the bar) as it moves
  * forward.  There is also a secondary progress displayable on a progress bar
  * which is useful for displaying intermediate progress, such as the buffer
  * level during a streaming playback progress bar.
@@ -81,7 +82,7 @@ import java.util.ArrayList;
  * <p>The following code example shows how a progress bar can be used from
  * a worker thread to update the user interface to notify the user of progress:
  * </p>
- * 
+ *
  * <pre>
  * public class MyActivity extends Activity {
  *     private static final int PROGRESS = 0x1;
@@ -169,13 +170,13 @@ import java.util.ArrayList;
  * </ul>
  * <p>The "inverse" styles provide an inverse color scheme for the spinner, which may be necessary
  * if your application uses a light colored theme (a white background).</p>
- *  
- * <p><strong>XML attributes</b></strong> 
- * <p> 
- * See {@link android.R.styleable#ProgressBar ProgressBar Attributes}, 
+ *
+ * <p><strong>XML attributes</b></strong>
+ * <p>
+ * See {@link android.R.styleable#ProgressBar ProgressBar Attributes},
  * {@link android.R.styleable#View View Attributes}
  * </p>
- * 
+ *
  * @attr ref android.R.styleable#ProgressBar_animationResolution
  * @attr ref android.R.styleable#ProgressBar_indeterminate
  * @attr ref android.R.styleable#ProgressBar_indeterminateBehavior
@@ -244,7 +245,7 @@ public class ProgressBar extends View {
     public ProgressBar(Context context) {
         this(context, null);
     }
-    
+
     public ProgressBar(Context context, AttributeSet attrs) {
         this(context, attrs, com.android.internal.R.attr.progressBarStyle);
     }
@@ -261,9 +262,9 @@ public class ProgressBar extends View {
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.ProgressBar, defStyleAttr, defStyleRes);
-        
+
         mNoInvalidate = true;
-        
+
         final Drawable progressDrawable = a.getDrawable(R.styleable.ProgressBar_progressDrawable);
         if (progressDrawable != null) {
             // Calling this method can set mMaxHeight, make sure the corresponding
@@ -282,11 +283,11 @@ public class ProgressBar extends View {
         mBehavior = a.getInt(R.styleable.ProgressBar_indeterminateBehavior, mBehavior);
 
         final int resID = a.getResourceId(
-                com.android.internal.R.styleable.ProgressBar_interpolator, 
+                com.android.internal.R.styleable.ProgressBar_interpolator,
                 android.R.anim.linear_interpolator); // default to linear interpolator
         if (resID > 0) {
             setInterpolator(context, resID);
-        } 
+        }
 
         setMax(a.getInt(R.styleable.ProgressBar_max, mMax));
 
@@ -399,12 +400,12 @@ public class ProgressBar extends View {
      * traverse layer and state list drawables.
      */
     private Drawable tileify(Drawable drawable, boolean clip) {
-        
+
         if (drawable instanceof LayerDrawable) {
             LayerDrawable background = (LayerDrawable) drawable;
             final int N = background.getNumberOfLayers();
             Drawable[] outDrawables = new Drawable[N];
-            
+
             for (int i = 0; i < N; i++) {
                 int id = background.getId(i);
                 outDrawables[i] = tileify(background.getDrawable(i),
@@ -412,13 +413,13 @@ public class ProgressBar extends View {
             }
 
             LayerDrawable newBg = new LayerDrawable(outDrawables);
-            
+
             for (int i = 0; i < N; i++) {
                 newBg.setId(i, background.getId(i));
             }
-            
+
             return newBg;
-            
+
         } else if (drawable instanceof StateListDrawable) {
             StateListDrawable in = (StateListDrawable) drawable;
             StateListDrawable out = new StateListDrawable();
@@ -427,7 +428,7 @@ public class ProgressBar extends View {
                 out.addState(in.getStateSet(i), tileify(in.getStateDrawable(i), clip));
             }
             return out;
-            
+
         } else if (drawable instanceof BitmapDrawable) {
             final BitmapDrawable bitmap = (BitmapDrawable) drawable;
             final Bitmap tileBitmap = bitmap.getBitmap();
@@ -448,7 +449,7 @@ public class ProgressBar extends View {
             return clip ? new ClipDrawable(
                     shapeDrawable, Gravity.LEFT, ClipDrawable.HORIZONTAL) : shapeDrawable;
         }
-        
+
         return drawable;
     }
 
@@ -456,7 +457,7 @@ public class ProgressBar extends View {
         final float[] roundedCorners = new float[] { 5, 5, 5, 5, 5, 5, 5, 5 };
         return new RoundRectShape(roundedCorners, null, null);
     }
-    
+
     /**
      * Convert a AnimationDrawable for use as a barberpole animation.
      * Each frame of the animation is wrapped in a ClipDrawable and
@@ -468,7 +469,7 @@ public class ProgressBar extends View {
             final int N = background.getNumberOfFrames();
             AnimationDrawable newBg = new AnimationDrawable();
             newBg.setOneShot(background.isOneShot());
-            
+
             for (int i = 0; i < N; i++) {
                 Drawable frame = tileify(background.getFrame(i), true);
                 frame.setLevel(10000);
@@ -479,7 +480,7 @@ public class ProgressBar extends View {
         }
         return drawable;
     }
-    
+
     /**
      * <p>
      * Initialize the progress bar's default values:
@@ -520,7 +521,7 @@ public class ProgressBar extends View {
      * <p>Change the indeterminate mode for this progress bar. In indeterminate
      * mode, the progress is ignored and the progress bar shows an infinite
      * animation instead.</p>
-     * 
+     *
      * If this progress bar's style only supports indeterminate mode (such as the circular
      * progress bars), then this will be ignored.
      *
@@ -699,7 +700,7 @@ public class ProgressBar extends View {
 
         setIndeterminateDrawable(d);
     }
-    
+
     /**
      * <p>Get the drawable used to draw the progress bar in
      * progress mode.</p>
@@ -1135,7 +1136,7 @@ public class ProgressBar extends View {
 
         setProgressDrawable(d);
     }
-    
+
     /**
      * @return The drawable currently used to draw the progress bar
      */
@@ -1214,7 +1215,7 @@ public class ProgressBar extends View {
             rd.fromUser = fromUser;
             return rd;
         }
-        
+
         public void recycle() {
             sPool.release(this);
         }
@@ -1257,13 +1258,13 @@ public class ProgressBar extends View {
         } else {
             invalidate();
         }
-        
+
         if (callBackToApp && id == R.id.progress) {
-            onProgressRefresh(scale, fromUser);
+            onProgressRefresh(scale, fromUser, progress);
         }
     }
 
-    void onProgressRefresh(float scale, boolean fromUser) {
+    void onProgressRefresh(float scale, boolean fromUser, int progress) {
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
             scheduleAccessibilityEventSender();
         }
@@ -1285,7 +1286,7 @@ public class ProgressBar extends View {
             }
         }
     }
-    
+
     /**
      * <p>Set the current progress to the specified value. Does not do anything
      * if the progress bar is in indeterminate mode.</p>
@@ -1295,13 +1296,13 @@ public class ProgressBar extends View {
      * @see #setIndeterminate(boolean)
      * @see #isIndeterminate()
      * @see #getProgress()
-     * @see #incrementProgressBy(int) 
+     * @see #incrementProgressBy(int)
      */
     @android.view.RemotableViewMethod
     public synchronized void setProgress(int progress) {
         setProgress(progress, false);
     }
-    
+
     @android.view.RemotableViewMethod
     synchronized void setProgress(int progress, boolean fromUser) {
         if (mIndeterminate) {
@@ -1327,7 +1328,7 @@ public class ProgressBar extends View {
      * Set the current secondary progress to the specified value. Does not do
      * anything if the progress bar is in indeterminate mode.
      * </p>
-     * 
+     *
      * @param secondaryProgress the new secondary progress, between 0 and {@link #getMax()}
      * @see #setIndeterminate(boolean)
      * @see #isIndeterminate()
@@ -1408,8 +1409,8 @@ public class ProgressBar extends View {
      * @param max the upper range of this progress bar
      *
      * @see #getMax()
-     * @see #setProgress(int) 
-     * @see #setSecondaryProgress(int) 
+     * @see #setProgress(int)
+     * @see #setSecondaryProgress(int)
      */
     @android.view.RemotableViewMethod
     public synchronized void setMax(int max) {
@@ -1426,13 +1427,13 @@ public class ProgressBar extends View {
             refreshProgress(R.id.progress, mProgress, false);
         }
     }
-    
+
     /**
      * <p>Increase the progress bar's progress by the specified amount.</p>
      *
      * @param diff the amount by which the progress must be increased
      *
-     * @see #setProgress(int) 
+     * @see #setProgress(int)
      */
     public synchronized final void incrementProgressBy(int diff) {
         setProgress(mProgress + diff);
@@ -1443,7 +1444,7 @@ public class ProgressBar extends View {
      *
      * @param diff the amount by which the secondary progress must be increased
      *
-     * @see #setSecondaryProgress(int) 
+     * @see #setSecondaryProgress(int)
      */
     public synchronized final void incrementSecondaryProgressBy(int diff) {
         setSecondaryProgress(mSecondaryProgress + diff);
@@ -1466,13 +1467,13 @@ public class ProgressBar extends View {
             if (mInterpolator == null) {
                 mInterpolator = new LinearInterpolator();
             }
-    
+
             if (mTransformation == null) {
                 mTransformation = new Transformation();
             } else {
                 mTransformation.clear();
             }
-            
+
             if (mAnimation == null) {
                 mAnimation = new AlphaAnimation(0.0f, 1.0f);
             } else {
@@ -1623,7 +1624,7 @@ public class ProgressBar extends View {
             }
             mIndeterminateDrawable.setBounds(left, top, right, bottom);
         }
-        
+
         if (mProgressDrawable != null) {
             mProgressDrawable.setBounds(0, 0, right, bottom);
         }
@@ -1693,20 +1694,20 @@ public class ProgressBar extends View {
         setMeasuredDimension(resolveSizeAndState(dw, widthMeasureSpec, 0),
                 resolveSizeAndState(dh, heightMeasureSpec, 0));
     }
-    
+
     @Override
     protected void drawableStateChanged() {
         super.drawableStateChanged();
         updateDrawableState();
     }
-        
+
     private void updateDrawableState() {
         int[] state = getDrawableState();
-        
+
         if (mProgressDrawable != null && mProgressDrawable.isStateful()) {
             mProgressDrawable.setState(state);
         }
-        
+
         if (mIndeterminateDrawable != null && mIndeterminateDrawable.isStateful()) {
             mIndeterminateDrawable.setState(state);
         }
@@ -1728,14 +1729,14 @@ public class ProgressBar extends View {
     static class SavedState extends BaseSavedState {
         int progress;
         int secondaryProgress;
-        
+
         /**
          * Constructor called from {@link ProgressBar#onSaveInstanceState()}
          */
         SavedState(Parcelable superState) {
             super(superState);
         }
-        
+
         /**
          * Constructor called from {@link #CREATOR}
          */
@@ -1769,10 +1770,10 @@ public class ProgressBar extends View {
         // Force our ancestor class to save its state
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
-        
+
         ss.progress = mProgress;
         ss.secondaryProgress = mSecondaryProgress;
-        
+
         return ss;
     }
 
@@ -1780,7 +1781,7 @@ public class ProgressBar extends View {
     public void onRestoreInstanceState(Parcelable state) {
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
-        
+
         setProgress(ss.progress);
         setSecondaryProgress(ss.secondaryProgress);
     }
