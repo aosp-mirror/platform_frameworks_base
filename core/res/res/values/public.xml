@@ -2634,4 +2634,9 @@
   <public type="style" name="Theme.Material.DayNight.Panel" />
   <public type="style" name="Theme.Material.Light.LightStatusBar" />
 
+  <!-- Context menu ID for the "Undo" menu item to undo the last text edit operation. -->
+  <public type="id" name="undo" />
+  <!-- Context menu ID for the "Redo" menu item to redo the last text edit operation. -->
+  <public type="id" name="redo" />
+
 </resources>

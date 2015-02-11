@@ -50,6 +50,7 @@ import android.graphics.drawable.Drawable;
 import android.inputmethodservice.ExtractEditText;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelableParcel;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.DynamicLayout;
@@ -118,15 +119,18 @@ import java.util.HashMap;
  */
 public class Editor {
     private static final String TAG = "Editor";
-    static final boolean DEBUG_UNDO = false;
+    private static final boolean DEBUG_UNDO = false;
 
     static final int BLINK = 500;
     private static final float[] TEMP_POSITION = new float[2];
     private static int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
+    // Tag used when the Editor maintains its own separate UndoManager.
+    private static final String UNDO_OWNER_TAG = "Editor";
 
-    UndoManager mUndoManager;
-    UndoOwner mUndoOwner;
-    InputFilter mUndoInputFilter;
+    // Each Editor manages its own undo stack.
+    private final UndoManager mUndoManager = new UndoManager();
+    private UndoOwner mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
+    final InputFilter mUndoInputFilter = new UndoInputFilter(this);
 
     // Cursor Controllers.
     InsertionPointCursorController mInsertionPointCursorController;
@@ -222,6 +226,39 @@ public class Editor {
 
     Editor(TextView textView) {
         mTextView = textView;
+        // Synchronize the filter list, which places the undo input filter at the end.
+        mTextView.setFilters(mTextView.getFilters());
+    }
+
+    ParcelableParcel saveInstanceState() {
+        // For now there is only undo state.
+        return (ParcelableParcel) mUndoManager.saveInstanceState();
+    }
+
+    void restoreInstanceState(ParcelableParcel state) {
+        mUndoManager.restoreInstanceState(state);
+        // Re-associate this object as the owner of undo state.
+        mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
+    }
+
+    boolean canUndo() {
+        UndoOwner[] owners = { mUndoOwner };
+        return mUndoManager.countUndos(owners) > 0;
+    }
+
+    boolean canRedo() {
+        UndoOwner[] owners = { mUndoOwner };
+        return mUndoManager.countRedos(owners) > 0;
+    }
+
+    void undo() {
+        UndoOwner[] owners = { mUndoOwner };
+        mUndoManager.undo(owners, 1);  // Undo 1 action.
+    }
+
+    void redo() {
+        UndoOwner[] owners = { mUndoOwner };
+        mUndoManager.redo(owners, 1);  // Redo 1 action.
     }
 
     void onAttachedToWindow() {
@@ -1706,7 +1743,7 @@ public class Editor {
 
     /**
      * Called by the framework in response to a text auto-correction (such as fixing a typo using a
-     * a dictionnary) from the current input method, provided by it calling
+     * a dictionary) from the current input method, provided by it calling
      * {@link InputConnection#commitCorrection} InputConnection.commitCorrection()}. The default
      * implementation flashes the background of the corrected word to provide feedback to the user.
      *
@@ -4161,8 +4198,12 @@ public class Editor {
         int mChangedStart, mChangedEnd, mChangedDelta;
     }
 
+    /**
+     * An InputFilter that monitors text input to maintain undo history. It does not modify the
+     * text being typed (and hence always returns null from the filter() method).
+     */
     public static class UndoInputFilter implements InputFilter {
-        final Editor mEditor;
+        private final Editor mEditor;
 
         public UndoInputFilter(Editor editor) {
             mEditor = editor;
@@ -4192,6 +4233,8 @@ public class Editor {
                     // The current operation is an add...  are we adding more?  We are adding
                     // more if we are either appending new text to the end of the last edit or
                     // completely replacing some or all of the last edit.
+                    // TODO: This sequence doesn't work right: a, left-arrow, b, undo, undo.
+                    // The two edits are incorrectly merged, so there is only one undo available.
                     if (start < end && ((dstart >= op.mRangeStart && dend <= op.mRangeEnd)
                             || (dstart == op.mRangeEnd && dend == op.mRangeEnd))) {
                         op.mRangeEnd = dstart + (end-start);
@@ -4245,7 +4288,10 @@ public class Editor {
         }
     }
 
-    public static class TextModifyOperation extends UndoOperation<TextView> {
+    /**
+     * An operation to undo a single "edit" to a text view.
+     */
+    public static class TextModifyOperation extends UndoOperation<Editor> {
         int mRangeStart, mRangeEnd;
         CharSequence mOldText;
 
@@ -4277,8 +4323,8 @@ public class Editor {
         private void swapText() {
             // Both undo and redo involves swapping the contents of the range
             // in the text view with our local text.
-            TextView tv = getOwnerData();
-            Editable editable = (Editable)tv.getText();
+            Editor editor = getOwnerData();
+            Editable editable = (Editable)editor.mTextView.getText();
             CharSequence curText;
             if (mRangeStart >= mRangeEnd) {
                 curText = null;
@@ -4309,14 +4355,17 @@ public class Editor {
 
         public static final Parcelable.ClassLoaderCreator<TextModifyOperation> CREATOR
                 = new Parcelable.ClassLoaderCreator<TextModifyOperation>() {
+            @Override
             public TextModifyOperation createFromParcel(Parcel in) {
                 return new TextModifyOperation(in, null);
             }
 
+            @Override
             public TextModifyOperation createFromParcel(Parcel in, ClassLoader loader) {
                 return new TextModifyOperation(in, loader);
             }
 
+            @Override
             public TextModifyOperation[] newArray(int size) {
                 return new TextModifyOperation[size];
             }

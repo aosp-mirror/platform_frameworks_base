@@ -89,4 +89,6 @@
   <item type="id" name="parentMatrix" />
   <item type="id" name="statusBarBackground" />
   <item type="id" name="navigationBarBackground" />
+  <item type="id" name="undo" />
+  <item type="id" name="redo" />
 </resources>

@@ -47,6 +47,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ParcelableParcel;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -1612,7 +1613,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     public final UndoManager getUndoManager() {
-        return mEditor == null ? null : mEditor.mUndoManager;
+        // TODO: Consider supporting a global undo manager.
+        throw new UnsupportedOperationException("not implemented");
     }
 
     /**
@@ -1630,22 +1632,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     public final void setUndoManager(UndoManager undoManager, String tag) {
-        if (undoManager != null) {
-            createEditorIfNeeded();
-            mEditor.mUndoManager = undoManager;
-            mEditor.mUndoOwner = undoManager.getOwner(tag, this);
-            mEditor.mUndoInputFilter = new Editor.UndoInputFilter(mEditor);
-            if (!(mText instanceof Editable)) {
-                setText(mText, BufferType.EDITABLE);
-            }
-
-            setFilters((Editable) mText, mFilters);
-        } else if (mEditor != null) {
-            // XXX need to destroy all associated state.
-            mEditor.mUndoManager = null;
-            mEditor.mUndoOwner = null;
-            mEditor.mUndoInputFilter = null;
-        }
+        // TODO: Consider supporting a global undo manager. An implementation will need to:
+        // * createEditorIfNeeded()
+        // * Promote to BufferType.EDITABLE if needed.
+        // * Update the UndoManager and UndoOwner.
+        // Likewise it will need to be able to restore the default UndoManager.
+        throw new UnsupportedOperationException("not implemented");
     }
 
     /**
@@ -3899,6 +3891,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             ss.error = getError();
 
+            if (mEditor != null) {
+                ss.editorState = mEditor.saveInstanceState();
+            }
             return ss;
         }
 
@@ -3967,6 +3962,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 }
             });
+        }
+
+        if (ss.editorState != null) {
+            createEditorIfNeeded();
+            mEditor.restoreInstanceState(ss.editorState);
         }
     }
 
@@ -8375,12 +8375,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean onKeyShortcut(int keyCode, KeyEvent event) {
-        final int filteredMetaState = event.getMetaState() & ~KeyEvent.META_CTRL_MASK;
-        if (KeyEvent.metaStateHasNoModifiers(filteredMetaState)) {
+        if (event.hasModifiers(KeyEvent.META_CTRL_ON)) {
+            // Handle Ctrl-only shortcuts.
             switch (keyCode) {
             case KeyEvent.KEYCODE_A:
                 if (canSelectText()) {
                     return onTextContextMenuItem(ID_SELECT_ALL);
+                }
+                break;
+            case KeyEvent.KEYCODE_Z:
+                if (canUndo()) {
+                    return onTextContextMenuItem(ID_UNDO);
                 }
                 break;
             case KeyEvent.KEYCODE_X:
@@ -8398,6 +8403,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return onTextContextMenuItem(ID_PASTE);
                 }
                 break;
+            }
+        } else if (event.hasModifiers(KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)) {
+            // Handle Ctrl-Shift shortcuts.
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_Z:
+                    if (canRedo()) {
+                        return onTextContextMenuItem(ID_REDO);
+                    }
+                    break;
             }
         }
         return super.onKeyShortcut(keyCode, event);
@@ -8775,6 +8789,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     static final int ID_SELECT_ALL = android.R.id.selectAll;
+    static final int ID_UNDO = android.R.id.undo;
+    static final int ID_REDO = android.R.id.redo;
     static final int ID_CUT = android.R.id.cut;
     static final int ID_COPY = android.R.id.copy;
     static final int ID_PASTE = android.R.id.paste;
@@ -8804,6 +8820,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // bulk edited, like selectAllOnFocus does. Returns true even if text is empty.
                 selectAllText();
                 return true;
+
+            case ID_UNDO:
+                if (mEditor != null) {
+                    mEditor.undo();
+                }
+                return true;  // Returns true even if nothing was undone.
+
+            case ID_REDO:
+                if (mEditor != null) {
+                    mEditor.redo();
+                }
+                return true;  // Returns true even if nothing was undone.
 
             case ID_PASTE:
                 paste(min, max);
@@ -8934,7 +8962,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      */
     protected void stopSelectionActionMode() {
-        mEditor.stopSelectionActionMode();
+        if (mEditor != null) {
+            mEditor.stopSelectionActionMode();
+        }
+    }
+
+    boolean canUndo() {
+        return mEditor != null && mEditor.canUndo();
+    }
+
+    boolean canRedo() {
+        return mEditor != null && mEditor.canRedo();
     }
 
     boolean canCut() {
@@ -9304,6 +9342,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         CharSequence text;
         boolean frozenWithFocus;
         CharSequence error;
+        ParcelableParcel editorState;  // Optional state from Editor.
 
         SavedState(Parcelable superState) {
             super(superState);
@@ -9322,6 +9361,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 out.writeInt(1);
                 TextUtils.writeToParcel(error, out, flags);
+            }
+
+            if (editorState == null) {
+                out.writeInt(0);
+            } else {
+                out.writeInt(1);
+                editorState.writeToParcel(out, flags);
             }
         }
 
@@ -9357,6 +9403,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (in.readInt() != 0) {
                 error = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            }
+
+            if (in.readInt() != 0) {
+                editorState = ParcelableParcel.CREATOR.createFromParcel(in);
             }
         }
     }
