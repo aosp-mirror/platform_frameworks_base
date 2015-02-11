@@ -27,6 +27,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -47,9 +48,9 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,6 +75,7 @@ import libcore.io.IoUtils;
 public abstract class RegisteredServicesCache<V> {
     private static final String TAG = "PackageManager";
     private static final boolean DEBUG = false;
+    protected static final String REGISTERED_SERVICES_DIR = "registered_services";
 
     public final Context mContext;
     private final String mInterfaceName;
@@ -84,31 +86,53 @@ public abstract class RegisteredServicesCache<V> {
     private final Object mServicesLock = new Object();
 
     @GuardedBy("mServicesLock")
-    private boolean mPersistentServicesFileDidNotExist;
-    @GuardedBy("mServicesLock")
     private final SparseArray<UserServices<V>> mUserServices = new SparseArray<UserServices<V>>(2);
 
     private static class UserServices<V> {
         @GuardedBy("mServicesLock")
-        public final Map<V, Integer> persistentServices = Maps.newHashMap();
+        final Map<V, Integer> persistentServices = Maps.newHashMap();
         @GuardedBy("mServicesLock")
-        public Map<V, ServiceInfo<V>> services = null;
+        Map<V, ServiceInfo<V>> services = null;
+        @GuardedBy("mServicesLock")
+        boolean mPersistentServicesFileDidNotExist = true;
     }
 
+    @GuardedBy("mServicesLock")
     private UserServices<V> findOrCreateUserLocked(int userId) {
+        return findOrCreateUserLocked(userId, true);
+    }
+
+    @GuardedBy("mServicesLock")
+    private UserServices<V> findOrCreateUserLocked(int userId, boolean loadFromFileIfNew) {
         UserServices<V> services = mUserServices.get(userId);
         if (services == null) {
             services = new UserServices<V>();
             mUserServices.put(userId, services);
+            if (loadFromFileIfNew && mSerializerAndParser != null) {
+                // Check if user exists and try loading data from file
+                // clear existing data if there was an error during migration
+                UserInfo user = getUser(userId);
+                if (user != null) {
+                    AtomicFile file = createFileForUser(user.id);
+                    if (file.getBaseFile().exists()) {
+                        if (DEBUG) {
+                            Slog.i(TAG, String.format("Loading u%s data from %s", user.id, file));
+                        }
+                        InputStream is = null;
+                        try {
+                            is = file.openRead();
+                            readPersistentServicesLocked(is);
+                        } catch (Exception e) {
+                            Log.w(TAG, "Error reading persistent services for user " + user.id, e);
+                        } finally {
+                            IoUtils.closeQuietly(is);
+                        }
+                    }
+                }
+            }
         }
         return services;
     }
-
-    /**
-     * This file contains the list of known services. We would like to maintain this forever
-     * so we store it as an XML file.
-     */
-    private final AtomicFile mPersistentServicesFile;
 
     // the listener and handler are synchronized on "this" and must be updated together
     private RegisteredServicesCacheListener<V> mListener;
@@ -116,25 +140,13 @@ public abstract class RegisteredServicesCache<V> {
 
     public RegisteredServicesCache(Context context, String interfaceName, String metaDataName,
             String attributeName, XmlSerializerAndParser<V> serializerAndParser) {
-        this(context, interfaceName, metaDataName, attributeName, serializerAndParser,
-                Environment.getDataDirectory());
-    }
-
-    @VisibleForTesting
-    protected RegisteredServicesCache(Context context, String interfaceName, String metaDataName,
-            String attributeName, XmlSerializerAndParser<V> serializerAndParser, File dataDir) {
         mContext = context;
         mInterfaceName = interfaceName;
         mMetaDataName = metaDataName;
         mAttributesName = attributeName;
         mSerializerAndParser = serializerAndParser;
 
-        File systemDir = new File(dataDir, "system");
-        File syncDir = new File(systemDir, "registered_services");
-        mPersistentServicesFile = new AtomicFile(new File(syncDir, interfaceName + ".xml"));
-
-        // Load persisted services from disk
-        readPersistentServicesLocked();
+        migrateIfNecessaryLocked();
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -148,6 +160,11 @@ public abstract class RegisteredServicesCache<V> {
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
         sdFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
         mContext.registerReceiver(mExternalReceiver, sdFilter);
+
+        // Register for user-related events
+        IntentFilter userFilter = new IntentFilter();
+        sdFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiver(mUserRemovedReceiver, userFilter);
     }
 
     private final void handlePackageEvent(Intent intent, int userId) {
@@ -196,6 +213,17 @@ public abstract class RegisteredServicesCache<V> {
         public void onReceive(Context context, Intent intent) {
             // External apps can't coexist with multi-user, so scan owner
             handlePackageEvent(intent, UserHandle.USER_OWNER);
+        }
+    };
+
+    private final BroadcastReceiver mUserRemovedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+            if (DEBUG) {
+                Slog.d(TAG, "u" + userId + " removed - cleaning up");
+            }
+            onUserRemoved(userId);
         }
     };
 
@@ -390,7 +418,7 @@ public abstract class RegisteredServicesCache<V> {
                     changed = true;
                     user.services.put(info.type, info);
                     user.persistentServices.put(info.type, info.uid);
-                    if (!(mPersistentServicesFileDidNotExist && firstScan)) {
+                    if (!(user.mPersistentServicesFileDidNotExist && firstScan)) {
                         notifyListener(info.type, userId, false /* removed */);
                     }
                 } else if (previousUid == info.uid) {
@@ -460,7 +488,7 @@ public abstract class RegisteredServicesCache<V> {
                 }
             }
             if (changed) {
-                writePersistentServicesLocked();
+                writePersistentServicesLocked(user, userId);
             }
         }
     }
@@ -542,86 +570,149 @@ public abstract class RegisteredServicesCache<V> {
     /**
      * Read all sync status back in to the initial engine state.
      */
-    private void readPersistentServicesLocked() {
-        mUserServices.clear();
+    private void readPersistentServicesLocked(InputStream is)
+            throws XmlPullParserException, IOException {
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(is, null);
+        int eventType = parser.getEventType();
+        while (eventType != XmlPullParser.START_TAG
+                && eventType != XmlPullParser.END_DOCUMENT) {
+            eventType = parser.next();
+        }
+        String tagName = parser.getName();
+        if ("services".equals(tagName)) {
+            eventType = parser.next();
+            do {
+                if (eventType == XmlPullParser.START_TAG && parser.getDepth() == 2) {
+                    tagName = parser.getName();
+                    if ("service".equals(tagName)) {
+                        V service = mSerializerAndParser.createFromXml(parser);
+                        if (service == null) {
+                            break;
+                        }
+                        String uidString = parser.getAttributeValue(null, "uid");
+                        final int uid = Integer.parseInt(uidString);
+                        final int userId = UserHandle.getUserId(uid);
+                        final UserServices<V> user = findOrCreateUserLocked(userId,
+                                false /*loadFromFileIfNew*/) ;
+                        user.persistentServices.put(service, uid);
+                    }
+                }
+                eventType = parser.next();
+            } while (eventType != XmlPullParser.END_DOCUMENT);
+        }
+    }
+
+    private void migrateIfNecessaryLocked() {
         if (mSerializerAndParser == null) {
             return;
         }
-        FileInputStream fis = null;
-        try {
-            mPersistentServicesFileDidNotExist = !mPersistentServicesFile.getBaseFile().exists();
-            if (mPersistentServicesFileDidNotExist) {
-                return;
-            }
-            fis = mPersistentServicesFile.openRead();
-            XmlPullParser parser = Xml.newPullParser();
-            parser.setInput(fis, null);
-            int eventType = parser.getEventType();
-            while (eventType != XmlPullParser.START_TAG
-                    && eventType != XmlPullParser.END_DOCUMENT) {
-                eventType = parser.next();
-            }
-            String tagName = parser.getName();
-            if ("services".equals(tagName)) {
-                eventType = parser.next();
-                do {
-                    if (eventType == XmlPullParser.START_TAG && parser.getDepth() == 2) {
-                        tagName = parser.getName();
-                        if ("service".equals(tagName)) {
-                            V service = mSerializerAndParser.createFromXml(parser);
-                            if (service == null) {
-                                break;
+        File systemDir = new File(getDataDirectory(), "system");
+        File syncDir = new File(systemDir, REGISTERED_SERVICES_DIR);
+        AtomicFile oldFile = new AtomicFile(new File(syncDir, mInterfaceName + ".xml"));
+        boolean oldFileExists = oldFile.getBaseFile().exists();
+
+        if (oldFileExists) {
+            File marker = new File(syncDir, mInterfaceName + ".xml.migrated");
+            // if not migrated, perform the migration and add a marker
+            if (!marker.exists()) {
+                if (DEBUG) {
+                    Slog.i(TAG, "Marker file " + marker + " does not exist - running migration");
+                }
+                InputStream is = null;
+                try {
+                    is = oldFile.openRead();
+                    mUserServices.clear();
+                    readPersistentServicesLocked(is);
+                } catch (Exception e) {
+                    Log.w(TAG, "Error reading persistent services, starting from scratch", e);
+                } finally {
+                    IoUtils.closeQuietly(is);
+                }
+                try {
+                    for (UserInfo user : getUsers()) {
+                        UserServices<V> userServices = mUserServices.get(user.id);
+                        if (userServices != null) {
+                            if (DEBUG) {
+                                Slog.i(TAG, "Migrating u" + user.id + " services "
+                                        + userServices.persistentServices);
                             }
-                            String uidString = parser.getAttributeValue(null, "uid");
-                            final int uid = Integer.parseInt(uidString);
-                            final int userId = UserHandle.getUserId(uid);
-                            final UserServices<V> user = findOrCreateUserLocked(userId);
-                            user.persistentServices.put(service, uid);
+                            writePersistentServicesLocked(userServices, user.id);
                         }
                     }
-                    eventType = parser.next();
-                } while (eventType != XmlPullParser.END_DOCUMENT);
+                    marker.createNewFile();
+                } catch (Exception e) {
+                    Log.w(TAG, "Migration failed", e);
+                }
+                // Migration is complete and we don't need to keep data for all users anymore,
+                // It will be loaded from a new location when requested
+                mUserServices.clear();
             }
-        } catch (Exception e) {
-            Log.w(TAG, "Error reading persistent services, starting from scratch", e);
-        } finally {
-            IoUtils.closeQuietly(fis);
         }
     }
 
     /**
-     * Write all sync status to the sync status file.
+     * Writes services of a specified user to the file.
      */
-    private void writePersistentServicesLocked() {
+    private void writePersistentServicesLocked(UserServices<V> user, int userId) {
         if (mSerializerAndParser == null) {
             return;
         }
+        AtomicFile atomicFile = createFileForUser(userId);
         FileOutputStream fos = null;
         try {
-            fos = mPersistentServicesFile.startWrite();
+            fos = atomicFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(fos, "utf-8");
             out.startDocument(null, true);
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "services");
-            for (int i = 0; i < mUserServices.size(); i++) {
-                final UserServices<V> user = mUserServices.valueAt(i);
-                for (Map.Entry<V, Integer> service : user.persistentServices.entrySet()) {
-                    out.startTag(null, "service");
-                    out.attribute(null, "uid", Integer.toString(service.getValue()));
-                    mSerializerAndParser.writeAsXml(service.getKey(), out);
-                    out.endTag(null, "service");
-                }
+            for (Map.Entry<V, Integer> service : user.persistentServices.entrySet()) {
+                out.startTag(null, "service");
+                out.attribute(null, "uid", Integer.toString(service.getValue()));
+                mSerializerAndParser.writeAsXml(service.getKey(), out);
+                out.endTag(null, "service");
             }
             out.endTag(null, "services");
             out.endDocument();
-            mPersistentServicesFile.finishWrite(fos);
+            atomicFile.finishWrite(fos);
         } catch (IOException e1) {
             Log.w(TAG, "Error writing accounts", e1);
             if (fos != null) {
-                mPersistentServicesFile.failWrite(fos);
+                atomicFile.failWrite(fos);
             }
         }
+    }
+
+    @VisibleForTesting
+    protected void onUserRemoved(int userId) {
+        mUserServices.remove(userId);
+    }
+
+    @VisibleForTesting
+    protected List<UserInfo> getUsers() {
+        return UserManager.get(mContext).getUsers(true);
+    }
+
+    @VisibleForTesting
+    protected UserInfo getUser(int userId) {
+        return UserManager.get(mContext).getUserInfo(userId);
+    }
+
+    private AtomicFile createFileForUser(int userId) {
+        File userDir = getUserSystemDirectory(userId);
+        File userFile = new File(userDir, REGISTERED_SERVICES_DIR + "/" + mInterfaceName + ".xml");
+        return new AtomicFile(userFile);
+    }
+
+    @VisibleForTesting
+    protected File getUserSystemDirectory(int userId) {
+        return Environment.getUserSystemDirectory(userId);
+    }
+
+    @VisibleForTesting
+    protected File getDataDirectory() {
+        return Environment.getDataDirectory();
     }
 
     @VisibleForTesting

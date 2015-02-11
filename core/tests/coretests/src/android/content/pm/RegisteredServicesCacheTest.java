@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.os.FileUtils;
 import android.os.Parcel;
@@ -30,6 +29,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,6 +44,12 @@ import java.util.Set;
  * Tests for {@link android.content.pm.RegisteredServicesCache}
  */
 public class RegisteredServicesCacheTest extends AndroidTestCase {
+    private static final int U0 = 0;
+    private static final int U1 = 1;
+    private static final int UID1 = 1;
+    private static final int UID2 = 2;
+    // Represents UID of a system image process
+    private static final int SYSTEM_IMAGE_UID = 20;
 
     private final ResolveInfo r1 = new ResolveInfo();
     private final ResolveInfo r2 = new ResolveInfo();
@@ -51,6 +57,7 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
     private final TestServiceType t2 = new TestServiceType("t2", "value2");
     private File mDataDir;
     private File mSyncDir;
+    private List<UserInfo> mUsers;
 
     @Override
     protected void setUp() throws Exception {
@@ -58,97 +65,152 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         File cacheDir = mContext.getCacheDir();
         mDataDir = new File(cacheDir, "testServicesCache");
         FileUtils.deleteContents(mDataDir);
-        mSyncDir = new File(mDataDir, "system/registered_services");
+        mSyncDir = new File(mDataDir, "system/"+RegisteredServicesCache.REGISTERED_SERVICES_DIR);
         mSyncDir.mkdirs();
+        mUsers = new ArrayList<>();
+        mUsers.add(new UserInfo(0, "Owner", UserInfo.FLAG_ADMIN));
+        mUsers.add(new UserInfo(1, "User1", 0));
     }
 
     public void testGetAllServicesHappyPath() {
-        TestServicesCache cache = new TestServicesCache(mContext, mDataDir);
-        cache.addServiceForQuerying(0, r1, new RegisteredServicesCache.ServiceInfo<>(t1, null, 1));
-        cache.addServiceForQuerying(0, r2, new RegisteredServicesCache.ServiceInfo<>(t2, null, 2));
-        assertEquals(2, cache.getAllServicesSize(0));
-        assertEquals(2, cache.getPersistentServicesSize(0));
-        File file = new File(mSyncDir, TestServicesCache.SERVICE_INTERFACE + ".xml");
-        assertTrue("File should be created at " + file, file.length() > 0);
+        TestServicesCache cache = new TestServicesCache();
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        cache.addServiceForQuerying(U0, r2, newServiceInfo(t2, UID2));
+        assertEquals(2, cache.getAllServicesSize(U0));
+        assertEquals(2, cache.getPersistentServicesSize(U0));
+        assertNotEmptyFileCreated(cache, U0);
         // Make sure all services can be loaded from xml
-        cache = new TestServicesCache(mContext, mDataDir);
-        assertEquals(2, cache.getPersistentServicesSize(0));
+        cache = new TestServicesCache();
+        assertEquals(2, cache.getPersistentServicesSize(U0));
     }
 
     public void testGetAllServicesReplaceUid() {
-        TestServicesCache cache = new TestServicesCache(mContext, mDataDir);
-        cache.addServiceForQuerying(0, r1, new RegisteredServicesCache.ServiceInfo<>(t1, null, 1));
-        cache.addServiceForQuerying(0, r2, new RegisteredServicesCache.ServiceInfo<>(t2, null, 2));
-        cache.getAllServices(0);
+        TestServicesCache cache = new TestServicesCache();
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        cache.addServiceForQuerying(U0, r2, newServiceInfo(t2, UID2));
+        cache.getAllServices(U0);
         // Invalidate cache and clear update query results
-        cache.invalidateCache(0);
+        cache.invalidateCache(U0);
         cache.clearServicesForQuerying();
-        cache.addServiceForQuerying(0, r1, new RegisteredServicesCache.ServiceInfo<>(t1, null, 1));
-        cache.addServiceForQuerying(0, r2, new RegisteredServicesCache.ServiceInfo<>(t2, null,
-                TestServicesCache.SYSTEM_IMAGE_UID));
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        cache.addServiceForQuerying(U0, r2, newServiceInfo(t2, SYSTEM_IMAGE_UID));
         Collection<RegisteredServicesCache.ServiceInfo<TestServiceType>> allServices = cache
-                .getAllServices(0);
+                .getAllServices(U0);
         assertEquals(2, allServices.size());
         Set<Integer> uids = new HashSet<>();
         for (RegisteredServicesCache.ServiceInfo<TestServiceType> srv : allServices) {
             uids.add(srv.uid);
         }
         assertTrue("UID must be updated to the new value",
-                uids.contains(TestServicesCache.SYSTEM_IMAGE_UID));
-        assertFalse("UID must be updated to the new value", uids.contains(2));
+                uids.contains(SYSTEM_IMAGE_UID));
+        assertFalse("UID must be updated to the new value", uids.contains(UID2));
     }
 
     public void testGetAllServicesServiceRemoved() {
-        TestServicesCache cache = new TestServicesCache(mContext, mDataDir);
-        cache.addServiceForQuerying(0, r1, new RegisteredServicesCache.ServiceInfo<>(t1, null, 1));
-        cache.addServiceForQuerying(0, r2, new RegisteredServicesCache.ServiceInfo<>(t2, null, 2));
-        assertEquals(2, cache.getAllServicesSize(0));
-        assertEquals(2, cache.getPersistentServicesSize(0));
+        TestServicesCache cache = new TestServicesCache();
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        cache.addServiceForQuerying(U0, r2, newServiceInfo(t2, UID2));
+        assertEquals(2, cache.getAllServicesSize(U0));
+        assertEquals(2, cache.getPersistentServicesSize(U0));
         // Re-read data from disk and verify services were saved
-        cache = new TestServicesCache(mContext, mDataDir);
-        assertEquals(2, cache.getPersistentServicesSize(0));
+        cache = new TestServicesCache();
+        assertEquals(2, cache.getPersistentServicesSize(U0));
         // Now register only one service and verify that another one is removed
-        cache.addServiceForQuerying(0, r1, new RegisteredServicesCache.ServiceInfo<>(t1, null, 1));
-        assertEquals(1, cache.getAllServicesSize(0));
-        assertEquals(1, cache.getPersistentServicesSize(0));
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        assertEquals(1, cache.getAllServicesSize(U0));
+        assertEquals(1, cache.getPersistentServicesSize(U0));
     }
 
     public void testGetAllServicesMultiUser() {
-        TestServicesCache cache = new TestServicesCache(mContext, mDataDir);
-        int u0 = 0;
-        int u1 = 1;
-        int pid1 = 1;
-        cache.addServiceForQuerying(u0, r1, new RegisteredServicesCache.ServiceInfo<>(t1, null,
-                pid1));
-        int u1uid = UserHandle.getUid(u1, 0);
-        cache.addServiceForQuerying(u1, r2, new RegisteredServicesCache.ServiceInfo<>(t2, null,
-                u1uid));
-        assertEquals(u1, cache.getAllServicesSize(u0));
-        assertEquals(u1, cache.getPersistentServicesSize(u0));
-        assertEquals(u1, cache.getAllServicesSize(u1));
-        assertEquals(u1, cache.getPersistentServicesSize(u1));
+        TestServicesCache cache = new TestServicesCache();
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        int u1uid = UserHandle.getUid(U1, 0);
+        cache.addServiceForQuerying(U1, r2, newServiceInfo(t2, u1uid));
+        assertEquals(1, cache.getAllServicesSize(U0));
+        assertEquals(1, cache.getPersistentServicesSize(U0));
+        assertEquals(1, cache.getAllServicesSize(U1));
+        assertEquals(1, cache.getPersistentServicesSize(U1));
         assertEquals("No services should be available for user 3", 0, cache.getAllServicesSize(3));
         // Re-read data from disk and verify services were saved
-        cache = new TestServicesCache(mContext, mDataDir);
-        assertEquals(u1, cache.getPersistentServicesSize(u0));
-        assertEquals(u1, cache.getPersistentServicesSize(u1));
+        cache = new TestServicesCache();
+        assertEquals(1, cache.getPersistentServicesSize(U0));
+        assertEquals(1, cache.getPersistentServicesSize(U1));
+        assertNotEmptyFileCreated(cache, U0);
+        assertNotEmptyFileCreated(cache, U1);
+    }
+
+    public void testOnRemove() {
+        TestServicesCache cache = new TestServicesCache();
+        cache.addServiceForQuerying(U0, r1, newServiceInfo(t1, UID1));
+        int u1uid = UserHandle.getUid(U1, 0);
+        cache.addServiceForQuerying(U1, r2, newServiceInfo(t2, u1uid));
+        assertEquals(1, cache.getAllServicesSize(U0));
+        assertEquals(1, cache.getAllServicesSize(U1));
+        // Simulate ACTION_USER_REMOVED
+        cache.onUserRemoved(U1);
+        // Make queryIntentServices(u1) return no results for U1
+        cache.clearServicesForQuerying();
+        assertEquals(1, cache.getAllServicesSize(U0));
+        assertEquals(0, cache.getAllServicesSize(U1));
+    }
+
+    public void testMigration() {
+        // Prepare "old" file for testing
+        String oldFile = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<services>\n"
+                + "    <service uid=\"1\" type=\"type1\" value=\"value1\" />\n"
+                + "    <service uid=\"100002\" type=\"type2\" value=\"value2\" />\n"
+                + "<services>\n";
+
+        File file = new File(mSyncDir, TestServicesCache.SERVICE_INTERFACE + ".xml");
+        FileUtils.copyToFile(new ByteArrayInputStream(oldFile.getBytes()), file);
+
+        int u0 = 0;
+        int u1 = 1;
+        TestServicesCache cache = new TestServicesCache();
+        assertEquals(1, cache.getPersistentServicesSize(u0));
+        assertEquals(1, cache.getPersistentServicesSize(u1));
+        assertNotEmptyFileCreated(cache, u0);
+        assertNotEmptyFileCreated(cache, u1);
+        // Check that marker was created
+        File markerFile = new File(mSyncDir, TestServicesCache.SERVICE_INTERFACE + ".xml.migrated");
+        assertTrue("Marker file should be created at " + markerFile, markerFile.exists());
+        // Now introduce 2 service types for u0: t1, t2. type1 will be removed
+        cache.addServiceForQuerying(0, r1, newServiceInfo(t1, 1));
+        cache.addServiceForQuerying(0, r2, newServiceInfo(t2, 2));
+        assertEquals(2, cache.getAllServicesSize(u0));
+        assertEquals(0, cache.getAllServicesSize(u1));
+        // Re-read data from disk. Verify that services were saved and old file was ignored
+        cache = new TestServicesCache();
+        assertEquals(2, cache.getPersistentServicesSize(u0));
+        assertEquals(0, cache.getPersistentServicesSize(u1));
+    }
+
+    private static RegisteredServicesCache.ServiceInfo<TestServiceType> newServiceInfo(
+            TestServiceType type, int uid) {
+        return new RegisteredServicesCache.ServiceInfo<>(type, null, uid);
+    }
+
+    private void assertNotEmptyFileCreated(TestServicesCache cache, int userId) {
+        File dir = new File(cache.getUserSystemDirectory(userId),
+                RegisteredServicesCache.REGISTERED_SERVICES_DIR);
+        File file = new File(dir, TestServicesCache.SERVICE_INTERFACE+".xml");
+        assertTrue("File should be created at " + file, file.length() > 0);
     }
 
     /**
      * Mock implementation of {@link android.content.pm.RegisteredServicesCache} for testing
      */
-    private static class TestServicesCache extends RegisteredServicesCache<TestServiceType> {
+    private class TestServicesCache extends RegisteredServicesCache<TestServiceType> {
         static final String SERVICE_INTERFACE = "RegisteredServicesCacheTest";
         static final String SERVICE_META_DATA = "RegisteredServicesCacheTest";
         static final String ATTRIBUTES_NAME = "test";
-        // Represents UID of a system image process
-        static final int SYSTEM_IMAGE_UID = 20;
         private SparseArray<Map<ResolveInfo, ServiceInfo<TestServiceType>>> mServices
                 = new SparseArray<>();
 
-        public TestServicesCache(Context context, File dir) {
-            super(context, SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME,
-                    new TestSerializer(), dir);
+        public TestServicesCache() {
+            super(RegisteredServicesCacheTest.this.mContext,
+                    SERVICE_INTERFACE, SERVICE_META_DATA, ATTRIBUTES_NAME, new TestSerializer());
         }
 
         @Override
@@ -162,6 +224,33 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
             Map<ResolveInfo, ServiceInfo<TestServiceType>> map = mServices
                     .get(userId, new HashMap<ResolveInfo, ServiceInfo<TestServiceType>>());
             return new ArrayList<>(map.keySet());
+        }
+
+        @Override
+        protected File getUserSystemDirectory(int userId) {
+            File dir = new File(mDataDir, "users/" + userId);
+            dir.mkdirs();
+            return dir;
+        }
+
+        @Override
+        protected List<UserInfo> getUsers() {
+            return mUsers;
+        }
+
+        @Override
+        protected UserInfo getUser(int userId) {
+            for (UserInfo user : getUsers()) {
+                if (user.id == userId) {
+                    return user;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected File getDataDirectory() {
+            return mDataDir;
         }
 
         void addServiceForQuerying(int userId, ResolveInfo resolveInfo,
@@ -203,6 +292,11 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
                 }
             }
             throw new IllegalArgumentException("Unexpected service " + resolveInfo);
+        }
+
+        @Override
+        public void onUserRemoved(int userId) {
+            super.onUserRemoved(userId);
         }
     }
 
