@@ -542,9 +542,9 @@ class WindowStateAnimator {
         mDrawState = READY_TO_SHOW;
         final AppWindowToken atoken = mWin.mAppToken;
         if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
-            performShowLocked();
+            return performShowLocked();
         }
-        return true;
+        return false;
     }
 
     static class SurfaceTrace extends SurfaceControl {
