@@ -12819,6 +12819,7 @@ package android.hardware {
     field public static final java.lang.String STRING_TYPE_STEP_COUNTER = "android.sensor.step_counter";
     field public static final java.lang.String STRING_TYPE_STEP_DETECTOR = "android.sensor.step_detector";
     field public static final deprecated java.lang.String STRING_TYPE_TEMPERATURE = "android.sensor.temperature";
+    field public static final java.lang.String STRING_TYPE_WRIST_TILT_GESTURE = "android.sensor.wrist_tilt_gesture";
     field public static final int TYPE_ACCELEROMETER = 1; // 0x1
     field public static final int TYPE_ALL = -1; // 0xffffffff
     field public static final int TYPE_AMBIENT_TEMPERATURE = 13; // 0xd
@@ -12841,6 +12842,7 @@ package android.hardware {
     field public static final int TYPE_STEP_COUNTER = 19; // 0x13
     field public static final int TYPE_STEP_DETECTOR = 18; // 0x12
     field public static final deprecated int TYPE_TEMPERATURE = 7; // 0x7
+    field public static final int TYPE_WRIST_TILT_GESTURE = 26; // 0x1a
   }
 
   public class SensorEvent {
