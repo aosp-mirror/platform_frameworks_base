@@ -79,10 +79,6 @@ void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType)
     incrementRefcountLocked(resource, resourceType);
 }
 
-void ResourceCache::incrementRefcount(const SkPath* pathResource) {
-    incrementRefcount((void*) pathResource, kPath);
-}
-
 void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
     incrementRefcount((void*) patchResource, kNinePatch);
 }
@@ -105,10 +101,6 @@ void ResourceCache::decrementRefcount(void* resource) {
 void ResourceCache::decrementRefcount(const SkBitmap* bitmapResource) {
     Mutex::Autolock _l(mLock);
     decrementRefcountLocked(bitmapResource);
-}
-
-void ResourceCache::decrementRefcount(const SkPath* pathResource) {
-    decrementRefcount((void*) pathResource);
 }
 
 void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
@@ -145,35 +137,8 @@ void ResourceCache::decrementRefcountLocked(const SkBitmap* bitmapResource) {
     }
 }
 
-void ResourceCache::decrementRefcountLocked(const SkPath* pathResource) {
-    decrementRefcountLocked((void*) pathResource);
-}
-
 void ResourceCache::decrementRefcountLocked(const Res_png_9patch* patchResource) {
     decrementRefcountLocked((void*) patchResource);
-}
-
-void ResourceCache::destructor(SkPath* resource) {
-    Mutex::Autolock _l(mLock);
-    destructorLocked(resource);
-}
-
-void ResourceCache::destructorLocked(SkPath* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
-    if (ref == nullptr) {
-        // If we're not tracking this resource, just delete it
-        if (Caches::hasInstance()) {
-            Caches::getInstance().pathCache.removeDeferred(resource);
-        } else {
-            delete resource;
-        }
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-    }
 }
 
 void ResourceCache::destructor(Res_png_9patch* resource) {
@@ -208,15 +173,6 @@ void ResourceCache::destructorLocked(Res_png_9patch* resource) {
 void ResourceCache::deleteResourceReferenceLocked(const void* resource, ResourceReference* ref) {
     if (ref->destroyed) {
         switch (ref->resourceType) {
-            case kPath: {
-                SkPath* path = (SkPath*) resource;
-                if (Caches::hasInstance()) {
-                    Caches::getInstance().pathCache.removeDeferred(path);
-                } else {
-                    delete path;
-                }
-            }
-            break;
             case kNinePatch: {
                 if (Caches::hasInstance()) {
                     Caches::getInstance().patchCache.removeDeferred((Res_png_9patch*) resource);

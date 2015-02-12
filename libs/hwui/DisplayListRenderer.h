@@ -282,21 +282,10 @@ private:
     inline const SkPath* refPath(const SkPath* path) {
         if (!path) return nullptr;
 
-        const SkPath* cachedPath = mPathMap.valueFor(path);
-        if (cachedPath == nullptr || cachedPath->getGenerationID() != path->getGenerationID()) {
-            SkPath* newPathCopy = new SkPath(*path);
-            newPathCopy->setSourcePath(path);
-            cachedPath = newPathCopy;
-            std::unique_ptr<const SkPath> copy(newPathCopy);
-            mDisplayListData->paths.push_back(std::move(copy));
-
-            // replaceValueFor() performs an add if the entry doesn't exist
-            mPathMap.replaceValueFor(path, cachedPath);
-        }
-        if (mDisplayListData->sourcePaths.indexOf(path) < 0) {
-            mResourceCache.incrementRefcount(path);
-            mDisplayListData->sourcePaths.add(path);
-        }
+        // The points/verbs within the path are refcounted so this copy operation
+        // is inexpensive and maintains the generationID of the original path.
+        const SkPath* cachedPath = new SkPath(*path);
+        mDisplayListData->pathResources.add(cachedPath);
         return cachedPath;
     }
 

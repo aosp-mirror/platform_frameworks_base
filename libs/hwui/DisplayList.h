@@ -134,12 +134,11 @@ public:
     int projectionReceiveIndex;
 
     Vector<const SkBitmap*> bitmapResources;
+    Vector<const SkPath*> pathResources;
     Vector<const Res_png_9patch*> patchResources;
 
     std::vector<std::unique_ptr<const SkPaint>> paints;
     std::vector<std::unique_ptr<const SkRegion>> regions;
-    std::vector<std::unique_ptr<const SkPath>> paths;
-    SortedVector<const SkPath*> sourcePaths;
     Vector<Functor*> functors;
 
     const Vector<Chunk>& getChunks() const {

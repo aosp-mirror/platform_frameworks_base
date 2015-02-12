@@ -362,22 +362,9 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 // Paths
 ///////////////////////////////////////////////////////////////////////////////
 
-void PathCache::remove(Vector<PathDescription>& pathsToRemove, const path_pair_t& pair) {
-    LruCache<PathDescription, PathTexture*>::Iterator i(mCache);
-
-    while (i.next()) {
-        const PathDescription& key = i.key();
-        if (key.type == kShapePath &&
-                (key.shape.path.mPath == pair.getFirst() ||
-                        key.shape.path.mPath == pair.getSecond())) {
-            pathsToRemove.push(key);
-        }
-    }
-}
-
-void PathCache::removeDeferred(SkPath* path) {
+void PathCache::removeDeferred(const SkPath* path) {
     Mutex::Autolock l(mLock);
-    mGarbage.push(path_pair_t(path, const_cast<SkPath*>(path->getSourcePath())));
+    mGarbage.push(path->getGenerationID());
 }
 
 void PathCache::clearGarbage() {
@@ -387,9 +374,15 @@ void PathCache::clearGarbage() {
         Mutex::Autolock l(mLock);
         size_t count = mGarbage.size();
         for (size_t i = 0; i < count; i++) {
-            const path_pair_t& pair = mGarbage.itemAt(i);
-            remove(pathsToRemove, pair);
-            delete pair.getFirst();
+            const uint32_t generationID = mGarbage.itemAt(i);
+
+            LruCache<PathDescription, PathTexture*>::Iterator iter(mCache);
+            while (iter.next()) {
+                const PathDescription& key = iter.key();
+                if (key.type == kShapePath && key.shape.path.mGenerationID == generationID) {
+                    pathsToRemove.push(key);
+                }
+            }
         }
         mGarbage.clear();
     }
@@ -399,27 +392,9 @@ void PathCache::clearGarbage() {
     }
 }
 
-/**
- * To properly handle path mutations at draw time we always make a copy
- * of paths objects when recording display lists. The source path points
- * to the path we originally copied the path from. This ensures we use
- * the original path as a cache key the first time a path is inserted
- * in the cache. The source path is also used to reclaim garbage when a
- * Dalvik Path object is collected.
- */
-static const SkPath* getSourcePath(const SkPath* path) {
-    const SkPath* sourcePath = path->getSourcePath();
-    if (sourcePath && sourcePath->getGenerationID() == path->getGenerationID()) {
-        return const_cast<SkPath*>(sourcePath);
-    }
-    return path;
-}
-
 PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
-    path = getSourcePath(path);
-
     PathDescription entry(kShapePath, paint);
-    entry.shape.path.mPath = path;
+    entry.shape.path.mGenerationID = path->getGenerationID();
 
     PathTexture* texture = mCache.get(entry);
 
@@ -442,11 +417,6 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
                 texture = nullptr;
                 mCache.remove(entry);
             }
-        } else if (path->getGenerationID() != texture->generation) {
-            // The size of the path might have changed so we first
-            // remove the entry from the cache
-            mCache.remove(entry);
-            texture = addTexture(entry, path, paint);
         }
     }
 
@@ -458,18 +428,13 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
         return;
     }
 
-    path = getSourcePath(path);
-
     PathDescription entry(kShapePath, paint);
-    entry.shape.path.mPath = path;
+    entry.shape.path.mGenerationID = path->getGenerationID();
 
     PathTexture* texture = mCache.get(entry);
 
     bool generate = false;
     if (!texture) {
-        generate = true;
-    } else if (path->getGenerationID() != texture->generation) {
-        mCache.remove(entry);
         generate = true;
     }
 

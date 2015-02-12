@@ -118,7 +118,7 @@ struct PathDescription {
     SkPathEffect* pathEffect;
     union Shape {
         struct Path {
-            const SkPath* mPath;
+            uint32_t mGenerationID;
         } path;
         struct RoundRect {
             float mWidth;
@@ -198,7 +198,7 @@ public:
      * Removes the specified path. This is meant to be called from threads
      * that are not the EGL context thread.
      */
-    void removeDeferred(SkPath* path);
+    ANDROID_API void removeDeferred(const SkPath* path);
     /**
      * Process deferred removals.
      */
@@ -227,8 +227,6 @@ public:
             float& left, float& top, float& offset, uint32_t& width, uint32_t& height);
 
 private:
-    typedef Pair<SkPath*, SkPath*> path_pair_t;
-
     PathTexture* addTexture(const PathDescription& entry,
             const SkPath *path, const SkPaint* paint);
     PathTexture* addTexture(const PathDescription& entry, SkBitmap* bitmap);
@@ -243,12 +241,6 @@ private:
     PathTexture* get(const PathDescription& entry) {
         return mCache.get(entry);
     }
-
-    /**
-     * Removes an entry.
-     * The pair must define first=path, second=sourcePath
-     */
-    void remove(Vector<PathDescription>& pathsToRemove, const path_pair_t& pair);
 
     /**
      * Ensures there is enough space in the cache for a texture of the specified
@@ -279,8 +271,7 @@ private:
             delete future()->get();
         }
 
-        // copied, since input path not refcounted / guaranteed to survive for duration of task
-        // TODO: avoid deep copy with refcounting
+        // copied, since input path not guaranteed to survive for duration of task
         const SkPath path;
 
         // copied, since input paint may not be immutable
@@ -308,7 +299,7 @@ private:
 
     sp<PathProcessor> mProcessor;
 
-    Vector<path_pair_t> mGarbage;
+    Vector<uint32_t> mGarbage;
     mutable Mutex mLock;
 }; // class PathCache
 

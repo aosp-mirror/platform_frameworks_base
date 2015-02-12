@@ -49,18 +49,21 @@ void DisplayListData::cleanupResources() {
         resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
     }
 
-    for (size_t i = 0; i < sourcePaths.size(); i++) {
-        resourceCache.decrementRefcountLocked(sourcePaths.itemAt(i));
-    }
-
     resourceCache.unlock();
+
+    for (size_t i = 0; i < pathResources.size(); i++) {
+        const SkPath* path = pathResources.itemAt(i);
+        if (path->unique() && Caches::hasInstance()) {
+            Caches::getInstance().pathCache.removeDeferred(path);
+        }
+        delete path;
+    }
 
     bitmapResources.clear();
     patchResources.clear();
-    sourcePaths.clear();
+    pathResources.clear();
     paints.clear();
     regions.clear();
-    paths.clear();
 }
 
 size_t DisplayListData::addChild(DrawRenderNodeOp* op) {

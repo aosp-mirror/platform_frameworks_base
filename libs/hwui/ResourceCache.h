@@ -20,7 +20,6 @@
 #include <cutils/compiler.h>
 
 #include <SkBitmap.h>
-#include <SkPath.h>
 #include <SkPixelRef.h>
 
 #include <utils/KeyedVector.h>
@@ -38,7 +37,6 @@ class Layer;
  */
 enum ResourceType {
     kNinePatch,
-    kPath
 };
 
 class ResourceReference {
@@ -105,21 +103,16 @@ public:
      */
     const SkBitmap* insert(const SkBitmap* resource);
 
-    void incrementRefcount(const SkPath* resource);
     void incrementRefcount(const Res_png_9patch* resource);
 
     void decrementRefcount(const SkBitmap* resource);
-    void decrementRefcount(const SkPath* resource);
     void decrementRefcount(const Res_png_9patch* resource);
 
     void decrementRefcountLocked(const SkBitmap* resource);
-    void decrementRefcountLocked(const SkPath* resource);
     void decrementRefcountLocked(const Res_png_9patch* resource);
 
-    void destructor(SkPath* resource);
     void destructor(Res_png_9patch* resource);
 
-    void destructorLocked(SkPath* resource);
     void destructorLocked(Res_png_9patch* resource);
 
 private:

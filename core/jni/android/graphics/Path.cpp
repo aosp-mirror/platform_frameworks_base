@@ -27,7 +27,7 @@
 #include "SkPath.h"
 #include "SkPathOps.h"
 
-#include <ResourceCache.h>
+#include <Caches.h>
 #include <vector>
 #include <map>
 
@@ -38,11 +38,11 @@ public:
 
     static void finalizer(JNIEnv* env, jobject clazz, jlong objHandle) {
         SkPath* obj = reinterpret_cast<SkPath*>(objHandle);
-        if (android::uirenderer::ResourceCache::hasInstance()) {
-            android::uirenderer::ResourceCache::getInstance().destructor(obj);
-        } else {
-            delete obj;
+        // Purge entries from the HWUI path cache if this path's data is unique
+        if (obj->unique() && android::uirenderer::Caches::hasInstance()) {
+            android::uirenderer::Caches::getInstance().pathCache.removeDeferred(obj);
         }
+        delete obj;
     }
 
     static jlong init1(JNIEnv* env, jobject clazz) {
