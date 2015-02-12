@@ -12259,8 +12259,10 @@ package android.graphics.drawable {
 
   public class LayerDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
     ctor public LayerDrawable(android.graphics.drawable.Drawable[]);
+    method public int addLayer(android.graphics.drawable.Drawable);
     method public void draw(android.graphics.Canvas);
     method public android.graphics.drawable.Drawable findDrawableByLayerId(int);
+    method public int findIndexByLayerId(int);
     method public android.graphics.drawable.Drawable getDrawable(int);
     method public int getId(int);
     method public int getLayerGravity(int);
@@ -12273,6 +12275,7 @@ package android.graphics.drawable {
     method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public void setAlpha(int);
     method public void setColorFilter(android.graphics.ColorFilter);
+    method public void setDrawable(int, android.graphics.drawable.Drawable);
     method public boolean setDrawableByLayerId(int, android.graphics.drawable.Drawable);
     method public void setId(int, int);
     method public void setLayerGravity(int, int);

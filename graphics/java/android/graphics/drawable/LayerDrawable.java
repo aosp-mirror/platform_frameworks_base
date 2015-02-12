@@ -322,7 +322,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         return false;
     }
 
-    void addLayer(ChildDrawable layer) {
+    /**
+     * Adds a new layer at the end of list of layers and returns its index.
+     *
+     * @param layer The layer to add.
+     * @return The index of the layer.
+     */
+    int addLayer(ChildDrawable layer) {
         final LayerState st = mLayerState;
         final int N = st.mChildren != null ? st.mChildren.length : 0;
         final int i = st.mNum;
@@ -338,12 +344,13 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         st.mChildren[i] = layer;
         st.mNum++;
         st.invalidateCache();
+        return i;
     }
 
     /**
      * Add a new layer to this drawable. The new layer is identified by an id.
      *
-     * @param layer The drawable to add as a layer.
+     * @param dr The drawable to add as a layer.
      * @param themeAttrs Theme attributes extracted from the layer.
      * @param id The id of the new layer.
      * @param left The left padding of the new layer.
@@ -351,12 +358,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * @param right The right padding of the new layer.
      * @param bottom The bottom padding of the new layer.
      */
-    ChildDrawable addLayer(Drawable layer, int[] themeAttrs, int id, int left, int top, int right,
-            int bottom) {
-        final ChildDrawable childDrawable = new ChildDrawable();
+    ChildDrawable addLayer(Drawable dr, int[] themeAttrs, int id,
+            int left, int top, int right, int bottom) {
+        final ChildDrawable childDrawable = createLayer(dr);
         childDrawable.mId = id;
         childDrawable.mThemeAttrs = themeAttrs;
-        childDrawable.mDrawable = layer;
         childDrawable.mDrawable.setAutoMirrored(isAutoMirrored());
         childDrawable.mInsetL = left;
         childDrawable.mInsetT = top;
@@ -365,10 +371,29 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         addLayer(childDrawable);
 
-        mLayerState.mChildrenChangingConfigurations |= layer.getChangingConfigurations();
-        layer.setCallback(this);
+        mLayerState.mChildrenChangingConfigurations |= dr.getChangingConfigurations();
+        dr.setCallback(this);
 
         return childDrawable;
+    }
+
+    private ChildDrawable createLayer(Drawable dr) {
+        final ChildDrawable layer = new ChildDrawable();
+        layer.mDrawable = dr;
+        return layer;
+    }
+
+    /**
+     * Adds a new layer containing the specified {@code drawable} to the end of
+     * the layer list and returns its index.
+     *
+     * @param dr The drawable to add as a new layer.
+     * @return The index of the new layer.
+     */
+    public int addLayer(Drawable dr) {
+        final ChildDrawable layer = createLayer(dr);
+        final int index = addLayer(layer);
+        return index;
     }
 
     /**
@@ -395,15 +420,38 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     /**
      * Sets the ID of a layer.
      *
-     * @param index The index of the layer which will received the ID.
-     * @param id The ID to assign to the layer.
+     * @param index The index of the layer to modify, must be in the range
+     *              {@code 0...getNumberOfLayers()-1}.
+     * @param id The id to assign to the layer.
+     *
+     * @see #getId(int)
+     * @attr ref android.R.styleable#LayerDrawableItem_id
      */
     public void setId(int index, int id) {
         mLayerState.mChildren[index].mId = id;
     }
 
     /**
-     * Returns the number of layers contained within this.
+     * Returns the ID of the specified layer.
+     *
+     * @param index The index of the layer, must be in the range
+     *              {@code 0...getNumberOfLayers()-1}.
+     * @return The id of the layer or {@link android.view.View#NO_ID} if the
+     *         layer has no id.
+     *
+     * @see #setId(int, int)
+     * @attr ref android.R.styleable#LayerDrawableItem_id
+     */
+    public int getId(int index) {
+        if (index >= mLayerState.mNum) {
+            throw new IndexOutOfBoundsException();
+        }
+        return mLayerState.mChildren[index].mId;
+    }
+
+    /**
+     * Returns the number of layers contained within this layer drawable.
+     *
      * @return The number of layers.
      */
     public int getNumberOfLayers() {
@@ -411,29 +459,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
-     * Returns the drawable at the specified layer index.
-     *
-     * @param index The layer index of the drawable to retrieve.
-     *
-     * @return The {@link android.graphics.drawable.Drawable} at the specified layer index.
-     */
-    public Drawable getDrawable(int index) {
-        return mLayerState.mChildren[index].mDrawable;
-    }
-
-    /**
-     * Returns the id of the specified layer.
-     *
-     * @param index The index of the layer.
-     *
-     * @return The id of the layer or {@link android.view.View#NO_ID} if the layer has no id.
-     */
-    public int getId(int index) {
-        return mLayerState.mChildren[index].mId;
-    }
-
-    /**
-     * Sets (or replaces) the {@link Drawable} for the layer with the given id.
+     * Replaces the {@link Drawable} for the layer with the given id.
      *
      * @param id The layer ID to search for.
      * @param drawable The replacement {@link Drawable}.
@@ -441,31 +467,88 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      *         the id was not found).
      */
     public boolean setDrawableByLayerId(int id, Drawable drawable) {
+        final int index = findIndexByLayerId(id);
+        if (index < 0) {
+            return false;
+        }
+
+        setDrawable(index, drawable);
+        return true;
+    }
+
+    /**
+     * Returns the layer with the specified {@code id}.
+     * <p>
+     * If multiple layers have the same ID, returns the layer with the lowest
+     * index.
+     *
+     * @param id The ID of the layer to return.
+     * @return The index of the layer with the specified ID.
+     */
+    public int findIndexByLayerId(int id) {
         final ChildDrawable[] layers = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
             final ChildDrawable childDrawable = layers[i];
             if (childDrawable.mId == id) {
-                if (childDrawable.mDrawable != null) {
-                    if (drawable != null) {
-                        final Rect bounds = childDrawable.mDrawable.getBounds();
-                        drawable.setBounds(bounds);
-                    }
-
-                    childDrawable.mDrawable.setCallback(null);
-                }
-
-                if (drawable != null) {
-                    drawable.setCallback(this);
-                }
-
-                childDrawable.mDrawable = drawable;
-                mLayerState.invalidateCache();
-                return true;
+                return i;
             }
         }
 
-        return false;
+        return -1;
+    }
+
+    /**
+     * Sets the drawable for the layer at the specified index.
+     *
+     * @param index The index of the layer to modify, must be in the range
+     *              {@code 0...getNumberOfLayers()-1}.
+     * @param drawable The drawable to set for the layer.
+     *
+     * @see #getDrawable(int)
+     * @attr ref android.R.styleable#LayerDrawableItem_drawable
+     */
+    public void setDrawable(int index, Drawable drawable) {
+        if (index >= mLayerState.mNum) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        final ChildDrawable[] layers = mLayerState.mChildren;
+        final ChildDrawable childDrawable = layers[index];
+        if (childDrawable.mDrawable != null) {
+            if (drawable != null) {
+                final Rect bounds = childDrawable.mDrawable.getBounds();
+                drawable.setBounds(bounds);
+            }
+
+            childDrawable.mDrawable.setCallback(null);
+        }
+
+        if (drawable != null) {
+            drawable.setCallback(this);
+            drawable.setLayoutDirection(getLayoutDirection());
+            drawable.setLevel(getLevel());
+        }
+
+        childDrawable.mDrawable = drawable;
+        mLayerState.invalidateCache();
+    }
+
+    /**
+     * Returns the drawable for the layer at the specified index.
+     *
+     * @param index The index of the layer, must be in the range
+     *              {@code 0...getNumberOfLayers()-1}.
+     * @return The {@link Drawable} at the specified layer index.
+     *
+     * @see #setDrawable(int, Drawable)
+     * @attr ref android.R.styleable#LayerDrawableItem_drawable
+     */
+    public Drawable getDrawable(int index) {
+        if (index >= mLayerState.mNum) {
+            throw new IndexOutOfBoundsException();
+        }
+        return mLayerState.mChildren[index].mDrawable;
     }
 
     /**
