@@ -62,6 +62,13 @@ public class DisplayMetrics {
     public static final int DENSITY_HIGH = 240;
 
     /**
+     * Intermediate density for screens that sit between {@link #DENSITY_HIGH} (240dpi) and
+     * {@link #DENSITY_XHIGH} (320dpi). This is not a density that applications should target,
+     * instead relying on the system to scale their {@link #DENSITY_XHIGH} assets for them.
+     */
+    public static final int DENSITY_280 = 280;
+
+    /**
      * Standard quantized DPI for extra-high-density screens.
      */
     public static final int DENSITY_XHIGH = 320;
