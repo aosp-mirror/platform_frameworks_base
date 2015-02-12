@@ -433,8 +433,8 @@ application, however, should localize properly.</p>
 <p>To change the locale in the emulator by using the adb shell. </p>
 
 <ol>
-  <li>Pick the locale you want to test and determine its language and region codes, for
-example <code>fr</code> for French and <code>CA</code> for Canada.<br>
+  <li>Pick the locale you want to test and determine its BCP-47 language tag, for
+example, Canadian French would be <code>fr-CA</code>.<br>
   </li>
   <li>Launch an emulator.</li>
   <li>From a command-line shell on the host computer, run the following
@@ -444,16 +444,14 @@ command:<br>
 the <code>-e</code> option:<br>
   <code>adb -e shell</code></li>
   <li>At  the  adb shell prompt (<code>#</code>), run this command: <br>
-    <code>setprop persist.sys.language  [<em>language code</em>];setprop
-persist.sys.country [<em>country  code</em>];stop;sleep 5;start <br>
+    <code>setprop persist.sys.locale [<em>BCP-47 language tag</em>];stop;sleep 5;start <br>
     </code>Replace bracketed sections with the  appropriate codes from Step
 1.</li>
 </ol>
 
 <p>For instance, to test in Canadian French:</p>
 
-<p><code>setprop persist.sys.language  fr;setprop persist.sys.country
-CA;stop;sleep 5;start </code></p>
+<p><code>setprop persist.sys.locale fr-CA;stop;sleep 5;start </code></p>
 
 <p>This will cause the emulator  to restart. (It will look like a full reboot,
 but it is not.) Once the Home screen appears again, re-launch your application (for
