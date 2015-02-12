@@ -931,6 +931,7 @@ public class NotificationManagerService extends SystemService {
             mDisableNotificationEffects = true;
         }
         mZenModeHelper.readZenModeFromSetting();
+        mInterruptionFilter = mZenModeHelper.getZenModeListenerInterruptionFilter();
 
         mUserProfiles.updateCache(getContext());
         listenForCallState();
@@ -1671,6 +1672,7 @@ public class NotificationManagerService extends SystemService {
 
             if (filter == null || zenOnly) {
                 pw.println("\n  Zen Mode:");
+                pw.print("    mInterruptionFilter="); pw.println(mInterruptionFilter);
                 mZenModeHelper.dump(pw, "    ");
 
                 pw.println("\n  Zen Log:");
