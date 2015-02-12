@@ -412,6 +412,7 @@
   <java-symbol type="dimen" name="notification_badge_size" />
   <java-symbol type="dimen" name="immersive_mode_cling_width" />
   <java-symbol type="dimen" name="circular_display_mask_offset" />
+  <java-symbol type="dimen" name="accessibility_magnification_indicator_width" />
 
   <java-symbol type="string" name="add_account_button_label" />
   <java-symbol type="string" name="addToDictionary" />
