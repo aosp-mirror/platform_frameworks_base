@@ -50,7 +50,7 @@
     <string name="root_type_service" msgid="2178854894416775409">"Serviços de armazenamento"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Atalhos"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivos"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"Mais aplicativos"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"Mais apps"</string>
     <string name="empty" msgid="7858882803708117596">"Nenhum item"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Não é possível abrir o arquivo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Não foi possível excluir alguns documentos"</string>
