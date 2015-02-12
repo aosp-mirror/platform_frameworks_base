@@ -397,8 +397,6 @@ final class AccessibilityController {
 
         private final class MagnifiedViewport {
 
-            private static final int DEFAUTLT_BORDER_WIDTH_DIP = 5;
-
             private final SparseArray<WindowState> mTempWindowStates =
                     new SparseArray<WindowState>();
 
@@ -410,6 +408,8 @@ final class AccessibilityController {
 
             private final Region mMagnifiedBounds = new Region();
             private final Region mOldMagnifiedBounds = new Region();
+
+            private final Path mCircularPath;
 
             private final MagnificationSpec mMagnificationSpec = MagnificationSpec.obtain();
 
@@ -425,12 +425,22 @@ final class AccessibilityController {
 
             public MagnifiedViewport() {
                 mWindowManager = (WindowManager) mContext.getSystemService(Service.WINDOW_SERVICE);
-                mBorderWidth = TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP, DEFAUTLT_BORDER_WIDTH_DIP,
-                                mContext.getResources().getDisplayMetrics());
+                mBorderWidth = mContext.getResources().getDimension(
+                        com.android.internal.R.dimen.accessibility_magnification_indicator_width);
                 mHalfBorderWidth = (int) Math.ceil(mBorderWidth / 2);
                 mDrawBorderInset = (int) mBorderWidth / 2;
                 mWindow = new ViewportWindow(mContext);
+
+                if (mContext.getResources().getBoolean(
+                            com.android.internal.R.bool.config_windowIsRound)) {
+                    mCircularPath = new Path();
+                    mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
+                    final int centerXY = mTempPoint.x / 2;
+                    mCircularPath.addCircle(centerXY, centerXY, centerXY, Path.Direction.CW);
+                } else {
+                    mCircularPath = null;
+                }
+
                 recomputeBoundsLocked();
             }
 
@@ -458,6 +468,10 @@ final class AccessibilityController {
 
                 Region availableBounds = mTempRegion1;
                 availableBounds.set(0, 0, screenWidth, screenHeight);
+
+                if (mCircularPath != null) {
+                    availableBounds.setPath(mCircularPath, availableBounds);
+                }
 
                 Region nonMagnifiedBounds = mTempRegion4;
                 nonMagnifiedBounds.set(0, 0, 0, 0);
