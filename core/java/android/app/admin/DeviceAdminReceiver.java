@@ -170,10 +170,10 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * lock task mode from an authorized package.  The extra {@link #EXTRA_LOCK_TASK_PACKAGE}
      * will describe the authorized package using lock task mode.
      *
-     * @see DevicePolicyManager#isLockTaskPermitted(String)
-     *
      * <p>The calling device admin must be the device owner or profile
      * owner to receive this broadcast.
+     *
+     * @see DevicePolicyManager#isLockTaskPermitted(String)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCK_TASK_ENTERING
@@ -183,20 +183,19 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * Action sent to a device administrator to notify that the device is exiting
      * lock task mode from an authorized package.
      *
-     * @see DevicePolicyManager#isLockTaskPermitted(String)
-     *
      * <p>The calling device admin must be the device owner or profile
      * owner to receive this broadcast.
+     *
+     * @see DevicePolicyManager#isLockTaskPermitted(String)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOCK_TASK_EXITING
             = "android.app.action.LOCK_TASK_EXITING";
 
     /**
-     * A boolean describing whether the device is currently entering or exiting
-     * lock task mode.
+     * A string containing the name of the package entering lock task mode.
      *
-     * @see #ACTION_LOCK_TASK_CHANGED
+     * @see #ACTION_LOCK_TASK_ENTERING
      */
     public static final String EXTRA_LOCK_TASK_PACKAGE =
             "android.app.extra.LOCK_TASK_PACKAGE";
