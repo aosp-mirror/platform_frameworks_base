@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Path;
 import android.util.AttributeSet;
-import android.util.FloatMath;
 
 /**
  * A PathMotion that generates a curved path along an arc on an imaginary circle containing
@@ -257,7 +256,7 @@ public class ArcMotion extends PathMotion {
             }
             if (newArcDistance2 != 0) {
                 float ratio2 = newArcDistance2 / arcDist2;
-                float ratio = FloatMath.sqrt(ratio2);
+                float ratio = (float) Math.sqrt(ratio2);
                 ex = dx + (ratio * (ex - dx));
                 ey = dy + (ratio * (ey - dy));
             }
