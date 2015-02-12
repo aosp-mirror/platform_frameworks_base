@@ -50,6 +50,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.IRingtonePlayer;
 import android.net.Uri;
@@ -179,6 +180,7 @@ public class NotificationManagerService extends SystemService {
 
     private IActivityManager mAm;
     AudioManager mAudioManager;
+    AudioManagerInternal mAudioManagerInternal;
     StatusBarManagerInternal mStatusBar;
     Vibrator mVibrator;
 
@@ -996,6 +998,7 @@ public class NotificationManagerService extends SystemService {
 
             // Grab our optional AudioService
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            mAudioManagerInternal = getLocalService(AudioManagerInternal.class);
             mZenModeHelper.onSystemReady();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
@@ -1468,7 +1471,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ZenModeConfig getZenModeConfig() {
-            enforceSystemOrSystemUI("INotificationManager.getZenModeConfig");
+            enforceSystemOrSystemUIOrVolume("INotificationManager.getZenModeConfig");
             return mZenModeHelper.getConfig();
         }
 
@@ -1476,6 +1479,17 @@ public class NotificationManagerService extends SystemService {
         public boolean setZenModeConfig(ZenModeConfig config) {
             checkCallerIsSystem();
             return mZenModeHelper.setConfig(config);
+        }
+
+        @Override
+        public void setZenMode(int mode) throws RemoteException {
+            enforceSystemOrSystemUIOrVolume("INotificationManager.setZenMode");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mZenModeHelper.setZenMode(mode, "NotificationManager");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override
@@ -1493,13 +1507,13 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void requestZenModeConditions(IConditionListener callback, int relevance) {
-            enforceSystemOrSystemUI("INotificationManager.requestZenModeConditions");
+            enforceSystemOrSystemUIOrVolume("INotificationManager.requestZenModeConditions");
             mConditionProviders.requestZenModeConditions(callback, relevance);
         }
 
         @Override
         public void setZenModeCondition(Condition condition) {
-            enforceSystemOrSystemUI("INotificationManager.setZenModeCondition");
+            enforceSystemOrSystemUIOrVolume("INotificationManager.setZenModeCondition");
             final long identity = Binder.clearCallingIdentity();
             try {
                 mConditionProviders.setZenModeCondition(condition, "binderCall");
@@ -1518,6 +1532,16 @@ public class NotificationManagerService extends SystemService {
         public Condition[] getAutomaticZenModeConditions() {
             enforceSystemOrSystemUI("INotificationManager.getAutomaticZenModeConditions");
             return mConditionProviders.getAutomaticZenModeConditions();
+        }
+
+        private void enforceSystemOrSystemUIOrVolume(String message) {
+            if (mAudioManagerInternal != null) {
+                final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
+                if (vcuid > 0 && Binder.getCallingUid() == vcuid) {
+                    return;
+                }
+            }
+            enforceSystemOrSystemUI(message);
         }
 
         private void enforceSystemOrSystemUI(String message) {
@@ -1541,7 +1565,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public ComponentName getEffectsSuppressor() {
-            enforceSystemOrSystemUI("INotificationManager.getEffectsSuppressor");
+            enforceSystemOrSystemUIOrVolume("INotificationManager.getEffectsSuppressor");
             return mEffectsSuppressor;
         }
 
@@ -1558,7 +1582,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean isSystemConditionProviderEnabled(String path) {
-            enforceSystemOrSystemUI("INotificationManager.isSystemConditionProviderEnabled");
+            enforceSystemOrSystemUIOrVolume("INotificationManager.isSystemConditionProviderEnabled");
             return mConditionProviders.isSystemConditionProviderEnabled(path);
         }
     };

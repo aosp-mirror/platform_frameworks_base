@@ -40,6 +40,7 @@
     <item type="id" name="notification_power"/>
     <item type="id" name="notification_screenshot"/>
     <item type="id" name="notification_hidden"/>
+    <item type="id" name="notification_volumeui"/>
 
     <!-- Whether the icon is from a notification for which targetSdk < L -->
     <item type="id" name="icon_is_pre_L"/>

@@ -15,8 +15,6 @@
  */
 package android.media;
 
-import android.os.IBinder;
-
 import com.android.server.LocalServices;
 
 /**
@@ -46,6 +44,8 @@ public abstract class AudioManagerInternal {
     public abstract int getRingerModeInternal();
 
     public abstract void setRingerModeInternal(int ringerMode, String caller);
+
+    public abstract int getVolumeControllerUid();
 
     public interface RingerModeDelegate {
         /** Called when external ringer mode is evaluated, returns the new internal ringer mode */

@@ -27,6 +27,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.service.notification.Condition;
+import android.service.notification.IConditionListener;
+import android.service.notification.ZenModeConfig;
 import android.util.Log;
 
 /**
@@ -274,6 +277,54 @@ public class NotificationManager
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void setZenMode(int mode) {
+        INotificationManager service = getService();
+        try {
+            service.setZenMode(mode);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void requestZenModeConditions(IConditionListener listener, int relevance) {
+        INotificationManager service = getService();
+        try {
+            service.requestZenModeConditions(listener, relevance);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void setZenModeCondition(Condition exitCondition) {
+        INotificationManager service = getService();
+        try {
+            service.setZenModeCondition(exitCondition);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public Condition getZenModeCondition() {
+        INotificationManager service = getService();
+        try {
+            final ZenModeConfig config = service.getZenModeConfig();
+            if (config != null) {
+                return config.exitCondition;
+            }
+        } catch (RemoteException e) {
+        }
+        return null;
     }
 
     private Context mContext;
