@@ -16402,15 +16402,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         if (isPersist) {
             SystemProperties.set("persist.sys.locale", languageTag);
-
-            // These values are *deprecated*, use persist.sys.locale instead.
-            //
-            // TODO: Stop setting these values once all code that references
-            // them has been removed.
-            SystemProperties.set("persist.sys.language", l.getLanguage());
-            SystemProperties.set("persist.sys.country", l.getCountry());
-            SystemProperties.set("persist.sys.localevar", l.getVariant());
-
             mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG, l));
         }
     }
