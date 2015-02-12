@@ -355,7 +355,7 @@ public class ZygoteInit {
                 Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
             }
             if (id != 0) {
-                if (mResources.getColorStateList(id) == null) {
+                if (mResources.getColorStateList(id, null) == null) {
                     throw new IllegalArgumentException(
                             "Unable to find preloaded color resource #0x"
                             + Integer.toHexString(id)

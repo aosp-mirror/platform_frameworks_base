@@ -1208,7 +1208,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@inheritDoc}
      */
     public void bringChildToFront(View child) {
-        int index = indexOfChild(child);
+        final int index = indexOfChild(child);
         if (index >= 0) {
             removeFromArray(index);
             addInArray(child, mChildrenCount);
@@ -3771,7 +3771,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@link #dispatchDraw(android.graphics.Canvas)} or any related method.</p>
      *
      * @param child the child view to add
-     * @param index the position at which to add the child
+     * @param index the position at which to add the child or -1 to add last
      * @param params the layout parameters to set on the child
      */
     public void addView(View child, int index, LayoutParams params) {
@@ -3887,7 +3887,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * If index is negative, it means put it at the end of the list.
      *
      * @param child the view to add to the group
-     * @param index the index at which the child must be added
+     * @param index the index at which the child must be added or -1 to add last
      * @param params the layout parameters to associate with the child
      * @return true if the child was added, false otherwise
      */
@@ -3902,7 +3902,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * If index is negative, it means put it at the end of the list.
      *
      * @param child the view to add to the group
-     * @param index the index at which the child must be added
+     * @param index the index at which the child must be added or -1 to add last
      * @param params the layout parameters to associate with the child
      * @param preventRequestLayout if true, calling this method will not trigger a
      *        layout request on child
