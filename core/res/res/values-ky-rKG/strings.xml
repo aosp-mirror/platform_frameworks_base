@@ -1404,43 +1404,11 @@
     <skip />
     <!-- no translation found for beforeOneMonthDurationPast (909134546836499826) -->
     <skip />
-    <!-- no translation found for num_seconds_ago:one (4869870056547896011) -->
-    <!-- no translation found for num_seconds_ago:other (3903706804349556379) -->
-    <!-- no translation found for num_minutes_ago:one (3306787433088810191) -->
-    <!-- no translation found for num_minutes_ago:other (2176942008915455116) -->
-    <!-- no translation found for num_hours_ago:one (9150797944610821849) -->
-    <!-- no translation found for num_hours_ago:other (2467273239587587569) -->
     <!-- no translation found for last_num_days:other (3069992808164318268) -->
     <!-- no translation found for last_month (3959346739979055432) -->
     <skip />
     <!-- no translation found for older (5211975022815554840) -->
     <skip />
-    <!-- no translation found for num_days_ago:one (861358534398115820) -->
-    <!-- no translation found for num_days_ago:other (2479586466153314633) -->
-    <!-- no translation found for in_num_seconds:one (2729745560954905102) -->
-    <!-- no translation found for in_num_seconds:other (1241926116443974687) -->
-    <!-- no translation found for in_num_minutes:one (8793095251325200395) -->
-    <!-- no translation found for in_num_minutes:other (3330713936399448749) -->
-    <!-- no translation found for in_num_hours:one (7164353342477769999) -->
-    <!-- no translation found for in_num_hours:other (547290677353727389) -->
-    <!-- no translation found for in_num_days:one (5413088743009839518) -->
-    <!-- no translation found for in_num_days:other (5109449375100953247) -->
-    <!-- no translation found for abbrev_num_seconds_ago:one (1849036840200069118) -->
-    <!-- no translation found for abbrev_num_seconds_ago:other (3699169366650930415) -->
-    <!-- no translation found for abbrev_num_minutes_ago:one (6361490147113871545) -->
-    <!-- no translation found for abbrev_num_minutes_ago:other (851164968597150710) -->
-    <!-- no translation found for abbrev_num_hours_ago:one (4796212039724722116) -->
-    <!-- no translation found for abbrev_num_hours_ago:other (6889970745748538901) -->
-    <!-- no translation found for abbrev_num_days_ago:one (8463161711492680309) -->
-    <!-- no translation found for abbrev_num_days_ago:other (3453342639616481191) -->
-    <!-- no translation found for abbrev_in_num_seconds:one (5842225370795066299) -->
-    <!-- no translation found for abbrev_in_num_seconds:other (5495880108825805108) -->
-    <!-- no translation found for abbrev_in_num_minutes:one (562786149928284878) -->
-    <!-- no translation found for abbrev_in_num_minutes:other (4216113292706568726) -->
-    <!-- no translation found for abbrev_in_num_hours:one (3274708118124045246) -->
-    <!-- no translation found for abbrev_in_num_hours:other (3705373766798013406) -->
-    <!-- no translation found for abbrev_in_num_days:one (2178576254385739855) -->
-    <!-- no translation found for abbrev_in_num_days:other (2973062968038355991) -->
     <!-- no translation found for preposition_for_date (9093949757757445117) -->
     <skip />
     <!-- no translation found for preposition_for_time (5506831244263083793) -->

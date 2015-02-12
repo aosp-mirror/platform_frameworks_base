@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ចង់​បើក​ការ​រុករ​ក​ដោយ​ប៉ះ។ ពេល​រុករក​ដោយ​ប៉ះ​ត្រូវ​បាន​បើក​​ អ្នក​អាច​ស្ដាប់​ឮ​ ឬ​ឃើញ​ការ​ពណ៌នា​អ្វី​ដែល​នៅ​ក្រោម​ម្រាមដៃ​របស់​អ្នក​​ ឬ​អនុវត្ត​កាយវិការ​ដើម្បី​មាន​អន្តរកម្ម​ជា​មួយ​ទូរស័ព្ទ។"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ខែ​មុន"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"មុន​ពេល ១ ខែ​មុន"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"១ វិនាទី​មុន"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> វិនាទី​មុន"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"១ នាទី​មុន"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> នាទី​​មុន"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"១ ម៉ោង​មុន"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ម៉ោង​មុន"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ​ចុងក្រោយ"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"ខែ​មុន"</string>
     <string name="older" msgid="5211975022815554840">"ចាស់​ជាង"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ម្សិលមិញ"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ​មុន"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"ក្នុង​រយៈ​ពេល ១ វិនាទី"</item>
-    <item quantity="other" msgid="1241926116443974687">"ក្នុង​រយៈ​ពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"ក្នុង​រយៈពេល ១ នាទី"</item>
-    <item quantity="other" msgid="3330713936399448749">"រយៈពេល <xliff:g id="COUNT">%d</xliff:g> នាទី"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"រយៈពេល ១ ម៉ោង"</item>
-    <item quantity="other" msgid="547290677353727389">"រយៈពេល <xliff:g id="COUNT">%d</xliff:g> ម៉ោង"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"ថ្ងៃស្អែក"</item>
-    <item quantity="other" msgid="5109449375100953247">"រយៈពេល <xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"១ វិនាទី​មុន"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> វិនាទី​មុន"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"១ នាទី​មុន"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> នាទី​​មុន"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"១ ម៉ោង​មុន"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> ម៉ោង​មុន"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"ម្សិលមិញ"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ​​មុន"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"ក្នុង​ពេល​ 1 វិនាទី"</item>
-    <item quantity="other" msgid="5495880108825805108">"ក្នុង​ពេល <xliff:g id="COUNT">%d</xliff:g> វិនាទី"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"ក្នុង​ពេល 1 នាទី"</item>
-    <item quantity="other" msgid="4216113292706568726">"នៅ​រយៈពេល <xliff:g id="COUNT">%d</xliff:g> នាទី"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"ក្នុង​រយៈ​ពេល ១ ម៉ោង"</item>
-    <item quantity="other" msgid="3705373766798013406">"ក្នុង​រយៈ​ពេល <xliff:g id="COUNT">%d</xliff:g> ម៉ោង"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"ថ្ងៃស្អែក"</item>
-    <item quantity="other" msgid="2973062968038355991">"ក្នុង​រយៈ​ពេល <xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"នៅ <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"នៅ​ម៉ោង <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"ក្នុង​ឆ្នាំ <xliff:g id="YEAR">%s</xliff:g>"</string>

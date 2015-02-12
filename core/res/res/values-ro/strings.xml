@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> doreşte să activeze funcţia Exploraţi prin atingere. Când această funcţie este activată, puteţi auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteţi efectua gesturi pentru a interacţiona cu telefonul."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"cu 1 lună în urmă"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Cu mai mult de 1 lună în urmă"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"cu 1 secundă în urmă"</item>
-    <item quantity="other" msgid="3903706804349556379">"cu <xliff:g id="COUNT">%d</xliff:g> (de) secunde în urmă"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"cu 1 minut în urmă"</item>
-    <item quantity="other" msgid="2176942008915455116">"cu <xliff:g id="COUNT">%d</xliff:g> (de) minute în urmă"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"cu 1 oră în urmă"</item>
-    <item quantity="other" msgid="2467273239587587569">"cu <xliff:g id="COUNT">%d</xliff:g> (de) ore în urmă"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Ultimele <xliff:g id="COUNT">%d</xliff:g> de zile"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Luna trecută"</string>
     <string name="older" msgid="5211975022815554840">"Mai vechi"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"ieri"</item>
-    <item quantity="other" msgid="2479586466153314633">"cu <xliff:g id="COUNT">%d</xliff:g> (de) zile în urmă"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"într-o secundă"</item>
-    <item quantity="other" msgid="1241926116443974687">"în <xliff:g id="COUNT">%d</xliff:g> (de) secunde"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"în 1 minut"</item>
-    <item quantity="other" msgid="3330713936399448749">"în <xliff:g id="COUNT">%d</xliff:g> (de) minute"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"în 1 oră"</item>
-    <item quantity="other" msgid="547290677353727389">"în <xliff:g id="COUNT">%d</xliff:g> (de) ore"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"mâine"</item>
-    <item quantity="other" msgid="5109449375100953247">"în <xliff:g id="COUNT">%d</xliff:g> (de) zile"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"cu 1 sec. în urmă"</item>
-    <item quantity="other" msgid="3699169366650930415">"cu <xliff:g id="COUNT">%d</xliff:g> (de) secunde în urmă"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"cu 1 min. în urmă"</item>
-    <item quantity="other" msgid="851164968597150710">"cu <xliff:g id="COUNT">%d</xliff:g> (de) min. în urmă"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"cu 1 oră în urmă"</item>
-    <item quantity="other" msgid="6889970745748538901">"cu <xliff:g id="COUNT">%d</xliff:g> (de) ore în urmă"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"ieri"</item>
-    <item quantity="other" msgid="3453342639616481191">"cu <xliff:g id="COUNT">%d</xliff:g> (de) zile în urmă"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"în 1 sec."</item>
-    <item quantity="other" msgid="5495880108825805108">"în <xliff:g id="COUNT">%d</xliff:g> (de) sec."</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"în 1 min."</item>
-    <item quantity="other" msgid="4216113292706568726">"în <xliff:g id="COUNT">%d</xliff:g> (de) min."</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"în 1 oră"</item>
-    <item quantity="other" msgid="3705373766798013406">"în <xliff:g id="COUNT">%d</xliff:g> (de) ore"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"mâine"</item>
-    <item quantity="other" msgid="2973062968038355991">"în <xliff:g id="COUNT">%d</xliff:g> (de) zile"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"pe <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"la <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"în <xliff:g id="YEAR">%s</xliff:g>"</string>

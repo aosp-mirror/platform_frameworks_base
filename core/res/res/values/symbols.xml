@@ -1037,27 +1037,11 @@
   <java-symbol type="string" name="config_ethernet_tcp_buffers" />
   <java-symbol type="string" name="config_wifi_tcp_buffers" />
 
-  <java-symbol type="plurals" name="abbrev_in_num_days" />
-  <java-symbol type="plurals" name="abbrev_in_num_hours" />
-  <java-symbol type="plurals" name="abbrev_in_num_minutes" />
-  <java-symbol type="plurals" name="abbrev_in_num_seconds" />
-  <java-symbol type="plurals" name="abbrev_num_days_ago" />
-  <java-symbol type="plurals" name="abbrev_num_hours_ago" />
-  <java-symbol type="plurals" name="abbrev_num_minutes_ago" />
-  <java-symbol type="plurals" name="abbrev_num_seconds_ago" />
   <java-symbol type="plurals" name="duration_hours" />
   <java-symbol type="plurals" name="duration_minutes" />
   <java-symbol type="plurals" name="duration_seconds" />
-  <java-symbol type="plurals" name="in_num_days" />
-  <java-symbol type="plurals" name="in_num_hours" />
-  <java-symbol type="plurals" name="in_num_minutes" />
-  <java-symbol type="plurals" name="in_num_seconds" />
   <java-symbol type="plurals" name="last_num_days" />
   <java-symbol type="plurals" name="matches_found" />
-  <java-symbol type="plurals" name="num_days_ago" />
-  <java-symbol type="plurals" name="num_hours_ago" />
-  <java-symbol type="plurals" name="num_minutes_ago" />
-  <java-symbol type="plurals" name="num_seconds_ago" />
   <java-symbol type="plurals" name="restr_pin_countdown" />
   <java-symbol type="plurals" name="pinpuk_attempts" />
 
