@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.graphics.PorterDuff;
 import com.android.internal.R;
@@ -50,7 +51,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
  */
 public abstract class CompoundButton extends Button implements Checkable {
     private boolean mChecked;
-    private int mButtonResource;
     private boolean mBroadcasting;
 
     private Drawable mButtonDrawable;
@@ -197,51 +197,59 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     /**
-     * Set the button graphic to a given Drawable, identified by its resource
-     * id.
+     * Sets a drawable as the compound button image given its resource
+     * identifier.
      *
-     * @param resid the resource id of the drawable to use as the button
-     *        graphic
+     * @param resId the resource identifier of the drawable
+     * @attr ref android.R.styleable#CompoundButton_button
      */
-    public void setButtonDrawable(int resid) {
-        if (resid != 0 && resid == mButtonResource) {
-            return;
-        }
-
-        mButtonResource = resid;
-
-        Drawable d = null;
-        if (mButtonResource != 0) {
-            d = getContext().getDrawable(mButtonResource);
+    public void setButtonDrawable(@DrawableRes int resId) {
+        final Drawable d;
+        if (resId != 0) {
+            d = getContext().getDrawable(resId);
+        } else {
+            d = null;
         }
         setButtonDrawable(d);
     }
 
     /**
-     * Set the button graphic to a given Drawable
+     * Sets a drawable as the compound button image.
      *
-     * @param d The Drawable to use as the button graphic
+     * @param drawable the drawable to set
+     * @attr ref android.R.styleable#CompoundButton_button
      */
-    public void setButtonDrawable(Drawable d) {
-        if (mButtonDrawable != d) {
+    @Nullable
+    public void setButtonDrawable(@Nullable Drawable drawable) {
+        if (mButtonDrawable != drawable) {
             if (mButtonDrawable != null) {
                 mButtonDrawable.setCallback(null);
                 unscheduleDrawable(mButtonDrawable);
             }
 
-            mButtonDrawable = d;
+            mButtonDrawable = drawable;
 
-            if (d != null) {
-                d.setCallback(this);
-                d.setLayoutDirection(getLayoutDirection());
-                if (d.isStateful()) {
-                    d.setState(getDrawableState());
+            if (drawable != null) {
+                drawable.setCallback(this);
+                drawable.setLayoutDirection(getLayoutDirection());
+                if (drawable.isStateful()) {
+                    drawable.setState(getDrawableState());
                 }
-                d.setVisible(getVisibility() == VISIBLE, false);
-                setMinHeight(d.getIntrinsicHeight());
+                drawable.setVisible(getVisibility() == VISIBLE, false);
+                setMinHeight(drawable.getIntrinsicHeight());
                 applyButtonTint();
             }
         }
+    }
+
+    /**
+     * @return the drawable used as the compound button image
+     * @see #setButtonDrawable(Drawable)
+     * @see #setButtonDrawable(int)
+     */
+    @Nullable
+    public Drawable getButtonDrawable() {
+        return mButtonDrawable;
     }
 
     /**

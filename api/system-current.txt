@@ -40243,6 +40243,7 @@ package android.widget {
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int);
     ctor public CompoundButton(android.content.Context, android.util.AttributeSet, int, int);
+    method public android.graphics.drawable.Drawable getButtonDrawable();
     method public android.content.res.ColorStateList getButtonTintList();
     method public android.graphics.PorterDuff.Mode getButtonTintMode();
     method public boolean isChecked();
