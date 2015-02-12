@@ -2636,9 +2636,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // 100 percent is full good, 0 is full bad.
     public void reportInetCondition(int networkType, int percentage) {
-        if (percentage > 50) return;  // don't handle good network reports
         NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
-        if (nai != null) reportBadNetwork(nai.network);
+        if (nai == null) return;
+        boolean isGood = percentage > 50;
+        // Revalidate if the app report does not match our current validated state.
+        if (isGood != nai.lastValidated) {
+            // Make the message logged by reportBadNetwork below less confusing.
+            if (DBG && isGood) log("reportInetCondition: type=" + networkType + " ok, revalidate");
+            reportBadNetwork(nai.network);
+        }
     }
 
     public void reportBadNetwork(Network network) {
