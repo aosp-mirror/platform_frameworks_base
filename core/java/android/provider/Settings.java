@@ -2098,7 +2098,7 @@ public final class Settings {
             @Override
             public boolean validate(String value) {
                 // TODO: No idea what the correct format is.
-                return value == null || value.length() > MAX_LENGTH;
+                return value == null || value.length() < MAX_LENGTH;
             }
         };
 
