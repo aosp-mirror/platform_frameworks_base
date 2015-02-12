@@ -18,6 +18,7 @@ package android.app;
 
 import com.android.internal.app.WindowDecorActionBar;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -476,6 +477,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @param id the identifier of the view to find
      * @return The view with the given id or null.
      */
+    @Nullable
     public View findViewById(int id) {
         return mWindow.findViewById(id);
     }

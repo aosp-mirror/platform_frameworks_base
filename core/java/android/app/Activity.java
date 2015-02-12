@@ -743,6 +743,7 @@ public class Activity extends ContextThemeWrapper
     final FragmentManagerImpl mFragments = new FragmentManagerImpl();
     final FragmentContainer mContainer = new FragmentContainer() {
         @Override
+        @Nullable
         public View findViewById(int id) {
             return Activity.this.findViewById(id);
         }
@@ -2068,6 +2069,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @return The view if found or null otherwise.
      */
+    @Nullable
     public View findViewById(int id) {
         return getWindow().findViewById(id);
     }

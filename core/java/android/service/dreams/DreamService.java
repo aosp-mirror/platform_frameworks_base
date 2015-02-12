@@ -18,6 +18,7 @@ package android.service.dreams;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.AlarmManager;
@@ -442,6 +443,7 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @return The view if found or null otherwise.
      */
+    @Nullable
     public View findViewById(int id) {
         return getWindow().findViewById(id);
     }
