@@ -184,6 +184,28 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         doTestQueryStringInBracketsViaProviderApiForType(SETTING_TYPE_SYSTEM);
     }
 
+    public void testQueryStringWithAppendedNameToUriViaProviderApi() throws Exception {
+        // Make sure we have a clean slate.
+        deleteStringViaProviderApi(SETTING_TYPE_SYSTEM, FAKE_SETTING_NAME);
+
+        try {
+            // Insert the setting.
+            final Uri uri = insertStringViaProviderApi(SETTING_TYPE_SYSTEM, FAKE_SETTING_NAME,
+                    FAKE_SETTING_VALUE, false);
+            Uri expectUri = Uri.withAppendedPath(getBaseUriForType(SETTING_TYPE_SYSTEM),
+                    FAKE_SETTING_NAME);
+            assertEquals("Did not get expected Uri.", expectUri, uri);
+
+            // Make sure the first setting is there.
+            String firstValue = queryStringViaProviderApi(SETTING_TYPE_SYSTEM, FAKE_SETTING_NAME,
+                    false, true);
+            assertEquals("Setting must be present", FAKE_SETTING_VALUE, firstValue);
+        } finally {
+            // Clean up.
+            deleteStringViaProviderApi(SETTING_TYPE_SYSTEM, FAKE_SETTING_NAME);
+        }
+    }
+
     private void doTestQueryStringInBracketsViaProviderApiForType(int type) {
         // Make sure we have a clean slate.
         deleteStringViaProviderApi(type, FAKE_SETTING_NAME);
@@ -196,7 +218,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             assertEquals("Did not get expected Uri.", expectUri, uri);
 
             // Make sure the first setting is there.
-            String firstValue = queryStringViaProviderApi(type, FAKE_SETTING_NAME, true);
+            String firstValue = queryStringViaProviderApi(type, FAKE_SETTING_NAME, true, false);
             assertEquals("Setting must be present", FAKE_SETTING_VALUE, firstValue);
         } finally {
             // Clean up.

@@ -1228,6 +1228,7 @@ public class SettingsProvider extends ContentProvider {
                             && whereArgs.length == 1) {
                         name = whereArgs[0];
                         table = computeTableForSetting(uri, name);
+                        return;
                     } else if (where != null
                             && (WHERE_PATTERN_NO_PARAM_NO_BRACKETS.matcher(where).matches()
                                 || WHERE_PATTERN_NO_PARAM_IN_BRACKETS.matcher(where).matches())) {
@@ -1237,30 +1238,35 @@ public class SettingsProvider extends ContentProvider {
                                 where.lastIndexOf("\""));
                         name = where.substring(startIndex, endIndex);
                         table = computeTableForSetting(uri, name);
+                        return;
                     } else if (supportAll && where == null && whereArgs == null) {
                         name = null;
                         table = computeTableForSetting(uri, null);
-                    } else if (uri.getPathSegments().size() == 2
-                            && where == null && whereArgs == null) {
-                        name = uri.getPathSegments().get(1);
-                        table = computeTableForSetting(uri, name);
-                    } else {
-                        EventLogTags.writeUnsupportedSettingsQuery(
-                                uri.toSafeString(), where, Arrays.toString(whereArgs));
-                        throw new IllegalArgumentException("Only null where and args"
-                                + " or name=? where and a single arg or name='SOME_SETTING' "
-                                + "are supported uri: " + uri + " where: " + where + " args: "
-                                + Arrays.toString(whereArgs));
+                        return;
                     }
                 } break;
 
-                default: {
-                    throw new IllegalArgumentException("Invalid URI: " + uri);
-                }
+                case 2: {
+                    if (where == null && whereArgs == null) {
+                        name = uri.getPathSegments().get(1);
+                        table = computeTableForSetting(uri, name);
+                        return;
+                    }
+                } break;
             }
+
+            EventLogTags.writeUnsupportedSettingsQuery(
+                    uri.toSafeString(), where, Arrays.toString(whereArgs));
+            String message = String.format( "Supported SQL:\n"
+                    + "  uri content://some_table/some_property with null where and where args\n"
+                    + "  uri content://some_table with query name=? and single name as arg\n"
+                    + "  uri content://some_table with query name=some_name and null args\n"
+                    + "  but got - uri:%1s, where:%2s whereArgs:%3s", uri, where,
+                    Arrays.toString(whereArgs));
+            throw new IllegalArgumentException(message);
         }
 
-        public static String computeTableForSetting(Uri uri, String name) {
+        private static String computeTableForSetting(Uri uri, String name) {
             String table = getValidTableOrThrow(uri);
 
             if (name != null) {
