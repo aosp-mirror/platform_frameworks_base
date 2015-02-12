@@ -182,7 +182,7 @@ public abstract class Visibility extends Transition {
         return visibility == View.VISIBLE && parent != null;
     }
 
-    private static VisibilityInfo getVisibilityChangeInfo(TransitionValues startValues,
+    private VisibilityInfo getVisibilityChangeInfo(TransitionValues startValues,
             TransitionValues endValues) {
         final VisibilityInfo visInfo = new VisibilityInfo();
         visInfo.visibilityChange = false;
@@ -484,7 +484,7 @@ public abstract class Visibility extends Transition {
     }
 
     @Override
-    protected boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
+    boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
         if (oldValues == null && newValues == null) {
             return false;
         }

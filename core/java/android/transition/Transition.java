@@ -1762,17 +1762,7 @@ public abstract class Transition implements Cloneable {
         runAnimators();
     }
 
-    /**
-     * Returns whether transition values have changed between the start scene and the end scene
-     * (thus determining whether animation is required). The default implementation compares the
-     * property values returned from {@link #getTransitionProperties()}, or all property values if
-     * {@code getTransitionProperties()} returns null. Subclasses may override this method to
-     * provide logic more specific to their transition implementation.
-     *
-     * @param oldValues the first set of values, may be {@code null}
-     * @param newValues the second set of values, may be {@code null}
-     */
-    protected boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
+    boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
         boolean valuesChanged = false;
         // if oldValues null, then transition didn't care to stash values,
         // and won't get canceled
