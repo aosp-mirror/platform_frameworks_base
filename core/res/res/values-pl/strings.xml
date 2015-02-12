@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Tryb samolotowy jest włączony"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Tryb samolotowy jest wyłączony"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Ustawienia"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Asystent głosowy"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Zablokuj teraz"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Tryb awaryjny"</string>
@@ -1649,7 +1650,7 @@
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Wyświetlacz bezprzewodowy"</string>
     <string name="media_route_button_content_description" msgid="591703006349356016">"Przesyłaj"</string>
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Połącz z urządzeniem"</string>
-    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prezentuj ekran na urządzeniu"</string>
+    <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Prześlij ekran na urządzenie"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Szukam urządzeń…"</string>
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"Ustawienia"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"Rozłącz"</string>

@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"KVEIKT er á flugstillingu"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"SLÖKKT er á flugstillingu"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Stillingar"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Raddaðstoð"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Læsa núna"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Örugg stilling"</string>
@@ -900,7 +901,7 @@
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Brúðkaupsafmæli"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Annað"</string>
     <string name="emailTypeCustom" msgid="8525960257804213846">"Sérsniðið"</string>
-    <string name="emailTypeHome" msgid="449227236140433919">"Heim"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Heima"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Vinna"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Annað"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Farsími"</string>
