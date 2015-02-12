@@ -275,7 +275,8 @@ final class SettingsState {
 
         if (newSize > mMaxBytesPerAppPackage) {
             throw new IllegalStateException("You are adding too many system settings. "
-                    + "You should stop using system settings for app specific data.");
+                    + "You should stop using system settings for app specific data"
+                    + " package: " + packageName);
         }
 
         if (DEBUG) {

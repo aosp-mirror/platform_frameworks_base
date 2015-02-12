@@ -136,16 +136,27 @@ abstract class BaseSettingsProviderTest extends AndroidTestCase {
     }
 
     protected String queryStringViaProviderApi(int type, String name) {
-        return queryStringViaProviderApi(type, name, false);
+        return queryStringViaProviderApi(type, name, false, false);
     }
 
-    protected String queryStringViaProviderApi(int type, String name, boolean queryStringInQuotes) {
-        Uri uri = getBaseUriForType(type);
+    protected String queryStringViaProviderApi(int type, String name, boolean queryStringInQuotes,
+            boolean appendNameToUri) {
+        final Uri uri;
+        final String queryString;
+        final String[] queryArgs;
 
-        String queryString = queryStringInQuotes ? "(name=?)" : "name=?";
+        if (appendNameToUri) {
+            uri = Uri.withAppendedPath(getBaseUriForType(type), name);
+            queryString = null;
+            queryArgs = null;
+        } else {
+            uri = getBaseUriForType(type);
+            queryString = queryStringInQuotes ? "(name=?)" : "name=?";
+            queryArgs = new String[]{name};
+        }
 
         Cursor cursor = getContext().getContentResolver().query(uri, NAME_VALUE_COLUMNS,
-                queryString, new String[]{name}, null);
+                queryString, queryArgs, null);
 
         if (cursor == null) {
             return null;
