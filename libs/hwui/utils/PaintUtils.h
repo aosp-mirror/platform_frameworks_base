@@ -37,6 +37,13 @@ public:
         return resultMode;
     }
 
+    static inline GLenum getFilter(const SkPaint* paint) {
+        if (!paint || paint->getFilterLevel() != SkPaint::kNone_FilterLevel) {
+            return GL_LINEAR;
+        }
+        return GL_NEAREST;
+    }
+
     // TODO: move to a method on android:Paint? replace with SkPaint::nothingToDraw()?
     static inline bool paintWillNotDraw(const SkPaint& paint) {
         return paint.getAlpha() == 0

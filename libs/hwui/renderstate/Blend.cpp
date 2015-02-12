@@ -119,7 +119,7 @@ void Blend::setFactors(GLenum srcMode, GLenum dstMode) {
             mEnabled = true;
         }
 
-        if (srcMode != mSrcMode || dstMode != mSrcMode) {
+        if (srcMode != mSrcMode || dstMode != mDstMode) {
             glBlendFunc(srcMode, dstMode);
             mSrcMode = srcMode;
             mDstMode = dstMode;

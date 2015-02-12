@@ -209,23 +209,25 @@ void RenderState::postDecStrong(VirtualLightRefBase* object) {
 
 void RenderState::render(const Glop& glop) {
     const Glop::Mesh& mesh = glop.mesh;
-    const Glop::Fill& shader = glop.fill;
+    const Glop::Fill& fill = glop.fill;
 
-    // --------------------------------------------
-    // ---------- Shader + uniform setup ----------
-    // --------------------------------------------
-    mCaches->setProgram(shader.program);
+    // ---------------------------------------------
+    // ---------- Program + uniform setup ----------
+    // ---------------------------------------------
+    mCaches->setProgram(fill.program);
 
-    Glop::FloatColor color = shader.color;
-    shader.program->setColor(color.r, color.g, color.b, color.a);
+    if (fill.colorEnabled) {
+        fill.program->setColor(fill.color);
+    }
 
-    shader.program->set(glop.transform.ortho,
+    fill.program->set(glop.transform.ortho,
             glop.transform.modelView,
             glop.transform.canvas,
             glop.transform.fudgingOffset);
 
+    // Color filter uniforms
     if (glop.fill.filterMode == ProgramDescription::kColorBlend) {
-        const Glop::FloatColor& color = glop.fill.filter.color;
+        const FloatColor& color = glop.fill.filter.color;
         glUniform4f(mCaches->program().getUniform("colorBlend"),
                 color.r, color.g, color.b, color.a);
     } else if (glop.fill.filterMode == ProgramDescription::kColorMatrix) {
@@ -235,11 +237,28 @@ void RenderState::render(const Glop& glop) {
                 glop.fill.filter.matrix.vector);
     }
 
+    // Round rect clipping uniforms
+    if (glop.roundRectClipState) {
+        // TODO: avoid query, and cache values (or RRCS ptr) in program
+        const RoundRectClipState* state = glop.roundRectClipState;
+        const Rect& innerRect = state->innerRect;
+        glUniform4f(fill.program->getUniform("roundRectInnerRectLTRB"),
+                innerRect.left, innerRect.top,
+                innerRect.right, innerRect.bottom);
+        glUniformMatrix4fv(fill.program->getUniform("roundRectInvTransform"),
+                1, GL_FALSE, &state->matrix.data[0]);
+
+        // add half pixel to round out integer rect space to cover pixel centers
+        float roundedOutRadius = state->radius + 0.5f;
+        glUniform1f(fill.program->getUniform("roundRectRadius"),
+                roundedOutRadius);
+    }
+
     // --------------------------------
     // ---------- Mesh setup ----------
     // --------------------------------
     // vertices
-    bool force = meshState().bindMeshBufferInternal(mesh.vertexBufferObject)
+    const bool force = meshState().bindMeshBufferInternal(mesh.vertexBufferObject)
             || (mesh.vertices != nullptr);
     meshState().bindPositionVertexPointer(force, mesh.vertices, mesh.stride);
 
@@ -247,19 +266,26 @@ void RenderState::render(const Glop& glop) {
     meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
 
     if (mesh.vertexFlags & kTextureCoord_Attrib) {
-        // TODO: support textures
-        LOG_ALWAYS_FATAL("textures not yet supported");
+        // TODO: to support shaders, increment texture unit
+        mCaches->textureState().activateTexture(0);
+
+        glop.fill.texture->setWrap(GL_CLAMP_TO_EDGE, true);
+        glop.fill.texture->setFilter(glop.fill.textureFilter, true);
+
+        mCaches->textureState().bindTexture(fill.texture->id);
+        meshState().enableTexCoordsVertexArray();
+        meshState().bindTexCoordsVertexPointer(force, mesh.texCoordOffset);
     } else {
         meshState().disableTexCoordsVertexArray();
     }
     if (mesh.vertexFlags & kColor_Attrib) {
         LOG_ALWAYS_FATAL("color vertex attribute not yet supported");
-        // TODO: enable color, disable when done
+        // TODO: enable color attribute, disable when done
     }
     int alphaSlot = -1;
     if (mesh.vertexFlags & kAlpha_Attrib) {
         const void* alphaCoords = ((const GLbyte*) glop.mesh.vertices) + kVertexAlphaOffset;
-        alphaSlot = shader.program->getAttrib("vtxAlpha");
+        alphaSlot = fill.program->getAttrib("vtxAlpha");
         glEnableVertexAttribArray(alphaSlot);
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, kAlphaVertexStride, alphaCoords);
     }
@@ -275,7 +301,7 @@ void RenderState::render(const Glop& glop) {
     if (mesh.indexBufferObject == meshState().getQuadListIBO()) {
         // Since the indexed quad list is of limited length, we loop over
         // the glDrawXXX method while updating the vertex pointer
-        GLsizei elementsCount = mesh.vertexCount;
+        GLsizei elementsCount = mesh.elementCount;
         const GLbyte* vertices = static_cast<const GLbyte*>(mesh.vertices);
         while (elementsCount > 0) {
             GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
@@ -287,9 +313,9 @@ void RenderState::render(const Glop& glop) {
             vertices += (drawCount / 6) * 4 * mesh.stride;
         }
     } else if (mesh.indexBufferObject || mesh.indices) {
-        glDrawElements(mesh.primitiveMode, mesh.vertexCount, GL_UNSIGNED_SHORT, mesh.indices);
+        glDrawElements(mesh.primitiveMode, mesh.elementCount, GL_UNSIGNED_SHORT, mesh.indices);
     } else {
-        glDrawArrays(mesh.primitiveMode, 0, mesh.vertexCount);
+        glDrawArrays(mesh.primitiveMode, 0, mesh.elementCount);
     }
 
     // -----------------------------------

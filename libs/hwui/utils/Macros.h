@@ -29,4 +29,8 @@
         friend inline int compare_type(const Type& lhs, const Type& rhs) { return lhs.compare(rhs); } \
         friend inline hash_t hash_type(const Type& entry) { return entry.hash(); }
 
+#define REQUIRE_COMPATIBLE_LAYOUT(Type) \
+        static_assert(std::is_standard_layout<Type>::value, \
+        #Type " must have standard layout")
+
 #endif /* MACROS_H */

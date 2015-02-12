@@ -17,6 +17,7 @@
 #ifndef ANDROID_HWUI_GLOP_H
 #define ANDROID_HWUI_GLOP_H
 
+#include "FloatColor.h"
 #include "Matrix.h"
 #include "Rect.h"
 #include "utils/Macros.h"
@@ -29,6 +30,7 @@ namespace android {
 namespace uirenderer {
 
 class Program;
+class RoundRectClipState;
 
 /*
  * Enumerates optional vertex attributes
@@ -44,22 +46,23 @@ enum VertexAttribFlags {
     kAlpha_Attrib = 1 << 2,
 };
 
-
 /**
- * Structure containing all data required to issue a single OpenGL draw
+ * Structure containing all data required to issue an OpenGL draw
  *
  * Includes all of the mesh, fill, and GL state required to perform
  * the operation. Pieces of data are either directly copied into the
  * structure, or stored as a pointer or GL object reference to data
- * managed
+ * managed.
+ *
+ * Eventually, a Glop should be able to be drawn multiple times from
+ * a single construction, up until GL context destruction. Currently,
+ * vertex/index/Texture/RoundRectClipState pointers prevent this from
+ * being safe.
  */
 // TODO: PREVENT_COPY_AND_ASSIGN(...) or similar
 struct Glop {
-    struct FloatColor {
-        float a, r, g, b;
-    };
-
     Rect bounds;
+    const RoundRectClipState* roundRectClipState;
 
     /*
      * Stores mesh - vertex and index data.
@@ -74,12 +77,18 @@ struct Glop {
         GLuint indexBufferObject;
         const void* vertices;
         const void* indices;
-        int vertexCount;
+        int elementCount;
         GLsizei stride;
+        GLvoid* texCoordOffset;
+        TextureVertex mappedVertices[4];
     } mesh;
 
     struct Fill {
         Program* program;
+        Texture* texture;
+        GLenum textureFilter;
+
+        bool colorEnabled;
         FloatColor color;
 
         /* TODO

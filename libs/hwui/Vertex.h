@@ -19,11 +19,9 @@
 
 #include "Vector.h"
 
-#include <type_traits>
+#include "utils/Macros.h"
 
-#define REQUIRE_COMPATIBLE_LAYOUT(TARGET_TYPE) \
-        static_assert(std::is_standard_layout<TARGET_TYPE>::value, \
-        #TARGET_TYPE " must have standard layout")
+#include <type_traits>
 
 namespace android {
 namespace uirenderer {
