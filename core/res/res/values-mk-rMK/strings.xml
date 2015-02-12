@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> сака да овозможи „Истражувај со допир“. Кога е вклучено „Истражувај со допир“, може да се слушнат или да се видат описи на она што е под вашиот прст или да се прават движења за комуницирање со телефонот."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Пред 1 месец"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Пред повеќе од 1 месец"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"пред 1 секунда"</item>
-    <item quantity="other" msgid="3903706804349556379">"пред <xliff:g id="COUNT">%d</xliff:g> секунди"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"пред 1 минута"</item>
-    <item quantity="other" msgid="2176942008915455116">"пред <xliff:g id="COUNT">%d</xliff:g> минути"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"Пред 1 час"</item>
-    <item quantity="other" msgid="2467273239587587569">"пред <xliff:g id="COUNT">%d</xliff:g> часа"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Последните <xliff:g id="COUNT">%d</xliff:g> дена"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Минатиот месец"</string>
     <string name="older" msgid="5211975022815554840">"Постари"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"вчера"</item>
-    <item quantity="other" msgid="2479586466153314633">"Пред <xliff:g id="COUNT">%d</xliff:g> дена"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"за 1 секунда"</item>
-    <item quantity="other" msgid="1241926116443974687">"за <xliff:g id="COUNT">%d</xliff:g> секунди"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"за 1 минута"</item>
-    <item quantity="other" msgid="3330713936399448749">"за <xliff:g id="COUNT">%d</xliff:g> минути"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"за 1 час"</item>
-    <item quantity="other" msgid="547290677353727389">"за <xliff:g id="COUNT">%d</xliff:g> часа"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"утре"</item>
-    <item quantity="other" msgid="5109449375100953247">"за <xliff:g id="COUNT">%d</xliff:g> дена"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"пред 1 сек"</item>
-    <item quantity="other" msgid="3699169366650930415">"пред <xliff:g id="COUNT">%d</xliff:g> секунди"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"пред 1 мин"</item>
-    <item quantity="other" msgid="851164968597150710">"пред <xliff:g id="COUNT">%d</xliff:g> минути"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"пред 1 час"</item>
-    <item quantity="other" msgid="6889970745748538901">"пред <xliff:g id="COUNT">%d</xliff:g> часа"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"вчера"</item>
-    <item quantity="other" msgid="3453342639616481191">"Пред <xliff:g id="COUNT">%d</xliff:g> дена"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"за 1 сек"</item>
-    <item quantity="other" msgid="5495880108825805108">"за <xliff:g id="COUNT">%d</xliff:g> секунди"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"за 1 мин"</item>
-    <item quantity="other" msgid="4216113292706568726">"за <xliff:g id="COUNT">%d</xliff:g> минути"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"за 1 час"</item>
-    <item quantity="other" msgid="3705373766798013406">"за <xliff:g id="COUNT">%d</xliff:g> часа"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"утре"</item>
-    <item quantity="other" msgid="2973062968038355991">"за <xliff:g id="COUNT">%d</xliff:g> дена"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"на <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"во <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"во <xliff:g id="YEAR">%s</xliff:g>"</string>

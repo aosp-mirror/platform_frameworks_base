@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>-ը ցանկանում է միացնել «Հետազոտում հպման միջոցով» ռեժիմը: Երբ միացված է «Հետազոտում հպման միջոցով» ռեժիմը, դուք կարող եք լսել կամ տեսնել նկարագրությունը, թե ինչ է ձեր մատի տակ, կամ կատարել ժեստեր`  հեռախոսի հետ փոխգործակցելու համար:"</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 ամիս առաջ"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Ավելի շուտ քան 1 ամիս"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 վայրկյան առաջ"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> վայրկյան առաջ"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 րոպե առաջ"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> րոպե առաջ"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 ժամ առաջ"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> ժամ առաջ"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Վերջին <xliff:g id="COUNT">%d</xliff:g> օրերին"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Անցյալ ամիս"</string>
     <string name="older" msgid="5211975022815554840">"Ավելի հին"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"երեկ"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> օր առաջ"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"1 վայրկյանից"</item>
-    <item quantity="other" msgid="1241926116443974687">"<xliff:g id="COUNT">%d</xliff:g> վայրկյանից"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"1 րոպեից"</item>
-    <item quantity="other" msgid="3330713936399448749">"<xliff:g id="COUNT">%d</xliff:g> րոպեից"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"1 ժամից"</item>
-    <item quantity="other" msgid="547290677353727389">"<xliff:g id="COUNT">%d</xliff:g> ժամից"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"վաղը"</item>
-    <item quantity="other" msgid="5109449375100953247">"<xliff:g id="COUNT">%d</xliff:g> օրից"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 վրկ առաջ"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> վրկ. առաջ"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 րոպե առաջ"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> րոպե առաջ"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 ժամ առաջ"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> ժամ առաջ"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"երեկ"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> օր առաջ"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"1 վրկ-ից"</item>
-    <item quantity="other" msgid="5495880108825805108">"<xliff:g id="COUNT">%d</xliff:g> վրկ-ից"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"1 րոպեից"</item>
-    <item quantity="other" msgid="4216113292706568726">"<xliff:g id="COUNT">%d</xliff:g> րոպեից"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"1 ժամից"</item>
-    <item quantity="other" msgid="3705373766798013406">"<xliff:g id="COUNT">%d</xliff:g> ժամից"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"վաղը"</item>
-    <item quantity="other" msgid="2973062968038355991">"<xliff:g id="COUNT">%d</xliff:g> օրից"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>-ին"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"ժամը <xliff:g id="TIME">%s</xliff:g>-ին"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"<xliff:g id="YEAR">%s</xliff:g> թվականին"</string>

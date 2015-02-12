@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Η υπηρεσία <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> απαιτεί ενεργοποίηση της Εξερεύνησης μέσω αφής. Όταν είναι ενεργοποιημένη η Εξερεύνηση μέσω αφής, μπορείτε να δείτε ή να ακούσετε περιγραφές για τις επιλογές που βρίσκονται κάτω από το δάχτυλό σας ή να κάνετε κινήσεις αλληλεπίδρασης με το τηλέφωνό σας."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"πριν από 1 μήνα"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Παλαιότερα από 1 μήνα"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"πριν από 1 δευτερόλεπτο"</item>
-    <item quantity="other" msgid="3903706804349556379">"πριν από <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"πριν από 1 λεπτό"</item>
-    <item quantity="other" msgid="2176942008915455116">"πριν από <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"πριν από 1 ώρα"</item>
-    <item quantity="other" msgid="2467273239587587569">"πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Τελευταίες <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Τελευταίος μήνας"</string>
     <string name="older" msgid="5211975022815554840">"Παλαιότερα"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"χθες"</item>
-    <item quantity="other" msgid="2479586466153314633">"πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"σε 1 δευτερόλεπτο"</item>
-    <item quantity="other" msgid="1241926116443974687">"σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"σε 1 λεπτό"</item>
-    <item quantity="other" msgid="3330713936399448749">"σε <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"σε 1 ώρα"</item>
-    <item quantity="other" msgid="547290677353727389">"σε <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"αύριο"</item>
-    <item quantity="other" msgid="5109449375100953247">"σε <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"πριν από 1 δευτερόλεπτο"</item>
-    <item quantity="other" msgid="3699169366650930415">"πριν από <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"πριν από 1 λεπτό"</item>
-    <item quantity="other" msgid="851164968597150710">"πριν από <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"πριν από 1 ώρα"</item>
-    <item quantity="other" msgid="6889970745748538901">"πριν από <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"χθες"</item>
-    <item quantity="other" msgid="3453342639616481191">"πριν από <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"σε 1 δευτερόλεπτο"</item>
-    <item quantity="other" msgid="5495880108825805108">"σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"σε 1 λεπτό"</item>
-    <item quantity="other" msgid="4216113292706568726">"σε <xliff:g id="COUNT">%d</xliff:g> λεπτά"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"σε 1 ώρα"</item>
-    <item quantity="other" msgid="3705373766798013406">"σε <xliff:g id="COUNT">%d</xliff:g> ώρες"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"αύριο"</item>
-    <item quantity="other" msgid="2973062968038355991">"σε <xliff:g id="COUNT">%d</xliff:g> ημέρες"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"στις <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"στις <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"το <xliff:g id="YEAR">%s</xliff:g>"</string>

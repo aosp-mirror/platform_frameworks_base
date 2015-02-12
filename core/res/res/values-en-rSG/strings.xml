@@ -776,22 +776,6 @@
     <skip />
     <!-- no translation found for beforeOneMonthDurationPast (7578100953282866827) -->
     <skip />
-    <!-- no translation found for num_seconds_ago:one (7416512229671810725) -->
-    <!-- no translation found for num_seconds_ago:other (8138756910300398447) -->
-    <!-- no translation found for num_minutes_ago:one (8620869479299420562) -->
-    <!-- no translation found for num_minutes_ago:other (5065488162050522741) -->
-    <!-- no translation found for num_hours_ago:one (853404611989669641) -->
-    <!-- no translation found for num_hours_ago:other (3558873784561756849) -->
-    <!-- no translation found for num_days_ago:one (4222479980812128212) -->
-    <!-- no translation found for num_days_ago:other (5445701370433601703) -->
-    <!-- no translation found for in_num_seconds:one (4253290037777327003) -->
-    <!-- no translation found for in_num_seconds:other (1280033870920841404) -->
-    <!-- no translation found for in_num_minutes:one (1487585791027953091) -->
-    <!-- no translation found for in_num_minutes:other (6274204576475209932) -->
-    <!-- no translation found for in_num_hours:one (6501470863235186391) -->
-    <!-- no translation found for in_num_hours:other (4415358752953289251) -->
-    <!-- no translation found for in_num_days:one (5608475533104443893) -->
-    <!-- no translation found for in_num_days:other (3827193006163842267) -->
     <!-- no translation found for preposition_for_date (2689847983632851560) -->
     <skip />
     <!-- no translation found for preposition_for_time (2613388053493148013) -->

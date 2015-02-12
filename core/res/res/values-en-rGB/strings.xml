@@ -1059,75 +1059,11 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wants to enable Explore by Touch. When Explore by Touch is turned on, you can hear or see descriptions of what\'s under your finger or perform gestures to interact with the phone."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 month ago"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Before 1 month ago"</string>
-  <plurals name="num_seconds_ago">
-    <item quantity="one" msgid="4869870056547896011">"1 second ago"</item>
-    <item quantity="other" msgid="3903706804349556379">"<xliff:g id="COUNT">%d</xliff:g> seconds ago"</item>
-  </plurals>
-  <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"1 minute ago"</item>
-    <item quantity="other" msgid="2176942008915455116">"<xliff:g id="COUNT">%d</xliff:g> minutes ago"</item>
-  </plurals>
-  <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"1 hour ago"</item>
-    <item quantity="other" msgid="2467273239587587569">"<xliff:g id="COUNT">%d</xliff:g> hours ago"</item>
-  </plurals>
   <plurals name="last_num_days">
     <item quantity="other" msgid="3069992808164318268">"Last <xliff:g id="COUNT">%d</xliff:g> days"</item>
   </plurals>
     <string name="last_month" msgid="3959346739979055432">"Last month"</string>
     <string name="older" msgid="5211975022815554840">"Older"</string>
-  <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"yesterday"</item>
-    <item quantity="other" msgid="2479586466153314633">"<xliff:g id="COUNT">%d</xliff:g> days ago"</item>
-  </plurals>
-  <plurals name="in_num_seconds">
-    <item quantity="one" msgid="2729745560954905102">"in 1 second"</item>
-    <item quantity="other" msgid="1241926116443974687">"in <xliff:g id="COUNT">%d</xliff:g> seconds"</item>
-  </plurals>
-  <plurals name="in_num_minutes">
-    <item quantity="one" msgid="8793095251325200395">"in 1 minute"</item>
-    <item quantity="other" msgid="3330713936399448749">"in <xliff:g id="COUNT">%d</xliff:g> minutes"</item>
-  </plurals>
-  <plurals name="in_num_hours">
-    <item quantity="one" msgid="7164353342477769999">"in 1 hour"</item>
-    <item quantity="other" msgid="547290677353727389">"in <xliff:g id="COUNT">%d</xliff:g> hours"</item>
-  </plurals>
-  <plurals name="in_num_days">
-    <item quantity="one" msgid="5413088743009839518">"tomorrow"</item>
-    <item quantity="other" msgid="5109449375100953247">"in <xliff:g id="COUNT">%d</xliff:g> days"</item>
-  </plurals>
-  <plurals name="abbrev_num_seconds_ago">
-    <item quantity="one" msgid="1849036840200069118">"1 sec ago"</item>
-    <item quantity="other" msgid="3699169366650930415">"<xliff:g id="COUNT">%d</xliff:g> secs ago"</item>
-  </plurals>
-  <plurals name="abbrev_num_minutes_ago">
-    <item quantity="one" msgid="6361490147113871545">"1 min ago"</item>
-    <item quantity="other" msgid="851164968597150710">"<xliff:g id="COUNT">%d</xliff:g> mins ago"</item>
-  </plurals>
-  <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"1 hour ago"</item>
-    <item quantity="other" msgid="6889970745748538901">"<xliff:g id="COUNT">%d</xliff:g> hours ago"</item>
-  </plurals>
-  <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"yesterday"</item>
-    <item quantity="other" msgid="3453342639616481191">"<xliff:g id="COUNT">%d</xliff:g> days ago"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_seconds">
-    <item quantity="one" msgid="5842225370795066299">"in 1 sec"</item>
-    <item quantity="other" msgid="5495880108825805108">"in <xliff:g id="COUNT">%d</xliff:g> secs"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_minutes">
-    <item quantity="one" msgid="562786149928284878">"in 1 min"</item>
-    <item quantity="other" msgid="4216113292706568726">"in <xliff:g id="COUNT">%d</xliff:g> mins"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_hours">
-    <item quantity="one" msgid="3274708118124045246">"in 1 hour"</item>
-    <item quantity="other" msgid="3705373766798013406">"in <xliff:g id="COUNT">%d</xliff:g> hours"</item>
-  </plurals>
-  <plurals name="abbrev_in_num_days">
-    <item quantity="one" msgid="2178576254385739855">"tomorrow"</item>
-    <item quantity="other" msgid="2973062968038355991">"in <xliff:g id="COUNT">%d</xliff:g> days"</item>
-  </plurals>
     <string name="preposition_for_date" msgid="9093949757757445117">"on <xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"at <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="preposition_for_year" msgid="5040395640711867177">"in<xliff:g id="YEAR">%s</xliff:g>"</string>
