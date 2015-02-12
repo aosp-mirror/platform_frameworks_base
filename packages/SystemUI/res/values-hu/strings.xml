@@ -323,7 +323,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akkumulátorkímélő mód bekapcsolva"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Akkumulátorkímélő mód kikapcsolása"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalomjegyzék elrejtve"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalom elrejtve"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"A(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> alkalmazás rögzíteni fog mindent, ami megjelenik a képernyőn."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne jelenjen meg többé"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Az összes törlése"</string>
