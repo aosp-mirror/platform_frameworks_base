@@ -32,7 +32,7 @@ public interface MidiReceiver {
      * The msg bytes should be copied by the receiver rather than retaining a reference
      * to this parameter.
      * Also, modifying the contents of the msg array parameter may result in other receivers
-     * in the same application receiving incorrect values in their onPost() method.
+     * in the same application receiving incorrect values in their post() method.
      *
      * @param msg a byte array containing the MIDI data
      * @param offset the offset of the first byte of the data in the byte array
@@ -40,5 +40,5 @@ public interface MidiReceiver {
      * @param timestamp the timestamp of the message (based on {@link java.lang.System#nanoTime}
      * @throws IOException
      */
-    public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException;
+    public void post(byte[] msg, int offset, int count, long timestamp) throws IOException;
 }

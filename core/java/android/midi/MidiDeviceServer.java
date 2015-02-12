@@ -254,12 +254,12 @@ public final class MidiDeviceServer implements Closeable {
         return new MidiReceiver() {
 
             @Override
-            public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException {
+            public void post(byte[] msg, int offset, int count, long timestamp) throws IOException {
                 ArrayList<MidiInputPort> receivers = mOutputPortReceivers[portNumberF];
                 synchronized (receivers) {
                     for (int i = 0; i < receivers.size(); i++) {
                         // FIXME catch errors and remove dead ones
-                        receivers.get(i).onPost(msg, offset, count, timestamp);
+                        receivers.get(i).post(msg, offset, count, timestamp);
                     }
                 }
             }

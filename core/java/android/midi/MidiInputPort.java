@@ -50,7 +50,7 @@ public class MidiInputPort extends MidiPort implements MidiReceiver {
      * @param timestamp future time to post the message (based on
      *                  {@link java.lang.System#nanoTime}
      */
-    public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void post(byte[] msg, int offset, int count, long timestamp) throws IOException {
         assert(offset >= 0 && count >= 0 && offset + count <= msg.length);
 
         synchronized (mBuffer) {

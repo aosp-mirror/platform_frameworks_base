@@ -65,7 +65,7 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
                         for (int i = 0; i < mReceivers.size(); i++) {
                             MidiReceiver receiver = mReceivers.get(i);
                             try {
-                                receiver.onPost(buffer, offset, size, timestamp);
+                                receiver.post(buffer, offset, size, timestamp);
                             } catch (IOException e) {
                                 Log.e(TAG, "post failed");
                                 deadReceivers.add(receiver);
