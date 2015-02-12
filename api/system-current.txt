@@ -33966,6 +33966,7 @@ package android.transition {
     method public android.transition.Transition addTarget(java.lang.String);
     method public android.transition.Transition addTarget(java.lang.Class);
     method public android.transition.Transition addTarget(android.view.View);
+    method protected boolean areValuesChanged(android.transition.TransitionValues, android.transition.TransitionValues);
     method public boolean canRemoveViews();
     method public abstract void captureEndValues(android.transition.TransitionValues);
     method public abstract void captureStartValues(android.transition.TransitionValues);
