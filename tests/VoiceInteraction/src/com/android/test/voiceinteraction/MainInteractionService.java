@@ -16,6 +16,7 @@
 
 package com.android.test.voiceinteraction;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.service.voice.AlwaysOnHotwordDetector;
@@ -74,9 +75,19 @@ public class MainInteractionService extends VoiceInteractionService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Bundle args = new Bundle();
-        args.putParcelable("intent", new Intent(this, TestInteractionActivity.class));
-        startSession(args);
+        if (isActiveService(this, new ComponentName(this, getClass()))) {
+            Bundle args = new Bundle();
+            args.putParcelable("intent", new Intent(this, TestInteractionActivity.class));
+            args.putBundle("assist", intent.getExtras());
+            Bundle assistContext = intent.getBundleExtra(Intent.EXTRA_ASSIST_CONTEXT);
+            int startFlags = 0;
+            if (assistContext == null) {
+                startFlags |= START_WITH_ASSIST;
+            }
+            startSession(args, startFlags);
+        } else {
+            Log.w(TAG, "Not starting -- not current voice interaction service");
+        }
         stopSelf(startId);
         return START_NOT_STICKY;
     }

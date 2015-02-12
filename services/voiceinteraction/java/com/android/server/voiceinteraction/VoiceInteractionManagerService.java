@@ -129,12 +129,14 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         public void initForUser(int userHandle) {
-            if (DEBUG) Slog.i(TAG, "initForUser user=" + userHandle);
+            if (DEBUG) Slog.d(TAG, "**************** initForUser user=" + userHandle);
             String curInteractorStr = Settings.Secure.getStringForUser(
                     mContext.getContentResolver(),
                     Settings.Secure.VOICE_INTERACTION_SERVICE, userHandle);
             ComponentName curRecognizer = getCurRecognizer(userHandle);
             VoiceInteractionServiceInfo curInteractorInfo = null;
+            if (DEBUG) Slog.d(TAG, "curInteractorStr=" + curInteractorStr
+                    + " curRecognizer=" + curRecognizer);
             if (curInteractorStr == null && curRecognizer != null
                     && !ActivityManager.isLowRamDeviceStatic()) {
                 // If there is no interactor setting, that means we are upgrading
@@ -148,6 +150,8 @@ public class VoiceInteractionManagerService extends SystemService {
                     // Looks good!  We'll apply this one.  To make it happen, we clear the
                     // recognizer so that we don't think we have anything set and will
                     // re-apply the settings.
+                    if (DEBUG) Slog.d(TAG, "No set interactor, found avail: "
+                            + curInteractorInfo.getServiceInfo().name);
                     curRecognizer = null;
                 }
             }
@@ -156,6 +160,7 @@ public class VoiceInteractionManagerService extends SystemService {
             // enabled; if it is, turn it off.
             if (ActivityManager.isLowRamDeviceStatic() && curInteractorStr != null) {
                 if (!TextUtils.isEmpty(curInteractorStr)) {
+                    if (DEBUG) Slog.d(TAG, "Svelte device; disabling interactor");
                     setCurInteractor(null, userHandle);
                     curInteractorStr = "";
                 }
@@ -178,8 +183,11 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 // If the apps for the currently set components still exist, then all is okay.
                 if (recognizerInfo != null && (curInteractor == null || interactorInfo != null)) {
+                    if (DEBUG) Slog.d(TAG, "Current interactor/recognizer okay, done!");
                     return;
                 }
+                if (DEBUG) Slog.d(TAG, "Bad recognizer (" + recognizerInfo + ") or interactor ("
+                        + interactorInfo + ")");
             }
 
             // Initializing settings, look for an interactor first (but only on non-svelte).
@@ -316,7 +324,7 @@ public class VoiceInteractionManagerService extends SystemService {
             if (TextUtils.isEmpty(curInteractor)) {
                 return null;
             }
-            if (DEBUG) Slog.i(TAG, "getCurInteractor curInteractor=" + curInteractor
+            if (DEBUG) Slog.d(TAG, "getCurInteractor curInteractor=" + curInteractor
                     + " user=" + userHandle);
             return ComponentName.unflattenFromString(curInteractor);
         }
@@ -325,7 +333,7 @@ public class VoiceInteractionManagerService extends SystemService {
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                     Settings.Secure.VOICE_INTERACTION_SERVICE,
                     comp != null ? comp.flattenToShortString() : "", userHandle);
-            if (DEBUG) Slog.i(TAG, "setCurInteractor comp=" + comp
+            if (DEBUG) Slog.d(TAG, "setCurInteractor comp=" + comp
                     + " user=" + userHandle);
         }
 
@@ -363,7 +371,7 @@ public class VoiceInteractionManagerService extends SystemService {
             if (TextUtils.isEmpty(curRecognizer)) {
                 return null;
             }
-            if (DEBUG) Slog.i(TAG, "getCurRecognizer curRecognizer=" + curRecognizer
+            if (DEBUG) Slog.d(TAG, "getCurRecognizer curRecognizer=" + curRecognizer
                     + " user=" + userHandle);
             return ComponentName.unflattenFromString(curRecognizer);
         }
@@ -372,12 +380,12 @@ public class VoiceInteractionManagerService extends SystemService {
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                     Settings.Secure.VOICE_RECOGNITION_SERVICE,
                     comp != null ? comp.flattenToShortString() : "", userHandle);
-            if (DEBUG) Slog.i(TAG, "setCurRecognizer comp=" + comp
+            if (DEBUG) Slog.d(TAG, "setCurRecognizer comp=" + comp
                     + " user=" + userHandle);
         }
 
         @Override
-        public void startSession(IVoiceInteractionService service, Bundle args) {
+        public void startSession(IVoiceInteractionService service, Bundle args, int flags) {
             synchronized (this) {
                 if (mImpl == null || mImpl.mService == null
                         || service.asBinder() != mImpl.mService.asBinder()) {
@@ -388,7 +396,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startSessionLocked(callingPid, callingUid, args);
+                    mImpl.startSessionLocked(callingPid, callingUid, args, flags);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -692,7 +700,7 @@ public class VoiceInteractionManagerService extends SystemService {
             @Override
             public void onSomePackagesChanged() {
                 int userHandle = getChangingUserId();
-                if (DEBUG) Slog.i(TAG, "onSomePackagesChanged user=" + userHandle);
+                if (DEBUG) Slog.d(TAG, "onSomePackagesChanged user=" + userHandle);
 
                 ComponentName curInteractor = getCurInteractor(userHandle);
                 ComponentName curRecognizer = getCurRecognizer(userHandle);

@@ -355,7 +355,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             if (mWindow != null) {
                 final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "    ");
                 ipw.increaseIndent();
-                DumpUtils.dumpAsync(mUiHandler, mWindow, ipw, 200);
+                DumpUtils.dumpAsync(mUiHandler, mWindow, ipw, "", 200);
             }
         }
 

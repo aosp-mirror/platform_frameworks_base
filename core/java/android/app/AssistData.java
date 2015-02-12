@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -43,6 +44,8 @@ final public class AssistData implements Parcelable {
      * {@link Activity#onProvideAssistData}.
      */
     public static final String ASSIST_KEY = "android:assist";
+
+    final ComponentName mActivityComponent;
 
     final ArrayList<ViewNodeImpl> mRootViews = new ArrayList<>();
 
@@ -400,6 +403,7 @@ final public class AssistData implements Parcelable {
     }
 
     AssistData(Activity activity) {
+        mActivityComponent = activity.getComponentName();
         ArrayList<ViewRootImpl> views = WindowManagerGlobal.getInstance().getRootViews(
                 activity.getActivityToken());
         for (int i=0; i<views.size(); i++) {
@@ -414,6 +418,7 @@ final public class AssistData implements Parcelable {
     }
 
     AssistData(Parcel in) {
+        mActivityComponent = ComponentName.readFromParcel(in);
         final int N = in.readInt();
         for (int i=0; i<N; i++) {
             mRootViews.add(new ViewNodeImpl(in));
@@ -421,7 +426,9 @@ final public class AssistData implements Parcelable {
         //dump();
     }
 
-    void dump() {
+    /** @hide */
+    public void dump() {
+        Log.i(TAG, "Activity: " + mActivityComponent.flattenToShortString());
         ViewNode node = new ViewNode();
         final int N = getWindowCount();
         for (int i=0; i<N; i++) {
@@ -445,7 +452,7 @@ final public class AssistData implements Parcelable {
         }
         String text = node.getText();
         if (text != null) {
-            Log.i(TAG, prefix + " Text (sel " + node.getTextSelectionStart() + "-"
+            Log.i(TAG, prefix + "  Text (sel " + node.getTextSelectionStart() + "-"
                     + node.getTextSelectionEnd() + "): " + text);
         }
         String hint = node.getHint();
@@ -476,6 +483,10 @@ final public class AssistData implements Parcelable {
         return assistBundle.getParcelable(ASSIST_KEY);
     }
 
+    public ComponentName getActivityComponent() {
+        return mActivityComponent;
+    }
+
     /**
      * Return the number of window contents that have been collected in this assist data.
      */
@@ -498,6 +509,7 @@ final public class AssistData implements Parcelable {
 
     public void writeToParcel(Parcel out, int flags) {
         int start = out.dataPosition();
+        ComponentName.writeToParcel(mActivityComponent, out);
         final int N = mRootViews.size();
         out.writeInt(N);
         for (int i=0; i<N; i++) {

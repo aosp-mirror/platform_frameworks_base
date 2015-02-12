@@ -17,11 +17,13 @@
 package android.service.voice;
 
 import android.content.Intent;
+import android.os.Bundle;
 
 /**
  * @hide
  */
 oneway interface IVoiceInteractionSession {
+    void handleAssist(in Bundle assistData);
     void taskStarted(in Intent intent, int taskId);
     void taskFinished(in Intent intent, int taskId);
     void closeSystemDialogs();

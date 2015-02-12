@@ -972,8 +972,12 @@ please see themes_device_defaults.xml.
          {@link android.service.voice.VoiceInteractionSession} class.
          this inherits from Theme.Panel, but sets up appropriate animations
          and a few custom attributes. -->
-    <style name="Theme.Material.VoiceInteractionSession" parent="Theme.Material.Light.Panel">
-        <item name="windowAnimationStyle">@style/Animation.VoiceInteractionSession</item>
+    <style name="Theme.Material.VoiceInteractionSession"
+           parent="Theme.Material.Light.NoActionBar.TranslucentDecor">
+        <item name="windowBackground">@color/transparent</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+        <item name="windowIsTranslucent">true</item>
+        <item name="windowAnimationStyle">@style/Animation</item>
     </style>
 
     <!-- Theme for the search input bar. -->

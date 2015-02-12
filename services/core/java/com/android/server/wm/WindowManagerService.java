@@ -11058,7 +11058,7 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(" mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
             pw.println("  mLayoutToAnim:");
-            mAppTransition.dump(pw);
+            mAppTransition.dump(pw, "    ");
         }
     }
 

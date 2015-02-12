@@ -3554,7 +3554,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pf.bottom = df.bottom = of.bottom = cf.bottom
                         = mOverscanScreenTop + mOverscanScreenHeight;
             }
-        } else  if (attrs.type == TYPE_INPUT_METHOD) {
+        } else  if (attrs.type == TYPE_INPUT_METHOD || attrs.type == TYPE_VOICE_INTERACTION) {
             pf.left = df.left = of.left = cf.left = vf.left = mDockLeft;
             pf.top = df.top = of.top = cf.top = vf.top = mDockTop;
             pf.right = df.right = of.right = cf.right = vf.right = mDockRight;
@@ -3936,7 +3936,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void offsetInputMethodWindowLw(WindowState win) {
-        int top = win.getContentFrameLw().top;
+        int top = win.getDisplayFrameLw().top;
         top += win.getGivenContentInsetsLw().top;
         if (mContentBottom > top) {
             mContentBottom = top;
@@ -3955,36 +3955,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void offsetVoiceInputWindowLw(WindowState win) {
-        final int gravity = win.getAttrs().gravity;
-        switch (gravity&((Gravity.AXIS_PULL_BEFORE|Gravity.AXIS_PULL_AFTER)
-                << Gravity.AXIS_X_SHIFT)) {
-            case Gravity.AXIS_PULL_BEFORE<<Gravity.AXIS_X_SHIFT: {
-                int right = win.getContentFrameLw().right - win.getGivenContentInsetsLw().right;
-                if (mVoiceContentLeft < right) {
-                    mVoiceContentLeft = right;
-                }
-            } break;
-            case Gravity.AXIS_PULL_AFTER<<Gravity.AXIS_X_SHIFT: {
-                int left = win.getContentFrameLw().left - win.getGivenContentInsetsLw().left;
-                if (mVoiceContentRight < left) {
-                    mVoiceContentRight = left;
-                }
-            } break;
-        }
-        switch (gravity&((Gravity.AXIS_PULL_BEFORE|Gravity.AXIS_PULL_AFTER)
-                << Gravity.AXIS_Y_SHIFT)) {
-            case Gravity.AXIS_PULL_BEFORE<<Gravity.AXIS_Y_SHIFT: {
-                int bottom = win.getContentFrameLw().bottom - win.getGivenContentInsetsLw().bottom;
-                if (mVoiceContentTop < bottom) {
-                    mVoiceContentTop = bottom;
-                }
-            } break;
-            case Gravity.AXIS_PULL_AFTER<<Gravity.AXIS_Y_SHIFT: {
-                int top = win.getContentFrameLw().top - win.getGivenContentInsetsLw().top;
-                if (mVoiceContentBottom < top) {
-                    mVoiceContentBottom = top;
-                }
-            } break;
+        int top = win.getDisplayFrameLw().top;
+        top += win.getGivenContentInsetsLw().top;
+        if (mVoiceContentBottom > top) {
+            mVoiceContentBottom = top;
         }
     }
 
@@ -6385,9 +6359,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar=");
-                    pw.println(mStatusBar);
-            pw.print(prefix); pw.print("isStatusBarKeyguard=");
-                    pw.print(isStatusBarKeyguard());
+                    pw.print(mStatusBar); pw.print(" isStatusBarKeyguard=");
+                    pw.println(isStatusBarKeyguard());
         }
         if (mNavigationBar != null) {
             pw.print(prefix); pw.print("mNavigationBar=");

@@ -43,6 +43,7 @@ import android.view.IWindowManager;
 import android.view.WindowManager;
 
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -103,13 +104,33 @@ class VoiceInteractionManagerServiceImpl {
     final class SessionConnection implements ServiceConnection {
         final IBinder mToken = new Binder();
         final Bundle mArgs;
+        final int mFlags;
         boolean mBound;
         IVoiceInteractionSessionService mService;
         IVoiceInteractionSession mSession;
         IVoiceInteractor mInteractor;
+        boolean mHaveAssistData;
+        Bundle mAssistData;
 
-        SessionConnection(Bundle args) {
+        final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
+            @Override
+            public void send(int resultCode, Bundle resultData) throws RemoteException {
+                synchronized (mLock) {
+                    mHaveAssistData = true;
+                    mAssistData = resultData;
+                    if (mSession != null) {
+                        try {
+                            mSession.handleAssist(resultData);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
+            }
+        };
+
+        SessionConnection(Bundle args, int flags) {
             mArgs = args;
+            mFlags = flags;
             Intent serviceIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
             serviceIntent.setComponent(mSessionComponentName);
             mBound = mContext.bindServiceAsUser(serviceIntent, this,
@@ -120,6 +141,14 @@ class VoiceInteractionManagerServiceImpl {
                             WindowManager.LayoutParams.TYPE_VOICE_INTERACTION);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed adding window token", e);
+                }
+                if ((flags&VoiceInteractionService.START_WITH_ASSIST) != 0) {
+                    try {
+                        mAm.requestAssistContextExtras(0, mAssistReceiver);
+                    } catch (RemoteException e) {
+                    }
+                } else {
+                    mHaveAssistData = true;
                 }
             } else {
                 Slog.w(TAG, "Failed binding to voice interaction session service " + mComponent);
@@ -132,7 +161,7 @@ class VoiceInteractionManagerServiceImpl {
                 mService = IVoiceInteractionSessionService.Stub.asInterface(service);
                 if (mActiveSession == this) {
                     try {
-                        mService.newSession(mToken, mArgs);
+                        mService.newSession(mToken, mArgs, mFlags);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed adding window token", e);
                     }
@@ -176,11 +205,16 @@ class VoiceInteractionManagerServiceImpl {
         public void dump(String prefix, PrintWriter pw) {
             pw.print(prefix); pw.print("mToken="); pw.println(mToken);
             pw.print(prefix); pw.print("mArgs="); pw.println(mArgs);
+            pw.print(prefix); pw.print("mFlags=0x"); pw.println(Integer.toHexString(mFlags));
             pw.print(prefix); pw.print("mBound="); pw.println(mBound);
             if (mBound) {
                 pw.print(prefix); pw.print("mService="); pw.println(mService);
                 pw.print(prefix); pw.print("mSession="); pw.println(mSession);
                 pw.print(prefix); pw.print("mInteractor="); pw.println(mInteractor);
+            }
+            pw.print(prefix); pw.print("mHaveAssistData="); pw.println(mHaveAssistData);
+            if (mHaveAssistData) {
+                pw.print(prefix); pw.print("mAssistData="); pw.println(mAssistData);
             }
         }
     };
@@ -222,12 +256,12 @@ class VoiceInteractionManagerServiceImpl {
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
     }
 
-    public void startSessionLocked(int callingPid, int callingUid, Bundle args) {
+    public void startSessionLocked(int callingPid, int callingUid, Bundle args, int flags) {
         if (mActiveSession != null) {
             mActiveSession.cancel();
             mActiveSession = null;
         }
-        mActiveSession = new SessionConnection(args);
+        mActiveSession = new SessionConnection(args, flags);
     }
 
     public boolean deliverNewSessionLocked(int callingPid, int callingUid, IBinder token,
@@ -238,6 +272,12 @@ class VoiceInteractionManagerServiceImpl {
         }
         mActiveSession.mSession = session;
         mActiveSession.mInteractor = interactor;
+        if (mActiveSession.mHaveAssistData) {
+            try {
+                session.handleAssist(mActiveSession.mAssistData);
+            } catch (RemoteException e) {
+            }
+        }
         return true;
     }
 

@@ -99,6 +99,10 @@ public class VoiceInteractionServiceInfo {
                 mParseError = "No sessionService specified";
                 return;
             }
+            if (mRecognitionService == null) {
+                mParseError = "No recognitionService specified";
+                return;
+            }
             /* Not yet time
             if (mRecognitionService == null) {
                 mParseError = "No recogitionService specified";
