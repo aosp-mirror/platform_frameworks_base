@@ -25885,8 +25885,13 @@ package android.provider {
 
   public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns android.provider.OpenableColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
+    method public static int deleteAll(android.content.Context);
+    method public static android.net.Uri insert(android.content.Context, android.telecom.Voicemail);
+    method public static int insert(android.content.Context, java.util.List<android.telecom.Voicemail>);
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String DELETED = "deleted";
+    field public static final java.lang.String DIRTY = "dirty";
     field public static final java.lang.String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String HAS_CONTENT = "has_content";
@@ -25894,6 +25899,8 @@ package android.provider {
     field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail";
     field public static final java.lang.String MIME_TYPE = "mime_type";
     field public static final java.lang.String NUMBER = "number";
+    field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+    field public static final java.lang.String PHONE_ACCOUNT_ID = "subscription_id";
     field public static final java.lang.String SOURCE_DATA = "source_data";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
     field public static final java.lang.String TRANSCRIPTION = "transcription";
@@ -28168,6 +28175,22 @@ package android.system {
 
 package android.telecom {
 
+  public class AuthenticatorService extends android.app.Service {
+    ctor public AuthenticatorService();
+    method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+  public class AuthenticatorService.Authenticator extends android.accounts.AbstractAccountAuthenticator {
+    ctor public AuthenticatorService.Authenticator(android.content.Context);
+    method public android.os.Bundle addAccount(android.accounts.AccountAuthenticatorResponse, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle confirmCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle editProperties(android.accounts.AccountAuthenticatorResponse, java.lang.String);
+    method public android.os.Bundle getAuthToken(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public java.lang.String getAuthTokenLabel(java.lang.String);
+    method public android.os.Bundle hasFeatures(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String[]) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle updateCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
+  }
+
   public class PhoneAccount implements android.os.Parcelable {
     method public static android.telecom.PhoneAccount.Builder builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     method public android.graphics.drawable.Drawable createIconDrawable(android.content.Context);
@@ -28273,6 +28296,51 @@ package android.telecom {
     field public static final int PAUSED = 4; // 0x4
     field public static final int RX_ENABLED = 2; // 0x2
     field public static final int TX_ENABLED = 1; // 0x1
+  }
+
+  public class Voicemail implements android.os.Parcelable {
+    method public static android.telecom.Voicemail.Builder createForInsertion(long, java.lang.String);
+    method public int describeContents();
+    method public long getDuration();
+    method public long getId();
+    method public java.lang.String getNumber();
+    method public java.lang.String getSourceData();
+    method public java.lang.String getSourcePackage();
+    method public long getTimestampMillis();
+    method public android.net.Uri getUri();
+    method public boolean hasContent();
+    method public boolean isRead();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.Voicemail> CREATOR;
+  }
+
+  public static class Voicemail.Builder {
+    method public android.telecom.Voicemail build();
+    method public android.telecom.Voicemail.Builder setDuration(long);
+    method public android.telecom.Voicemail.Builder setHasContent(boolean);
+    method public android.telecom.Voicemail.Builder setId(long);
+    method public android.telecom.Voicemail.Builder setIsRead(boolean);
+    method public android.telecom.Voicemail.Builder setNumber(java.lang.String);
+    method public android.telecom.Voicemail.Builder setSourceData(java.lang.String);
+    method public android.telecom.Voicemail.Builder setSourcePackage(java.lang.String);
+    method public android.telecom.Voicemail.Builder setTimestamp(long);
+    method public android.telecom.Voicemail.Builder setUri(android.net.Uri);
+  }
+
+  public class VvmSyncService extends android.app.Service {
+    ctor public VvmSyncService();
+    method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+  public class VvmSyncService.VvmSyncAdapter extends android.content.AbstractThreadedSyncAdapter {
+    ctor public VvmSyncService.VvmSyncAdapter(android.content.Context, boolean);
+    method protected java.util.List<android.telecom.Voicemail> downloadVoicemails();
+    method public void onPerformSync(android.accounts.Account, android.os.Bundle, java.lang.String, android.content.ContentProviderClient, android.content.SyncResult);
+    method protected void syncToServer();
+    field public static final java.lang.String NEW_VOICEMAIL_DATA = "extra_new_voicemail_data";
+    field public static final java.lang.String SYNC_EXTRA_CODE = "sync_extra_code";
+    field public static final int SYNC_EXTRA_MAILBOX_UPDATE = 2; // 0x2
+    field public static final int SYNC_EXTRA_NEW_VOICEMAIL = 1; // 0x1
   }
 
 }
