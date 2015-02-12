@@ -643,7 +643,8 @@ public class MyPrefsBackupAgent extends BackupAgentHelper {
     // Allocate a helper and add it to the backup agent
     &#64;Override
     public void onCreate() {
-        SharedPreferencesBackupHelper helper = new SharedPreferencesBackupHelper(this, PREFS);
+        SharedPreferencesBackupHelper helper =
+                new SharedPreferencesBackupHelper(this, PREFS);
         addHelper(PREFS_BACKUP_KEY, helper);
     }
 }
@@ -688,8 +689,10 @@ public class MyFileBackupAgent extends BackupAgentHelper {
     static final String FILES_BACKUP_KEY = "myfiles";
 
     // Allocate a helper and add it to the backup agent
-    void onCreate() {
-        FileBackupHelper helper = new FileBackupHelper(this, TOP_SCORES, PLAYER_STATS);
+    &#64;Override
+    public void onCreate() {
+        FileBackupHelper helper = new FileBackupHelper(this,
+                TOP_SCORES, PLAYER_STATS);
         addHelper(FILES_BACKUP_KEY, helper);
     }
 }
