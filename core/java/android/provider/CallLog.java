@@ -33,7 +33,9 @@ import android.provider.ContactsContract.CommonDataKinds.Callable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.DataUsageFeedback;
+import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
@@ -336,22 +338,33 @@ public class CallLog {
         // that was encoded into call log databases.
 
         /**
-         * The component name of the account in string form.
+         * The component name of the account used to place or receive the call; in string form.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
 
         /**
-         * The identifier of a account that is unique to a specified component.
+         * The identifier for the account used to place or receive the call.
          * <P>Type: TEXT</P>
          */
         public static final String PHONE_ACCOUNT_ID = "subscription_id";
 
         /**
-         * The identifier of a account that is unique to a specified component. Equivalent value
-         * to {@link #PHONE_ACCOUNT_ID}. For ContactsProvider internal use only.
+         * The address associated with the account used to place or receive the call; in string
+         * form. For SIM-based calls, this is the user's own phone number.
+         * <P>Type: TEXT</P>
+         *
+         * @hide
+         */
+        public static final String PHONE_ACCOUNT_ADDRESS = "phone_account_address";
+
+        /**
+         * The subscription ID used to place this call.  This is no longer used and has been
+         * replaced with PHONE_ACCOUNT_COMPONENT_NAME/PHONE_ACCOUNT_ID.
+         * For ContactsProvider internal use only.
          * <P>Type: INTEGER</P>
          *
+         * @Deprecated
          * @hide
          */
         public static final String SUB_ID = "sub_id";
@@ -422,6 +435,19 @@ public class CallLog {
             final ContentResolver resolver = context.getContentResolver();
             int numberPresentation = PRESENTATION_ALLOWED;
 
+            TelecomManager tm = null;
+            try {
+                tm = TelecomManager.from(context);
+            } catch (UnsupportedOperationException e) {}
+
+            String accountAddress = null;
+            if (tm != null && accountHandle != null) {
+                PhoneAccount account = tm.getPhoneAccount(accountHandle);
+                if (account != null) {
+                    accountAddress = account.getSubscriptionAddress().getSchemeSpecificPart();
+                }
+            }
+
             // Remap network specified number presentation types
             // PhoneConstants.PRESENTATION_xxx to calllog number presentation types
             // Calls.PRESENTATION_xxx, in order to insulate the persistent calllog
@@ -463,6 +489,7 @@ public class CallLog {
             }
             values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
             values.put(PHONE_ACCOUNT_ID, accountId);
+            values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
 
             if (callType == MISSED_TYPE) {
