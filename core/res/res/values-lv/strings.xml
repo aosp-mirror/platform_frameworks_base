@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Lidojuma režīms ir IESLĒGTS."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Lidojuma režīms ir IZSLĒGTS."</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Iestatījumi"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Balss palīgs"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloķēt tūlīt"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"Pārsniedz"</string>
     <string name="safeMode" msgid="2788228061547930246">"Drošais režīms"</string>

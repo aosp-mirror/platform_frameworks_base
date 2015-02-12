@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"हवाइजहाज मोड खुला छ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"हवाइजहाज मोड बन्द छ"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"सेटिङ्हरू"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"आवाज सहायता"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"अब बन्द गर्नुहोस्"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"९९९+"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>

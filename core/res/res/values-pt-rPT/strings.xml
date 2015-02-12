@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"O modo de voo está ativado"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"O modo de voo está desativado"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Definições"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Assist. de voz"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"Bloquear agora"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo seguro"</string>

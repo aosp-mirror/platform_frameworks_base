@@ -200,6 +200,7 @@
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Naka-ON ang airplane mode"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Naka-OFF ang airplane mode"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Mga Setting"</string>
+    <string name="global_action_voice_assist" msgid="7751191495200504480">"Voice Assist"</string>
     <string name="global_action_lockdown" msgid="8751542514724332873">"I-lock ngayon"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
