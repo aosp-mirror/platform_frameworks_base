@@ -86,7 +86,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefone"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Desbloquear"</string>
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
-    <string name="phone_label" msgid="2320074140205331708">"abrir smartphone"</string>
+    <string name="phone_label" msgid="2320074140205331708">"abrir telefone"</string>
     <string name="camera_label" msgid="7261107956054836961">"abrir câmera"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alterar botão do método de entrada."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botão de zoom da compatibilidade."</string>

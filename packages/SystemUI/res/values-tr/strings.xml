@@ -144,7 +144,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Kablosuz"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM kart yok."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth İnternet paylaşımı"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçak modu."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Pil yüzdesi: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem ayarları."</string>
