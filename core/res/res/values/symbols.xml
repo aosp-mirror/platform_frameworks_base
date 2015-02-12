@@ -2167,4 +2167,5 @@
 
   <java-symbol type="xml" name="bookmarks" />
 
+  <java-symbol type="integer" name="config_defaultNightMode" />
 </resources>

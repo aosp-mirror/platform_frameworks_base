@@ -1238,8 +1238,7 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- Default theme for Settings and activities launched from Settings. -->
-    <style name="Theme.Material.Settings" parent="Theme.Material.Light.DarkActionBar">
-        <item name="colorBackground">@color/white</item>
+    <style name="Theme.Material.Settings" parent="Theme.Material.DayNight.DarkActionBar">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
@@ -1251,8 +1250,7 @@ please see themes_device_defaults.xml.
         <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>
     </style>
 
-    <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.Light.BaseDialog">
-        <item name="colorBackground">@color/white</item>
+    <style name="Theme.Material.Settings.BaseDialog" parent="Theme.Material.DayNight.BaseDialog">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
@@ -1260,8 +1258,7 @@ please see themes_device_defaults.xml.
 
     <style name="Theme.Material.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog" />
 
-    <style name="Theme.Material.Settings.Dialog.BaseAlert" parent="Theme.Material.Light.Dialog.BaseAlert">
-        <item name="colorBackground">@color/white</item>
+    <style name="Theme.Material.Settings.Dialog.BaseAlert" parent="Theme.Material.DayNight.Dialog.BaseAlert">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
@@ -1269,22 +1266,19 @@ please see themes_device_defaults.xml.
 
     <style name="Theme.Material.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert" />
 
-    <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
-        <item name="colorBackground">@color/white</item>
+    <style name="Theme.Material.Settings.Dialog.Presentation" parent="Theme.Material.DayNight.Dialog.Presentation">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
-    <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.Light.SearchBar">
-        <item name="colorBackground">@color/white</item>
+    <style name="Theme.Material.Settings.SearchBar" parent="Theme.Material.DayNight.SearchBar">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
     </style>
 
-    <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.Light.CompactMenu">
-        <item name="colorBackground">@color/white</item>
+    <style name="Theme.Material.Settings.CompactMenu" parent="Theme.Material.DayNight.CompactMenu">
         <item name="colorPrimary">@color/material_blue_grey_900</item>
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
