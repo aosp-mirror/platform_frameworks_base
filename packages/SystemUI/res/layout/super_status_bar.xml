@@ -22,9 +22,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:focusable="true"
-    android:fitsSystemWindows="true"
-    android:descendantFocusability="afterDescendants">
+    android:fitsSystemWindows="true">
 
     <com.android.systemui.statusbar.BackDropView
             android:id="@+id/backdrop"
@@ -45,7 +43,8 @@
 
     <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
     <include layout="@layout/status_bar"
         android:layout_width="match_parent"
@@ -82,6 +81,7 @@
 
     <com.android.systemui.statusbar.ScrimView android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
 </com.android.systemui.statusbar.phone.StatusBarWindowView>
