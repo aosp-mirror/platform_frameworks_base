@@ -219,10 +219,9 @@ public class UiModeManager {
     }
 
     /**
-     * Returns the currently configured night mode.
-     *
-     * @return {@link #MODE_NIGHT_NO}, {@link #MODE_NIGHT_YES}, or
-     *  {@link #MODE_NIGHT_AUTO}.  When an error occurred -1 is returned.
+     * @return the currently configured night mode. May be one of
+     *         {@link #MODE_NIGHT_NO}, {@link #MODE_NIGHT_YES},
+     *         {@link #MODE_NIGHT_AUTO}, or -1 on error.
      */
     public int getNightMode() {
         if (mService != null) {

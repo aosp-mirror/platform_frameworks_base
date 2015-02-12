@@ -2617,4 +2617,20 @@
 
   <public type="style" name="Widget.Material.Button.Colored" />
 
+  <public type="style" name="Theme.Material.DayNight" />
+  <public type="style" name="Theme.Material.DayNight.DarkActionBar" />
+  <public type="style" name="Theme.Material.DayNight.Dialog" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.Alert" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.MinWidth" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.NoActionBar.MinWidth" />
+  <public type="style" name="Theme.Material.DayNight.Dialog.Presentation" />
+  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge" />
+  <public type="style" name="Theme.Material.DayNight.DialogWhenLarge.NoActionBar" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar.Fullscreen" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar.Overscan" />
+  <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
+  <public type="style" name="Theme.Material.DayNight.Panel" />
+
 </resources>
