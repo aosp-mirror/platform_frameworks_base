@@ -2369,6 +2369,10 @@ public class ConnectivityManager {
      * The lookup key for a {@link Network} object included with the intent after
      * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
+     * <p>
+     * Note that if you intend to invoke (@link #setProcessDefaultNetwork(Network)) or
+     * {@link Network#openConnection(java.net.URL)} then you must get a
+     * ConnectivityManager instance before doing so.
      */
     public static final String EXTRA_NETWORK = "android.net.extra.NETWORK";
 
