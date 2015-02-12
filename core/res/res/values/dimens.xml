@@ -304,6 +304,9 @@
     <!-- Touch slop for the global toggle accessibility gesture -->
     <dimen name="accessibility_touch_slop">80dip</dimen>
 
+    <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
+    <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
+
     <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
     <dimen name="keyguard_security_width">320dp</dimen>
 
