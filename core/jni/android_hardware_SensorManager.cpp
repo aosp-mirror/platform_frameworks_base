@@ -16,6 +16,8 @@
 
 #define LOG_TAG "SensorManager"
 
+#include <map>
+
 #include <utils/Log.h>
 #include <utils/Looper.h>
 
@@ -44,7 +46,6 @@ struct SensorOffsets
     jfieldID    vendor;
     jfieldID    version;
     jfieldID    handle;
-    jfieldID    type;
     jfieldID    range;
     jfieldID    resolution;
     jfieldID    power;
@@ -55,6 +56,7 @@ struct SensorOffsets
     jfieldID    requiredPermission;
     jfieldID    maxDelay;
     jfieldID    flags;
+    jmethodID   setType;
 } gSensorOffsets;
 
 
@@ -71,7 +73,6 @@ nativeClassInit (JNIEnv *_env, jclass _this)
     sensorOffsets.vendor      = _env->GetFieldID(sensorClass, "mVendor",    "Ljava/lang/String;");
     sensorOffsets.version     = _env->GetFieldID(sensorClass, "mVersion",   "I");
     sensorOffsets.handle      = _env->GetFieldID(sensorClass, "mHandle",    "I");
-    sensorOffsets.type        = _env->GetFieldID(sensorClass, "mType",      "I");
     sensorOffsets.range       = _env->GetFieldID(sensorClass, "mMaxRange",  "F");
     sensorOffsets.resolution  = _env->GetFieldID(sensorClass, "mResolution","F");
     sensorOffsets.power       = _env->GetFieldID(sensorClass, "mPower",     "F");
@@ -84,6 +85,47 @@ nativeClassInit (JNIEnv *_env, jclass _this)
                                                         "Ljava/lang/String;");
     sensorOffsets.maxDelay    = _env->GetFieldID(sensorClass, "mMaxDelay",  "I");
     sensorOffsets.flags = _env->GetFieldID(sensorClass, "mFlags",  "I");
+    sensorOffsets.setType = _env->GetMethodID(sensorClass, "setType", "(I)Z");
+}
+
+/**
+ * A key comparator predicate.
+ * It is used to intern strings associated with Sensor data.
+ * It defines a 'Strict weak ordering' for the interned strings.
+ */
+class InternedStringCompare {
+public:
+    bool operator()(const String8* string1, const String8* string2) const {
+        if (string1 == NULL) {
+            return string2 != NULL;
+        }
+        return string1->compare(*string2) < 0;
+    }
+};
+
+/**
+ * A localized interning mechanism for Sensor strings.
+ * We implement our own interning to avoid the overhead of using java.lang.String#intern().
+ * It is common that Vendor, StringType, and RequirePermission data is common between many of the
+ * Sensors, by interning the memory usage to represent Sensors is optimized.
+ */
+static jstring
+getInternedString(JNIEnv *env, const String8* string) {
+    static std::map<const String8*, jstring, InternedStringCompare> internedStrings;
+
+    jstring internedString;
+    std::map<const String8*, jstring>::iterator iterator = internedStrings.find(string);
+    if (iterator != internedStrings.end()) {
+        internedString = iterator->second;
+    } else {
+        jstring localString = env->NewStringUTF(string->string());
+        // we are implementing our own interning so expect these strings to be backed by global refs
+        internedString = (jstring) env->NewGlobalRef(localString);
+        internedStrings.insert(std::make_pair(string, internedString));
+        env->DeleteLocalRef(localString);
+    }
+
+    return internedString;
 }
 
 static jint
@@ -93,20 +135,19 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
 
     Sensor const* const* sensorList;
     size_t count = mgr.getSensorList(&sensorList);
-    if (size_t(next) >= count)
+    if (size_t(next) >= count) {
         return -1;
+    }
 
     Sensor const* const list = sensorList[next];
     const SensorOffsets& sensorOffsets(gSensorOffsets);
-    jstring name = env->NewStringUTF(list->getName().string());
-    jstring vendor = env->NewStringUTF(list->getVendor().string());
-    jstring stringType = env->NewStringUTF(list->getStringType().string());
-    jstring requiredPermission = env->NewStringUTF(list->getRequiredPermission().string());
+    jstring name = getInternedString(env, &list->getName());
+    jstring vendor = getInternedString(env, &list->getVendor());
+    jstring requiredPermission = getInternedString(env, &list->getRequiredPermission());
     env->SetObjectField(sensor, sensorOffsets.name,      name);
     env->SetObjectField(sensor, sensorOffsets.vendor,    vendor);
     env->SetIntField(sensor, sensorOffsets.version,      list->getVersion());
     env->SetIntField(sensor, sensorOffsets.handle,       list->getHandle());
-    env->SetIntField(sensor, sensorOffsets.type,         list->getType());
     env->SetFloatField(sensor, sensorOffsets.range,      list->getMaxValue());
     env->SetFloatField(sensor, sensorOffsets.resolution, list->getResolution());
     env->SetFloatField(sensor, sensorOffsets.power,      list->getPowerUsage());
@@ -115,11 +156,14 @@ nativeGetNextSensor(JNIEnv *env, jclass clazz, jobject sensor, jint next)
                      list->getFifoReservedEventCount());
     env->SetIntField(sensor, sensorOffsets.fifoMaxEventCount,
                      list->getFifoMaxEventCount());
-    env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
     env->SetObjectField(sensor, sensorOffsets.requiredPermission,
                         requiredPermission);
     env->SetIntField(sensor, sensorOffsets.maxDelay, list->getMaxDelay());
     env->SetIntField(sensor, sensorOffsets.flags, list->getFlags());
+    if (env->CallBooleanMethod(sensor, sensorOffsets.setType, list->getType()) == JNI_FALSE) {
+        jstring stringType = getInternedString(env, &list->getStringType());
+        env->SetObjectField(sensor, sensorOffsets.stringType, stringType);
+    }
     next++;
     return size_t(next) < count ? next : 0;
 }

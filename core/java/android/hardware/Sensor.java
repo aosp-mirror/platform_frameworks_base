@@ -833,4 +833,96 @@ public final class Sensor {
                 + ", type=" + mType + ", maxRange=" + mMaxRange + ", resolution=" + mResolution
                 + ", power=" + mPower + ", minDelay=" + mMinDelay + "}";
     }
+
+    /**
+     * Sets the Type associated with the sensor.
+     * NOTE: to be used only by native bindings in SensorManager.
+     *
+     * This allows interned static strings to be used across all representations of the Sensor. If
+     * a sensor type is not referenced here, it will still be interned by the native SensorManager.
+     *
+     * @return {@code true} if the StringType was successfully set, {@code false} otherwise.
+     */
+    private boolean setType(int value) {
+        mType = value;
+        switch (mType) {
+            case TYPE_ACCELEROMETER:
+                mStringType = STRING_TYPE_ACCELEROMETER;
+                return true;
+            case TYPE_AMBIENT_TEMPERATURE:
+                mStringType = STRING_TYPE_AMBIENT_TEMPERATURE;
+                return true;
+            case TYPE_GAME_ROTATION_VECTOR:
+                mStringType = STRING_TYPE_GAME_ROTATION_VECTOR;
+                return true;
+            case TYPE_GEOMAGNETIC_ROTATION_VECTOR:
+                mStringType = STRING_TYPE_GEOMAGNETIC_ROTATION_VECTOR;
+                return true;
+            case TYPE_GLANCE_GESTURE:
+                mStringType = STRING_TYPE_GLANCE_GESTURE;
+                return true;
+            case TYPE_GRAVITY:
+                mStringType = STRING_TYPE_GRAVITY;
+                return true;
+            case TYPE_GYROSCOPE:
+                mStringType = STRING_TYPE_GYROSCOPE;
+                return true;
+            case TYPE_GYROSCOPE_UNCALIBRATED:
+                mStringType = STRING_TYPE_GYROSCOPE_UNCALIBRATED;
+                return true;
+            case TYPE_HEART_RATE:
+                mStringType = STRING_TYPE_HEART_RATE;
+                return true;
+            case TYPE_LIGHT:
+                mStringType = STRING_TYPE_LIGHT;
+                return true;
+            case TYPE_LINEAR_ACCELERATION:
+                mStringType = STRING_TYPE_LINEAR_ACCELERATION;
+                return true;
+            case TYPE_MAGNETIC_FIELD:
+                mStringType = STRING_TYPE_MAGNETIC_FIELD;
+                return true;
+            case TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                mStringType = STRING_TYPE_MAGNETIC_FIELD_UNCALIBRATED;
+                return true;
+            case TYPE_PICK_UP_GESTURE:
+                mStringType = STRING_TYPE_PICK_UP_GESTURE;
+                return true;
+            case TYPE_PRESSURE:
+                mStringType = STRING_TYPE_PRESSURE;
+                return true;
+            case TYPE_PROXIMITY:
+                mStringType = STRING_TYPE_PROXIMITY;
+                return true;
+            case TYPE_RELATIVE_HUMIDITY:
+                mStringType = STRING_TYPE_RELATIVE_HUMIDITY;
+                return true;
+            case TYPE_ROTATION_VECTOR:
+                mStringType = STRING_TYPE_ROTATION_VECTOR;
+                return true;
+            case TYPE_SIGNIFICANT_MOTION:
+                mStringType = STRING_TYPE_SIGNIFICANT_MOTION;
+                return true;
+            case TYPE_STEP_COUNTER:
+                mStringType = STRING_TYPE_STEP_COUNTER;
+                return true;
+            case TYPE_STEP_DETECTOR:
+                mStringType = STRING_TYPE_STEP_DETECTOR;
+                return true;
+            case TYPE_TILT_DETECTOR:
+                mStringType = SENSOR_STRING_TYPE_TILT_DETECTOR;
+                return true;
+            case TYPE_WAKE_GESTURE:
+                mStringType = STRING_TYPE_WAKE_GESTURE;
+                return true;
+            case TYPE_ORIENTATION:
+                mStringType = STRING_TYPE_ORIENTATION;
+                return true;
+            case TYPE_TEMPERATURE:
+                mStringType = STRING_TYPE_TEMPERATURE;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
