@@ -690,7 +690,7 @@ private:
      * @param texture The texture reprsenting the shape
      * @param paint The paint to draw the shape with
      */
-    void drawShape(float left, float top, const PathTexture* texture, const SkPaint* paint);
+    void drawShape(float left, float top, PathTexture* texture, const SkPaint* paint);
 
     /**
      * Draws the specified texture as an alpha bitmap. Alpha bitmaps obey
@@ -819,7 +819,7 @@ private:
      * @param y The y coordinate where the texture will be drawn
      * @param paint The paint to draw the texture with
      */
-     void drawPathTexture(const PathTexture* texture, float x, float y, const SkPaint* paint);
+     void drawPathTexture(PathTexture* texture, float x, float y, const SkPaint* paint);
 
     /**
      * Resets the texture coordinates stored in mMeshVertices. Setting the values

@@ -2505,7 +2505,7 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     mDirty = true;
 }
 
-void OpenGLRenderer::drawShape(float left, float top, const PathTexture* texture,
+void OpenGLRenderer::drawShape(float left, float top, PathTexture* texture,
         const SkPaint* paint) {
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
@@ -2528,7 +2528,7 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
 
     if (p->getPathEffect() != nullptr) {
         mCaches.textureState().activateTexture(0);
-        const PathTexture* texture = mCaches.pathCache.getRoundRect(
+        PathTexture* texture = mCaches.pathCache.getRoundRect(
                 right - left, bottom - top, rx, ry, p);
         drawShape(left, top, texture, p);
     } else {
@@ -2546,7 +2546,7 @@ void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p
     }
     if (p->getPathEffect() != nullptr) {
         mCaches.textureState().activateTexture(0);
-        const PathTexture* texture = mCaches.pathCache.getCircle(radius, p);
+        PathTexture* texture = mCaches.pathCache.getCircle(radius, p);
         drawShape(x - radius, y - radius, texture, p);
     } else {
         SkPath path;
@@ -2569,7 +2569,7 @@ void OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
 
     if (p->getPathEffect() != nullptr) {
         mCaches.textureState().activateTexture(0);
-        const PathTexture* texture = mCaches.pathCache.getOval(right - left, bottom - top, p);
+        PathTexture* texture = mCaches.pathCache.getOval(right - left, bottom - top, p);
         drawShape(left, top, texture, p);
     } else {
         SkPath path;
@@ -2593,7 +2593,7 @@ void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
     // TODO: support fills (accounting for concavity if useCenter && sweepAngle > 180)
     if (p->getStyle() != SkPaint::kStroke_Style || p->getPathEffect() != nullptr || useCenter) {
         mCaches.textureState().activateTexture(0);
-        const PathTexture* texture = mCaches.pathCache.getArc(right - left, bottom - top,
+        PathTexture* texture = mCaches.pathCache.getArc(right - left, bottom - top,
                 startAngle, sweepAngle, useCenter, p);
         drawShape(left, top, texture, p);
         return;
@@ -2630,7 +2630,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
         if (p->getPathEffect() != nullptr || p->getStrokeJoin() != SkPaint::kMiter_Join ||
                 p->getStrokeMiter() != SkPaintDefaults_MiterLimit) {
             mCaches.textureState().activateTexture(0);
-            const PathTexture* texture =
+            PathTexture* texture =
                     mCaches.pathCache.getRect(right - left, bottom - top, p);
             drawShape(left, top, texture, p);
         } else {
@@ -2974,7 +2974,7 @@ void OpenGLRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
 
     mCaches.textureState().activateTexture(0);
 
-    const PathTexture* texture = mCaches.pathCache.get(path, paint);
+    PathTexture* texture = mCaches.pathCache.get(path, paint);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
@@ -3107,11 +3107,25 @@ Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
     return texture;
 }
 
-void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
+void OpenGLRenderer::drawPathTexture(PathTexture* texture,
         float x, float y, const SkPaint* paint) {
     if (quickRejectSetupScissor(x, y, x + texture->width, y + texture->height)) {
         return;
     }
+
+    if (USE_GLOPS && !paint->getShader()) {
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshTexturedUnitQuad(nullptr, true)
+                .setFillPathTexturePaint(*texture, *paint, currentSnapshot()->alpha)
+                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
 
     int alpha;
     SkXfermode::Mode mode;

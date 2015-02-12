@@ -269,8 +269,12 @@ void RenderState::render(const Glop& glop) {
         // TODO: to support shaders, increment texture unit
         mCaches->textureState().activateTexture(0);
 
-        glop.fill.texture->setWrap(GL_CLAMP_TO_EDGE, true);
-        glop.fill.texture->setFilter(glop.fill.textureFilter, true);
+        if (glop.fill.textureClamp != GL_INVALID_ENUM) {
+            glop.fill.texture->setWrap(glop.fill.textureClamp, true);
+        }
+        if (glop.fill.textureFilter != GL_INVALID_ENUM) {
+            glop.fill.texture->setFilter(glop.fill.textureFilter, true);
+        }
 
         mCaches->textureState().bindTexture(fill.texture->id);
         meshState().enableTexCoordsVertexArray();

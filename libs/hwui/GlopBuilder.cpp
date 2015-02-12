@@ -246,6 +246,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, bool isAlphaMask
 
     mOutGlop->fill.texture = &texture;
     mOutGlop->fill.textureFilter = PaintUtils::getFilter(paint);
+    mOutGlop->fill.textureClamp = GL_CLAMP_TO_EDGE;
 
     if (paint) {
         int color = paint->getColor();
@@ -289,11 +290,33 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale) {
     REQUIRE_STAGES(kMeshStage);
 
     mOutGlop->fill.texture = nullptr;
-    mOutGlop->fill.textureFilter = GL_NEAREST;
+    mOutGlop->fill.textureFilter = GL_INVALID_ENUM;
+    mOutGlop->fill.textureClamp = GL_INVALID_ENUM;
 
     setFill(paint.getColor(), alphaScale, PaintUtils::getXfermode(paint.getXfermode()),
             paint.getShader(), paint.getColorFilter());
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setFillPathTexturePaint(Texture& texture,
+        const SkPaint& paint, float alphaScale) {
+    TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
+
+    mOutGlop->fill.texture = &texture;
+
+    //specify invalid, since these are always static for path textures
+    mOutGlop->fill.textureFilter = GL_INVALID_ENUM;
+    mOutGlop->fill.textureClamp = GL_INVALID_ENUM;
+
+    setFill(paint.getColor(), alphaScale, PaintUtils::getXfermode(paint.getXfermode()),
+            paint.getShader(), paint.getColorFilter());
+
+    mDescription.modulate = mOutGlop->fill.color.a < 1.0f
+            || mOutGlop->fill.color.r > 0.0f
+            || mOutGlop->fill.color.g > 0.0f
+            || mOutGlop->fill.color.b > 0.0f;
     return *this;
 }
 
@@ -310,7 +333,6 @@ GlopBuilder& GlopBuilder::setTransformClip(const Matrix4& ortho,
     mOutGlop->transform.fudgingOffset = fudgingOffset;
     return *this;
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // ModelView

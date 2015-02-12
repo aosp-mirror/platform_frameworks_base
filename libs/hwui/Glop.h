@@ -39,7 +39,6 @@ class RoundRectClipState;
  * are enabled/disabled dynamically based on mesh content.
  */
 enum VertexAttribFlags {
-    // NOTE: position attribute always enabled
     kNone_Attrib = 0,
     kTextureCoord_Attrib = 1 << 0,
     kColor_Attrib = 1 << 1,
@@ -61,9 +60,6 @@ enum VertexAttribFlags {
  */
 // TODO: PREVENT_COPY_AND_ASSIGN(...) or similar
 struct Glop {
-    Rect bounds;
-    const RoundRectClipState* roundRectClipState;
-
     /*
      * Stores mesh - vertex and index data.
      *
@@ -85,8 +81,10 @@ struct Glop {
 
     struct Fill {
         Program* program;
+
         Texture* texture;
         GLenum textureFilter;
+        GLenum textureClamp;
 
         bool colorEnabled;
         FloatColor color;
@@ -113,10 +111,23 @@ struct Glop {
         bool fudgingOffset;
     } transform;
 
+    const RoundRectClipState* roundRectClipState;
+
+    /**
+     * Blending to be used by this draw - both GL_NONE if blending is disabled.
+     *
+     * Defined by fill step, but can be force-enabled by presence of kAlpha_Attrib
+     */
     struct Blend {
         GLenum src;
         GLenum dst;
     } blend;
+
+    /**
+     * Bounds of the drawing command in layer space. Only mapped into layer
+     * space once GlopBuilder::build() is called.
+     */
+    Rect bounds;
 
     /**
      * Additional render state to enumerate:
