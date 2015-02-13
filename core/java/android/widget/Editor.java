@@ -1352,6 +1352,9 @@ public class Editor {
                             searchStartIndex);
                     // Note how dynamic layout's internal block indices get updated from Editor
                     blockIndices[i] = blockIndex;
+                    if (mTextDisplayLists[blockIndex] != null) {
+                        mTextDisplayLists[blockIndex].isDirty = true;
+                    }
                     searchStartIndex = blockIndex + 1;
                 }
 
@@ -1388,6 +1391,7 @@ public class Editor {
                             // brings this range of text back to the top left corner of the viewport
                             hardwareCanvas.translate(-left, -top);
                             layout.drawText(hardwareCanvas, blockBeginLine, blockEndLine);
+                            mTextDisplayLists[blockIndex].isDirty = false;
                             // No need to untranslate, previous context is popped after
                             // drawDisplayList
                         } finally {
