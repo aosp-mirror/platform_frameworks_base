@@ -327,7 +327,7 @@ please see themes_device_defaults.xml.
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
-        <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
+        <item name="actionBarItemBackground">@drawable/action_bar_item_background_material</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_material</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_material</item>
@@ -681,7 +681,7 @@ please see themes_device_defaults.xml.
         <item name="actionModePopupWindowStyle">@style/Widget.Material.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
-        <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
+        <item name="actionBarItemBackground">@drawable/action_bar_item_background_material</item>
 
         <item name="actionModeCutDrawable">@drawable/ic_menu_cut_material</item>
         <item name="actionModeCopyDrawable">@drawable/ic_menu_copy_material</item>

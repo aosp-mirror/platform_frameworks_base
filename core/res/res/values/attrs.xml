@@ -5291,6 +5291,9 @@
     <declare-styleable name="RippleDrawable">
         <!-- The color to use for ripple effects. This attribute is required. -->
         <attr name="color" />
+        <!-- The radius of the ripple when fully expanded. By default, the
+             radius is computed based on the size of the ripple's container. -->
+        <attr name="radius" />
     </declare-styleable>
 
     <declare-styleable name="ScaleDrawable">
