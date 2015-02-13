@@ -12069,7 +12069,10 @@ package android.graphics.drawable {
 
   public class RippleDrawable extends android.graphics.drawable.LayerDrawable {
     ctor public RippleDrawable(android.content.res.ColorStateList, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
+    method public int getRadius();
     method public void setColor(android.content.res.ColorStateList);
+    method public void setRadius(int);
+    field public static final int RADIUS_AUTO = -1; // 0xffffffff
   }
 
   public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {

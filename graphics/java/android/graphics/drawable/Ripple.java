@@ -46,8 +46,7 @@ class Ripple {
     private static final long RIPPLE_ENTER_DELAY = 80;
 
     // Hardware animators.
-    private final ArrayList<RenderNodeAnimator> mRunningAnimations =
-            new ArrayList<RenderNodeAnimator>();
+    private final ArrayList<RenderNodeAnimator> mRunningAnimations = new ArrayList<>();
 
     private final RippleDrawable mOwner;
 
@@ -117,8 +116,8 @@ class Ripple {
         mStartingY = startingY;
     }
 
-    public void setup(int maxRadius, float density) {
-        if (maxRadius != RippleDrawable.RADIUS_AUTO) {
+    public void setup(float maxRadius, float density) {
+        if (maxRadius >= 0) {
             mHasMaxRadius = true;
             mOuterRadius = maxRadius;
         } else {

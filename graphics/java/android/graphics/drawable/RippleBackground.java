@@ -49,8 +49,7 @@ class RippleBackground {
     private static final int ENTER_DURATION_FAST = 100;
 
     // Hardware animators.
-    private final ArrayList<RenderNodeAnimator> mRunningAnimations =
-            new ArrayList<RenderNodeAnimator>();
+    private final ArrayList<RenderNodeAnimator> mRunningAnimations = new ArrayList<>();
 
     private final RippleDrawable mOwner;
 
@@ -105,8 +104,8 @@ class RippleBackground {
         mBounds = bounds;
     }
 
-    public void setup(int maxRadius, float density) {
-        if (maxRadius != RippleDrawable.RADIUS_AUTO) {
+    public void setup(float maxRadius, float density) {
+        if (maxRadius >= 0) {
             mHasMaxRadius = true;
             mOuterRadius = maxRadius;
         } else {

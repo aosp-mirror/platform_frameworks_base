@@ -92,18 +92,16 @@ import java.util.Arrays;
  * @attr ref android.R.styleable#RippleDrawable_color
  */
 public class RippleDrawable extends LayerDrawable {
+    /**
+     * Radius value that specifies the ripple radius should be computed based
+     * on the size of the ripple's container.
+     */
+    public static final int RADIUS_AUTO = -1;
+
     private static final int MASK_UNKNOWN = -1;
     private static final int MASK_NONE = 0;
     private static final int MASK_CONTENT = 1;
     private static final int MASK_EXPLICIT = 2;
-
-    /**
-     * Constant for automatically determining the maximum ripple radius.
-     *
-     * @see #setMaxRadius(int)
-     * @hide
-     */
-    public static final int RADIUS_AUTO = -1;
 
     /** The maximum number of ripples supported. */
     private static final int MAX_RIPPLES = 10;
@@ -356,10 +354,34 @@ public class RippleDrawable extends LayerDrawable {
      * Sets the ripple color.
      *
      * @param color Ripple color as a color state list.
+     *
+     * @attr ref android.R.styleable#RippleDrawable_color
      */
     public void setColor(ColorStateList color) {
         mState.mColor = color;
         invalidateSelf();
+    }
+
+    /**
+     * Sets the radius in pixels of the fully expanded ripple.
+     *
+     * @param radius ripple radius in pixels, or {@link #RADIUS_AUTO} to
+     *               compute the radius based on the container size
+     * @attr ref android.R.styleable#RippleDrawable_radius
+     */
+    public void setRadius(int radius) {
+        mState.mMaxRadius = radius;
+        invalidateSelf();
+    }
+
+    /**
+     * @return the radius in pixels of the fully expanded ripple if an explicit
+     *         radius has been set, or {@link #RADIUS_AUTO} if the radius is
+     *         computed based on the container size
+     * @attr ref android.R.styleable#RippleDrawable_radius
+     */
+    public int getRadius() {
+        return mState.mMaxRadius;
     }
 
     @Override
@@ -427,6 +449,9 @@ public class RippleDrawable extends LayerDrawable {
         if (color != null) {
             mState.mColor = color;
         }
+
+        mState.mMaxRadius = a.getDimensionPixelSize(
+                R.styleable.RippleDrawable_radius, mState.mMaxRadius);
 
         verifyRequiredAttributes(a);
     }
@@ -957,36 +982,6 @@ public class RippleDrawable extends LayerDrawable {
         public Drawable newDrawable(Resources res) {
             return new RippleDrawable(this, res);
         }
-    }
-
-    /**
-     * Sets the maximum ripple radius in pixels. The default value of
-     * {@link #RADIUS_AUTO} defines the radius as the distance from the center
-     * of the drawable bounds (or hotspot bounds, if specified) to a corner.
-     *
-     * @param maxRadius the maximum ripple radius in pixels or
-     *            {@link #RADIUS_AUTO} to automatically determine the maximum
-     *            radius based on the bounds
-     * @see #getMaxRadius()
-     * @see #setHotspotBounds(int, int, int, int)
-     * @hide
-     */
-    public void setMaxRadius(int maxRadius) {
-        if (maxRadius != RADIUS_AUTO && maxRadius < 0) {
-            throw new IllegalArgumentException("maxRadius must be RADIUS_AUTO or >= 0");
-        }
-
-        mState.mMaxRadius = maxRadius;
-    }
-
-    /**
-     * @return the maximum ripple radius in pixels, or {@link #RADIUS_AUTO} if
-     *         the radius is determined automatically
-     * @see #setMaxRadius(int)
-     * @hide
-     */
-    public int getMaxRadius() {
-        return mState.mMaxRadius;
     }
 
     private RippleDrawable(RippleState state, Resources res) {
