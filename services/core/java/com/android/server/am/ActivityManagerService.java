@@ -16692,10 +16692,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 
                 EventLog.writeEvent(EventLogTags.CONFIGURATION_CHANGED, changes);
 
-                if (values.locale != null && !initLocale) {
-                    saveLocaleLocked(values.locale, 
-                                     !values.locale.equals(mConfiguration.locale),
-                                     values.userSetLocale);
+                if (!initLocale && values.locale != null && values.userSetLocale) {
+                    final String languageTag = values.locale.toLanguageTag();
+                    SystemProperties.set("persist.sys.locale", languageTag);
+                    mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
+                            values.locale));
                 }
 
                 mConfigurationSeq++;
@@ -16799,27 +16800,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     private static final boolean shouldShowDialogs(Configuration config) {
         return !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                 && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH);
-    }
-
-    /**
-     * Save the locale. You must be inside a synchronized (this) block.
-     */
-    private void saveLocaleLocked(Locale l, boolean isDiff, boolean isPersist) {
-        final String languageTag = l.toLanguageTag();
-        if (isDiff) {
-            SystemProperties.set("user.locale", languageTag);
-
-            // TODO: Who uses these ? There are no references to these system
-            // properties in documents or code. Did the author intend to call
-            // System.setProperty() instead ? Even that wouldn't have any effect.
-            SystemProperties.set("user.language", l.getLanguage());
-            SystemProperties.set("user.region", l.getCountry());
-        }
-
-        if (isPersist) {
-            SystemProperties.set("persist.sys.locale", languageTag);
-            mHandler.sendMessage(mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG, l));
-        }
     }
 
     @Override
