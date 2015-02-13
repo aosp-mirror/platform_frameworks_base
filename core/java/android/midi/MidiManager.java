@@ -66,22 +66,24 @@ public class MidiManager {
     }
 
     /**
-     * Callback interface used for clients to receive MIDI device added and removed notifications
+     * Callback class used for clients to receive MIDI device added and removed notifications
      */
-    public interface DeviceCallback {
+    public static class DeviceCallback {
         /**
          * Called to notify when a new MIDI device has been added
          *
          * @param device a {@link MidiDeviceInfo} for the newly added device
          */
-        void onDeviceAdded(MidiDeviceInfo device);
+        void onDeviceAdded(MidiDeviceInfo device) {
+        }
 
         /**
          * Called to notify when a MIDI device has been removed
          *
          * @param device a {@link MidiDeviceInfo} for the removed device
          */
-        void onDeviceRemoved(MidiDeviceInfo device);
+        void onDeviceRemoved(MidiDeviceInfo device) {
+        }
     }
 
     /**
