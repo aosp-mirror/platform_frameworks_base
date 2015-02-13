@@ -14,7 +14,15 @@
      limitations under the License.
 -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+            android:paddingMode="nest">
+    <item>
+        <ripple android:color="@color/tab_highlight_material">
+            <item android:id="@id/mask">
+                <color android:color="@color/white" />
+            </item>
+        </ripple>
+    </item>
     <item android:gravity="bottom">
         <shape android:shape="rectangle"
                android:tint="?attr/colorControlActivated">
