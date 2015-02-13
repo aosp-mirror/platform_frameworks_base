@@ -26,6 +26,8 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.Display;
+import android.view.Surface;
 
 import com.android.server.EventLogTags;
 
@@ -52,6 +54,8 @@ public class TaskStack {
 
     /** For comparison with DisplayContent bounds. */
     private Rect mTmpRect = new Rect();
+    /** For handling display rotations. */
+    private Rect mTmpRect2 = new Rect();
 
     /** Content limits relative to the DisplayContent this sits in. */
     private Rect mBounds = new Rect();
@@ -94,6 +98,9 @@ public class TaskStack {
     // the status bar.
     boolean mUnderStatusBar;
 
+    // Device rotation as of the last time {@link #mBounds} was set.
+    int mRotation;
+
     TaskStack(WindowManagerService service, int stackId) {
         mService = service;
         mStackId = stackId;
@@ -135,8 +142,10 @@ public class TaskStack {
     /** Set the stack bounds. Passing in null sets the bounds to fullscreen. */
     boolean setBounds(Rect bounds) {
         boolean oldFullscreen = mFullscreen;
+        int rotation = Surface.ROTATION_0;
         if (mDisplayContent != null) {
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
+            rotation = mDisplayContent.getDisplayInfo().rotation;
             if (bounds == null) {
                 bounds = mTmpRect;
                 mFullscreen = true;
@@ -147,10 +156,10 @@ public class TaskStack {
         }
 
         if (bounds == null) {
-            // Can set to fullscreen if we don't have a display to get bounds from...
+            // Can't set to fullscreen if we don't have a display to get bounds from...
             return false;
         }
-        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen) {
+        if (mBounds.equals(bounds) && oldFullscreen == mFullscreen && mRotation == rotation) {
             return false;
         }
 
@@ -158,6 +167,7 @@ public class TaskStack {
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
         mUnderStatusBar = (mBounds.top == 0);
+        mRotation = rotation;
         updateOverrideConfiguration();
         return true;
     }
@@ -191,9 +201,42 @@ public class TaskStack {
     }
 
     void updateDisplayInfo() {
-        if (mFullscreen && mDisplayContent != null) {
+        if (mFullscreen) {
+            setBounds(null);
+        } else if (mDisplayContent != null) {
+            final int newRotation = mDisplayContent.getDisplayInfo().rotation;
+            if (mRotation == newRotation) {
+                return;
+            }
+
+            // Device rotation changed. We don't want the stack to move around on the screen when
+            // this happens, so update the stack bounds so it stays in the same place.
+            final int rotationDelta = DisplayContent.deltaRotation(mRotation, newRotation);
             mDisplayContent.getLogicalDisplayRect(mTmpRect);
-            setBounds(mTmpRect);
+            switch (rotationDelta) {
+                case Surface.ROTATION_0:
+                    mTmpRect2.set(mBounds);
+                    break;
+                case Surface.ROTATION_90:
+                    mTmpRect2.top = mTmpRect.bottom - mBounds.right;
+                    mTmpRect2.left = mBounds.top;
+                    mTmpRect2.right = mTmpRect2.left + mBounds.height();
+                    mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
+                    break;
+                case Surface.ROTATION_180:
+                    mTmpRect2.top = mTmpRect.bottom - mBounds.bottom;
+                    mTmpRect2.left = mTmpRect.right - mBounds.right;
+                    mTmpRect2.right = mTmpRect2.left + mBounds.width();
+                    mTmpRect2.bottom = mTmpRect2.top + mBounds.height();
+                    break;
+                case Surface.ROTATION_270:
+                    mTmpRect2.top = mBounds.left;
+                    mTmpRect2.left = mTmpRect.right - mBounds.bottom;
+                    mTmpRect2.right = mTmpRect2.left + mBounds.height();
+                    mTmpRect2.bottom = mTmpRect2.top + mBounds.width();
+                    break;
+            }
+            setBounds(mTmpRect2);
         }
     }
 
