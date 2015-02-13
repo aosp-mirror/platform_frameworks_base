@@ -1579,15 +1579,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void syncDeviceCapabilitiesLocked(DevicePolicyData policy) {
         // Ensure the status of the camera is synced down to the system. Interested native services
         // should monitor this value and act accordingly.
-        boolean systemState = SystemProperties.getBoolean(SYSTEM_PROP_DISABLE_CAMERA, false);
+        String cameraPropertyForUser = SYSTEM_PROP_DISABLE_CAMERA_PREFIX + policy.mUserHandle;
+        boolean systemState = SystemProperties.getBoolean(cameraPropertyForUser, false);
         boolean cameraDisabled = getCameraDisabled(null, policy.mUserHandle);
         if (cameraDisabled != systemState) {
             long token = Binder.clearCallingIdentity();
             try {
                 String value = cameraDisabled ? "1" : "0";
                 if (DBG) Slog.v(LOG_TAG, "Change in camera state ["
-                        + SYSTEM_PROP_DISABLE_CAMERA + "] = " + value);
-                SystemProperties.set(SYSTEM_PROP_DISABLE_CAMERA, value);
+                        + cameraPropertyForUser + "] = " + value);
+                SystemProperties.set(cameraPropertyForUser, value);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -3611,9 +3612,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     /**
      * The system property used to share the state of the camera. The native camera service
-     * is expected to read this property and act accordingly.
+     * is expected to read this property and act accordingly. The userId should be appended
+     * to this key.
      */
-    public static final String SYSTEM_PROP_DISABLE_CAMERA = "sys.secpolicy.camera.disabled";
+    public static final String SYSTEM_PROP_DISABLE_CAMERA_PREFIX = "sys.secpolicy.camera.off_";
 
     /**
      * Disables all device cameras according to the specified admin.
