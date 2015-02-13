@@ -420,18 +420,24 @@ public class TaskStack {
 
     void startDimmingIfNeeded(WindowStateAnimator newWinAnimator) {
         // Only set dim params on the highest dimmed layer.
-        final WindowStateAnimator existingDimWinAnimator = mDimWinAnimator;
         // Don't turn on for an unshown surface, or for any layer but the highest dimmed layer.
-        if (newWinAnimator.mSurfaceShown && (existingDimWinAnimator == null
-                || !existingDimWinAnimator.mSurfaceShown
-                || existingDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
+        if (newWinAnimator.mSurfaceShown && (mDimWinAnimator == null
+                || !mDimWinAnimator.mSurfaceShown
+                || mDimWinAnimator.mAnimLayer < newWinAnimator.mAnimLayer)) {
             mDimWinAnimator = newWinAnimator;
+            if (mDimWinAnimator.mWin.mAppToken == null
+                    && !mFullscreen && mDisplayContent != null) {
+                // Dim should cover the entire screen for system windows.
+                mDisplayContent.getLogicalDisplayRect(mTmpRect);
+                mDimLayer.setBounds(mTmpRect);
+            }
         }
     }
 
     void stopDimmingIfNeeded() {
         if (!mDimmingTag && isDimming()) {
             mDimWinAnimator = null;
+            mDimLayer.setBounds(mBounds);
         }
     }
 
@@ -446,7 +452,7 @@ public class TaskStack {
         }
     }
 
-    void switchUser(int userId) {
+    void switchUser() {
         int top = mTasks.size();
         for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
             Task task = mTasks.get(taskNdx);
@@ -475,7 +481,7 @@ public class TaskStack {
         }
         if (mDimLayer.isDimming()) {
             pw.print(prefix); pw.println("mDimLayer:");
-            mDimLayer.printTo(prefix, pw);
+            mDimLayer.printTo(prefix + " ", pw);
             pw.print(prefix); pw.print("mDimWinAnimator="); pw.println(mDimWinAnimator);
         }
         if (!mExitingAppTokens.isEmpty()) {

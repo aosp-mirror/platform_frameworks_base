@@ -244,20 +244,19 @@ class DisplayContent {
         mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
     }
 
-    void switchUserStacks(int newUserId) {
+    void switchUserStacks() {
         final WindowList windows = getWindowList();
         for (int i = 0; i < windows.size(); i++) {
             final WindowState win = windows.get(i);
             if (win.isHiddenFromUserLocked()) {
-                if (DEBUG_VISIBILITY) Slog.w(TAG, "user changing " + newUserId + " hiding "
-                        + win + ", attrs=" + win.mAttrs.type + ", belonging to "
-                        + win.mOwnerUid);
+                if (DEBUG_VISIBILITY) Slog.w(TAG, "user changing, hiding " + win
+                        + ", attrs=" + win.mAttrs.type + ", belonging to " + win.mOwnerUid);
                 win.hideLw(false);
             }
         }
 
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            mStacks.get(stackNdx).switchUser(newUserId);
+            mStacks.get(stackNdx).switchUser();
         }
     }
 
