@@ -663,20 +663,21 @@ mNotificationManager.notify(id, builder.build());
 NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 // Creates an Intent for the Activity
 Intent notifyIntent =
-        new Intent(new ComponentName(this, ResultActivity.class));
+        new Intent(this, ResultActivity.class);
 // Sets the Activity to start in a new, empty task
-notifyIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK);
+notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 // Creates the PendingIntent
-PendingIntent notifyIntent =
+PendingIntent notifyPendingIntent =
         PendingIntent.getActivity(
         this,
         0,
-        notifyIntent
+        notifyIntent,
         PendingIntent.FLAG_UPDATE_CURRENT
 );
 
 // Puts the PendingIntent into the notification builder
-builder.setContentIntent(notifyIntent);
+builder.setContentIntent(notifyPendingIntent);
 // Notifications are issued by sending them to the
 // NotificationManager system service.
 NotificationManager mNotificationManager =
@@ -715,7 +716,7 @@ mNotificationManager.notify(id, builder.build());
 <h3 id="FixedProgress">Displaying a fixed-duration progress indicator</h3>
 <p>
     To display a determinate progress bar, add the bar to your notification by calling
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
     setProgress(max, progress, false)} and then issue the notification. As your operation proceeds,
     increment <code>progress</code>, and update the notification. At the end of the operation,
     <code>progress</code> should equal <code>max</code>. A common way to call
@@ -727,7 +728,7 @@ mNotificationManager.notify(id, builder.build());
     You can either leave the progress bar showing when the operation is done, or remove it. In
     either case, remember to update the notification text to show that the operation is complete.
     To remove the progress bar, call
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress
     setProgress(0, 0, false)}. For example:
 </p>
 <pre>
@@ -783,8 +784,8 @@ new Thread(
 <p>
     Issue the notification at the beginning of the operation. The animation will run until you
     modify your notification. When the operation is done, call
-    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress()
-    setProgress(0, 0, false)} and then update the notification to remove the activity indicator.
+    {@link android.support.v4.app.NotificationCompat.Builder#setProgress setProgress(0, 0, false)}
+    and then update the notification to remove the activity indicator.
     Always do this; otherwise, the animation will run even when the operation is complete. Also
     remember to change the notification text to indicate that the operation is complete.
 </p>
