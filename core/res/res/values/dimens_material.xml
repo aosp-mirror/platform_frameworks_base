@@ -23,7 +23,7 @@
     <dimen name="preference_screen_side_margin_negative_material">0dp</dimen>
 
     <!-- Preference fragment padding, sides -->
-    <dimen name="preference_fragment_padding_side_material">8dp</dimen>
+    <dimen name="preference_fragment_padding_side_material">0dp</dimen>
 
     <!-- Preference breadcrumbs padding, start padding -->
     <dimen name="preference_breadcrumbs_padding_start_material">12dp</dimen>

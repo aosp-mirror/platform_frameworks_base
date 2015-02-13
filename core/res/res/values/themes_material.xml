@@ -64,8 +64,8 @@ please see themes_device_defaults.xml.
         <item name="textColorTertiaryInverse">@color/secondary_text_material_light</item>
         <item name="textColorHint">@color/hint_foreground_material_dark</item>
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
-        <item name="textColorHighlight">@color/highlighted_text_material_dark</item>
-        <item name="textColorHighlightInverse">@color/highlighted_text_material_light</item>
+        <item name="textColorHighlight">@color/highlighted_text_material</item>
+        <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
         <item name="textColorLink">@color/link_text_material_dark</item>
         <item name="textColorLinkInverse">@color/link_text_material_light</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>
@@ -128,8 +128,8 @@ please see themes_device_defaults.xml.
         <item name="listChoiceIndicatorSingle">@drawable/btn_radio_material_anim</item>
         <item name="listChoiceIndicatorMultiple">@drawable/btn_check_material_anim</item>
 
-        <item name="listChoiceBackgroundIndicator">?attr/selectableItemBackground</item>
-        <item name="activatedBackgroundIndicator">@drawable/activated_background_material</item>
+        <item name="listChoiceBackgroundIndicator">@drawable/list_highlight_material</item>
+        <item name="activatedBackgroundIndicator">@null</item>
 
         <item name="listDividerAlertDialog">@null</item>
 
@@ -418,8 +418,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorHint">@color/hint_foreground_material_light</item>
         <item name="textColorHintInverse">@color/hint_foreground_material_dark</item>
-        <item name="textColorHighlight">@color/highlighted_text_material_light</item>
-        <item name="textColorHighlightInverse">@color/highlighted_text_material_dark</item>
+        <item name="textColorHighlight">@color/highlighted_text_material</item>
+        <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
         <item name="textColorLink">@color/link_text_material_light</item>
         <item name="textColorLinkInverse">@color/link_text_material_dark</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
@@ -777,8 +777,8 @@ please see themes_device_defaults.xml.
         <item name="textColorPrimaryInverseDisableOnly">@color/primary_text_disable_only_material_dark</item>
         <item name="textColorHint">@color/hint_foreground_material_light</item>
         <item name="textColorHintInverse">@color/hint_foreground_material_dark</item>
-        <item name="textColorHighlight">@color/highlighted_text_material_light</item>
-        <item name="textColorHighlightInverse">@color/highlighted_text_material_dark</item>
+        <item name="textColorHighlight">@color/highlighted_text_material</item>
+        <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
         <item name="textColorLink">@color/link_text_material_light</item>
         <item name="textColorLinkInverse">@color/link_text_material_dark</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_light</item>
@@ -812,8 +812,8 @@ please see themes_device_defaults.xml.
         <item name="textColorTertiaryInverse">@color/secondary_text_material_light</item>
         <item name="textColorHint">@color/hint_foreground_material_dark</item>
         <item name="textColorHintInverse">@color/hint_foreground_material_light</item>
-        <item name="textColorHighlight">@color/highlighted_text_material_dark</item>
-        <item name="textColorHighlightInverse">@color/highlighted_text_material_light</item>
+        <item name="textColorHighlight">@color/highlighted_text_material</item>
+        <item name="textColorHighlightInverse">@color/highlighted_text_material</item>
         <item name="textColorLink">@color/link_text_material_dark</item>
         <item name="textColorLinkInverse">@color/link_text_material_light</item>
         <item name="textColorSearchUrl">@color/search_url_text_material_dark</item>

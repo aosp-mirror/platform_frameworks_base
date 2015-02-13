@@ -306,7 +306,9 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimary</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.TabWidget" parent="TextAppearance.Material.Button" />
+    <style name="TextAppearance.Material.Widget.TabWidget" parent="TextAppearance.Material.Button">
+        <item name="textColor">@color/tab_indicator_text_material</item>
+    </style>
 
     <style name="TextAppearance.Material.Widget.TextView">
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
@@ -788,11 +790,15 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/spinner_textfield_background_material</item>
     </style>
 
-    <style name="Widget.Material.TabWidget" parent="Widget.TabWidget">
-        <item name="tabStripLeft">@null</item>
-        <item name="tabStripRight">@null</item>
+    <style name="Widget.Material.TabWidget">
+        <item name="textAppearance">@style/TextAppearance.Material.Widget.TabWidget</item>
+        <item name="ellipsize">marquee</item>
+        <item name="singleLine">true</item>
+        <item name="tabStripLeft">@empty</item>
+        <item name="tabStripRight">@empty</item>
         <item name="tabStripEnabled">false</item>
         <item name="divider">?attr/dividerVertical</item>
+        <item name="gravity">fill_horizontal|center_vertical</item>
         <item name="showDividers">middle</item>
         <item name="dividerPadding">8dip</item>
         <item name="measureWithLargestChild">true</item>
@@ -816,19 +822,21 @@ please see styles_device_defaults.xml.
         <item name="subtitleTextAppearance">@style/TextAppearance.Material.Widget.Toolbar.Subtitle</item>
     </style>
 
-    <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
+    <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Material">
         <item name="background">?attr/controlBackground</item>
+        <item name="minWidth">56dp</item>
+        <item name="scaleType">center</item>
         <item name="paddingStart">@dimen/action_bar_navigation_padding_start_material</item>
     </style>
 
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>
-
     <style name="Widget.Material.WebView" parent="Widget.WebView"/>
 
-    <style name="Widget.Material.DropDownItem" parent="Widget.DropDownItem">
+    <style name="Widget.Material.DropDownItem">
         <item name="textAppearance">@style/TextAppearance.Material.Widget.DropDownItem</item>
         <item name="paddingStart">8dp</item>
         <item name="paddingEnd">8dp</item>
+        <item name="gravity">center_vertical</item>
     </style>
 
     <style name="Widget.Material.DropDownItem.Spinner"/>
@@ -841,7 +849,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.QuickContactBadgeSmall.WindowMedium" parent="Widget.QuickContactBadgeSmall.WindowMedium"/>
     <style name="Widget.Material.QuickContactBadgeSmall.WindowLarge" parent="Widget.QuickContactBadgeSmall.WindowLarge"/>
 
-    <style name="Widget.Material.ListPopupWindow" parent="Widget.ListPopupWindow">
+    <style name="Widget.Material.ListPopupWindow">
         <item name="dropDownSelector">?attr/listChoiceBackgroundIndicator</item>
         <item name="popupBackground">@drawable/popup_background_material</item>
         <item name="popupElevation">@dimen/floating_window_z</item>
@@ -860,14 +868,15 @@ please see styles_device_defaults.xml.
         <item name="dropDownHorizontalOffset">-4dip</item>
     </style>
 
-    <style name="Widget.Material.ActionButton" parent="Widget.ActionButton">
+    <style name="Widget.Material.ActionButton">
+        <item name="background">?attr/actionBarItemBackground</item>
+        <item name="paddingStart">12dp</item>
+        <item name="paddingEnd">12dp</item>
         <item name="minWidth">@dimen/action_button_min_width_material</item>
         <item name="minHeight">@dimen/action_button_min_height_material</item>
         <item name="gravity">center</item>
         <item name="scaleType">center</item>
         <item name="maxLines">2</item>
-        <item name="paddingStart">12dp</item>
-        <item name="paddingEnd">12dp</item>
     </style>
 
     <style name="Widget.Material.ActionButton.CloseMode">
@@ -884,34 +893,36 @@ please see styles_device_defaults.xml.
         <item name="paddingEnd">@dimen/action_bar_overflow_padding_end_material</item>
     </style>
 
-    <style name="Widget.Material.ActionBar.TabView" parent="Widget.ActionBar.TabView">
+    <style name="Widget.Material.ActionBar.TabView" parent="Widget.Material">
+        <item name="gravity">center_horizontal</item>
         <item name="background">@drawable/tab_indicator_material</item>
         <item name="paddingStart">16dip</item>
         <item name="paddingEnd">16dip</item>
     </style>
 
-    <style name="Widget.Material.ActionBar.TabBar" parent="Widget.ActionBar.TabBar">
+    <style name="Widget.Material.ActionBar.TabBar" parent="Widget.Material">
         <item name="divider">?attr/actionBarDivider</item>
         <item name="showDividers">middle</item>
         <item name="dividerPadding">12dip</item>
     </style>
 
-    <style name="Widget.Material.ActionBar.TabText" parent="Widget.ActionBar.TabText">
-        <item name="textAppearance">@style/TextAppearance.Material.Medium</item>
-        <item name="textColor">?attr/textColorPrimary</item>
-        <item name="textSize">12sp</item>
-        <item name="textStyle">bold</item>
-        <item name="textAllCaps">true</item>
+    <style name="Widget.Material.ActionBar.TabText">
+        <item name="textAppearance">@style/TextAppearance.Material.Widget.TabWidget</item>
         <item name="ellipsize">marquee</item>
         <item name="maxLines">2</item>
     </style>
 
-    <style name="Widget.Material.ActionBar" parent="Widget.ActionBar">
+    <style name="Widget.Material.ActionBar">
         <item name="background">@null</item>
         <item name="backgroundStacked">@null</item>
         <item name="backgroundSplit">@null</item>
         <item name="displayOptions">showTitle</item>
         <item name="divider">?attr/dividerVertical</item>
+        <item name="height">?attr/actionBarSize</item>
+        <item name="paddingStart">0dip</item>
+        <item name="paddingTop">0dip</item>
+        <item name="paddingEnd">0dip</item>
+        <item name="paddingBottom">0dip</item>
         <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Subtitle</item>
         <item name="progressBarStyle">?attr/progressBarStyleHorizontal</item>
@@ -932,19 +943,28 @@ please see styles_device_defaults.xml.
         <item name="backgroundSplit">?attr/colorPrimary</item>
     </style>
 
-    <style name="Widget.Material.ActionMode" parent="Widget.ActionMode">
+    <style name="Widget.Material.ActionMode">
+        <item name="background">?attr/actionModeBackground</item>
+        <item name="backgroundSplit">?attr/actionModeSplitBackground</item>
+        <item name="height">?attr/actionBarSize</item>
         <item name="titleTextStyle">@style/TextAppearance.Material.Widget.ActionMode.Title</item>
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionMode.Subtitle</item>
         <item name="closeItemLayout">@layout/action_mode_close_item_material</item>
     </style>
 
-    <style name="Widget.Material.FastScroll" parent="Widget.FastScroll">
+    <style name="Widget.Material.FastScroll">
+        <item name="thumbDrawable">?attr/fastScrollThumbDrawable</item>
+        <item name="trackDrawable">?attr/fastScrollTrackDrawable</item>
+        <item name="backgroundLeft">?attr/fastScrollPreviewBackgroundLeft</item>
+        <item name="backgroundRight">?attr/fastScrollPreviewBackgroundRight</item>
+        <item name="position">?attr/fastScrollOverlayPosition</item>
+        <item name="textColor">?attr/fastScrollTextColor</item>
         <item name="thumbMinWidth">0dp</item>
         <item name="thumbMinHeight">0dp</item>
+        <item name="textSize">45sp</item>
         <item name="minWidth">88dp</item>
         <item name="minHeight">88dp</item>
         <item name="padding">0dp</item>
-        <item name="textSize">45sp</item>
     </style>
 
     <style name="Widget.Material.PreferenceFrameLayout">
