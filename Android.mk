@@ -614,7 +614,10 @@ $(gen): $(aidl_files) | $(AIDL)
 # TODO: deal with com/google/android/googleapps
 packages_to_document := \
 	android \
-	javax/microedition/khronos
+	javax/microedition/khronos \
+	org/apache/http/conn \
+	org/apache/http/params
+
 
 # Search through the base framework dirs for these packages.
 # The result will be relative to frameworks/base.
@@ -635,7 +638,6 @@ include libcore/Docs.mk
 include external/junit/Common.mk
 
 non_base_dirs := \
-	../../external/apache-http/src/org/apache/http \
 	../opt/telephony/src/java/android/provider \
 	../opt/telephony/src/java/android/telephony \
 	../opt/telephony/src/java/android/telephony/gsm \
@@ -1024,13 +1026,8 @@ include $(BUILD_DROIDDOC)
 # Build ext.jar
 # ============================================================
 
-# NOTICE notes for non-obvious sections
-# apache-http - covered by the Apache Commons section.
-
-
 ext_dirs := \
 	../../external/nist-sip/java \
-	../../external/apache-http/src \
 	../../external/tagsoup/src \
 
 ext_src_files := $(call all-java-files-under,$(ext_dirs))

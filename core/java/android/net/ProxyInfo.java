@@ -21,8 +21,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
-import org.apache.http.client.HttpClient;
-
 import java.net.InetSocketAddress;
 import java.net.URLConnection;
 import java.util.List;
@@ -31,8 +29,9 @@ import java.util.Locale;
 /**
  * Describes a proxy configuration.
  *
- * Proxy configurations are already integrated within the Apache HTTP stack.
- * So {@link URLConnection} and {@link HttpClient} will use them automatically.
+ * Proxy configurations are already integrated within the {@code java.net} and
+ * Apache HTTP stack. So {@link URLConnection} and Apache's {@code HttpClient} will use
+ * them automatically.
  *
  * Other HTTP stacks will need to obtain the proxy info from
  * {@link Proxy#PROXY_CHANGE_ACTION} broadcast as the extra {@link Proxy#EXTRA_PROXY_INFO}.

@@ -35,8 +35,8 @@ import java.util.Map;
  * Caches HTTP and HTTPS responses to the filesystem so they may be reused,
  * saving time and bandwidth. This class supports {@link
  * java.net.HttpURLConnection} and {@link javax.net.ssl.HttpsURLConnection};
- * there is no platform-provided cache for {@link
- * org.apache.http.impl.client.DefaultHttpClient} or {@link AndroidHttpClient}.
+ * there is no platform-provided cache for {@code DefaultHttpClient} or
+ * {@code AndroidHttpClient}.
  *
  * <h3>Installing an HTTP response cache</h3>
  * Enable caching of all of your application's HTTP requests by installing the

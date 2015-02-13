@@ -12,6 +12,8 @@ LOCAL_CERTIFICATE := platform
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-media-protocols
 
+LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
+
 LOCAL_PROGUARD_ENABLED := disabled
 
 include $(BUILD_PACKAGE)

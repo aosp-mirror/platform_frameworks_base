@@ -17,7 +17,6 @@
 package android.webkit;
 
 import android.content.Context;
-import android.net.http.EventHandler;
 import android.util.Log;
 
 /**
@@ -44,52 +43,52 @@ class LegacyErrorStrings {
      */
     private static int getResource(int errorCode) {
         switch(errorCode) {
-            case EventHandler.OK:
+            case 0: /* EventHandler.OK: */
                 return com.android.internal.R.string.httpErrorOk;
 
-            case EventHandler.ERROR:
+            case -1: /* EventHandler.ERROR: */
                 return com.android.internal.R.string.httpError;
 
-            case EventHandler.ERROR_LOOKUP:
+            case -2: /* EventHandler.ERROR_LOOKUP: */
                 return com.android.internal.R.string.httpErrorLookup;
 
-            case EventHandler.ERROR_UNSUPPORTED_AUTH_SCHEME:
+            case -3: /* EventHandler.ERROR_UNSUPPORTED_AUTH_SCHEME: */
                 return com.android.internal.R.string.httpErrorUnsupportedAuthScheme;
 
-            case EventHandler.ERROR_AUTH:
+            case -4: /* EventHandler.ERROR_AUTH: */
                 return com.android.internal.R.string.httpErrorAuth;
 
-            case EventHandler.ERROR_PROXYAUTH:
+            case -5: /* EventHandler.ERROR_PROXYAUTH: */
                 return com.android.internal.R.string.httpErrorProxyAuth;
 
-            case EventHandler.ERROR_CONNECT:
+            case -6: /* EventHandler.ERROR_CONNECT: */
                 return com.android.internal.R.string.httpErrorConnect;
 
-            case EventHandler.ERROR_IO:
+            case -7: /* EventHandler.ERROR_IO: */
                 return com.android.internal.R.string.httpErrorIO;
 
-            case EventHandler.ERROR_TIMEOUT:
+            case -8: /* EventHandler.ERROR_TIMEOUT: */
                 return com.android.internal.R.string.httpErrorTimeout;
 
-            case EventHandler.ERROR_REDIRECT_LOOP:
+            case -9: /* EventHandler.ERROR_REDIRECT_LOOP: */
                 return com.android.internal.R.string.httpErrorRedirectLoop;
 
-            case EventHandler.ERROR_UNSUPPORTED_SCHEME:
+            case -10: /* EventHandler.ERROR_UNSUPPORTED_SCHEME: */
                 return com.android.internal.R.string.httpErrorUnsupportedScheme;
 
-            case EventHandler.ERROR_FAILED_SSL_HANDSHAKE:
+            case -11: /* EventHandler.ERROR_FAILED_SSL_HANDSHAKE: */
                 return com.android.internal.R.string.httpErrorFailedSslHandshake;
 
-            case EventHandler.ERROR_BAD_URL:
+            case -12: /* EventHandler.ERROR_BAD_URL: */
                 return com.android.internal.R.string.httpErrorBadUrl;
 
-            case EventHandler.FILE_ERROR:
+            case -13: /* EventHandler.FILE_ERROR: */
                 return com.android.internal.R.string.httpErrorFile;
 
-            case EventHandler.FILE_NOT_FOUND_ERROR:
+            case -14: /* EventHandler.FILE_NOT_FOUND_ERROR: */
                 return com.android.internal.R.string.httpErrorFileNotFound;
 
-            case EventHandler.TOO_MANY_REQUESTS_ERROR:
+            case -15: /* EventHandler.TOO_MANY_REQUESTS_ERROR: */
                 return com.android.internal.R.string.httpErrorTooManyRequests;
 
             default:

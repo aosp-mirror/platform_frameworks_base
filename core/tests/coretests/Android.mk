@@ -24,7 +24,7 @@ LOCAL_SRC_FILES := \
 LOCAL_DX_FLAGS := --core-library
 LOCAL_AAPT_FLAGS = -0 dat -0 gld
 LOCAL_STATIC_JAVA_LIBRARIES := core-tests-support android-common frameworks-core-util-lib mockwebserver guava littlemock mockito-target
-LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common
+LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
 LOCAL_CERTIFICATE := platform
