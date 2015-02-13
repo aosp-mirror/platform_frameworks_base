@@ -16,11 +16,12 @@
 
 package android.content.res;
 
+import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.layoutlib.bridge.Bridge;
 
-import android.content.res.AssetManager;
-
 public class BridgeAssetManager extends AssetManager {
+
+    private AssetRepository mAssetRepository;
 
     /**
      * This initializes the static field {@link AssetManager#sSystem} which is used
@@ -48,6 +49,14 @@ public class BridgeAssetManager extends AssetManager {
         AssetManager.sSystem = null;
     }
 
-    private BridgeAssetManager() {
+    public void setAssetRepository(AssetRepository assetRepository) {
+        mAssetRepository = assetRepository;
+    }
+
+    public AssetRepository getAssetRepository() {
+        return mAssetRepository;
+    }
+
+    public BridgeAssetManager() {
     }
 }
