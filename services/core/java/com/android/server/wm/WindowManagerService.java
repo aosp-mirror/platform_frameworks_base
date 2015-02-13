@@ -4062,6 +4062,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void overridePendingAppTransitionClipReveal(int startX, int startY,
+            int startWidth, int startHeight) {
+        synchronized(mWindowMap) {
+            mAppTransition.overridePendingAppTransitionClipReveal(startX, startY, startWidth,
+                    startHeight);
+        }
+    }
+
+    @Override
     public void overridePendingAppTransitionThumb(Bitmap srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean scaleUp) {
         synchronized(mWindowMap) {

@@ -122,7 +122,13 @@ public class Transformation {
         mAlpha *= t.getAlpha();
         mMatrix.preConcat(t.getMatrix());
         if (t.mHasClipRect) {
-            setClipRect(t.getClipRect());
+            Rect bounds = t.getClipRect();
+            if (mHasClipRect) {
+                setClipRect(mClipRect.left + bounds.left, mClipRect.top + bounds.top,
+                        mClipRect.right + bounds.right, mClipRect.bottom + bounds.bottom);
+            } else {
+                setClipRect(bounds);
+            }
         }
     }
     
@@ -135,7 +141,13 @@ public class Transformation {
         mAlpha *= t.getAlpha();
         mMatrix.postConcat(t.getMatrix());
         if (t.mHasClipRect) {
-            setClipRect(t.getClipRect());
+            Rect bounds = t.getClipRect();
+            if (mHasClipRect) {
+                setClipRect(mClipRect.left + bounds.left, mClipRect.top + bounds.top,
+                        mClipRect.right + bounds.right, mClipRect.bottom + bounds.bottom);
+            } else {
+                setClipRect(bounds);
+            }
         }
     }
 

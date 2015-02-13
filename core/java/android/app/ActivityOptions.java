@@ -140,6 +140,8 @@ public class ActivityOptions {
     public static final int ANIM_THUMBNAIL_ASPECT_SCALE_DOWN = 9;
     /** @hide */
     public static final int ANIM_CUSTOM_IN_PLACE = 10;
+    /** @hide */
+    public static final int ANIM_CLIP_REVEAL = 11;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
@@ -281,6 +283,33 @@ public class ActivityOptions {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = ANIM_SCALE_UP;
+        int[] pts = new int[2];
+        source.getLocationOnScreen(pts);
+        opts.mStartX = pts[0] + startX;
+        opts.mStartY = pts[1] + startY;
+        opts.mWidth = width;
+        opts.mHeight = height;
+        return opts;
+    }
+
+    /**
+     * Create an ActivityOptions specifying an animation where the new
+     * activity is revealed from a small originating area of the screen to
+     * its final full representation.
+     *
+     * @param source The View that the new activity is animating from.  This
+     * defines the coordinate space for <var>startX</var> and <var>startY</var>.
+     * @param startX The x starting location of the new activity, relative to <var>source</var>.
+     * @param startY The y starting location of the activity, relative to <var>source</var>.
+     * @param width The initial width of the new activity.
+     * @param height The initial height of the new activity.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when starting an activity.
+     */
+    public static ActivityOptions makeClipRevealAnimation(View source,
+            int startX, int startY, int width, int height) {
+        ActivityOptions opts = new ActivityOptions();
+        opts.mAnimationType = ANIM_CLIP_REVEAL;
         int[] pts = new int[2];
         source.getLocationOnScreen(pts);
         opts.mStartX = pts[0] + startX;
@@ -582,6 +611,7 @@ public class ActivityOptions {
                 break;
 
             case ANIM_SCALE_UP:
+            case ANIM_CLIP_REVEAL:
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
                 mWidth = opts.getInt(KEY_ANIM_WIDTH, 0);
@@ -809,6 +839,7 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_IN_PLACE_RES_ID, mCustomInPlaceResId);
                 break;
             case ANIM_SCALE_UP:
+            case ANIM_CLIP_REVEAL:
                 b.putInt(KEY_ANIM_START_X, mStartX);
                 b.putInt(KEY_ANIM_START_Y, mStartY);
                 b.putInt(KEY_ANIM_WIDTH, mWidth);

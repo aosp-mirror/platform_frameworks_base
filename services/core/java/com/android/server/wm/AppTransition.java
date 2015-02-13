@@ -17,12 +17,16 @@
 package com.android.server.wm;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IRemoteCallback;
+import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
@@ -30,9 +34,14 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ClipRectAnimation;
+import android.view.animation.ClipRectLRAnimation;
+import android.view.animation.ClipRectTBAnimation;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.view.animation.TranslateXAnimation;
+import android.view.animation.TranslateYAnimation;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.server.AttributeCache;
 import com.android.server.wm.WindowManagerService.H;
@@ -134,6 +143,7 @@ public class AppTransition implements Dump {
     private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP = 5;
     private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN = 6;
     private static final int NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE = 7;
+    private static final int NEXT_TRANSIT_TYPE_CLIP_REVEAL = 8;
     private int mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
@@ -169,19 +179,24 @@ public class AppTransition implements Dump {
     private final Interpolator mDecelerateInterpolator;
     private final Interpolator mThumbnailFadeInInterpolator;
     private final Interpolator mThumbnailFadeOutInterpolator;
-    private final Interpolator mThumbnailFastOutSlowInInterpolator;
+    private final Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mFastOutSlowInInterpolator;
+    private final LinearInterpolator mLinearInterpolator;
 
     private int mCurrentUserId = 0;
 
     AppTransition(Context context, Handler h) {
         mContext = context;
         mH = h;
+        mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.linear_out_slow_in);
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
+        mLinearInterpolator = new LinearInterpolator();
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
         mDecelerateInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.decelerate_cubic);
-        mThumbnailFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
-                com.android.internal.R.interpolator.fast_out_slow_in);
         mThumbnailFadeInInterpolator = new Interpolator() {
             @Override
             public float getInterpolation(float input) {
@@ -447,6 +462,83 @@ public class AppTransition implements Dump {
         return a;
     }
 
+    private Animation createClipRevealAnimationLocked(int transit, boolean enter,
+                                                      int appWidth, int appHeight) {
+        final Animation anim;
+        if (enter) {
+            // Reveal will expand and move faster in horizontal direction
+
+            // Start from size of launch icon, expand to full width/height
+            Animation clipAnimLR = new ClipRectLRAnimation(
+                    (appWidth - mNextAppTransitionStartWidth) / 2,
+                    (appWidth + mNextAppTransitionStartWidth) / 2, 0, appWidth);
+            clipAnimLR.setInterpolator(mLinearOutSlowInInterpolator);
+            clipAnimLR.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+            Animation clipAnimTB = new ClipRectTBAnimation(
+                    (appHeight - mNextAppTransitionStartHeight) / 2,
+                    (appHeight + mNextAppTransitionStartHeight) / 2, 0, appHeight);
+            clipAnimTB.setInterpolator(mFastOutSlowInInterpolator);
+            clipAnimTB.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+
+            // Start from middle of launch icon area, move to 0, 0
+            int startMiddleX = mNextAppTransitionStartX +
+                    (mNextAppTransitionStartWidth - appWidth) / 2;
+            int startMiddleY = mNextAppTransitionStartY +
+                    (mNextAppTransitionStartHeight - appHeight) / 2;
+
+            TranslateXAnimation translateX = new TranslateXAnimation(
+                    Animation.ABSOLUTE, startMiddleX, Animation.ABSOLUTE, 0);
+            translateX.setInterpolator(mLinearOutSlowInInterpolator);
+            translateX.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+            TranslateYAnimation translateY = new TranslateYAnimation(
+                    Animation.ABSOLUTE, startMiddleY, Animation.ABSOLUTE, 0);
+            translateY.setInterpolator(mFastOutSlowInInterpolator);
+            translateY.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+
+            // Quick fade-in from icon to app window
+            final int alphaDuration = 100;
+            AlphaAnimation alpha = new AlphaAnimation(0.1f, 1);
+            alpha.setDuration(alphaDuration);
+            alpha.setInterpolator(mLinearInterpolator);
+
+            AnimationSet set = new AnimationSet(false);
+            set.addAnimation(clipAnimLR);
+            set.addAnimation(clipAnimTB);
+            set.addAnimation(translateX);
+            set.addAnimation(translateY);
+            set.addAnimation(alpha);
+            set.initialize(appWidth, appHeight, appWidth, appHeight);
+            anim = set;
+        } else {
+            final long duration;
+            switch (transit) {
+                case TRANSIT_ACTIVITY_OPEN:
+                case TRANSIT_ACTIVITY_CLOSE:
+                    duration = mConfigShortAnimTime;
+                    break;
+                default:
+                    duration = DEFAULT_APP_TRANSITION_DURATION;
+                    break;
+            }
+            if (transit == TRANSIT_WALLPAPER_INTRA_OPEN ||
+                    transit == TRANSIT_WALLPAPER_INTRA_CLOSE) {
+                // If we are on top of the wallpaper, we need an animation that
+                // correctly handles the wallpaper staying static behind all of
+                // the animated elements.  To do this, will just have the existing
+                // element fade out.
+                anim = new AlphaAnimation(1, 0);
+                anim.setDetachWallpaper(true);
+            } else {
+                // For normal animations, the exiting element just holds in place.
+                anim = new AlphaAnimation(1, 1);
+            }
+            anim.setInterpolator(mDecelerateInterpolator);
+            anim.setDuration(duration);
+            anim.setFillAfter(true);
+        }
+        return anim;
+    }
+
     /**
      * Prepares the specified animation with a standard duration, interpolator, etc.
      */
@@ -522,14 +614,14 @@ public class AppTransition implements Dump {
             Animation scale = new ScaleAnimation(1f, scaleW, 1f, scaleW,
                     mNextAppTransitionStartX + (thumbWidth / 2f),
                     mNextAppTransitionStartY + (thumbHeight / 2f));
-            scale.setInterpolator(mThumbnailFastOutSlowInInterpolator);
+            scale.setInterpolator(mFastOutSlowInInterpolator);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
             Animation alpha = new AlphaAnimation(1, 0);
             alpha.setInterpolator(mThumbnailFadeOutInterpolator);
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
             Animation translate = new TranslateAnimation(0, 0, 0, -unscaledStartY +
                     mNextAppTransitionInsets.top);
-            translate.setInterpolator(mThumbnailFastOutSlowInInterpolator);
+            translate.setInterpolator(mFastOutSlowInInterpolator);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
             // This AnimationSet uses the Interpolators assigned above.
@@ -543,14 +635,14 @@ public class AppTransition implements Dump {
             Animation scale = new ScaleAnimation(scaleW, 1f, scaleW, 1f,
                     mNextAppTransitionStartX + (thumbWidth / 2f),
                     mNextAppTransitionStartY + (thumbHeight / 2f));
-            scale.setInterpolator(mThumbnailFastOutSlowInInterpolator);
+            scale.setInterpolator(mFastOutSlowInInterpolator);
             scale.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
             Animation alpha = new AlphaAnimation(0f, 1f);
             alpha.setInterpolator(mThumbnailFadeInInterpolator);
             alpha.setDuration(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION);
             Animation translate = new TranslateAnimation(0, 0, -unscaledStartY +
                     mNextAppTransitionInsets.top, 0);
-            translate.setInterpolator(mThumbnailFastOutSlowInInterpolator);
+            translate.setInterpolator(mFastOutSlowInInterpolator);
             translate.setDuration(THUMBNAIL_APP_TRANSITION_DURATION);
 
             // This AnimationSet uses the Interpolators assigned above.
@@ -562,7 +654,7 @@ public class AppTransition implements Dump {
 
         }
         return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, 0,
-                mThumbnailFastOutSlowInInterpolator);
+                mFastOutSlowInInterpolator);
     }
 
     /**
@@ -698,7 +790,7 @@ public class AppTransition implements Dump {
         int duration = Math.max(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION,
                 THUMBNAIL_APP_TRANSITION_DURATION);
         return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, duration,
-                mThumbnailFastOutSlowInInterpolator);
+                mFastOutSlowInInterpolator);
     }
 
     /**
@@ -845,6 +937,12 @@ public class AppTransition implements Dump {
                     "applyAnimation:"
                             + " anim=" + a + " nextAppTransition=ANIM_CUSTOM_IN_PLACE"
                             + " transit=" + transit + " Callers=" + Debug.getCallers(3));
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL) {
+            a = createClipRevealAnimationLocked(transit, enter, appWidth, appHeight);
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "applyAnimation:"
+                            + " anim=" + a + " nextAppTransition=ANIM_CLIP_REVEAL"
+                            + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
             a = createScaleUpAnimationLocked(transit, enter, appWidth, appHeight);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
@@ -978,6 +1076,19 @@ public class AppTransition implements Dump {
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_SCALE_UP;
             mNextAppTransitionPackage = null;
             mNextAppTransitionThumbnail = null;
+            mNextAppTransitionStartX = startX;
+            mNextAppTransitionStartY = startY;
+            mNextAppTransitionStartWidth = startWidth;
+            mNextAppTransitionStartHeight = startHeight;
+            postAnimationCallback();
+            mNextAppTransitionCallback = null;
+        }
+    }
+
+    void overridePendingAppTransitionClipReveal(int startX, int startY,
+                                                int startWidth, int startHeight) {
+        if (isTransitionSet()) {
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CLIP_REVEAL;
             mNextAppTransitionStartX = startX;
             mNextAppTransitionStartY = startY;
             mNextAppTransitionStartWidth = startWidth;
