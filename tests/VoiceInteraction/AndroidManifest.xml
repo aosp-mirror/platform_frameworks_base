@@ -12,10 +12,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="SettingsActivity"
-                android:label="Voice Interaction Settings"
+        <activity android:name="AssistProxyActivity"
+                android:label="Test Assist Proxy"
+                android:theme="@android:style/Theme.NoDisplay"
                 android:excludeFromRecents="true"
                 android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.ASSIST" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="SettingsActivity"
+                android:label="Voice Interaction Settings">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -44,7 +52,7 @@
             <meta-data android:name="android.speech" android:resource="@xml/recognition_service" />
         </service>
         <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target"
-                  android:theme="@android:style/Theme.Material.Light.Voice">
+                  android:theme="@android:style/Theme.Material.Light">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />

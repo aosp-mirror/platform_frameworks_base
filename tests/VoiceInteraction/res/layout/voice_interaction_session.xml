@@ -15,24 +15,46 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <FrameLayout android:layout_width="fill_parent"
+    <com.android.test.voiceinteraction.AssistVisualizer android:id="@+id/assist_visualizer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <FrameLayout android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp">
+        android:fitsSystemWindows="true">
 
-        <LinearLayout android:id="@+id/content"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
+        <FrameLayout android:id="@+id/top_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="vertical"
+            android:background="#ffffffff"
+            android:elevation="8dp"
+            >
+
+            <Button android:id="@+id/start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|right"
+                android:text="@string/start"
+                />
+
+        </FrameLayout>
+
+        <LinearLayout android:id="@+id/bottom_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:orientation="vertical"
             android:background="#ffffffff"
             android:elevation="8dp"
             >
 
             <TextView android:id="@+id/text"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:textAppearance="?android:attr/textAppearanceMedium"
@@ -40,11 +62,6 @@
 
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="horizontal">
-                <Button android:id="@+id/start"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/start"
-                    />
                 <Button android:id="@+id/confirm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

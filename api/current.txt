@@ -3938,6 +3938,7 @@ package android.app {
 
   public final class AssistData implements android.os.Parcelable {
     method public int describeContents();
+    method public android.content.ComponentName getActivityComponent();
     method public static android.app.AssistData getAssistData(android.os.Bundle);
     method public void getWindowAt(int, android.app.AssistData.ViewNode);
     method public int getWindowCount();
@@ -27646,9 +27647,10 @@ package android.service.voice {
     method public android.os.IBinder onBind(android.content.Intent);
     method public void onReady();
     method public void onShutdown();
-    method public void startSession(android.os.Bundle);
+    method public void startSession(android.os.Bundle, int);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.voice.VoiceInteractionService";
     field public static final java.lang.String SERVICE_META_DATA = "android.voice_interaction";
+    field public static final int START_WITH_ASSIST = 1; // 0x1
   }
 
   public abstract class VoiceInteractionSession implements android.view.KeyEvent.Callback {
@@ -27666,10 +27668,11 @@ package android.service.voice {
     method public void onCompleteVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
     method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
-    method public void onCreate(android.os.Bundle);
+    method public void onCreate(android.os.Bundle, int);
     method public android.view.View onCreateContentView();
     method public void onDestroy();
     method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
+    method public void onHandleAssist(android.os.Bundle);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);

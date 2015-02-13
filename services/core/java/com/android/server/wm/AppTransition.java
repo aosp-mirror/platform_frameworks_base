@@ -1241,32 +1241,34 @@ public class AppTransition implements Dump {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
-        pw.print(" " + this);
-        pw.print("  mAppTransitionState="); pw.println(appStateToString());
+    public void dump(PrintWriter pw, String prefix) {
+        pw.print(prefix); pw.println(this);
+        pw.print(prefix); pw.print("mAppTransitionState="); pw.println(appStateToString());
         if (mNextAppTransitionType != NEXT_TRANSIT_TYPE_NONE) {
-            pw.print("  mNextAppTransitionType="); pw.println(transitTypeToString());
+            pw.print(prefix); pw.print("mNextAppTransitionType=");
+                    pw.println(transitTypeToString());
         }
         switch (mNextAppTransitionType) {
             case NEXT_TRANSIT_TYPE_CUSTOM:
-                pw.print("  mNextAppTransitionPackage=");
+                pw.print(prefix); pw.print("mNextAppTransitionPackage=");
                         pw.println(mNextAppTransitionPackage);
-                pw.print("  mNextAppTransitionEnter=0x");
+                pw.print(prefix); pw.print("mNextAppTransitionEnter=0x");
                         pw.print(Integer.toHexString(mNextAppTransitionEnter));
                         pw.print(" mNextAppTransitionExit=0x");
                         pw.println(Integer.toHexString(mNextAppTransitionExit));
                 break;
             case NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE:
-                pw.print("  mNextAppTransitionPackage=");
+                pw.print(prefix); pw.print("mNextAppTransitionPackage=");
                         pw.println(mNextAppTransitionPackage);
-                pw.print("  mNextAppTransitionInPlace=0x");
+                pw.print(prefix); pw.print("mNextAppTransitionInPlace=0x");
                         pw.print(Integer.toHexString(mNextAppTransitionInPlace));
                 break;
             case NEXT_TRANSIT_TYPE_SCALE_UP:
-                pw.print("  mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);
+                pw.print(prefix); pw.print("mNextAppTransitionStartX=");
+                        pw.print(mNextAppTransitionStartX);
                         pw.print(" mNextAppTransitionStartY=");
                         pw.println(mNextAppTransitionStartY);
-                pw.print("  mNextAppTransitionStartWidth=");
+                pw.print(prefix); pw.print("mNextAppTransitionStartWidth=");
                         pw.print(mNextAppTransitionStartWidth);
                         pw.print(" mNextAppTransitionStartHeight=");
                         pw.println(mNextAppTransitionStartHeight);
@@ -1275,22 +1277,23 @@ public class AppTransition implements Dump {
             case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN:
             case NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP:
             case NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN:
-                pw.print("  mNextAppTransitionThumbnail=");
+                pw.print(prefix); pw.print("mNextAppTransitionThumbnail=");
                         pw.print(mNextAppTransitionThumbnail);
                         pw.print(" mNextAppTransitionStartX=");
                         pw.print(mNextAppTransitionStartX);
                         pw.print(" mNextAppTransitionStartY=");
                         pw.println(mNextAppTransitionStartY);
-                        pw.print(" mNextAppTransitionStartWidth=");
+                pw.print(prefix); pw.print("mNextAppTransitionStartWidth=");
                         pw.print(mNextAppTransitionStartWidth);
                         pw.print(" mNextAppTransitionStartHeight=");
                         pw.println(mNextAppTransitionStartHeight);
-                pw.print("  mNextAppTransitionScaleUp="); pw.println(mNextAppTransitionScaleUp);
+                pw.print(prefix); pw.print("mNextAppTransitionScaleUp=");
+                        pw.println(mNextAppTransitionScaleUp);
                 break;
         }
         if (mNextAppTransitionCallback != null) {
-            pw.print("  mNextAppTransitionCallback=");
-            pw.println(mNextAppTransitionCallback);
+            pw.print(prefix); pw.print("mNextAppTransitionCallback=");
+                    pw.println(mNextAppTransitionCallback);
         }
     }
 

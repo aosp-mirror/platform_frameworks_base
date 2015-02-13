@@ -123,7 +123,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             pw.println("mDisplayController:");
             final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
             ipw.increaseIndent();
-            DumpUtils.dumpAsync(getHandler(), mDisplayController, ipw, 200);
+            DumpUtils.dumpAsync(getHandler(), mDisplayController, ipw, "", 200);
         }
     }
 

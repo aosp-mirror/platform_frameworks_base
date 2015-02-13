@@ -65,6 +65,7 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
@@ -439,23 +440,28 @@ public final class ActivityManagerService extends ActivityManagerNative
         public final Bundle extras;
         public final Intent intent;
         public final String hint;
+        public final IResultReceiver receiver;
         public final int userHandle;
         public boolean haveResult = false;
         public Bundle result = null;
         public PendingAssistExtras(ActivityRecord _activity, Bundle _extras, Intent _intent,
-                String _hint, int _userHandle) {
+                String _hint, IResultReceiver _receiver, int _userHandle) {
             activity = _activity;
             extras = _extras;
             intent = _intent;
             hint = _hint;
+            receiver = _receiver;
             userHandle = _userHandle;
         }
         @Override
         public void run() {
             Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from " + activity);
-            synchronized (this) {
-                haveResult = true;
-                notifyAll();
+            synchronized (ActivityManagerService.this) {
+                synchronized (this) {
+                    haveResult = true;
+                    notifyAll();
+                }
+                pendingAssistExtrasTimedOutLocked(this);
             }
         }
     }
@@ -9980,8 +9986,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         return true;
     }
 
+    @Override
     public Bundle getAssistContextExtras(int requestType) {
-        PendingAssistExtras pae = enqueueAssistContext(requestType, null, null,
+        PendingAssistExtras pae = enqueueAssistContext(requestType, null, null, null,
                 UserHandle.getCallingUserId());
         if (pae == null) {
             return null;
@@ -9993,19 +10000,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } catch (InterruptedException e) {
                 }
             }
-            if (pae.result != null) {
-                pae.extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.result);
-            }
         }
         synchronized (this) {
+            buildAssistBundleLocked(pae, pae.result);
             mPendingAssistExtras.remove(pae);
             mHandler.removeCallbacks(pae);
         }
         return pae.extras;
     }
 
+    @Override
+    public void requestAssistContextExtras(int requestType, IResultReceiver receiver) {
+        enqueueAssistContext(requestType, null, null, receiver, UserHandle.getCallingUserId());
+    }
+
     private PendingAssistExtras enqueueAssistContext(int requestType, Intent intent, String hint,
-            int userHandle) {
+            IResultReceiver receiver, int userHandle) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
                 "getAssistContextExtras()");
         PendingAssistExtras pae;
@@ -10025,7 +10035,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "getAssistContextExtras failed: request process same as " + activity);
                 return null;
             }
-            pae = new PendingAssistExtras(activity, extras, intent, hint, userHandle);
+            pae = new PendingAssistExtras(activity, extras, intent, hint, receiver, userHandle);
             try {
                 activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
                         requestType);
@@ -10039,13 +10049,33 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void pendingAssistExtrasTimedOutLocked(PendingAssistExtras pae) {
+        mPendingAssistExtras.remove(pae);
+        if (pae.receiver != null) {
+            // Caller wants result sent back to them.
+            try {
+                pae.receiver.send(0, null);
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
+    private void buildAssistBundleLocked(PendingAssistExtras pae, Bundle result) {
+        if (result != null) {
+            pae.extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, result);
+        }
+        if (pae.hint != null) {
+            pae.extras.putBoolean(pae.hint, true);
+        }
+    }
+
     public void reportAssistContextExtras(IBinder token, Bundle extras) {
         PendingAssistExtras pae = (PendingAssistExtras)token;
         synchronized (pae) {
             pae.result = extras;
             pae.haveResult = true;
             pae.notifyAll();
-            if (pae.intent == null) {
+            if (pae.intent == null && pae.receiver == null) {
                 // Caller is just waiting for the result.
                 return;
             }
@@ -10053,17 +10083,23 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // We are now ready to launch the assist activity.
         synchronized (this) {
+            buildAssistBundleLocked(pae, extras);
             boolean exists = mPendingAssistExtras.remove(pae);
             mHandler.removeCallbacks(pae);
             if (!exists) {
                 // Timed out.
                 return;
             }
+            if (pae.receiver != null) {
+                // Caller wants result sent back to them.
+                try {
+                    pae.receiver.send(0, pae.extras);
+                } catch (RemoteException e) {
+                }
+                return;
+            }
         }
-        pae.intent.replaceExtras(extras);
-        if (pae.hint != null) {
-            pae.intent.putExtra(pae.hint, true);
-        }
+        pae.intent.replaceExtras(pae.extras);
         pae.intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_SINGLE_TOP
                 | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -10076,7 +10112,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle) {
-        return enqueueAssistContext(requestType, intent, hint, userHandle) != null;
+        return enqueueAssistContext(requestType, intent, hint, null, userHandle) != null;
     }
 
     public void registerProcessObserver(IProcessObserver observer) {

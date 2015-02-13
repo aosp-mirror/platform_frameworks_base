@@ -50,7 +50,6 @@ import com.android.internal.os.SomeArgs;
 import java.lang.ref.WeakReference;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * An active voice interaction session, providing a facility for the implementation
@@ -91,7 +90,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     final ArrayMap<IBinder, Request> mActiveRequests = new ArrayMap<IBinder, Request>();
 
     final Insets mTmpInsets = new Insets();
-    final int[] mTmpLocation = new int[2];
 
     final WeakReference<VoiceInteractionSession> mWeakRef
             = new WeakReference<VoiceInteractionSession>(this);
@@ -152,6 +150,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     };
 
     final IVoiceInteractionSession mSession = new IVoiceInteractionSession.Stub() {
+        @Override
+        public void handleAssist(Bundle assistBundle) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_HANDLE_ASSIST,
+                    assistBundle));
+        }
+
         @Override
         public void taskStarted(Intent intent, int taskId) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIO(MSG_TASK_STARTED,
@@ -279,6 +283,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     static final int MSG_TASK_FINISHED = 101;
     static final int MSG_CLOSE_SYSTEM_DIALOGS = 102;
     static final int MSG_DESTROY = 103;
+    static final int MSG_HANDLE_ASSIST = 104;
 
     class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
@@ -340,6 +345,10 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                 case MSG_DESTROY:
                     if (DEBUG) Log.d(TAG, "doDestroy");
                     doDestroy();
+                    break;
+                case MSG_HANDLE_ASSIST:
+                    if (DEBUG) Log.d(TAG, "onHandleAssist: " + (Bundle)msg.obj);
+                    onHandleAssist((Bundle) msg.obj);
                     break;
             }
         }
@@ -441,10 +450,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     }
 
-    void doCreate(IVoiceInteractionManagerService service, IBinder token, Bundle args) {
+    void doCreate(IVoiceInteractionManagerService service, IBinder token, Bundle args,
+            int startFlags) {
         mSystemService = service;
         mToken = token;
-        onCreate(args);
+        onCreate(args, startFlags);
     }
 
     void doDestroy() {
@@ -585,12 +595,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     }
 
-    /**
-     * Initiatize a new session.
-     *
-     * @param args The arguments that were supplied to
-     * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
-     */
+    /** @hide */
     public void onCreate(Bundle args) {
         mTheme = mTheme != 0 ? mTheme
                 : com.android.internal.R.style.Theme_DeviceDefault_VoiceInteractionSession;
@@ -598,11 +603,23 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                 Context.LAYOUT_INFLATER_SERVICE);
         mWindow = new SoftInputWindow(mContext, "VoiceInteractionSession", mTheme,
                 mCallbacks, this, mDispatcherState,
-                WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.TOP, true);
+                WindowManager.LayoutParams.TYPE_VOICE_INTERACTION, Gravity.BOTTOM, true);
         mWindow.getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         initViews();
-        mWindow.getWindow().setLayout(MATCH_PARENT, WRAP_CONTENT);
+        mWindow.getWindow().setLayout(MATCH_PARENT, MATCH_PARENT);
         mWindow.setToken(mToken);
+    }
+
+    /**
+     * Initiatize a new session.
+     *
+     * @param args The arguments that were supplied to
+     * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
+     * @param startFlags The start flags originally provided to
+     * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
+     */
+    public void onCreate(Bundle args, int startFlags) {
+        onCreate(args);
     }
 
     /**
@@ -622,8 +639,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mContentFrame.removeAllViews();
         mContentFrame.addView(view, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
+                ViewGroup.LayoutParams.MATCH_PARENT));
 
+    }
+
+    public void onHandleAssist(Bundle assistBundle) {
     }
 
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -657,19 +677,19 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
 
     /**
      * Compute the interesting insets into your UI.  The default implementation
-     * uses the entire window frame as the insets.  The default touchable
-     * insets are {@link Insets#TOUCHABLE_INSETS_FRAME}.
+     * sets {@link Insets#contentInsets outInsets.contentInsets.top} to the height
+     * of the window, meaning it should not adjust content underneath.  The default touchable
+     * insets are {@link Insets#TOUCHABLE_INSETS_FRAME}, meaning it consumes all touch
+     * events within its window frame.
      *
      * @param outInsets Fill in with the current UI insets.
      */
     public void onComputeInsets(Insets outInsets) {
-        int[] loc = mTmpLocation;
-        View decor = getWindow().getWindow().getDecorView();
-        decor.getLocationInWindow(loc);
-        outInsets.contentInsets.top = 0;
         outInsets.contentInsets.left = 0;
-        outInsets.contentInsets.right = 0;
         outInsets.contentInsets.bottom = 0;
+        outInsets.contentInsets.right = 0;
+        View decor = getWindow().getWindow().getDecorView();
+        outInsets.contentInsets.top = decor.getHeight();
         outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_FRAME;
         outInsets.touchableRegion.setEmpty();
     }

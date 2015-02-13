@@ -1039,10 +1039,10 @@ public class DreamService extends Service implements Window.Callback {
     protected void dump(final FileDescriptor fd, PrintWriter pw, final String[] args) {
         DumpUtils.dumpAsync(mHandler, new Dump() {
             @Override
-            public void dump(PrintWriter pw) {
+            public void dump(PrintWriter pw, String prefix) {
                 dumpOnHandler(fd, pw, args);
             }
-        }, pw, 1000);
+        }, pw, "", 1000);
     }
 
     /** @hide */

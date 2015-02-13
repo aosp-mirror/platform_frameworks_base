@@ -40,9 +40,9 @@ public abstract class VoiceInteractionSessionService extends Service {
     VoiceInteractionSession mSession;
 
     IVoiceInteractionSessionService mInterface = new IVoiceInteractionSessionService.Stub() {
-        public void newSession(IBinder token, Bundle args) {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(MSG_NEW_SESSION,
-                    token, args));
+        public void newSession(IBinder token, Bundle args, int startFlags) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIOO(MSG_NEW_SESSION,
+                    startFlags, token, args));
 
         }
     };
@@ -54,7 +54,7 @@ public abstract class VoiceInteractionSessionService extends Service {
             SomeArgs args = (SomeArgs)msg.obj;
             switch (msg.what) {
                 case MSG_NEW_SESSION:
-                    doNewSession((IBinder)args.arg1, (Bundle)args.arg2);
+                    doNewSession((IBinder)args.arg1, (Bundle)args.arg2, args.argi1);
                     break;
             }
         }
@@ -76,7 +76,7 @@ public abstract class VoiceInteractionSessionService extends Service {
         return mInterface.asBinder();
     }
 
-    void doNewSession(IBinder token, Bundle args) {
+    void doNewSession(IBinder token, Bundle args, int startFlags) {
         if (mSession != null) {
             mSession.doDestroy();
             mSession = null;
@@ -84,7 +84,7 @@ public abstract class VoiceInteractionSessionService extends Service {
         mSession = onNewSession(args);
         try {
             mSystemService.deliverNewSession(token, mSession.mSession, mSession.mInteractor);
-            mSession.doCreate(mSystemService, token, args);
+            mSession.doCreate(mSystemService, token, args, startFlags);
         } catch (RemoteException e) {
         }
     }

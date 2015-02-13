@@ -153,7 +153,7 @@ final class OverlayDisplayWindow implements DumpUtils.Dump {
     }
 
     @Override
-    public void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw, String prefix) {
         pw.println("mWindowVisible=" + mWindowVisible);
         pw.println("mWindowX=" + mWindowX);
         pw.println("mWindowY=" + mWindowY);

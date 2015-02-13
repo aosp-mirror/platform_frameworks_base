@@ -51,6 +51,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Singleton;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.os.IResultReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -2111,6 +2112,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             Bundle res = getAssistContextExtras(requestType);
             reply.writeNoException();
             reply.writeBundle(res);
+            return true;
+        }
+
+        case REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int requestType = data.readInt();
+            IResultReceiver receiver = IResultReceiver.Stub.asInterface(data.readStrongBinder());
+            requestAssistContextExtras(requestType, receiver);
+            reply.writeNoException();
             return true;
         }
 
@@ -5144,6 +5154,19 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return res;
+    }
+
+    public void requestAssistContextExtras(int requestType, IResultReceiver receiver)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(requestType);
+        data.writeStrongBinder(receiver.asBinder());
+        mRemote.transact(REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     public void reportAssistContextExtras(IBinder token, Bundle extras)

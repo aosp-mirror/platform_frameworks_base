@@ -57,11 +57,6 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         mCompleteButton = (Button)findViewById(R.id.complete);
         mCompleteButton.setOnClickListener(this);
 
-        // Framework should take care of these.
-        getWindow().setGravity(Gravity.TOP);
-        getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-
         mInteractor = getVoiceInteractor();
         VoiceInteractor.ConfirmationRequest req = new VoiceInteractor.ConfirmationRequest(
                 "This is a confirmation", null) {

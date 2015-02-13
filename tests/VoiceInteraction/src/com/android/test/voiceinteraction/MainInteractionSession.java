@@ -16,6 +16,7 @@
 
 package com.android.test.voiceinteraction;
 
+import android.app.AssistData;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,11 +32,16 @@ public class MainInteractionSession extends VoiceInteractionSession
 
     Intent mStartIntent;
     View mContentView;
+    AssistVisualizer mAssistVisualizer;
+    View mTopContent;
+    View mBottomContent;
     TextView mText;
     Button mStartButton;
     Button mConfirmButton;
     Button mCompleteButton;
     Button mAbortButton;
+
+    AssistData mAssistData;
 
     static final int STATE_IDLE = 0;
     static final int STATE_LAUNCHING = 1;
@@ -52,15 +58,25 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     @Override
-    public void onCreate(Bundle args) {
+    public void onCreate(Bundle args, int startFlags) {
         super.onCreate(args);
         showWindow();
         mStartIntent = args.getParcelable("intent");
+        Bundle assist = args.getBundle("assist");
+        if (assist != null) {
+            parseAssistData(assist);
+        }
     }
 
     @Override
     public View onCreateContentView() {
         mContentView = getLayoutInflater().inflate(R.layout.voice_interaction_session, null);
+        mAssistVisualizer = (AssistVisualizer)mContentView.findViewById(R.id.assist_visualizer);
+        if (mAssistData != null) {
+            mAssistVisualizer.setAssistData(mAssistData);
+        }
+        mTopContent = mContentView.findViewById(R.id.top_content);
+        mBottomContent = mContentView.findViewById(R.id.bottom_content);
         mText = (TextView)mContentView.findViewById(R.id.text);
         mStartButton = (Button)mContentView.findViewById(R.id.start);
         mStartButton.setOnClickListener(this);
@@ -74,7 +90,34 @@ public class MainInteractionSession extends VoiceInteractionSession
         return mContentView;
     }
 
+    @Override
+    public void onHandleAssist(Bundle assistBundle) {
+        if (assistBundle != null) {
+            parseAssistData(assistBundle);
+        } else {
+            Log.i(TAG, "onHandleAssist: NO ASSIST BUNDLE");
+        }
+    }
+
+    void parseAssistData(Bundle assistBundle) {
+        Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
+        if (assistContext != null) {
+            mAssistData = AssistData.getAssistData(assistContext);
+            mAssistData.dump();
+            if (mAssistVisualizer != null) {
+                mAssistVisualizer.setAssistData(mAssistData);
+            }
+        }
+    }
+
     void updateState() {
+        if (mState == STATE_IDLE) {
+            mTopContent.setVisibility(View.VISIBLE);
+            mBottomContent.setVisibility(View.GONE);
+        } else {
+            mTopContent.setVisibility(View.GONE);
+            mBottomContent.setVisibility(View.VISIBLE);
+        }
         mStartButton.setEnabled(mState == STATE_IDLE);
         mConfirmButton.setEnabled(mState == STATE_CONFIRM || mState == STATE_COMMAND);
         mAbortButton.setEnabled(mState == STATE_ABORT_VOICE);
@@ -105,6 +148,15 @@ public class MainInteractionSession extends VoiceInteractionSession
             mPendingRequest = null;
             mState = STATE_IDLE;
             updateState();
+        }
+    }
+
+    @Override
+    public void onComputeInsets(Insets outInsets) {
+        super.onComputeInsets(outInsets);
+        if (mState != STATE_IDLE) {
+            outInsets.contentInsets.top = mBottomContent.getTop();
+            outInsets.touchableInsets = Insets.TOUCHABLE_INSETS_CONTENT;
         }
     }
 

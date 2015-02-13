@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package android.service.voice;
+package com.android.test.voiceinteraction;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
-import android.service.voice.IVoiceInteractionSession;
+public class AssistProxyActivity extends Activity {
 
-/**
- * @hide
- */
-oneway interface IVoiceInteractionSessionService {
-    void newSession(IBinder token, in Bundle args, int startFlags);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        finish();
+        Intent intent = new Intent(this, MainInteractionService.class);
+        intent.setAction(Intent.ACTION_ASSIST);
+        intent.putExtras(getIntent());
+        startService(new Intent(this, MainInteractionService.class));
+    }
 }

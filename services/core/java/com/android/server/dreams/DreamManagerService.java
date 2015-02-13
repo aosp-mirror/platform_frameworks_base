@@ -137,10 +137,10 @@ public final class DreamManagerService extends SystemService {
 
         DumpUtils.dumpAsync(mHandler, new DumpUtils.Dump() {
             @Override
-            public void dump(PrintWriter pw) {
+            public void dump(PrintWriter pw, String prefix) {
                 mController.dump(pw);
             }
-        }, pw, 200);
+        }, pw, "", 200);
     }
 
     private boolean isDreamingInternal() {

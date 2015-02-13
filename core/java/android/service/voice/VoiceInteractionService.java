@@ -70,6 +70,12 @@ public class VoiceInteractionService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
+    /**
+     * Flag for use with {@link #startSession}: request that the session be started with
+     * assist data from the currently focused activity.
+     */
+    public static final int START_WITH_ASSIST = 1<<0;
+
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
         @Override public void ready() {
             mHandler.sendEmptyMessage(MSG_READY);
@@ -136,14 +142,19 @@ public class VoiceInteractionService extends Service {
      * Initiate the execution of a new {@link android.service.voice.VoiceInteractionSession}.
      * @param args Arbitrary arguments that will be propagated to the session.
      */
-    public void startSession(Bundle args) {
+    public void startSession(Bundle args, int flags) {
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         try {
-            mSystemService.startSession(mInterface, args);
+            mSystemService.startSession(mInterface, args, flags);
         } catch (RemoteException e) {
         }
+    }
+
+    /** @hide */
+    public void startSession(Bundle args) {
+        startSession(args, 0);
     }
 
     @Override
@@ -163,8 +174,8 @@ public class VoiceInteractionService extends Service {
     /**
      * Called during service initialization to tell you when the system is ready
      * to receive interaction from it. You should generally do initialization here
-     * rather than in {@link #onCreate()}. Methods such as {@link #startSession(Bundle)} and
-     * {@link #createAlwaysOnHotwordDetector(String, Locale, android.service.voice.AlwaysOnHotwordDetector.Callback)}
+     * rather than in {@link #onCreate}. Methods such as {@link #startSession} and
+     * {@link #createAlwaysOnHotwordDetector}
      * will not be operational until this point.
      */
     public void onReady() {
