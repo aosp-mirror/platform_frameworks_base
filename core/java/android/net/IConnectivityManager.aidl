@@ -42,6 +42,7 @@ import com.android.internal.net.VpnProfile;
 /** {@hide} */
 interface IConnectivityManager
 {
+    Network getActiveNetwork();
     NetworkInfo getActiveNetworkInfo();
     NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);
@@ -132,7 +133,7 @@ interface IConnectivityManager
 
     void unregisterNetworkFactory(in Messenger messenger);
 
-    void registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+    int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score, in NetworkMisc misc);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,

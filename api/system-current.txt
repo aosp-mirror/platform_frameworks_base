@@ -18216,6 +18216,7 @@ package android.net {
   public class ConnectivityManager {
     method public void addDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public boolean bindProcessToNetwork(android.net.Network);
+    method public android.net.Network getActiveNetwork();
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public android.net.Network[] getAllNetworks();

@@ -602,6 +602,27 @@ public class ConnectivityManager {
     }
 
     /**
+     * Returns a {@link Network} object corresponding to the currently active
+     * default data network.  In the event that the current active default data
+     * network disconnects, the returned {@code Network} object will no longer
+     * be usable.  This will return {@code null} when there is no default
+     * network.
+     *
+     * @return a {@link Network} object for the current default network or
+     *        {@code null} if no default network is currently active
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     */
+    public Network getActiveNetwork() {
+        try {
+            return mService.getActiveNetwork();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns details about the currently active default data network
      * for a given uid.  This is for internal use only to avoid spying
      * other apps.
@@ -1927,12 +1948,18 @@ public class ConnectivityManager {
         } catch (RemoteException e) { }
     }
 
-    /** {@hide} */
-    public void registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
+    /**
+     * @hide
+     * Register a NetworkAgent with ConnectivityService.
+     * @return NetID corresponding to NetworkAgent.
+     */
+    public int registerNetworkAgent(Messenger messenger, NetworkInfo ni, LinkProperties lp,
             NetworkCapabilities nc, int score, NetworkMisc misc) {
         try {
-            mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
-        } catch (RemoteException e) { }
+            return mService.registerNetworkAgent(messenger, ni, lp, nc, score, misc);
+        } catch (RemoteException e) {
+            return NETID_UNSET;
+        }
     }
 
     /**

@@ -17,9 +17,10 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
-import static android.os.UserHandle.PER_USER_RANGE;
+import static android.net.ConnectivityManager.NETID_UNSET;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
+import static android.os.UserHandle.PER_USER_RANGE;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
@@ -337,6 +338,10 @@ public class Vpn {
 
     public NetworkInfo getNetworkInfo() {
         return mNetworkInfo;
+    }
+
+    public int getNetId() {
+        return mNetworkAgent != null ? mNetworkAgent.netId : NETID_UNSET;
     }
 
     private LinkProperties makeLinkProperties() {
