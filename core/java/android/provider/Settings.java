@@ -5290,6 +5290,10 @@ public final class Settings {
         public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
 
         /** @hide */
+        public static final String VOLUME_CONTROLLER_SERVICE_COMPONENT
+                = "volume_controller_service_component";
+
+        /** @hide */
         public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
         /**

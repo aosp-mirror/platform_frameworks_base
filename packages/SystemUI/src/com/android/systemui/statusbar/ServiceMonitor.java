@@ -279,4 +279,14 @@ public class ServiceMonitor {
         }
         return sb.append('}').toString();
     }
+
+    public ComponentName getComponent() {
+        return getComponentNameFromSetting();
+    }
+
+    public void setComponent(ComponentName component) {
+        final String setting = component == null ? null : component.flattenToShortString();
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                mSettingKey, setting, UserHandle.USER_CURRENT);
+    }
 }

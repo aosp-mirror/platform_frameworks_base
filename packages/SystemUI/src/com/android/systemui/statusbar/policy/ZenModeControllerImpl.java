@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.AlarmManager;
-import android.app.INotificationManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -28,8 +27,6 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
@@ -53,7 +50,7 @@ public class ZenModeControllerImpl implements ZenModeController {
     private final Context mContext;
     private final GlobalSetting mModeSetting;
     private final GlobalSetting mConfigSetting;
-    private final INotificationManager mNoMan;
+    private final NotificationManager mNoMan;
     private final LinkedHashMap<Uri, Condition> mConditions = new LinkedHashMap<Uri, Condition>();
     private final AlarmManager mAlarmManager;
     private final SetupObserver mSetupObserver;
@@ -78,8 +75,7 @@ public class ZenModeControllerImpl implements ZenModeController {
         };
         mModeSetting.setListening(true);
         mConfigSetting.setListening(true);
-        mNoMan = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        mNoMan = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mSetupObserver = new SetupObserver(handler);
         mSetupObserver.register();
@@ -113,11 +109,7 @@ public class ZenModeControllerImpl implements ZenModeController {
     @Override
     public void requestConditions(boolean request) {
         mRequesting = request;
-        try {
-            mNoMan.requestZenModeConditions(mListener, request ? Condition.FLAG_RELEVANT_NOW : 0);
-        } catch (RemoteException e) {
-            // noop
-        }
+        mNoMan.requestZenModeConditions(mListener, request ? Condition.FLAG_RELEVANT_NOW : 0);
         if (!mRequesting) {
             mConditions.clear();
         }
@@ -125,24 +117,12 @@ public class ZenModeControllerImpl implements ZenModeController {
 
     @Override
     public void setExitCondition(Condition exitCondition) {
-        try {
-            mNoMan.setZenModeCondition(exitCondition);
-        } catch (RemoteException e) {
-            // noop
-        }
+        mNoMan.setZenModeCondition(exitCondition);
     }
 
     @Override
     public Condition getExitCondition() {
-        try {
-            final ZenModeConfig config = mNoMan.getZenModeConfig();
-            if (config != null) {
-                return config.exitCondition;
-            }
-        } catch (RemoteException e) {
-            // noop
-        }
-        return null;
+        return mNoMan.getZenModeCondition();
     }
 
     @Override

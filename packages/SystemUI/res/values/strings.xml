@@ -932,4 +932,19 @@
 
     <!-- Hide quick settings tile confirmation button -->
     <string name="quick_settings_reset_confirmation_button">Hide</string>
+
+    <!-- VolumeUI activation dialog: warning message -->
+    <string name="volumeui_prompt_message"><xliff:g id="app_name" example="Volume Prototype 1">%1$s</xliff:g> wants to be the volume dialog.</string>
+
+    <!-- VolumeUI activation dialog: allow button label -->
+    <string name="volumeui_prompt_allow">Allow</string>
+
+    <!-- VolumeUI activation dialog: deny button label -->
+    <string name="volumeui_prompt_deny">Deny</string>
+
+    <!-- VolumeUI restoration notification: title -->
+    <string name="volumeui_notification_title"><xliff:g id="app_name" example="Volume Prototype 1">%1$s</xliff:g> is the volume dialog</string>
+
+    <!-- VolumeUI restoration notification: text -->
+    <string name="volumeui_notification_text">Touch to restore the original.</string>
 </resources>
