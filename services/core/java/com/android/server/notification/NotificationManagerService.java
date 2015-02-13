@@ -209,7 +209,7 @@ public class NotificationManagerService extends SystemService {
     private final ArraySet<ManagedServiceInfo> mListenersDisablingEffects = new ArraySet<>();
     private ComponentName mEffectsSuppressor;
     private int mListenerHints;  // right now, all hints are global
-    private int mInterruptionFilter;  // current ZEN mode as communicated to listeners
+    private int mInterruptionFilter = NotificationListenerService.INTERRUPTION_FILTER_UNKNOWN;
 
     // for enabling and disabling notification pulse behavior
     private boolean mScreenOn = true;

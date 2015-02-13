@@ -29171,6 +29171,7 @@ package android.service.notification {
     field public static final int INTERRUPTION_FILTER_ALL = 1; // 0x1
     field public static final int INTERRUPTION_FILTER_NONE = 3; // 0x3
     field public static final int INTERRUPTION_FILTER_PRIORITY = 2; // 0x2
+    field public static final int INTERRUPTION_FILTER_UNKNOWN = 0; // 0x0
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.notification.NotificationListenerService";
     field public static final int TRIM_FULL = 0; // 0x0
     field public static final int TRIM_LIGHT = 1; // 0x1

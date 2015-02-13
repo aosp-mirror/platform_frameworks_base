@@ -77,6 +77,14 @@ public abstract class NotificationListenerService extends Service {
      */
     public static final int INTERRUPTION_FILTER_NONE = 3;
 
+    /** {@link #getCurrentInterruptionFilter() Interruption filter} constant - returned when
+     * the value is unavailable for any reason.  For example, before the notification listener
+     * is connected.
+     *
+     * {@see #onListenerConnected()}
+     */
+    public static final int INTERRUPTION_FILTER_UNKNOWN = 0;
+
     /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
      * should disable notification sound, vibrating and other visual or aural effects.
      * This does not change the interruption filter, only the effects. **/
@@ -473,15 +481,16 @@ public abstract class NotificationListenerService extends Service {
      * <p>
      * Listen for updates using {@link #onInterruptionFilterChanged(int)}.
      *
-     * @return One of the INTERRUPTION_FILTER_ constants, or 0 on errors.
+     * @return One of the INTERRUPTION_FILTER_ constants, or INTERRUPTION_FILTER_UNKNOWN when
+     * unavailable.
      */
     public final int getCurrentInterruptionFilter() {
-        if (!isBound()) return 0;
+        if (!isBound()) return INTERRUPTION_FILTER_UNKNOWN;
         try {
             return getNotificationInterface().getInterruptionFilterFromListener(mWrapper);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
-            return 0;
+            return INTERRUPTION_FILTER_UNKNOWN;
         }
     }
 
