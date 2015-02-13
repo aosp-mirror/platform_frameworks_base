@@ -799,7 +799,7 @@ please see styles_device_defaults.xml.
         <item name="tabStripEnabled">false</item>
         <item name="divider">?attr/dividerVertical</item>
         <item name="gravity">fill_horizontal|center_vertical</item>
-        <item name="showDividers">middle</item>
+        <item name="showDividers">none</item>
         <item name="dividerPadding">8dip</item>
         <item name="measureWithLargestChild">true</item>
         <item name="tabLayout">@layout/tab_indicator_material</item>
