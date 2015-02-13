@@ -588,9 +588,9 @@ public class ConnectivityManager {
      * network.
      *
      * @return a {@link NetworkInfo} object for the current default network
-     *        or {@code null} if no network default network is currently active
+     *        or {@code null} if no default network is currently active
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      */
     public NetworkInfo getActiveNetworkInfo() {
@@ -737,9 +737,9 @@ public class ConnectivityManager {
      * network.
      *
      * @return a {@link NetworkInfo} object for the current default network
-     *        or {@code null} if no network default network is currently active
+     *        or {@code null} if no default network is currently active
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * {@hide}
@@ -759,7 +759,7 @@ public class ConnectivityManager {
      *        for the current default network, or {@code null} if there
      *        is no current default network.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -779,7 +779,7 @@ public class ConnectivityManager {
      *        for the given networkType, or {@code null} if there is
      *        no current default network.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -829,7 +829,7 @@ public class ConnectivityManager {
      * @return a boolean, {@code true} indicating success.  All network types
      *        will be tried, even if some fail.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -850,7 +850,7 @@ public class ConnectivityManager {
      *        {@code} false to turn it off.
      * @return a boolean, {@code true} indicating success.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1272,7 +1272,7 @@ public class ConnectivityManager {
      * network is active. Quota status can change rapidly, so these values
      * shouldn't be cached.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      *
      * @hide
@@ -1451,7 +1451,7 @@ public class ConnectivityManager {
      *
      * @return an array of 0 or more Strings of tetherable interface names.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1468,7 +1468,7 @@ public class ConnectivityManager {
      *
      * @return an array of 0 or more String of currently tethered interface names.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1491,7 +1491,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more String indicating the interface names
      *        which failed to tether.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1529,7 +1529,7 @@ public class ConnectivityManager {
      * @param iface the interface name to tether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1547,7 +1547,7 @@ public class ConnectivityManager {
      * @param iface the interface name to untether.
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1566,7 +1566,7 @@ public class ConnectivityManager {
      *
      * @return a boolean - {@code true} indicating Tethering is supported.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1586,7 +1586,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable usb interfaces.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1606,7 +1606,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable wifi interfaces.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1626,7 +1626,7 @@ public class ConnectivityManager {
      * @return an array of 0 or more regular expression Strings defining
      *        what interfaces are considered tetherable bluetooth interfaces.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1648,7 +1648,7 @@ public class ConnectivityManager {
      * @param enable a boolean - {@code true} to enable tethering
      * @return error a {@code TETHER_ERROR} value indicating success or failure type
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CHANGE_NETWORK_STATE}.
      * {@hide}
      */
@@ -1691,7 +1691,7 @@ public class ConnectivityManager {
      * @return error The error code of the last error tethering or untethering the named
      *               interface
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * {@hide}
      */
@@ -1710,7 +1710,7 @@ public class ConnectivityManager {
      * @param networkType The type of network you want to report on
      * @param percentage The quality of the connection 0 is bad, 100 is good
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#STATUS_BAR}.
      * {@hide}
      */
@@ -1746,7 +1746,7 @@ public class ConnectivityManager {
      * @param p The a {@link ProxyInfo} object defining the new global
      *        HTTP proxy.  A {@code null} value will clear the global HTTP proxy.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * android.Manifest.permission#CONNECTIVITY_INTERNAL.
      * @hide
      */
@@ -1763,7 +1763,7 @@ public class ConnectivityManager {
      * @return {@link ProxyInfo} for the current global HTTP proxy or {@code null}
      *        if no global HTTP proxy is set.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @hide
      */
@@ -1811,7 +1811,7 @@ public class ConnectivityManager {
      * @param networkType The network type we'd like to check
      * @return {@code true} if supported, else {@code false}
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      * @hide
      */
@@ -1833,7 +1833,7 @@ public class ConnectivityManager {
      * @return {@code true} if large transfers should be avoided, otherwise
      *        {@code false}.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
      */
     public boolean isActiveNetworkMetered() {
@@ -1869,7 +1869,7 @@ public class ConnectivityManager {
      *        in question.
      * @param isCaptivePortal true/false.
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      * {@hide}
      */
@@ -1944,7 +1944,7 @@ public class ConnectivityManager {
      *
      * @param enable whether to enable airplane mode or not
      *
-     * <p>This method requires the call to hold the permission
+     * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
      * @hide
      */
