@@ -861,9 +861,33 @@
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
 
+    <!-- Stability requirements in milliseconds for accepting a new brightness level.  This is used
+         for debouncing the light sensor.  Different constants are used to debounce the light sensor
+         when adapting to brighter or darker environments.  This parameter controls how quickly
+         brightness changes occur in response to an observed change in light level that exceeds the
+         hysteresis threshold. -->
+    <integer name="config_autoBrightnessBrighteningLightDebounce">4000</integer>
+    <integer name="config_autoBrightnessDarkeningLightDebounce">8000</integer>
+
+    <!-- Light sensor event rate in milliseconds for automatic brightness control. -->
+    <integer name="config_autoBrightnessLightSensorRate">250</integer>
+
     <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
          to reduce it to preserve the battery. Value of 100% means no scaling. -->
     <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
+
+    <!-- When the screen is turned on, the previous estimate of the ambient light level at the time
+         the screen was turned off is restored and is used to determine the initial screen
+         brightness.
+
+         If this flag is true, then the ambient light level estimate will be promptly recomputed
+         after the warm-up interface and the screen brightness will be adjusted immediately.
+
+         If this flag is false, then the ambient light level estimate will be adjusted more
+         gradually in the same manner that normally happens when the screen is on according to the
+         brightening or dimming debounce thresholds.  As a result, it may take somewhat longer to
+         adapt to the environment.  This mode may be better suited for watches. -->
+    <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">true</bool>
 
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
