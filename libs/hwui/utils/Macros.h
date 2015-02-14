@@ -16,6 +16,8 @@
 #ifndef MACROS_H
 #define MACROS_H
 
+#include <type_traits>
+
 #define PREVENT_COPY_AND_ASSIGN(Type) \
     private: \
         Type(const Type&) = delete; \

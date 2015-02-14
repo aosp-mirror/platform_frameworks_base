@@ -17,14 +17,13 @@
 #ifndef ANDROID_HWUI_SKIA_SHADER_H
 #define ANDROID_HWUI_SKIA_SHADER_H
 
-#include <SkShader.h>
-#include <SkXfermode.h>
+#include "FloatColor.h"
+#include "Matrix.h"
 
 #include <GLES2/gl2.h>
-
+#include <SkShader.h>
+#include <SkXfermode.h>
 #include <cutils/compiler.h>
-
-#include "Matrix.h"
 
 namespace android {
 namespace uirenderer {
@@ -32,17 +31,58 @@ namespace uirenderer {
 class Caches;
 class Extensions;
 class Layer;
+class Texture;
 struct ProgramDescription;
 
 /**
  * Type of Skia shader in use.
+ *
+ * Note that kBitmap | kGradient = kCompose, since Compose implies
+ * both its component types are in use simultaneously. No other
+ * composition of multiple types is supported.
  */
 enum SkiaShaderType {
-    kNone_SkiaShaderType,
-    kBitmap_SkiaShaderType,
-    kGradient_SkiaShaderType,
-    kCompose_SkiaShaderType,
-    kLayer_SkiaShaderType
+    kNone_SkiaShaderType = 0,
+    kBitmap_SkiaShaderType = 1,
+    kGradient_SkiaShaderType = 2,
+    kCompose_SkiaShaderType = kBitmap_SkiaShaderType | kGradient_SkiaShaderType,
+    kLayer_SkiaShaderType = 4,
+};
+
+struct SkiaShaderData {
+    SkiaShaderType skiaShaderType;
+    struct BitmapShaderData {
+        Texture* bitmapTexture;
+        GLuint bitmapSampler;
+        GLenum wrapS;
+        GLenum wrapT;
+
+        Matrix4 textureTransform;
+        float textureDimension[2];
+    } bitmapData;
+    struct GradientShaderData {
+        Matrix4 screenSpace;
+        GLuint ditherSampler;
+
+        // simple gradient
+        FloatColor startColor;
+        FloatColor endColor;
+
+        // complex gradient
+        Texture* gradientTexture;
+        GLuint gradientSampler;
+        GLenum wrapST;
+
+    } gradientData;
+    struct LayerShaderData {
+        Layer* layer;
+        GLuint bitmapSampler;
+        GLenum wrapS;
+        GLenum wrapT;
+
+        Matrix4 textureTransform;
+        float textureDimension[2];
+    } layerData;
 };
 
 class SkiaShader {
@@ -52,6 +92,12 @@ public:
             const Extensions& extensions, const SkShader& shader);
     static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
             GLuint* textureUnit, const Extensions& extensions, const SkShader& shader);
+
+    // new SkiaShader interaction model - store into ShaderData, and apply to Caches/Program/GL
+    static void store(Caches& caches, const SkShader* shader, const Matrix4& modelViewMatrix,
+            GLuint* textureUnit, ProgramDescription* description,
+            SkiaShaderData* outData);
+    static void apply(Caches& caches, const SkiaShaderData& data);
 };
 
 class InvalidSkiaShader {
