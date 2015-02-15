@@ -478,7 +478,6 @@ public final class ViewRootImpl implements ViewParent,
 
                 CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
-                mDisplayAdjustments.setActivityToken(attrs.token);
 
                 // If the application owns the surface, don't enable hardware acceleration
                 if (mSurfaceHolder == null) {

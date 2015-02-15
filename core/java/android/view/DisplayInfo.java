@@ -17,7 +17,7 @@
 package android.view;
 
 import android.content.res.CompatibilityInfo;
-import android.os.IBinder;
+import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.DisplayMetrics;
@@ -401,16 +401,17 @@ public final class DisplayInfo implements Parcelable {
 
     public void getAppMetrics(DisplayMetrics outMetrics, DisplayAdjustments displayAdjustments) {
         getMetricsWithSize(outMetrics, displayAdjustments.getCompatibilityInfo(),
-                displayAdjustments.getActivityToken(), appWidth, appHeight);
+                displayAdjustments.getConfiguration(), appWidth, appHeight);
     }
 
-    public void getAppMetrics(DisplayMetrics outMetrics, CompatibilityInfo ci, IBinder token) {
-        getMetricsWithSize(outMetrics, ci, token, appWidth, appHeight);
+    public void getAppMetrics(DisplayMetrics outMetrics, CompatibilityInfo ci,
+            Configuration configuration) {
+        getMetricsWithSize(outMetrics, ci, configuration, appWidth, appHeight);
     }
 
     public void getLogicalMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
-            IBinder token) {
-        getMetricsWithSize(outMetrics, compatInfo, token, logicalWidth, logicalHeight);
+            Configuration configuration) {
+        getMetricsWithSize(outMetrics, compatInfo, configuration, logicalWidth, logicalHeight);
     }
 
     public int getNaturalWidth() {
@@ -431,16 +432,23 @@ public final class DisplayInfo implements Parcelable {
     }
 
     private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
-            IBinder token, int width, int height) {
+            Configuration configuration, int width, int height) {
         outMetrics.densityDpi = outMetrics.noncompatDensityDpi = logicalDensityDpi;
-        outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
-        outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
-
         outMetrics.density = outMetrics.noncompatDensity =
                 logicalDensityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
         outMetrics.scaledDensity = outMetrics.noncompatScaledDensity = outMetrics.density;
         outMetrics.xdpi = outMetrics.noncompatXdpi = physicalXDpi;
         outMetrics.ydpi = outMetrics.noncompatYdpi = physicalYDpi;
+
+        width = (configuration != null
+                && configuration.screenWidthDp != Configuration.SCREEN_WIDTH_DP_UNDEFINED)
+                ? (int)((configuration.screenWidthDp * outMetrics.density) + 0.5f) : width;
+        height = (configuration != null
+                && configuration.screenHeightDp != Configuration.SCREEN_HEIGHT_DP_UNDEFINED)
+                ? (int)((configuration.screenHeightDp * outMetrics.density) + 0.5f) : height;
+
+        outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
+        outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
 
         if (!compatInfo.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
             compatInfo.applyToDisplayMetrics(outMetrics);

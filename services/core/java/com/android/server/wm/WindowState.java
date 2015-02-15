@@ -1551,6 +1551,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 pw.print(prefix); pw.print("touchable region="); pw.println(region);
             }
             pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
+            if (mOverrideConfig != Configuration.EMPTY) {
+                pw.print(prefix); pw.print("mOverrideConfig="); pw.println(mOverrideConfig);
+            }
         }
         pw.print(prefix); pw.print("mHasSurface="); pw.print(mHasSurface);
                 pw.print(" mShownFrame="); mShownFrame.printShortString(pw);

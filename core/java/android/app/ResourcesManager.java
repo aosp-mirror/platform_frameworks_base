@@ -27,6 +27,7 @@ import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -40,11 +41,10 @@ public class ResourcesManager {
     private static final boolean DEBUG = false;
 
     private static ResourcesManager sResourcesManager;
-    final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources
-            = new ArrayMap<ResourcesKey, WeakReference<Resources> >();
-
-    final ArrayMap<DisplayAdjustments, DisplayMetrics> mDefaultDisplayMetrics
-            = new ArrayMap<DisplayAdjustments, DisplayMetrics>();
+    private final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources =
+            new ArrayMap<>();
+    private final ArrayMap<Pair<Integer, Configuration>, WeakReference<Display>> mDisplays =
+            new ArrayMap<>();
 
     CompatibilityInfo mResCompatibilityInfo;
 
@@ -63,46 +63,18 @@ public class ResourcesManager {
         return mResConfiguration;
     }
 
-    public void flushDisplayMetricsLocked() {
-        mDefaultDisplayMetrics.clear();
+    DisplayMetrics getDisplayMetricsLocked() {
+        return getDisplayMetricsLocked(Display.DEFAULT_DISPLAY);
     }
 
-    public DisplayMetrics getDisplayMetricsLocked(int displayId) {
-        return getDisplayMetricsLocked(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
-    }
-
-    public DisplayMetrics getDisplayMetricsLocked(int displayId, DisplayAdjustments daj) {
-        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        DisplayMetrics dm = isDefaultDisplay ? mDefaultDisplayMetrics.get(daj) : null;
-        if (dm != null) {
-            return dm;
-        }
-        dm = new DisplayMetrics();
-
-        DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-        if (displayManager == null) {
-            // may be null early in system startup
-            dm.setToDefaults();
-            return dm;
-        }
-
-        if (isDefaultDisplay) {
-            mDefaultDisplayMetrics.put(daj, dm);
-        }
-
-        Display d = displayManager.getCompatibleDisplay(displayId, daj);
-        if (d != null) {
-            d.getMetrics(dm);
+    DisplayMetrics getDisplayMetricsLocked(int displayId) {
+        DisplayMetrics dm = new DisplayMetrics();
+        final Display display = getAdjustedDisplay(displayId, Configuration.EMPTY);
+        if (display != null) {
+            display.getMetrics(dm);
         } else {
-            // Display no longer exists
-            // FIXME: This would not be a problem if we kept the Display object around
-            // instead of using the raw display id everywhere.  The Display object caches
-            // its information even after the display has been removed.
             dm.setToDefaults();
         }
-        //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
-        //        + metrics.heightPixels + " den=" + metrics.density
-        //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
         return dm;
     }
 
@@ -138,6 +110,37 @@ public class ResourcesManager {
     }
 
     /**
+     * Returns an adjusted {@link Display} object based on the inputs or null if display isn't
+     * available.
+     *
+     * @param displayId display Id.
+     * @param overrideConfiguration override configurations.
+     */
+    public Display getAdjustedDisplay(final int displayId, Configuration overrideConfiguration) {
+        final Pair<Integer, Configuration> key =
+                Pair.create(displayId, new Configuration(overrideConfiguration));
+        synchronized (this) {
+            WeakReference<Display> wd = mDisplays.get(key);
+            if (wd != null) {
+                final Display display = wd.get();
+                if (display != null) {
+                    return display;
+                }
+            }
+            final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+            if (dm == null) {
+                // may be null early in system startup
+                return null;
+            }
+            final Display display = dm.getRealDisplay(displayId, key.second);
+            if (display != null) {
+                mDisplays.put(key, new WeakReference<>(display));
+            }
+            return display;
+        }
+    }
+
+    /**
      * Creates the top level Resources for applications with the given compatibility info.
      *
      * @param resDir the resource directory.
@@ -148,7 +151,7 @@ public class ResourcesManager {
      * @param overrideConfiguration override configurations.
      * @param compatInfo the compatibility info. Must not be null.
      */
-    public Resources getTopLevelResources(String resDir, String[] splitResDirs,
+    Resources getTopLevelResources(String resDir, String[] splitResDirs,
             String[] overlayDirs, String[] libDirs, int displayId,
             Configuration overrideConfiguration, CompatibilityInfo compatInfo) {
         final float scale = compatInfo.applicationScale;
@@ -247,7 +250,7 @@ public class ResourcesManager {
         }
     }
 
-    public final boolean applyConfigurationToResourcesLocked(Configuration config,
+    final boolean applyConfigurationToResourcesLocked(Configuration config,
             CompatibilityInfo compat) {
         if (mResConfiguration == null) {
             mResConfiguration = new Configuration();
@@ -258,8 +261,9 @@ public class ResourcesManager {
             return false;
         }
         int changes = mResConfiguration.updateFrom(config);
-        flushDisplayMetricsLocked();
-        DisplayMetrics defaultDisplayMetrics = getDisplayMetricsLocked(Display.DEFAULT_DISPLAY);
+        // Things might have changed in display manager, so clear the cached displays.
+        mDisplays.clear();
+        DisplayMetrics defaultDisplayMetrics = getDisplayMetricsLocked();
 
         if (compat != null && (mResCompatibilityInfo == null ||
                 !mResCompatibilityInfo.equals(compat))) {
@@ -281,7 +285,7 @@ public class ResourcesManager {
 
         Configuration tmpConfig = null;
 
-        for (int i=mActiveResources.size()-1; i>=0; i--) {
+        for (int i = mActiveResources.size() - 1; i >= 0; i--) {
             ResourcesKey key = mActiveResources.keyAt(i);
             Resources r = mActiveResources.valueAt(i).get();
             if (r != null) {

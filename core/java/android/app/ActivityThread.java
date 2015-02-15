@@ -2372,35 +2372,32 @@ public final class ActivityThread {
         return activity;
     }
 
-    private Context createBaseContextForActivity(ActivityClientRecord r,
-            final Activity activity) {
-        ContextImpl appContext =
-                ContextImpl.createActivityContext(this, r.packageInfo, r.overrideConfig);
-        appContext.setOuterContext(activity);
-        Context baseContext = appContext;
-
-        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
+    private Context createBaseContextForActivity(ActivityClientRecord r, final Activity activity) {
+        int displayId = Display.DEFAULT_DISPLAY;
         try {
             IActivityContainer container =
                     ActivityManagerNative.getDefault().getEnclosingActivityContainer(r.token);
-            final int displayId =
-                    container == null ? Display.DEFAULT_DISPLAY : container.getDisplayId();
-            if (displayId > Display.DEFAULT_DISPLAY) {
-                Display display = dm.getRealDisplay(displayId, r.token);
-                baseContext = appContext.createDisplayContext(display);
+            if (container != null) {
+                displayId = container.getDisplayId();
             }
         } catch (RemoteException e) {
         }
 
+        ContextImpl appContext = ContextImpl.createActivityContext(
+                this, r.packageInfo, displayId, r.overrideConfig);
+        appContext.setOuterContext(activity);
+        Context baseContext = appContext;
+
+        final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
         // For debugging purposes, if the activity's package name contains the value of
         // the "debug.use-second-display" system property as a substring, then show
         // its content on a secondary display if there is one.
         String pkgName = SystemProperties.get("debug.second-display.pkg");
         if (pkgName != null && !pkgName.isEmpty()
                 && r.packageInfo.mPackageName.contains(pkgName)) {
-            for (int displayId : dm.getDisplayIds()) {
-                if (displayId != Display.DEFAULT_DISPLAY) {
-                    Display display = dm.getRealDisplay(displayId, r.token);
+            for (int id : dm.getDisplayIds()) {
+                if (id != Display.DEFAULT_DISPLAY) {
+                    Display display = dm.getRealDisplay(id, r.overrideConfig);
                     baseContext = appContext.createDisplayContext(display);
                     break;
                 }
