@@ -194,17 +194,20 @@ def parse_api_file(fn):
 
 
 class Failure():
-    def __init__(self, sig, clazz, detail, error, msg):
+    def __init__(self, sig, clazz, detail, error, rule, msg):
         self.sig = sig
         self.clazz = clazz
         self.detail = detail
         self.error = error
+        self.rule = rule
         self.msg = msg
 
         if error:
-            dump = "%sError:%s %s" % (format(fg=RED, bg=BLACK, bold=True), format(reset=True), msg)
+            self.head = "Error %s" % (rule) if rule else "Error"
+            dump = "%s%s:%s %s" % (format(fg=RED, bg=BLACK, bold=True), self.head, format(reset=True), msg)
         else:
-            dump = "%sWarning:%s %s" % (format(fg=YELLOW, bg=BLACK, bold=True), format(reset=True), msg)
+            self.head = "Warning %s" % (rule) if rule else "Warning"
+            dump = "%s%s:%s %s" % (format(fg=YELLOW, bg=BLACK, bold=True), self.head, format(reset=True), msg)
 
         self.line = clazz.line
         blame = clazz.blame
@@ -226,21 +229,21 @@ class Failure():
 
 failures = {}
 
-def _fail(clazz, detail, error, msg):
+def _fail(clazz, detail, error, rule, msg):
     """Records an API failure to be processed later."""
     global failures
 
     sig = "%s-%s-%s" % (clazz.fullname, repr(detail), msg)
     sig = sig.replace(" deprecated ", " ")
 
-    failures[sig] = Failure(sig, clazz, detail, error, msg)
+    failures[sig] = Failure(sig, clazz, detail, error, rule, msg)
 
 
-def warn(clazz, detail, msg):
-    _fail(clazz, detail, False, msg)
+def warn(clazz, detail, rule, msg):
+    _fail(clazz, detail, False, rule, msg)
 
-def error(clazz, detail, msg):
-    _fail(clazz, detail, True, msg)
+def error(clazz, detail, rule, msg):
+    _fail(clazz, detail, True, rule, msg)
 
 
 def verify_constants(clazz):
@@ -250,13 +253,13 @@ def verify_constants(clazz):
     for f in clazz.fields:
         if "static" in f.split and "final" in f.split:
             if re.match("[A-Z0-9_]+", f.name) is None:
-                error(clazz, f, "Constant field names should be FOO_NAME")
+                error(clazz, f, "C2", "Constant field names should be FOO_NAME")
 
 
 def verify_enums(clazz):
     """Enums are bad, mmkay?"""
     if "extends java.lang.Enum" in clazz.raw:
-        error(clazz, None, "Enums are not allowed")
+        error(clazz, None, "F5", "Enums are not allowed")
 
 
 def verify_class_names(clazz):
@@ -266,9 +269,9 @@ def verify_class_names(clazz):
     if re.match("android\.R\.[a-z]+", clazz.fullname): return
 
     if re.search("[A-Z]{2,}", clazz.name) is not None:
-        warn(clazz, None, "Class name style should be Mtp not MTP")
+        warn(clazz, None, "S1", "Class name style should be Mtp not MTP")
     if re.match("[^A-Z]", clazz.name):
-        error(clazz, None, "Class must start with uppercase char")
+        error(clazz, None, "S1", "Class must start with uppercase char")
 
 
 def verify_method_names(clazz):
@@ -279,9 +282,9 @@ def verify_method_names(clazz):
 
     for m in clazz.methods:
         if re.search("[A-Z]{2,}", m.name) is not None:
-            warn(clazz, m, "Method name style should be getMtu() instead of getMTU()")
+            warn(clazz, m, "S1", "Method name style should be getMtu() instead of getMTU()")
         if re.match("[^a-z]", m.name):
-            error(clazz, m, "Method name must start with lowercase char")
+            error(clazz, m, "S1", "Method name must start with lowercase char")
 
 
 def verify_callbacks(clazz):
@@ -291,17 +294,17 @@ def verify_callbacks(clazz):
     if clazz.fullname == "android.speech.tts.SynthesisCallback": return
 
     if clazz.name.endswith("Callbacks"):
-        error(clazz, None, "Class name must not be plural")
+        error(clazz, None, "L1", "Class name must not be plural")
     if clazz.name.endswith("Observer"):
-        warn(clazz, None, "Class should be named FooCallback")
+        warn(clazz, None, "L1", "Class should be named FooCallback")
 
     if clazz.name.endswith("Callback"):
         if "interface" in clazz.split:
-            error(clazz, None, "Callback must be abstract class to enable extension in future API levels")
+            error(clazz, None, "CL3", "Callback must be abstract class to enable extension in future API levels")
 
         for m in clazz.methods:
             if not re.match("on[A-Z][a-z]*", m.name):
-                error(clazz, m, "Callback method names must be onFoo() style")
+                error(clazz, m, "L1", "Callback method names must be onFoo() style")
 
 
 def verify_listeners(clazz):
@@ -313,16 +316,16 @@ def verify_listeners(clazz):
 
     if clazz.name.endswith("Listener"):
         if " abstract class " in clazz.raw:
-            error(clazz, None, "Listener should be an interface, otherwise renamed Callback")
+            error(clazz, None, "L1", "Listener should be an interface, otherwise renamed Callback")
 
         for m in clazz.methods:
             if not re.match("on[A-Z][a-z]*", m.name):
-                error(clazz, m, "Listener method names must be onFoo() style")
+                error(clazz, m, "L1", "Listener method names must be onFoo() style")
 
         if len(clazz.methods) == 1 and clazz.name.startswith("On"):
             m = clazz.methods[0]
             if (m.name + "Listener").lower() != clazz.name.lower():
-                error(clazz, m, "Single listener method name should match class name")
+                error(clazz, m, "L1", "Single listener method name should match class name")
 
 
 def verify_actions(clazz):
@@ -340,7 +343,7 @@ def verify_actions(clazz):
         if "static" in f.split and "final" in f.split and f.typ == "java.lang.String":
             if "_ACTION" in f.name or "ACTION_" in f.name or ".action." in f.value.lower():
                 if not f.name.startswith("ACTION_"):
-                    error(clazz, f, "Intent action constant name must be ACTION_FOO")
+                    error(clazz, f, "C3", "Intent action constant name must be ACTION_FOO")
                 else:
                     if clazz.fullname == "android.content.Intent":
                         prefix = "android.intent.action"
@@ -352,7 +355,7 @@ def verify_actions(clazz):
                         prefix = clazz.pkg.name + ".action"
                     expected = prefix + "." + f.name[7:]
                     if f.value != expected:
-                        error(clazz, f, "Inconsistent action value; expected %s" % (expected))
+                        error(clazz, f, "C4", "Inconsistent action value; expected %s" % (expected))
 
 
 def verify_extras(clazz):
@@ -372,7 +375,7 @@ def verify_extras(clazz):
         if "static" in f.split and "final" in f.split and f.typ == "java.lang.String":
             if "_EXTRA" in f.name or "EXTRA_" in f.name or ".extra" in f.value.lower():
                 if not f.name.startswith("EXTRA_"):
-                    error(clazz, f, "Intent extra must be EXTRA_FOO")
+                    error(clazz, f, "C3", "Intent extra must be EXTRA_FOO")
                 else:
                     if clazz.pkg.name == "android.content" and clazz.name == "Intent":
                         prefix = "android.intent.extra"
@@ -382,7 +385,7 @@ def verify_extras(clazz):
                         prefix = clazz.pkg.name + ".extra"
                     expected = prefix + "." + f.name[6:]
                     if f.value != expected:
-                        error(clazz, f, "Inconsistent extra value; expected %s" % (expected))
+                        error(clazz, f, "C4", "Inconsistent extra value; expected %s" % (expected))
 
 
 def verify_equals(clazz):
@@ -391,7 +394,7 @@ def verify_equals(clazz):
     eq = "equals" in methods
     hc = "hashCode" in methods
     if eq != hc:
-        error(clazz, None, "Must override both equals and hashCode; missing one")
+        error(clazz, None, "M8", "Must override both equals and hashCode; missing one")
 
 
 def verify_parcelable(clazz):
@@ -402,17 +405,17 @@ def verify_parcelable(clazz):
         describe = [ i for i in clazz.methods if i.name == "describeContents" ]
 
         if len(creator) == 0 or len(write) == 0 or len(describe) == 0:
-            error(clazz, None, "Parcelable requires CREATOR, writeToParcel, and describeContents; missing one")
+            error(clazz, None, "FW3", "Parcelable requires CREATOR, writeToParcel, and describeContents; missing one")
 
 
 def verify_protected(clazz):
     """Verify that no protected methods are allowed."""
     for m in clazz.methods:
         if "protected" in m.split:
-            error(clazz, m, "No protected methods; must be public")
+            error(clazz, m, "M7", "No protected methods; must be public")
     for f in clazz.fields:
         if "protected" in f.split:
-            error(clazz, f, "No protected fields; must be public")
+            error(clazz, f, "M7", "No protected fields; must be public")
 
 
 def verify_fields(clazz):
@@ -442,18 +445,18 @@ def verify_fields(clazz):
             elif clazz.fullname.startswith("android.util.Mutable"):
                 pass
             else:
-                error(clazz, f, "Bare fields must be marked final; consider adding accessors")
+                error(clazz, f, "F2", "Bare fields must be marked final, or add accessors if mutable")
 
         if not "static" in f.split:
             if not re.match("[a-z]([a-zA-Z]+)?", f.name):
-                error(clazz, f, "Non-static fields must be named with myField style")
+                error(clazz, f, "S1", "Non-static fields must be named with myField style")
 
         if re.match("[ms][A-Z]", f.name):
-            error(clazz, f, "Don't expose your internal objects")
+            error(clazz, f, "F1", "Don't expose your internal objects")
 
         if re.match("[A-Z_]+", f.name):
             if "static" not in f.split or "final" not in f.split:
-                error(clazz, f, "Constants must be marked static final")
+                error(clazz, f, "C2", "Constants must be marked static final")
 
 
 def verify_register(clazz):
@@ -466,34 +469,34 @@ def verify_register(clazz):
             if m.name.startswith("register"):
                 other = "unregister" + m.name[8:]
                 if other not in methods:
-                    error(clazz, m, "Missing unregister method")
+                    error(clazz, m, "L2", "Missing unregister method")
             if m.name.startswith("unregister"):
                 other = "register" + m.name[10:]
                 if other not in methods:
-                    error(clazz, m, "Missing register method")
+                    error(clazz, m, "L2", "Missing register method")
 
             if m.name.startswith("add") or m.name.startswith("remove"):
-                error(clazz, m, "Callback methods should be named register/unregister")
+                error(clazz, m, "L3", "Callback methods should be named register/unregister")
 
         if "Listener" in m.raw:
             if m.name.startswith("add"):
                 other = "remove" + m.name[3:]
                 if other not in methods:
-                    error(clazz, m, "Missing remove method")
+                    error(clazz, m, "L2", "Missing remove method")
             if m.name.startswith("remove") and not m.name.startswith("removeAll"):
                 other = "add" + m.name[6:]
                 if other not in methods:
-                    error(clazz, m, "Missing add method")
+                    error(clazz, m, "L2", "Missing add method")
 
             if m.name.startswith("register") or m.name.startswith("unregister"):
-                error(clazz, m, "Listener methods should be named add/remove")
+                error(clazz, m, "L3", "Listener methods should be named add/remove")
 
 
 def verify_sync(clazz):
     """Verify synchronized methods aren't exposed."""
     for m in clazz.methods:
         if "synchronized" in m.split:
-            error(clazz, m, "Internal lock exposed")
+            error(clazz, m, "M5", "Internal lock exposed")
 
 
 def verify_intent_builder(clazz):
@@ -505,7 +508,7 @@ def verify_intent_builder(clazz):
             if m.name.startswith("create") and m.name.endswith("Intent"):
                 pass
             else:
-                error(clazz, m, "Methods creating an Intent should be named createFooIntent()")
+                error(clazz, m, "FW1", "Methods creating an Intent should be named createFooIntent()")
 
 
 def verify_helper_classes(clazz):
@@ -515,57 +518,45 @@ def verify_helper_classes(clazz):
     if "extends android.app.Service" in clazz.raw:
         test_methods = True
         if not clazz.name.endswith("Service"):
-            error(clazz, None, "Inconsistent class name; should be FooService")
+            error(clazz, None, "CL4", "Inconsistent class name; should be FooService")
 
         found = False
         for f in clazz.fields:
             if f.name == "SERVICE_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "Inconsistent interface constant; expected %s" % (clazz.fullname))
-
-        if not found:
-            warn(clazz, None, "Missing SERVICE_INTERFACE constant")
-
-        if "abstract" in clazz.split and not clazz.fullname.startswith("android.service."):
-            warn(clazz, None, "Services extended by developers should be under android.service")
+                    error(clazz, f, "C4", "Inconsistent interface constant; expected %s" % (clazz.fullname))
 
     if "extends android.content.ContentProvider" in clazz.raw:
         test_methods = True
         if not clazz.name.endswith("Provider"):
-            error(clazz, None, "Inconsistent class name; should be FooProvider")
+            error(clazz, None, "CL4", "Inconsistent class name; should be FooProvider")
 
         found = False
         for f in clazz.fields:
             if f.name == "PROVIDER_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "Inconsistent interface name; expected %s" % (clazz.fullname))
-
-        if not found:
-            warn(clazz, None, "Missing PROVIDER_INTERFACE constant")
-
-        if "abstract" in clazz.split and not clazz.fullname.startswith("android.provider."):
-            warn(clazz, None, "Providers extended by developers should be under android.provider")
+                    error(clazz, f, "C4", "Inconsistent interface name; expected %s" % (clazz.fullname))
 
     if "extends android.content.BroadcastReceiver" in clazz.raw:
         test_methods = True
         if not clazz.name.endswith("Receiver"):
-            error(clazz, None, "Inconsistent class name; should be FooReceiver")
+            error(clazz, None, "CL4", "Inconsistent class name; should be FooReceiver")
 
     if "extends android.app.Activity" in clazz.raw:
         test_methods = True
         if not clazz.name.endswith("Activity"):
-            error(clazz, None, "Inconsistent class name; should be FooActivity")
+            error(clazz, None, "CL4", "Inconsistent class name; should be FooActivity")
 
     if test_methods:
         for m in clazz.methods:
             if "final" in m.split: continue
             if not re.match("on[A-Z]", m.name):
                 if "abstract" in m.split:
-                    error(clazz, m, "Methods implemented by developers must be named onFoo()")
+                    error(clazz, m, None, "Methods implemented by developers must be named onFoo()")
                 else:
-                    warn(clazz, m, "If implemented by developer, should be named onFoo(); otherwise consider marking final")
+                    warn(clazz, m, None, "If implemented by developer, should be named onFoo(); otherwise consider marking final")
 
 
 def verify_builder(clazz):
@@ -575,7 +566,7 @@ def verify_builder(clazz):
     if not clazz.name.endswith("Builder"): return
 
     if clazz.name != "Builder":
-        warn(clazz, None, "Builder should be defined as inner class")
+        warn(clazz, None, None, "Builder should be defined as inner class")
 
     has_build = False
     for m in clazz.methods:
@@ -587,26 +578,26 @@ def verify_builder(clazz):
         if m.name.startswith("clear"): continue
 
         if m.name.startswith("with"):
-            error(clazz, m, "Builder methods names must follow setFoo() style")
+            error(clazz, m, None, "Builder methods names must follow setFoo() style")
 
         if m.name.startswith("set"):
             if not m.typ.endswith(clazz.fullname):
-                warn(clazz, m, "Methods should return the builder")
+                warn(clazz, m, "M4", "Methods should return the builder")
 
     if not has_build:
-        warn(clazz, None, "Missing build() method")
+        warn(clazz, None, None, "Missing build() method")
 
 
 def verify_aidl(clazz):
     """Catch people exposing raw AIDL."""
     if "extends android.os.Binder" in clazz.raw or "implements android.os.IInterface" in clazz.raw:
-        error(clazz, None, "Exposing raw AIDL interface")
+        error(clazz, None, None, "Exposing raw AIDL interface")
 
 
 def verify_internal(clazz):
     """Catch people exposing internal classes."""
     if clazz.pkg.name.startswith("com.android"):
-        error(clazz, None, "Exposing internal class")
+        error(clazz, None, None, "Exposing internal class")
 
 
 def verify_layering(clazz):
@@ -641,16 +632,16 @@ def verify_layering(clazz):
     for f in clazz.fields:
         ir = rank(f.typ)
         if ir and ir < cr:
-            warn(clazz, f, "Field type violates package layering")
+            warn(clazz, f, "FW6", "Field type violates package layering")
 
     for m in clazz.methods:
         ir = rank(m.typ)
         if ir and ir < cr:
-            warn(clazz, m, "Method return type violates package layering")
+            warn(clazz, m, "FW6", "Method return type violates package layering")
         for arg in m.args:
             ir = rank(arg)
             if ir and ir < cr:
-                warn(clazz, m, "Method argument type violates package layering")
+                warn(clazz, m, "FW6", "Method argument type violates package layering")
 
 
 def verify_boolean(clazz, api):
@@ -672,7 +663,7 @@ def verify_boolean(clazz, api):
             elif builder is not None and setter in builder_methods:
                 pass
             else:
-                warn(clazz, m, "Methods returning boolean should be named isFoo, hasFoo, areFoo")
+                warn(clazz, m, None, "Methods returning boolean should be named isFoo, hasFoo, areFoo")
 
 
 def verify_collections(clazz):
@@ -683,10 +674,10 @@ def verify_collections(clazz):
            "java.util.HashMap", "java.util.HashSet", "android.util.ArraySet", "android.util.ArrayMap"]
     for m in clazz.methods:
         if m.typ in bad:
-            error(clazz, m, "Return type is concrete collection; should be interface")
+            error(clazz, m, "CL2", "Return type is concrete collection; should be interface")
         for arg in m.args:
             if arg in bad:
-                error(clazz, m, "Argument is concrete collection; should be interface")
+                error(clazz, m, "CL2", "Argument is concrete collection; should be interface")
 
 
 def verify_flags(clazz):
@@ -701,8 +692,94 @@ def verify_flags(clazz):
 
             scope = f.name[0:f.name.index("FLAG_")]
             if val & known[scope]:
-                warn(clazz, f, "Found overlapping flag constant value")
+                error(clazz, f, "C1", "Found overlapping flag constant value")
             known[scope] |= val
+
+
+def verify_exception(clazz):
+    """Verifies that methods don't throw generic exceptions."""
+    for m in clazz.methods:
+        if "throws java.lang.Exception" in m.raw or "throws java.lang.Throwable" in m.raw or "throws java.lang.Error" in m.raw:
+            error(clazz, m, "S1", "Methods must not throw generic exceptions")
+
+
+def verify_google(clazz):
+    """Verifies that APIs never reference Google."""
+
+    if re.search("google", clazz.raw, re.IGNORECASE):
+        error(clazz, None, None, "Must never reference Google")
+
+    test = []
+    test.extend(clazz.ctors)
+    test.extend(clazz.fields)
+    test.extend(clazz.methods)
+
+    for t in test:
+        if re.search("google", t.raw, re.IGNORECASE):
+            error(clazz, t, None, "Must never reference Google")
+
+
+def verify_bitset(clazz):
+    """Verifies that we avoid using heavy BitSet."""
+
+    for f in clazz.fields:
+        if f.typ == "java.util.BitSet":
+            error(clazz, f, None, "Field type must not be heavy BitSet")
+
+    for m in clazz.methods:
+        if m.typ == "java.util.BitSet":
+            error(clazz, m, None, "Return type must not be heavy BitSet")
+        for arg in m.args:
+            if arg == "java.util.BitSet":
+                error(clazz, m, None, "Argument type must not be heavy BitSet")
+
+
+def verify_manager(clazz):
+    """Verifies that FooManager is only obtained from Context."""
+
+    if not clazz.name.endswith("Manager"): return
+
+    for c in clazz.ctors:
+        error(clazz, c, None, "Managers must always be obtained from Context")
+
+
+def verify_boxed(clazz):
+    """Verifies that methods avoid boxed primitives."""
+
+    boxed = ["java.lang.Number", "java.lang.Byte","java.lang.Double","java.lang.Float","java.lang.Integer","java.lang.Long","java.lang.Short"]
+
+    for c in clazz.ctors:
+        for arg in c.args:
+            if arg in boxed:
+                error(clazz, c, None, "Must avoid boxed primitives")
+
+    for f in clazz.fields:
+        if f.typ in boxed:
+            error(clazz, f, None, "Must avoid boxed primitives")
+
+    for m in clazz.methods:
+        if m.typ in boxed:
+            error(clazz, m, None, "Must avoid boxed primitives")
+        for arg in m.args:
+            if arg in boxed:
+                error(clazz, m, None, "Must avoid boxed primitives")
+
+
+def verify_static_utils(clazz):
+    """Verifies that helper classes can't be constructed."""
+    if clazz.fullname.startswith("android.opengl"): return
+    if re.match("android\.R\.[a-z]+", clazz.fullname): return
+
+    if len(clazz.fields) > 0: return
+    if len(clazz.methods) == 0: return
+
+    for m in clazz.methods:
+        if "static" not in m.split:
+            return
+
+    # At this point, we have no fields, and all methods are static
+    if len(clazz.ctors) > 0:
+        error(clazz, None, None, "Fully-static utility classes must not have constructor")
 
 
 def verify_style(api):
@@ -743,6 +820,12 @@ def verify_style(api):
         verify_boolean(clazz, api)
         verify_collections(clazz)
         verify_flags(clazz)
+        verify_exception(clazz)
+        verify_google(clazz)
+        verify_bitset(clazz)
+        verify_manager(clazz)
+        verify_boxed(clazz)
+        verify_static_utils(clazz)
 
     return failures
 
@@ -781,23 +864,23 @@ def verify_compat(cur, prev):
         prev_clazz = prev[key]
 
         if not class_exists(cur, prev_clazz):
-            error(prev_clazz, None, "Class removed or incompatible change")
+            error(prev_clazz, None, None, "Class removed or incompatible change")
             continue
 
         cur_clazz = cur[key]
 
         for test in prev_clazz.ctors:
             if not ctor_exists(cur, cur_clazz, test):
-                error(prev_clazz, prev_ctor, "Constructor removed or incompatible change")
+                error(prev_clazz, prev_ctor, None, "Constructor removed or incompatible change")
 
         methods = all_methods(prev, prev_clazz)
         for test in methods:
             if not method_exists(cur, cur_clazz, test):
-                error(prev_clazz, test, "Method removed or incompatible change")
+                error(prev_clazz, test, None, "Method removed or incompatible change")
 
         for test in prev_clazz.fields:
             if not field_exists(cur, cur_clazz, test):
-                error(prev_clazz, test, "Field removed or incompatible change")
+                error(prev_clazz, test, None, "Field removed or incompatible change")
 
     return failures
 
