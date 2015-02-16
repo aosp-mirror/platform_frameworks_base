@@ -551,7 +551,14 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // draw the views
                 // create the BufferedImage into which the layout will be rendered.
                 boolean newImage = false;
-                if (newRenderSize || mCanvas == null) {
+
+                // When disableBitmapCaching is true, we do not reuse mImage and
+                // we create a new one in every render.
+                // This is useful when mImage is just a wrapper of Graphics2D so
+                // it doesn't get cached.
+                boolean disableBitmapCaching = Boolean.TRUE.equals(params.getFlag(
+                    SessionParamsFlags.FLAG_KEY_DISABLE_BITMAP_CACHING));
+                if (newRenderSize || mCanvas == null || disableBitmapCaching) {
                     if (params.getImageFactory() != null) {
                         mImage = params.getImageFactory().getImage(
                                 mMeasuredScreenWidth,
@@ -578,8 +585,12 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     Bitmap bitmap = Bitmap_Delegate.createBitmap(mImage,
                             true /*isMutable*/, hardwareConfig.getDensity());
 
-                    // create a Canvas around the Android bitmap
-                    mCanvas = new Canvas(bitmap);
+                    if (mCanvas == null) {
+                        // create a Canvas around the Android bitmap
+                        mCanvas = new Canvas(bitmap);
+                    } else {
+                        mCanvas.setBitmap(bitmap);
+                    }
                     mCanvas.setDensity(hardwareConfig.getDensity().getDpiValue());
                 }
 
