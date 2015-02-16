@@ -1182,8 +1182,7 @@ public class AudioService extends IAudioService.Stub {
             synchronized (mHdmiTvClient) {
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    mHdmiTvClient.setSystemAudioVolume(
-                            (oldVolume + 5) / 10, (newVolume + 5) / 10, maxVolume);
+                    mHdmiTvClient.setSystemAudioVolume(oldVolume, newVolume, maxVolume);
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
