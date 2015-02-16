@@ -31,7 +31,7 @@
     <integer name="max_action_buttons">2</integer>
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
-    <dimen name="status_bar_height">25dip</dimen>
+    <dimen name="status_bar_height">24dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
