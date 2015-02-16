@@ -72,10 +72,8 @@ page.tags="audio","video","adaptive","streaming","DASH","smoothstreaming"
 <ul>
     <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/library">
       ExoPlayer Library</a> &mdash; This part of the project contains the core library classes.</li>
-    <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/demo/src/main/java/com/google/android/exoplayer/demo/simple">
-      Simple Demo</a> &mdash; This part of the app demonstrates a basic use of ExoPlayer.</li>
-    <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/demo/src/main/java/com/google/android/exoplayer/demo/full">
-      Full Demo</a> &mdash; This part of the app demonstrates more advanced features,
+    <li><a class="external-link" href="https://github.com/google/ExoPlayer/tree/master/demo">
+      Demo App</a> &mdash; This part of the project demonstrates usage of ExoPlayer,
       including the ability to select between multiple audio tracks, a background audio mode,
       event logging and DRM protected playback. </li>
 </ul>
@@ -137,9 +135,10 @@ player.setPlayWhenReady(true);
 player.release(); // Don’t forget to release when done!
 </pre>
 
-<p>For a complete example, see the {@code SimplePlayerActivity} in the ExoPlayer demo app, which
-  correctly manages an ExoPlayer instance with respect to both the {@link android.app.Activity} and
-  {@link android.view.Surface} lifecycles.</p>
+<p>For a complete example, see {@code PlayerActivity} and {@code DemoPlayer} in the ExoPlayer demo
+  app. Between them these classes correctly manage an ExoPlayer instance with respect to both the
+  {@link android.app.Activity} and {@link android.view.Surface} lifecycles.
+</p>
 
 
 <h2 id="samplesource">SampleSource</h2>
@@ -187,7 +186,7 @@ MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(
 </pre>
 
 <p>The ExoPlayer demo app provides a complete implementation of this code in
-  {@code DefaultRendererBuilder}. The {@code SimplePlaybackActivity} class uses it to play one
+  {@code DefaultRendererBuilder}. The {@code PlayerActivity} class uses it to play one
   of the videos available in the demo app. Note that in the example, video and audio
   are muxed, meaning they are streamed together from a single URI. The {@code FrameworkSampleSource}
   instance provides video samples to the {@code videoRenderer} object and audio samples to the
@@ -211,9 +210,9 @@ MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(
   which loads chunks of media data from which individual samples can be extracted. Each {@code
   ChunkSampleSource} requires a {@code ChunkSource} object to be injected through its constructor,
   which is responsible for providing media chunks from which to load and read samples. The {@code
-  DashMp4ChunkSource} and {@code SmoothStreamingChunkSource} classes provide DASH and SmoothStreaming
-  playback using the FMP4 container format. The {@code DashWebMChunkSource} class uses the WebM
-  container format to provide DASH playback.</p>
+  DashChunkSource} class provides DASH playback using the FMP4 and WebM container formats. The
+  {@code SmoothStreamingChunkSource} class provides SmoothStreaming playback using the FMP4
+  container format.</p>
 
 <p>All of the standard {@code ChunkSource} implementations require a {@code FormatEvaluator} and
   a {@code DataSource} to be injected through their constructors. The {@code FormatEvaluator}
@@ -242,7 +241,7 @@ BandwidthMeter bandwidthMeter = new BandwidthMeter();
 // Build the video renderer.
 DataSource videoDataSource = new HttpDataSource(userAgent,
         HttpDataSource.REJECT_PAYWALL_TYPES, bandwidthMeter);
-ChunkSource videoChunkSource = new DashMp4ChunkSource(videoDataSource,
+ChunkSource videoChunkSource = new DashChunkSource(videoDataSource,
         new AdaptiveEvaluator(bandwidthMeter), videoRepresentations);
 ChunkSampleSource videoSampleSource = new ChunkSampleSource(videoChunkSource,
         loadControl, VIDEO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, true);
@@ -253,7 +252,7 @@ MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(
 // Build the audio renderer.
 DataSource audioDataSource = new HttpDataSource(userAgent,
         HttpDataSource.REJECT_PAYWALL_TYPES, bandwidthMeter);
-ChunkSource audioChunkSource = new DashMp4ChunkSource(audioDataSource,
+ChunkSource audioChunkSource = new DashChunkSource(audioDataSource,
         new FormatEvaluator.FixedEvaluator(), audioRepresentation);
 SampleSource audioSampleSource = new ChunkSampleSource(audioChunkSource,
         loadControl, AUDIO_BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, true);
@@ -273,9 +272,8 @@ MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(
 </p>
 
 <p>The ExoPlayer demo app provides complete implementation of this code in
-  {@code DashVodRendererBuilder}. The {@code SimplePlaybackActivity} class uses this builder to
-  construct renderers for playing DASH sample videos in the demo app. It asynchronously fetches a
-  specified MPD file in order to construct the required {@code Representation} objects. For an
+  {@code DashRendererBuilder}. The {@code PlayerActivity} class uses this builder to
+  construct renderers for playing DASH sample videos in the demo app. For an
   equivalent SmoothStreaming example, see the {@code SmoothStreamingRendererBuilder} class in the
   demo app.</p>
 
@@ -313,7 +311,7 @@ if (format.width * format.height &lt;= maxDecodableFrameSize) {
 }
 </pre>
 
-<p>This approach is used to filter {@code Representations} in the {@code DashVodRendererBuilder}
+<p>This approach is used to filter {@code Representations} in the {@code DashRendererBuilder}
   class of the ExoPlayer demo app, and similarly to filter track indices in {@code
   SmoothStreamingRendererBuilder}.</p>
 
@@ -372,24 +370,26 @@ boolean isAdaptive = MediaCodecUtil.getDecoderInfo(MimeTypes.VIDEO_H264).adaptiv
 <p>In addition to high level listeners, many of the individual components provided by the
   ExoPlayer library allow their own event listeners. For example, {@code
   MediaCodecVideoTrackRenderer} has constructors that take a {@code
-  MediaCodecVideoTrackRenderer.EventListener}. In the ExoPlayer demo app, {@code SimplePlayerActivity}
-  acts as a listener so that it can adjust the dimensions of the target surface to have the correct
-  height and width ratio for the video being played:</p>
+  MediaCodecVideoTrackRenderer.EventListener}. In the ExoPlayer demo app, {@code DemoPlayer}
+  acts as the listener to multiple individual components, forwarding events to {@code PlayerActivity}.
+  This approach allows {@code PlayerActivity} to adjust the dimensions of the target surface
+  to have the correct height and width ratio for the video being played:</p>
 
 <pre>
 &#64;Override
-public void onVideoSizeChanged(int width, int height) {
-  surfaceView.setVideoWidthHeightRatio(height == 0 ? 1 : (float) width / height);
+public void onVideoSizeChanged(int width, int height, float pixelWidthAspectRatio) {
+  surfaceView.setVideoWidthHeightRatio(
+          height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
 }
 </pre>
 
-<p>The {@code RendererBuilder} classes in the ExoPlayer demo app inject the activity as the
-  listener, for example in the {@code DashVodRendererBuilder} class:</p>
+<p>The {@code RendererBuilder} classes in the ExoPlayer demo app inject the {@code DemoPlayer} as
+  the listener to each component, for example in the {@code DashRendererBuilder} class:</p>
 
 <pre>
 MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(
-        videoSampleSource, null, true, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT,
-        0, <strong>mainHandler, playerActivity</strong>, 50);
+        sampleSource, null, true, MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT, 5000,
+        null, <strong>player.getMainHandler(), player</strong>, 50);
 </pre>
 
 <p>Note that you must pass a {@link android.os.Handler} object to the renderer, which determines
@@ -441,9 +441,7 @@ player.blockingSendMessage(videoRenderer,
 
 <p>You must use a blocking message because the contract of {@link
   android.view.SurfaceHolder.Callback#surfaceDestroyed surfaceDestroyed()} requires that the
-  app does not attempt to access the surface after the method returns. The {@code
-  SimplePlayerActivity} class in the demo app demonstrates how the surface should be set and
-  cleared.</p>
+  app does not attempt to access the surface after the method returns.</p>
 
 
 <h2 id="customizing">Customizing ExoPlayer</h2>
