@@ -95,15 +95,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати планшетний ПК за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%d</xliff:g> сек."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неправильний PIN-код SIM-карти. Зв’яжіться зі своїм оператором, щоб розблокувати пристрій."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Неправильний PIN-код SIM-карти. У вас залишилась <xliff:g id="NUMBER">%d</xliff:g> спроба. Після цього потрібно буде зв’язатися з оператором, щоб розблокувати пристрій."</item>
-    <item quantity="other" msgid="2215723361575359486">"Неправильний PIN-код SIM-карти. У вас залишилося стільки спроб: <xliff:g id="NUMBER">%d</xliff:g>."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">Неправильний PIN-код SIM-карти. У вас залишилась <xliff:g id="NUMBER_1">%d</xliff:g> спроба.</item>
+      <item quantity="few">Неправильний PIN-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+      <item quantity="many">Неправильний PIN-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб.</item>
+      <item quantity="other">Неправильний PIN-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-карту заблоковано. Зв’яжіться з оператором."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Неправильний PUK-код SIM-карти. У вас залишилась <xliff:g id="NUMBER">%d</xliff:g> спроба. Після цього SIM-карту буде назавжди заблоковано."</item>
-    <item quantity="other" msgid="5477305226026342036">"Неправильний PUK-код SIM-карти. У вас залишилося стільки спроб: <xliff:g id="NUMBER">%d</xliff:g>. Після цього SIM-карту буде назавжди заблоковано."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">Неправильний PUK-код SIM-карти. У вас залишилася <xliff:g id="NUMBER_1">%d</xliff:g> спроба. Після цього SIM-карту буде назавжди заблоковано.</item>
+      <item quantity="few">Неправильний PUK-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано.</item>
+      <item quantity="many">Неправильний PUK-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроб. Після цього SIM-карту буде назавжди заблоковано.</item>
+      <item quantity="other">Неправильний PUK-код SIM-карти. У вас залишилося <xliff:g id="NUMBER_1">%d</xliff:g> спроби. Після цього SIM-карту буде назавжди заблоковано.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Помилка введення PIN-коду SIM-карти."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Помилка введення PUK-коду SIM-карти."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код прийнято."</string>

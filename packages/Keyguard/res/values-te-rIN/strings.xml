@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"సిమ్ పిన్ కోడ్ చెల్లదు, మీరు ఇప్పుడు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించండి."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"సిమ్ పిన్ కోడ్ చెల్లదు, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించాల్సిన పరిస్థితి ఏర్పడకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది."</item>
-    <item quantity="other" msgid="2215723361575359486">"సిమ్ పిన్ కోడ్ చెల్లదు, మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM PIN కోడ్ చెల్లదు, మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
+      <item quantity="one">SIM PIN కోడ్ చెల్లదు, మీరు మీ పరికరాన్ని అన్‌లాక్ చేయడానికి తప్పనిసరిగా మీ క్యారియర్‌ను సంప్రదించడానికి ముందు మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"సిమ్ నిరుపయోగమైనది. మీ క్యారియర్‌ను సంప్రదించండి."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"సిమ్ PUK కోడ్ చెల్లదు, సిమ్ శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది."</item>
-    <item quantity="other" msgid="5477305226026342036">"సిమ్ PUK కోడ్ చెల్లదు, సిమ్ శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM PUK కోడ్ చెల్లదు, SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER_1">%d</xliff:g> ప్రయత్నాలు మిగిలి ఉన్నాయి.</item>
+      <item quantity="one">SIM PUK కోడ్ చెల్లదు, SIM శాశ్వతంగా నిరుపయోగం కాకుండా ఉండటానికి మీకు <xliff:g id="NUMBER_0">%d</xliff:g> ప్రయత్నం మిగిలి ఉంది.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"సిమ్ పిన్ చర్య విఫలమైంది!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"సిమ్ PUK చర్య విఫలమైంది!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"కోడ్ ఆమోదించబడింది!"</string>

@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Falscher PIN-Code der SIM-Karte. Bitte wenden Sie sich an Ihren Mobilfunkanbieter, damit er Ihr Gerät entsperrt."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Falscher PIN-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuch, bevor Sie das Gerät von Ihrem Mobilfunkanbieter entsperren lassen müssen."</item>
-    <item quantity="other" msgid="2215723361575359486">"Falscher PIN-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuche."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Falscher PIN-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche.</item>
+      <item quantity="one">Falscher PIN-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor Sie das Gerät von Ihrem Mobilfunkanbieter entsperren lassen müssen.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Die SIM-Karte kann nicht verwendet werden. Bitte wenden Sie sich an Ihren Mobilfunkanbieter."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Falscher PUK-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuch, bevor Ihre SIM-Karte endgültig gesperrt wird."</item>
-    <item quantity="other" msgid="5477305226026342036">"Falscher PUK-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER">%d</xliff:g> Versuche, bevor Ihre SIM-Karte endgültig gesperrt wird."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Falscher PUK-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER_1">%d</xliff:g> Versuche, bevor Ihre SIM-Karte endgültig gesperrt wird.</item>
+      <item quantity="one">Falscher PUK-Code der SIM-Karte. Sie haben noch <xliff:g id="NUMBER_0">%d</xliff:g> Versuch, bevor Ihre SIM-Karte endgültig gesperrt wird.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Fehler beim Entsperren mit der PIN der SIM-Karte"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Fehler beim Entsperren mithilfe des PUK-Codes der SIM-Karte"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Code akzeptiert"</string>

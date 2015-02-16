@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Código PIN do cartão SIM incorreto. Tem de contactar o seu operador para desbloquear o dispositivo."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Código PIN do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER">%d</xliff:g> tentativa antes de necessitar de contactar o seu operador para desbloquear o dispositivo."</item>
-    <item quantity="other" msgid="2215723361575359486">"Código PIN do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER">%d</xliff:g> tentativas."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Código PIN do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas.</item>
+      <item quantity="one">Código PIN do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de necessitar de contactar o seu operador para desbloquear o dispositivo.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Cartão SIM inutilizável. Contacte o seu operador."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Código PUK do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER">%d</xliff:g> tentativa antes de o cartão SIM ficar permanentemente inutilizável."</item>
-    <item quantity="other" msgid="5477305226026342036">"Código PUK do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER">%d</xliff:g> tentativas antes de o cartão SIM ficar permanentemente inutilizável."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Código PUK do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar permanentemente inutilizável.</item>
+      <item quantity="one">Código PUK do cartão SIM incorreto. Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar permanentemente inutilizável.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Falha ao introduzir o PIN do cartão SIM!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Falha ao introduzir o PUK do cartão SIM!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceite!"</string>

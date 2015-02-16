@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN 碼不正確，您現在必須聯絡流動網絡供應商為您的裝置解鎖。"</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM PIN 碼不正確，您剩下 <xliff:g id="NUMBER">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，您必須聯絡流動網絡供應商為您的裝置解鎖。"</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM PIN 碼不正確，您剩下 <xliff:g id="NUMBER">%d</xliff:g> 次機會輸入。"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM PIN 碼不正確，您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會輸入。</item>
+      <item quantity="one">SIM PIN 碼不正確，您還有 <xliff:g id="NUMBER_0">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，您必須聯絡流動網絡供應商為您的裝置解鎖。</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM 無法使用，請聯絡您的流動網絡供應商。"</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM PUK 碼不正確，您剩下 <xliff:g id="NUMBER">%d</xliff:g> 次機會輸入。如果仍然輪入錯誤，SIM 將永久無法使用。"</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM PUK 碼不正確，您剩下 <xliff:g id="NUMBER">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，SIM 將永久無法使用。"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM PUK 碼不正確，您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，SIM 卡將永久無法使用。</item>
+      <item quantity="one">SIM PUK 碼不正確，您還有 <xliff:g id="NUMBER_0">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，SIM 卡將永久無法使用。</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN 碼操作失敗！"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK 碼操作失敗！"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"密碼正確！"</string>

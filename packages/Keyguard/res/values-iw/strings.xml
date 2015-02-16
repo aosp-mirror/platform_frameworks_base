@@ -95,15 +95,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון אימייל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"‏מספר PIN שגוי של כרטיס ה-SIM. עליך ליצור כעת קשר עם הספק על מנת לבטל את נעילת המכשיר."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"‏מספר PIN שגוי של כרטיס ה-SIM. נותר לך ניסיון <xliff:g id="NUMBER">%d</xliff:g> נוסף לפני שיהיה עליך ליצור קשר עם הספק על מנת לבטל את נעילת המכשיר."</item>
-    <item quantity="other" msgid="2215723361575359486">"‏מספר PIN שגוי של כרטיס ה-SIM. נותרו לך <xliff:g id="NUMBER">%d</xliff:g> ניסיונות נוספים."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="two">‏קוד PIN שגוי של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות.</item>
+      <item quantity="many">‏קוד PIN שגוי של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות.</item>
+      <item quantity="other">‏קוד PIN שגוי של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות.</item>
+      <item quantity="one">‏קוד PIN שגוי של כרטיס SIM. נותר לך ניסיון <xliff:g id="NUMBER_0">%d</xliff:g> לפני שיהיה עליך ליצור קשר עם הספק כדי לבטל את נעילת המכשיר.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"‏לא ניתן להשתמש בכרטיס ה-SIM. צור קשר עם הספק."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"‏קוד PUK שגוי של כרטיס ה-SIM. נותר לך ניסיון <xliff:g id="NUMBER">%d</xliff:g> נוסף לפני שכרטיס ה-SIM ינעל לצמיתות."</item>
-    <item quantity="other" msgid="5477305226026342036">"‏קוד PUK שגוי של כרטיס ה-SIM. נותרו לך <xliff:g id="NUMBER">%d</xliff:g> ניסיונות נוספים לפני שכרטיס ה-SIM ינעל לצמיתות."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="two">‏קוד PUK שגוי של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
+      <item quantity="many">‏קוד PUK שגוי של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
+      <item quantity="other">‏קוד PUK שגוי של כרטיס SIM. נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
+      <item quantity="one">‏קוד PUK שגוי של כרטיס SIM. נותר לך ניסיון <xliff:g id="NUMBER_0">%d</xliff:g> לפני שכרטיס ה-SIM יינעל לצמיתות.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"‏פעולת מספר ה-PIN של כרטיס ה-SIM נכשלה!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"‏פעולת קוד ה-PUK של כרטיס ה-SIM נכשלה!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"הקוד התקבל!"</string>

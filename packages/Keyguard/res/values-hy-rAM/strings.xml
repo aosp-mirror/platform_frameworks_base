@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Դուք սխալ եք հավաքել ձեր ապակողպման սխեման <xliff:g id="NUMBER_0">%d</xliff:g> անգամ: Եվս <xliff:g id="NUMBER_1">%d</xliff:g> անհաջող փորձից հետո ձեզանից կպահանջվի ապակողպել ձեր գրասալիկը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%d</xliff:g> վայրկյանից:"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Դուք <xliff:g id="NUMBER_0">%d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման նմուշը: <xliff:g id="NUMBER_1">%d</xliff:g> անգամից ավել անհաջող փորձերից հետո ձեզ կառաջարկվի ապակողպել ձեր հեռախոսը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%d</xliff:g> վայրկյանից:"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Սխալ SIM PIN կոդի պատճառով պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ, որից հետո պետք է դիմեք ձեր օպերատորին՝ սարքն արգելաբացելու համար:"</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ:"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ:</item>
+      <item quantity="other">SIM PIN կոդը սխալ է: Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ:</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-ը հնարավոր չէ օգտագործել: Դիմեք ձեր օպերատորին:"</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ՝ մինչև SIM-ի ընդմիշտ արգելափակումը:"</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER">%d</xliff:g> փորձ՝ մինչև SIM-ի ընդմիշտ արգելափակումը:"</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել:</item>
+      <item quantity="other">SIM PUK կոդը սխալ է: Մնաց <xliff:g id="NUMBER_1">%d</xliff:g> փորձ, որից հետո SIM քարտն այլևս հնարավոր չի լինի օգտագործել:</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN գործողությունը ձախողվեց:"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK գործողությունը ձախողվեց:"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Կոդն ընդունվեց:"</string>

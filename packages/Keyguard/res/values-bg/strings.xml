@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неправилен ПИН код за SIM картата – сега трябва да се свържете с оператора си, за да отключите устройството."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Неправилен ПИН код за SIM картата – остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди да трябва да се свържете с оператора си, за да отключите устройството."</item>
-    <item quantity="other" msgid="2215723361575359486">"Неправилен ПИН код за SIM картата – остават ви <xliff:g id="NUMBER">%d</xliff:g> опита."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Неправилен ПИН код за SIM картата – остават ви <xliff:g id="NUMBER_1">%d</xliff:g> опита.</item>
+      <item quantity="one">Неправилен ПИН код за SIM картата – остава ви <xliff:g id="NUMBER_0">%d</xliff:g> опит, преди да трябва да се свържете с оператора си, за да отключите устройството.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM картата е неизползваема. Свържете се с оператора си."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Неправилен PUK код за SIM картата – остава ви <xliff:g id="NUMBER">%d</xliff:g> опит, преди SIM картата да стане неизползваема завинаги."</item>
-    <item quantity="other" msgid="5477305226026342036">"Неправилен PUK код за SIM картата – остават ви <xliff:g id="NUMBER">%d</xliff:g> опита, преди SIM картата да стане неизползваема завинаги."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Неправилен PUK код за SIM картата – остават ви <xliff:g id="NUMBER_1">%d</xliff:g> опита, преди тя да стане неизползваема завинаги.</item>
+      <item quantity="one">Неправилен PUK код за SIM картата – остава ви <xliff:g id="NUMBER_0">%d</xliff:g> опит, преди тя да стане неизползваема завинаги.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Операцията с ПИН кода за SIM картата не бе успешна!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Операцията с PUK кода за SIM картата не бе успешна!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Кодът е приет!"</string>

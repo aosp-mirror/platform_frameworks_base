@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp nettbrettet via en e-postkonto.\n\n Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet opplåsningsmønsteret feil <xliff:g id="NUMBER_0">%d</xliff:g> ganger. Etter ytterligere <xliff:g id="NUMBER_1">%d</xliff:g> gale forsøk, blir du bedt om å låse opp telefonen via en e-postkonto.\n\n Prøv på nytt om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Feil PIN-kode for SIM-kortet. Du må nå kontakte operatøren din for å låse opp enheten."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Feil PIN-kode for SIM-kortet. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøk igjen før du må kontakte operatøren din for å låse opp enheten."</item>
-    <item quantity="other" msgid="2215723361575359486">"Feil PIN-kode for SIM-kortet. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøk igjen."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Feil PIN-kode for SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøk igjen.</item>
+      <item quantity="one">Feil PIN-kode for SIM-kortet. Du har <xliff:g id="NUMBER_0">%d</xliff:g> forsøk igjen før du må kontakte operatøren din for å låse opp enheten.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM-kortet er ubrukelig. Kontakt operatøren din."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Feil PUK-kode for SIM-kortet. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøk igjen før SIM-kortet blir permanent ubrukelig."</item>
-    <item quantity="other" msgid="5477305226026342036">"Feil PUK-kode for SIM-kortet. Du har <xliff:g id="NUMBER">%d</xliff:g> forsøk igjen før SIM-kortet blir permanent ubrukelig."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Feil PUK-kode for SIM-kortet. Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøk igjen før SIM-kortet blir permanent ubrukelig.</item>
+      <item quantity="one">Feil PUK-kode for SIM-kortet. Du har <xliff:g id="NUMBER_0">%d</xliff:g> forsøk igjen før SIM-kortet blir permanent ubrukelig.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"PIN-koden for SIM-kortet ble avvist."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"PUK-koden for SIM-kortet ble avvist."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koden er godkjent."</string>

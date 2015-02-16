@@ -95,15 +95,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Netinkamas SIM kortelės PIN kodas. Reikės susisiekti su operatoriumi, kad atrakintų įrenginį."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Netinkamas SIM kortelės PIN kodas. Jums liko <xliff:g id="NUMBER">%d</xliff:g> band. Paskui reikės susisiekti su operatoriumi, kad jis atrakintų įrenginį."</item>
-    <item quantity="other" msgid="2215723361575359486">"Netinkamas SIM kortelės PIN kodas, liko <xliff:g id="NUMBER">%d</xliff:g> band."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas.</item>
+      <item quantity="few">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai.</item>
+      <item quantity="many">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymo.</item>
+      <item quantity="other">Netinkamas SIM kortelės PIN kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymų.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Nebegalima naudoti SIM kortelės. Susisiekite su operatoriumi."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER">%d</xliff:g> band. Paskui visiškai nebegalėsite naudoti SIM kortelės."</item>
-    <item quantity="other" msgid="5477305226026342036">"Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER">%d</xliff:g> band. Paskui visiškai nebegalėsite naudoti SIM kortelės."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymas. Tada nebegalėsite naudotis SIM kortele.</item>
+      <item quantity="few">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymai. Tada nebegalėsite naudotis SIM kortele.</item>
+      <item quantity="many">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymo. Tada nebegalėsite naudotis SIM kortele.</item>
+      <item quantity="other">Netinkamas SIM kortelės PUK kodas. Liko <xliff:g id="NUMBER_1">%d</xliff:g> bandymų. Tada nebegalėsite naudotis SIM kortele.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Nepavyko atlikti SIM kortelės PIN kodo operacijos."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Nepavyko atlikti SIM kortelės PUK kodo operacijos."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kodas priimtas."</string>

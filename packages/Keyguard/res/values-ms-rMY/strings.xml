@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Kod PIN SIM tidak betul, jadi anda harus menghubungi pembawa anda untuk membuka kunci peranti."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Kod PIN SIM tidak betul. Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti."</item>
-    <item quantity="other" msgid="2215723361575359486">"Kod PIN SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">Kod PIN SIM salah, anda ada <xliff:g id="NUMBER_1">%d</xliff:g> cubaan lagi.</item>
+      <item quantity="one">Kod PIN SIM tidak betul. Anda ada <xliff:g id="NUMBER_0">%d</xliff:g> cubaan lagi sebelum anda harus menghubungi pembawa anda untuk membuka kunci peranti.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM tidak boleh digunakan. Hubungi pembawa anda."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM tidak boleh digunakan secara kekal."</item>
-    <item quantity="other" msgid="5477305226026342036">"Kod PUK SIM tidak betul, anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi sebelum SIM tidak boleh digunakan secara kekal."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">Kod PUK SIM tidak betul, anda ada <xliff:g id="NUMBER_1">%d</xliff:g> cubaan lagi sebelum SIM tidak boleh digunakan secara kekal.</item>
+      <item quantity="one">Kod PUK SIM tidak betul, anda ada <xliff:g id="NUMBER_0">%d</xliff:g> cubaan lagi sebelum SIM tidak boleh digunakan secara kekal.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Operasi PIN SIM gagal!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operasi PUK SIM gagal!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod Diterima!"</string>

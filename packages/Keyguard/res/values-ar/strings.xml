@@ -95,15 +95,23 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"‏رمز \"رقم التعريف الشخصي\" لبطاقة SIM غير صحيح، ويلزمك الاتصال الآن بمشغّل شبكة الجوّال لإلغاء قفل الجهاز."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"‏رمز \"رقم التعريف الشخصي\" لبطاقة SIM غير صحيح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER">%d</xliff:g>) يتعين عليك بعدها الاتصال بمشغّل شبكة الجوّال لإلغاء قفل الجهاز."</item>
-    <item quantity="other" msgid="2215723361575359486">"‏رمز \"رقم التعريف الشخصي\" لبطاقة SIM غير صحيح، يتبقى لديك <xliff:g id="NUMBER">%d</xliff:g> من المحاولات."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="zero">‏رمز رقم التعريف الشخصي لبطاقة SIM غير صحيح، ولم تتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="two">‏رمز رقم التعريف الشخصي لبطاقة SIM غير صحيح، ويتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="few">‏رمز رقم التعريف الشخصي لبطاقة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
+      <item quantity="many">‏رمز رقم التعريف الشخصي لبطاقة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
+      <item quantity="other">‏رمز رقم التعريف الشخصي\" لبطاقة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات.</item>
+      <item quantity="one">‏رمز رقم التعريف الشخصي لبطاقة SIM غير صحيح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) يتعين عليك بعدها الاتصال بمشغّل شبكة الجوّال لإلغاء قفل الجهاز.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"‏بطاقة SIM غير صالحة للاستخدام. يُرجى الاتصال بمشغّل شبكة الجوّال."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"‏رمز PUK لبطاقة SIM غير صالح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER">%d</xliff:g>)، تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم."</item>
-    <item quantity="other" msgid="5477305226026342036">"‏رمز PUK لبطاقة SIM غير صالح، ويتبقى لديك <xliff:g id="NUMBER">%d</xliff:g> من المحاولات، تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="zero">‏رمز PUK لبطاقة SIM غير صحيح، ولم تتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="two">‏رمز PUK لبطاقة SIM غير صحيح، ويتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="few">‏رمز PUK لبطاقة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="many">‏رمز PUK لبطاقة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="other">‏رمز PUK لبطاقة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="one">‏رمز PUK لبطاقة SIM غير صحيح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>) تصبح بعدها بطاقة SIM غير صالحة للاستخدام بشكل دائم.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"‏أخفقت عملية \"رقم التعريف الشخصي\" لبطاقة SIM!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"‏أخفقت عملية PUK لبطاقة SIM!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"تم قبول الرمز!"</string>

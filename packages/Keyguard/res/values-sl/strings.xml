@@ -95,15 +95,19 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Napačna koda PIN kartice SIM. Zdaj se boste morali za odklenitev naprave obrniti na operaterja."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem se boste morali za odklenitev naprave obrniti na operaterja."</item>
-    <item quantity="other" msgid="2215723361575359486">"Napačna koda PIN kartice SIM. Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus.</item>
+      <item quantity="two">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa.</item>
+      <item quantity="few">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse.</item>
+      <item quantity="other">Napačna koda PIN kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"Kartica SIM ni več uporabna. Obrnite se na operaterja."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna."</item>
-    <item quantity="other" msgid="5477305226026342036">"Napačna koda PUK kartice SIM. Poskusite lahko še <xliff:g id="NUMBER">%d</xliff:g>-krat. Potem bo kartica SIM postala trajno neuporabna."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskus. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="two">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusa. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="few">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskuse. Potem bo kartica SIM postala trajno neuporabna.</item>
+      <item quantity="other">Napačna koda PUK kartice SIM. Na voljo imate še <xliff:g id="NUMBER_1">%d</xliff:g> poskusov. Potem bo kartica SIM postala trajno neuporabna.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Postopek za odklepanje s kodo PIN kartice SIM ni uspel."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Postopek za odklepanje s kodo PUK kartice SIM ni uspel."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koda je sprejeta."</string>

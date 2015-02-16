@@ -95,15 +95,17 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Nepareizs SIM kartes PIN kods. Lai atbloķētu ierīci, sazinieties ar mobilo sakaru operatoru."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi. Kļūdas gadījumā būs jāsazinās ar mobilo sakaru operatoru, lai tas atbloķētu jūsu ierīci."</item>
-    <item quantity="other" msgid="2215723361575359486">"Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi(-es)."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="zero">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+      <item quantity="one">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi.</item>
+      <item quantity="other">Nepareizs SIM kartes PIN kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM karte nav izmantojama. Sazinieties ar mobilo sakaru operatoru."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi. Kļūdas gadījumā SIM karte kļūs neizmantojama."</item>
-    <item quantity="other" msgid="5477305226026342036">"Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER">%d</xliff:g> reizi(-es). Kļūdas gadījumā SIM karte kļūs neizmantojama."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="zero">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes. Pēdējā mēģinājuma kļūdas gadījumā SIM karte kļūs neizmantojama.</item>
+      <item quantity="one">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizi. Pēdējā mēģinājuma kļūdas gadījumā SIM karte kļūs neizmantojama.</item>
+      <item quantity="other">Nepareizs SIM kartes PUK kods. Varat mēģināt vēl <xliff:g id="NUMBER_1">%d</xliff:g> reizes. Pēdējā mēģinājuma kļūdas gadījumā SIM karte kļūs neizmantojama.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM kartes PIN koda ievadīšana neizdevās."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM kartes PUK koda ievadīšana neizdevās."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kods ir pieņemts!"</string>

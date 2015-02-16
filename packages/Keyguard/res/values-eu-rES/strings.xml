@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz oker marrazten baduzu, tableta posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%d</xliff:g> segundo barru."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz oker marrazten baduzu, telefonoa posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%d</xliff:g> segundo barru."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM txartelaren PIN kodea okerra da. Gailua desblokeatzeko, jarri operadorearekin harremanetan."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"SIM txartelaren PIN kodea ez da zuzena; <xliff:g id="NUMBER">%d</xliff:g> saiakera geratzen zaizu. Saiakerak agortuz gero, operadoreari eskatu beharko diozu gailua desblokeatzeko."</item>
-    <item quantity="other" msgid="2215723361575359486">"SIM txartelaren PIN kodea ez da zuzena; <xliff:g id="NUMBER">%d</xliff:g> saiakera geratzen zaizkizu."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="other">SIM txartelaren PIN kodea okerra da. <xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu gailua desblokeatzeko.</item>
+      <item quantity="one">SIM txartelaren PIN kodea okerra da. <xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu gailua desblokeatzeko.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM txartela erabilgaitza da. Jarri operadorearekin harremanetan."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"SIM txartelaren PUK kodea ez da zuzena; <xliff:g id="NUMBER">%d</xliff:g> saiakera geratzen zaizu SIM txartela betiko erabilgaitz geratu aurretik."</item>
-    <item quantity="other" msgid="5477305226026342036">"SIM txartelaren PUK kodea ez da zuzena; <xliff:g id="NUMBER">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela betiko erabilgaitz geratu aurretik."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="other">SIM txartelaren PUK kodea okerra da. <xliff:g id="NUMBER_1">%d</xliff:g> saiakera geratzen zaizkizu SIM txartela betiko erabilgaitz geratu aurretik.</item>
+      <item quantity="one">SIM txartelaren PUK kodea okerra da. <xliff:g id="NUMBER_0">%d</xliff:g> saiakera geratzen zaizu SIM txartela betiko erabilgaitz geratu aurretik.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM txartelaren PIN eragiketak huts egin du!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM txartelaren PUK eragiketak huts egin du!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kodea onartu da!"</string>

@@ -95,15 +95,15 @@
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Code PIN de la carte SIM incorrect. Vous devez désormais contacter votre opérateur pour déverrouiller votre appareil."</string>
-  <plurals name="kg_password_wrong_pin_code">
-    <item quantity="one" msgid="8134313997799638254">"Code PIN de la carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative. Après cela, vous devrez contacter votre opérateur pour déverrouiller votre appareil."</item>
-    <item quantity="other" msgid="2215723361575359486">"Code PIN de la carte SIM incorrect. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
+      <item quantity="one">Code PIN de la carte SIM erroné. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative.</item>
+      <item quantity="other">Code PIN de la carte SIM erroné. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives.</item>
+    </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"La carte SIM est inutilisable. Veuillez contacter votre opérateur."</string>
-  <plurals name="kg_password_wrong_puk_code">
-    <item quantity="one" msgid="3256893607561060649">"Clé PUK de la carte SIM incorrecte. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM ne devienne définitivement inutilisable."</item>
-    <item quantity="other" msgid="5477305226026342036">"Clé PUK de la carte SIM incorrecte. Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentatives avant que votre carte SIM ne devienne définitivement inutilisable."</item>
-  </plurals>
+    <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
+      <item quantity="one">Clé PUK de la carte SIM erronée. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne devienne définitivement inutilisable.</item>
+      <item quantity="other">Clé PUK de la carte SIM erronée. Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne devienne définitivement inutilisable.</item>
+    </plurals>
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Échec du déverrouillage à l\'aide du code PIN de la carte SIM."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Échec du déverrouillage à l\'aide de la clé PUK de la carte SIM."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Code accepté."</string>
