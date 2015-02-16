@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.security.KeyChain;
 
 /**
  * Base class for implementing a device administration component.  This
@@ -222,7 +223,28 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
 
-    /**
+    /** @hide */
+    public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID = "android.app.extra.CHOOSE_PRIVATE_KEY_SENDER_UID";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_HOST = "android.app.extra.CHOOSE_PRIVATE_KEY_HOST";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_PORT = "android.app.extra.CHOOSE_PRIVATE_KEY_PORT";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_URL = "android.app.extra.CHOOSE_PRIVATE_KEY_URL";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.extra.CHOOSE_PRIVATE_KEY_ALIAS";
+
+    /** @hide */
+    public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE = "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
+
+   /**
      * Name under which a DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
      * a device-admin tag.  XXX TO DO: describe syntax.
@@ -402,6 +424,26 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Allows this receiver to select the alias for a private key and certificate pair for
+     * authentication. If this method returns null, the default {@link android.app.Activity} will be
+     * shown that lets the user pick a private key and certificate pair.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param uid The uid asking for the private key and certificate pair.
+     * @param host The authentication host, may be null.
+     * @param port The authentication port, or -1.
+     * @param url The URL to authenticate, may be null.
+     * @param alias The alias preselected by the client, or null.
+     * @return The private key alias to return and grant access to.
+     * @see KeyChain#choosePrivateKeyAlias
+     */
+    public String onChoosePrivateKeyAlias(Context context, Intent intent, long uid, String host,
+            int port, String url, String alias) {
+        return null;
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -430,6 +472,15 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onPasswordExpiring(context, intent);
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
+        } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
+            long uid = intent.getLongExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
+            String host = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_HOST);
+            int port = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_PORT, -1);
+            String url = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_URL);
+            String alias = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_ALIAS);
+            String chosenAlias = onChoosePrivateKeyAlias(context, intent, uid, host, port, url,
+                    alias);
+            setResultData(chosenAlias);
         } else if (ACTION_LOCK_TASK_ENTERING.equals(action)) {
             String pkg = intent.getStringExtra(EXTRA_LOCK_TASK_PACKAGE);
             onLockTaskModeEntering(context, intent, pkg);
