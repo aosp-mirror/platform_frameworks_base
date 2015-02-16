@@ -25,10 +25,12 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informacje o aplikacji"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Tutaj pojawią się ostatnie ekrany"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ukryj ostatnie aplikacje"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 ekran w widoku przeglądu"</item>
-    <item quantity="other" msgid="5523506463832158203">"Ekrany w widoku przeglądu: %d"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="few">%d ekrany w widoku przeglądu</item>
+      <item quantity="many">%d ekranów w widoku przeglądu</item>
+      <item quantity="other">%d ekranu w widoku przeglądu</item>
+      <item quantity="one">1 ekran w widoku przeglądu</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Brak powiadomień"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Bieżące"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Powiadomienia"</string>
@@ -250,7 +252,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Brak sieci"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi wyłączone"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="2831702993995222755">"Brak dostępnych zapisanych sieci"</string>
-    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Przesyłaj ekran"</string>
+    <string name="quick_settings_cast_title" msgid="1893629685050355115">"Prześlij ekran"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Przesyłam"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Urządzenie bez nazwy"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Wszystko gotowe do przesyłania"</string>
@@ -369,4 +371,14 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Ukryć <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Pojawi się ponownie, gdy następnym włączysz go w ustawieniach."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ukryj"</string>
+    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
+    <skip />
 </resources>

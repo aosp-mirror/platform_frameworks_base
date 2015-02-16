@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"അപ്ലിക്കേഷൻ വിവരം"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"നിങ്ങളുടെ പുതിയ സ്ക്രീനുകൾ ഇവിടെ ദൃശ്യമാകുന്നു"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"സമീപകാല അപ്ലിക്കേഷനുകൾ നിരസിക്കുക"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"കാഴ്ചയിലെ ഒരു സ്‌ക്രീൻ"</item>
-    <item quantity="other" msgid="5523506463832158203">"കാഴ്ചയിലെ %d സ്‌ക്രീനുകൾ"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">ചുരുക്കവിവരണത്തിലെ %d സ്‌ക്രീനുകൾ</item>
+      <item quantity="one">ചുരുക്കവിവരണത്തിലെ ഒരു സ്‌ക്രീൻ</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"അറിയിപ്പുകൾ ഒന്നുമില്ല"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"നടന്നുകൊണ്ടിരിക്കുന്നവ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"അറിയിപ്പുകൾ"</string>
@@ -369,4 +369,14 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> എന്നത് മറയ്‌ക്കണോ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"അടുത്ത തവണ നിങ്ങൾ അത് ക്രമീകരണങ്ങളിൽ ഓണാക്കുമ്പോൾ അത് വീണ്ടും ദൃശ്യമാകും."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"മറയ്‌ക്കുക"</string>
+    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
+    <skip />
 </resources>

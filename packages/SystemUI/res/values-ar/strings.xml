@@ -25,10 +25,14 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"معلومات التطبيق"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"تظهر شاشاتك المعروضة مؤخرًا هنا"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"إزالة التطبيقات الحديثة"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"شاشة واحدة في النظرة عامة"</item>
-    <item quantity="other" msgid="5523506463832158203">"‏%d من الشاشات في النظرة عامة"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="zero">‏ لا توجد أية شاشات (%d) في النظرة العامة</item>
+      <item quantity="two">‏شاشتان (%d) في النظرة العامة</item>
+      <item quantity="few">‏%d شاشات في النظرة العامة</item>
+      <item quantity="many">‏%d شاشة في النظرة العامة</item>
+      <item quantity="other">‏%d من الشاشات في النظرة العامة</item>
+      <item quantity="one">شاشة واحدة في النظرة العامة</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ليس هناك أي اشعارات"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"الإشعارات"</string>
@@ -369,4 +373,14 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"هل تريد إخفاء <xliff:g id="TILE_LABEL">%1$s</xliff:g>؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"سيظهر مرة أخرى عند تمكينه في الإعدادات المرة التالية."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"إخفاء"</string>
+    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
+    <skip />
 </resources>
