@@ -1481,14 +1481,8 @@ public class TextToSpeech {
                 // interface).
 
                 // Sanitize locale using isLanguageAvailable.
-                int result = service.isLanguageAvailable( language, country, variant);
-                if (result >= LANG_AVAILABLE){
-                    if (result < LANG_COUNTRY_VAR_AVAILABLE) {
-                        variant = "";
-                        if (result < LANG_COUNTRY_AVAILABLE) {
-                            country = "";
-                        }
-                    }
+                int result = service.isLanguageAvailable(language, country, variant);
+                if (result >= LANG_AVAILABLE) {
                     // Get the default voice for the locale.
                     String voiceName = service.getDefaultVoiceNameFor(language, country, variant);
                     if (TextUtils.isEmpty(voiceName)) {
@@ -1502,10 +1496,28 @@ public class TextToSpeech {
                         return LANG_NOT_SUPPORTED;
                     }
 
+                    // Set the language/country/variant of the voice, so #getLanguage will return
+                    // the currently set voice locale when called.
+                    Voice voice = getVoice(service, voiceName);
+                    String voiceLanguage = "";
+                    try {
+                        voiceLanguage = voice.getLocale().getISO3Language();
+                    } catch (MissingResourceException e) {
+                        Log.w(TAG, "Couldn't retrieve ISO 639-2/T language code for locale: " +
+                                voice.getLocale(), e);
+                    }
+
+                    String voiceCountry = "";
+                    try {
+                        voiceCountry = voice.getLocale().getISO3Country();
+                    } catch (MissingResourceException e) {
+                        Log.w(TAG, "Couldn't retrieve ISO 3166 country code for locale: " +
+                                voice.getLocale(), e);
+                    }
                     mParams.putString(Engine.KEY_PARAM_VOICE_NAME, voiceName);
-                    mParams.putString(Engine.KEY_PARAM_LANGUAGE, language);
-                    mParams.putString(Engine.KEY_PARAM_COUNTRY, country);
-                    mParams.putString(Engine.KEY_PARAM_VARIANT, variant);
+                    mParams.putString(Engine.KEY_PARAM_LANGUAGE, voiceLanguage);
+                    mParams.putString(Engine.KEY_PARAM_COUNTRY, voiceCountry);
+                    mParams.putString(Engine.KEY_PARAM_VARIANT, voice.getLocale().getVariant());
                 }
                 return result;
             }
@@ -1654,18 +1666,30 @@ public class TextToSpeech {
                 if (TextUtils.isEmpty(voiceName)) {
                     return null;
                 }
-                List<Voice> voices = service.getVoices();
-                if (voices == null) {
-                    return null;
-                }
-                for (Voice voice : voices) {
-                    if (voice.getName().equals(voiceName)) {
-                        return voice;
-                    }
-                }
-                return null;
+                return getVoice(service, voiceName);
             }
         }, null, "getVoice");
+    }
+
+
+    /**
+     * Returns a Voice instance of the voice with the given voice name.
+     *
+     * @return Voice instance with the given voice name, or {@code null} if not set or on error.
+     *
+     * @see Voice
+     */
+    private Voice getVoice(ITextToSpeechService service, String voiceName) throws RemoteException {
+        List<Voice> voices = service.getVoices();
+        if (voices == null) {
+            return null;
+        }
+        for (Voice voice : voices) {
+            if (voice.getName().equals(voiceName)) {
+                return voice;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1690,14 +1714,7 @@ public class TextToSpeech {
 
                 // Sanitize the locale using isLanguageAvailable.
                 int result = service.isLanguageAvailable(language, country, variant);
-                if (result >= LANG_AVAILABLE){
-                    if (result < LANG_COUNTRY_VAR_AVAILABLE) {
-                        variant = "";
-                        if (result < LANG_COUNTRY_AVAILABLE) {
-                            country = "";
-                        }
-                    }
-                } else {
+                if (result < LANG_AVAILABLE) {
                     // The default language is not supported.
                     return null;
                 }
