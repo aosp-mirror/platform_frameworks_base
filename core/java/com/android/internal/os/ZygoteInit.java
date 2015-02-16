@@ -557,6 +557,7 @@ public class ZygoteInit {
 
     public static void main(String argv[]) {
         try {
+            RuntimeInit.enableDdms();
             // Start profiling the zygote initialization.
             SamplingProfilerIntegration.start();
 
