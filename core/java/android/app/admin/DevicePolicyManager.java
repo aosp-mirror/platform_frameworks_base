@@ -1683,7 +1683,7 @@ public class DevicePolicyManager {
     public static final int ENCRYPTION_STATUS_INACTIVE = 1;
 
     /**
-     * Result code for {@link #setStorageEncryption} and {@link #getStorageEncryptionStatus}:
+     * Result code for {@link #getStorageEncryptionStatus}:
      * indicating that encryption is not currently active, but is currently
      * being activated.  This is only reported by devices that support
      * encryption of data and only when the storage is currently
@@ -1697,6 +1697,13 @@ public class DevicePolicyManager {
      * indicating that encryption is active.
      */
     public static final int ENCRYPTION_STATUS_ACTIVE = 3;
+
+    /**
+     * Result code for {@link #getStorageEncryptionStatus}:
+     * indicating that encryption is active, but an encryption key has not
+     * been set by the user.
+     */
+    public static final int ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY = 4;
 
     /**
      * Activity action: begin the process of encrypting data on the device.  This activity should
@@ -1822,12 +1829,15 @@ public class DevicePolicyManager {
      * storage system does not support encryption.  If the
      * result is {@link #ENCRYPTION_STATUS_INACTIVE}, use {@link
      * #ACTION_START_ENCRYPTION} to begin the process of encrypting or decrypting the
-     * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
+     * storage.  If the result is {@link #ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY}, the
+     * storage system has enabled encryption but no password is set so further action
+     * may be required.  If the result is {@link #ENCRYPTION_STATUS_ACTIVATING} or
      * {@link #ENCRYPTION_STATUS_ACTIVE}, no further action is required.
      *
      * @return current status of encryption. The value will be one of
      * {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE},
-     * {@link #ENCRYPTION_STATUS_ACTIVATING}, or{@link #ENCRYPTION_STATUS_ACTIVE}.
+     * {@link #ENCRYPTION_STATUS_ACTIVATING}, {@link #ENCRYPTION_STATUS_ACTIVE_DEFAULT_KEY},
+     * or {@link #ENCRYPTION_STATUS_ACTIVE}.
      */
     public int getStorageEncryptionStatus() {
         return getStorageEncryptionStatus(UserHandle.myUserId());
