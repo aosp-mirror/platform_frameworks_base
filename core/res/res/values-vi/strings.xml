@@ -833,7 +833,7 @@
     <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Ngăn sử dụng một số tính năng trong chế độ bảo vệ phím."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
-    <item msgid="869923650527136615">"ĐT di động"</item>
+    <item msgid="869923650527136615">"Di Động"</item>
     <item msgid="7897544654242874543">"Cơ quan"</item>
     <item msgid="1103601433382158155">"Số fax Cơ quan"</item>
     <item msgid="1735177144948329370">"Số fax Nhà riêng"</item>
@@ -876,7 +876,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="1644738059053355820">"Tùy chỉnh"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Nhà riêng"</string>
-    <string name="phoneTypeMobile" msgid="6501463557754751037">"ĐT di động"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Di Động"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Cơ quan"</string>
     <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Số fax Cơ quan"</string>
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Số fax Nhà riêng"</string>
@@ -903,7 +903,7 @@
     <string name="emailTypeHome" msgid="449227236140433919">"Nhà riêng"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Cơ quan"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Khác"</string>
-    <string name="emailTypeMobile" msgid="119919005321166205">"ĐT di động"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Di Động"</string>
     <string name="postalTypeCustom" msgid="8903206903060479902">"Tùy chỉnh"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Nhà riêng"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Cơ quan"</string>
