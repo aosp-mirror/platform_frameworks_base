@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"앱 정보"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"여기에 최근 화면이 표시됩니다."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"최근에 사용한 앱 숨기기"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"최근 사용에 화면 1개"</item>
-    <item quantity="other" msgid="5523506463832158203">"최근 사용에 화면 %d개"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="other">최근 사용에 화면 %d개 있음</item>
+      <item quantity="one">최근 사용에 화면 1개 있음</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"알림 없음"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
@@ -369,4 +369,14 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>을(를) 숨기시겠습니까?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"다음번에 설정에서 사용 설정하면 다시 표시됩니다."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"숨기기"</string>
+    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
+    <skip />
 </resources>

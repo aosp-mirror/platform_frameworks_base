@@ -25,10 +25,10 @@
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ऐप्स की जानकारी"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"आपकी हाल की स्‍क्रीन यहां दिखाई देती हैं"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"हाल ही के ऐप्स  खारिज करें"</string>
-  <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"अवलोकन मेें 1 स्क्रीन"</item>
-    <item quantity="other" msgid="5523506463832158203">"अवलोकन में %d स्क्रीन"</item>
-  </plurals>
+    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
+      <item quantity="one">अवलोकन में %d स्‍क्रीन</item>
+      <item quantity="other">अवलोकन में %d स्‍क्रीन</item>
+    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कोई नोटिफिकेशन नहीं"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
@@ -369,4 +369,14 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> को छिपाएं?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"जब आप उसे अगली बार सेटिंग में चालू करेंगे तो वह फिर से दिखाई देगी."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"छिपाएं"</string>
+    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
+    <skip />
+    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
+    <skip />
+    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
+    <skip />
 </resources>
