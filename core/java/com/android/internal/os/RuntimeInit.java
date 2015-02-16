@@ -233,6 +233,7 @@ public class RuntimeInit {
     }
 
     public static final void main(String[] argv) {
+        enableDdms();
         if (argv.length == 2 && argv[1].equals("application")) {
             if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application");
             redirectLogStreams();
@@ -365,9 +366,9 @@ public class RuntimeInit {
     }
 
     /**
-     * Enable debugging features.
+     * Enable DDMS.
      */
-    static {
+    static final void enableDdms() {
         // Register handlers for DDM messages.
         android.ddm.DdmRegister.registerHandlers();
     }
