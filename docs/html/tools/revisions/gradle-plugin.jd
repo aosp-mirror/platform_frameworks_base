@@ -1,0 +1,153 @@
+page.title=Android Plugin for Gradle Release Notes
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+     <li><a href="{@docRoot}sdk/installing/studio-build.html">Build System Overview</a></li>
+     <li><a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plugin for Gradle</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>The Android build system uses the Android Plugin for Gradle to support building Android
+applications with the <a href="http://www.gradle.org/">Gradle</a> build toolkit. The plugin runs
+independent of Android Studio so the plugin and the Gradle build system can be updated
+independently of Android Studio.</p>
+
+<p class="note"><strong>Note:</strong> When you update Android Studio or open a project in a
+previous version of Android Studio, Android Studio prompts you to automatically update the plugin
+and Gradle to the latest available versions. You can choose to accept these updates based
+on your project's build requirements. </p>
+
+
+<h2 id="revisions">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Android Plugin for Gradle, as denoted by revision number. To determine what revision of the
+plugin you are using, check the version declaration in the project-level
+<strong>build.gradle</strong> file. </p>
+
+<p>For a summary of known issues in Android Plugin for Gradle, see <a
+href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
+
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.1</a> <em>(February 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+    <ul>
+      <li>Fixed issue with Gradle build failure when accessing the
+      <code>extractReleaseAnnotations</code> module.
+      (<a href="http://b.android.com/81638">Issue 81638</a>).</li>
+      <li>Fixed debugging issue when displaying method input parameters at breakpoints.
+      (<a href="http://b.android.com/82031">Issue 82031</a>).</li>
+      <li>Fixed manifest merger issues when importing libraries with a <code>targetSdkVersion</code>
+      less than 16.</li>
+      <li>Fixed density ordering issue when using Android Studio with JDK 8.</li>
+    </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.0</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Initial plugin release.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+
+<h2>Updating the Android Plugin for Gradle Version</h2>
+<p>The Android Plugin for Gradle version is specified in the
+<strong>File &gt; Project Structure</strong> menu or the project-level
+<code>build.gradle</code> file. The plugin version applies to all modules built in that
+Android Studio project. This example updates the Android Plugin for Gradle to version 1.1:
+<pre>
+...
+     dependencies {
+         classpath 'com.android.tools.build:gradle:1.1'
+     }
+...
+</pre>
+
+
+<p class="caution"><strong>Caution:</strong> You should not use dynamic dependencies (+) in
+version numbers. Using this feature can cause unexpected version updates and difficulty
+resolving version differences.
+</p>
+
+<p>If you're building with Gradle but using not Android Studio, the build process downloads the
+latest Android Plugin for Gradle plugin when it runs. </p>
+
+
+
+<h2>Updating the Gradle Version </h2>
+
+<p>Android Studio requires Gradle version 2.2.1 or later. To view and
+update the Gradle version, edit the Gradle distribution reference in the
+<code>gradle/wrapper/gradle-wrapper.properties</code> file. This example shows the
+Android Plugin for Gradle version set to 2.2.1.</p>
+
+<pre>
+...
+distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip
+...
+</pre>
+
+
+
+
+<p>For more details about the supported Android Plugin for Gradle properties and syntax, click
+the link to the
+<a href="{@docRoot}tools/building/plugin-for-gradle.html">Plugin Language Reference</a>.</p>
+
+
+
+
+
