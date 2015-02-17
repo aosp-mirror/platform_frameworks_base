@@ -29,7 +29,7 @@ everything you need to begin developing Android apps:</p>
 <p>For an introduction to Android Studio, read the
 <a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
 
-<p>Periodic updates are pushed to Android Studio without requiring you to update from here. To
+<p>Periodic updates are pushed to Android Studio without requiring you to update. To
 manually check for updates, select <strong>Help > Check for updates</strong> (on Mac, select
 <strong>Android Studio > Check for updates</strong>).</p>
 
@@ -43,6 +43,33 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.1</a> <em>(February 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Various fixes and enhancements:</p>
+    <ul>
+      <li>Added support for the <a href="{@docRoot}design/wear/index.html">Android Wear</a> watch
+      template. </li>
+      <li>Modified new project and module creation to include
+      <a href="{@docRoot}tools/projects/index.html#mipmap"><code>res/mipmap</code></a> folders for
+      density-specific launcher icons. These <code>res/mipmap</code> folders replace the
+      <a href="{@docRoot}guide/topics/resources/drawable-resource.html"><code>res/drawable</code></a>
+      folders for launcher icons.  </li>
+      <li>Updated launcher icons to have a
+      <a href="{@docRoot}design/material/index.html">Material Design</a> look and added an
+      <code>xxxhdpi</code> launcher icon. </li>
+      <li>Added and enhanced <a href="{@docRoot}tools/help/lint.html"><code>lint</code></a> checks
+      for region and language combinations, launcher icons, resource names, and other common
+      code problems.</li>
+      <li>Added support for Best Current Practice (BCP) language tag 47.  </li>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.0.1</a> <em>(December 2014)</em>
   </p>
 
