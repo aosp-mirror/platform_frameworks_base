@@ -19,7 +19,9 @@
 
 #include "FloatColor.h"
 #include "Matrix.h"
+#include "Program.h"
 #include "Rect.h"
+#include "SkiaShader.h"
 #include "utils/Macros.h"
 
 #include <GLES2/gl2.h>
@@ -31,6 +33,7 @@ namespace uirenderer {
 
 class Program;
 class RoundRectClipState;
+class Texture;
 
 /*
  * Enumerates optional vertex attributes
@@ -89,11 +92,6 @@ struct Glop {
         bool colorEnabled;
         FloatColor color;
 
-        /* TODO
-        union shader {
-            //...
-        }; TODO
-        */
         ProgramDescription::ColorFilterMode filterMode;
         union Filter {
             struct Matrix {
@@ -102,6 +100,8 @@ struct Glop {
             } matrix;
             FloatColor color;
         } filter;
+
+        SkiaShaderData skiaShaderData;
     } fill;
 
     struct Transform {

@@ -39,7 +39,7 @@ namespace uirenderer {
     LOG_ALWAYS_FATAL_IF((mStageFlags & (requiredFlags)) != (requiredFlags), \
             "not prepared for current stage")
 
-static void setUnitQuadTextureCoords(Rect uvs, TextureVertex* quadVertex) {;
+static void setUnitQuadTextureCoords(Rect uvs, TextureVertex* quadVertex) {
     TextureVertex::setUV(quadVertex++, uvs.left, uvs.top);
     TextureVertex::setUV(quadVertex++, uvs.right, uvs.top);
     TextureVertex::setUV(quadVertex++, uvs.left, uvs.bottom);
@@ -49,6 +49,7 @@ static void setUnitQuadTextureCoords(Rect uvs, TextureVertex* quadVertex) {;
 GlopBuilder::GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop)
         : mRenderState(renderState)
         , mCaches(caches)
+        , mShader(nullptr)
         , mOutGlop(outGlop) {
     mStageFlags = kInitialStage;
 }
@@ -192,12 +193,7 @@ void GlopBuilder::setFill(int color, float alphaScale, SkXfermode::Mode mode,
             }
         }
     }
-
-    if (shader) {
-        SkiaShader::describe(&mCaches, mDescription, mCaches.extensions(), *shader);
-        // TODO: store shader data
-        LOG_ALWAYS_FATAL("shaders not yet supported");
-    }
+    mShader = shader; // shader resolved in ::build()
 
     if (colorFilter) {
         SkColor color;
@@ -393,6 +389,11 @@ GlopBuilder& GlopBuilder::setRoundRectClipState(const RoundRectClipState* roundR
 
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
+
+    // serialize shader info into ShaderData
+    GLuint textureUnit = mOutGlop->fill.texture ? 1 : 0;
+    SkiaShader::store(mCaches, mShader, mOutGlop->transform.modelView,
+            &textureUnit, &mDescription, &(mOutGlop->fill.skiaShaderData));
 
     mOutGlop->fill.program = mCaches.programCache.get(mDescription);
     mOutGlop->transform.canvas.mapRect(mOutGlop->bounds);

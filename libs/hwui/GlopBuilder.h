@@ -21,16 +21,17 @@
 #include "utils/Macros.h"
 
 class SkPaint;
+class SkShader;
 
 namespace android {
 namespace uirenderer {
 
 class Caches;
-struct Glop;
 class Matrix4;
 class RenderState;
 class Texture;
 class VertexBuffer;
+struct Glop;
 
 class GlopBuilder {
     PREVENT_COPY_AND_ASSIGN(GlopBuilder);
@@ -74,6 +75,7 @@ private:
     ProgramDescription mDescription;
     RenderState& mRenderState;
     Caches& mCaches;
+    const SkShader* mShader;
     Glop* mOutGlop;
 };
 

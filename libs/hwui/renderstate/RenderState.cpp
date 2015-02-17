@@ -266,7 +266,7 @@ void RenderState::render(const Glop& glop) {
     meshState().bindIndicesBufferInternal(mesh.indexBufferObject);
 
     if (mesh.vertexFlags & kTextureCoord_Attrib) {
-        // TODO: to support shaders, increment texture unit
+        // glop.fill.texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
         if (glop.fill.textureClamp != GL_INVALID_ENUM) {
@@ -293,6 +293,9 @@ void RenderState::render(const Glop& glop) {
         glEnableVertexAttribArray(alphaSlot);
         glVertexAttribPointer(alphaSlot, 1, GL_FLOAT, GL_FALSE, kAlphaVertexStride, alphaCoords);
     }
+
+    // Shader uniforms
+    SkiaShader::apply(*mCaches, glop.fill.skiaShaderData);
 
     // ------------------------------------
     // ---------- GL state setup ----------

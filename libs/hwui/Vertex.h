@@ -21,8 +21,6 @@
 
 #include "utils/Macros.h"
 
-#include <type_traits>
-
 namespace android {
 namespace uirenderer {
 

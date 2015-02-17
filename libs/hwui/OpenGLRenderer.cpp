@@ -63,20 +63,6 @@ namespace android {
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
-// Globals
-///////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////////////////
-// Functions
-///////////////////////////////////////////////////////////////////////////////
-
-template<typename T>
-static inline T min(T a, T b) {
-    return a < b ? a : b;
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1199,7 +1185,7 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
 void OpenGLRenderer::issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount) {
     GLsizei elementsCount = quadsCount * 6;
     while (elementsCount > 0) {
-        GLsizei drawCount = min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+        GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
 
         setupDrawIndexedVertices(&mesh[0].x);
         glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, nullptr);
@@ -1970,7 +1956,7 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
 }
 
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, const SkPaint* paint) {
-    if (USE_GLOPS && (!paint || !paint->getShader())) {
+    if (USE_GLOPS) {
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
         aBuilder.setMeshTexturedUnitQuad(texture->uvMapper, true)
@@ -2358,7 +2344,7 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         return;
     }
 
-    if (USE_GLOPS && !paint->getShader()) {
+    if (USE_GLOPS) {
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
         bool fudgeOffset = displayFlags & kVertexBuffer_Offset;
@@ -3052,7 +3038,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             GLsizei elementsCount = layer->meshElementCount;
 
             while (elementsCount > 0) {
-                GLsizei drawCount = min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+                GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
 
                 setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
                 DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
@@ -3113,7 +3099,7 @@ void OpenGLRenderer::drawPathTexture(PathTexture* texture,
         return;
     }
 
-    if (USE_GLOPS && !paint->getShader()) {
+    if (USE_GLOPS) {
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
         aBuilder.setMeshTexturedUnitQuad(nullptr, true)
@@ -3274,7 +3260,7 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
         return;
     }
 
-    if (USE_GLOPS && !paint->getShader()) {
+    if (USE_GLOPS) {
         const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
@@ -3320,7 +3306,7 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
 void OpenGLRenderer::drawColorRect(float left, float top, float right, float bottom,
         const SkPaint* paint, bool ignoreTransform) {
 
-    if (USE_GLOPS && !paint->getShader()) {
+    if (USE_GLOPS) {
         const Matrix4& transform = ignoreTransform ? Matrix4::identity() : *currentTransform();
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);

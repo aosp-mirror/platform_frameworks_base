@@ -18,10 +18,19 @@
 
 #include "utils/Macros.h"
 
+#include <stdint.h>
+
 namespace android {
 namespace uirenderer {
 
 struct FloatColor {
+    void set(uint32_t color) {
+        a = ((color >> 24) & 0xff) / 255.0f;
+        r = a * ((color >> 16) & 0xff) / 255.0f;
+        g = a * ((color >>  8) & 0xff) / 255.0f;
+        b = a * ((color      ) & 0xff) / 255.0f;
+    }
+
     float r;
     float g;
     float b;
