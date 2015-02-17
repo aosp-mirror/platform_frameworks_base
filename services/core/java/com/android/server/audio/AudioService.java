@@ -370,7 +370,8 @@ public class AudioService extends IAudioService.Stub {
     // Streams currently muted by ringer mode
     private int mRingerModeMutedStreams;
 
-    /** @see System#MUTE_STREAMS_AFFECTED */
+    /** Streams that can be muted. Do not resolve to aliases when checking.
+     * @see System#MUTE_STREAMS_AFFECTED */
     private int mMuteAffectedStreams;
 
     /**
@@ -998,14 +999,14 @@ public class AudioService extends IAudioService.Stub {
 
         boolean isMuteAdjust = isMuteAdjust(direction);
 
+        if (isMuteAdjust && !isStreamAffectedByMute(streamType)) {
+            return;
+        }
+
         // use stream type alias here so that streams with same alias have the same behavior,
         // including with regard to silent mode control (e.g the use of STREAM_RING below and in
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
         int streamTypeAlias = mStreamVolumeAlias[streamType];
-
-        if (isMuteAdjust && !isStreamAffectedByMute(streamTypeAlias)) {
-            return;
-        }
 
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
