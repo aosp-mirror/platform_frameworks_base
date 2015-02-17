@@ -3334,6 +3334,19 @@ public class AudioManager {
      * Only useful for volume controllers.
      * @hide
      */
+    public boolean isStreamAffectedByMute(int streamType) {
+        try {
+            return getService().isStreamAffectedByMute(streamType);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling isStreamAffectedByMute", e);
+            return false;
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
     public void disableSafeMediaVolume() {
         try {
             getService().disableSafeMediaVolume();
