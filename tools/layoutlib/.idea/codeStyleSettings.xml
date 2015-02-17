@@ -5,7 +5,6 @@
       <value>
         <option name="FIELD_NAME_PREFIX" value="m" />
         <option name="STATIC_FIELD_NAME_PREFIX" value="s" />
-        <option name="USE_FQ_CLASS_NAMES_IN_JAVADOC" value="false" />
         <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
         <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
         <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="999" />
@@ -34,6 +33,9 @@
         <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
         <option name="JD_DO_NOT_WRAP_ONE_LINE_COMMENTS" value="true" />
         <option name="WRAP_COMMENTS" value="true" />
+        <JavaCodeStyleSettings>
+          <option name="CLASS_NAMES_IN_JAVADOC" value="3" />
+        </JavaCodeStyleSettings>
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>
