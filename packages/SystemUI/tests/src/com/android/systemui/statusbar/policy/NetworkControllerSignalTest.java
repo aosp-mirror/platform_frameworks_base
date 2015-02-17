@@ -248,6 +248,11 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         }
     }
 
+    public void testHistorySize() {
+        // Verify valid history size, otherwise it gits printed out the wrong order and whatnot.
+        assertEquals(0, SignalController.HISTORY_SIZE & (SignalController.HISTORY_SIZE - 1));
+    }
+
     private void setCdma() {
         setIsGsm(false);
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
