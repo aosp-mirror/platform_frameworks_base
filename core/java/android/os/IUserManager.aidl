@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.content.pm.UserInfo;
 import android.content.RestrictionEntry;
 import android.graphics.Bitmap;
+import android.os.ParcelFileDescriptor;
 
 /**
  *  {@hide}
@@ -32,7 +33,7 @@ interface IUserManager {
     boolean removeUser(int userHandle);
     void setUserName(int userHandle, String name);
     void setUserIcon(int userHandle, in Bitmap icon);
-    Bitmap getUserIcon(int userHandle);
+    ParcelFileDescriptor getUserIcon(int userHandle);
     List<UserInfo> getUsers(boolean excludeDying);
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
     UserInfo getProfileParent(int userHandle);

@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
@@ -30,6 +31,7 @@ import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1083,11 +1085,21 @@ public class UserManager {
      */
     public Bitmap getUserIcon(int userHandle) {
         try {
-            return mService.getUserIcon(userHandle);
+            ParcelFileDescriptor fd = mService.getUserIcon(userHandle);
+            if (fd != null) {
+                try {
+                    return BitmapFactory.decodeFileDescriptor(fd.getFileDescriptor());
+                } finally {
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
         } catch (RemoteException re) {
             Log.w(TAG, "Could not get the user icon ", re);
-            return null;
         }
+        return null;
     }
 
     /**
