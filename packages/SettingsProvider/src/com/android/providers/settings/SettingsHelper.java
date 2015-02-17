@@ -19,7 +19,10 @@ package com.android.providers.settings;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.backup.IBackupManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -28,10 +31,12 @@ import android.net.Uri;
 import android.os.IPowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
 import java.util.Locale;
 
@@ -40,6 +45,48 @@ public class SettingsHelper {
     private Context mContext;
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager;
+
+    /**
+     * A few settings elements are special in that a restore of those values needs to
+     * be post-processed by relevant parts of the OS.  A restore of any settings element
+     * mentioned in this table will therefore cause the system to send a broadcast with
+     * the {@link Intent#ACTION_SETTING_RESTORED} action, with extras naming the
+     * affected setting and supplying its pre-restore value for comparison.
+     *
+     * @see Intent#ACTION_SETTING_RESTORED
+     * @see System#SETTINGS_TO_BACKUP
+     * @see Secure#SETTINGS_TO_BACKUP
+     * @see Global#SETTINGS_TO_BACKUP
+     *
+     * {@hide}
+     */
+    private static final ArraySet<String> sBroadcastOnRestore;
+    static {
+        sBroadcastOnRestore = new ArraySet<String>(1);
+        sBroadcastOnRestore.add(Settings.Secure.ENABLED_NOTIFICATION_LISTENERS);
+    }
+
+    private interface SettingsLookup {
+        public String lookup(ContentResolver resolver, String name, int userHandle);
+    }
+
+    private static SettingsLookup sSystemLookup = new SettingsLookup() {
+        public String lookup(ContentResolver resolver, String name, int userHandle) {
+            return Settings.System.getStringForUser(resolver, name, userHandle);
+        }
+    };
+
+    private static SettingsLookup sSecureLookup = new SettingsLookup() {
+        public String lookup(ContentResolver resolver, String name, int userHandle) {
+            return Settings.Secure.getStringForUser(resolver, name, userHandle);
+        }
+    };
+
+    private static SettingsLookup sGlobalLookup = new SettingsLookup() {
+        public String lookup(ContentResolver resolver, String name, int userHandle) {
+            return Settings.Global.getStringForUser(resolver, name, userHandle);
+        }
+    };
 
     public SettingsHelper(Context context) {
         mContext = context;
@@ -58,24 +105,67 @@ public class SettingsHelper {
      * some cases the data will be written by the call to the appropriate API,
      * and in some cases the property value needs to be modified before setting.
      */
-    public boolean restoreValue(String name, String value) {
-        if (Settings.System.SCREEN_BRIGHTNESS.equals(name)) {
-            setBrightness(Integer.parseInt(value));
-        } else if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
-            setSoundEffects(Integer.parseInt(value) == 1);
-        } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-            setGpsLocation(value);
-            return false;
-        } else if (Settings.Secure.BACKUP_AUTO_RESTORE.equals(name)) {
-            setAutoRestore(Integer.parseInt(value) == 1);
-        } else if (isAlreadyConfiguredCriticalAccessibilitySetting(name)) {
-            return false;
-        } else if (Settings.System.RINGTONE.equals(name)
-                || Settings.System.NOTIFICATION_SOUND.equals(name)) {
-            setRingtone(name, value);
-            return false;
+    public void restoreValue(Context context, ContentResolver cr, ContentValues contentValues,
+            Uri destination, String name, String value) {
+        // Will we need a post-restore broadcast for this element?
+        String oldValue = null;
+        boolean sendBroadcast = false;
+        final SettingsLookup table;
+
+        if (destination.equals(Settings.Secure.CONTENT_URI)) {
+            table = sSecureLookup;
+        } else if (destination.equals(Settings.System.CONTENT_URI)) {
+            table = sSystemLookup;
+        } else { /* must be GLOBAL; this was preflighted by the caller */
+            table = sGlobalLookup;
         }
-        return true;
+
+        if (sBroadcastOnRestore.contains(name)) {
+            oldValue = table.lookup(cr, name, UserHandle.USER_OWNER);
+            sendBroadcast = true;
+        }
+
+        try {
+            if (Settings.System.SCREEN_BRIGHTNESS.equals(name)) {
+                setBrightness(Integer.parseInt(value));
+                // fall through to the ordinary write to settings
+            } else if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
+                setSoundEffects(Integer.parseInt(value) == 1);
+                // fall through to the ordinary write to settings
+            } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
+                setGpsLocation(value);
+                return;
+            } else if (Settings.Secure.BACKUP_AUTO_RESTORE.equals(name)) {
+                setAutoRestore(Integer.parseInt(value) == 1);
+            } else if (isAlreadyConfiguredCriticalAccessibilitySetting(name)) {
+                return;
+            } else if (Settings.System.RINGTONE.equals(name)
+                    || Settings.System.NOTIFICATION_SOUND.equals(name)) {
+                setRingtone(name, value);
+                return;
+            }
+
+            // Default case: write the restored value to settings
+            contentValues.clear();
+            contentValues.put(Settings.NameValueTable.NAME, name);
+            contentValues.put(Settings.NameValueTable.VALUE, value);
+            cr.insert(destination, contentValues);
+        } catch (Exception e) {
+            // If we fail to apply the setting, by definition nothing happened
+            sendBroadcast = false;
+        } finally {
+            // If this was an element of interest, send the "we just restored it"
+            // broadcast with the historical value now that the new value has
+            // been committed and observers kicked off.
+            if (sendBroadcast) {
+                Intent intent = new Intent(Intent.ACTION_SETTING_RESTORED)
+                        .setPackage("android").addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY)
+                        .putExtra(Intent.EXTRA_SETTING_NAME, name)
+                        .putExtra(Intent.EXTRA_SETTING_NEW_VALUE, value)
+                        .putExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE, oldValue);
+                context.sendBroadcastAsUser(intent, UserHandle.OWNER, null);
+            }
+        }
     }
 
     public String onBackupValue(String name, String value) {

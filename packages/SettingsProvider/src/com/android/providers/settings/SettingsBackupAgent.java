@@ -793,7 +793,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         // Figure out the white list and redirects to the global table.
-        String[] whitelist = null;
+        final String[] whitelist;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
             whitelist = Settings.Secure.SETTINGS_TO_BACKUP;
         } else if (contentUri.equals(Settings.System.CONTENT_URI)) {
@@ -809,6 +809,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         Map<String, String> cachedEntries = new HashMap<String, String>();
         ContentValues contentValues = new ContentValues(2);
         SettingsHelper settingsHelper = mSettingsHelper;
+        ContentResolver cr = getContentResolver();
 
         final int whiteListSize = whitelist.length;
         for (int i = 0; i < whiteListSize; i++) {
@@ -841,14 +842,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             final Uri destination = (movedToGlobal != null && movedToGlobal.contains(key))
                     ? Settings.Global.CONTENT_URI
                     : contentUri;
-
-            // The helper doesn't care what namespace the keys are in
-            if (settingsHelper.restoreValue(key, value)) {
-                contentValues.clear();
-                contentValues.put(Settings.NameValueTable.NAME, key);
-                contentValues.put(Settings.NameValueTable.VALUE, value);
-                getContentResolver().insert(destination, contentValues);
-            }
+            settingsHelper.restoreValue(this, cr, contentValues, destination, key, value);
 
             if (DEBUG) {
                 Log.d(TAG, "Restored setting: " + destination + " : "+ key + "=" + value);
