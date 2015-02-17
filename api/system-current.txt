@@ -2199,6 +2199,7 @@ package android {
     field public static final int Theme_Material_Light_Dialog_NoActionBar = 16974396; // 0x103023c
     field public static final int Theme_Material_Light_Dialog_NoActionBar_MinWidth = 16974397; // 0x103023d
     field public static final int Theme_Material_Light_Dialog_Presentation = 16974398; // 0x103023e
+    field public static final int Theme_Material_Light_LightStatusBar = 16974563; // 0x10302e3
     field public static final int Theme_Material_Light_NoActionBar = 16974401; // 0x1030241
     field public static final int Theme_Material_Light_NoActionBar_Fullscreen = 16974402; // 0x1030242
     field public static final int Theme_Material_Light_NoActionBar_Overscan = 16974403; // 0x1030243
