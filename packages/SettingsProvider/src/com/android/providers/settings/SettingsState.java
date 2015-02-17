@@ -109,6 +109,9 @@ final class SettingsState {
     @GuardedBy("mLock")
     private boolean mWriteScheduled;
 
+    @GuardedBy("mLock")
+    private long mNextId;
+
     public SettingsState(Object lock, File file, int key, int maxBytesPerAppPackage) {
         // It is important that we use the same lock as the settings provider
         // to ensure multiple mutations on this state are atomicaly persisted
@@ -521,21 +524,19 @@ final class SettingsState {
         return value;
     }
 
-    public static final class Setting {
-        private static long sNextId;
-
+    public final class Setting {
         private String name;
         private String value;
         private String packageName;
         private String id;
 
         public Setting(String name, String value, String packageName) {
-            init(name, value, packageName, String.valueOf(sNextId++));
+            init(name, value, packageName, String.valueOf(mNextId++));
         }
 
         public Setting(String name, String value, String packageName, String id) {
-            sNextId = Math.max(sNextId, Long.valueOf(id));
-            init(name, value, packageName, String.valueOf(sNextId));
+            mNextId = Math.max(mNextId, Long.valueOf(id) + 1);
+            init(name, value, packageName, id);
         }
 
         private void init(String name, String value, String packageName, String id) {
@@ -567,7 +568,7 @@ final class SettingsState {
             }
             this.value = value;
             this.packageName = packageName;
-            this.id = String.valueOf(sNextId++);
+            this.id = String.valueOf(mNextId++);
             return true;
         }
     }

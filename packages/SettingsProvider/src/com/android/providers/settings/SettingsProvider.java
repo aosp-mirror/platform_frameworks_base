@@ -56,7 +56,9 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
@@ -477,6 +479,59 @@ public class SettingsProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         throw new FileNotFoundException("Direct file access no longer supported; "
                 + "ringtone playback is available through android.media.Ringtone");
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        synchronized (mLock) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                List<UserInfo> users = mUserManager.getUsers(true);
+                final int userCount = users.size();
+                for (int i = 0; i < userCount; i++) {
+                    UserInfo user = users.get(i);
+                    dumpForUser(user.id, pw);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    private void dumpForUser(int userId, PrintWriter pw) {
+        if (userId == UserHandle.USER_OWNER) {
+            pw.println("GLOBAL SETTINGS (user " + userId + ")");
+            Cursor globalCursor = getAllGlobalSettingsLocked(ALL_COLUMNS);
+            dumpSettings(globalCursor, pw);
+            pw.println();
+        }
+
+        pw.println("SECURE SETTINGS (user " + userId + ")");
+        Cursor secureCursor = getAllSecureSettingsLocked(userId, ALL_COLUMNS);
+        dumpSettings(secureCursor, pw);
+        pw.println();
+
+        pw.println("SYSTEM SETTINGS (user " + userId + ")");
+        Cursor systemCursor = getAllSystemSettingsLocked(userId, ALL_COLUMNS);
+        dumpSettings(systemCursor, pw);
+        pw.println();
+    }
+
+    private void dumpSettings(Cursor cursor, PrintWriter pw) {
+        if (!cursor.moveToFirst()) {
+            return;
+        }
+
+        final int idColumnIdx = cursor.getColumnIndex(Settings.NameValueTable._ID);
+        final int nameColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.NAME);
+        final int valueColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
+
+        do {
+            pw.append("_id:").append(cursor.getString(idColumnIdx));
+            pw.append(" name:").append(cursor.getString(nameColumnIdx));
+            pw.append(" value:").append(cursor.getString(valueColumnIdx));
+            pw.println();
+        } while (cursor.moveToNext());
     }
 
     private void registerBroadcastReceivers() {
