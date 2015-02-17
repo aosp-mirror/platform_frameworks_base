@@ -18,21 +18,28 @@ package android.graphics;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
+import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import android.content.res.AssetManager;
+import android.content.res.BridgeAssetManager;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -56,10 +63,28 @@ public class FontFamily_Delegate {
     public static final int BOLD_FONT_WEIGHT_DELTA = 300;
     public static final int BOLD_FONT_WEIGHT = 700;
 
-    // FONT_SUFFIX_ITALIC will always match FONT_SUFFIX_BOLDITALIC and hence it must be checked
-    // separately.
     private static final String FONT_SUFFIX_ITALIC = "Italic.ttf";
     private static final String FN_ALL_FONTS_LIST = "fontsInSdk.txt";
+    private static final String EXTENSION_OTF = ".otf";
+
+    private static final int CACHE_SIZE = 10;
+    // The cache has a drawback that if the font file changed after the font object was created,
+    // we will not update it.
+    private static final Map<String, FontInfo> sCache =
+            new LinkedHashMap<String, FontInfo>(CACHE_SIZE) {
+        @Override
+        protected boolean removeEldestEntry(Entry<String, FontInfo> eldest) {
+            return size() > CACHE_SIZE;
+        }
+
+        @Override
+        public FontInfo put(String key, FontInfo value) {
+            // renew this entry.
+            FontInfo removed = remove(key);
+            super.put(key, value);
+            return removed;
+        }
+    };
 
     /**
      * A class associating {@link Font} with its metadata.
@@ -194,7 +219,7 @@ public class FontFamily_Delegate {
             try {
                 return Font.createFont(Font.TRUETYPE_FONT, f);
             } catch (Exception e) {
-                if (path.endsWith(".otf") && e instanceof FontFormatException) {
+                if (path.endsWith(EXTENSION_OTF) && e instanceof FontFormatException) {
                     // If we aren't able to load an Open Type font, don't log a warning just yet.
                     // We wait for a case where font is being used. Only then we try to log the
                     // warning.
@@ -281,8 +306,74 @@ public class FontFamily_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Typeface.createFromAsset is not supported.", null, null);
+        FontFamily_Delegate ffd = sManager.getDelegate(nativeFamily);
+        ffd.mValid = true;
+        if (mgr == null) {
+            return false;
+        }
+        if (mgr instanceof BridgeAssetManager) {
+            InputStream fontStream = null;
+            try {
+                AssetRepository assetRepository = ((BridgeAssetManager) mgr).getAssetRepository();
+                if (assetRepository == null) {
+                    Bridge.getLog().error(LayoutLog.TAG_MISSING_ASSET, "Asset not found: " + path,
+                            null);
+                    return false;
+                }
+                if (!assetRepository.isSupported()) {
+                    // Don't log any warnings on unsupported IDEs.
+                    return false;
+                }
+                // Check cache
+                FontInfo fontInfo = sCache.get(path);
+                if (fontInfo != null) {
+                    // renew the font's lease.
+                    sCache.put(path, fontInfo);
+                    ffd.addFont(fontInfo);
+                    return true;
+                }
+                fontStream = assetRepository.openAsset(path, AssetManager.ACCESS_STREAMING);
+                if (fontStream == null) {
+                    Bridge.getLog().error(LayoutLog.TAG_MISSING_ASSET, "Asset not found: " + path,
+                            path);
+                    return false;
+                }
+                Font font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+                fontInfo = new FontInfo();
+                fontInfo.mFont = font;
+                fontInfo.mWeight = font.isBold() ? BOLD_FONT_WEIGHT : DEFAULT_FONT_WEIGHT;
+                fontInfo.mIsItalic = font.isItalic();
+                ffd.addFont(fontInfo);
+                return true;
+            } catch (IOException e) {
+                Bridge.getLog().error(LayoutLog.TAG_MISSING_ASSET, "Unable to load font " + path, e,
+                        path);
+            } catch (FontFormatException e) {
+                if (path.endsWith(EXTENSION_OTF)) {
+                    // otf fonts are not supported on the user's config (JRE version + OS)
+                    Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
+                            "OpenType fonts are not supported yet: " + path, null, path);
+                } else {
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                            "Unable to load font " + path, e, path);
+                }
+            } finally {
+                if (fontStream != null) {
+                    try {
+                        fontStream.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+            return false;
+        }
+        // This should never happen. AssetManager is a final class (from user's perspective), and
+        // we've replaced every creation of AssetManager with our implementation. We create an
+        // exception and log it, but continue with rest of the rendering, without loading this font.
+        Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                "You have found a bug in the rendering library. Please file a bug at b.android.com.",
+                new RuntimeException("Asset Manager is not an instance of BridgeAssetManager"),
+                null);
         return false;
     }
 
