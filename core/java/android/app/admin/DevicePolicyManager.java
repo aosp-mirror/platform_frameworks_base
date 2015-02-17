@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -3739,5 +3740,19 @@ public class DevicePolicyManager {
             }
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Called by profile or device owners to set the current user's photo.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param icon the bitmap to set as the photo.
+     */
+    public void setUserIcon(ComponentName admin, Bitmap icon) {
+        try {
+            mService.setUserIcon(admin, icon);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not set the user icon ", re);
+        }
     }
 }

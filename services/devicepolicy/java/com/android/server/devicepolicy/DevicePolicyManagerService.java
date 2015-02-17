@@ -51,6 +51,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -5494,6 +5495,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             AudioManager audioManager =
                     (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
             return audioManager.isMasterMute();
+        }
+    }
+
+    @Override
+    public void setUserIcon(ComponentName who, Bitmap icon) {
+        synchronized (this) {
+            Preconditions.checkNotNull(who, "ComponentName is null");
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+
+            int userId = UserHandle.getCallingUserId();
+            long id = Binder.clearCallingIdentity();
+            try {
+                mUserManager.setUserIcon(userId, icon);
+            } finally {
+                restoreCallingIdentity(id);
+            }
         }
     }
 

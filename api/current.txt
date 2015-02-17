@@ -5543,6 +5543,7 @@ package android.app.admin {
     method public int setStorageEncryption(android.content.ComponentName, boolean);
     method public void setUninstallBlocked(android.content.ComponentName, java.lang.String, boolean);
     method public boolean setUserEnabled(android.content.ComponentName);
+    method public void setUserIcon(android.content.ComponentName, android.graphics.Bitmap);
     method public boolean switchUser(android.content.ComponentName, android.os.UserHandle);
     method public void uninstallAllUserCaCerts(android.content.ComponentName);
     method public void uninstallCaCert(android.content.ComponentName, byte[]);
