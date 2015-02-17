@@ -249,6 +249,9 @@ class="en">Support Library</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/revisions/build-tools.html">
         <span class="en">SDK Build Tools</span>
       </a></li>
+      <li><a href="<?cs var:toroot ?>tools/revisions/gradle-plugin.html">
+        <span class="en">Android Plugin for Gradle</span>
+      </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html">
         <span class="en">SDK Platforms</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
