@@ -2852,11 +2852,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // indicates that the window was either just added and received them for the
                     // first time, or the window size or position has changed.
                     boolean hasTopStableInset = insets.getStableInsetTop() != 0;
-                    disallowAnimate |= hasTopStableInset && !mLastHasTopStableInset;
+                    disallowAnimate |= (hasTopStableInset != mLastHasTopStableInset);
                     mLastHasTopStableInset = hasTopStableInset;
 
                     boolean hasBottomStableInset = insets.getStableInsetBottom() != 0;
-                    disallowAnimate |= hasBottomStableInset && !mLastHasBottomStableInset;
+                    disallowAnimate |= (hasBottomStableInset != mLastHasBottomStableInset);
                     mLastHasBottomStableInset = hasBottomStableInset;
                 }
 
