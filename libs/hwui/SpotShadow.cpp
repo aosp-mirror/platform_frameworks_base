@@ -44,6 +44,9 @@
 // For each RADIANS_DIVISOR, we would allocate one more vertex b/t the normals.
 #define SPOT_CORNER_RADIANS_DIVISOR (M_PI / SPOT_EXTRA_CORNER_VERTEX_PER_PI)
 
+// For performance, we use (1 - alpha) value for the shader input.
+#define TRANSFORMED_PENUMBRA_ALPHA 1.0f
+#define TRANSFORMED_UMBRA_ALPHA 0.0f
 
 #include <math.h>
 #include <stdlib.h>
@@ -964,11 +967,11 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
     // Fill the IB and VB for the penumbra area.
     for (int i = 0; i < newPenumbraLength; i++) {
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], newPenumbra[i].x,
-                newPenumbra[i].y, 0.0f);
+                newPenumbra[i].y, TRANSFORMED_PENUMBRA_ALPHA);
     }
     for (int i = 0; i < umbraLength; i++) {
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], umbra[i].x, umbra[i].y,
-                M_PI);
+                TRANSFORMED_UMBRA_ALPHA);
     }
 
     for (int i = 0; i < verticesPairIndex; i++) {
@@ -1008,14 +1011,14 @@ void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrength
             indexBuffer[indexBufferIndex++] = newPenumbraLength + i;
             indexBuffer[indexBufferIndex++] = vertexBufferIndex;
             AlphaVertex::set(&shadowVertices[vertexBufferIndex++],
-                    closerVertex.x, closerVertex.y, M_PI);
+                    closerVertex.x, closerVertex.y, TRANSFORMED_UMBRA_ALPHA);
         }
     } else {
         // If there is no occluded umbra at all, then draw the triangle fan
         // starting from the centroid to all umbra vertices.
         int lastCentroidIndex = vertexBufferIndex;
         AlphaVertex::set(&shadowVertices[vertexBufferIndex++], centroid.x,
-                centroid.y, M_PI);
+                centroid.y, TRANSFORMED_UMBRA_ALPHA);
         for (int i = 0; i < umbraLength; i++) {
             indexBuffer[indexBufferIndex++] = newPenumbraLength + i;
             indexBuffer[indexBufferIndex++] = lastCentroidIndex;

@@ -240,8 +240,9 @@ const char* gFS_Main_ModulateColor =
 const char* gFS_Main_ApplyVertexAlphaLinearInterp =
         "    fragColor *= alpha;\n";
 const char* gFS_Main_ApplyVertexAlphaShadowInterp =
-        "    fragColor *= (1.0 - cos(alpha)) / 2.0;\n";
-
+        // Use a gaussian function for the shadow fall off. Note that alpha here
+        // is actually (1.0 - alpha) for saving computation.
+        "    fragColor *= exp(- alpha * alpha * 4.0) - 0.018;\n";
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
         "    fragColor = texture2D(baseSampler, outTexCoords);\n",
