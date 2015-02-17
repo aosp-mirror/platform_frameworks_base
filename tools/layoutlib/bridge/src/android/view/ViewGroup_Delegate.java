@@ -71,8 +71,10 @@ public class ViewGroup_Delegate {
         int x = 0;
         if (outline.mRect != null) {
             Shadow s = getRectShadow(parent, canvas, child, outline);
-            shadow = s.mShadow;
-            x = -s.mShadowWidth;
+            if (s != null) {
+              shadow = s.mShadow;
+              x = -s.mShadowWidth;
+            }
         } else if (outline.mPath != null) {
             shadow = getPathShadow(child, outline, canvas);
         }
@@ -132,6 +134,9 @@ public class ViewGroup_Delegate {
 
     private static BufferedImage getPathShadow(View child, Outline outline, Canvas canvas) {
         Rect clipBounds = canvas.getClipBounds();
+        if (clipBounds.isEmpty()) {
+          return null;
+        }
         BufferedImage image = new BufferedImage(clipBounds.width(), clipBounds.height(),
                 BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
