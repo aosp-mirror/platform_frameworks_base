@@ -2982,11 +2982,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void choosePrivateKeyAlias(final String host, int port, final String url,
+    public void choosePrivateKeyAlias(final int uid, final String host, int port, final String url,
             final String alias, final IBinder response) {
-        final ComponentName profileOwner = getProfileOwner(UserHandle.getCallingUserId());
+        // Caller UID needs to be trusted, so we restrict this method to SYSTEM_UID callers.
+        if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
+            return;
+        }
+
         final UserHandle caller = Binder.getCallingUserHandle();
-        final int callerUid = Binder.getCallingUid();
+        final ComponentName profileOwner = getProfileOwner(caller.getIdentifier());
 
         if (profileOwner == null) {
             sendPrivateKeyAliasResponse(null, response);
@@ -2995,7 +2999,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         Intent intent = new Intent(DeviceAdminReceiver.ACTION_CHOOSE_PRIVATE_KEY_ALIAS);
         intent.setComponent(profileOwner);
-        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, callerUid);
+        intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, uid);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_HOST, host);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_PORT, port);
         intent.putExtra(DeviceAdminReceiver.EXTRA_CHOOSE_PRIVATE_KEY_URL, url);
