@@ -119,7 +119,12 @@ you can access them at:</p>
       <p>You may want to add {@code android-studio/bin/} to your PATH environmental
       variable so that you can start Android Studio from any directory.</p>
     </li>
-    <li>Follow the setup wizard to install any necessary SDK tools.</li>
+    <li>If the SDK is not already installed, follow the setup wizard to install the SDK and any
+    necessary SDK tools.
+    <p class="note"><strong>Note:</strong> You may also need to install the ia32-libs,
+    lib32ncurses5-dev, and lib32stc++6 packages. These packages are required to support 32-bit apps
+    on a 64-bit machine. </p>
+    </li>
   </ol>
 
 </div><!-- end linux -->
