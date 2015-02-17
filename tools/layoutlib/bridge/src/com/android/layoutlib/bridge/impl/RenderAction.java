@@ -35,7 +35,6 @@ import com.android.resources.ScreenSize;
 
 import android.content.res.Configuration;
 import android.os.HandlerThread_Delegate;
-import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.ViewConfiguration_Accessor;
 import android.view.inputmethod.InputMethodManager;
@@ -71,7 +70,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
     /**
      * Creates a renderAction.
      * <p>
-     * This <b>must</b> be followed by a call to {@link RenderAction#init()}, which act as a
+     * This <b>must</b> be followed by a call to {@link RenderAction#init(long)}, which act as a
      * call to {@link RenderAction#acquire(long)}
      *
      * @param params the RenderParams. This must be a copy that the action can keep
@@ -121,8 +120,8 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getProjectCallback(), getConfiguration(), mParams.getTargetSdkVersion(),
-                mParams.isRtlSupported());
+                mParams.getAssets(), mParams.getProjectCallback(), getConfiguration(),
+                mParams.getTargetSdkVersion(), mParams.isRtlSupported());
 
         setUp();
 
@@ -139,7 +138,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
      * The preparation can fail if another rendering took too long and the timeout was elapsed.
      *
      * More than one call to this from the same thread will have no effect and will return
-     * {@link Result#SUCCESS}.
+     * {@link Result.Status#SUCCESS}.
      *
      * After scene actions have taken place, only one call to {@link #release()} must be
      * done.
@@ -173,7 +172,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
      * Acquire the lock so that the scene can be acted upon.
      * <p>
      * This returns null if the lock was just acquired, otherwise it returns
-     * {@link Result#SUCCESS} if the lock already belonged to that thread, or another
+     * {@link Result.Status#SUCCESS} if the lock already belonged to that thread, or another
      * instance (see {@link Result#getStatus()}) if an error occurred.
      *
      * @param timeout the time to wait if another rendering is happening.
@@ -184,11 +183,11 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
      */
     private Result acquireLock(long timeout) {
         ReentrantLock lock = Bridge.getLock();
-        if (lock.isHeldByCurrentThread() == false) {
+        if (!lock.isHeldByCurrentThread()) {
             try {
                 boolean acquired = lock.tryLock(timeout, TimeUnit.MILLISECONDS);
 
-                if (acquired == false) {
+                if (!acquired) {
                     return ERROR_TIMEOUT.createResult();
                 }
             } catch (InterruptedException e) {
@@ -308,7 +307,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
      */
     protected void checkLock() {
         ReentrantLock lock = Bridge.getLock();
-        if (lock.isHeldByCurrentThread() == false) {
+        if (!lock.isHeldByCurrentThread()) {
             throw new IllegalStateException("scene must be acquired first. see #acquire(long)");
         }
         if (sCurrentContext != mContext) {
@@ -347,6 +346,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         config.screenWidthDp = hardwareConfig.getScreenWidth() / density.getDpiValue();
         config.screenHeightDp = hardwareConfig.getScreenHeight() / density.getDpiValue();
         if (config.screenHeightDp < config.screenWidthDp) {
+            //noinspection SuspiciousNameCombination
             config.smallestScreenWidthDp = config.screenHeightDp;
         } else {
             config.smallestScreenWidthDp = config.screenWidthDp;
@@ -367,6 +367,7 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
                 config.orientation = Configuration.ORIENTATION_LANDSCAPE;
                 break;
             case SQUARE:
+                //noinspection deprecation
                 config.orientation = Configuration.ORIENTATION_SQUARE;
                 break;
             }

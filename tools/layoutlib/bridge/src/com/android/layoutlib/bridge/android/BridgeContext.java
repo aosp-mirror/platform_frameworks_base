@@ -18,6 +18,7 @@ package com.android.layoutlib.bridge.android;
 
 import android.os.IBinder;
 import com.android.annotations.Nullable;
+import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -48,6 +49,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.BridgeAssetManager;
 import android.content.res.BridgeResources;
 import android.content.res.BridgeTypedArray;
 import android.content.res.Configuration;
@@ -102,6 +104,7 @@ public final class BridgeContext extends Context {
      * used to populate the mViewKeyMap.
      */
     private final HashMap<Object, Object> mViewKeyHelpMap = new HashMap<Object, Object>();
+    private final BridgeAssetManager mAssets;
     private Resources mSystemResources;
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
@@ -141,6 +144,7 @@ public final class BridgeContext extends Context {
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
             RenderResources renderResources,
+            AssetRepository assets,
             IProjectCallback projectCallback,
             Configuration config,
             int targetSdkVersion,
@@ -151,6 +155,8 @@ public final class BridgeContext extends Context {
 
         mRenderResources = renderResources;
         mConfig = config;
+        mAssets = new BridgeAssetManager();
+        mAssets.setAssetRepository(assets);
 
         mApplicationInfo = new ApplicationInfo();
         mApplicationInfo.targetSdkVersion = targetSdkVersion;
@@ -1088,9 +1094,8 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public AssetManager getAssets() {
-        // pass
-        return null;
+    public BridgeAssetManager getAssets() {
+        return mAssets;
     }
 
     @Override
