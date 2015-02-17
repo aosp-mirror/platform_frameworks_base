@@ -3217,6 +3217,7 @@ public class AudioService extends IAudioService.Stub {
         return false;
     }
 
+    @Override
     public boolean isStreamAffectedByMute(int streamType) {
         return (mMuteAffectedStreams & (1 << streamType)) != 0;
     }
