@@ -887,55 +887,6 @@ public class RenderScript {
         return rsnPathCreate(mContext, prim, isStatic, vtx, loop, q);
     }
 
-    native void rsnScriptIntrinsicBLAS_Single(long con, long id, int func, int TransA,
-                                              int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                              float alpha, long A, long B, float beta, long C, int incX, int incY,
-                                              int KL, int KU);
-    synchronized void nScriptIntrinsicBLAS_Single(long id, int func, int TransA,
-                                                  int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                                  float alpha, long A, long B, float beta, long C, int incX, int incY,
-                                                  int KL, int KU) {
-        validate();
-        rsnScriptIntrinsicBLAS_Single(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alpha, A, B, beta, C, incX, incY, KL, KU);
-    }
-
-    native void rsnScriptIntrinsicBLAS_Double(long con, long id, int func, int TransA,
-                                              int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                              double alpha, long A, long B, double beta, long C, int incX, int incY,
-                                              int KL, int KU);
-    synchronized void nScriptIntrinsicBLAS_Double(long id, int func, int TransA,
-                                                  int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                                  double alpha, long A, long B, double beta, long C, int incX, int incY,
-                                                  int KL, int KU) {
-        validate();
-        rsnScriptIntrinsicBLAS_Double(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alpha, A, B, beta, C, incX, incY, KL, KU);
-    }
-
-    native void rsnScriptIntrinsicBLAS_Complex(long con, long id, int func, int TransA,
-                                               int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                               float alphaX, float alphaY, long A, long B, float betaX, float betaY, long C, int incX, int incY,
-                                               int KL, int KU);
-    synchronized void nScriptIntrinsicBLAS_Complex(long id, int func, int TransA,
-                                                   int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                                   float alphaX, float alphaY, long A, long B, float betaX, float betaY, long C, int incX, int incY,
-                                                   int KL, int KU) {
-        validate();
-        rsnScriptIntrinsicBLAS_Complex(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU);
-    }
-
-    native void rsnScriptIntrinsicBLAS_Z(long con, long id, int func, int TransA,
-                                         int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                         double alphaX, double alphaY, long A, long B, double betaX, double betaY, long C, int incX, int incY,
-                                         int KL, int KU);
-    synchronized void nScriptIntrinsicBLAS_Z(long id, int func, int TransA,
-                                             int TransB, int Side, int Uplo, int Diag, int M, int N, int K,
-                                             double alphaX, double alphaY, long A, long B, double betaX, double betaY, long C, int incX, int incY,
-                                             int KL, int KU) {
-        validate();
-        rsnScriptIntrinsicBLAS_Z(mContext, id, func, TransA, TransB, Side, Uplo, Diag, M, N, K, alphaX, alphaY, A, B, betaX, betaY, C, incX, incY, KL, KU);
-    }
-
-
     long     mDev;
     long     mContext;
     @SuppressWarnings({"FieldCanBeLocal"})
