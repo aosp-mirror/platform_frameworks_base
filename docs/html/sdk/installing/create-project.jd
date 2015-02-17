@@ -71,7 +71,7 @@ of your project.</p>
 <h3 id="Step2SelectFormFactor">Step 2: Select Form Factors and API Level</h2>
 
 <p>The next window lets you select the form factors supported by your app, such as phone, tablet,
-TV, Wear, and Google Glass. The selected form factors become the application modules witin the
+TV, Wear, and Google Glass. The selected form factors become the application modules within the
 project. For each form factor, you can also select the API Level for that app. To get more information,
 click <strong>Help me choose</strong>.</p>
 
@@ -220,7 +220,7 @@ with complete source files for each of them as shown in figure 6.</p>
   along with the other modules. </p>
 
   <p> You can easily change an existing application module to a library module by changing the
-  plugin assignment in the <strong>build.gradle</strong> file to <em>com.android.libary</em>.</p>
+  plugin assignment in the <strong>build.gradle</strong> file to <em>com.android.library</em>.</p>
 
 <pre>
 apply plugin: 'com.android.application'
@@ -287,7 +287,7 @@ file will override any shared library resources declared in the manifest file.</
 
   <ol>
     <li>Make sure that both the module library and the application module that depends on it are
-      in your proejct. If one of the modules is missing, import it into your project.</li>
+      in your project. If one of the modules is missing, import it into your project.</li>
 
     <li>In the project view, right-click the dependent module and select
     <strong>Open</strong> > <strong>Module Settings</strong>.</li>
@@ -359,39 +359,38 @@ Android project view:</p>
 per resource type.</li>
 </ul>
 
-<div style="float:right;margin-left:30px;width:240px">
-<img src="{@docRoot}images/tools/projectview01.png" alt="" width="220" height="264"/>
-<p class="img-caption"><strong>Figure 9:</strong> Show the Android project view.</p>
-</div>
 
 
-<h2 id="enable-view">Enable and use the Android Project View</h2>
+<h2 id="enable-view">Use the Android Project View</h2>
 
-<p>The Android project view is not yet enabled by default. To show the Android project view,
-click <strong>Project</strong> and select <strong>Android</strong>, as shown in figure 9.</p>
-
-<p>The Android project view shows all the build files at the top level of the project hierarchy
-under <strong>Gradle Scripts</strong>. Each project module appears as a folder at the top
-level of the project hierarchy and contains these three elements at the top level:</p>
+<p>The <em>Android</em> project view is enabled by default and shows all the build files at
+the top level of the project hierarchy under <strong>Gradle Scripts</strong>. The project module
+appears as a folder at the top level of the project hierarchy and contains these three elements
+at the top level:</p>
 
 <ul>
-<li><code>java/</code> - Source files for the module.</li>
 <li><code>manifests/</code> - Manifest files for the module.</li>
+<li><code>java/</code> - Source files for the module.</li>
 <li><code>res/</code> - Resource files for the module.</li>
 </ul>
 
-<p>Figure 10 shows how the Android project view groups all the instances of the
+<p>Notice how the Android project view groups all instances of the
 <code>ic_launcher.png</code> resource for different screen densities under the same element.</p>
 
 <p class="note"><strong>Note:</strong> The Android project view shows a hierarchy that helps you
 work with Android projects by providing a flattened structure that highlights the most commonly
 used files while developing Android applications. However, the project structure on disk differs
-from this representation.</p>
+from this representation and maintains the traditional project structure.</p>
 
-<img src="{@docRoot}images/tools/projectview03.png" alt=""
-     style="margin-top:10px" width="650" height="508"/>
-<p class="img-caption"><strong>Figure 10:</strong> The traditional project view (left) and the
-Android project view (right).</p>
+<img src="{@docRoot}images/tools/projectview-p1.png" alt="" style="width:240px" "/>
+&nbsp;&nbsp;&nbsp;
+<img src="{@docRoot}images/tools/projectview-p2.png" alt="" style="width:240px" " />
+<p class="img-caption"><strong>Figure 10:</strong> Android and Traditional project view </p>
+
+
+
+
+
 
 
 
