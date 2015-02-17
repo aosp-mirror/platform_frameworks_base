@@ -340,6 +340,12 @@ class DisplayContent {
         }
     }
 
+    static int deltaRotation(int oldRotation, int newRotation) {
+        int delta = newRotation - oldRotation;
+        if (delta < 0) delta += 4;
+        return delta;
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
