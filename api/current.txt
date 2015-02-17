@@ -5404,7 +5404,7 @@ package android.app.admin {
     ctor public DeviceAdminReceiver();
     method public android.app.admin.DevicePolicyManager getManager(android.content.Context);
     method public android.content.ComponentName getWho(android.content.Context);
-    method public java.lang.String onChoosePrivateKeyAlias(android.content.Context, android.content.Intent, long, java.lang.String, int, java.lang.String, java.lang.String);
+    method public java.lang.String onChoosePrivateKeyAlias(android.content.Context, android.content.Intent, int, java.lang.String, int, java.lang.String, java.lang.String);
     method public java.lang.CharSequence onDisableRequested(android.content.Context, android.content.Intent);
     method public void onDisabled(android.content.Context, android.content.Intent);
     method public void onEnabled(android.content.Context, android.content.Intent);

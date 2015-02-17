@@ -438,7 +438,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @return The private key alias to return and grant access to.
      * @see KeyChain#choosePrivateKeyAlias
      */
-    public String onChoosePrivateKeyAlias(Context context, Intent intent, long uid, String host,
+    public String onChoosePrivateKeyAlias(Context context, Intent intent, int uid, String host,
             int port, String url, String alias) {
         return null;
     }
@@ -473,7 +473,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
         } else if (ACTION_PROFILE_PROVISIONING_COMPLETE.equals(action)) {
             onProfileProvisioningComplete(context, intent);
         } else if (ACTION_CHOOSE_PRIVATE_KEY_ALIAS.equals(action)) {
-            long uid = intent.getLongExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
+            int uid = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_SENDER_UID, -1);
             String host = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_HOST);
             int port = intent.getIntExtra(EXTRA_CHOOSE_PRIVATE_KEY_PORT, -1);
             String url = intent.getStringExtra(EXTRA_CHOOSE_PRIVATE_KEY_URL);
