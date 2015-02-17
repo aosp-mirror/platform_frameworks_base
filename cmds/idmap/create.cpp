@@ -7,6 +7,7 @@
 #include <utils/String8.h>
 
 #include <fcntl.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 
 using namespace android;
