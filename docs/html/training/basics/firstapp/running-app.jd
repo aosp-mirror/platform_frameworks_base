@@ -83,14 +83,37 @@ from the toolbar.</li>
 
 <h3>Run the app from a command line</h3>
 
-<ol>
-  <li>Change directories to the root of your Android project and execute:
-<pre class="no-pretty-print">ant debug</pre></li>
-  <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
-<code>PATH</code> environment variable, then execute:
-<pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
-  <li>On your device, locate <em>MyFirstApp</em> and open it.</li>
-</ol>
+<p>Open a command-line and navigate to the root of your project directory.
+  Use Gradle to build your project in debug mode, invoke the <code>assembleDebug</code> build task
+  using the Gradle wrapper script (<code>gradlew assembleRelease</code>).
+
+  <p>This creates your debug <code>.apk</code> file inside the module <code>build/</code>
+  directory, named <code>MyFirstApp-debug.apk</code>.  </p>
+
+  <p>On Windows platforms, type this command:</p>
+
+<pre>
+> gradlew.bat assembleDebug
+</pre>
+
+<p>On Mac OS and Linux platforms, type these commands:</p>
+
+<pre>
+$ chmod +x gradlew
+$ ./gradlew assembleDebug
+</pre>
+
+  <p>After you build the project, the output APK for the app module is located in
+  <code>app/build/outputs/apk/</code>
+
+  <p class="note"><strong>Note:</strong> The first command (<code>chmod</code>) adds the execution
+  permission to the Gradle wrapper script and is only necessary the first time you build this
+  project from the command line.</p>
+
+  <p>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
+  <code>PATH</code> environment variable, then execute:
+  <pre class="no-pretty-print">adb install app/build/outputs/MyFirstApp-debug.apk</pre><p>
+  <p>On your device, locate <em>MyFirstApp</em> and open it.</p>
 
 <p>That's how you build and run your Android app on a device!
   To start developing, continue to the <a href="building-ui.html">next
@@ -113,11 +136,11 @@ device.</p>
       <li>In Android Studio, select <strong>Tools &gt; Android &gt; AVD Manager</strong>, or click
   the AVD Manager icon <img src="{@docRoot}images/tools/avd-manager-studio.png" style="vertical-align:bottom;margin:0;height:19px"> in the toolbar.</li>
       <li>Or, from the command line, change directories to
-      <code>&lt;sdk>/tools/</code> and execute:
-        <pre class="no-pretty-print">android avd</pre>
+      <code>sdk/</code> and execute:
+        <pre class="no-pretty-print">tools/android avd</pre>
         <p class="note"><strong>Note:</strong> The AVD Manager that appears
         when launched from the command line is different from the version in
-        Android Studio, so the following instructions may not apply.</p>
+        Android Studio, so the following instructions may not all apply.</p>
         </li>
     </ul>
 
@@ -127,7 +150,6 @@ device.</p>
 
   </li>
   <li>On the AVD Manager main screen (figure 1), click <strong>Create Virtual Device</strong>.</li>
-
   <li>In the Select Hardware window, select a device configuration, such as Nexus 6,
   then click <strong>Next</strong>.
   </li>
@@ -143,40 +165,33 @@ device.</p>
 <h3>Run the app from Android Studio</h3>
 <ol>
   <li>In <strong>Android Studio</strong>, select your project and click <strong>Run</strong>
-    <img src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" />
-    from the toolbar.</li>
+    <img src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" /> from the toolbar.</li>
   <li>In the <strong>Choose Device</strong> window, click the <strong>Launch emulator</strong> radio
     button.</li>
   <li>From the <strong>Android virtual device</strong> pull-down menu, select the emulator
     you created, and click <strong>OK</strong>.</li>
 </ol>
 <p>It can take a few minutes for the emulator to load itself. You may have to unlock the screen.
-  When you do, My First App appears on the emulator screen.</p>
+When you do, <em>My First App</em> appears on the emulator screen.</p>
 
 
 <h3>Run your app from the command line</h3>
-
-<ol>
-  <li>Change directories to the root of your Android project and execute:
-    <pre class="no-pretty-print">ant debug</pre></li>
+ <ol>
+  <li>Build the project from the command line. The output APK for the app module is located in
+  <code>app/build/outputs/apk/</code>.</li>
   <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
-    <code>PATH</code> environment variable, then execute:
-    <pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
+  <code>PATH</code> environment variable.</li>
+  <li>Execute this command:
+   <p>
+   <pre class="no-pretty-print">adb install app/build/outputs/MyFirstApp-debug.apk</pre>
+   </p> 
+  </li>
   <li>On the emulator, locate <em>MyFirstApp</em> and open it.</li>
-</ol>
+ </ol>
 
 
-<p>That's how you build and run your Android app on the emulator!
+  <p>That's how you build and run your Android app on the emulator!
   To start developing, continue to the <a href="building-ui.html">next
-lesson</a>.</p>
-
-
-
-
-
-
-
-
-
+  lesson</a>.</p>
 
 
