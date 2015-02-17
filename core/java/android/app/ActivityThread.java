@@ -2375,11 +2375,7 @@ public final class ActivityThread {
     private Context createBaseContextForActivity(ActivityClientRecord r, final Activity activity) {
         int displayId = Display.DEFAULT_DISPLAY;
         try {
-            IActivityContainer container =
-                    ActivityManagerNative.getDefault().getEnclosingActivityContainer(r.token);
-            if (container != null) {
-                displayId = container.getDisplayId();
-            }
+            displayId = ActivityManagerNative.getDefault().getActivityDisplayId(r.token);
         } catch (RemoteException e) {
         }
 

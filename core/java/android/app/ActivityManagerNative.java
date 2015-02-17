@@ -17,7 +17,6 @@
 package android.app;
 
 import android.app.ActivityManager.StackInfo;
-import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -2233,17 +2232,12 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case GET_ACTIVITY_CONTAINER_TRANSACTION: {
+        case GET_ACTIVITY_DISPLAY_ID_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder activityToken = data.readStrongBinder();
-            IActivityContainer activityContainer = getEnclosingActivityContainer(activityToken);
+            int displayId = getActivityDisplayId(activityToken);
             reply.writeNoException();
-            if (activityContainer != null) {
-                reply.writeInt(1);
-                reply.writeStrongBinder(activityContainer.asBinder());
-            } else {
-                reply.writeInt(0);
-            }
+            reply.writeInt(displayId);
             return true;
         }
 
@@ -5298,6 +5292,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
+    @Override
     public IActivityContainer createStackOnDisplay(int displayId) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -5317,26 +5312,22 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
+    @Override
+    public int getActivityDisplayId(IBinder activityToken)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(activityToken);
-        mRemote.transact(GET_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
+        mRemote.transact(GET_ACTIVITY_DISPLAY_ID_TRANSACTION, data, reply, 0);
         reply.readException();
-        final int result = reply.readInt();
-        final IActivityContainer res;
-        if (result == 1) {
-            res = IActivityContainer.Stub.asInterface(reply.readStrongBinder());
-        } else {
-            res = null;
-        }
+        final int displayId = reply.readInt();
         data.recycle();
         reply.recycle();
-        return res;
+        return displayId;
     }
 
+    @Override
     public IBinder getHomeActivityToken() throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
