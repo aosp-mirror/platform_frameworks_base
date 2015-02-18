@@ -192,6 +192,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
+        mYearPickerView.setRange(mMinDate, mMaxDate);
 
         final ColorStateList yearBackgroundColor = a.getColorStateList(
                 R.styleable.DatePicker_yearListSelectorColor);
