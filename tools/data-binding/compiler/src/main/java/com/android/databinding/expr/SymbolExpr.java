@@ -18,8 +18,8 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.Lists;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 import java.util.List;
 
@@ -38,8 +38,8 @@ public class SymbolExpr extends Expr {
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
-        return reflectionAnalyzer.findClass(mType);
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
+        return modelAnalyzer.findClass(mType);
     }
 
     @Override

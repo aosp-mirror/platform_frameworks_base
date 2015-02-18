@@ -20,7 +20,6 @@ import com.google.common.base.Preconditions;
 
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
-import com.android.databinding.reflection.ReflectionAnalyzer;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -241,8 +240,8 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
 //                @org.jetbrains.annotations.NotNull
 //                @Override
 //                public Class<? extends Object> resolveValueType(
-//                        @org.jetbrains.annotations.NotNull ReflectionAnalyzer reflectionAnalyzer) {
-//                    return reflectionAnalyzer.commonParentOf(aggregate.getResolvedClass(), nextResult.getResolvedClass());
+//                        @org.jetbrains.annotations.NotNull ModelAnalyzer modelAnalyzer) {
+//                    return modelAnalyzer.commonParentOf(aggregate.getResolvedClass(), nextResult.getResolvedClass());
 //                }
 //
 //                @org.jetbrains.annotations.NotNull

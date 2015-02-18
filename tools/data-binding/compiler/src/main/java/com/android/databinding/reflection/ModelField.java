@@ -15,33 +15,5 @@
  */
 package com.android.databinding.reflection;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-
-public class ModelField implements ReflectionField {
-
-    final VariableElement mField;
-
-    final TypeElement mDeclaredClass;
-
-    public ModelField(TypeElement declaredClass, VariableElement field) {
-        mDeclaredClass = declaredClass;
-        mField = field;
-    }
-
-    @Override
-    public String toString() {
-        return mField.toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ModelField) {
-            ModelField that = (ModelField) obj;
-            return mDeclaredClass.equals(that.mDeclaredClass) && ModelAnalyzer.instance
-                    .getTypeUtils().isSameType(mField.asType(), that.mField.asType());
-        } else {
-            return false;
-        }
-    }
+public interface ModelField {
 }

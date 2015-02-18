@@ -26,13 +26,13 @@ public class Callable {
 
     public final String name;
 
-    public final ReflectionClass resolvedType;
+    public final ModelClass resolvedType;
 
     public final boolean isDynamic;
 
     public final boolean canBeInvalidated;
 
-    public Callable(Type type, String name, ReflectionClass resolvedType, boolean isDynamic,
+    public Callable(Type type, String name, ModelClass resolvedType, boolean isDynamic,
             boolean canBeInvalidated) {
         this.type = type;
         this.name = name;

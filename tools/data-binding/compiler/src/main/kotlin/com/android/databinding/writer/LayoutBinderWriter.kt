@@ -15,7 +15,7 @@ package com.android.databinding.writer
 
 import com.android.databinding.LayoutBinder
 import com.android.databinding.expr.Expr
-import com.android.databinding.reflection.ReflectionAnalyzer
+import com.android.databinding.reflection.ModelAnalyzer
 import kotlin.properties.Delegates
 import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.BindingTarget

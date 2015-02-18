@@ -17,62 +17,16 @@ package com.android.databinding.reflection;
 
 import java.util.List;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
+public interface ModelMethod {
+    ModelClass getDeclaringClass();
 
-public class ModelMethod implements ReflectionMethod {
-    final ExecutableElement mMethod;
-    final DeclaredType mDeclaringType;
+    ModelClass[] getParameterTypes();
 
-    public ModelMethod(DeclaredType declaringType, ExecutableElement method) {
-        mDeclaringType = declaringType;
-        mMethod = method;
-    }
+    String getName();
 
-    @Override
-    public ReflectionClass getDeclaringClass() {
-        return new ModelClass(mDeclaringType);
-    }
+    ModelClass getReturnType(List<ModelClass> args);
 
-    @Override
-    public ReflectionClass[] getParameterTypes() {
-        List<? extends VariableElement> parameters = mMethod.getParameters();
-        ReflectionClass[] parameterTypes = new ReflectionClass[parameters.size()];
-        for (int i = 0; i < parameters.size(); i++) {
-            parameterTypes[i] = new ModelClass(parameters.get(i).asType());
-        }
-        return parameterTypes;
-    }
+    boolean isPublic();
 
-    @Override
-    public String getName() {
-        return mMethod.getSimpleName().toString();
-    }
-
-    @Override
-    public ReflectionClass getReturnType(List<ReflectionClass> args) {
-        ExecutableType executableType = (ExecutableType) ModelAnalyzer.instance.getTypeUtils().asMemberOf(mDeclaringType, mMethod);
-        TypeMirror returnType = executableType.getReturnType();
-        // TODO: support argument-supplied types
-        // for example: public T[] toArray(T[] arr)
-        return new ModelClass(returnType);
-    }
-
-    @Override
-    public boolean isPublic() {
-        return mMethod.getModifiers().contains(Modifier.PUBLIC);
-    }
-
-    @Override
-    public boolean isStatic() {
-        return mMethod.getModifiers().contains(Modifier.STATIC);
-    }
+    boolean isStatic();
 }

@@ -43,7 +43,7 @@ import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
 import java.util.Arrays
 import org.apache.commons.io.FileUtils
-import com.android.databinding.reflection.ReflectionAnalyzer
+import com.android.databinding.reflection.ModelAnalyzer
 import com.android.databinding.writer.JavaFileWriter
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -202,11 +202,6 @@ class DataBinderPlugin : Plugin<Project> {
         val cpFiles = arrayListOf<File>()
         cpFiles.addAll(dexTask.getInputFiles())
         cpFiles.addAll(jCompileTask.getClasspath().getFiles())
-        val urls = cpFiles.map { it.toURI().toURL() }.copyToArray()
-        log("generated urls: ${urls} len: ${urls.size}")
-        val classLoader = URLClassLoader(urls, androidClassLoader)
-        log("created class loader")
-        ReflectionAnalyzer.setClassLoader(classLoader)
         //project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {

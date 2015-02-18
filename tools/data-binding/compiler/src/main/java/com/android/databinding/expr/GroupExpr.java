@@ -16,8 +16,8 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 import java.util.List;
 
@@ -27,8 +27,8 @@ public class GroupExpr extends Expr {
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
-        return getWrapped().resolveType(reflectionAnalyzer);
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
+        return getWrapped().resolveType(modelAnalyzer);
     }
 
     @Override

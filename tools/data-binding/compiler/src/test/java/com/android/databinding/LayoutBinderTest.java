@@ -20,7 +20,7 @@ import com.android.databinding.expr.FieldAccessExpr;
 import com.android.databinding.expr.IdentifierExpr;
 import com.android.databinding.expr.StaticIdentifierExpr;
 import com.android.databinding.reflection.Callable;
-import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ModelAnalyzer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class LayoutBinderTest {
     ExprModel mExprModel;
     @Before
     public void setUp() throws Exception {
-        ReflectionAnalyzer.initForTests();
+        ModelAnalyzer.initForTests();
         mLayoutBinder = new LayoutBinder(null);
         mExprModel = mLayoutBinder.getModel();
     }

@@ -16,11 +16,10 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.Callable;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelClass;
 
-import java.util.Collections;
 import java.util.List;
 
 public class FieldAccessExpr extends Expr {
@@ -87,10 +86,10 @@ public class FieldAccessExpr extends Expr {
     }
 
     @Override
-    public void updateExpr(ReflectionAnalyzer reflectionAnalyzer) {
+    public void updateExpr(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            mGetter = reflectionAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
-            if (reflectionAnalyzer.isObservableField(mGetter.resolvedType)) {
+            mGetter = modelAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
+            if (modelAnalyzer.isObservableField(mGetter.resolvedType)) {
                 // Make this the ".get()" and add an extra field access for the observable field
                 Expr parent = getParent();
                 parent.getParents().remove(this);
@@ -101,16 +100,16 @@ public class FieldAccessExpr extends Expr {
 
                 getChildren().add(observableField);
                 observableField.getParents().add(this);
-                mGetter = reflectionAnalyzer.findMethodOrField(mGetter.resolvedType, "get");
+                mGetter = modelAnalyzer.findMethodOrField(mGetter.resolvedType, "get");
                 mName = "";
             }
         }
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            mGetter = reflectionAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
+            mGetter = modelAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
         }
         return mGetter.resolvedType;
     }

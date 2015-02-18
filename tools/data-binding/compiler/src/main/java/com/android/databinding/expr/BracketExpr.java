@@ -16,12 +16,10 @@
 
 package com.android.databinding.expr;
 
-import com.android.databinding.reflection.ClassClass;
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 import java.util.List;
-import java.util.Map;
 
 public class BracketExpr extends Expr {
 
@@ -38,8 +36,8 @@ public class BracketExpr extends Expr {
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
-        ReflectionClass targetType = getTarget().resolveType(reflectionAnalyzer);
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
+        ModelClass targetType = getTarget().resolveType(modelAnalyzer);
         if (targetType.isArray()) {
             mAccessor = BracketAccessor.ARRAY;
         } else if (targetType.isList()) {

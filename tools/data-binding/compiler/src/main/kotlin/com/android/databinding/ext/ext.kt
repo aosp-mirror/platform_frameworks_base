@@ -17,9 +17,9 @@ import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.Delegates
 import com.android.databinding.ext.joinToCamelCase
 import com.android.databinding.ext.joinToCamelCaseAsVar
-import com.android.databinding.reflection.ReflectionAnalyzer
-import com.android.databinding.reflection.ReflectionClass
-import com.android.databinding.reflection.ReflectionAnalyzer
+import com.android.databinding.reflection.ModelAnalyzer
+import com.android.databinding.reflection.ModelClass
+import com.android.databinding.reflection.ModelAnalyzer
 
 private class LazyExt<K, T>(private val initializer: (k : K) -> T) : ReadOnlyProperty<K, T> {
     private val mapping = hashMapOf<K, T>()

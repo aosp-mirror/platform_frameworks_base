@@ -17,8 +17,8 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.ImmutableMap;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +60,7 @@ public class ResourceExpr extends Expr {
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         String type;
         switch (mResourceType) {
             case "anim":
@@ -70,7 +70,7 @@ public class ResourceExpr extends Expr {
                 type = "android.animation.Animator";
                 break;
             case "bool":
-                return reflectionAnalyzer.findClass(boolean.class);
+                return modelAnalyzer.findClass(boolean.class);
             case "color":
             case "dimenOffset":
             case "dimenSize":
@@ -78,18 +78,18 @@ public class ResourceExpr extends Expr {
             case "integer":
             case "layout":
             case "plurals":
-                return reflectionAnalyzer.findClass(int.class);
+                return modelAnalyzer.findClass(int.class);
             case "colorStateList":
                 type = "android.content.res.ColorStateList";
                 break;
             case "dimen":
             case "fraction":
-                return reflectionAnalyzer.findClass(float.class);
+                return modelAnalyzer.findClass(float.class);
             case "drawable":
                 type = "android.graphics.drawable.Drawable";
                 break;
             case "intArray":
-                return reflectionAnalyzer.findClass(int[].class);
+                return modelAnalyzer.findClass(int[].class);
             case "interpolator":
                 type = "";
                 break;
@@ -97,9 +97,9 @@ public class ResourceExpr extends Expr {
                 type = "android.animation.StateListAnimator";
                 break;
             case "string":
-                return reflectionAnalyzer.findClass(String.class);
+                return modelAnalyzer.findClass(String.class);
             case "stringArray":
-                return reflectionAnalyzer.findClass(String[].class);
+                return modelAnalyzer.findClass(String[].class);
             case "transition":
                 type = "android.transition.Transition";
                 break;
@@ -110,7 +110,7 @@ public class ResourceExpr extends Expr {
                 type = mResourceType;
                 break;
         }
-        return reflectionAnalyzer.findClass(type);
+        return modelAnalyzer.findClass(type);
     }
 
     @Override

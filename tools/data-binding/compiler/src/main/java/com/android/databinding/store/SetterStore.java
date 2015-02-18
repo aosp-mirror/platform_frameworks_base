@@ -15,9 +15,9 @@
  */
 package com.android.databinding.store;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
-import com.android.databinding.reflection.ReflectionMethod;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.ModelMethod;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -53,10 +52,10 @@ public class SetterStore {
     private static SetterStore sStore;
 
     private final IntermediateV1 mStore;
-    private final ReflectionAnalyzer mClassAnalyzer;
+    private final ModelAnalyzer mClassAnalyzer;
 
-    private SetterStore(ReflectionAnalyzer reflectionAnalyzer, IntermediateV1 store) {
-        mClassAnalyzer = reflectionAnalyzer;
+    private SetterStore(ModelAnalyzer modelAnalyzer, IntermediateV1 store) {
+        mClassAnalyzer = modelAnalyzer;
         mStore = store;
     }
 
@@ -93,22 +92,22 @@ public class SetterStore {
         return sStore;
     }
 
-    public static SetterStore get(ReflectionAnalyzer reflectionAnalyzer) {
+    public static SetterStore get(ModelAnalyzer modelAnalyzer) {
         if (sStore == null) {
-            sStore = load(reflectionAnalyzer);
+            sStore = load(modelAnalyzer);
         }
         return sStore;
     }
 
-    private static SetterStore load(ReflectionAnalyzer reflectionAnalyzer) {
+    private static SetterStore load(ModelAnalyzer modelAnalyzer) {
         IntermediateV1 store = new IntermediateV1();
         String resourceName = SetterStore.class.getPackage().getName().replace('.', '/') +
                 '/' + SETTER_STORE_FILE_NAME;
         try {
-            for (URL resource : reflectionAnalyzer.getResources(resourceName)) {
+            for (URL resource : modelAnalyzer.getResources(resourceName)) {
                 merge(store, resource);
             }
-            return new SetterStore(reflectionAnalyzer, store);
+            return new SetterStore(modelAnalyzer, store);
         } catch (IOException e) {
             System.err.println("Could not read SetterStore intermediate file: " +
                     e.getLocalizedMessage());
@@ -118,7 +117,7 @@ public class SetterStore {
                     e.getLocalizedMessage());
             e.printStackTrace();
         }
-        return new SetterStore(reflectionAnalyzer, store);
+        return new SetterStore(modelAnalyzer, store);
     }
 
     private static SetterStore load(InputStream inputStream)
@@ -255,8 +254,8 @@ public class SetterStore {
         }
     }
 
-    public String getSetterCall(String attribute, ReflectionClass viewType,
-            ReflectionClass valueType, String viewExpression, String valueExpression) {
+    public String getSetterCall(String attribute, ModelClass viewType,
+            ModelClass valueType, String viewExpression, String valueExpression) {
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
@@ -266,9 +265,9 @@ public class SetterStore {
         HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
         MethodDescription adapter = null;
         String setterName = null;
-        ReflectionMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute);
-        ReflectionClass bestViewType = null;
-        ReflectionClass bestValueType = null;
+        ModelMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute);
+        ModelClass bestViewType = null;
+        ModelClass bestValueType = null;
         if (bestSetterMethod != null) {
             bestViewType = bestSetterMethod.getDeclaringClass();
             bestValueType = bestSetterMethod.getParameterTypes()[0];
@@ -278,10 +277,10 @@ public class SetterStore {
         if (adapters != null) {
             for (AccessorKey key : adapters.keySet()) {
                 try {
-                    ReflectionClass adapterViewType = mClassAnalyzer.findClass(key.viewType);
+                    ModelClass adapterViewType = mClassAnalyzer.findClass(key.viewType);
                     if (adapterViewType.isAssignableFrom(viewType)) {
                         try {
-                            ReflectionClass adapterValueType = mClassAnalyzer.findClass(key.valueType);
+                            ModelClass adapterValueType = mClassAnalyzer.findClass(key.valueType);
                             boolean isBetterView = bestViewType == null ||
                                     bestValueType.isAssignableFrom(adapterValueType);
                             if (isBetterParameter(valueType, adapterValueType, bestValueType,
@@ -317,7 +316,7 @@ public class SetterStore {
         }
     }
 
-    private ReflectionMethod getBestSetter(ReflectionClass viewType, ReflectionClass argumentType,
+    private ModelMethod getBestSetter(ModelClass viewType, ModelClass argumentType,
             String attribute) {
         String setterName = null;
 
@@ -325,7 +324,7 @@ public class SetterStore {
         if (renamed != null) {
             for (String className : renamed.keySet()) {
                 try {
-                    ReflectionClass renamedViewType = mClassAnalyzer.findClass(className);
+                    ModelClass renamedViewType = mClassAnalyzer.findClass(className);
                     if (renamedViewType.isAssignableFrom(viewType)) {
                         setterName = renamed.get(className).method;
                         break;
@@ -338,16 +337,16 @@ public class SetterStore {
         if (setterName == null) {
             setterName = getDefaultSetter(attribute);
         }
-        ReflectionMethod[] methods = viewType.getMethods(setterName, 1);
+        ModelMethod[] methods = viewType.getMethods(setterName, 1);
 
-        ReflectionClass bestParameterType = null;
-        ReflectionMethod bestMethod = null;
-        List<ReflectionClass> args = new ArrayList<>();
+        ModelClass bestParameterType = null;
+        ModelMethod bestMethod = null;
+        List<ModelClass> args = new ArrayList<>();
         args.add(argumentType);
-        for (ReflectionMethod method : methods) {
-            ReflectionClass[] parameterTypes = method.getParameterTypes();
+        for (ModelMethod method : methods) {
+            ModelClass[] parameterTypes = method.getParameterTypes();
             if (method.getReturnType(args).isVoid() && !method.isStatic() && method.isPublic()) {
-                ReflectionClass param = parameterTypes[0];
+                ModelClass param = parameterTypes[0];
                 if (isBetterParameter(argumentType, param, bestParameterType, true)) {
                     bestParameterType = param;
                     bestMethod = method;
@@ -365,8 +364,8 @@ public class SetterStore {
         return "set" + propertyName;
     }
 
-    private boolean isBetterParameter(ReflectionClass argument, ReflectionClass parameter,
-            ReflectionClass oldParameter, boolean isBetterViewTypeMatch) {
+    private boolean isBetterParameter(ModelClass argument, ModelClass parameter,
+            ModelClass oldParameter, boolean isBetterViewTypeMatch) {
         // Right view type. Check the value
         if (!isBetterViewTypeMatch && oldParameter.equals(argument)) {
             return false;
@@ -406,7 +405,7 @@ public class SetterStore {
         }
     }
 
-    private static boolean isImplicitConversion(ReflectionClass from, ReflectionClass to) {
+    private static boolean isImplicitConversion(ModelClass from, ModelClass to) {
         if (from != null && to != null && from.isPrimitive() && to.isPrimitive()) {
             if (from.isBoolean() || to.isBoolean() || to.isChar()) {
                 return false;
@@ -419,17 +418,17 @@ public class SetterStore {
         }
     }
 
-    private MethodDescription getConversionMethod(ReflectionClass from, ReflectionClass to) {
+    private MethodDescription getConversionMethod(ModelClass from, ModelClass to) {
         if (from != null && to != null) {
             for (String fromClassName : mStore.conversionMethods.keySet()) {
                 try {
-                    ReflectionClass convertFrom = mClassAnalyzer.findClass(fromClassName);
+                    ModelClass convertFrom = mClassAnalyzer.findClass(fromClassName);
                     if (canUseForConversion(from, convertFrom)) {
                         HashMap<String, MethodDescription> conversion =
                                 mStore.conversionMethods.get(fromClassName);
                         for (String toClassName : conversion.keySet()) {
                             try {
-                                ReflectionClass convertTo = mClassAnalyzer.findClass(toClassName);
+                                ModelClass convertTo = mClassAnalyzer.findClass(toClassName);
                                 if (canUseForConversion(convertTo, to)) {
                                     return conversion.get(toClassName);
                                 }
@@ -446,11 +445,11 @@ public class SetterStore {
         return null;
     }
 
-    private boolean canUseForConversion(ReflectionClass from, ReflectionClass to) {
+    private boolean canUseForConversion(ModelClass from, ModelClass to) {
         return from.equals(to) || isBoxingConversion(from, to) || to.isAssignableFrom(from);
     }
 
-    private static int getConversionLevel(ReflectionClass primitive) {
+    private static int getConversionLevel(ModelClass primitive) {
         if (primitive == null) {
             return -1;
         } else if (primitive.isByte()) {
@@ -472,7 +471,7 @@ public class SetterStore {
         }
     }
 
-    public static boolean isBoxingConversion(ReflectionClass class1, ReflectionClass class2) {
+    public static boolean isBoxingConversion(ModelClass class1, ModelClass class2) {
         if (class1.isPrimitive() != class2.isPrimitive()) {
             return (class1.box().equals(class2.box()));
         } else {

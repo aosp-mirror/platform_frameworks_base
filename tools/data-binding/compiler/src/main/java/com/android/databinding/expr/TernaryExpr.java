@@ -18,8 +18,8 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.Lists;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 import java.util.BitSet;
 import java.util.List;
@@ -47,8 +47,8 @@ public class TernaryExpr extends Expr {
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
-        return reflectionAnalyzer.findCommonParentOf(getIfTrue().getResolvedType(),
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
+        return modelAnalyzer.findCommonParentOf(getIfTrue().getResolvedType(),
                 getIfFalse().getResolvedType());
     }
 

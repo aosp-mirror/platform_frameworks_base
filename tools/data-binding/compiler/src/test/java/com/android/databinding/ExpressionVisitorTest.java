@@ -26,7 +26,7 @@ import com.android.databinding.expr.MethodCallExpr;
 import com.android.databinding.expr.SymbolExpr;
 import com.android.databinding.expr.TernaryExpr;
 import com.android.databinding.reflection.Callable;
-import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ModelAnalyzer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class ExpressionVisitorTest {
 
     @Before
     public void setUp() throws Exception {
-        ReflectionAnalyzer.initForTests();
+        ModelAnalyzer.initForTests();
     }
 
     private <T extends Expr> T parse(String input, Class<T> klass) {
@@ -69,7 +69,7 @@ public class ExpressionVisitorTest {
 
         @Before
         public void setUp() throws Exception {
-            ReflectionAnalyzer.initForTests();
+            ModelAnalyzer.initForTests();
         }
 
         @Parameterized.Parameters

@@ -18,9 +18,9 @@ package com.android.databinding.expr;
 
 import com.google.common.collect.Iterables;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
+import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.Callable;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelClass;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,13 +37,13 @@ public class MethodCallExpr extends Expr {
     }
 
     @Override
-    protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer) {
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            List<ReflectionClass> args = new ArrayList<>();
+            List<ModelClass> args = new ArrayList<>();
             for (Expr expr : getArgs()) {
                 args.add(expr.getResolvedType());
             }
-            mGetter = reflectionAnalyzer.findMethod(getTarget().getResolvedType(), mName, args);
+            mGetter = modelAnalyzer.findMethod(getTarget().getResolvedType(), mName, args);
         }
         return mGetter.resolvedType;
     }

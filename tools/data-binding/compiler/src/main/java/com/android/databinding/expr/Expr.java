@@ -28,8 +28,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import com.android.databinding.reflection.ReflectionAnalyzer;
-import com.android.databinding.reflection.ReflectionClass;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 abstract public class Expr {
 
@@ -41,7 +41,7 @@ abstract public class Expr {
 
     private Boolean mIsDynamic;
 
-    private ReflectionClass mResolvedType;
+    private ModelClass mResolvedType;
 
     private String mUniqueKey;
 
@@ -145,7 +145,7 @@ abstract public class Expr {
     }
 
     public boolean isObservable() {
-        return ReflectionAnalyzer.getInstance().isObservable(getResolvedType());
+        return ModelAnalyzer.getInstance().isObservable(getResolvedType());
     }
 
     public BitSet getShouldReadFlags() {
@@ -278,15 +278,15 @@ abstract public class Expr {
 
     }
 
-    public ReflectionClass getResolvedType() {
+    public ModelClass getResolvedType() {
         if (mResolvedType == null) {
             // TODO not get instance
-            mResolvedType = resolveType(ReflectionAnalyzer.getInstance());
+            mResolvedType = resolveType(ModelAnalyzer.getInstance());
         }
         return mResolvedType;
     }
 
-    abstract protected ReflectionClass resolveType(ReflectionAnalyzer reflectionAnalyzer);
+    abstract protected ModelClass resolveType(ModelAnalyzer modelAnalyzer);
 
     abstract protected List<Dependency> constructDependencies();
 
@@ -535,7 +535,7 @@ abstract public class Expr {
     }
 
     public String getDefaultValue() {
-        return ReflectionAnalyzer.getInstance().getDefaultValue(getResolvedType().toJavaCode());
+        return ModelAnalyzer.getInstance().getDefaultValue(getResolvedType().toJavaCode());
     }
 
     protected BitSet getPredicateInvalidFlags() {
@@ -569,7 +569,7 @@ abstract public class Expr {
         return mIsUsed;
     }
 
-    public void updateExpr(ReflectionAnalyzer reflectionAnalyzer) {
+    public void updateExpr(ModelAnalyzer modelAnalyzer) {
     }
 
     static class Node {
