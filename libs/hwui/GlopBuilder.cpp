@@ -271,10 +271,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, bool isAlphaMask
     }
 
     if (isAlphaMaskTexture) {
-        mDescription.modulate = mOutGlop->fill.color.a < 1.0f
-                || mOutGlop->fill.color.r > 0.0f
-                || mOutGlop->fill.color.g > 0.0f
-                || mOutGlop->fill.color.b > 0.0f;
+        mDescription.modulate = mOutGlop->fill.color.isNotBlack();
     } else {
         mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     }
@@ -295,27 +292,74 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale) {
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setFillPathTexturePaint(Texture& texture,
+GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
         const SkPaint& paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
     mOutGlop->fill.texture = &texture;
 
-    //specify invalid, since these are always static for path textures
+    //specify invalid, since these are always static for PathTextures
     mOutGlop->fill.textureFilter = GL_INVALID_ENUM;
     mOutGlop->fill.textureClamp = GL_INVALID_ENUM;
 
     setFill(paint.getColor(), alphaScale, PaintUtils::getXfermode(paint.getXfermode()),
             paint.getShader(), paint.getColorFilter());
 
-    mDescription.modulate = mOutGlop->fill.color.a < 1.0f
-            || mOutGlop->fill.color.r > 0.0f
-            || mOutGlop->fill.color.g > 0.0f
-            || mOutGlop->fill.color.b > 0.0f;
+    mDescription.modulate = mOutGlop->fill.color.isNotBlack();
     return *this;
 }
 
+GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int shadowColor,
+        const SkPaint& paint, float alphaScale) {
+    TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
+
+    mOutGlop->fill.texture = &texture;
+
+    //specify invalid, since these are always static for ShadowTextures
+    mOutGlop->fill.textureFilter = GL_INVALID_ENUM;
+    mOutGlop->fill.textureClamp = GL_INVALID_ENUM;
+
+    const int ALPHA_BITMASK = SK_ColorBLACK;
+    const int COLOR_BITMASK = ~ALPHA_BITMASK;
+    if ((shadowColor & ALPHA_BITMASK) == ALPHA_BITMASK) {
+        // shadow color is fully opaque: override its alpha with that of paint
+        shadowColor &= paint.getColor() | COLOR_BITMASK;
+    }
+
+    setFill(shadowColor, alphaScale, PaintUtils::getXfermode(paint.getXfermode()),
+            paint.getShader(), paint.getColorFilter());
+
+    mDescription.modulate = mOutGlop->fill.color.isNotBlack();
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setFillBlack() {
+    TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
+
+    mOutGlop->fill.texture = nullptr;
+    mOutGlop->fill.textureFilter = GL_INVALID_ENUM;
+    mOutGlop->fill.textureClamp = GL_INVALID_ENUM;
+
+    setFill(SK_ColorBLACK, 1.0f, SkXfermode::kSrcOver_Mode, nullptr, nullptr);
+
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setFillClear() {
+    TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
+
+    mOutGlop->fill.texture = nullptr;
+    mOutGlop->fill.textureFilter = GL_INVALID_ENUM;
+    mOutGlop->fill.textureClamp = GL_INVALID_ENUM;
+
+    setFill(SK_ColorBLACK, 1.0f, SkXfermode::kClear_Mode, nullptr, nullptr);
+
+    return *this;
+}
 ////////////////////////////////////////////////////////////////////////////////
 // Transform
 ////////////////////////////////////////////////////////////////////////////////

@@ -1198,8 +1198,8 @@ void OpenGLRenderer::issueIndexedQuadDraw(Vertex* mesh, GLsizei quadsCount) {
 }
 
 void OpenGLRenderer::clearLayerRegions() {
-    const size_t count = mLayers.size();
-    if (count == 0) return;
+    const size_t quadCount = mLayers.size();
+    if (quadCount == 0) return;
 
     if (!mState.currentlyIgnored()) {
         EVENT_LOGD("clearLayerRegions");
@@ -1212,10 +1212,10 @@ void OpenGLRenderer::clearLayerRegions() {
         // is likely different so we need to disable clipping here
         bool scissorChanged = mRenderState.scissor().setEnabled(false);
 
-        Vertex mesh[count * 4];
+        Vertex mesh[quadCount * 4];
         Vertex* vertex = mesh;
 
-        for (uint32_t i = 0; i < count; i++) {
+        for (uint32_t i = 0; i < quadCount; i++) {
             const Rect& bounds = mLayers[i];
 
             Vertex::set(vertex++, bounds.left, bounds.top);
@@ -1228,18 +1228,30 @@ void OpenGLRenderer::clearLayerRegions() {
         // the same thing again
         mLayers.clear();
 
-        SkPaint clearPaint;
-        clearPaint.setXfermodeMode(SkXfermode::kClear_Mode);
+        if (USE_GLOPS) {
+            Glop glop;
+            GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+            aBuilder.setMeshIndexedQuads(&mesh[0], quadCount)
+                    .setFillClear()
+                    .setTransformClip(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                    .setModelViewOffsetRect(0, 0, currentSnapshot()->getClipRect())
+                    .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                    .build();
+            renderGlop(glop);
+        } else {
+            SkPaint clearPaint;
+            clearPaint.setXfermodeMode(SkXfermode::kClear_Mode);
 
-        setupDraw(false);
-        setupDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
-        setupDrawBlending(&clearPaint, true);
-        setupDrawProgram();
-        setupDrawPureColorUniforms();
-        setupDrawModelView(kModelViewMode_Translate, false,
-                0.0f, 0.0f, 0.0f, 0.0f, true);
+            setupDraw(false);
+            setupDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
+            setupDrawBlending(&clearPaint, true);
+            setupDrawProgram();
+            setupDrawPureColorUniforms();
+            setupDrawModelView(kModelViewMode_Translate, false,
+                    0.0f, 0.0f, 0.0f, 0.0f, true);
 
-        issueIndexedQuadDraw(&mesh[0], count);
+            issueIndexedQuadDraw(&mesh[0], quadCount);
+        }
 
         if (scissorChanged) mRenderState.scissor().setEnabled(true);
     } else {
@@ -1391,11 +1403,11 @@ static void handlePointNoTransform(std::vector<Vertex>& rectangleVertices, float
 }
 
 void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
-    int count = rectangleList.getTransformedRectanglesCount();
-    std::vector<Vertex> rectangleVertices(count * 4);
+    int quadCount = rectangleList.getTransformedRectanglesCount();
+    std::vector<Vertex> rectangleVertices(quadCount * 4);
     Rect scissorBox = rectangleList.calculateBounds();
     scissorBox.snapToPixelBoundaries();
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < quadCount; ++i) {
         const TransformedRectangle& tr(rectangleList.getTransformedRectangle(i));
         const Matrix4& transform = tr.getTransform();
         Rect bounds = tr.getBounds();
@@ -1419,6 +1431,19 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
 
     mRenderState.scissor().set(scissorBox.left, getViewportHeight() - scissorBox.bottom,
             scissorBox.getWidth(), scissorBox.getHeight());
+
+    if (USE_GLOPS) {
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshIndexedQuads(&rectangleVertices[0], rectangleVertices.size() / 4)
+                .setFillBlack()
+                .setTransformClip(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                .setModelViewOffsetRect(0, 0, scissorBox)
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
 
     const SkPaint* paint = nullptr;
     setupDraw();
@@ -2654,17 +2679,30 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     // NOTE: The drop shadow will not perform gamma correction
     //       if shader-based correction is enabled
     mCaches.dropShadowCache.setFontRenderer(fontRenderer);
-    const ShadowTexture* shadow = mCaches.dropShadowCache.get(
+    ShadowTexture* texture = mCaches.dropShadowCache.get(
             paint, text, bytesCount, count, textShadow.radius, positions);
     // If the drop shadow exceeds the max texture size or couldn't be
     // allocated, skip drawing
-    if (!shadow) return;
-    const AutoTexture autoCleanup(shadow);
+    if (!texture) return;
+    const AutoTexture autoCleanup(texture);
 
-    const float sx = x - shadow->left + textShadow.dx;
-    const float sy = y - shadow->top + textShadow.dy;
+    const float sx = x - texture->left + textShadow.dx;
+    const float sy = y - texture->top + textShadow.dy;
 
-    const int shadowAlpha = ((textShadow.color >> 24) & 0xFF) * writableSnapshot()->alpha;
+    if (USE_GLOPS) {
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshTexturedUnitQuad(nullptr, true)
+                .setFillShadowTexturePaint(*texture, textShadow.color, *paint, currentSnapshot()->alpha)
+                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
+    const int shadowAlpha = ((textShadow.color >> 24) & 0xFF) * currentSnapshot()->alpha;
     if (getShader(paint)) {
         textShadow.color = SK_ColorWHITE;
     }
@@ -2677,8 +2715,8 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     setupDrawBlending(paint, true);
     setupDrawProgram();
     setupDrawModelView(kModelViewMode_TranslateAndScale, false,
-            sx, sy, sx + shadow->width, sy + shadow->height);
-    setupDrawTexture(shadow->id);
+            sx, sy, sx + texture->width, sy + texture->height);
+    setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawShaderUniforms(getShader(paint));
@@ -3010,7 +3048,6 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
                     composeLayerRect(layer, layer->regionRect));
         } else if (layer->mesh) {
-
             const float a = getLayerAlpha(layer);
             setupDraw();
             setupDrawWithTexture();
@@ -3093,8 +3130,8 @@ Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
     return texture;
 }
 
-void OpenGLRenderer::drawPathTexture(PathTexture* texture,
-        float x, float y, const SkPaint* paint) {
+void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
+        const SkPaint* paint) {
     if (quickRejectSetupScissor(x, y, x + texture->width, y + texture->height)) {
         return;
     }
