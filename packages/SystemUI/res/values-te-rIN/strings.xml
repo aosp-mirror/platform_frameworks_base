@@ -369,14 +369,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ని దాచాలా?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"మీరు సెట్టింగ్‌ల్లో దీన్ని ఆన్ చేసిన తదుపరిసారి ఇది కనిపిస్తుంది."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"దాచు"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్‌గా ఉండాలనుకుంటోంది."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"అనుమతించు"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"తిరస్కరించు"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> అనేది వాల్యూమ్ డైలాగ్"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"అసలుదాన్ని పునరుద్ధరించడానికి తాకండి."</string>
 </resources>

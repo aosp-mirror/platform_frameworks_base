@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"უკან"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"საწყისი"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"მენიუ"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"გადახედვა"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"მიმოხილვა"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ძიება"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"კამერა"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ტელეფონი"</string>
@@ -166,7 +166,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"სწრაფი პარამეტრები"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ეკრანის დაბლოკვა."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"პარამეტრები"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"გადახედვა."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"მიმოხილვა"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"მომხმარებელი: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi გამორთულია."</string>
@@ -369,14 +369,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"დაიმალოს <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ის კვლავ გამოჩნდება, როდესაც პარამეტრებში ჩართავთ"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"დამალვა"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> სურს იყოს ხმოვან დიალოგში."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"უფლების მიცემა"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"უარყოფა"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ხმოვან დიალოგშია"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"ორიგინალის აღდგენისათვის, შეეხეთ."</string>
 </resources>
