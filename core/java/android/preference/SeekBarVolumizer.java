@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -174,6 +175,11 @@ public class SeekBarVolumizer implements OnSeekBarChangeListener, Handler.Callba
             }
             if (mRingtone != null) {
                 try {
+                    mRingtone.setAudioAttributes(new AudioAttributes.Builder(mRingtone
+                            .getAudioAttributes())
+                            .setFlags(AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY |
+                                    AudioAttributes.FLAG_BYPASS_MUTE)
+                            .build());
                     mRingtone.play();
                 } catch (Throwable e) {
                     Log.w(TAG, "Error playing ringtone, stream " + mStreamType, e);

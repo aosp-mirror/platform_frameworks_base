@@ -15118,6 +15118,8 @@ package android.media {
     field public static final android.os.Parcelable.Creator<android.media.AudioAttributes> CREATOR;
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int FLAG_BEACON = 8; // 0x8
+    field public static final int FLAG_BYPASS_INTERRUPTION_POLICY = 64; // 0x40
+    field public static final int FLAG_BYPASS_MUTE = 128; // 0x80
     field public static final int FLAG_HW_AV_SYNC = 16; // 0x10
     field public static final int FLAG_HW_HOTWORD = 32; // 0x20
     field public static final int USAGE_ALARM = 4; // 0x4

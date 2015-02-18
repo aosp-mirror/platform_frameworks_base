@@ -604,6 +604,7 @@ public class MediaPlayer implements SubtitleController.Listener
     private final IAppOpsService mAppOps;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
     private int mUsage = -1;
+    private boolean mBypassInterruptionPolicy;
 
     /**
      * Default constructor. Consider using one of the create() methods for
@@ -1169,6 +1170,9 @@ public class MediaPlayer implements SubtitleController.Listener
     private native void _start() throws IllegalStateException;
 
     private boolean isRestricted() {
+        if (mBypassInterruptionPolicy) {
+            return false;
+        }
         try {
             final int usage = mUsage != -1 ? mUsage
                     : AudioAttributes.usageForLegacyStreamType(getAudioStreamType());
@@ -1560,6 +1564,8 @@ public class MediaPlayer implements SubtitleController.Listener
             throw new IllegalArgumentException(msg);
         }
         mUsage = attributes.getUsage();
+        mBypassInterruptionPolicy = (attributes.getFlags()
+                & AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY) != 0;
         Parcel pattributes = Parcel.obtain();
         attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
         setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
