@@ -29,6 +29,7 @@ Saved in {@code res/color/} and accessed from the {@code R.color} class.</dd>
   <dt><a href="{@docRoot}guide/topics/resources/drawable-resource.html">Drawable Resources</a></dt>
     <dd>Define various graphics with bitmaps or XML.<br/>
 Saved in {@code res/drawable/} and accessed from the {@code R.drawable} class.</dd>
+
   <dt><a href="{@docRoot}guide/topics/resources/layout-resource.html">Layout Resource</a></dt>
     <dd>Define the layout for your application UI.<br/>
 Saved in {@code res/layout/} and accessed from the {@code R.layout} class.</dd>

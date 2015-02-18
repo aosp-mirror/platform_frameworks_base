@@ -60,17 +60,23 @@ MyProject/
         MyActivity.java  </span>
     res/
         drawable/  <span style="color:black">
-            icon.png  </span>
+            graphic.png  </span>
         layout/  <span style="color:black">
             main.xml
             info.xml</span>
+        mipmap/  <span style="color:black">
+            icon.png </span>
         values/  <span style="color:black">
             strings.xml  </span>
 </pre>
 
 <p>As you can see in this example, the {@code res/} directory contains all the resources (in
-subdirectories): an image resource, two layout resources, and a string resource file. The resource
+subdirectories): an image resource, two layout resources, {@code mipmap/} directories for launcher
+icons, and a string resource file. The resource
 directory names are important and are described in table 1.</p>
+
+<p class="note"><strong>Note:</strong> For more information about using the mipmap folders, see
+<a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>.</p>
 
 <p class="table-caption" id="table1"><strong>Table 1.</strong> Resource directories
 supported inside project {@code res/} directory.</p>
@@ -104,6 +110,7 @@ State List Resource</a></td>
 
   <tr>
     <td><code>drawable/</code></td>
+
     <td><p>Bitmap files ({@code .png}, {@code .9.png}, {@code .jpg}, {@code .gif}) or XML files that
 are compiled into the following drawable resource subtypes:</p>
       <ul>
@@ -116,6 +123,13 @@ are compiled into the following drawable resource subtypes:</p>
       </ul>
       <p>See <a href="drawable-resource.html">Drawable Resources</a>.</p>
     </td>
+  </tr>
+
+  <tr>
+    <td><code>mipmap/</code></td>
+    <td>Drawable files for different launcher icon densities. For more information on managing
+    launcher icons with {@code mipmap/} folders, see
+    <a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>.</td>
   </tr>
 
   <tr>
