@@ -65,8 +65,8 @@ Studio</a>.</p>
 <h3 id="project-view"><em>Android</em> Project View</h3>
 <p>By default, Android Studio displays your profile files in the <em>Android</em> project view. This
 view shows a flattened version of your project's structure that provides quick access to the key
-source files of Android projects and helps you work with the new
-<a href="{@docRoot}sdk/installing/studio-build.html">Gradle-based build system</a>. 
+source files of Android projects and helps you work with the
+<a href="{@docRoot}sdk/installing/studio-build.html">Gradle-based build system</a>.
 The Android project view:</p>
 
 <ul>
@@ -102,7 +102,7 @@ the <strong>Project</strong drop-down. </p>
 
 
 
-<h3>New Project and Directory Structure</h3>
+<h3>Android Studio Project and Directory Structure</h3>
 <p>When you use the <em>Project</em> view of a new project in Android Studio, you
 should notice that the project structure appears different than you may be used to in Eclipse. Each
 instance of Android Studio contains a project with one or more application modules. Each
@@ -118,6 +118,7 @@ specification and the files under {@code src/androidTest} directory for test cas
 <p>For more information, see
 <a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Project+Organization"class="external-link">IntelliJ project organization</a> and
 <a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.</p>
+
 
 
 <h3>Creating new files</h3>
@@ -250,23 +251,15 @@ memory the connected device is using. With your app running on a device or emula
 <strong>Memory Monitor</strong> tab in the lower right corner to launch the memory monitor. </p>
 
     <img src="{@docRoot}images/tools/studio-memory-monitor.png" />
-    <p class="img-caption"><strong>Figure 4.</strong> Memory Monitor</p>
+    <p class="img-caption"><strong>Figure 5.</strong> Memory Monitor</p>
 
 
 
-<h3> New Lint inspections</h3>
-<p>Lint has several new checks to ensure:
-<ul>
-  <li><code> Cipher.getInstance()</code> is used with safe values</li>
-  <li>In custom Views, the associated declare-styleable for the custom view uses the same
-  base name as the class name.</li>
-  <li>Security check for fragment injection.</li>
-  <li>Where ever property assignment no longer works as expected.</li>
-  <li>Gradle plugin version is compatible with the SDK.</li>
-  <li>Right to left validation </li>
-  <li>Required API version</li>
-  <li>many others</li>
-</ul>
+<h3> Lint inspections</h3>
+<p>The Android {@code lint} tool is a static code analysis tool that checks your Android project
+source files for potential bugs and optimization improvements. Choose the <strong>Analyze &gt; 
+Inspect Code</strong> to manually run the inspections. The {@code lint} settings icon in the
+Inspection display provides a complete list of the current inspections.</p>
 
 <p>Hovering over a Lint error displays the full issue explanation inline for easy error
 resolution. There is also a helpful hyperlink at the end of the error message for additional
@@ -295,17 +288,17 @@ build.gradle file.  </p>
 <p>Android Studio allows you to work with layouts in both a <em>Design View</em> </p>
 <p><img src="{@docRoot}images/tools/studio-helloworld-design.png" alt="" />
 </p>
-    <p class="img-caption"><strong>Figure 5.</strong> Hello World App with Design View</p>
+    <p class="img-caption"><strong>Figure 6.</strong> Hello World App with Design View</p>
 
 <p>and a <em>Text View</em>. </p>
 
     <p><img src="{@docRoot}images/tools/studio-helloworld-text.png" alt="" />
-    <pclass="img-caption"><strong>Figure 6.</strong> Hello World App with Text View</p>
+    <pclass="img-caption"><strong>Figure 7.</strong> Hello World App with Text View</p>
 
 <p>Easily select and preview layout changes for different device images, display
 densities, UI modes, locales, and Android versions (multi-API version rendering).
     <p><img src="{@docRoot}images/tools/studio-api-version-rendering.png" /></p>
-    <p class="img-caption"><strong>Figure 7.</strong> API Version Rendering</p>
+    <p class="img-caption"><strong>Figure 8.</strong> API Version Rendering</p>
 
 
 <p>From the Design View, you can drag and drop elements from the Palette to the Preview or
@@ -342,18 +335,18 @@ the wizard updates your system image and emulation requirements, such GPU, and t
 an optimized default Android Virtual Device (AVD) based on Android 5 (Lollipop) for speedy and
 reliable emulation. </p>
 <p><img src="{@docRoot}images/tools/studio-setup-wizard.png" /></p>
-<p class="img-caption"><strong>Figure 8.</strong> Setup Wizard</p>
+<p class="img-caption"><strong>Figure 9.</strong> Setup Wizard</p>
 
 
 <h3>Expanded template and form factor support</h3>
-<p>Android Studio supports new templates for Google Services and expands the available device
+<p>Android Studio supports templates for Google Services and expands the available device
 types. </p>
 
     <h4> Android Wear and TV support</h4>
     <p>For easy cross-platform development, the Project Wizard provides new templates for
     creating your apps for Android Wear and TV. </p>
     <p><img src="{@docRoot}images/tools/studio-tvwearsupport.png"  />
-      <p class="img-caption"><strong>Figure 9.</strong> New Form Factors</p>
+      <p class="img-caption"><strong>Figure 10.</strong> Supported Form Factors</p>
     <p>During app creation, the Project Wizard also displays an API Level dialog to help you choose
     the best <em>minSdkVersion</em> for your project.</p>
 
@@ -363,7 +356,7 @@ types. </p>
     and create a cloud end-point is as easy as selecting <em>File > New Module > App Engine Java
     Servlet Module</em> and specifying the module, package, and client names. </p>
     <p><img src="{@docRoot}images/tools/studio-cloudmodule.png" /></p>
-    <p class="img-caption"><strong>Figure 10.</strong> Setup Wizard</p>
+    <p class="img-caption"><strong>Figure 11.</strong> Setup Wizard</p>
 
 
 
@@ -514,14 +507,14 @@ into your project. </p>
 <strong>Open Editor</strong> link.  </p>
 
     <img src="{@docRoot}images/tools/studio-translationeditoropen.png" />
-    <p class="img-caption"><strong>Figure 11.</strong> Translation Editor</p>
+    <p class="img-caption"><strong>Figure 12.</strong> Translation Editor</p>
 
 
 <h3> Editor support for the latest Android APIs</h3>
-<p>Android Studio supports the new
+<p>Android Studio supports the
 <a href="{@docRoot}design/material/index.html">Material Design</a></li> themes, widgets, and
 graphics, such as shadow layers and API version rendering (showing the layout across different
-UI versions). Also, the new drawable XML tags and attributes, such as &lt;ripple&gt;
+UI versions). Also, the drawable XML tags and attributes, such as &lt;ripple&gt;
 and &lt;animated-selector&gt;, are supported.</p>
 
 
@@ -529,9 +522,9 @@ and &lt;animated-selector&gt;, are supported.</p>
 <p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or Welcome page
 provides seamless access to Google code samples on GitHub.</p>
     <p><img src="{@docRoot}images/tools/studio-samples-githubaccess.png" /></p>
-    <p class="img-caption"><strong>Figure 12.</strong> Code Sample Access</p>
+    <p class="img-caption"><strong>Figure 13.</strong> Code Sample Access</p>
 
     <p><img src="{@docRoot}images/tools/studio-sample-in-editor.png" /></p>
-    <p class="img-caption"><strong>Figure 13.</strong> Imported Code Sample</p>
+    <p class="img-caption"><strong>Figure 14.</strong> Imported Code Sample</p>
 
 
