@@ -117,8 +117,9 @@ public class ResourcesManager {
      * @param overrideConfiguration override configurations.
      */
     public Display getAdjustedDisplay(final int displayId, Configuration overrideConfiguration) {
-        final Pair<Integer, Configuration> key =
-                Pair.create(displayId, new Configuration(overrideConfiguration));
+        final Configuration configCopy = (overrideConfiguration != null)
+                ? new Configuration(overrideConfiguration) : new Configuration();
+        final Pair<Integer, Configuration> key = Pair.create(displayId, configCopy);
         synchronized (this) {
             WeakReference<Display> wd = mDisplays.get(key);
             if (wd != null) {

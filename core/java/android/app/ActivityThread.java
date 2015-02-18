@@ -3867,6 +3867,7 @@ public final class ActivityThread {
                     ActivityClientRecord existing = mActivities.get(token);
                     if (existing != null) {
                         target.startsNotResumed = existing.paused;
+                        target.overrideConfig = existing.overrideConfig;
                     }
                     target.onlyLocalRequest = true;
                 }
