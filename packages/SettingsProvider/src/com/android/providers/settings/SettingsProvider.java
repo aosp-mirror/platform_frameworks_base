@@ -779,7 +779,7 @@ public class SettingsProvider extends ContentProvider {
 
         // Special cases for location providers (sigh).
         if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-            return updateLocationProvidersAllowed(value, owningUserId);
+            return updateLocationProvidersAllowedLocked(value, owningUserId);
         }
 
         // Mutate the value.
@@ -1072,7 +1072,7 @@ public class SettingsProvider extends ContentProvider {
      *
      * @returns whether the enabled location providers changed.
      */
-    private boolean updateLocationProvidersAllowed(String value, int owningUserId) {
+    private boolean updateLocationProvidersAllowedLocked(String value, int owningUserId) {
         if (TextUtils.isEmpty(value)) {
             return false;
         }
@@ -1130,10 +1130,9 @@ public class SettingsProvider extends ContentProvider {
             return false;
         }
 
-        updateSecureSettingLocked(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                newProviders, owningUserId);
-
-        return true;
+        return mSettingsRegistry.insertSettingLocked(SettingsRegistry.SETTINGS_TYPE_SECURE,
+                owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders,
+                getCallingPackage());
     }
 
     private void sendNotify(Uri uri, int userId) {
