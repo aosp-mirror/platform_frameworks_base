@@ -117,6 +117,9 @@ public class AlsaCardsParser {
                 cardRecord.parse(line, 0);
 
                 line = bufferedReader.readLine();
+                if (line == null) {
+                    break;
+                }
                 if (DEBUG) {
                     Slog.i(TAG, "  " + line);
                 }
