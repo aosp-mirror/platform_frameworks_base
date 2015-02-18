@@ -1288,6 +1288,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return displayContent.isDefaultDisplay;
     }
 
+    @Override
+    public boolean isDimming() {
+        TaskStack stack = getStack();
+        if (stack == null) {
+            return false;
+        }
+        return stack.isDimming(mWinAnimator);
+    }
+
     public void setShowToOwnerOnlyLocked(boolean showToOwnerOnly) {
         mShowToOwnerOnly = showToOwnerOnly;
     }

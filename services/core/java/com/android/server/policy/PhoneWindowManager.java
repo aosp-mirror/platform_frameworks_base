@@ -457,6 +457,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpNavigationFrame = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
+    WindowState mTopFullscreenOpaqueOrDimmingWindowState;
     HashSet<IApplicationToken> mAppsToBeHidden = new HashSet<IApplicationToken>();
     HashSet<IApplicationToken> mAppsThatDismissKeyguard = new HashSet<IApplicationToken>();
     boolean mTopIsFullscreen;
@@ -3972,6 +3973,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
+        mTopFullscreenOpaqueOrDimmingWindowState = null;
         mAppsToBeHidden.clear();
         mAppsThatDismissKeyguard.clear();
         mForceStatusBar = false;
@@ -4060,6 +4062,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && attrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "Fullscreen window: " + win);
                     mTopFullscreenOpaqueWindowState = win;
+                    if (mTopFullscreenOpaqueOrDimmingWindowState == null) {
+                        mTopFullscreenOpaqueOrDimmingWindowState = win;
+                    }
                     if (!mAppsThatDismissKeyguard.isEmpty() &&
                             mDismissKeyguard == DISMISS_KEYGUARD_NONE) {
                         if (DEBUG_LAYOUT) Slog.v(TAG,
@@ -4084,6 +4089,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     win.hideLw(false);
                 }
             }
+        }
+        if (mTopFullscreenOpaqueOrDimmingWindowState == null
+                && win.isVisibleOrBehindKeyguardLw() && !win.isGoneForLayoutLw()
+                && win.isDimming()) {
+            mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
     }
 
@@ -6051,6 +6061,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mForcingShowNavBar && win.getSurfaceLayer() < mForcingShowNavBarLayer) {
             tmpVisibility &= ~PolicyControl.adjustClearableFlags(win, View.SYSTEM_UI_CLEARABLE_FLAGS);
         }
+        tmpVisibility = updateLightStatusBarLw(tmpVisibility);
         final int visibility = updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int diff = visibility ^ mLastSystemUiFlags;
         final boolean needsMenu = win.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
@@ -6077,6 +6088,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             });
         return diff;
+    }
+
+    private int updateLightStatusBarLw(int vis) {
+        WindowState statusColorWin = isStatusBarKeyguard() && !mHideLockScreen
+                ? mStatusBar
+                : mTopFullscreenOpaqueOrDimmingWindowState;
+
+        if (statusColorWin != null) {
+            if (statusColorWin == mTopFullscreenOpaqueWindowState) {
+                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
+                // its light flag.
+                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+                vis |= PolicyControl.getSystemUiVisibility(statusColorWin, null)
+                        & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            } else if (statusColorWin != null && statusColorWin.isDimming()) {
+                // Otherwise if it's dimming, clear the light flag.
+                vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            }
+        }
+        return vis;
     }
 
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
@@ -6382,6 +6413,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mTopFullscreenOpaqueWindowState != null) {
             pw.print(prefix); pw.print("mTopFullscreenOpaqueWindowState=");
                     pw.println(mTopFullscreenOpaqueWindowState);
+        }
+        if (mTopFullscreenOpaqueOrDimmingWindowState != null) {
+            pw.print(prefix); pw.print("mTopFullscreenOpaqueOrDimmingWindowState=");
+                    pw.println(mTopFullscreenOpaqueOrDimmingWindowState);
         }
         if (mForcingShowNavBar) {
             pw.print(prefix); pw.print("mForcingShowNavBar=");
