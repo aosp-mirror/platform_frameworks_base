@@ -1,4 +1,6 @@
 page.title=Managing Projects Overview
+meta.tags="project, mipmap"
+page.tags="project", "mipmap"
 @jd:body
 
  <div id="qv-wrapper">
@@ -8,7 +10,9 @@ page.title=Managing Projects Overview
       <ol>
         <li><a href="#ProjectFiles">Android Project Files</a></li>
         <li><a href="#ApplicationModules">Android Application Modules</a></li>
-
+          <ol>
+            <li><a href="#mipmap">Managing Launcher Icons as mipmap Resources</a></li>
+          </ol>
         <li><a href="#LibraryModules">Library Modules</a>
           <ol>
             <li><a href="#considerations">Development considerations</a></li>
@@ -230,7 +234,18 @@ project and override similar module file settings.</p>
            focused). See the <a href=
            "{@docRoot}guide/topics/resources/drawable-resource.html">Drawable</a> resource type.</dd>
 
-           <dt><code>layout/</code></dt>
+
+           <dt><code>mipmap/</code></dt>
+
+           <dd>For app launcher icons. The Android system retains the resources in this folder
+           (and density-specific folders such as mipmap-xxxhdpi) regardless of the screen resolution
+           of the device where your app is installed. This behavior allows launcher apps to pick
+           the best resolution icon for your app to display on the home screen. For more information
+           about using the <code>mipmap</code> folders, see
+           <a href="#mipmap">Managing Launcher Icons as mipmap Resources</a>. </p>
+
+
+          <dt><code>layout/</code></dt>
 
            <dd>XML files that are compiled into screen layouts (or part of a screen). See the <a href=
            "{@docRoot}guide/topics/resources/layout-resource.html">Layout</a> resource type.</dd>
@@ -301,6 +316,46 @@ project and override similar module file settings.</p>
 
 
   </dl>
+
+
+
+<h2 id="mipmap">Managing Launcher Icons as mipmap Resources</h2>
+
+<p>Different home screen launcher apps on different devices show app launcher icons at various
+resolutions. When app resource optimization techniques remove resources for unused
+screen densities, launcher icons can wind up looking fuzzy because the launcher app has to upscale
+a lower-resolution icon for display. To avoid these display issues, apps should use the
+<code>mipmap/</code> resource folders for launcher icons. The Android system
+preserves these resources regardless of density stripping, and ensures that launcher apps can
+pick icons with the best resolution for display. </p>
+
+<p>Make sure launcher apps show a high-resolution icon for your app by moving all densities of your
+launcher icons to density-specific <code>res/mipmap/</code> folders
+(for example <code>res/mipmap-mdpi/</code> and <code>res/mipmap-xxxhdpi/</code>). The
+<code>mipmap/</code> folders replace the <code>drawable/</code> folders for launcher icons. For
+xxhpdi launcher icons, be sure to add the higher resolution xxxhdpi versions of the
+icons to enhance the visual experience of the icons on higher resolution devices.</p>
+
+<p class="note"><strong>Note:</strong> Even if you build a single APK for all devices, it is still
+best practice to move your launcher icons to the <code>mipmap/</code> folders.</p>
+
+
+<h3>Manifest update</h3>
+
+<p>When you move your launcher icons to the <code>mipmap-[density]</code> folders, change the
+launcher icon references in the <code>AndroidManifest.xml</code> file so your manifest references
+the <code>mipmap/</code> location. This example changes the manifest file to reference the
+<code>ic_launcher</code> icon in the <code>mipmap/</code> folder. </p>
+
+<pre>
+...
+&lt;application android:name="ApplicationTitle"
+         android:label="@string/app_label"
+         android:icon="@mipmap/ic_launcher" &gt;
+         ...
+</pre>
+
+
 
 
 
