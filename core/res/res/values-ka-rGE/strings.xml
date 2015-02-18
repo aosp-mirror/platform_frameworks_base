@@ -1831,8 +1831,8 @@
     <string name="item_is_selected" msgid="949687401682476608">"არჩეულია <xliff:g id="ITEM">%1$s</xliff:g>"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> წაიშალა"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"სამსახური <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"მიმაგრების გასაუქმებლად ერთდროულად შეეხეთ და არ აუშვათ ღილაკებს „უკან“ და „გადახედვა“."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ამ ეკრანისთვის მიმაგრების გასაუქმებლად შეეხეთ და არ აუშვათ ღილაკებს „გადახედვა“."</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"მიმაგრების გასაუქმებლად ერთდროულად შეეხეთ და არ აუშვათ ღილაკებს „უკან“ და „მიმოხილვა“."</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ამ ეკრანისთვის მიმაგრების გასაუქმებლად, შეეხეთ და არ აუშვათ „მიმოხილვა“-ს."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ეკრანი დაფიქსირებული. ფიქსაციის მოხსნა თქვენო ორგანიზაციის მიერ ნებადართული არ არის."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"ეკრანი დაფიქსირდა"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ეკრანს ფიქსაცია მოეხსნა"</string>
