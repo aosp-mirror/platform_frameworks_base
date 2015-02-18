@@ -16,6 +16,9 @@
 
 package android.view;
 
+import android.annotation.DrawableRes;
+import android.annotation.IdRes;
+import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -985,7 +988,7 @@ public abstract class Window {
      * @return The view if found or null otherwise.
      */
     @Nullable
-    public View findViewById(int id) {
+    public View findViewById(@IdRes int id) {
         return getDecorView().findViewById(id);
     }
 
@@ -998,7 +1001,7 @@ public abstract class Window {
      * @param layoutResID Resource ID to be inflated.
      * @see #setContentView(View, android.view.ViewGroup.LayoutParams)
      */
-    public abstract void setContentView(int layoutResID);
+    public abstract void setContentView(@LayoutRes int layoutResID);
 
     /**
      * Convenience for
@@ -1128,7 +1131,7 @@ public abstract class Window {
      * @param resId The resource identifier of a drawable resource which will
      *              be installed as the new background.
      */
-    public void setBackgroundDrawableResource(int resId) {
+    public void setBackgroundDrawableResource(@DrawableRes int resId) {
         setBackgroundDrawable(mContext.getDrawable(resId));
     }
 
@@ -1144,7 +1147,7 @@ public abstract class Window {
 
     /**
      * Set the value for a drawable feature of this window, from a resource
-     * identifier.  You must have called requestFeauture(featureId) before
+     * identifier.  You must have called requestFeature(featureId) before
      * calling this function.
      *
      * @see android.content.res.Resources#getDrawable(int)
@@ -1153,7 +1156,7 @@ public abstract class Window {
      * constant by Window.
      * @param resId Resource identifier of the desired image.
      */
-    public abstract void setFeatureDrawableResource(int featureId, int resId);
+    public abstract void setFeatureDrawableResource(int featureId, @DrawableRes int resId);
 
     /**
      * Set the value for a drawable feature of this window, from a URI. You
@@ -1423,7 +1426,7 @@ public abstract class Window {
      *
      * @param resId resource ID of a drawable to set
      */
-    public void setIcon(int resId) { }
+    public void setIcon(@DrawableRes int resId) { }
 
     /**
      * Set the default icon for this window.
@@ -1432,7 +1435,7 @@ public abstract class Window {
      *
      * @hide
      */
-    public void setDefaultIcon(int resId) { }
+    public void setDefaultIcon(@DrawableRes int resId) { }
 
     /**
      * Set the logo for this window. A logo is often shown in place of an
@@ -1441,7 +1444,7 @@ public abstract class Window {
      *
      * @param resId resource ID of a drawable to set
      */
-    public void setLogo(int resId) { }
+    public void setLogo(@DrawableRes int resId) { }
 
     /**
      * Set the default logo for this window.
@@ -1450,7 +1453,7 @@ public abstract class Window {
      *
      * @hide
      */
-    public void setDefaultLogo(int resId) { }
+    public void setDefaultLogo(@DrawableRes int resId) { }
 
     /**
      * Set focus locally. The window should have the

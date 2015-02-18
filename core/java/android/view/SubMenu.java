@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.DrawableRes;
+import android.annotation.StringRes;
 import android.graphics.drawable.Drawable;
 
 /**
@@ -38,7 +40,7 @@ public interface SubMenu extends Menu {
      * @param titleRes The string resource identifier used for the title.
      * @return This SubMenu so additional setters can be called.
      */
-    public SubMenu setHeaderTitle(int titleRes);
+    public SubMenu setHeaderTitle(@StringRes int titleRes);
 
     /**
      * Sets the submenu header's title to the title given in <var>title</var>.
@@ -55,7 +57,7 @@ public interface SubMenu extends Menu {
      * @param iconRes The resource identifier used for the icon.
      * @return This SubMenu so additional setters can be called.
      */
-    public SubMenu setHeaderIcon(int iconRes);
+    public SubMenu setHeaderIcon(@DrawableRes int iconRes);
 
     /**
      * Sets the submenu header's icon to the icon given in <var>icon</var>
@@ -88,7 +90,7 @@ public interface SubMenu extends Menu {
      * @param iconRes The new icon (as a resource ID) to be displayed.
      * @return This SubMenu so additional setters can be called.
      */
-    public SubMenu setIcon(int iconRes);
+    public SubMenu setIcon(@DrawableRes int iconRes);
     
     /**
      * Change the icon associated with this submenu's item in its parent menu.

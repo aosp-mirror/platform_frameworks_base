@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.IntDef;
+import android.annotation.StringRes;
 import android.app.INotificationManager;
 import android.app.ITransientNotification;
 import android.content.Context;
@@ -280,7 +281,7 @@ public class Toast {
      *
      * @throws Resources.NotFoundException if the resource can't be found.
      */
-    public static Toast makeText(Context context, int resId, @Duration int duration)
+    public static Toast makeText(Context context, @StringRes int resId, @Duration int duration)
                                 throws Resources.NotFoundException {
         return makeText(context, context.getResources().getText(resId), duration);
     }
@@ -289,7 +290,7 @@ public class Toast {
      * Update the text in a Toast that was previously created using one of the makeText() methods.
      * @param resId The new text for the Toast.
      */
-    public void setText(int resId) {
+    public void setText(@StringRes int resId) {
         setText(mContext.getText(resId));
     }
     

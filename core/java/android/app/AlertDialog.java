@@ -18,6 +18,10 @@ package android.app;
 
 import com.android.internal.app.AlertController;
 
+import android.annotation.ArrayRes;
+import android.annotation.AttrRes;
+import android.annotation.DrawableRes;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -117,7 +121,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * or one of the constants {@link #THEME_TRADITIONAL},
      * {@link #THEME_HOLO_DARK}, or {@link #THEME_HOLO_LIGHT}.
      */
-    protected AlertDialog(Context context, int theme) {
+    protected AlertDialog(Context context, @AttrRes int theme) {
         this(context, theme, true);
     }
 
@@ -327,7 +331,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * @param resId the resourceId of the drawable to use as the icon or 0
      * if you don't want an icon.
      */
-    public void setIcon(int resId) {
+    public void setIcon(@DrawableRes int resId) {
         mAlert.setIcon(resId);
     }
     
@@ -340,7 +344,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
      *
      * @param attrId ID of a theme attribute that points to a drawable resource.
      */
-    public void setIconAttribute(int attrId) {
+    public void setIconAttribute(@AttrRes int attrId) {
         TypedValue out = new TypedValue();
         mContext.getTheme().resolveAttribute(attrId, out, true);
         mAlert.setIcon(out.resourceId);
@@ -413,7 +417,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setTitle(int titleId) {
+        public Builder setTitle(@StringRes int titleId) {
             P.mTitle = P.mContext.getText(titleId);
             return this;
         }
@@ -449,7 +453,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setMessage(int messageId) {
+        public Builder setMessage(@StringRes int messageId) {
             P.mMessage = P.mContext.getText(messageId);
             return this;
         }
@@ -471,7 +475,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setIcon(int iconId) {
+        public Builder setIcon(@DrawableRes int iconId) {
             P.mIconId = iconId;
             return this;
         }
@@ -495,7 +499,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @param attrId ID of a theme attribute that points to a drawable resource.
          */
-        public Builder setIconAttribute(int attrId) {
+        public Builder setIconAttribute(@AttrRes int attrId) {
             TypedValue out = new TypedValue();
             P.mContext.getTheme().resolveAttribute(attrId, out, true);
             P.mIconId = out.resourceId;
@@ -509,7 +513,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setPositiveButton(int textId, final OnClickListener listener) {
+        public Builder setPositiveButton(@StringRes int textId, final OnClickListener listener) {
             P.mPositiveButtonText = P.mContext.getText(textId);
             P.mPositiveButtonListener = listener;
             return this;
@@ -535,7 +539,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setNegativeButton(int textId, final OnClickListener listener) {
+        public Builder setNegativeButton(@StringRes int textId, final OnClickListener listener) {
             P.mNegativeButtonText = P.mContext.getText(textId);
             P.mNegativeButtonListener = listener;
             return this;
@@ -561,7 +565,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setNeutralButton(int textId, final OnClickListener listener) {
+        public Builder setNeutralButton(@StringRes int textId, final OnClickListener listener) {
             P.mNeutralButtonText = P.mContext.getText(textId);
             P.mNeutralButtonListener = listener;
             return this;
@@ -634,7 +638,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setItems(int itemsId, final OnClickListener listener) {
+        public Builder setItems(@ArrayRes int itemsId, final OnClickListener listener) {
             P.mItems = P.mContext.getResources().getTextArray(itemsId);
             P.mOnClickListener = listener;
             return this;
@@ -706,7 +710,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setMultiChoiceItems(int itemsId, boolean[] checkedItems, 
+        public Builder setMultiChoiceItems(@ArrayRes int itemsId, boolean[] checkedItems,
                 final OnMultiChoiceClickListener listener) {
             P.mItems = P.mContext.getResources().getTextArray(itemsId);
             P.mOnCheckboxClickListener = listener;
@@ -785,7 +789,7 @@ public class AlertDialog extends Dialog implements DialogInterface {
          *
          * @return This Builder object to allow for chaining of calls to set methods
          */
-        public Builder setSingleChoiceItems(int itemsId, int checkedItem, 
+        public Builder setSingleChoiceItems(@ArrayRes int itemsId, int checkedItem,
                 final OnClickListener listener) {
             P.mItems = P.mContext.getResources().getTextArray(itemsId);
             P.mOnClickListener = listener;

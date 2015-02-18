@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.annotation.ArrayRes;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -277,7 +278,7 @@ public class RestrictionEntry implements Parcelable {
      * @param stringArrayResId the resource id for a string array containing the possible values.
      * @see #setChoiceValues(String[])
      */
-    public void setChoiceValues(Context context, int stringArrayResId) {
+    public void setChoiceValues(Context context, @ArrayRes int stringArrayResId) {
         mChoiceValues = context.getResources().getStringArray(stringArrayResId);
     }
 
@@ -307,7 +308,7 @@ public class RestrictionEntry implements Parcelable {
      * @param context the application context, used for retrieving the resources.
      * @param stringArrayResId the resource id of a string array containing the possible entries.
      */
-    public void setChoiceEntries(Context context, int stringArrayResId) {
+    public void setChoiceEntries(Context context, @ArrayRes int stringArrayResId) {
         mChoiceEntries = context.getResources().getStringArray(stringArrayResId);
     }
 

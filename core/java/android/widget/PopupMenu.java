@@ -22,6 +22,7 @@ import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.SubMenuBuilder;
 
+import android.annotation.MenuRes;
 import android.content.Context;
 import android.view.Gravity;
 import android.view.Menu;
@@ -205,7 +206,7 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
      * popupMenu.getMenuInflater().inflate(menuRes, popupMenu.getMenu()).
      * @param menuRes Menu resource to inflate
      */
-    public void inflate(int menuRes) {
+    public void inflate(@MenuRes int menuRes) {
         getMenuInflater().inflate(menuRes, mMenu);
     }
 

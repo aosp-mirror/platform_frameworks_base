@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.DrawableRes;
 import android.annotation.Widget;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -253,7 +254,7 @@ public class CalendarView extends FrameLayout {
      *
      * @attr ref android.R.styleable#CalendarView_selectedDateVerticalBar
      */
-    public void setSelectedDateVerticalBar(int resourceId) {
+    public void setSelectedDateVerticalBar(@DrawableRes int resourceId) {
         mDelegate.setSelectedDateVerticalBar(resourceId);
     }
 

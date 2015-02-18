@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.DrawableRes;
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.widget.AdapterView;
@@ -44,7 +46,7 @@ public interface ContextMenu extends Menu {
      * @param titleRes The string resource identifier used for the title.
      * @return This ContextMenu so additional setters can be called.
      */
-    public ContextMenu setHeaderTitle(int titleRes);
+    public ContextMenu setHeaderTitle(@StringRes int titleRes);
 
     /**
      * Sets the context menu header's title to the title given in <var>title</var>.
@@ -61,7 +63,7 @@ public interface ContextMenu extends Menu {
      * @param iconRes The resource identifier used for the icon.
      * @return This ContextMenu so additional setters can be called.
      */
-    public ContextMenu setHeaderIcon(int iconRes);
+    public ContextMenu setHeaderIcon(@DrawableRes int iconRes);
 
     /**
      * Sets the context menu header's icon to the icon given in <var>icon</var>

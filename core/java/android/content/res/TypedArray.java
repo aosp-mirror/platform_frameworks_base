@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.AnyRes;
 import android.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
@@ -786,6 +787,7 @@ public class TypedArray {
      * @return Attribute resource identifier, or defValue if not defined.
      * @throws RuntimeException if the TypedArray has already been recycled.
      */
+    @AnyRes
     public int getResourceId(int index, int defValue) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");

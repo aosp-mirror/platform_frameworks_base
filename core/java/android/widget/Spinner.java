@@ -18,6 +18,7 @@ package android.widget;
 
 import com.android.internal.R;
 
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.annotation.Widget;
 import android.app.AlertDialog;
@@ -45,7 +46,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ListPopupWindow.ForwardingListener;
 import android.widget.PopupWindow.OnDismissListener;
-
 
 /**
  * A view that displays one child at a time and lets the user pick among them.
@@ -331,7 +331,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      *
      * @attr ref android.R.styleable#Spinner_popupBackground
      */
-    public void setPopupBackgroundResource(int resId) {
+    public void setPopupBackgroundResource(@DrawableRes int resId) {
         setPopupBackgroundDrawable(getPopupContext().getDrawable(resId));
     }
 

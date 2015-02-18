@@ -16,6 +16,9 @@
 
 package android.view;
 
+import android.annotation.DrawableRes;
+import android.annotation.LayoutRes;
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -165,7 +168,7 @@ public interface MenuItem {
      * @see #setTitleCondensed(CharSequence)
      */
     
-    public MenuItem setTitle(int title);
+    public MenuItem setTitle(@StringRes int title);
 
     /**
      * Retrieve the current title of the item.
@@ -214,7 +217,7 @@ public interface MenuItem {
      * @param iconRes The new icon (as a resource ID) to be displayed.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setIcon(int iconRes);
+    public MenuItem setIcon(@DrawableRes int iconRes);
     
     /**
      * Returns the icon for this item as a Drawable (getting it from resources if it hasn't been
@@ -511,7 +514,7 @@ public interface MenuItem {
      *
      * @see #setShowAsAction(int)
      */
-    public MenuItem setActionView(int resId);
+    public MenuItem setActionView(@LayoutRes int resId);
 
     /**
      * Returns the currently set action view for this menu item.

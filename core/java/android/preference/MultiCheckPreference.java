@@ -18,6 +18,7 @@ package android.preference;
 
 import java.util.Arrays;
 
+import android.annotation.ArrayRes;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -96,7 +97,7 @@ public class MultiCheckPreference extends DialogPreference {
      * @see #setEntries(CharSequence[])
      * @param entriesResId The entries array as a resource.
      */
-    public void setEntries(int entriesResId) {
+    public void setEntries(@ArrayRes int entriesResId) {
         setEntries(getContext().getResources().getTextArray(entriesResId));
     }
     
@@ -126,7 +127,7 @@ public class MultiCheckPreference extends DialogPreference {
      * @see #setEntryValues(CharSequence[])
      * @param entryValuesResId The entry values array as a resource.
      */
-    public void setEntryValues(int entryValuesResId) {
+    public void setEntryValues(@ArrayRes int entryValuesResId) {
         setEntryValuesCS(getContext().getResources().getTextArray(entryValuesResId));
     }
 

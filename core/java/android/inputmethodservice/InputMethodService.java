@@ -19,6 +19,7 @@ package android.inputmethodservice;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import android.annotation.DrawableRes;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
@@ -1178,7 +1179,7 @@ public class InputMethodService extends AbstractInputMethodService {
         return isExtractViewShown() ? View.GONE : View.INVISIBLE;
     }
     
-    public void showStatusIcon(int iconResId) {
+    public void showStatusIcon(@DrawableRes int iconResId) {
         mStatusIcon = iconResId;
         mImm.showStatusIcon(mToken, getPackageName(), iconResId);
     }

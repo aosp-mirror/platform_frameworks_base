@@ -16,6 +16,8 @@
 
 package android.preference;
 
+import android.annotation.StringRes;
+import android.annotation.XmlRes;
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
 import android.app.FragmentManager;
@@ -337,6 +339,7 @@ public abstract class PreferenceActivity extends ListActivity implements
          * Resource ID of title of the header that is shown to the user.
          * @attr ref android.R.styleable#PreferenceHeader_title
          */
+        @StringRes
         public int titleRes;
 
         /**
@@ -349,6 +352,7 @@ public abstract class PreferenceActivity extends ListActivity implements
          * Resource ID of optional summary describing what this header controls.
          * @attr ref android.R.styleable#PreferenceHeader_summary
          */
+        @StringRes
         public int summaryRes;
 
         /**
@@ -361,6 +365,7 @@ public abstract class PreferenceActivity extends ListActivity implements
          * Resource ID of optional text to show as the title in the bread crumb.
          * @attr ref android.R.styleable#PreferenceHeader_breadCrumbTitle
          */
+        @StringRes
         public int breadCrumbTitleRes;
 
         /**
@@ -373,6 +378,7 @@ public abstract class PreferenceActivity extends ListActivity implements
          * Resource ID of optional text to show as the short title in the bread crumb.
          * @attr ref android.R.styleable#PreferenceHeader_breadCrumbShortTitle
          */
+        @StringRes
         public int breadCrumbShortTitleRes;
 
         /**
@@ -797,7 +803,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param resid The XML resource to load and parse.
      * @param target The list in which the parsed headers should be placed.
      */
-    public void loadHeadersFromResource(int resid, List<Header> target) {
+    public void loadHeadersFromResource(@XmlRes int resid, List<Header> target) {
         XmlResourceParser parser = null;
         try {
             parser = getResources().getXml(resid);
@@ -1086,7 +1092,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * fragment.
      */
     public Intent onBuildStartFragmentIntent(String fragmentName, Bundle args,
-            int titleRes, int shortTitleRes) {
+            @StringRes int titleRes, int shortTitleRes) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClass(this, getClass());
         intent.putExtra(EXTRA_SHOW_FRAGMENT, fragmentName);
@@ -1124,7 +1130,8 @@ public abstract class PreferenceActivity extends ListActivity implements
      * this set of preferences.
      */
     public void startWithFragment(String fragmentName, Bundle args,
-            Fragment resultTo, int resultRequestCode, int titleRes, int shortTitleRes) {
+            Fragment resultTo, int resultRequestCode, @StringRes int titleRes,
+            @StringRes int shortTitleRes) {
         Intent intent = onBuildStartFragmentIntent(fragmentName, args, titleRes, shortTitleRes);
         if (resultTo == null) {
             startActivity(intent);
@@ -1343,9 +1350,9 @@ public abstract class PreferenceActivity extends ListActivity implements
      * preference panel is done.  The launched panel must use
      * {@link #finishPreferencePanel(Fragment, int, Intent)} when done.
      * @param resultRequestCode If resultTo is non-null, this is the caller's
-     * request code to be received with the resut.
+     * request code to be received with the result.
      */
-    public void startPreferencePanel(String fragmentClass, Bundle args, int titleRes,
+    public void startPreferencePanel(String fragmentClass, Bundle args, @StringRes int titleRes,
             CharSequence titleText, Fragment resultTo, int resultRequestCode) {
         if (mSinglePane) {
             startWithFragment(fragmentClass, args, resultTo, resultRequestCode, titleRes, 0);

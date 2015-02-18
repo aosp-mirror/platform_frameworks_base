@@ -21,6 +21,7 @@ import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
+import android.annotation.IdRes;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -3630,7 +3631,7 @@ public class ListView extends AbsListView {
      * First look in our children, then in any header and footer views that may be scrolled off.
      */
     @Override
-    protected View findViewTraversal(int id) {
+    protected View findViewTraversal(@IdRes int id) {
         View v;
         v = super.findViewTraversal(id);
         if (v == null) {

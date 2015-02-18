@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.XmlRes;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -263,7 +264,7 @@ public class PreferenceManager {
      *         root).
      * @hide
      */
-    public PreferenceScreen inflateFromResource(Context context, int resId,
+    public PreferenceScreen inflateFromResource(Context context, @XmlRes int resId,
             PreferenceScreen rootPreferences) {
         // Block commits
         setNoCommit(true);
@@ -438,7 +439,7 @@ public class PreferenceManager {
      *            and clear it followed by a call to this method with this
      *            parameter set to true.
      */
-    public static void setDefaultValues(Context context, int resId, boolean readAgain) {
+    public static void setDefaultValues(Context context, @XmlRes int resId, boolean readAgain) {
         
         // Use the default shared preferences name and mode
         setDefaultValues(context, getDefaultSharedPreferencesName(context),
