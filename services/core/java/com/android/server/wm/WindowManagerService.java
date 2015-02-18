@@ -3663,14 +3663,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // TODO(multidisplay): Change to the correct display.
         final WindowList windows = getDefaultWindowListLocked();
-        int pos = windows.size() - 1;
-        while (pos >= 0) {
+        for (int pos = windows.size() - 1; pos >= 0; --pos) {
             WindowState win = windows.get(pos);
-            pos--;
             if (win.mAppToken != null) {
                 // We hit an application window. so the orientation will be determined by the
                 // app window. No point in continuing further.
-                return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                return (mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             }
             if (!win.isVisibleLw() || !win.mPolicyVisibilityAfterAnim) {
                 continue;
@@ -3682,9 +3680,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (DEBUG_ORIENTATION) Slog.v(TAG, win + " forcing orientation to " + req);
-            return (mLastWindowForcedOrientation=req);
+            return (mLastWindowForcedOrientation = req);
         }
-        return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        return (mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     public int getOrientationFromAppTokensLocked() {
@@ -3742,14 +3740,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 // to use the orientation behind it, then just take whatever
                 // orientation it has and ignores whatever is under it.
                 lastFullscreen = atoken.appFullscreen;
-                if (lastFullscreen
-                        && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                if (lastFullscreen && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
                             + " -- full screen, return " + or);
                     return or;
                 }
-                // If this application has requested an explicit orientation,
-                // then use it.
+                // If this application has requested an explicit orientation, then use it.
                 if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                         && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
                     if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + atoken
@@ -6367,13 +6363,12 @@ public class WindowManagerService extends IWindowManager.Stub
         screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(Display.DEFAULT_DISPLAY);
 
-        // We need to update our screen size information to match the new
-        // rotation.  Note that this is redundant with the later call to
-        // sendNewConfiguration() that must be called after this function
-        // returns...  however we need to do the screen size part of that
-        // before then so we have the correct size to use when initializing
-        // the rotation animation for the new rotation.
-        computeScreenConfigurationLocked(null);
+        // We need to update our screen size information to match the new rotation. If the rotation
+        // has actually changed then this method will return true and, according to the comment at
+        // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
+        // By updating the Display info here it will be available to
+        // computeScreenConfigurationLocked later.
+        updateDisplayAndOrientationLocked();
 
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
         if (!inTransaction) {
@@ -7045,9 +7040,9 @@ public class WindowManagerService extends IWindowManager.Stub
         return sw;
     }
 
-    private boolean computeScreenConfigurationLocked(Configuration config) {
+    DisplayInfo updateDisplayAndOrientationLocked() {
         if (!mDisplayReady) {
-            return false;
+            return null;
         }
 
         // TODO(multidisplay): For now, apply Configuration to main screen only.
@@ -7079,11 +7074,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
-        if (config != null) {
-            config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
-                    Configuration.ORIENTATION_LANDSCAPE;
-        }
-
         // Update application display metrics.
         final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
         final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
@@ -7106,87 +7096,100 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
         }
 
-        final DisplayMetrics dm = mDisplayMetrics;
-        mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
+        mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
                 mCompatDisplayMetrics);
+        return displayInfo;
+    }
 
-        if (config != null) {
-            config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation)
-                    / dm.density);
-            config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation)
-                    / dm.density);
-            computeSizeRangesAndScreenLayout(displayInfo, rotated, dw, dh, dm.density, config);
+    boolean computeScreenConfigurationLocked(Configuration config) {
+        final DisplayInfo displayInfo = updateDisplayAndOrientationLocked();
+        if (displayInfo == null) {
+            return false;
+        }
 
-            config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
-            config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
-            config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
-            config.densityDpi = displayContent.mBaseDisplayDensity;
+        final int dw = displayInfo.logicalWidth;
+        final int dh = displayInfo.logicalHeight;
+        config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
+                Configuration.ORIENTATION_LANDSCAPE;
+        config.screenWidthDp =
+                (int)(mPolicy.getConfigDisplayWidth(dw, dh, mRotation) / mDisplayMetrics.density);
+        config.screenHeightDp =
+                (int)(mPolicy.getConfigDisplayHeight(dw, dh, mRotation) / mDisplayMetrics.density);
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        computeSizeRangesAndScreenLayout(displayInfo, rotated, dw, dh, mDisplayMetrics.density,
+                config);
 
-            // Update the configuration based on available input devices, lid switch,
-            // and platform configuration.
-            config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
-            config.keyboard = Configuration.KEYBOARD_NOKEYS;
-            config.navigation = Configuration.NAVIGATION_NONAV;
+        config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
+        config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
+        config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated,
+                mDisplayMetrics, dw, dh);
+        config.densityDpi = displayInfo.logicalDensityDpi;
 
-            int keyboardPresence = 0;
-            int navigationPresence = 0;
-            final InputDevice[] devices = mInputManager.getInputDevices();
-            final int len = devices.length;
-            for (int i = 0; i < len; i++) {
-                InputDevice device = devices[i];
-                if (!device.isVirtual()) {
-                    final int sources = device.getSources();
-                    final int presenceFlag = device.isExternal() ?
-                            WindowManagerPolicy.PRESENCE_EXTERNAL :
-                                    WindowManagerPolicy.PRESENCE_INTERNAL;
+        // Update the configuration based on available input devices, lid switch,
+        // and platform configuration.
+        config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+        config.keyboard = Configuration.KEYBOARD_NOKEYS;
+        config.navigation = Configuration.NAVIGATION_NONAV;
 
-                    if (mIsTouchDevice) {
-                        if ((sources & InputDevice.SOURCE_TOUCHSCREEN) ==
-                                InputDevice.SOURCE_TOUCHSCREEN) {
-                            config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
-                        }
-                    } else {
-                        config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+        int keyboardPresence = 0;
+        int navigationPresence = 0;
+        final InputDevice[] devices = mInputManager.getInputDevices();
+        final int len = devices.length;
+        for (int i = 0; i < len; i++) {
+            InputDevice device = devices[i];
+            if (!device.isVirtual()) {
+                final int sources = device.getSources();
+                final int presenceFlag = device.isExternal() ?
+                        WindowManagerPolicy.PRESENCE_EXTERNAL :
+                                WindowManagerPolicy.PRESENCE_INTERNAL;
+
+                if (mIsTouchDevice) {
+                    if ((sources & InputDevice.SOURCE_TOUCHSCREEN) ==
+                            InputDevice.SOURCE_TOUCHSCREEN) {
+                        config.touchscreen = Configuration.TOUCHSCREEN_FINGER;
                     }
+                } else {
+                    config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+                }
 
-                    if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
-                        config.navigation = Configuration.NAVIGATION_TRACKBALL;
-                        navigationPresence |= presenceFlag;
-                    } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
-                            && config.navigation == Configuration.NAVIGATION_NONAV) {
-                        config.navigation = Configuration.NAVIGATION_DPAD;
-                        navigationPresence |= presenceFlag;
-                    }
+                if ((sources & InputDevice.SOURCE_TRACKBALL) == InputDevice.SOURCE_TRACKBALL) {
+                    config.navigation = Configuration.NAVIGATION_TRACKBALL;
+                    navigationPresence |= presenceFlag;
+                } else if ((sources & InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD
+                        && config.navigation == Configuration.NAVIGATION_NONAV) {
+                    config.navigation = Configuration.NAVIGATION_DPAD;
+                    navigationPresence |= presenceFlag;
+                }
 
-                    if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
-                        config.keyboard = Configuration.KEYBOARD_QWERTY;
-                        keyboardPresence |= presenceFlag;
-                    }
+                if (device.getKeyboardType() == InputDevice.KEYBOARD_TYPE_ALPHABETIC) {
+                    config.keyboard = Configuration.KEYBOARD_QWERTY;
+                    keyboardPresence |= presenceFlag;
                 }
             }
-
-            if (config.navigation == Configuration.NAVIGATION_NONAV && mHasPermanentDpad) {
-                config.navigation = Configuration.NAVIGATION_DPAD;
-                navigationPresence |= WindowManagerPolicy.PRESENCE_INTERNAL;
-            }
-
-            // Determine whether a hard keyboard is available and enabled.
-            boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
-            if (hardKeyboardAvailable != mHardKeyboardAvailable) {
-                mHardKeyboardAvailable = hardKeyboardAvailable;
-                mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
-                mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
-            }
-            if (mShowImeWithHardKeyboard) {
-                config.keyboard = Configuration.KEYBOARD_NOKEYS;
-            }
-
-            // Let the policy update hidden states.
-            config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
-            config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
-            config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
-            mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
         }
+
+        if (config.navigation == Configuration.NAVIGATION_NONAV && mHasPermanentDpad) {
+            config.navigation = Configuration.NAVIGATION_DPAD;
+            navigationPresence |= WindowManagerPolicy.PRESENCE_INTERNAL;
+        }
+
+        // Determine whether a hard keyboard is available and enabled.
+        boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
+        if (hardKeyboardAvailable != mHardKeyboardAvailable) {
+            mHardKeyboardAvailable = hardKeyboardAvailable;
+            mH.removeMessages(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+            mH.sendEmptyMessage(H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
+        }
+        if (mShowImeWithHardKeyboard) {
+            config.keyboard = Configuration.KEYBOARD_NOKEYS;
+        }
+
+        // Let the policy update hidden states.
+        config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
+        config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
+        config.navigationHidden = Configuration.NAVIGATIONHIDDEN_NO;
+        mPolicy.adjustConfigurationLw(config, keyboardPresence, navigationPresence);
 
         return true;
     }
