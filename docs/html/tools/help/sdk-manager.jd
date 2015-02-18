@@ -16,7 +16,7 @@ your environment.</p>
   <li>On Windows, double-click the <code>SDK Manager.exe</code> file at the root of the Android
 SDK directory.</li>
   <li>On Mac or Linux, open a terminal and navigate to the <code>tools/</code> directory in the
-Android SDK, then execute <code>android sdk</code>.</li>
+location where the Android SDK is installed, then execute <code>android sdk</code>.</li>
 </ul>
 
 <p>You can select which packages you want to download by toggling the checkboxes on the left, then
