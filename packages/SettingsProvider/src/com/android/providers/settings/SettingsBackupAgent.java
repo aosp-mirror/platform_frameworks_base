@@ -942,6 +942,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 OutputStreamWriter out = new OutputStreamWriter(bos);
                 fromFile.write(out);
+                out.flush();
                 return bos.toByteArray();
             } else {
                 return EMPTY_DATA;
