@@ -626,6 +626,22 @@ public final class BatteryService extends SystemService {
                 pw.println("  voltage: " + mBatteryProps.batteryVoltage);
                 pw.println("  temperature: " + mBatteryProps.batteryTemperature);
                 pw.println("  technology: " + mBatteryProps.batteryTechnology);
+
+            } else if ("unplug".equals(args[0])) {
+                if (!mUpdatesStopped) {
+                    mLastBatteryProps.set(mBatteryProps);
+                }
+                mBatteryProps.chargerAcOnline = false;
+                mBatteryProps.chargerUsbOnline = false;
+                mBatteryProps.chargerWirelessOnline = false;
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    mUpdatesStopped = true;
+                    processValuesLocked(false);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+
             } else if (args.length == 3 && "set".equals(args[0])) {
                 String key = args[1];
                 String value = args[2];
@@ -662,6 +678,7 @@ public final class BatteryService extends SystemService {
                 } catch (NumberFormatException ex) {
                     pw.println("Bad value: " + value);
                 }
+
             } else if (args.length == 1 && "reset".equals(args[0])) {
                 long ident = Binder.clearCallingIdentity();
                 try {
@@ -676,6 +693,7 @@ public final class BatteryService extends SystemService {
             } else {
                 pw.println("Dump current battery state, or:");
                 pw.println("  set [ac|usb|wireless|status|level|invalid] <value>");
+                pw.println("  unplug");
                 pw.println("  reset");
             }
         }

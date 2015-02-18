@@ -592,6 +592,86 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    /**
+     * Optional detailed information that can go into a history step.  This is typically
+     * generated each time the battery level changes.
+     */
+    public final static class HistoryStepDetails {
+        // Time (in 1/100 second) spent in user space and the kernel since the last step.
+        public int userTime;
+        public int systemTime;
+
+        // Top three apps using CPU in the last step, with times in 1/100 second.
+        public int appCpuUid1;
+        public int appCpuUTime1;
+        public int appCpuSTime1;
+        public int appCpuUid2;
+        public int appCpuUTime2;
+        public int appCpuSTime2;
+        public int appCpuUid3;
+        public int appCpuUTime3;
+        public int appCpuSTime3;
+
+        // Information from /proc/stat
+        public int statUserTime;
+        public int statSystemTime;
+        public int statIOWaitTime;
+        public int statIrqTime;
+        public int statSoftIrqTime;
+        public int statIdlTime;
+
+        public HistoryStepDetails() {
+            clear();
+        }
+
+        public void clear() {
+            userTime = systemTime = 0;
+            appCpuUid1 = appCpuUid2 = appCpuUid3 = -1;
+            appCpuUTime1 = appCpuSTime1 = appCpuUTime2 = appCpuSTime2
+                    = appCpuUTime3 = appCpuSTime3 = 0;
+        }
+
+        public void writeToParcel(Parcel out) {
+            out.writeInt(userTime);
+            out.writeInt(systemTime);
+            out.writeInt(appCpuUid1);
+            out.writeInt(appCpuUTime1);
+            out.writeInt(appCpuSTime1);
+            out.writeInt(appCpuUid2);
+            out.writeInt(appCpuUTime2);
+            out.writeInt(appCpuSTime2);
+            out.writeInt(appCpuUid3);
+            out.writeInt(appCpuUTime3);
+            out.writeInt(appCpuSTime3);
+            out.writeInt(statUserTime);
+            out.writeInt(statSystemTime);
+            out.writeInt(statIOWaitTime);
+            out.writeInt(statIrqTime);
+            out.writeInt(statSoftIrqTime);
+            out.writeInt(statIdlTime);
+        }
+
+        public void readFromParcel(Parcel in) {
+            userTime = in.readInt();
+            systemTime = in.readInt();
+            appCpuUid1 = in.readInt();
+            appCpuUTime1 = in.readInt();
+            appCpuSTime1 = in.readInt();
+            appCpuUid2 = in.readInt();
+            appCpuUTime2 = in.readInt();
+            appCpuSTime2 = in.readInt();
+            appCpuUid3 = in.readInt();
+            appCpuUTime3 = in.readInt();
+            appCpuSTime3 = in.readInt();
+            statUserTime = in.readInt();
+            statSystemTime = in.readInt();
+            statIOWaitTime = in.readInt();
+            statIrqTime = in.readInt();
+            statSoftIrqTime = in.readInt();
+            statIdlTime = in.readInt();
+        }
+    }
+
     public final static class HistoryItem implements Parcelable {
         public HistoryItem next;
 
@@ -686,6 +766,9 @@ public abstract class BatteryStats implements Parcelable {
 
         // Kernel wakeup reason at this point.
         public HistoryTag wakeReasonTag;
+
+        // Non-null when there is more detailed information at this step.
+        public HistoryStepDetails stepDetails;
 
         public static final int EVENT_FLAG_START = 0x8000;
         public static final int EVENT_FLAG_FINISH = 0x4000;
@@ -3692,9 +3775,114 @@ public abstract class BatteryStats implements Parcelable {
                     }
                 }
                 pw.println();
+                if (rec.stepDetails != null) {
+                    if (!checkin) {
+                        pw.print("                 Details: cpu=");
+                        pw.print(rec.stepDetails.userTime);
+                        pw.print("u+");
+                        pw.print(rec.stepDetails.systemTime);
+                        pw.print("s");
+                        if (rec.stepDetails.appCpuUid1 >= 0) {
+                            pw.print(" (");
+                            printStepCpuUidDetails(pw, rec.stepDetails.appCpuUid1,
+                                    rec.stepDetails.appCpuUTime1, rec.stepDetails.appCpuSTime1);
+                            if (rec.stepDetails.appCpuUid2 >= 0) {
+                                pw.print(", ");
+                                printStepCpuUidDetails(pw, rec.stepDetails.appCpuUid2,
+                                        rec.stepDetails.appCpuUTime2, rec.stepDetails.appCpuSTime2);
+                            }
+                            if (rec.stepDetails.appCpuUid3 >= 0) {
+                                pw.print(", ");
+                                printStepCpuUidDetails(pw, rec.stepDetails.appCpuUid3,
+                                        rec.stepDetails.appCpuUTime3, rec.stepDetails.appCpuSTime3);
+                            }
+                            pw.print(')');
+                        }
+                        pw.println();
+                        pw.print("                          /proc/stat=");
+                        pw.print(rec.stepDetails.statUserTime);
+                        pw.print(" usr, ");
+                        pw.print(rec.stepDetails.statSystemTime);
+                        pw.print(" sys, ");
+                        pw.print(rec.stepDetails.statIOWaitTime);
+                        pw.print(" io, ");
+                        pw.print(rec.stepDetails.statIrqTime);
+                        pw.print(" irq, ");
+                        pw.print(rec.stepDetails.statSoftIrqTime);
+                        pw.print(" sirq, ");
+                        pw.print(rec.stepDetails.statIdlTime);
+                        pw.print(" idle");
+                        int totalRun = rec.stepDetails.statUserTime + rec.stepDetails.statSystemTime
+                                + rec.stepDetails.statIOWaitTime + rec.stepDetails.statIrqTime
+                                + rec.stepDetails.statSoftIrqTime;
+                        int total = totalRun + rec.stepDetails.statIdlTime;
+                        if (total > 0) {
+                            pw.print(" (");
+                            float perc = ((float)totalRun) / ((float)total) * 100;
+                            pw.print(String.format("%.1f%%", perc));
+                            pw.print(" of ");
+                            StringBuilder sb = new StringBuilder(64);
+                            formatTimeMsNoSpace(sb, total*10);
+                            pw.print(sb);
+                            pw.print(")");
+                        }
+                        pw.println();
+                    } else {
+                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                        pw.print(HISTORY_DATA); pw.print(",0,Dcpu=");
+                        pw.print(rec.stepDetails.userTime);
+                        pw.print(":");
+                        pw.print(rec.stepDetails.systemTime);
+                        if (rec.stepDetails.appCpuUid1 >= 0) {
+                            printStepCpuUidCheckinDetails(pw, rec.stepDetails.appCpuUid1,
+                                    rec.stepDetails.appCpuUTime1, rec.stepDetails.appCpuSTime1);
+                            if (rec.stepDetails.appCpuUid2 >= 0) {
+                                printStepCpuUidCheckinDetails(pw, rec.stepDetails.appCpuUid2,
+                                        rec.stepDetails.appCpuUTime2, rec.stepDetails.appCpuSTime2);
+                            }
+                            if (rec.stepDetails.appCpuUid3 >= 0) {
+                                printStepCpuUidCheckinDetails(pw, rec.stepDetails.appCpuUid3,
+                                        rec.stepDetails.appCpuUTime3, rec.stepDetails.appCpuSTime3);
+                            }
+                        }
+                        pw.println();
+                        pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                        pw.print(HISTORY_DATA); pw.print(",0,Dpst=");
+                        pw.print(rec.stepDetails.statUserTime);
+                        pw.print(',');
+                        pw.print(rec.stepDetails.statSystemTime);
+                        pw.print(',');
+                        pw.print(rec.stepDetails.statIOWaitTime);
+                        pw.print(',');
+                        pw.print(rec.stepDetails.statIrqTime);
+                        pw.print(',');
+                        pw.print(rec.stepDetails.statSoftIrqTime);
+                        pw.print(',');
+                        pw.print(rec.stepDetails.statIdlTime);
+                        pw.println();
+                    }
+                }
                 oldState = rec.states;
                 oldState2 = rec.states2;
             }
+        }
+
+        private void printStepCpuUidDetails(PrintWriter pw, int uid, int utime, int stime) {
+            UserHandle.formatUid(pw, uid);
+            pw.print("=");
+            pw.print(utime);
+            pw.print("u+");
+            pw.print(stime);
+            pw.print("s");
+        }
+
+        private void printStepCpuUidCheckinDetails(PrintWriter pw, int uid, int utime, int stime) {
+            pw.print('/');
+            pw.print(uid);
+            pw.print(":");
+            pw.print(utime);
+            pw.print(":");
+            pw.print(stime);
         }
     }
 
