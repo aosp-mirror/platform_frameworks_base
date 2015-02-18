@@ -369,14 +369,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> සඟවන්නද?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ඊළඟ අවස්ථාවේ සැකසීම් තුළ ඔබ එය සක්‍රිය කළ විට එය නැවත දිසිවේ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"සඟවන්න"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> හට ධාරිතා සංවාදය වීමට අවශ්‍යයි"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ඉඩ දෙන්න"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ප්‍රතික්ෂේප කරන්න"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ධාරිතා සංවාදයයි"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"මුල් තත්වය නැවත ප්‍රතිසාධනය කිරීමට ස්පර්ශ කරන්න."</string>
 </resources>

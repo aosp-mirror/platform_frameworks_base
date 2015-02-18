@@ -369,14 +369,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ဝှက်မည်လား?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"နောက်တစ်ကြိမ်သင် ချိန်ညှိချက်များဖွင့်လျှင် ၎င်းပေါ်လာပါမည်။"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ဖျောက်ထားမည်"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည်အသံဒိုင်ယာလော့ခ်ဖြစ်လိုပါသည်။"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ခွင့်ပြုသည်"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ငြင်းပယ်သည်"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အသံဒိုင်ယာလော့ခ်ဖြစ်သည်"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"မူရင်းအားပြန်လည်သိမ်းဆည်းရန် ထိပါ။"</string>
 </resources>

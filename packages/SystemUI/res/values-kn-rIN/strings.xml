@@ -369,14 +369,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ಮರೆಮಾಡುವುದೇ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅದನ್ನು ಆನ್ ಮಾಡಿದಾಗ ಅದು ಮರುಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ಮರೆಮಾಡಿ"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಲು ಬಯಸುತ್ತದೆ."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ಅನುಮತಿಸು"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ನಿರಾಕರಿಸು"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ವಾಲ್ಯೂಮ್ ಸಂವಾದವಾಗಿದೆ"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"ಮೂಲ ಮರುಸ್ಥಾಪಿಸಲು ಸ್ಪರ್ಶಿಸಿ."</string>
 </resources>

@@ -370,14 +370,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti pločicu <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ponovo će se pojaviti kada je sljedeći put uključite u postavkama."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sakrij"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> želi biti dijaloški okvir za upravljanje glasnoćom."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Dopusti"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Odbij"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> predstavlja dijaloški okvir za upravljanje glasnoćom"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"Dodirnite da biste vratili izvorno."</string>
 </resources>
