@@ -202,7 +202,12 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
   <tr>
     <td>{@code purchaseToken}</td>
-    <td>A token that uniquely identifies a purchase for a given item and user pair. </td>
+    <td>A token that uniquely identifies a purchase for a given item and user
+    pair. This token may be up to 1,000 characters long.
+    Pass this entire token to other methods, such as when you consume the
+    purchase (as described in
+<a href="{@docRoot}training/in-app-billing/purchase-iab-products.html#Consume">Consume
+    a Purchase</a>). Do not abbreviate or truncate this token.</td>
   </tr>
 </table>
 </p>
