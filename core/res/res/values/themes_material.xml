@@ -754,6 +754,13 @@ please see themes_device_defaults.xml.
         <item name="colorPrimary">@color/primary_material_dark</item>
     </style>
 
+    <!-- Variant of the material (light) theme that has a light status bar background with dark
+         status bar contents. -->
+    <style name="Theme.Material.Light.LightStatusBar">
+        <item name="colorPrimaryDark">@color/primary_dark_material_light_light_status_bar</item>
+        <item name="windowHasLightStatusBar">true</item>
+    </style>
+
     <style name="ThemeOverlay" />
     <style name="ThemeOverlay.Material" />
 

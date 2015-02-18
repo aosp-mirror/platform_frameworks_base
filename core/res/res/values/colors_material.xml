@@ -25,6 +25,7 @@
     <color name="primary_material_light">#ffefefef</color>
     <color name="primary_dark_material_dark">#ff000000</color>
     <color name="primary_dark_material_light">#ff757575</color>
+    <color name="primary_dark_material_light_light_status_bar">#ffe0e0e0</color>
 
     <!-- 26% white (foreground) -->
     <color name="ripple_material_dark">#42ffffff</color>
