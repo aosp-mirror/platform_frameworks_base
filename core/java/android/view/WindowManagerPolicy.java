@@ -365,6 +365,11 @@ public interface WindowManagerPolicy {
          * @return true if window is on default display.
          */
         public boolean isDefaultDisplay();
+
+        /**
+         * Check whether the window is currently dimming.
+         */
+        public boolean isDimming();
     }
 
     /**
