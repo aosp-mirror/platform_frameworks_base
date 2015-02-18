@@ -409,7 +409,7 @@ def verify_parcelable(clazz):
 
 
 def verify_protected(clazz):
-    """Verify that no protected methods are allowed."""
+    """Verify that no protected methods or fields are allowed."""
     for m in clazz.methods:
         if "protected" in m.split:
             error(clazz, m, "M7", "No protected methods; must be public")
@@ -554,7 +554,7 @@ def verify_helper_classes(clazz):
             if "final" in m.split: continue
             if not re.match("on[A-Z]", m.name):
                 if "abstract" in m.split:
-                    error(clazz, m, None, "Methods implemented by developers must be named onFoo()")
+                    warn(clazz, m, None, "Methods implemented by developers should be named onFoo()")
                 else:
                     warn(clazz, m, None, "If implemented by developer, should be named onFoo(); otherwise consider marking final")
 
@@ -578,7 +578,7 @@ def verify_builder(clazz):
         if m.name.startswith("clear"): continue
 
         if m.name.startswith("with"):
-            error(clazz, m, None, "Builder methods names must follow setFoo() style")
+            warn(clazz, m, None, "Builder methods names should follow setFoo() style")
 
         if m.name.startswith("set"):
             if not m.typ.endswith(clazz.fullname):
@@ -692,7 +692,7 @@ def verify_flags(clazz):
 
             scope = f.name[0:f.name.index("FLAG_")]
             if val & known[scope]:
-                error(clazz, f, "C1", "Found overlapping flag constant value")
+                warn(clazz, f, "C1", "Found overlapping flag constant value")
             known[scope] |= val
 
 
@@ -740,13 +740,13 @@ def verify_manager(clazz):
     if not clazz.name.endswith("Manager"): return
 
     for c in clazz.ctors:
-        error(clazz, c, None, "Managers must always be obtained from Context")
+        error(clazz, c, None, "Managers should always be obtained from Context")
 
 
 def verify_boxed(clazz):
     """Verifies that methods avoid boxed primitives."""
 
-    boxed = ["java.lang.Number", "java.lang.Byte","java.lang.Double","java.lang.Float","java.lang.Integer","java.lang.Long","java.lang.Short"]
+    boxed = ["java.lang.Number","java.lang.Byte","java.lang.Double","java.lang.Float","java.lang.Integer","java.lang.Long","java.lang.Short"]
 
     for c in clazz.ctors:
         for arg in c.args:
@@ -780,6 +780,115 @@ def verify_static_utils(clazz):
     # At this point, we have no fields, and all methods are static
     if len(clazz.ctors) > 0:
         error(clazz, None, None, "Fully-static utility classes must not have constructor")
+
+
+def verify_overload_args(clazz):
+    """Verifies that method overloads add new arguments at the end."""
+    if clazz.fullname.startswith("android.opengl"): return
+
+    overloads = collections.defaultdict(list)
+    for m in clazz.methods:
+        if "deprecated" in m.split: continue
+        overloads[m.name].append(m)
+
+    for name, methods in overloads.iteritems():
+        if len(methods) <= 1: continue
+
+        # Look for arguments common across all overloads
+        def cluster(args):
+            count = collections.defaultdict(int)
+            res = set()
+            for i in range(len(args)):
+                a = args[i]
+                res.add("%s#%d" % (a, count[a]))
+                count[a] += 1
+            return res
+
+        common_args = cluster(methods[0].args)
+        for m in methods:
+            common_args = common_args & cluster(m.args)
+
+        if len(common_args) == 0: continue
+
+        # Require that all common arguments are present at start of signature
+        locked_sig = None
+        for m in methods:
+            sig = m.args[0:len(common_args)]
+            if not common_args.issubset(cluster(sig)):
+                warn(clazz, m, "M2", "Expected common arguments [%s] at beginning of overloaded method" % (", ".join(common_args)))
+            elif not locked_sig:
+                locked_sig = sig
+            elif locked_sig != sig:
+                error(clazz, m, "M2", "Expected consistent argument ordering between overloads: %s..." % (", ".join(locked_sig)))
+
+
+def verify_callback_handlers(clazz):
+    """Verifies that methods adding listener/callback have overload
+    for specifying delivery thread."""
+
+    # Ignore UI components which deliver things on main thread
+    skip = [
+        "android.animation",
+        "android.view",
+        "android.graphics",
+        "android.transition",
+        "android.widget",
+        "android.webkit",
+    ]
+    for s in skip:
+        if clazz.fullname.startswith(s): return
+        if clazz.extends and clazz.extends.startswith(s): return
+
+    skip = [
+        "android.app.ActionBar",
+        "android.app.AlertDialog",
+        "android.app.AlertDialog.Builder",
+        "android.app.Application",
+        "android.app.Activity",
+        "android.app.Dialog",
+        "android.app.Fragment",
+        "android.app.FragmentManager",
+        "android.app.LoaderManager",
+        "android.app.ListActivity",
+        "android.app.AlertDialog.Builder"
+        "android.content.Loader",
+    ]
+    for s in skip:
+        if clazz.fullname == s or clazz.extends == s: return
+
+    found = {}
+    by_name = collections.defaultdict(list)
+    for m in clazz.methods:
+        if m.name.startswith("unregister"): continue
+        if m.name.startswith("remove"): continue
+        if re.match("on[A-Z]+", m.name): continue
+
+        by_name[m.name].append(m)
+
+        for a in m.args:
+            if a.endswith("Listener") or a.endswith("Callback") or a.endswith("Callbacks"):
+                found[m.name] = m
+
+    for f in found.values():
+        takes_handler = False
+        for m in by_name[f.name]:
+            if "android.os.Handler" in m.args:
+                takes_handler = True
+        if not takes_handler:
+            error(clazz, f, "L1", "Registration methods should have overload that accepts delivery Handler")
+
+
+def verify_context_first(clazz):
+    """Verifies that methods accepting a Context keep it the first argument."""
+    for m in clazz.ctors:
+        if len(m.args) > 1:
+            if "android.content.Context" in m.args[1:]:
+                error(clazz, m, "M3", "Context is distinct, so it must be the first argument")
+
+    for m in clazz.methods:
+        if len(m.args) > 1:
+            if "android.content.Context" in m.args[1:]:
+                error(clazz, m, "M3", "Context is distinct, so it must be the first argument")
 
 
 def verify_style(api):
@@ -826,6 +935,9 @@ def verify_style(api):
         verify_manager(clazz)
         verify_boxed(clazz)
         verify_static_utils(clazz)
+        verify_overload_args(clazz)
+        verify_callback_handlers(clazz)
+        verify_context_first(clazz)
 
     return failures
 
