@@ -27,6 +27,7 @@ import static android.system.OsConstants.O_WRONLY;
 import static com.android.server.pm.PackageInstallerService.prepareExternalStageCid;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -92,6 +93,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final Context mContext;
     private final PackageManagerService mPm;
     private final Handler mHandler;
+    private final boolean mIsInstallerDeviceOwner;
 
     final int sessionId;
     final int userId;
@@ -208,8 +210,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mPrepared = prepared;
         mSealed = sealed;
 
+        // Device owners are allowed to silently install packages, so the permission check is
+        // waived if the installer is the device owner.
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        mIsInstallerDeviceOwner = (dpm != null) && dpm.isDeviceOwnerApp(installerPackageName);
         if ((mPm.checkUidPermission(android.Manifest.permission.INSTALL_PACKAGES, installerUid)
-                == PackageManager.PERMISSION_GRANTED) || (installerUid == Process.ROOT_UID)) {
+                == PackageManager.PERMISSION_GRANTED)
+                || (installerUid == Process.ROOT_UID)
+                || mIsInstallerDeviceOwner) {
             mPermissionsAccepted = true;
         } else {
             mPermissionsAccepted = false;
@@ -440,7 +449,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mActiveCount.incrementAndGet();
 
         final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(mContext,
-                statusReceiver, sessionId);
+                statusReceiver, sessionId, mIsInstallerDeviceOwner, userId);
         mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
     }
 

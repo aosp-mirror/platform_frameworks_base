@@ -44,7 +44,8 @@ interface IPackageInstaller {
     void registerCallback(IPackageInstallerCallback callback, int userId);
     void unregisterCallback(IPackageInstallerCallback callback);
 
-    void uninstall(String packageName, int flags, in IntentSender statusReceiver, int userId);
+    void uninstall(String packageName, String callerPackageName, int flags,
+            in IntentSender statusReceiver, int userId);
 
     void setPermissionsResult(int sessionId, boolean accepted);
 }

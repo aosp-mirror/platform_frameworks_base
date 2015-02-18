@@ -31,16 +31,22 @@ import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageInstallerCallback;
 import android.content.pm.IPackageInstallerSession;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
@@ -79,9 +85,11 @@ import android.util.Xml;
 
 import libcore.io.IoUtils;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.google.android.collect.Sets;
@@ -784,16 +792,34 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     }
 
     @Override
-    public void uninstall(String packageName, int flags, IntentSender statusReceiver, int userId) {
-        mPm.enforceCrossUserPermission(Binder.getCallingUid(), userId, true, true, "uninstall");
+    public void uninstall(String packageName, String callerPackageName, int flags,
+                IntentSender statusReceiver, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "uninstall");
+        if ((callingUid != Process.SHELL_UID) && (callingUid != Process.ROOT_UID)) {
+            mAppOps.checkPackage(callingUid, callerPackageName);
+        }
+
+        // Check whether the caller is device owner
+        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        boolean isDeviceOwner = (dpm != null) && dpm.isDeviceOwnerApp(callerPackageName);
 
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
-                statusReceiver, packageName);
+                statusReceiver, packageName, isDeviceOwner, userId);
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DELETE_PACKAGES)
                 == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
-
+        } else if (isDeviceOwner) {
+            // Allow the DeviceOwner to silently delete packages
+            // Need to clear the calling identity to get DELETE_PACKAGES permission
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mPm.deletePackage(packageName, adapter.getBinder(), userId, flags);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         } else {
             // Take a short detour to confirm with user
             final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
@@ -849,12 +875,21 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         private final Context mContext;
         private final IntentSender mTarget;
         private final String mPackageName;
+        private final Notification mNotification;
 
         public PackageDeleteObserverAdapter(Context context, IntentSender target,
-                String packageName) {
+                String packageName, boolean showNotification, int userId) {
             mContext = context;
             mTarget = target;
             mPackageName = packageName;
+            if (showNotification) {
+                mNotification = buildSuccessNotification(mContext,
+                        mContext.getResources().getString(R.string.package_deleted_device_owner),
+                        packageName,
+                        userId);
+            } else {
+                mNotification = null;
+            }
         }
 
         @Override
@@ -872,6 +907,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
         @Override
         public void onPackageDeleted(String basePackageName, int returnCode, String msg) {
+            if (PackageManager.DELETE_SUCCEEDED == returnCode && mNotification != null) {
+                NotificationManager notificationManager = (NotificationManager)
+                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(basePackageName, 0, mNotification);
+            }
             final Intent fillIn = new Intent();
             fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, mPackageName);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
@@ -890,11 +930,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         private final Context mContext;
         private final IntentSender mTarget;
         private final int mSessionId;
+        private final boolean mShowNotification;
+        private final int mUserId;
 
-        public PackageInstallObserverAdapter(Context context, IntentSender target, int sessionId) {
+        public PackageInstallObserverAdapter(Context context, IntentSender target, int sessionId,
+                boolean showNotification, int userId) {
             mContext = context;
             mTarget = target;
             mSessionId = sessionId;
+            mShowNotification = showNotification;
+            mUserId = userId;
         }
 
         @Override
@@ -913,6 +958,17 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         @Override
         public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                 Bundle extras) {
+            if (PackageManager.INSTALL_SUCCEEDED == returnCode && mShowNotification) {
+                Notification notification = buildSuccessNotification(mContext,
+                        mContext.getResources().getString(R.string.package_installed_device_owner),
+                        basePackageName,
+                        mUserId);
+                if (notification != null) {
+                    NotificationManager notificationManager = (NotificationManager)
+                            mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.notify(basePackageName, 0, notification);
+                }
+            }
             final Intent fillIn = new Intent();
             fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, mSessionId);
             fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
@@ -932,6 +988,40 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             } catch (SendIntentException ignored) {
             }
         }
+    }
+
+    /**
+     * Build a notification for package installation / deletion by device owners that is shown if
+     * the operation succeeds.
+     */
+    private static Notification buildSuccessNotification(Context context, String contentText,
+            String basePackageName, int userId) {
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = AppGlobals.getPackageManager().getPackageInfo(
+                    basePackageName, 0, userId);
+        } catch (RemoteException ignored) {
+        }
+        if (packageInfo == null || packageInfo.applicationInfo == null) {
+            Slog.w(TAG, "Notification not built for package: " + basePackageName);
+            return null;
+        }
+        PackageManager pm = context.getPackageManager();
+        Bitmap packageIcon = ImageUtils.buildScaledBitmap(
+                packageInfo.applicationInfo.loadIcon(pm),
+                context.getResources().getDimensionPixelSize(
+                        android.R.dimen.notification_large_icon_width),
+                context.getResources().getDimensionPixelSize(
+                        android.R.dimen.notification_large_icon_height));
+        CharSequence packageLabel = packageInfo.applicationInfo.loadLabel(pm);
+        return new Notification.Builder(context)
+                .setSmallIcon(R.drawable.ic_check_circle_24px)
+                .setColor(context.getResources().getColor(
+                        R.color.system_notification_accent_color))
+                .setContentTitle(packageLabel)
+                .setContentText(contentText)
+                .setLargeIcon(packageIcon)
+                .build();
     }
 
     private static class Callbacks extends Handler {

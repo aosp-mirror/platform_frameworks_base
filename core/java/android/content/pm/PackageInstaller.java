@@ -423,7 +423,7 @@ public class PackageInstaller {
      */
     public void uninstall(@NonNull String packageName, @NonNull IntentSender statusReceiver) {
         try {
-            mInstaller.uninstall(packageName, 0, statusReceiver, mUserId);
+            mInstaller.uninstall(packageName, mInstallerPackageName, 0, statusReceiver, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

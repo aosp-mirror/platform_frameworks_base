@@ -1385,7 +1385,8 @@ public final class Pm {
         }
 
         final LocalIntentReceiver receiver = new LocalIntentReceiver();
-        mInstaller.uninstall(pkg, flags, receiver.getIntentSender(), userId);
+        mInstaller.uninstall(pkg, null /* callerPackageName */, flags,
+                receiver.getIntentSender(), userId);
 
         final Intent result = receiver.getResult();
         final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
