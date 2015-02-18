@@ -2837,10 +2837,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return providersUpdated;
     }
 
-    private boolean removeHostsAndProvidersForPackageLocked(String pkgName, int userId) {
+    private boolean removeProvidersForPackageLocked(String pkgName, int userId) {
         boolean removed = false;
 
-        int N = mProviders.size();
+        final int N = mProviders.size();
         for (int i = N - 1; i >= 0; i--) {
             Provider provider = mProviders.get(i);
             if (pkgName.equals(provider.info.provider.getPackageName())
@@ -2849,11 +2849,16 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 removed = true;
             }
         }
+        return removed;
+    }
+
+    private boolean removeHostsAndProvidersForPackageLocked(String pkgName, int userId) {
+        boolean removed = removeProvidersForPackageLocked(pkgName, userId);
 
         // Delete the hosts for this package too
         // By now, we have removed any AppWidgets that were in any hosts here,
         // so we don't need to worry about sending DISABLE broadcasts to them.
-        N = mHosts.size();
+        final int N = mHosts.size();
         for (int i = N - 1; i >= 0; i--) {
             Host host = mHosts.get(i);
             if (pkgName.equals(host.id.packageName)
@@ -2925,11 +2930,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             synchronized (mLock) {
                 boolean providersChanged = false;
 
+                ArraySet<String> previousPackages = new ArraySet<String>();
+                final int providerCount = mProviders.size();
+                for (int i = 0; i < providerCount; ++i) {
+                    Provider provider = mProviders.get(i);
+                    if (provider.getUserId() == userId) {
+                        previousPackages.add(provider.id.componentName.getPackageName());
+                    }
+                }
+
                 final int packageCount = packages.size();
                 for (int i = 0; i < packageCount; i++) {
                     String packageName = packages.get(i);
+                    previousPackages.remove(packageName);
                     providersChanged |= updateProvidersForPackageLocked(packageName,
                             userId, null);
+                }
+
+                // Some packages are no longer whitelisted.
+                final int removedCount = previousPackages.size();
+                for (int i = 0; i < removedCount; ++i) {
+                    providersChanged |= removeProvidersForPackageLocked(
+                            previousPackages.valueAt(i), userId);
                 }
 
                 if (providersChanged) {
@@ -3142,10 +3164,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (parentId != callerId) {
                 return false;
             }
-            return isProviderWhitelListed(packageName, profileId);
+            return isProviderWhiteListed(packageName, profileId);
         }
 
-        public boolean isProviderWhitelListed(String packageName, int profileId) {
+        public boolean isProviderWhiteListed(String packageName, int profileId) {
             DevicePolicyManagerInternal devicePolicyManager = LocalServices.getService(
                     DevicePolicyManagerInternal.class);
 
