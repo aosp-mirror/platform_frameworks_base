@@ -310,6 +310,143 @@ nScriptGroup2Execute(JNIEnv *_env, jobject _this, jlong con, jlong groupID) {
 }
 
 static void
+nScriptIntrinsicBLAS_Single(JNIEnv *_env, jobject _this, jlong con, jlong id, jint func, jint TransA,
+                            jint TransB, jint Side, jint Uplo, jint Diag, jint M, jint N, jint K,
+                            jfloat alpha, jlong A, jlong B, jfloat beta, jlong C, jint incX, jint incY,
+                            jint KL, jint KU) {
+    RsBlasCall call;
+    memset(&call, 0, sizeof(call));
+    call.func = (RsBlasFunction)func;
+    call.transA = (RsBlasTranspose)TransA;
+    call.transB = (RsBlasTranspose)TransB;
+    call.side = (RsBlasSide)Side;
+    call.uplo = (RsBlasUplo)Uplo;
+    call.diag = (RsBlasDiag)Diag;
+    call.M = M;
+    call.N = N;
+    call.K = K;
+    call.alpha.f = alpha;
+    call.beta.f = beta;
+    call.incX = incX;
+    call.incY = incY;
+    call.KL = KL;
+    call.KU = KU;
+
+    RsAllocation in_allocs[3];
+    in_allocs[0] = (RsAllocation)A;
+    in_allocs[1] = (RsAllocation)B;
+    in_allocs[2] = (RsAllocation)C;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
+                         in_allocs, sizeof(in_allocs), nullptr,
+                         &call, sizeof(call), nullptr, 0);
+}
+
+static void
+nScriptIntrinsicBLAS_Double(JNIEnv *_env, jobject _this, jlong con, jlong id, jint func, jint TransA,
+                            jint TransB, jint Side, jint Uplo, jint Diag, jint M, jint N, jint K,
+                            jdouble alpha, jlong A, jlong B, jdouble beta, jlong C, jint incX, jint incY,
+                            jint KL, jint KU) {
+    RsBlasCall call;
+    memset(&call, 0, sizeof(call));
+    call.func = (RsBlasFunction)func;
+    call.transA = (RsBlasTranspose)TransA;
+    call.transB = (RsBlasTranspose)TransB;
+    call.side = (RsBlasSide)Side;
+    call.uplo = (RsBlasUplo)Uplo;
+    call.diag = (RsBlasDiag)Diag;
+    call.M = M;
+    call.N = N;
+    call.K = K;
+    call.alpha.d = alpha;
+    call.beta.d = beta;
+    call.incX = incX;
+    call.incY = incY;
+    call.KL = KL;
+    call.KU = KU;
+
+    RsAllocation in_allocs[3];
+    in_allocs[0] = (RsAllocation)A;
+    in_allocs[1] = (RsAllocation)B;
+    in_allocs[2] = (RsAllocation)C;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
+                         in_allocs, sizeof(in_allocs), nullptr,
+                         &call, sizeof(call), nullptr, 0);
+}
+
+static void
+nScriptIntrinsicBLAS_Complex(JNIEnv *_env, jobject _this, jlong con, jlong id, jint func, jint TransA,
+                             jint TransB, jint Side, jint Uplo, jint Diag, jint M, jint N, jint K,
+                             jfloat alphaX, jfloat alphaY, jlong A, jlong B, jfloat betaX,
+                             jfloat betaY, jlong C, jint incX, jint incY, jint KL, jint KU) {
+    RsBlasCall call;
+    memset(&call, 0, sizeof(call));
+    call.func = (RsBlasFunction)func;
+    call.transA = (RsBlasTranspose)TransA;
+    call.transB = (RsBlasTranspose)TransB;
+    call.side = (RsBlasSide)Side;
+    call.uplo = (RsBlasUplo)Uplo;
+    call.diag = (RsBlasDiag)Diag;
+    call.M = M;
+    call.N = N;
+    call.K = K;
+    call.alpha.c.r = alphaX;
+    call.alpha.c.i = alphaY;
+    call.beta.c.r = betaX;
+    call.beta.c.r = betaY;
+    call.incX = incX;
+    call.incY = incY;
+    call.KL = KL;
+    call.KU = KU;
+
+    RsAllocation in_allocs[3];
+    in_allocs[0] = (RsAllocation)A;
+    in_allocs[1] = (RsAllocation)B;
+    in_allocs[2] = (RsAllocation)C;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
+                         in_allocs, sizeof(in_allocs), nullptr,
+                         &call, sizeof(call), nullptr, 0);
+}
+
+static void
+nScriptIntrinsicBLAS_Z(JNIEnv *_env, jobject _this, jlong con, jlong id, jint func, jint TransA,
+                       jint TransB, jint Side, jint Uplo, jint Diag, jint M, jint N, jint K,
+                       jdouble alphaX, jdouble alphaY, jlong A, jlong B, jdouble betaX,
+                       jdouble betaY, jlong C, jint incX, jint incY, jint KL, jint KU) {
+    RsBlasCall call;
+    memset(&call, 0, sizeof(call));
+    call.func = (RsBlasFunction)func;
+    call.transA = (RsBlasTranspose)TransA;
+    call.transB = (RsBlasTranspose)TransB;
+    call.side = (RsBlasSide)Side;
+    call.uplo = (RsBlasUplo)Uplo;
+    call.diag = (RsBlasDiag)Diag;
+    call.M = M;
+    call.N = N;
+    call.K = K;
+    call.alpha.z.r = alphaX;
+    call.alpha.z.i = alphaY;
+    call.beta.z.r = betaX;
+    call.beta.z.r = betaY;
+    call.incX = incX;
+    call.incY = incY;
+    call.KL = KL;
+    call.KU = KU;
+
+    RsAllocation in_allocs[3];
+    in_allocs[0] = (RsAllocation)A;
+    in_allocs[1] = (RsAllocation)B;
+    in_allocs[2] = (RsAllocation)C;
+
+    rsScriptForEachMulti((RsContext)con, (RsScript)id, 0,
+                         in_allocs, sizeof(in_allocs), nullptr,
+                         &call, sizeof(call), nullptr, 0);
+}
+
+
+static void
 nAssignName(JNIEnv *_env, jobject _this, jlong con, jlong obj, jbyteArray str)
 {
     if (kLogApi) {
@@ -2093,6 +2230,11 @@ static JNINativeMethod methods[] = {
 {"rsnScriptGroupSetOutput",          "(JJJJ)V",                               (void*)nScriptGroupSetOutput },
 {"rsnScriptGroupExecute",            "(JJ)V",                                 (void*)nScriptGroupExecute },
 {"rsnScriptGroup2Execute",           "(JJ)V",                                 (void*)nScriptGroup2Execute },
+
+{"rsnScriptIntrinsicBLAS_Single",    "(JJIIIIIIIIIFJJFJIIII)V",               (void*)nScriptIntrinsicBLAS_Single },
+{"rsnScriptIntrinsicBLAS_Double",    "(JJIIIIIIIIIDJJDJIIII)V",               (void*)nScriptIntrinsicBLAS_Double },
+{"rsnScriptIntrinsicBLAS_Complex",   "(JJIIIIIIIIIFFJJFFJIIII)V",             (void*)nScriptIntrinsicBLAS_Complex },
+{"rsnScriptIntrinsicBLAS_Z",         "(JJIIIIIIIIIDDJJDDJIIII)V",             (void*)nScriptIntrinsicBLAS_Z },
 
 {"rsnProgramStoreCreate",            "(JZZZZZZIII)J",                         (void*)nProgramStoreCreate },
 
