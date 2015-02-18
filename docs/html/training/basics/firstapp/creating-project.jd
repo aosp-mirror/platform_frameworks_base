@@ -100,10 +100,13 @@ lesson.</p>
         Activities</a> for more information.</p>
     </div>
   </div>
-  <li>Under <strong>Add an activity to your project</strong>, select <strong>Blank Activity</strong>
-    and click <strong>Next</strong>.</li>
-  <li>Under <strong>Describe the new activity for your project</strong>, leave the fields as they
-    are and click <strong>Finish</strong>.</li>
+  <li>Under <strong>Add an activity to &lt;<em>template</em>&gt;</strong>, select <strong>Blank
+    Activity</strong> and click <strong>Next</strong>.</li>
+  <li>Under <strong>Choose options for your new file</strong>, change the
+    <strong>Activity Name</strong> to <em>MyActivity</em>. The <strong>Layout Name</strong> changes
+    to <em>activity_my</em>, and the <strong>Title</strong> to <em>MyActivity</em>. The
+    <strong>Menu Resource Name</strong> is <em>menu_my</em>. 
+   <li>Click the <strong>Finish</strong> button to create the project.</li>
 </ol>
 
 <p>Your Android project is now a basic "Hello World" app that contains some default files. Take a
@@ -120,7 +123,7 @@ moment to review the most important of these:</p>
     select the file you see the class definition for the activity you created. When you build and
     run the app, the {@link android.app.Activity} class starts the activity and loads the layout file
     that says "Hello World!"</dd>
-  <dt><code>app/src/res/AndroidManifest.xml</code></dt>
+  <dt><code>app/src/main/AndroidManifest.xml</code></dt>
   <dd>The <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a> describes
     the fundamental characteristics of the app and defines each of its components. You'll revisit
     this file as you follow these lessons and add more components to your app.</dd>
@@ -156,13 +159,16 @@ moment to review the most important of these:</p>
 <p>Note also the <code>/res</code> subdirectories that contain the
 <a href="{@docRoot}guide/topics/resources/overview.html">resources</a> for your application:</p>
 <dl>
-  <dt><code>drawable-hdpi/</code></dt>
-    <dd>Directory for drawable objects (such as bitmaps) that are designed for high-density
-    (hdpi) screens. Other drawable directories contain assets designed for other screen densities.
+  <dt><code>drawable<em>&lt;density&gt;</em>/</code></dt>
+    <dd>Directories for drawable objects (such as bitmaps) that are designed for various densities,
+    such as medium-density (mdpi) and high-density (hdpi) screens. Other drawable directories
+    contain assets designed for other screen densities.
     Here you'll find the ic_launcher.png that appears when you run the default app.</dd>
   <dt><code>layout/</code></dt>
     <dd>Directory for files that define your app's user interface like activity_my.xml,
       discussed above, which describes a basic layout for the MyActivity class.</dd>
+  <dt><code>menu/</code></dt>
+    <dd>Directory for files that define your app's menu items.</dd>
   <dt><code>values/</code></dt>
     <dd>Directory for other XML files that contain a collection of resources, such as
       string and color definitions. The strings.xml file defines the "Hello world!" string that
@@ -177,9 +183,9 @@ moment to review the most important of these:</p>
 using the SDK tools from a command line:</p>
 
 <ol>
-  <li>Change directories into the Android SDK’s <code>tools/</code> path.</li>
+  <li>Change directories into the Android SDK’s <code>sdk/</code> path.</li>
   <li>Execute:
-<pre class="no-pretty-print">android list targets</pre>
+<pre class="no-pretty-print">tools/android list targets</pre>
 <p>This prints a list of the available Android platforms that you’ve downloaded for your SDK. Find
 the platform against which you want to compile your app. Make a note of the target ID. We
 recommend that you select the highest version possible. You can still build your app to
@@ -206,7 +212,6 @@ projects.</p></li>
 
 <p>Your Android project is now a basic "Hello World" app that contains some default files.
 To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
-
 
 
 
