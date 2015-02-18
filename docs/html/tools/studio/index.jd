@@ -36,7 +36,7 @@ Android Studio offers:</p>
   <li>Build variants and multiple <code>apk</code> file generation</li>
   <li>Code templates to help you build common app features</li>
   <li>Rich layout editor with support for drag and drop theme editing</li>
-  <li>Lint tools to catch performance, usability, version compatibility, and other problems</li>
+  <li>{@code lint} tools to catch performance, usability, version compatibility, and other problems</li>
   <li>ProGuard and app-signing capabilities</li>
   <li>Built-in support for <a
   href="http://developers.google.com/cloud/devtools/android_studio_templates/"
@@ -244,7 +244,7 @@ Manager (HAXM) emulator accelerator and creates a default emulator for quick app
 
 
 
-<h3> Memory Monitor</h3>
+<h3>Memory Monitor</h3>
 <p>Android Studio provides a memory monitor view so you can more easily monitor your
 app's memory usage to find deallocated objects, locate memory leaks and track the amount of
 memory the connected device is using. With your app running on a device or emulator, click the
@@ -255,33 +255,81 @@ memory the connected device is using. With your app running on a device or emula
 
 
 
-<h3> Lint inspections</h3>
-<p>The Android {@code lint} tool is a static code analysis tool that checks your Android project
-source files for potential bugs and optimization improvements. Choose the <strong>Analyze &gt; 
-Inspect Code</strong> to manually run the inspections. The {@code lint} settings icon in the
-Inspection display provides a complete list of the current inspections.</p>
+<h3>Code Inspections</h3>
+<p>In Android Studio, the configured <a href="{@docRoot}tools/help/lint.html"><code>lint</code></a> and
+other IDE inspections run automatically whenever you compile your program. In addition to the
+configured {@code lint} checks, additional
+<a href="https://www.jetbrains.com/idea/help/inspection-basics.html?search=inspection" class="external-link"
+target="_blank">IntelliJ code inspections</a>
+run to streamline code review.</p>
 
-<p>Hovering over a Lint error displays the full issue explanation inline for easy error
+
+<p>Android Studio enables several <code>lint</code> checks
+to ensure:
+<ul>
+  <li><code> Cipher.getInstance()</code> is used with safe values</li>
+  <li>In custom Views, the associated declare-styleable for the custom view uses the same
+  base name as the class name.</li>
+  <li>Security check for fragment injection.</li>
+  <li>Where ever property assignment no longer works as expected.</li>
+  <li>Gradle plugin version is compatible with the SDK.</li>
+  <li>Right to left validation </li>
+  <li>Required API version</li>
+  <li>many others</li>
+</ul>
+
+
+<p>Hovering over an inspection error displays the full issue explanation inline for easy error
 resolution. There is also a helpful hyperlink at the end of the error message for additional
 error information.</p>
 
-<p>With Android Studio, you can run Lint for a specific build variant, or for all build variants.
-You can configure Lint by adding a <em>lintOptions</em> property to the Android settings in the
-build.gradle file.  </p>
+<p>With Android Studio, you can also run {@code lint} inspections for a specific build variant, or
+for all build variants. You can configure the {@code lint} inspections that run by adding a
+<code>lintOptions</code> property to the Android settings in the <code>build.gradle</code>
+file.  </p>
 
-    <pre>
-    android {
-        lintOptions {
-           // set to true to turn off analysis progress reporting by lint
-           quiet true
-           // if true, stop the gradle build if errors are found
-           abortOnError false
-           // if true, only report errors
-           ignoreWarnings true
-    </pre>
+<pre>
+android {
+    lintOptions {
+       // set to true to turn off analysis progress reporting by lint
+       quiet true
+       // if true, stop the gradle build if errors are found
+       abortOnError false
+       // if true, only report errors
+       ignoreWarnings true
+    }
+</pre>
+
+
+<p>You can also manage inspection profiles and configure inspections within Android Studio.
+Choose <strong>File &gt; Settings &gt; Project Settings</strong>. The
+<em>Inspection Configuration</em> page appears with the supported inspections.</p>
+<p><img src="{@docRoot}images/tools/studio-inspections-config.png" alt="" /> </p>
+<p class="img-caption"><strong>Figure 5.</strong> Inspection Configuration</p> 
+
+<p class="note"><strong>Note:</strong> If you wish to change the behavior of specific
+inspection notifications, you can change the inspection severity, for example from <em>warning</em>
+to <em>error</em>. </p>
+
+
+<p>To manually run inspections in Android Studio, choose <strong>Analyze &gt; Inspect Code</strong>.
+The <em>Inspections Scope</em> dialog appears so you can specify the desired inspection profile and scope.</p>
+
+
+
+<h4>Running Inspections from the command line</h4>
+<p>You can also run {@code lint} inspections from the command line in your SDK directory. </p>
+<pre>
+sdk$ lint [flags] <project directories>
+</pre>
+
+<p class="note"><strong>Note:</strong> The {@code lint} <strong>--show</strong> and <strong>--list</strong>
+flags can be used to display the available issues and explanations. </p>
+
 
 <p>For more information, see
-<a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with Lint</a>.</p>
+<a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with {@code lint}</a> and
+<a href="{@docRoot}tools/help/lint.html">lint tool</a>.</p>
 
 
 <h3>Dynamic layout preview</h3>
@@ -346,6 +394,7 @@ types. </p>
     <p>For easy cross-platform development, the Project Wizard provides new templates for
     creating your apps for Android Wear and TV. </p>
     <p><img src="{@docRoot}images/tools/studio-tvwearsupport.png"  />
+
       <p class="img-caption"><strong>Figure 10.</strong> Supported Form Factors</p>
     <p>During app creation, the Project Wizard also displays an API Level dialog to help you choose
     the best <em>minSdkVersion</em> for your project.</p>
@@ -519,7 +568,8 @@ and &lt;animated-selector&gt;, are supported.</p>
 
 
 <h3 id="git-samples"> Easy access to Android code samples on GitHub</h3>
-<p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or Welcome page
+<p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or <em>Welcome</em> page
+
 provides seamless access to Google code samples on GitHub.</p>
     <p><img src="{@docRoot}images/tools/studio-samples-githubaccess.png" /></p>
     <p class="img-caption"><strong>Figure 13.</strong> Code Sample Access</p>
