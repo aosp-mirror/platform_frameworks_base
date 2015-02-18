@@ -9,11 +9,11 @@ parent.link=index.html
 
       <ol>
         <li><a href="#overview">Overview</a></li>
-        <li><a href=#eclipse">Running lint from Eclipse</a></li>
+        <li><a href=#studio">Running lint from Android Studio</a></li>
         <li><a href=#commandline">Running lint from the command-line</a></li>
          <li><a href=#config">Configuring lint</a>
             <ol>
-		<LI><a href="#eclipse_config">Configuring lint in Eclipse</a></LI>
+		<LI><a href="#studio_config">Configuring lint in Android Studio</a></LI>
                 <LI><a href="#pref">Configuring the lint file</a></LI>
                 <LI><a href="#src">Configuring lint checking in Java and XML source files</a></LI>
             </ol>
@@ -31,8 +31,15 @@ parent.link=index.html
 In addition to testing that your Android application meets its functional requirements, it's important to ensure that your code has no structural problems. Poorly structured code can impact the reliability and efficiency of your Android apps and make your code harder to maintain. For example, if your XML resource files contain unused namespaces, this takes up space and incurs unnecessary processing. Other structural issues, such as use of deprecated elements or API calls that are not supported by the target API versions, might lead to code failing to run correctly.</p>
 
 <h2 id="overview">Overview</h2>
-<p>The Android SDK provides a code scanning tool called {@code lint} that can help you to easily identify and correct problems with the structural quality of your code, without having to execute the app or write any test cases. Each problem detected by the tool is reported with a description message and a severity level, so that you can quickly prioritize the critical improvements that need to be made.  You can also configure a problem's severity level to ignore issues that are not relevant for your project, or raise the severity level. The tool has a command-line interface, so you can easily integrate it into your automated testing process.</p>
-<p>The {@code lint} tool checks your Android project source files for potential bugs and optimization improvements for correctness, security, performance, usability, accessibility, and internationalization. You can run {@code lint} from the command-line or from the Eclipse environment.</p>
+<p>The Android SDK provides a code scanning tool called <a href="{@docRoot}tools/help/lint.html"><code>lint</code></a>
+that can help you to easily identify and correct problems with the structural quality of your code, without having to execute the app or write any test cases. Each problem detected by the tool is reported with a description message and a severity level, so that you can quickly prioritize the critical improvements that need to be made.  You can also configure a problem's severity level to ignore issues that are not relevant for your project, or raise the severity level. The tool has a command-line interface, so you can easily integrate it into your automated testing process.</p>
+<p>The {@code lint} tool checks your Android project source files for potential bugs and optimization improvements for correctness, security, performance, usability, accessibility, and internationalization. You can run {@code lint} from the command-line or from Android Studio.</p>
+
+<p class="note"><strong>Note:</strong> In Android Studio, additional
+<a href="https://www.jetbrains.com/idea/help/inspection-basics.html?search=inspection" class="external-link"
+target="_blank">IntelliJ code inspections</a> run when your code is compiled in Android Studio to
+streamline code review.</p>
+
 <p>Figure 1 shows how the {@code lint} tool processes the application source files.</p>
 <img id="Fig1" src="{@docRoot}images/tools/lint.png" alt="">
 <p class="img-caption"><strong>Figure 1.</strong> Code scanning workflow with the {@code lint} tool</p>
@@ -42,25 +49,51 @@ In addition to testing that your Android application meets its functional requir
 <dt><b>The <code>lint.xml</code> file</b></dt>
 <dd>A configuration file that you can use to specify any {@code lint} checks that you want to exclude and to customize problem severity levels.</dd>
 <dt><b>The {@code lint} tool</b></dt>
-<dd>A static code scanning tool that you can run on your Android project from the command-line or from Eclipse.   The {@code lint} tool checks for structural code problems that could affect the quality and performance of your Android application. It is strongly recommended that you correct any errors that {@code lint} detects before publishing your application.</dd>
+<dd>A static code scanning tool that you can run on your Android project from the command-line or Android Studio.  The {@code lint} tool checks for structural code problems that could affect the quality and performance of your Android application. It is strongly recommended that you correct any errors that {@code lint} detects before publishing your application.</dd>
 <dt><b>Results of {@code lint} checking</b></dt>
-<dd>You can view the results from {@code lint} in the console or in the <strong>Lint Warnings</strong> view in Eclipse.  Each issue is identified by the location in the source files where it occurred and a description of the issue.</dd>
+<dd>You can view the results from {@code lint} in the console or in the <strong>Event Log</strong> in Android Studio.  Each issue is identified by the location in the source files where it occurred and a description of the issue.</dd>
 </dl>
-<p>The {@code lint} tool is automatically installed as part of the Android SDK Tools revision 16 or higher. If you want to use {@code lint} in the Eclipse environment, you must also install the Android Development Tools (ADT) Plugin for Eclipse revision 16 or higher. For more information about installing the SDK or the ADT Plugin for Eclipse, see <a href="http://developer.android.com/sdk/installing.html">Installing the SDK.</a></p>
+<p>The {@code lint} tool is automatically installed as part of the Android SDK Tools revision 16 or higher.</p>
 
-<h2 id="eclipse">Running lint from Eclipse</h2>
-<p>If the ADT Plugin is installed in your Eclipse environment, the {@code lint} tool runs automatically when you perform one of these actions:</p>
-<ul>
-<LI>Export an APK</LI>
-<LI>Edit and save an XML source file in your Android project (such as a manifest or layout file)</LI>
-<LI>Use the layout editor in Eclipse to make changes</LI>
-</ul>
-<p>Note that when you export an APK, {@code lint} only runs an automatic check for fatal errors and aborts the export if fatal errors are found. You can turn off this automatic checking from the <strong>Lint Error Checking</strong> page in Eclipse Preferences. </p>
-<p>The output is displayed in the <strong>Lint Warnings</strong> view. If the <strong>Lint Warnings</strong> view is not showing in the workbench, you can bring it up from the Eclipse menu by clicking <strong>Window &gt; Show View &gt; Other &gt;  Android &gt; Lint Warnings</strong>.</p>
-<p>Figure 2 shows an example of the output in the Lint Warnings view.</p>
-<img id="Fig2" src="{@docRoot}images/tools/lint_output.png" alt="">
-<p class="img-caption"><strong>Figure 2.</strong> Sample output in the <strong>Lint Warnings</strong> view</p>
-<p>You can also run a {@code lint} scan manually on your Android project in Eclipse by right-clicking on the project folder in the Package Explorer > <strong>Android Tools  &gt; Run Lint: Check for Common Errors</strong>.</p>
+
+<h2 id="studio">Running lint in Android Studio</h2>
+<p>In Android Studio, the configured <code>lint</code> and
+IDE inspections run automatically whenever you build your app. The IDE inspections are
+configured along with the {@code lint} checks to run
+<a href="https://www.jetbrains.com/idea/help/inspection-basics.html?search=inspection" class="external-link"
+target="_blank">IntelliJ code inspections</a> to streamline code review.</p>
+
+<p class="note"><strong>Note:</strong> To view and modify inspection severity
+levels, use the <strong>File &gt; Settings &gt; Project Settings</strong> menu to open the
+<em>Inspection Configuration</em> page with a list of the supported inspections.</p>
+
+
+<p>With Android Studio, you can also run {@code lint} inspections for a specific build variant,
+or for all build variants from the <code>build.gradle</code> file. Add the
+<code>lintOptions</code> property to the <code>android</code> settings in the build file.
+This code snippet from a Gradle build file shows how to set the <code>quiet</code> option to
+<code>true</code> and the <code>abortOnError</code> option to <code>false</code>. </p>
+
+<pre>
+android {
+    lintOptions {
+       // set to true to turn off analysis progress reporting by lint
+       quiet true
+       // if true, stop the gradle build if errors are found
+       abortOnError false
+       // if true, only report errors
+       ignoreWarnings true
+       }
+       ...
+    }
+</pre>
+
+
+<p>To manually run inspections in Android Studio, from the application or right-click menu,
+choose <strong>Analyze &gt; Inspect Code</strong>. The <em>Specify Inspections Scope</em> dialog
+appears so you can specify the desired inspection scope and profile.</p>
+
+
 
 
 <h2 id="commandline">Running lint from the Command-Line</h2>
@@ -96,38 +129,45 @@ res: Warning: Missing density variation folders in res: drawable-xhdpi [IconMiss
 <p>By default, when you run a {@code lint} scan, the tool checks for all issues that are supported by {@code lint}.  You can also restrict the issues for {@code lint} to check and assign the severity level for those issues. For example, you can disable {@code lint} checking for specific issues that are not relevant to your project and configure {@code lint} to report non-critical issues at a lower severity level.</p>
 <p>You can configure {@code lint} checking at different levels:</p>
 <ul>
-<LI>Globally, for all projects</LI>
-<li>Per project</li>
-<li>Per file</li>
-<li>Per Java class or method (by using the <code>&#64;SuppressLint</code> annotation), or per XML element (by using the <code>tools:ignore</code> attribute.</li>
+<LI>Globally, for the entire project</LI>
+<li>Per project module</li>
+<li>Per production module</li>
+<li>Per test module</li>
+<li>Per open files</li>
+<li>Per class hierarchy</li>
+<li>Per Version Control System (VCS) scopes</li>
 </ul>
 
-<h3 id="eclipse_config">Configuring lint in Eclipse</h3>
-<p>You can configure global, project-specific, and file-specific settings for {@code lint} from the Eclipse user interface.</p>
+<h3 id="studio_config">Configuring lint in Android Studio</h3>
+<p>Android Studio allows you to enable or disable individual inspections and configure
+project-global, directory-specific, and file-specific settings for {@code lint}.</p>
+
+<p>You can manage inspection profiles and configure inspection severity within Android Studio using
+the <strong>File &gt; Settings &gt; Project Settings</strong> menu to open the <em>Inspections</em>
+page with a list of the supported profiles and inspections.</p>
+<p><img src="{@docRoot}images/tools/studio-inspections-config.png" alt="" /> </p>
+<p class="img-caption"><strong>Figure 3.</strong> Inspection Configuration</p> 
 
 <h4>Global preferences</h4>
 <ol>
-<LI>Open <strong>Window  &gt; Preferences  &gt; Android  &gt; Lint Error Checking</strong>.</LI>
-<li>Specify your preferences and click <b>OK</b>.</li>
-</ol>
-<p>These settings are applied by default when you run {@code lint} on your Android projects in Eclipse.</p>
+<li>To specify global project settings, select the project folder in the Project View and choose
+<strong>Analyze &gt; Inspect Code</strong>.</li>
 
-<h4>Project and file-specific preferences</h4>
-<ol>
-<LI>Run the {@code lint} tool on your project by right-clicking on your project folder in the Package Explorer and selecting  <strong>Android Tools &gt; Run Lint: Check for Common Errors</strong>. This action brings up the <strong>Lint Warnings</strong> view which displays a list of issues that {@code lint} detected in your project.</LI>
-<li>From the <strong>Lint Warnings</strong> view, use the toolbar options to configure {@code lint} preferences for individual projects and files in Eclipse. The options you can select include:
-<ul>
-<LI><b>Suppress this error with an annotation/attribute</b> - If the issue appears in a Java class, the {@code lint} tool adds a <code>&#64;SuppressLint</code> annotation to the method where the issue was detected.  If the issue appears in an {@code .xml} file, {@code lint} inserts a <code>tools:ignore</code> attribute to disable checking for the {@code lint} issue in this file.</LI>
-<LI><b>Ignore in this file</b> - Disables checking for this {@code lint} issue in this file.</LI>
-<li><b>Ignore in this project</b>  - Disables checking for this {@code lint} issue in this project.</li>
-<li><b>Always ignore</b> - Disables checking for this {@code lint} issue globally for all projects.</li>
-</ul>
-</li>
+<li>Specify your inspection scope and profile, and click <b>OK</b>.</li>
 </ol>
-<p>If you select the second or third option, the {@code lint} tool automatically generates a <code>lint.xml</code> file with these configuration settings in your Android application project folder.  </p>
+<p>The configured settings run the specified {@code lint} inspections. The {@code lint}
+inspections are also run whenever you build and run your Android project and modules.</p>
+
+<h4>Module and file-specific preferences</h4>
+<ol>
+<LI>Run the {@code lint} tool on your module by right-clicking on your module folder or file in the Project View and selecting  <strong>Analyze &gt; Inspect Code</strong>. This displays the {@code lint} inspection results
+with a list of issues that {@code lint} detected in your module.</LI>
+<li>From the <strong>Lint Warnings</strong> view, use the toolbar options to configure {@code lint} preferences for individual modules and files, and set the issue display options.</li>
+</ol>
+
 
 <h3 id="pref">Configuring the lint file</h3>
-<p>You can specify your {@code lint} checking preferences in the <code>lint.xml</code> file.  If you are creating this file manually, place it in the root directory of your Android project.  If you are configuring {@code lint} preferences in Eclipse, the <code>lint.xml</code> file is automatically created and added to your Android project for you.</p>
+<p>You can specify your {@code lint} checking preferences in the <code>lint.xml</code> file.  If you are creating this file manually, place it in the root directory of your Android project.  If you are configuring {@code lint} preferences in Android Studio, the <code>lint.xml</code> file is automatically created and added to your Android project for you.</p>
 <p>The <code>lint.xml</code> file consists of an enclosing <code>&lt;lint&gt;</code> parent tag that contains one or more children <code>&lt;issue&gt;</code> elements.  Each <code>&lt;issue&gt;</code> is identified by a unique <code>id</code> attribute value, which is defined by {@code lint}.</p>
 <pre>
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
@@ -165,12 +205,9 @@ res: Warning: Missing density variation folders in res: drawable-xhdpi [IconMiss
 <h3 id="src">Configuring lint checking in Java and XML source files</h3>
 <p>You can disable {@code lint} checking from your Java and XML source files.</p>
 
-<p class="note"><strong>Tip: </strong>If you are using Eclipse, you can use the <strong>Quick Fix</strong> feature to automatically add the annotation or attribute to disable {@code lint} checking to your Java or XML source files:
-<ol>
-<LI>Open the Java or XML file that has a {@code lint} warning or error in an Eclipse editor.</LI>
-<LI>Move your cursor to the location in the file where is {@code lint} issue is found, then press <code>Ctrl+1</code> to bring up the <strong>Quick Fix</strong> pop-up.</LI>
-<li>From the <strong>Quick Fix</strong> pop-up, select the action to add an annotation or attribute to ignore the {@code lint} issue.</li>
-</ol>
+<p class="note"><strong>Tip: </strong>If you are using Android Studio, you can use the
+<strong>File &gt; Settings &gt; Project Settings &gt; Inspections</strong> feature to manage the
+{@code lint} checking to your Java or XML source files.
 </p>
 
 <h4>Configuring lint checking in Java</h4>

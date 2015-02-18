@@ -126,13 +126,15 @@ layout is used for every item in a list.</p>
 
 <p>Most of this time difference is due to the use of {@code layout_weight} in the {@link
 android.widget.LinearLayout} design, which can slow down the speed of measurement. It is just one
-example of how each layout has appropriate uses and you should carefully consider whether using 
+example of how each layout has appropriate uses and you should carefully consider whether using
 layout weight is necessary.</p>
 
 
 <h2 id="Lint">Use Lint</h2>
 
-<p>It is always good practice to run the <a href="http://tools.android.com/tips/lint">Lint</a> tool on your layout files to search for possible view hierarchy optimizations. Lint has replaced the Layoutopt tool and has much greater functionality. Some examples of Lint <a
+<p>It is always good practice to run the <a href="{@docRoot}tools/help/lint.html">lint</a>
+tool on your layout files to search for possible view hierarchy optimizations. Lint has replaced
+the Layoutopt tool and has much greater functionality. Some examples of lint <a
 href="http://tools.android.com/tips/lint-checks">rules</a> are:</p>
 
 <ul>
@@ -143,11 +145,18 @@ href="http://tools.android.com/tips/lint-checks">rules</a> are:</p>
 <li>Deep layouts - Layouts with too much nesting are bad for performance. Consider using flatter layouts such as {@link android.widget.RelativeLayout} or {@link android.widget.GridLayout} to improve performance. The default maximum depth is 10.</li>
 </ul>
 
-<p>Another benefit of Lint is that it is integrated into the Android Development Tools for Eclipse (ADT 16+). Lint automatically runs whenever you export an APK, edit and save an XML file or use the Layout Editor. To manually force Lint to run press the Lint button in the Eclipse toolbar.</p>
+<p>Another benefit of Lint is that it is integrated into Android Studio. Lint automatically runs 
+whenever you compile your program. With Android Studio, you can also run lint inspections for a
+specific build variant, or for all build variants. </p>
 
-<img src="{@docRoot}images/training/lint_icon.png" alt="" />
+<p>You can also manage inspection profiles and configure inspections within Android Studio with the
+<strong>File&gt;Settings&gt;Project Settings</strong> option. The Inspection Configuration page
+appears with the supported inspections.</p>
+<p><img src="{@docRoot}images/tools/studio-inspections-config.png" alt="" /> </p>
+<p class="img-caption"><strong>Figure 5.</strong> Inspection Configuration</p> 
 
-<p>When used inside Eclipse, Lint has the ability to automatically fix some issues, provide suggestions for others and jump directly to the offending code for review. If you don’t use Eclipse for your development, Lint can also be run from the command line. More information about Lint is available at <a href="http://tools.android.com/tips/lint">tools.android.com</a>.</p>
+<p>Lint has the ability to automatically fix some issues, provide suggestions for others and jump
+directly to the offending code for review.</p>
 
 
 
