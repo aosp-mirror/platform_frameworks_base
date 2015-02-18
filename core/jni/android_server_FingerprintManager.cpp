@@ -28,7 +28,7 @@
 
 namespace android {
 
-static const uint16_t kVersion = HARDWARE_MODULE_API_VERSION(1, 0);
+static const uint16_t kVersion = HARDWARE_MODULE_API_VERSION(2, 0);
 
 static const char* FINGERPRINT_SERVICE = "com/android/server/fingerprint/FingerprintService";
 static struct {
@@ -55,15 +55,15 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
             arg1 = msg.data.acquired.acquired_info;
             break;
         case FINGERPRINT_PROCESSED:
-            arg1 = msg.data.processed.id;
+            arg1 = msg.data.processed.finger.fid;
             break;
         case FINGERPRINT_TEMPLATE_ENROLLING:
-            arg1 = msg.data.enroll.id;
+            arg1 = msg.data.enroll.finger.fid;
             arg2 = msg.data.enroll.samples_remaining;
-            arg3 = msg.data.enroll.data_collected_bmp;
+            arg3 = 0;
             break;
         case FINGERPRINT_TEMPLATE_REMOVED:
-            arg1 = msg.data.removed.id;
+            arg1 = msg.data.removed.finger.fid;
             break;
         default:
             ALOGE("fingerprint: invalid msg: %d", msg.type);
@@ -99,7 +99,7 @@ static void nativeInit(JNIEnv *env, jobject clazz, jobject callbackObj) {
 
 static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeEnroll()\n");
-    int ret = gContext.device->enroll(gContext.device, timeout);
+    int ret = gContext.device->enroll(gContext.device, 0, timeout);
     return reinterpret_cast<jint>(ret);
 }
 
@@ -111,7 +111,10 @@ static jint nativeEnrollCancel(JNIEnv* env, jobject clazz) {
 
 static jint nativeRemove(JNIEnv* env, jobject clazz, jint fingerprintId) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeRemove(%d)\n", fingerprintId);
-    int ret = gContext.device->remove(gContext.device, fingerprintId);
+    fingerprint_finger_id_t finger;
+    finger.gid = 0;
+    finger.fid = fingerprintId;
+    int ret = gContext.device->remove(gContext.device, finger);
     return reinterpret_cast<jint>(ret);
 }
 
