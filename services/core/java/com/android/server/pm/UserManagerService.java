@@ -28,7 +28,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -36,6 +35,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IUserManager;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -111,6 +111,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String USER_INFO_DIR = "system" + File.separator + "users";
     private static final String USER_LIST_FILENAME = "userlist.xml";
     private static final String USER_PHOTO_FILENAME = "photo.png";
+    private static final String USER_PHOTO_FILENAME_TMP = USER_PHOTO_FILENAME + ".tmp";
 
     private static final String RESTRICTIONS_FILE_PREFIX = "res_";
     private static final String XML_SUFFIX = ".xml";
@@ -433,7 +434,8 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public Bitmap getUserIcon(int userId) {
+    public ParcelFileDescriptor getUserIcon(int userId) {
+        String iconPath;
         synchronized (mPackagesLock) {
             UserInfo info = mUsers.get(userId);
             if (info == null || info.partial) {
@@ -448,8 +450,16 @@ public class UserManagerService extends IUserManager.Stub {
             if (info.iconPath == null) {
                 return null;
             }
-            return BitmapFactory.decodeFile(info.iconPath);
+            iconPath = info.iconPath;
         }
+
+        try {
+            return ParcelFileDescriptor.open(
+                    new File(iconPath), ParcelFileDescriptor.MODE_READ_ONLY);
+        } catch (FileNotFoundException e) {
+            Log.e(LOG_TAG, "Couldn't find icon file", e);
+        }
+        return null;
     }
 
     public void makeInitialized(int userId) {
@@ -572,6 +582,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             File dir = new File(mUsersDir, Integer.toString(info.id));
             File file = new File(dir, USER_PHOTO_FILENAME);
+            File tmp = new File(dir, USER_PHOTO_FILENAME_TMP);
             if (!dir.exists()) {
                 dir.mkdir();
                 FileUtils.setPermissions(
@@ -580,7 +591,8 @@ public class UserManagerService extends IUserManager.Stub {
                         -1, -1);
             }
             FileOutputStream os;
-            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, os = new FileOutputStream(file))) {
+            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, os = new FileOutputStream(tmp))
+                    && tmp.renameTo(file)) {
                 info.iconPath = file.getAbsolutePath();
             }
             try {
@@ -588,6 +600,7 @@ public class UserManagerService extends IUserManager.Stub {
             } catch (IOException ioe) {
                 // What the ... !
             }
+            tmp.delete();
         } catch (FileNotFoundException e) {
             Slog.w(LOG_TAG, "Error setting photo for user ", e);
         }
