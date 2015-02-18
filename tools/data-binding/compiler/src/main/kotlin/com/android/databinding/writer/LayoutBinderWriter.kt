@@ -45,6 +45,7 @@ import com.android.databinding.ext.toJavaCode
 import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
 import com.android.databinding.reflection.Callable
+import com.android.databinding.expr.CastExpr
 
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
@@ -215,6 +216,10 @@ fun Expr.toCode(full : Boolean = false) : KCode {
                     app(")")
                 }
             }
+        }
+        is CastExpr -> kcode("") {
+            app("(", it.getCastType())
+            app(") ", it.getCastExpr().toCode())
         }
         else -> kcode("//NOT IMPLEMENTED YET")
     }

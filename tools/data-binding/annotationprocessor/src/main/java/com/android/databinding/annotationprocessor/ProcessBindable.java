@@ -2,6 +2,8 @@ package com.android.databinding.annotationprocessor;
 
 import com.android.databinding.reflection.ModelAnalyzer;
 
+import org.apache.commons.io.IOUtils;
+
 import android.binding.Bindable;
 
 import java.io.File;
@@ -216,11 +218,13 @@ public class ProcessBindable extends AbstractProcessor {
                 properties = (Intermediate) in.readObject();
             }
         } catch (IOException e) {
-            System.err.println("Could not read Binding properties intermediate file: " +
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "Could not read Binding properties intermediate file: " +
                     e.getLocalizedMessage());
         } catch (ClassNotFoundException e) {
-            System.err.println("Could not read Binding properties intermediate file: " +
-                    e.getLocalizedMessage());
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "Could not read Binding properties intermediate file: " +
+                            e.getLocalizedMessage());
         } finally {
             try {
                 if (in != null) {
@@ -244,7 +248,8 @@ public class ProcessBindable extends AbstractProcessor {
                     .getResources(resourcePath);
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
-                System.out.println("Merging binding adapters from " + url);
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
+                        "Merging binding adapters from " + url);
                 InputStream inputStream = null;
                 try {
                     inputStream = url.openStream();
@@ -254,23 +259,21 @@ public class ProcessBindable extends AbstractProcessor {
                         properties.captureProperties(intermediateProperties);
                     }
                 } catch (IOException e) {
-                    System.err.println("Could not merge in Bindables from " + url + ": " +
-                            e.getLocalizedMessage());
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                            "Could not merge in Bindables from " + url + ": " +
+                                    e.getLocalizedMessage());
                 } catch (ClassNotFoundException e) {
-                    System.err.println("Could not read Binding properties intermediate file: " +
-                            e.getLocalizedMessage());
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                            "Could not read Binding properties intermediate file: " +
+                                    e.getLocalizedMessage());
                 } finally {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e2) {
-                        System.err.println("Error closing intermediate Bindables store: " +
-                                e2.getLocalizedMessage());
-                    }
+                    IOUtils.closeQuietly(inputStream);
                 }
             }
         } catch (IOException e) {
-            System.err.println("Could not read Binding properties intermediate file: " +
-                    e.getLocalizedMessage());
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "Could not read Binding properties intermediate file: " +
+                            e.getLocalizedMessage());
         }
     }
 

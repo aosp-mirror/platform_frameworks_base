@@ -294,7 +294,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
             declaredType = (DeclaredType) typeElement.asType();
         } else {
             int templateCloseIndex = className.lastIndexOf('>');
-            String paramStr = className.substring(templateOpenIndex + 1, templateCloseIndex - 1);
+            String paramStr = className.substring(templateOpenIndex + 1, templateCloseIndex);
 
             Elements elementUtils = getElementUtils();
             String baseClassName = className.substring(0, templateOpenIndex);
@@ -338,6 +338,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
                     openCount--;
                 }
             }
+            index++;
         }
         list.add(arg.toString());
         return list;

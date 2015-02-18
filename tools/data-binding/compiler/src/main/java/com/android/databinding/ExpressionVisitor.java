@@ -159,6 +159,11 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         return mModel.bracketExpr(visit(ctx.expression(0)), visit(ctx.expression(1)));
     }
 
+    @Override
+    public Expr visitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx) {
+        return mModel.castExpr(ctx.type().getText(), visit(ctx.expression()));
+    }
+
     //    @Override
 //    public Expr visitIdentifier(@NotNull BindingExpressionParser.IdentifierContext ctx) {
 //        final String identifier = ctx.Identifier().getText();

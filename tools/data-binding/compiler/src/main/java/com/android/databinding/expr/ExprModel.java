@@ -141,6 +141,10 @@ public class ExprModel {
         return register(new BracketExpr(variableExpr, argExpr));
     }
 
+    public Expr castExpr(String type, Expr expr) {
+        return register(new CastExpr(type, expr));
+    }
+
     public List<Expr> getBindingExpressions() {
         return mBindingExpressions;
     }

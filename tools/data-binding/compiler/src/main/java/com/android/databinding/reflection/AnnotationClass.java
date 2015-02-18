@@ -80,13 +80,16 @@ public class AnnotationClass implements ModelClass {
         TypeMirror foundInterface = null;
         if (typeUtil.isSameType(interfaceType, typeUtil.erasure(mTypeMirror))) {
             foundInterface = mTypeMirror;
-        } else if (mTypeMirror.getKind() == TypeKind.DECLARED) {
-            DeclaredType declaredType = (DeclaredType) mTypeMirror;
-            TypeElement typeElement = (TypeElement) declaredType.asElement();
-            for (TypeMirror type : typeElement.getInterfaces()) {
-                if (typeUtil.isSameType(interfaceType, typeUtil.erasure(type))) {
-                    foundInterface = type;
+        } else {
+            ArrayList<TypeMirror> toCheck = new ArrayList<>();
+            toCheck.add(mTypeMirror);
+            while (!toCheck.isEmpty()) {
+                TypeMirror typeMirror = toCheck.remove(0);
+                if (typeUtil.isSameType(interfaceType, typeUtil.erasure(typeMirror))) {
+                    foundInterface = typeMirror;
                     break;
+                } else {
+                    toCheck.addAll(typeUtil.directSupertypes(typeMirror));
                 }
             }
             if (foundInterface == null) {
@@ -102,6 +105,7 @@ public class AnnotationClass implements ModelClass {
                             ", but it isn't a declared type: " + foundInterface);
             return null;
         }
+        System.err.println("found interface: " + foundInterface);
         return (DeclaredType) foundInterface;
     }
 
@@ -226,6 +230,9 @@ public class AnnotationClass implements ModelClass {
 
     @Override
     public boolean isAssignableFrom(ModelClass that) {
+        if (that == null) {
+            return false;
+        }
         TypeMirror thatType = ((AnnotationClass)that).mTypeMirror;
         return getTypeUtils().isAssignable(thatType, mTypeMirror);
     }

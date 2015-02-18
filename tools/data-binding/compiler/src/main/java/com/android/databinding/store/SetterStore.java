@@ -15,6 +15,7 @@
  */
 package com.android.databinding.store;
 
+import com.android.databinding.reflection.AnnotationAnalyzer;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.reflection.ModelMethod;
@@ -109,11 +110,11 @@ public class SetterStore {
             }
             return new SetterStore(modelAnalyzer, store);
         } catch (IOException e) {
-            System.err.println("Could not read SetterStore intermediate file: " +
+            printMessage(Diagnostic.Kind.ERROR, "Could not read SetterStore intermediate file: " +
                     e.getLocalizedMessage());
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            System.err.println("Could not read SetterStore intermediate file: " +
+            printMessage(Diagnostic.Kind.ERROR, "Could not read SetterStore intermediate file: " +
                     e.getLocalizedMessage());
             e.printStackTrace();
         }
@@ -240,8 +241,8 @@ public class SetterStore {
         Filer filer = processingEnvironment.getFiler();
         FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT,
                 SetterStore.class.getPackage().getName(), "setter_store.bin");
-        processingEnvironment.getMessager().printMessage(Diagnostic.Kind.NOTE,
-                "============= Writing intermediate file: " + resource.getName());
+        printMessage(Diagnostic.Kind.NOTE, "============= Writing intermediate file: " +
+                resource.getName());
         ObjectOutputStream out = null;
         try {
             out = new ObjectOutputStream(resource.openOutputStream());
@@ -291,11 +292,11 @@ public class SetterStore {
                             }
 
                         } catch (Exception e) {
-                            System.out.println("Unknown class: " + key.valueType);
+                            printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + key.valueType);
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Unknown class: " + key.viewType);
+                    printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + key.viewType);
                 }
             }
         }
@@ -330,7 +331,7 @@ public class SetterStore {
                         break;
                     }
                 } catch (Exception e) {
-                    //System.out.println("Unknown class: " + className);
+                    //printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + className);
                 }
             }
         }
@@ -433,12 +434,12 @@ public class SetterStore {
                                     return conversion.get(toClassName);
                                 }
                             } catch (Exception e) {
-                                System.out.println("Unknown class: " + toClassName);
+                                printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + toClassName);
                             }
                         }
                     }
                 } catch (Exception e) {
-                    System.out.println("Unknown class: " + fromClassName);
+                    printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + fromClassName);
                 }
             }
         }
@@ -515,6 +516,15 @@ public class SetterStore {
                     }
                 }
             }
+        }
+    }
+
+    private static void printMessage(Diagnostic.Kind kind, String message) {
+        ModelAnalyzer modelAnalyzer = ModelAnalyzer.getInstance();
+        if (modelAnalyzer instanceof AnnotationAnalyzer) {
+            ((AnnotationAnalyzer) modelAnalyzer).printMessage(kind, message);
+        } else {
+            System.out.println(message);
         }
     }
 
