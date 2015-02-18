@@ -17,16 +17,13 @@
 package com.android.server.wm;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.UserHandle;
-import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
@@ -47,7 +44,9 @@ import com.android.server.AttributeCache;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
+import static android.view.WindowManagerInternal.AppTransitionListener;
 import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
@@ -185,6 +184,8 @@ public class AppTransition implements Dump {
 
     private int mCurrentUserId = 0;
 
+    private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
+
     AppTransition(Context context, Handler h) {
         mContext = context;
         mH = h;
@@ -291,12 +292,18 @@ public class AppTransition implements Dump {
     void prepare() {
         if (!isRunning()) {
             mAppTransitionState = APP_STATE_IDLE;
+            notifyAppTransitionPendingLocked();
         }
     }
 
-    void goodToGo() {
+    void goodToGo(AppWindowAnimator openingAppAnimator, AppWindowAnimator closingAppAnimator) {
         mNextAppTransition = TRANSIT_UNSET;
         mAppTransitionState = APP_STATE_RUNNING;
+        notifyAppTransitionStartingLocked(
+                openingAppAnimator != null ? openingAppAnimator.mAppToken.token : null,
+                closingAppAnimator != null ? closingAppAnimator.mAppToken.token : null,
+                openingAppAnimator != null ? openingAppAnimator.animation : null,
+                closingAppAnimator != null ? closingAppAnimator.animation : null);
     }
 
     void clear() {
@@ -309,6 +316,38 @@ public class AppTransition implements Dump {
         setAppTransition(AppTransition.TRANSIT_UNSET);
         clear();
         setReady();
+        notifyAppTransitionCancelledLocked();
+    }
+
+    void registerListenerLocked(AppTransitionListener listener) {
+        mListeners.add(listener);
+    }
+
+    public void notifyAppTransitionFinishedLocked(AppWindowAnimator animator) {
+        IBinder token = animator != null ? animator.mAppToken.token : null;
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onAppTransitionFinishedLocked(token);
+        }
+    }
+
+    private void notifyAppTransitionPendingLocked() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onAppTransitionPendingLocked();
+        }
+    }
+
+    private void notifyAppTransitionCancelledLocked() {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onAppTransitionCancelledLocked();
+        }
+    }
+
+    private void notifyAppTransitionStartingLocked(IBinder openToken,
+            IBinder closeToken, Animation openAnimation, Animation closeAnimation) {
+        for (int i = 0; i < mListeners.size(); i++) {
+            mListeners.get(i).onAppTransitionStartingLocked(openToken, closeToken, openAnimation,
+                    closeAnimation);
+        }
     }
 
     private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {

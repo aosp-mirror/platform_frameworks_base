@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import android.graphics.Matrix;
-import android.os.RemoteException;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.Display;
@@ -312,23 +311,7 @@ public class AppWindowAnimator {
         for (int i = 0; i < numAllAppWinAnimators; i++) {
             mAllAppWinAnimators.get(i).finishExit();
         }
-        if (mAppToken.mLaunchTaskBehind) {
-            try {
-                mService.mActivityManager.notifyLaunchTaskBehindComplete(mAppToken.token);
-            } catch (RemoteException e) {
-            }
-            mAppToken.mLaunchTaskBehind = false;
-        } else {
-            mAppToken.updateReportedVisibilityLocked();
-            if (mAppToken.mEnteringAnimation) {
-                mAppToken.mEnteringAnimation = false;
-                try {
-                    mService.mActivityManager.notifyEnterAnimationComplete(mAppToken.token);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
+        mService.mAppTransition.notifyAppTransitionFinishedLocked(this);
         return false;
     }
 

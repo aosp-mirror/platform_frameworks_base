@@ -20,7 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.IBinder;
-import android.os.IRemoteCallback;
+import android.view.animation.Animation;
 
 import java.util.List;
 
@@ -82,6 +82,41 @@ public abstract class WindowManagerInternal {
          * was started.
          */
         public void onUserContextChanged();
+    }
+
+    /**
+     * Abstract class to be notified about {@link com.android.server.wm.AppTransition} events. Held
+     * as an abstract class so a listener only needs to implement the methods of its interest.
+     */
+    public static abstract class AppTransitionListener {
+
+        /**
+         * Called when an app transition is being setup and about to be executed.
+         */
+        public void onAppTransitionPendingLocked() {}
+
+        /**
+         * Called when a pending app transition gets cancelled.
+         */
+        public void onAppTransitionCancelledLocked() {}
+
+        /**
+         * Called when an app transition gets started
+         *
+         * @param openToken the token for the opening app
+         * @param closeToken the token for the closing app
+         * @param openAnimation the animation for the opening app
+         * @param closeAnimation the animation for the closing app
+         */
+        public void onAppTransitionStartingLocked(IBinder openToken, IBinder closeToken,
+                Animation openAnimation, Animation closeAnimation) {}
+
+        /**
+         * Called when an app transition is finished running.
+         *
+         * @param token the token for app whose transition has finished
+         */
+        public void onAppTransitionFinishedLocked(IBinder token) {}
     }
 
     /**
