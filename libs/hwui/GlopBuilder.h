@@ -46,8 +46,12 @@ public:
     GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
     GlopBuilder& setFillTexturePaint(Texture& texture, bool isAlphaMaskTexture,
             const SkPaint* paint, float alphaScale);
-    GlopBuilder& setFillPathTexturePaint(Texture& texture,
+    GlopBuilder& setFillPathTexturePaint(PathTexture& texture,
             const SkPaint& paint, float alphaScale);
+    GlopBuilder& setFillShadowTexturePaint(ShadowTexture& texture, int shadowColor,
+            const SkPaint& paint, float alphaScale);
+    GlopBuilder& setFillBlack();
+    GlopBuilder& setFillClear();
 
     GlopBuilder& setTransformClip(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
 

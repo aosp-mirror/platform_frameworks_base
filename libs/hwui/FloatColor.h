@@ -31,6 +31,13 @@ struct FloatColor {
         b = a * ((color      ) & 0xff) / 255.0f;
     }
 
+    bool isNotBlack() {
+        return a < 1.0f
+                || r > 0.0f
+                || g > 0.0f
+                || b > 0.0f;
+    }
+
     float r;
     float g;
     float b;
