@@ -2052,4 +2052,12 @@
 
     <!-- Whether to start in touch mode -->
     <bool name="config_defaultInTouchMode">true</bool>
+
+    <!-- Time adjustment, in milliseconds, applied to the default double tap threshold
+         used for gesture detection by the screen magnifier. -->
+    <integer name="config_screen_magnification_multi_tap_adjustment">-50</integer>
+
+    <!-- Scale factor threshold used by the screen magnifier to determine when to switch from
+         panning to scaling the magnification viewport. -->
+    <item name="config_screen_magnification_scaling_threshold" format="float" type="dimen">0.3</item>
 </resources>

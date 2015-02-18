@@ -43,4 +43,12 @@
     <!-- Flags enabling default window features. See Window.java -->
     <bool name="config_defaultWindowFeatureOptionsPanel">false</bool>
     <bool name="config_defaultWindowFeatureContextMenu">false</bool>
+
+    <!-- Time adjustment, in milliseconds, applied to the default double tap threshold
+         used for gesture detection by the screen magnifier. -->
+    <integer name="config_screen_magnification_multi_tap_adjustment">25</integer>
+
+    <!-- Scale factor threshold used by the screen magnifier to determine when to switch from
+         panning to scaling the magnification viewport. -->
+    <item name="config_screen_magnification_scaling_threshold" format="float" type="dimen">0.1</item>
 </resources>
