@@ -1,5 +1,5 @@
 page.title=Supporting Multiple Screens
-page.metaDescription=Nanaging UIs for the best display on multiple screen sizes.
+page.metaDescription=Managing UIs for the best display on multiple screen sizes.
 meta.tags="multiple screens"
 
 @jd:body
@@ -348,19 +348,29 @@ can use for density-specific resources are <code>ldpi</code> (low), <code>mdpi</
 <code>hdpi</code> (high), <code>xhdpi</code> extra-high), <code>xxhdpi</code>
 (extra-extra-high), and <code>xxxhdpi</code> (extra-extra-extra-high). For example, bitmaps
 for high-density screens should go in {@code drawable-hdpi/}.</p>
-    <p class="note" id="xxxhdpi-note"><strong>Note:</strong>  the <code>drawable-xxxhdpi</code>
+    <p class="note" id="xxxhdpi-note"><strong>Note:</strong>  The <code>mipmap-xxxhdpi</code>
 qualifier is necessary only to provide a launcher icon that can appear larger than usual on an
 xxhdpi device. You do not need to provide xxxhdpi assets for all your app's images.</p>
     <p>Some devices scale-up the launcher icon by as much as 25%. For example, if your highest
 density launcher icon image is already extra-extra-high-density, the scaling process will make it
 appear less crisp. So you should provide a higher density launcher icon in the
-<code>drawable-xxxhdpi</code> directory, which the system uses instead of scaling up a smaller
+<code>mipmap-xxxhdpi</code> directory, which the system uses instead of scaling up a smaller
 version of the icon.</p>
     <p>See <a href="{@docRoot}design/style/iconography.html#xxxhdpi-launcher">Provide an
 xxx-high-density launcher icon</a> for more information. You should not use the
 <code>xxxhdpi</code> qualifier for UI elements other than the launcher icon.</p>
   </li>
 </ul>
+
+<p class="note"><strong>Note:</strong> Place all your launcher icons in the
+<code>res/mipmap-[density]/</code> folders, rather than the <code>res/drawable-[density]/</code>
+folders. The Android system retains the resources in these density-specific folders, such as
+mipmap-xxxhdpi, regardless of the screen resolution of the device where your app is installed. This
+behavior allows launcher apps to pick the best resolution icon for your app to display on the home
+screen. For more information about using the mipmap folders, see
+<a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>.
+</p>
+
 
 <p>The size and density configuration qualifiers correspond to the generalized sizes and densities
 described in <a href="#range">Range of screens supported</a>, above.</p>
@@ -538,9 +548,9 @@ screen sizes (instead of using the size qualifiers in table 1).</p></p>
 sizes and densities, see <a href="#range">Range of Screens Supported</a>, earlier in this
 document.</p>
 
-<p>For example, the following is a list of resource directories in an application that
-provides different layout designs for different screen sizes and different bitmap drawables
-for medium, high, and extra-high-density screens.</p>
+<p>For example, the following application resource directories provide different layout designs
+for different screen sizes and different drawables. Use the <code>mipmap/</code> folders for
+launcher icons.</p>
 
 <pre class="classic">
 res/layout/my_layout.xml              // layout for normal screen size ("default")
@@ -548,10 +558,16 @@ res/layout-large/my_layout.xml        // layout for large screen size
 res/layout-xlarge/my_layout.xml       // layout for extra-large screen size
 res/layout-xlarge-land/my_layout.xml  // layout for extra-large in landscape orientation
 
-res/drawable-mdpi/my_icon.png         // bitmap for medium-density
-res/drawable-hdpi/my_icon.png         // bitmap for high-density
-res/drawable-xhdpi/my_icon.png        // bitmap for extra-high-density
-res/drawable-xxhdpi/my_icon.png       // bitmap for extra-extra-high-density
+res/drawable-mdpi/graphic.png         // bitmap for medium-density
+res/drawable-hdpi/graphic.png         // bitmap for high-density
+res/drawable-xhdpi/graphic.png        // bitmap for extra-high-density
+res/drawable-xxhdpi/graphic.png       // bitmap for extra-extra-high-density
+
+res/mipmap-mdpi/my_icon.png         // launcher icon for medium-density
+res/mipmap-hdpi/my_icon.png         // launcher icon for high-density
+res/mipmap-xhdpi/my_icon.png        // launcher icon for extra-high-density
+res/mipmap-xxhdpi/my_icon.png       // launcher icon for extra-extra-high-density
+res/mipmap-xxxhdpi/my_icon.png      // launcher icon for extra-extra-extra-high-density
 </pre>
 
 <p>For more information about how to use alternative resources and a complete list of
@@ -560,7 +576,7 @@ configuration qualifiers (not just for screen configurations), see
 Providing Alternative Resources</a>.</p>
 
 <p>Be aware that, when the Android system picks which resources to use at runtime, it uses
-certain logic to determing the "best matching" resources. That is, the qualifiers you use don't
+certain logic to determine the "best matching" resources. That is, the qualifiers you use don't
 have to exactly match the current screen configuration in all cases in order for the system to
 use them. Specifically, when selecting resources based on the size qualifiers, the system will
 use resources designed for a screen smaller than the current screen if there are no resources
@@ -703,10 +719,10 @@ such, you can now specify that these layout resources should be used only when t
 smallest width your layout supports once it's complete.</p>
 
 <p class="note"><strong>Note:</strong> Remember that all the figures used with these new size APIs
-are density-indpendent pixel (dp) values and your layout dimensions should also always be defined
+are density-independent pixel (dp) values and your layout dimensions should also always be defined
 using dp units, because what you care about is the amount of screen space available after the system
 accounts for screen density (as opposed to using raw pixel resolution). For more information about
-density-indpendent pixels, read <a href="#terms">Terms and concepts</a>, earlier in this
+density-independent pixels, read <a href="#terms">Terms and concepts</a>, earlier in this
 document.</p>
 
 
@@ -728,7 +744,7 @@ Also beware that the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action B
 a part of your application's window space, although your layout does not declare it, so it reduces
 the space available for your layout and you must account for it in your design.</p>
 
-<p class="table-caption"><strong>Table 2.</strong> New configuration qualifers for screen size
+<p class="table-caption"><strong>Table 2.</strong> New configuration qualifiers for screen size
 (introduced in Android 3.2).</p>
 <table>
   <tr><th>Screen configuration</th><th>Qualifier values</th><th>Description</th></tr>
@@ -745,7 +761,7 @@ height and width (you may also think of it as the "smallest possible width" for 
 use this qualifier to ensure that, regardless of the screen's current orientation, your
 application's has at least {@code &lt;N&gt;} dps of width available for its UI.</p>
         <p>For example, if your layout requires that its smallest dimension of screen area be at
-least 600 dp at all times, then you can use this qualifer to create the layout resources, {@code
+least 600 dp at all times, then you can use this qualifier to create the layout resources, {@code
 res/layout-sw600dp/}. The system will use these resources only when the smallest dimension of
 available screen is at least 600dp, regardless of whether the 600dp side is the user-perceived
 height or width. The smallestWidth is a fixed screen size characteristic of the device; <strong>the
@@ -851,7 +867,7 @@ res/layout-sw600dp/main_activity.xml   # For 7” tablets (600dp wide and bigger
 res/layout-sw720dp/main_activity.xml   # For 10” tablets (720dp wide and bigger)
 </pre>
 
-<p>Notice that the previous two sets of example resources use the "smallest width" qualifer, {@code
+<p>Notice that the previous two sets of example resources use the "smallest width" qualifier, {@code
 sw&lt;N&gt;dp}, which specifies the smallest of the screen's two sides, regardless of the
 device's current orientation. Thus, using {@code sw&lt;N&gt;dp} is a simple way to specify the
 overall screen size available for your layout by ignoring the screen's orientation.</p>
