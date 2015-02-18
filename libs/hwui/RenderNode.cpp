@@ -402,9 +402,10 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
                 clipFlags = 0; // all clipping done by saveLayer
             }
 
-            ATRACE_FORMAT("%s alpha caused %ssaveLayer %dx%d",
-                    getName(), clipFlags ? "" : "unclipped ",
-                    (int)layerBounds.getWidth(), (int)layerBounds.getHeight());
+            ATRACE_FORMAT("%s alpha caused %ssaveLayer %dx%d", getName(),
+                    (saveFlags & SkCanvas::kClipToLayer_SaveFlag) ? "" : "unclipped ",
+                    static_cast<int>(layerBounds.getWidth()),
+                    static_cast<int>(layerBounds.getHeight()));
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
                     layerBounds.left, layerBounds.top, layerBounds.right, layerBounds.bottom,
