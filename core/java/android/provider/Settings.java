@@ -1320,9 +1320,6 @@ public final class Settings {
             }
         };
 
-        private static final Validator sVolumeValidator =
-                new InclusiveFloatRangeValidator(0, 1);
-
         private static final Validator sUriValidator = new Validator() {
             @Override
             public boolean validate(String value) {
@@ -1785,6 +1782,7 @@ public final class Settings {
                 mValues = values;
             }
 
+            @Override
             public boolean validate(String value) {
                 return ArrayUtils.contains(mValues, value);
             }
@@ -1799,6 +1797,7 @@ public final class Settings {
                 mMax = max;
             }
 
+            @Override
             public boolean validate(String value) {
                 try {
                     final int intValue = Integer.parseInt(value);
@@ -1818,6 +1817,7 @@ public final class Settings {
                 mMax = max;
             }
 
+            @Override
             public boolean validate(String value) {
                 try {
                     final float floatValue = Float.parseFloat(value);
@@ -2095,6 +2095,7 @@ public final class Settings {
 
         private static final Validator NEXT_ALARM_FORMATTED_VALIDATOR = new Validator() {
             private static final int MAX_LENGTH = 1000;
+
             @Override
             public boolean validate(String value) {
                 // TODO: No idea what the correct format is.
@@ -2257,15 +2258,11 @@ public final class Settings {
          */
         public static final String VOLUME_RING = "volume_ring";
 
-        private static final Validator VOLUME_RING_VALIDATOR = sVolumeValidator;
-
         /**
          * System/notifications volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
          */
         public static final String VOLUME_SYSTEM = "volume_system";
-
-        private static final Validator VOLUME_SYSTEM_VALIDATOR = sVolumeValidator;
 
         /**
          * Voice call volume. This is used internally, changing this value will
@@ -2273,15 +2270,11 @@ public final class Settings {
          */
         public static final String VOLUME_VOICE = "volume_voice";
 
-        private static final Validator VOLUME_VOICE_VALIDATOR = sVolumeValidator;
-
         /**
          * Music/media/gaming volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
          */
         public static final String VOLUME_MUSIC = "volume_music";
-
-        private static final Validator VOLUME_MUSIC_VALIDATOR = sVolumeValidator;
 
         /**
          * Alarm volume. This is used internally, changing this
@@ -2289,15 +2282,11 @@ public final class Settings {
          */
         public static final String VOLUME_ALARM = "volume_alarm";
 
-        private static final Validator VOLUME_ALARM_VALIDATOR = sVolumeValidator;
-
         /**
          * Notification volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
          */
         public static final String VOLUME_NOTIFICATION = "volume_notification";
-
-        private static final Validator VOLUME_NOTIFICATION_VALIDATOR = sVolumeValidator;
 
         /**
          * Bluetooth Headset volume. This is used internally, changing this value will
@@ -2305,15 +2294,14 @@ public final class Settings {
          */
         public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
 
-        private static final Validator VOLUME_BLUETOOTH_SCO_VALIDATOR = sVolumeValidator;
-
         /**
          * Master volume (float in the range 0.0f to 1.0f).
          * @hide
          */
         public static final String VOLUME_MASTER = "volume_master";
 
-        private static final Validator VOLUME_MASTER_VALIDATOR = sVolumeValidator;
+        private static final Validator VOLUME_MASTER_VALIDATOR =
+                new InclusiveFloatRangeValidator(0, 1);
 
         /**
          * Master volume mute (int 1 = mute, 0 = not muted).
@@ -3157,13 +3145,6 @@ public final class Settings {
             VALIDATORS.put(MODE_RINGER_STREAMS_AFFECTED, MODE_RINGER_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(MUTE_STREAMS_AFFECTED, MUTE_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(VIBRATE_ON, VIBRATE_ON_VALIDATOR);
-            VALIDATORS.put(VOLUME_RING, VOLUME_RING_VALIDATOR);
-            VALIDATORS.put(VOLUME_SYSTEM, VOLUME_SYSTEM_VALIDATOR);
-            VALIDATORS.put(VOLUME_VOICE, VOLUME_VOICE_VALIDATOR);
-            VALIDATORS.put(VOLUME_MUSIC, VOLUME_MUSIC_VALIDATOR);
-            VALIDATORS.put(VOLUME_ALARM, VOLUME_ALARM_VALIDATOR);
-            VALIDATORS.put(VOLUME_NOTIFICATION, VOLUME_NOTIFICATION_VALIDATOR);
-            VALIDATORS.put(VOLUME_BLUETOOTH_SCO, VOLUME_BLUETOOTH_SCO_VALIDATOR);
             VALIDATORS.put(RINGTONE, RINGTONE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_SOUND, NOTIFICATION_SOUND_VALIDATOR);
             VALIDATORS.put(ALARM_ALERT, ALARM_ALERT_VALIDATOR);
