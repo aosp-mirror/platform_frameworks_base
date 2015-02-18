@@ -34,17 +34,17 @@ parent.link=index.html
       <h2>Related videos</h2>
           <ol>
               <li>
-<iframe title="Hierarchyviewer" 
-    width="210" height="160" 
-    src="//www.youtube.com/embed/PAgE7saQUUY?rel=0&amp;hd=1" 
+<iframe title="Hierarchyviewer"
+    width="210" height="160"
+    src="//www.youtube.com/embed/PAgE7saQUUY?rel=0&amp;hd=1"
     frameborder="0" allowfullscreen>
 </iframe>
               </li>
               <li>
-<iframe title="Pixel Perfect" 
-    width="210" height="160" 
-    src="//www.youtube.com/embed/C45bMZGdN7Y?rel=0&amp;hd=1" 
-    frameborder="0" 
+<iframe title="Pixel Perfect"
+    width="210" height="160"
+    src="//www.youtube.com/embed/C45bMZGdN7Y?rel=0&amp;hd=1"
+    frameborder="0"
     allowfullscreen>
 </iframe>
               </li>
@@ -52,11 +52,10 @@ parent.link=index.html
     </div>
   </div>
 
-  <p>
-Sometimes your application's layout can slow down your application.
-  To help debug issues in your layout, the Android SDK provides the Hierarchy Viewer and
-  <code>lint</code> tools.
-  </p>
+
+<p>Sometimes your application's layout can slow down your application.
+To help debug issues in your layout, the Android SDK provides the Hierarchy Viewer and
+<code><a href="{@docRoot}tools/help/lint.html">lint</a></code> tools. </p>
 
   <p>The Hierarchy Viewer application allows you to debug and optimize your user interface. It
   provides a visual representation of the layout's View hierarchy (the View Hierarchy window)
@@ -64,8 +63,10 @@ Sometimes your application's layout can slow down your application.
   and a magnified view of the display (the Pixel Perfect window) to closely examine the pixels
   in your layout.</p>
 
-  <p>Android <code>lint</code> is a static code scanning tool that helps you optimize the layouts and layout
-  hierarchies of your applications, as well as detect other common coding problems. You can run it against your layout files or resource
+  <p>Android <code><a href="{@docRoot}tools/help/lint.html">lint</a></code> is a static code
+  scanning tool that helps you optimize the layouts and layout
+  hierarchies of your applications, as well as detect other common coding problems. You can run it
+  against your layout files or resource
   directories to quickly check for inefficiencies or other types of problems that could be
   affecting the performance of your application.</p>
 
@@ -493,7 +494,10 @@ Sometimes your application's layout can slow down your application.
         alt=""
         height="600"/>
 <p class="img-caption"><strong>Figure 4.</strong> The Pixel Perfect window</p>
+
+
 <h2 id="lint">Using lint to Optimize Your UI</h2>
-<p>The Android {@code lint} tool lets you analyze the XML files that define your application's UI to find inefficiencies in the view hierarchy.</p>
-<p class="note"><strong>Note: </strong>The Android <code>layoutopt</code> tool has been replaced by the {@code lint} tool beginning in ADT and SDK Tools revision 16. The {@code lint} tool reports UI layout performance issues in a similar way as <code>layoutopt</code>, and detects additional problems.</p>
-<p>For more information about using {@code lint}, see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a> and the <a  href="{@docRoot}tools/help/lint.html">lint reference documentation</a>.</p>
+<p>The Android <a href="{@docRoot}tools/help/lint.html">lint</a> tool lets you analyze the XML
+files that define your application's UI to find inefficiencies in the view hierarchy.</p>
+<p class="note"><strong>Note: </strong>The Android <code>layoutopt</code> tool has been replaced by the {@code lint} tool beginning in SDK Tools revision 16. The {@code lint} tool reports UI layout performance issues in a similar way as <code>layoutopt</code>, and detects additional problems.</p>
+<p>For more information about using {@code lint}, see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a> and the <a  href="{@docRoot}tools/help/lint.html">lint tools help</a>.</p>
