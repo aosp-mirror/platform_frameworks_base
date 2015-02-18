@@ -1787,7 +1787,8 @@ public class UserManagerService extends IUserManager.Stub {
     public int getUserHandle(int userSerialNumber) {
         synchronized (mPackagesLock) {
             for (int userId : mUserIds) {
-                if (getUserInfoLocked(userId).serialNumber == userSerialNumber) return userId;
+                UserInfo info = getUserInfoLocked(userId);
+                if (info != null && info.serialNumber == userSerialNumber) return userId;
             }
             // Not found
             return -1;
