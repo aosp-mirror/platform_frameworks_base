@@ -685,7 +685,7 @@ bool tryStoreLayer(Caches& caches, const SkShader& shader, const Matrix4& modelV
     }
 
     description->hasBitmap = true;
-
+    outData->layer = layer;
     outData->bitmapSampler = (*textureUnit)++;
 
     const float width = layer->getWidth();

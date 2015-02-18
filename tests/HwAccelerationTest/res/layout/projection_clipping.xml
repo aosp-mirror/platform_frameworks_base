@@ -14,13 +14,13 @@
             android:id="@+id/clickable1"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:background="?android:attr/selectableItemBackground"/>
+            android:background="?android:attr/selectableItemBackgroundBorderless"/>
         <View
             android:id="@+id/clickable2"
             android:translationX="50dp"
             android:translationY="10dp"
             android:layout_width="150dp"
             android:layout_height="100dp"
-            android:background="?android:attr/selectableItemBackground"/>
+            android:background="?android:attr/selectableItemBackgroundBorderless"/>
     </FrameLayout>
 </LinearLayout>
