@@ -14,14 +14,23 @@ parent.link=index.html
   </div>
 </div>
 
-<p>The Android {@code lint} tool is a static code analysis tool that checks your Android project source files for potential bugs and optimization improvements for correctness, security, performance, usability, accessibility, and internationalization. </p>
-<p>For more information on running {@code lint}, see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a>.</p>
+<p>The Android {@code lint} tool is a static code analysis tool that checks your Android project source files for potential bugs and optimization improvements for correctness, security, performance, usability, accessibility, and internationalization.</p>
 
-<h2 id="syntax">Syntax</h2>
+<p>In Android Studio, the configured <code>lint</code> and other IDE inspections run automatically
+whenever you compile your program. You can also manually run inspections in Android Studio
+by selecting <strong>Analyze &gt; Inspect Code</strong> from the application or right-click menu.
+The <em>Specify Inspections Scope</em> dialog appears so you can specify the desired inspection 
+profile and scope.</p>
+
+<p>For more information on enabling {@code lint} inspections and running {@code lint},
+see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a>.</p>
+
+<h2 id="syntax">Command Line Syntax</h2>
 <p>
 <pre>lint [flags] &lt;project directory&gt;</pre>
 
-For example, you can issue the following command to scan the Java and XML files under the {@code myproject}  directory and its subdirectories. The result is displayed on the console.
+For example, you can issue the following command to scan the Java and XML files under the
+{@code myproject}  directory and its subdirectories. The result is displayed on the console.
 <pre>lint myproject</pre>
 
 You can also use {@code lint} to check for a specific issue. For example, you can run the following command to scan the files under the {@code myproject} directory and its subdirectories to check for XML attributes missing the Android namespace prefix. The issue ID {@code MissingPrefix} tells lint to only scan for this issue.
@@ -172,7 +181,11 @@ You can create an HTML report for the issues that {@code lint} detects. For exam
 <h2 id="config_keywords">Configuring Java and XML Source Files</h2>
 <p>To configure lint checking, you can apply the following annotation or attribute to the source files in your Android project. </p>
 <ul>
-<LI>To disable lint checking for a specific Java class or method, use the <code>@SuppressLint</code> annotation. </LI>
-<li>To disable lint checking for specific sections of your XML file, use the <code>tools:ignore</code> attribute. </li>
+<LI>To disable {@code lint} checking for a specific Java class or method, use the <code>@SuppressLint</code>
+annotation. </LI>
+<li>To disable {@code lint} checking for specific sections of your XML file, use the
+<code>tools:ignore</code> attribute. </li>
 </ul>
-<p>You can also specify your lint checking preferences for a specific Android project in the lint.xml file.  For more information on configuring lint, see <a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a>.</p>
+<p>You can also specify your {@code lint} checking preferences for a specific Android project in
+the <code>lint.xml</code> file.  For more information on configuring {@code lint}, see
+<a href="{@docRoot}tools/debugging/improving-w-lint.html">Improving Your Code with lint</a>.</p>
