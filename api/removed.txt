@@ -34,6 +34,22 @@ package android.os {
 
 }
 
+package android.provider {
+
+  public static final class Settings.System extends android.provider.Settings.NameValueTable {
+    field public static final java.lang.String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
+    field public static final java.lang.String VOLUME_ALARM = "volume_alarm";
+    field public static final java.lang.String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
+    field public static final java.lang.String VOLUME_MUSIC = "volume_music";
+    field public static final java.lang.String VOLUME_NOTIFICATION = "volume_notification";
+    field public static final java.lang.String VOLUME_RING = "volume_ring";
+    field public static final java.lang.String[] VOLUME_SETTINGS;
+    field public static final java.lang.String VOLUME_SYSTEM = "volume_system";
+    field public static final java.lang.String VOLUME_VOICE = "volume_voice";
+  }
+
+}
+
 package android.text.format {
 
   public class DateFormat {

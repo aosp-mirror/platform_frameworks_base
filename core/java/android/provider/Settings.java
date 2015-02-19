@@ -2254,53 +2254,65 @@ public final class Settings {
         /**
          * Ringer volume. This is used internally, changing this value will not
          * change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_RING = "volume_ring";
 
         /**
          * System/notifications volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_SYSTEM = "volume_system";
 
         /**
          * Voice call volume. This is used internally, changing this value will
          * not change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_VOICE = "volume_voice";
 
         /**
          * Music/media/gaming volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_MUSIC = "volume_music";
 
         /**
          * Alarm volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_ALARM = "volume_alarm";
 
         /**
          * Notification volume. This is used internally, changing this
          * value will not change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_NOTIFICATION = "volume_notification";
 
         /**
          * Bluetooth Headset volume. This is used internally, changing this value will
          * not change the volume. See AudioManager.
+         *
+         * @removed Not used by anything since API 2.
          */
         public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
 
         /**
          * Master volume (float in the range 0.0f to 1.0f).
+         *
          * @hide
          */
         public static final String VOLUME_MASTER = "volume_master";
-
-        private static final Validator VOLUME_MASTER_VALIDATOR =
-                new InclusiveFloatRangeValidator(0, 1);
 
         /**
          * Master volume mute (int 1 = mute, 0 = not muted).
@@ -2358,6 +2370,8 @@ public final class Settings {
 
         /**
          * The mapping of stream type (integer) to its setting.
+         *
+         * @removed  Not used by anything since API 2.
          */
         public static final String[] VOLUME_SETTINGS = {
             VOLUME_VOICE, VOLUME_SYSTEM, VOLUME_RING, VOLUME_MUSIC,
@@ -2368,6 +2382,8 @@ public final class Settings {
          * Appended to various volume related settings to record the previous
          * values before they the settings were affected by a silent/vibrate
          * ringer mode change.
+         *
+         * @removed  Not used by anything since API 2.
          */
         public static final String APPEND_FOR_LAST_AUDIBLE = "_last_audible";
 
@@ -2981,20 +2997,6 @@ public final class Settings {
             SCREEN_AUTO_BRIGHTNESS_ADJ,
             VIBRATE_INPUT_DEVICES,
             MODE_RINGER_STREAMS_AFFECTED,
-            VOLUME_VOICE,
-            VOLUME_SYSTEM,
-            VOLUME_RING,
-            VOLUME_MUSIC,
-            VOLUME_ALARM,
-            VOLUME_NOTIFICATION,
-            VOLUME_BLUETOOTH_SCO,
-            VOLUME_VOICE + APPEND_FOR_LAST_AUDIBLE,
-            VOLUME_SYSTEM + APPEND_FOR_LAST_AUDIBLE,
-            VOLUME_RING + APPEND_FOR_LAST_AUDIBLE,
-            VOLUME_MUSIC + APPEND_FOR_LAST_AUDIBLE,
-            VOLUME_ALARM + APPEND_FOR_LAST_AUDIBLE,
-            VOLUME_NOTIFICATION + APPEND_FOR_LAST_AUDIBLE,
-            VOLUME_BLUETOOTH_SCO + APPEND_FOR_LAST_AUDIBLE,
             TEXT_AUTO_REPLACE,
             TEXT_AUTO_CAPS,
             TEXT_AUTO_PUNCTUATE,
@@ -3167,7 +3169,6 @@ public final class Settings {
             VALIDATORS.put(ADVANCED_SETTINGS, ADVANCED_SETTINGS_VALIDATOR);
             VALIDATORS.put(SCREEN_AUTO_BRIGHTNESS_ADJ, SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR);
             VALIDATORS.put(VIBRATE_INPUT_DEVICES, VIBRATE_INPUT_DEVICES_VALIDATOR);
-            VALIDATORS.put(VOLUME_MASTER, VOLUME_MASTER_VALIDATOR);
             VALIDATORS.put(VOLUME_MASTER_MUTE, VOLUME_MASTER_MUTE_VALIDATOR);
             VALIDATORS.put(MICROPHONE_MUTE, MICROPHONE_MUTE_VALIDATOR);
             VALIDATORS.put(NOTIFICATIONS_USE_RING_VOLUME, NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR);
