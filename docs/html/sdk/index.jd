@@ -4,27 +4,27 @@ page.template=sdk
 header.hide=1
 page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=1.0.1
+studio.version=1.1.0
 
-studio.linux_bundle_download=android-studio-ide-135.1641136-linux.zip
-studio.linux_bundle_bytes=243917559
-studio.linux_bundle_checksum=7c8f2d0cec21b98984cdba45ab5a25f26d67f23a
+studio.linux_bundle_download=android-studio-ide-135.1740770-linux.zip
+studio.linux_bundle_bytes=259336386
+studio.linux_bundle_checksum=e8d166559c50a484f83ebfec6731cc0e3f259208
 
-studio.mac_bundle_download=android-studio-ide-1641136.dmg
-studio.mac_bundle_bytes=245729073
-studio.mac_bundle_checksum=49506ba2cf6b56be4f7d07e6a00c4ec3ba2249d5
+studio.mac_bundle_download=android-studio-ide-135.1740770-mac.dmg
+studio.mac_bundle_bytes=261303345
+studio.mac_bundle_checksum=f9745d0fec1eefd498f6160a2d6a1b5247d4cda3
 
-studio.win_bundle_exe_download=android-studio-bundle-135.1641136.exe
-studio.win_bundle_exe_bytes=868344232
-studio.win_bundle_exe_checksum=9c1c8ea6aa17fb74e0593c62fd48ee62a8950be7
+studio.win_bundle_exe_download=android-studio-bundle-135.1740770-windows.exe
+studio.win_bundle_exe_bytes=856233768
+studio.win_bundle_exe_checksum=7484b9989d2914e1de30995fbaa97a271a514b3f
 
-studio.win_notools_exe_download=android-studio-ide-135.1641136.exe
-studio.win_notools_exe_bytes=260272840
-studio.win_notools_exe_checksum=464d1c5497ab3d1bdef441365791ab36c89cd5ae
+studio.win_notools_exe_download=android-studio-ide-135.1740770-windows.exe
+studio.win_notools_exe_bytes=242135128
+studio.win_notools_exe_checksum=5ea77661cd2300cea09e8e34f4a2219a0813911f
 
-studio.win_bundle_download=android-studio-ide-135.1641136-windows.zip
-studio.win_bundle_bytes=246249059
-studio.win_bundle_checksum=6d6856aca83f6ff747ca40b10f70edfbbcccd91c
+studio.win_bundle_download=android-studio-ide-135.1740770-windows.zip
+studio.win_bundle_bytes=261667054
+studio.win_bundle_checksum=e903f17cc6a57c7e3d460c4555386e3e65c6b4eb
 
 
 
