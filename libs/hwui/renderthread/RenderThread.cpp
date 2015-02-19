@@ -143,7 +143,8 @@ RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
         , mFrameCallbackTaskPending(false)
         , mFrameCallbackTask(0)
         , mRenderState(NULL)
-        , mEglManager(NULL) {
+        , mEglManager(NULL)
+        , mJankTracker(NULL) {
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
     run("RenderThread");
@@ -151,6 +152,11 @@ RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
 
 RenderThread::~RenderThread() {
     LOG_ALWAYS_FATAL("Can't destroy the render thread");
+}
+
+void RenderThread::setFrameInterval(nsecs_t frameInterval) {
+    mTimeLord.setFrameInterval(frameInterval);
+    mJankTracker->setFrameInterval(frameInterval);
 }
 
 void RenderThread::initializeDisplayEventReceiver() {
@@ -169,6 +175,7 @@ void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
+    mJankTracker = new JankTracker(mTimeLord.frameIntervalNanos());
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

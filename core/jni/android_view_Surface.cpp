@@ -49,6 +49,7 @@
 
 #include <AnimationContext.h>
 #include <DisplayListRenderer.h>
+#include <FrameInfo.h>
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
 
@@ -394,7 +395,7 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
     proxy->initialize(surface);
     // Shadows can't be used via this interface, so just set the light source
     // to all 0s. (and width & height are unused, TODO remove them)
-    proxy->setup(0, 0, (Vector3){0, 0, 0}, 0, 0, 0);
+    proxy->setup(0, 0, (Vector3){0, 0, 0}, 0, 0, 0, 1.0f);
     return (jlong) proxy;
 }
 
@@ -406,8 +407,11 @@ static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfa
 
 static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
-    nsecs_t frameTimeNs = systemTime(CLOCK_MONOTONIC);
-    proxy->syncAndDrawFrame(frameTimeNs, 0, 1.0f);
+    nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
+    UiFrameInfoBuilder(proxy->frameInfo())
+            .setVsync(vsync, vsync)
+            .addFlag(FrameInfoFlags::kSurfaceCanvas);
+    proxy->syncAndDrawFrame();
 }
 
 static void destroy(JNIEnv* env, jclass clazz, jlong rendererPtr) {

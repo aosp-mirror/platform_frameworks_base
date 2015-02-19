@@ -283,10 +283,10 @@ static jboolean android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject 
 static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,
         jint width, jint height,
         jfloat lightX, jfloat lightY, jfloat lightZ, jfloat lightRadius,
-        jint ambientShadowAlpha, jint spotShadowAlpha) {
+        jint ambientShadowAlpha, jint spotShadowAlpha, jfloat density) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     proxy->setup(width, height, (Vector3){lightX, lightY, lightZ}, lightRadius,
-            ambientShadowAlpha, spotShadowAlpha);
+            ambientShadowAlpha, spotShadowAlpha, density);
 }
 
 static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
@@ -296,9 +296,13 @@ static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
 }
 
 static int android_view_ThreadedRenderer_syncAndDrawFrame(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jlong frameTimeNanos, jlong recordDuration, jfloat density) {
+        jlong proxyPtr, jlongArray frameInfo, jint frameInfoSize) {
+    LOG_ALWAYS_FATAL_IF(frameInfoSize != UI_THREAD_FRAME_INFO_SIZE,
+            "Mismatched size expectations, given %d expected %d",
+            frameInfoSize, UI_THREAD_FRAME_INFO_SIZE);
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    return proxy->syncAndDrawFrame(frameTimeNanos, recordDuration, density);
+    env->GetLongArrayRegion(frameInfo, 0, frameInfoSize, proxy->frameInfo());
+    return proxy->syncAndDrawFrame();
 }
 
 static void android_view_ThreadedRenderer_destroy(JNIEnv* env, jobject clazz,
@@ -393,10 +397,10 @@ static void android_view_ThreadedRenderer_notifyFramePending(JNIEnv* env, jobjec
 }
 
 static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject javaFileDescriptor) {
+        jlong proxyPtr, jobject javaFileDescriptor, jint dumpFlags) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    proxy->dumpProfileInfo(fd);
+    proxy->dumpProfileInfo(fd, dumpFlags);
 }
 
 #endif
@@ -430,9 +434,9 @@ static JNINativeMethod gMethods[] = {
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
     { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
-    { "nSetup", "(JIIFFFFII)V", (void*) android_view_ThreadedRenderer_setup },
+    { "nSetup", "(JIIFFFFIIF)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
-    { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
+    { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
     { "nDestroy", "(J)V", (void*) android_view_ThreadedRenderer_destroy },
     { "nRegisterAnimatingRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_registerAnimatingRenderNode },
     { "nInvokeFunctor", "(JZ)V", (void*) android_view_ThreadedRenderer_invokeFunctor },
@@ -447,7 +451,7 @@ static JNINativeMethod gMethods[] = {
     { "nFence", "(J)V", (void*) android_view_ThreadedRenderer_fence },
     { "nStopDrawing", "(J)V", (void*) android_view_ThreadedRenderer_stopDrawing },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
-    { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
+    { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;I)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
 #endif
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
