@@ -1106,11 +1106,6 @@ public class AudioService extends IAudioService.Stub {
                 for (int stream = 0; stream < mStreamStates.length; stream++) {
                     if (streamTypeAlias == mStreamVolumeAlias[stream]) {
                         mStreamStates[stream].mute(state);
-
-                        Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
-                        intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, stream);
-                        intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
-                        sendBroadcastToAll(intent);
                     }
                 }
             } else if ((direction == AudioManager.ADJUST_RAISE) &&
@@ -3719,9 +3714,12 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public void mute(boolean state) {
+            boolean changed = false;
             synchronized (VolumeStreamState.class) {
                 if (state != mIsMuted) {
+                    changed = true;
                     mIsMuted = state;
+
                     // Set the new mute volume. This propagates the values to
                     // the audio system, otherwise the volume won't be changed
                     // at the lower level.
@@ -3732,6 +3730,13 @@ public class AudioService extends IAudioService.Stub {
                             0,
                             this, 0);
                 }
+            }
+            if (changed) {
+                // Stream mute changed, fire the intent.
+                Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+                intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
+                intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
+                sendBroadcastToAll(intent);
             }
         }
 
