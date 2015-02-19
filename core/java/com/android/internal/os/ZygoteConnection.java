@@ -399,7 +399,7 @@ class ZygoteConnection {
                 throws IllegalArgumentException {
             int curArg = 0;
 
-            boolean seenRuntimeArgs = true;
+            boolean seenRuntimeArgs = false;
 
             for ( /* curArg */ ; curArg < args.length; curArg++) {
                 String arg = args[curArg];
@@ -533,14 +533,18 @@ class ZygoteConnection {
                 }
             }
 
-            if (!seenRuntimeArgs) {
-                throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
+            if (abiListQuery) {
+                if (args.length - curArg > 0) {
+                    throw new IllegalArgumentException("Unexpected arguments after --query-abi-list.");
+                }
+            } else {
+                if (!seenRuntimeArgs) {
+                    throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
+                }
+
+                remainingArgs = new String[args.length - curArg];
+                System.arraycopy(args, curArg, remainingArgs, 0, remainingArgs.length);
             }
-
-            remainingArgs = new String[args.length - curArg];
-
-            System.arraycopy(args, curArg, remainingArgs, 0,
-                    remainingArgs.length);
         }
     }
 
