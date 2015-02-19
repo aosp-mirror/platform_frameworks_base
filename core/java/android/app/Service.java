@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.Nullable;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -498,6 +499,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * @return Return an IBinder through which clients can call on to the 
      *         service.
      */
+    @Nullable
     public abstract IBinder onBind(Intent intent);
 
     /**
