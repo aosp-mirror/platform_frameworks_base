@@ -46,7 +46,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -832,6 +831,24 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    private void setDisplayOffsetsInternal(int displayId, int x, int y) {
+        synchronized (mSyncRoot) {
+            LogicalDisplay display = mLogicalDisplays.get(displayId);
+            if (display == null) {
+                return;
+            }
+            if (display.getDisplayOffsetXLocked() != x
+                    || display.getDisplayOffsetYLocked() != y) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Display " + displayId + " burn-in offset set to ("
+                            + x + ", " + y + ")");
+                }
+                display.setDisplayOffsetsLocked(x, y);
+                scheduleTraversalLocked(false);
+            }
+        }
+    }
+
     private void clearViewportsLocked() {
         mDefaultViewport.valid = false;
         mExternalTouchViewport.valid = false;
@@ -1512,6 +1529,11 @@ public final class DisplayManagerService extends SystemService {
         public void setDisplayProperties(int displayId, boolean hasContent,
                 float requestedRefreshRate, boolean inTraversal) {
             setDisplayPropertiesInternal(displayId, hasContent, requestedRefreshRate, inTraversal);
+        }
+
+        @Override
+        public void setDisplayOffsets(int displayId, int x, int y) {
+            setDisplayOffsetsInternal(displayId, x, y);
         }
     }
 }
