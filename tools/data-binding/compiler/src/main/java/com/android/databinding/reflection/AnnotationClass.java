@@ -105,20 +105,17 @@ public class AnnotationClass implements ModelClass {
                             ", but it isn't a declared type: " + foundInterface);
             return null;
         }
-        System.err.println("found interface: " + foundInterface);
         return (DeclaredType) foundInterface;
     }
 
     @Override
     public boolean isList() {
-        AnnotationAnalyzer analyzer = AnnotationAnalyzer.instance;
         Types typeUtil = getTypeUtils();
         return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getListType());
     }
 
     @Override
     public boolean isMap() {
-        AnnotationAnalyzer analyzer = AnnotationAnalyzer.instance;
         Types typeUtil = getTypeUtils();
         return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getMapType());
     }
@@ -221,7 +218,7 @@ public class AnnotationClass implements ModelClass {
     }
 
     @Override
-    public ModelClass box() {
+    public AnnotationClass box() {
         if (!isPrimitive()) {
             return this;
         }
@@ -233,8 +230,10 @@ public class AnnotationClass implements ModelClass {
         if (that == null) {
             return false;
         }
-        TypeMirror thatType = ((AnnotationClass)that).mTypeMirror;
-        return getTypeUtils().isAssignable(thatType, mTypeMirror);
+        AnnotationClass thisBoxed = box();
+        AnnotationClass thatBoxed = (AnnotationClass) that.box();
+        final TypeMirror thatType = thatBoxed.mTypeMirror;
+        return getTypeUtils().isAssignable(thatType, thisBoxed.mTypeMirror);
     }
 
     @Override

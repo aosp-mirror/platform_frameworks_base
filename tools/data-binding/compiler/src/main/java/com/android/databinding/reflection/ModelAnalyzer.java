@@ -28,7 +28,7 @@ public abstract class ModelAnalyzer {
     public abstract boolean isDataBinder(ModelClass modelClass);
 
     public abstract Callable findMethod(ModelClass modelClass, String name,
-            List<ModelClass> args);
+            List<ModelClass> args, boolean staticAccess);
 
     public abstract boolean isObservable(ModelClass modelClass);
 
@@ -38,7 +38,8 @@ public abstract class ModelAnalyzer {
 
     public abstract boolean isBindable(ModelMethod method);
 
-    public abstract Callable findMethodOrField(ModelClass modelClass, String name);
+    public abstract Callable findMethodOrField(ModelClass modelClass, String name,
+            boolean staticAccess);
 
     public ModelClass findCommonParentOf(ModelClass modelClass1,
             ModelClass modelClass2) {

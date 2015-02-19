@@ -16,11 +16,6 @@
 
 package com.android.databinding.expr;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
-
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -30,6 +25,11 @@ import com.google.common.collect.Lists;
 
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
+
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.List;
 
 abstract public class Expr {
 
@@ -570,6 +570,41 @@ abstract public class Expr {
     }
 
     public void updateExpr(ModelAnalyzer modelAnalyzer) {
+        for (Expr child : mChildren) {
+            child.updateExpr(modelAnalyzer);
+        }
+    }
+
+    protected void replaceStaticAccess(ModelAnalyzer modelAnalyzer) {
+        for (int i = 0; i < mChildren.size(); i++) {
+            Expr child = mChildren.get(i);
+            String packageName = child.asPackage();
+            if (packageName != null) {
+                ModelClass modelClass = modelAnalyzer.findClass(packageName);
+                if (modelClass != null) {
+                    Expr staticAccessExpr = getModel().staticAccessExpr(modelClass);
+                    staticAccessExpr.getParents().add(this);
+                    mChildren.set(i, staticAccessExpr);
+                    child.removeParentAndUnregisterIfOrphan(this);
+                }
+            }
+        }
+    }
+
+    private void removeParentAndUnregisterIfOrphan(Expr parent) {
+        while (mParents.remove(parent)) {
+        }
+        if (getParents().isEmpty()) {
+            getModel().unregister(this);
+            for (Expr expr : mChildren) {
+                expr.removeParentAndUnregisterIfOrphan(this);
+            }
+            mChildren.clear();
+        }
+    }
+
+    protected String asPackage() {
+        return null;
     }
 
     static class Node {

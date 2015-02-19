@@ -68,4 +68,9 @@ public class IdentifierExpr extends Expr {
     protected List<Dependency> constructDependencies() {
         return Lists.newArrayList();
     }
+
+    @Override
+    protected String asPackage() {
+        return mUserDefinedType == null ? mName : null;
+    }
 }

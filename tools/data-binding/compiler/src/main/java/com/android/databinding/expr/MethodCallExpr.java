@@ -37,13 +37,23 @@ public class MethodCallExpr extends Expr {
     }
 
     @Override
+    public void updateExpr(ModelAnalyzer modelAnalyzer) {
+        resolveType(modelAnalyzer);
+        super.updateExpr(modelAnalyzer);
+    }
+
+    @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
+            replaceStaticAccess(modelAnalyzer);
             List<ModelClass> args = new ArrayList<>();
             for (Expr expr : getArgs()) {
                 args.add(expr.getResolvedType());
             }
-            mGetter = modelAnalyzer.findMethod(getTarget().getResolvedType(), mName, args);
+
+            Expr target = getTarget();
+            boolean isStatic = target instanceof StaticAccessExpr;
+            mGetter = modelAnalyzer.findMethod(target.getResolvedType(), mName, args, isStatic);
         }
         return mGetter.resolvedType;
     }

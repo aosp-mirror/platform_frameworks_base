@@ -22,6 +22,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.util.L;
 import com.android.databinding.writer.FlagSet;
 
@@ -85,6 +86,10 @@ public class ExprModel {
         return expr;
     }
 
+    public void unregister(Expr expr) {
+        mExprMap.remove(expr.getUniqueKey());
+    }
+
     public Map<String, Expr> getExprMap() {
         return mExprMap;
     }
@@ -139,6 +144,10 @@ public class ExprModel {
 
     public Expr bracketExpr(Expr variableExpr, Expr argExpr) {
         return register(new BracketExpr(variableExpr, argExpr));
+    }
+
+    public Expr staticAccessExpr(ModelClass modelClass) {
+        return register(new StaticAccessExpr(modelClass));
     }
 
     public Expr castExpr(String type, Expr expr) {
@@ -197,17 +206,10 @@ public class ExprModel {
         //ensure class analyzer. We need to know observables at this point
         final ModelAnalyzer modelAnalyzer = ModelAnalyzer.getInstance();
 
-        ArrayList<Expr> processedExprs = new ArrayList<>();
-        ArrayList<Expr> exprs = new ArrayList<>();
-        do {
-            exprs.clear();
-            exprs.addAll(mExprMap.values());
-            exprs.removeAll(processedExprs);
-            for (Expr expr: exprs) {
-                expr.updateExpr(modelAnalyzer);
-            }
-            processedExprs.addAll(exprs);
-        } while (!exprs.isEmpty());
+        ArrayList<Expr> exprs = new ArrayList<>(mBindingExpressions);
+        for (Expr expr: exprs) {
+            expr.updateExpr(modelAnalyzer);
+        }
 
         int counter = 0;
         final Iterable<Expr> observables = filterObservables(modelAnalyzer);

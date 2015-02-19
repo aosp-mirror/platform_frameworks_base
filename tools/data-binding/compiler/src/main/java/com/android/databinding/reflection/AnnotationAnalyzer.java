@@ -124,31 +124,33 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public Callable findMethod(ModelClass modelClass, String name,
-            List<ModelClass> args) {
+            List<ModelClass> args, boolean staticAccess) {
         AnnotationClass clazz = (AnnotationClass)modelClass;
         // TODO implement properly
         for (String methodName :  new String[]{"set" + StringUtils.capitalize(name), name}) {
             for (ModelMethod method : clazz.getMethods(methodName, args.size())) {
-                ModelClass[] parameters = method.getParameterTypes();
-                boolean parametersMatch = true;
-                boolean isVarArgs = ((AnnotationMethod)method).mMethod.isVarArgs();
-                for (int i = 0; i < parameters.length; i++) {
-                    if (isVarArgs && i == parameters.length - 1) {
-                        ModelClass component = parameters[i].getComponentType();
-                        for (int j = i; j < args.size(); j++) {
-                            if (!component.isAssignableFrom(args.get(j))) {
-                                parametersMatch = false;
-                                break;
+                if (method.isStatic() == staticAccess) {
+                    ModelClass[] parameters = method.getParameterTypes();
+                    boolean parametersMatch = true;
+                    boolean isVarArgs = ((AnnotationMethod) method).mMethod.isVarArgs();
+                    for (int i = 0; i < parameters.length; i++) {
+                        if (isVarArgs && i == parameters.length - 1) {
+                            ModelClass component = parameters[i].getComponentType();
+                            for (int j = i; j < args.size(); j++) {
+                                if (!component.isAssignableFrom(args.get(j))) {
+                                    parametersMatch = false;
+                                    break;
+                                }
                             }
+                        } else if (!parameters[i].isAssignableFrom(args.get(i))) {
+                            parametersMatch = false;
+                            break;
                         }
-                    } else if (!parameters[i].isAssignableFrom(args.get(i))) {
-                        parametersMatch = false;
-                        break;
                     }
-                }
-                if (parametersMatch) {
-                    return new Callable(Callable.Type.METHOD, methodName,
-                            method.getReturnType(args), true, false);
+                    if (parametersMatch) {
+                        return new Callable(Callable.Type.METHOD, methodName,
+                                method.getReturnType(args), true, false);
+                    }
                 }
             }
         }
@@ -190,7 +192,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     }
 
     @Override
-    public Callable findMethodOrField(ModelClass modelClass, String name) {
+    public Callable findMethodOrField(ModelClass modelClass, String name, boolean staticAccess) {
         AnnotationClass annotationClass = (AnnotationClass)modelClass;
         for (String methodName :
                 new String[]{"get" + StringUtils.capitalize(name),
@@ -198,7 +200,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
             ModelMethod[] methods = modelClass.getMethods(methodName, 0);
             for (ModelMethod modelMethod : methods) {
                 AnnotationMethod method = (AnnotationMethod) modelMethod;
-                if (method.isPublic()) {
+                if (method.isPublic() && method.isStatic() == staticAccess) {
                     final AnnotationField backingField = findField(annotationClass, name, true);
                     final Callable result = new Callable(Callable.Type.METHOD, methodName,
                             method.getReturnType(null), true, isBindable(method) ||
@@ -210,7 +212,8 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         }
 
         AnnotationField field = findField(annotationClass, name, false);
-        if (field != null && field.mField.getModifiers().contains(Modifier.PUBLIC)) {
+        if (field != null && field.mField.getModifiers().contains(Modifier.PUBLIC) &&
+                field.mField.getModifiers().contains(Modifier.STATIC) == staticAccess) {
             AnnotationClass fieldType = new AnnotationClass(field.mField.asType());
             return new Callable(Callable.Type.FIELD, name, fieldType,
                     !field.mField.getModifiers().contains(Modifier.FINAL)
@@ -288,15 +291,17 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         }
         int templateOpenIndex = className.indexOf('<');
         DeclaredType declaredType;
+        Elements elementUtils = getElementUtils();
         if (templateOpenIndex < 0) {
-            Elements elementUtils = getElementUtils();
             TypeElement typeElement = elementUtils.getTypeElement(className);
+            if (typeElement == null) {
+                return null;
+            }
             declaredType = (DeclaredType) typeElement.asType();
         } else {
             int templateCloseIndex = className.lastIndexOf('>');
             String paramStr = className.substring(templateOpenIndex + 1, templateCloseIndex);
 
-            Elements elementUtils = getElementUtils();
             String baseClassName = className.substring(0, templateOpenIndex);
             TypeElement typeElement = elementUtils.getTypeElement(baseClassName);
 

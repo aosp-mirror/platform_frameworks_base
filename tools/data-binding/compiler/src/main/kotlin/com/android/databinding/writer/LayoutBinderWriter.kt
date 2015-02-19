@@ -46,6 +46,7 @@ import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
 import com.android.databinding.reflection.Callable
 import com.android.databinding.expr.CastExpr
+import com.android.databinding.expr.StaticAccessExpr
 
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
@@ -220,6 +221,9 @@ fun Expr.toCode(full : Boolean = false) : KCode {
         is CastExpr -> kcode("") {
             app("(", it.getCastType())
             app(") ", it.getCastExpr().toCode())
+        }
+        is StaticAccessExpr -> kcode("") {
+            app("", it.getResolvedType().toJavaCode())
         }
         else -> kcode("//NOT IMPLEMENTED YET")
     }
@@ -422,24 +426,26 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
             nl("}")
         }
         usedVariables.forEach {
-            nl("public void ${it.setterName}(${it.getResolvedType().toJavaCode()} ${it.readableUniqueName}) {") {
-                if (it.isObservable()) {
-                    tab("updateRegistration(${it.getId()}, ${it.readableUniqueName});");
+            if (it.getUserDefinedType() != null) {
+                nl("public void ${it.setterName}(${it.getResolvedType().toJavaCode()} ${it.readableUniqueName}) {") {
+                    if (it.isObservable()) {
+                        tab("updateRegistration(${it.getId()}, ${it.readableUniqueName});");
+                    }
+                    tab("this.${it.fieldName} = ${it.readableUniqueName};")
+                    // set dirty flags!
+                    val flagSet = it.invalidateFlagSet
+                    mDirtyFlags.mapOr(flagSet) { suffix, index ->
+                        tab("${mDirtyFlags.getLocalName()}$suffix |= ${flagSet.localValue(index)};")
+                    }
+                    tab("super.requestRebind();")
                 }
-                tab("this.${it.fieldName} = ${it.readableUniqueName};")
-                // set dirty flags!
-                val flagSet = it.invalidateFlagSet
-                mDirtyFlags.mapOr(flagSet) { suffix, index ->
-                    tab("${mDirtyFlags.getLocalName()}$suffix |= ${flagSet.localValue(index)};")
+                nl("}")
+                nl("")
+                nl("public ${it.getResolvedType().toJavaCode()} ${it.getterName}() {") {
+                    tab("return ${it.fieldName};")
                 }
-                tab("super.requestRebind();")
+                nl("}")
             }
-            nl("}")
-            nl("")
-            nl("public ${it.getResolvedType().toJavaCode()} ${it.getterName}() {") {
-                tab("return ${it.fieldName};")
-            }
-            nl("}")
         }
     }
 
@@ -667,8 +673,10 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
 
             nl("public interface ${interfaceName} extends IViewDataBinder {")
             variables.forEach {
-                tab("@Bindable")
-                tab("public void ${it.setterName}(${it.getUserDefinedType()} ${it.readableUniqueName});")
+                if (it.getUserDefinedType() != null) {
+                    tab("@Bindable")
+                    tab("public void ${it.setterName}(${it.getUserDefinedType()} ${it.readableUniqueName});")
+                }
             }
             layoutBinder.getBindingTargets().forEach {
                 tab("public ${it.getInterfaceType()} ${it.getterName}();")

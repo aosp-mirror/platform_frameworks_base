@@ -87,11 +87,19 @@ public class FieldAccessExpr extends Expr {
 
     @Override
     public void updateExpr(ModelAnalyzer modelAnalyzer) {
+        resolveType(modelAnalyzer);
+        super.updateExpr(modelAnalyzer);
+    }
+
+    @Override
+    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            mGetter = modelAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
+            replaceStaticAccess(modelAnalyzer);
+            Expr parent = getParent();
+            boolean isStatic = parent instanceof StaticAccessExpr;
+            mGetter = modelAnalyzer.findMethodOrField(parent.getResolvedType(), mName, isStatic);
             if (modelAnalyzer.isObservableField(mGetter.resolvedType)) {
                 // Make this the ".get()" and add an extra field access for the observable field
-                Expr parent = getParent();
                 parent.getParents().remove(this);
                 getChildren().remove(parent);
 
@@ -100,17 +108,16 @@ public class FieldAccessExpr extends Expr {
 
                 getChildren().add(observableField);
                 observableField.getParents().add(this);
-                mGetter = modelAnalyzer.findMethodOrField(mGetter.resolvedType, "get");
+                mGetter = modelAnalyzer.findMethodOrField(mGetter.resolvedType, "get", false);
                 mName = "";
             }
         }
+        return mGetter.resolvedType;
     }
 
     @Override
-    protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
-        if (mGetter == null) {
-            mGetter = modelAnalyzer.findMethodOrField(mChildren.get(0).getResolvedType(), mName);
-        }
-        return mGetter.resolvedType;
+    protected String asPackage() {
+        String parentPackage = getParent().asPackage();
+        return parentPackage == null ? null : parentPackage + "." + mName;
     }
 }
