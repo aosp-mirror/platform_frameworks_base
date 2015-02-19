@@ -228,21 +228,23 @@ void SkiaCanvasProxy::onDrawText(const void* text, size_t byteLength, SkScalar x
     }
 
     // setup the first glyph position and adjust bounds if needed
+    int xBaseline = 0;
+    int yBaseline = 0;
     if (mCanvas->drawTextAbsolutePos()) {
         bounds.offset(x,y);
-        pointStorage[0].set(x, y);
-    } else {
-        pointStorage[0].set(0, 0);
+        xBaseline = x;
+        yBaseline = y;
     }
+    pointStorage[0].set(xBaseline, yBaseline);
 
     // setup the remaining glyph positions
     if (glyphs.paint.isVerticalText()) {
         for (int i = 1; i < glyphs.count; i++) {
-            pointStorage[i].set(x, glyphWidths[i-1] + pointStorage[i-1].fY);
+            pointStorage[i].set(xBaseline, glyphWidths[i-1] + pointStorage[i-1].fY);
         }
     } else {
         for (int i = 1; i < glyphs.count; i++) {
-            pointStorage[i].set(glyphWidths[i-1] + pointStorage[i-1].fX, y);
+            pointStorage[i].set(glyphWidths[i-1] + pointStorage[i-1].fX, yBaseline);
         }
     }
 
