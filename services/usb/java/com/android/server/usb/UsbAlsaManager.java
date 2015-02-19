@@ -153,7 +153,7 @@ public final class UsbAlsaManager {
     // audioDevice - the AudioDevice that was added or removed
     // enabled - if true, we're connecting a device (it's arrived), else disconnecting
     private void notifyDeviceState(UsbAudioDevice audioDevice, boolean enabled) {
-       if (DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "notifyDeviceState " + enabled + " " + audioDevice);
         }
 
@@ -422,7 +422,7 @@ public final class UsbAlsaManager {
     }
 
     /* package */ void usbDeviceRemoved(UsbDevice usbDevice) {
-       if (DEBUG) {
+        if (DEBUG) {
           Slog.d(TAG, "deviceRemoved(): " + usbDevice);
         }
 
