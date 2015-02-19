@@ -56,6 +56,30 @@ public class NetworkUtils {
 
     /**
      * Start the DHCP client daemon, in order to have it request addresses
+     * for the named interface.  This returns {@code true} if the DHCPv4 daemon
+     * starts, {@code false} otherwise.  This call blocks until such time as a
+     * result is available or the default discovery timeout has been reached.
+     * Callers should check {@link #getDhcpResults} to determine whether DHCP
+     * succeeded or failed, and if it succeeded, to fetch the {@link DhcpResults}.
+     * @param interfaceName the name of the interface to configure
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean startDhcp(String interfaceName);
+
+    /**
+     * Initiate renewal on the DHCP client daemon for the named interface.  This
+     * returns {@code true} if the DHCPv4 daemon has been notified, {@code false}
+     * otherwise.  This call blocks until such time as a result is available or
+     * the default renew timeout has been reached.  Callers should check
+     * {@link #getDhcpResults} to determine whether DHCP succeeded or failed,
+     * and if it succeeded, to fetch the {@link DhcpResults}.
+     * @param interfaceName the name of the interface to configure
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean startDhcpRenew(String interfaceName);
+
+    /**
+     * Start the DHCP client daemon, in order to have it request addresses
      * for the named interface, and then configure the interface with those
      * addresses. This call blocks until it obtains a result (either success
      * or failure) from the daemon.
@@ -64,17 +88,31 @@ public class NetworkUtils {
      * the IP address information.
      * @return {@code true} for success, {@code false} for failure
      */
-    public native static boolean runDhcp(String interfaceName, DhcpResults dhcpResults);
+    public static boolean runDhcp(String interfaceName, DhcpResults dhcpResults) {
+        return startDhcp(interfaceName) && getDhcpResults(interfaceName, dhcpResults);
+    }
 
     /**
-     * Initiate renewal on the Dhcp client daemon. This call blocks until it obtains
+     * Initiate renewal on the DHCP client daemon. This call blocks until it obtains
      * a result (either success or failure) from the daemon.
      * @param interfaceName the name of the interface to configure
      * @param dhcpResults if the request succeeds, this object is filled in with
      * the IP address information.
      * @return {@code true} for success, {@code false} for failure
      */
-    public native static boolean runDhcpRenew(String interfaceName, DhcpResults dhcpResults);
+    public static boolean runDhcpRenew(String interfaceName, DhcpResults dhcpResults) {
+        return startDhcpRenew(interfaceName) && getDhcpResults(interfaceName, dhcpResults);
+    }
+
+    /**
+     * Fetch results from the DHCP client daemon. This call returns {@code true} if
+     * if there are results available to be read, {@code false} otherwise.
+     * @param interfaceName the name of the interface to configure
+     * @param dhcpResults if the request succeeds, this object is filled in with
+     * the IP address information.
+     * @return {@code true} for success, {@code false} for failure
+     */
+    public native static boolean getDhcpResults(String interfaceName, DhcpResults dhcpResults);
 
     /**
      * Shut down the DHCP client daemon.
