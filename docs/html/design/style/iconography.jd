@@ -536,7 +536,7 @@ see <a href="{@docRoot}guide/topics/resources/providing-resources.html">Providin
 </p>
 
 <p> For more information about using the mipmap folders, see
-<a href="{@docRoot}tools/project/index.html#mipmap">Managing Projects Overview</a>.</p>
+<a href="{@docRoot}tools/projects/index.html#mipmap">Managing Projects Overview</a>.</p>
 
 <h3 id="xxxhdpi-launcher">Provide an xxx-high-density launcher icon</h3>
 
