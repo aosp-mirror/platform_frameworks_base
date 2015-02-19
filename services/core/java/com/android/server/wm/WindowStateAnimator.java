@@ -238,9 +238,7 @@ class WindowStateAnimator {
     boolean isAnimating() {
         return mAnimation != null
                 || (mAttachedWinAnimator != null && mAttachedWinAnimator.mAnimation != null)
-                || (mAppAnimator != null &&
-                        (mAppAnimator.animation != null
-                                || mAppAnimator.mAppToken.inPendingTransaction));
+                || (mAppAnimator != null && mAppAnimator.isAnimating());
     }
 
     /** Is the window animating the DummyAnimation? */

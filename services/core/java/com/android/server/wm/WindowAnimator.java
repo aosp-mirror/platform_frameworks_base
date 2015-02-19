@@ -62,7 +62,11 @@ public class WindowAnimator {
     final Context mContext;
     final WindowManagerPolicy mPolicy;
 
+    /** Is any window animating? */
     boolean mAnimating;
+
+    /** Is any app window animating? */
+    boolean mAppWindowAnimating;
 
     final Choreographer.FrameCallback mAnimationFrameCallback;
 
@@ -158,7 +162,7 @@ public class WindowAnimator {
                     final boolean wasAnimating = appAnimator.animation != null
                             && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
                     if (appAnimator.stepAnimationLocked(mCurrentTime)) {
-                        mAnimating = true;
+                        mAnimating = mAppWindowAnimating = true;
                     } else if (wasAnimating) {
                         // stopped animating, do one more pass through the layout
                         setAppLayoutChanges(appAnimator,
@@ -177,7 +181,7 @@ public class WindowAnimator {
                 final boolean wasAnimating = appAnimator.animation != null
                         && appAnimator.animation != AppWindowAnimator.sDummyAnimation;
                 if (appAnimator.stepAnimationLocked(mCurrentTime)) {
-                    mAnimating = true;
+                    mAnimating = mAppWindowAnimating = true;
                 } else if (wasAnimating) {
                     // stopped animating, do one more pass through the layout
                     setAppLayoutChanges(appAnimator, WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER,
@@ -601,6 +605,7 @@ public class WindowAnimator {
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         boolean wasAnimating = mAnimating;
         mAnimating = false;
+        mAppWindowAnimating = false;
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
         }
