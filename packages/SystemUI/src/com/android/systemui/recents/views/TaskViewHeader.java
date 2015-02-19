@@ -32,12 +32,10 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.widget.FrameLayout;
@@ -104,11 +102,10 @@ public class TaskViewHeader extends FrameLayout {
         });
 
         // Load the dismiss resources
-        Resources res = context.getResources();
-        mLightDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_light);
-        mDarkDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_dark);
+        mLightDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_light);
+        mDarkDismissDrawable = context.getDrawable(R.drawable.recents_dismiss_dark);
         mDismissContentDescription =
-                res.getString(R.string.accessibility_recents_item_will_be_dismissed);
+                context.getString(R.string.accessibility_recents_item_will_be_dismissed);
 
         // Configure the highlight paint
         if (sHighlightPaint == null) {
@@ -283,23 +280,26 @@ public class TaskViewHeader extends FrameLayout {
         }
 
         if (focused) {
+            int currentColor = mBackgroundColor;
             int secondaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             int[][] states = new int[][] {
+                    new int[] {},
                     new int[] { android.R.attr.state_enabled },
                     new int[] { android.R.attr.state_pressed }
             };
             int[] newStates = new int[]{
+                    0,
                     android.R.attr.state_enabled,
                     android.R.attr.state_pressed
             };
             int[] colors = new int[] {
+                    currentColor,
                     secondaryColor,
                     secondaryColor
             };
             mBackground.setColor(new ColorStateList(states, colors));
             mBackground.setState(newStates);
             // Pulse the background color
-            int currentColor = mBackgroundColor;
             int lightPrimaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
                     currentColor, lightPrimaryColor);
@@ -326,7 +326,7 @@ public class TaskViewHeader extends FrameLayout {
 
             mFocusAnimator = new AnimatorSet();
             mFocusAnimator.playTogether(backgroundColor, translation);
-            mFocusAnimator.setStartDelay(750);
+            mFocusAnimator.setStartDelay(150);
             mFocusAnimator.setDuration(750);
             mFocusAnimator.start();
         } else {

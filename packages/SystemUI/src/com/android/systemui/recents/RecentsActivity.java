@@ -193,8 +193,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
 
         // Start loading tasks according to the load plan
-        ArrayList<TaskStack> stacks = plan.getAllTaskStacks();
-        if (stacks.size() == 0) {
+        if (!plan.hasTasks()) {
             loader.preloadTasks(plan, mConfig.launchedFromHome);
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
@@ -203,11 +202,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         loadOpts.numVisibleTaskThumbnails = mConfig.launchedNumVisibleThumbnails;
         loader.loadTasks(this, plan, loadOpts);
 
-        boolean hasTasks = plan.hasTasks();
-        if (hasTasks) {
+        ArrayList<TaskStack> stacks = plan.getAllTaskStacks();
+        mConfig.launchedWithNoRecentTasks = !plan.hasTasks();
+        if (!mConfig.launchedWithNoRecentTasks) {
             mRecentsView.setTaskStacks(stacks);
         }
-        mConfig.launchedWithNoRecentTasks = !hasTasks;
 
         // Create the home intent runnable
         Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
