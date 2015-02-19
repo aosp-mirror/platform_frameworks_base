@@ -2396,7 +2396,7 @@
     <!-- Title of policy access to limiting the user's password choices -->
     <string name="policylab_limitPassword">Set password rules</string>
     <!-- Description of policy access to limiting the user's password choices -->
-    <string name="policydesc_limitPassword">Control the length and the characters allowed in screen-unlock passwords.</string>
+    <string name="policydesc_limitPassword">Control the length and the characters allowed in screen lock passwords and PINs.</string>
     <!-- Title of policy access to watch user login attempts -->
     <string name="policylab_watchLogin">Monitor screen-unlock attempts</string>
     <!-- Description of policy access to watch user login attempts -->
@@ -2411,15 +2411,24 @@
     <string name="policydesc_watchLogin" product="default">Monitor the number of incorrect passwords
     typed. when unlocking the screen, and lock the phone or erase all the phone\'s
     data if too many incorrect passwords are typed.</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock the tablet or erase all this user\'s data
+    if too many incorrect passwords are typed.</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock the TV or erase all this user\'s data
+    if too many incorrect passwords are typed.</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default">Monitor the number of incorrect passwords
+    typed when unlocking the screen, and lock the phone or erase all this user\'s data
+    if too many incorrect passwords are typed.</string>
     <!-- Title of policy access to reset user's password -->
-    <string name="policylab_resetPassword">Change the screen-unlock password</string>
+    <string name="policylab_resetPassword">Change the screen lock</string>
     <!-- Description of policy access to reset user's password -->
-    <string name="policydesc_resetPassword">Change the screen-unlock password.</string>
+    <string name="policydesc_resetPassword">Change the screen lock.</string>
     <!-- Title of policy access to force lock the device -->
     <string name="policylab_forceLock">Lock the screen</string>
     <!-- Description of policy access to limiting the user's password choices -->
     <string name="policydesc_forceLock">Control how and when the screen locks.</string>
-    <!-- Title of policy access to wipe the user's data -->
+    <!-- Title of policy access to wipe primary user's data -->
     <string name="policylab_wipeData">Erase all data</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="tablet">Erase the tablet\'s data without warning by performing a factory data reset.</string>
@@ -2427,15 +2436,23 @@
     <string name="policydesc_wipeData" product="tv">Erase the TV\'s data without warning by performing a factory data reset.</string>
     <!-- Description of policy access to wipe the user's data -->
     <string name="policydesc_wipeData" product="default">Erase the phone\'s data without warning by performing a factory data reset.</string>
-    <string name="policylab_setGlobalProxy">Set the device global proxy</string>
+    <!-- Title of policy access to wipe secondary user's data -->
+    <string name="policylab_wipeData_secondaryUser">Erase user data</string>
     <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData_secondaryUser" product="tablet">Erase this user\'s data on this tablet without warning.</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData_secondaryUser" product="tv">Erase this user\'s data on this TV without warning.</string>
+    <!-- Description of policy access to wipe the user's data -->
+    <string name="policydesc_wipeData_secondaryUser" product="default">Erase this user\'s data on this phone without warning.</string>
+    <!-- Title of policy access to set global proxy -->
+    <string name="policylab_setGlobalProxy">Set the device global proxy</string>
+    <!-- Description of policy access to set global proxy -->
     <string name="policydesc_setGlobalProxy">Set the device global proxy
-        to be used while policy is enabled. Only the first device admin
-        sets the effective global proxy.</string>
+    to be used while policy is enabled. Only the device owner can set the global proxy.</string>
     <!-- Title of policy access to enforce password expiration [CHAR LIMIT=30]-->
-    <string name="policylab_expirePassword">Set lock-screen password expiration</string>
+    <string name="policylab_expirePassword">Set screen lock password expiration</string>
     <!-- Description of policy access to enforce password expiration [CHAR LIMIT=110]-->
-    <string name="policydesc_expirePassword">Control how frequently the lock-screen password must be changed.</string>
+    <string name="policydesc_expirePassword">Change how frequently the screen lock password, PIN, or pattern must be changed.</string>
     <!-- Title of policy access to require encrypted storage [CHAR LIMIT=30]-->
     <string name="policylab_encryptedStorage">Set storage encryption</string>
     <!-- Description of policy access to require encrypted storage [CHAR LIMIT=110]-->
@@ -2445,9 +2462,9 @@
     <!-- Description of policy access to disable all device cameras [CHAR LIMIT=110]-->
     <string name="policydesc_disableCamera">Prevent use of all device cameras.</string>
     <!-- Title of policy access to disable all device cameras [CHAR LIMIT=30]-->
-    <string name="policylab_disableKeyguardFeatures">Disable features in keyguard</string>
+    <string name="policylab_disableKeyguardFeatures">Disable features of screen lock</string>
     <!-- Description of policy access to disable all device cameras [CHAR LIMIT=110]-->
-    <string name="policydesc_disableKeyguardFeatures">Prevent use of some features in keyguard.</string>
+    <string name="policydesc_disableKeyguardFeatures">Prevent use of some features of screen lock.</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
