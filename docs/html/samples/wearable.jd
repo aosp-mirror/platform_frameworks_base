@@ -1,0 +1,11 @@
+page.title=Wearable
+@jd:body
+
+
+<div id="samples" class="wearable">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>

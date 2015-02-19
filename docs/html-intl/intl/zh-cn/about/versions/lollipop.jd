@@ -1,0 +1,253 @@
+page.title=Android Lollipop 
+@jd:body
+
+
+
+
+
+
+
+
+  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
+    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
+  </div>
+
+  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
+  <div class="col-4 normal-links highlights" style="font-size:12px;">
+    <h3 id="thisd" >面向开发者的主要功能</h3>
+    <ul style="list-style-type:none;">
+  <li><a href="#Material">Material Design 设计</a></li>
+  <li><a href="#Perf">注重性能</a></li>
+  <li><a href="#Notifications">通知</a></li>
+  <li><a href="#TV">以大屏幕呈现</a></li>
+  <li><a href="#Documents">以文档为中心</a></li>
+  <li><a href="#Connectivity">连接性能再上一级</a></li>
+  <li><a href="#Graphics">高性能图形</a></li>
+  <li><a href="#Audio">音频处理功能更强</a></li>
+  <li><a href="#Camera">摄像头和视频处理进一步完善</a></li>
+  <li><a href="#Work">Android 在办公中的应用</a></li>
+  <li><a href="#ScreenCapture">屏幕截图和共享</a></li>
+  <li><a href="#Sensors">新型传感器</a></li>
+  <li><a href="#WebView">Chromium WebView</a></li>
+  <li><a href="#Accessibility">辅助功能和输入</a></li>
+  <li><a href="#Battery">构建低电耗应用</a></li>
+    </ul>
+  </div>
+</div>
+
+
+
+
+
+
+
+<p>欢迎使用 Android 5.0 Lollipop，这是迄今为止规模最大最为雄心勃勃的 Android 版本！</p>
+
+<p>此版本为用户推出了各种崭新的新功能，为开发者则提供了数千个新的 API。不仅如此，它将 Android 的疆土扩展得更远，小到手机、平板电脑和穿戴式设备，大到电视和汽车，都可以是它活跃的领地。</p>
+
+<p>要深入了解面向开发者的新 API，请参阅 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 概述</a>。有关适合消费者阅读的更多 Android 5.0 内容，请访问 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>。</p>
+
+
+
+<h2 id="Material">Material design 设计</h2>
+
+<p>Android 5.0 将 <a href="http://www.google.com/design/spec">Material design 设计</a>引入 Android 系统，它自带一个扩展的界面工具包，可以让您轻松地将新的设计图案集成到自己的应用中。  </p>
+
+
+
+<p>在新的 <strong>3D 视图</strong>中，您可以设置 z 轴让元素从视图层面上“站”起来，甚至可以随着元素的移动投下<strong>实时阴影</strong>。</p>
+
+
+<p>内置的 <strong>Activity Transitions</strong> API 可以通过优美的动画天衣无缝地让用户从一种状态切换到另一种状态。素材主题为您的活动提供了各种过渡方式，包括在各个活动中使用<strong>共享的可视化元素</strong>功能。</p>
+
+
+
+<div style="width:290px;margin-right:35px;float:left">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="/design/material/videos/ContactsAnim.mp4">
+    <source src="/design/videos/ContactsAnim.webm">
+    <source src="/design/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em>要重播影片，请单击设备屏幕</em>
+  </div>
+</div>
+
+
+<p>您可以对按钮、复选框以及应用中的其他触摸控件加上涟漪动画。 
+
+<p>您还可以在 XML 文件中定义可动的矢量图，让它们展现出各种不同的动画效果。矢量图在自由缩放的同时不会失真，非常适合用作应用中的纯色图标。</p>
+
+<p><strong>RenderThread</strong> 则是新推出的由系统管理的渲染线程，即使主界面线程出现延迟，它也能保持动画运行流畅。 </p>
+
+
+<h2 id="Perf">注重性能</h2>
+
+<p>Android 5.0 为用户带来更快、更流畅、更强大的计算体验。</p>
+
+<p>Android 现在完全运行在全新构建的 <strong>ART 运行时</strong>上，支持混合使用预先编译 (AOT)、即时编译 (JIT) 和编译好的代码。它可以在 ARM、x86 和 MIPS 架构上正常运行，并且完全兼容 64 位。</p>
+
+<p>ART 改进了应用性能和响应能力。它采用高效的垃圾回收方式，减少了垃圾回收事件的次数和暂停时间，贴合搭配垂直同步窗口，因此您的应用不会出现掉帧现象。ART 还会动态移动内存，针对前台使用情况优化内存。 </p>
+
+<p>Android 5.0 引入了对 <strong>64 位架构</strong>（已应用于 Nexus 9 的 NVIDIA Tegra K1）的平台支持，经过优化后提供更大的寻址空间，提升了针对特定的计算工作负载的性能。以 Java 编写的应用可自动作为 64 位应用运行，无需任何修改。如果您的应用使用原生代码，也不用担心。我们扩展了 NDK，可支持适用于 ARM v8、x86-64 和 MIPS-64 的新 ABI。</p>
+
+<p>Android 一如既往注重实现更流畅的性能，并在 5.0 中改进了声音/视频同步方式。音频和图形管道都经过调校，时间戳更为精准，因此视频应用和游戏都能显示流畅的同步内容。</p>
+
+
+<h2 id="Notifications">通知</h2>
+
+<p>在 Android 5.0 中，用户可以更加方便地查看、使用和配置通知。 </p>
+
+<img src="{@docRoot}images/versions/notification-headsup.png" style="float:right; margin:0 0 40px 60px" width="300" height="224" />
+
+<p>用户可以根据需在<strong>锁屏上</strong>显示不同的通知详细信息，例如，他们可以选择在安全锁屏上完全不显示通知，也可以选择显示部分或全部通知。 </p>
+
+<p>像来电这样的重要通知警报会显示在<strong>浮动通知</strong>中，这是一个浮在上方显示的小窗口，方便用户无需退出当前应用就能响应或关闭通知。</p>
+
+<p>您现在可以在通知中通过<strong>新的元数据</strong>来收集相关的联系人（用于评级）、类别和优先级。</p>
+
+<p>内置新的媒体通知模板可以设置多达 6 个控制按钮（包括“翘拇指”之类的自定义控件），以通知方式实现一致的媒体控制，再也用不着 RemoteViews 了！</p>
+
+
+
+<h2 id="TV">以大屏幕呈现</h2>
+
+<p><a href="http://developer.android.com/tv/index.html">Android TV</a> 打造了一个完整的电视平台，让您的应用在大屏幕上驰骋。它以简洁的主屏幕体验为核心，提供个性化推荐和语音搜索功能，方便客户轻松发现内容。</p>
+
+<p>有了 Android TV，您现在可以为应用或游戏内容<strong>营造宏大且引人入胜的氛围</strong>，并支持与游戏控制器和其他输入设备互动。Android 还在 <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 支持库</a>中提供了 <strong>Leanback 界面框架</strong>，帮助您构建在 10 英尺处观看的电视界面，给用户一种恍若看电影的感觉。</p>
+
+<p><strong>Android TV 输入框架</strong> (TIF) 能够让电视应用处理来自 HDMI 输入、电视调谐器和 IPTV 接收器等等的视频流。它还通过 TV 输入框架发布的元数据支持直播电视搜索和推荐功能，并且内置 HDMI-CEC 控制服务，可以让用户通过单独一个遥控器操控多个设备。 </p>
+
+<p>TV 输入框架能够让您广泛使用大量直播电视输入来源，并将它们汇总在同一个界面中供用户浏览、查看和欣赏内容。如果您为内容构建电视输入服务，用户就能更便利地在电视设备上观看这些内容。</p>
+
+
+
+<img src="{@docRoot}images/versions/recents_screen_2x.png" srcset="{@docRoot}images/versions/recents_screen.png 1x, {@docRoot}images/versions/recents_screen_2x.png 2x" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
+
+<h2 id="Documents">以文档为中心</h2>
+
+<p>Android 5.0 引入了重新设计的“概览”空间（以前称为“最近事项”），在多任务处理上更为强大，用途更加广泛。</p>
+
+<p>新的 API 让应用中的活动化身成为独立的文档，与其他最近活动的屏幕并排显示，</p>
+
+<p>这样您可以充分利用并行文档，让用户即时访问您的更多内容或服务。例如，您可以使用并行文档展现工作提效应用中的文件、游戏中的玩家比赛，或者即时消息应用的聊天。 </p>
+
+
+
+<h2 id="Connectivity">连接性能更上一级</h2>
+
+<p>Android 5.0 新开放的 API 可以让应用与<strong>低功耗蓝牙</strong> (BLE) 的扫描（內围模式）和广告（外围模式）实现并行操作。</p>
+
+<p>新的<strong>多重联网</strong>功能允许应用查询可用网络来查找可用功能，例如它们是 Wi-Fi 网络、蜂窝网络还是不限流量网络，以及它们是否提供了特定的网络功能。然后，应用可以请求联网，并在连接断开或出现其他的网络变动时做出响应。</p>
+
+<p><strong>NFC</strong> API 现在允许应用动态注册 NFC 应用 ID (AID)。它们还可以根据活动状态下的服务设置首选的卡仿真服务并创建 NDEF 记录（采用 UTF-8 文本数据）。</p>
+
+
+
+<h2 id="Graphics">高性能图形</h2>
+
+<p>现已支持 <strong><a href="http://www.khronos.org/opengles/3_X/">Khronos OpenGL ES 3.1</a></strong>，因此您可以在受支持的设备上为游戏和其他应用采用最高性能的 2D 和 3D 图形功能。 </p>
+
+<p>OpenGL ES 3.1 增加了计算着色器、模版纹理、加速的视觉效果、优质 ETC2/EAC 纹理压缩、高级纹理渲染、标准化纹理尺寸以及渲染缓冲区格式等功能。</p>
+
+
+<div class="figure" style="width:350px; margin:0 0 0 60px">
+<img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" height="525" />
+<p class="img-caption">Gameloft 开发的《骑士对决》采用了 AEP 中的 ASTC（自适应可伸缩纹理压缩）和 ES 3.1 中的计算着色器，不仅打造出 HDR（高动态范围）泛光效果，而且图形细节更加清楚。</p>
+</div>
+
+<p>Android 5.0 还引入了 <strong>Android 扩展程序包</strong> (AEP)，这是一组 OpenGL ES 扩展程序，可让您使用镶嵌图案着色器、几何图形着色器、ASTC 纹理压缩、按样本插入和着色以及其他高级渲染功能。有了 AEP，您就可以通过一系列 GPU 运用高性能图形。</p>
+
+
+<h2 id="Audio">音频处理功能更强</h2>
+
+<p>采用全新的音频捕捉设计，提供<strong>低延迟音频输入</strong>功能。在此设计中，快速音频捕捉线程只要不是读取则永远不会阻塞，高速客户端采用本地取样频率、通道数和位深度；普通客户端具备重新采样、上/下行通道混合以及上/下位深度的特点。</p>
+
+<p>借助多通道<strong>音频流混合</strong>，专业音频应用可以混音多达八个通道，包括 5.1 和 7.1 通道在内。</p>
+
+<p>应用现在可以公开自己的媒体内容，并<strong>浏览其他应用的媒体</strong>，然后请求播放。内容通过具有查询功能的界面公开，不需要驻留在设备上。</p>
+
+<p>应用可以通过与特定区域设置、质量和延迟评级关联的语音配置文件精准控制<strong>从文本到语音的合成</strong>。新的 API 还增强了对合成错误检查、网络合成、语言搜索和网络回退的支持。</p>
+
+<p>Android 现在支持标准 <strong>USB 音频</strong>外设，因此用户可以连接 USB 耳机、扬声器、麦克风和其他高性能数字外设。Android 5.0 更是支持 <strong>Opus</strong> 音频编解码器。</p>
+
+<p>在媒体播放控制领域内新开放的 <strong>{@link android.media.session.MediaSession}</strong> API，能够在不同屏幕和不同控制器之间保持一致的媒体控制。</p>
+
+
+<h2 id="Camera">摄像头和视频处理进一步完善</h2>
+
+<p>Android 5.0 引入了<strong>全新的摄像头 API</strong>，支持您以 YUV 和 Bayer RAW 等原始格式拍照，并针对每个独立帧控制曝光时间、ISO 感光度和帧持续时间。新的完全同步的摄像头管道允许您在受支持的设备上以每秒 30 帧的速率捕获未压缩的全分辨率 YUV 图片。</p>
+
+<p>除了图片之外，您还可以通过摄像头捕获元数据，例如噪声模型和光学信息。</p>
+
+<p>视频如果是通过网络发送视频流，则现在可以利用 H.265 <strong>高效视频编码 (HEVC)</strong> 实现视频数据的最佳编码和解码。 </p>
+
+<p>Android 5.0 还新支持<strong>多媒体隧道</strong>，以便针对超高清 (4K) 内容提供最佳体验，并且能够将压缩的音频和视频数据一起播放。 </p>
+
+
+
+<div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
+<img style="float:right; margin:0 1em 1em 2em"    src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"    srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"    alt="" width="300"  />
+<p class="img-caption">用户可以通过一致的方式查看其个人应用和工作应用，这些应用带有标记，可以轻松识别。</p>
+</div>
+
+
+<h2 id="Work">工作场所中的 Android</h2>
+
+<p>为了在企业环境中实现自带设备办公，开发者可以借助全新的<a href="{@docRoot}about/versions/android-5.0.html#Enterprise">托管配置流程</a>在设备上创建安全的工作配置文件。在启动器中，应用如果带有工作标记，则表示该应用及其数据是由 IT 管理员在工作配置文件内管理的。</p>
+
+<p>针对个人配置文件和工作配置文件的通知都显示在一个统一视图中。每个配置文件的数据始终彼此分开，即使当两个配置文件使用同一应用时也是如此。</p>
+
+<p>对于公司自有的设备，IT 管理员可以通过<a href="{@docRoot}about/versions/android-5.0.html#DeviceOwner">设备所有者</a>着手处理新设备并予以配置。雇主可以针对已安装并可配置全局设备设置的设备所有者应用发放这些设备。</p>
+
+
+
+<h2 id="ScreenCapture">屏幕截图和共享</h2>
+
+<p>Android 5.0 允许您在应用中使用屏幕捕获和屏幕共享功能。 </p>
+
+<p>只要拥有用户权限，您就可以从显示屏捕获非安全视频，并可以选择通过网络发送。</p>
+
+
+<h2 id="Sensors">新型传感器</h2>
+
+<p>在 Android 5.0 中，新的<strong>倾斜检测</strong>传感器能够帮助改善受支持设备上对活动的识别情况，<strong>心率传感器</strong>则可报告触摸设备的人员的心率。 </p>
+
+<p>新的<strong>互动复合传感器</strong>现在可用来检测特殊互动，例如“唤醒”<em></em>手势、<em></em>“拾取”手势和<em></em>“扫视”手势。</p>
+
+
+
+<h2 id="WebView">Chromium WebView</h2>
+
+<div style="float:right;margin:1em 2em 1em 2em;">
+  <img src="/images/kk-chromium-icon.png" alt="" height="160" style="margin-bottom:0em;">
+</div>
+
+<p>Android 5.0 的初始版本包括一个适用于 {@link android.webkit.WebView} 的 Chromium 版本，该版本基于 Chromium M37 版本，增加了对 <strong>WebRTC</strong>、<strong>WebAudio</strong> 和 <strong>WebGL</strong> 的支持。 </p>
+
+<p>Chromium M37 还包括对所有 <strong>Web 组件</strong>规范的原生支持：定制元素、Shadow DOM、HTML 导入以及模板。也就是说，您可以在 WebView 中使用 <a href="http://polymer-project.org/">Polymer</a> 及其<a href="https://www.polymer-project.org/docs/elements/material.html">Material design 设计元素</a>，无需 polyfills。</p>
+
+<p>虽然自 Android 4.4 以来 WebView 已基于 Chromium ，但现在可以从 Google Play 更新 Chromium 层。</p>
+
+<p>当有新的 Chromium 版本可用时，用户可以从 Google Play 进行更新以确保获得针对 WebView 的最新增强功能和错误修复，以便为在 Android 5.0 和更高版本上使用 WebView 的应用提供最新的 Web API 和错误修复。</p>
+
+
+
+<h2 id="Accessibility">辅助功能和输入</h2>
+
+<p>新的辅助功能 API 可以检索屏幕（普通用户可见并可与之互动）上窗口的属性的详细信息，并且可以为界面元素定义标准或定制的输入操作。</p>
+
+<p>新的输入法编辑器 (IME) API 支持从输入法更快地直接切换到其他 IME。</p>
+
+
+
+<h2 id="Battery">可构建低电耗应用</h2>
+
+<p>新的<strong>作业调度</strong> API 支持您将系统作业推迟到后期或特定情况（例如，设备在充电或已连接到 Wi-Fi），从而最大延长电池寿命。</p>
+
+<p>新的 <code>dumpsys batterystats</code> 命令会生成<strong>耗电量统计信息</strong>，方便您了解整个系统的用电情况以及应用对设备电池的影响。您可以查看电源事件的历史记录、每个 UID 和系统组件的大致用电量，等等。</p>
+
+<img src="{@docRoot}images/versions/battery_historian.png" srcset="{@docRoot}images/versions/battery_historian@2x.png 2x" alt="" width="760" height="462"  />
+<p class="img-caption">Battery Historian 是一个新工具，可以将 <code>dumpsys batterystats</code> 的统计信息转成直观的信息，方便就电池进行调试。该工具位于 <a href="https://github.com/google/battery-historian">https://github.com/google/battery-historian</a>。</p>

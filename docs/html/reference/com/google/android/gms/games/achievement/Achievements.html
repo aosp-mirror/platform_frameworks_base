@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Achievements</li>
       </ul>
     </div>
@@ -738,6 +807,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -808,7 +880,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievements.LoadAchievementsResult.html">Achievements.LoadAchievementsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when achievement data has been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when achievement data has been loaded.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -820,8 +897,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievements.UpdateAchievementResult.html">Achievements.UpdateAchievementResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when achievement data has been updated (revealed, unlocked
- or incremented).&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when achievement data has been updated (revealed, unlocked
+ or incremented).&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -870,7 +952,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#getAchievementsIntent(com.google.android.gms.common.api.GoogleApiClient)">getAchievementsIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Gets an intent to show the list of achievements for a game.</div>
+        <div class="jd-descrdiv">
+          Gets an intent to show the list of achievements for a game.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -888,7 +975,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#increment(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)">increment</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id, int numSteps)</nobr>
         
-        <div class="jd-descrdiv">Increments an achievement by the given number of steps.</div>
+        <div class="jd-descrdiv">
+          Increments an achievement by the given number of steps.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -906,7 +998,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#incrementImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)">incrementImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id, int numSteps)</nobr>
         
-        <div class="jd-descrdiv">Increments an achievement by the given number of steps.</div>
+        <div class="jd-descrdiv">
+          Increments an achievement by the given number of steps.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -924,7 +1021,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#load(com.google.android.gms.common.api.GoogleApiClient, boolean)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean forceReload)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously load achievement data for the currently signed in player.</div>
+        <div class="jd-descrdiv">
+          Asynchronously load achievement data for the currently signed in player.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -942,7 +1044,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#reveal(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">reveal</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id)</nobr>
         
-        <div class="jd-descrdiv">Reveal a hidden achievement to the currently signed in player.</div>
+        <div class="jd-descrdiv">
+          Reveal a hidden achievement to the currently signed in player.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -960,7 +1067,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#revealImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">revealImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id)</nobr>
         
-        <div class="jd-descrdiv">Reveal a hidden achievement to the currently signed in player.</div>
+        <div class="jd-descrdiv">
+          Reveal a hidden achievement to the currently signed in player.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -978,7 +1090,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#setSteps(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)">setSteps</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id, int numSteps)</nobr>
         
-        <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
+        <div class="jd-descrdiv">
+          Set an achievement to have at least the given number of steps completed.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -996,7 +1113,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#setStepsImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)">setStepsImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id, int numSteps)</nobr>
         
-        <div class="jd-descrdiv">Set an achievement to have at least the given number of steps completed.</div>
+        <div class="jd-descrdiv">
+          Set an achievement to have at least the given number of steps completed.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1014,7 +1136,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#unlock(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">unlock</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id)</nobr>
         
-        <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
+        <div class="jd-descrdiv">
+          Unlock an achievement for the currently signed in player.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1032,7 +1159,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievements.html#unlockImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">unlockImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String id)</nobr>
         
-        <div class="jd-descrdiv">Unlock an achievement for the currently signed in player.</div>
+        <div class="jd-descrdiv">
+          Unlock an achievement for the currently signed in player.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1108,6 +1240,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets an intent to show the list of achievements for a game. Note that this must be invoked
  with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the
  calling package can be established.
@@ -1160,6 +1295,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Increments an achievement by the given number of steps. The achievement must be an
  incremental achievement. Once an achievement reaches at least the maximum number of steps, it
@@ -1218,6 +1356,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Increments an achievement by the given number of steps. The achievement must be an
  incremental achievement. Once an achievement reaches at least the maximum number of steps, it
@@ -1278,6 +1419,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load achievement data for the currently signed in player.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1330,6 +1474,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Reveal a hidden achievement to the currently signed in player. If the achievement has already
  been unlocked, this will have no effect.
@@ -1387,6 +1534,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Reveal a hidden achievement to the currently signed in player. If the achievement is already
  visible, this will have no effect.
@@ -1447,6 +1597,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set an achievement to have at least the given number of steps completed. Calling this method
  while the achievement already has more steps than the provided value is a no-op. Once the
  achievement reaches the maximum number of steps, the achievement will automatically be
@@ -1505,6 +1658,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Set an achievement to have at least the given number of steps completed. Calling this method
  while the achievement already has more steps than the provided value is a no-op. Once the
@@ -1566,6 +1722,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Unlock an achievement for the currently signed in player. If the achievement is hidden this
  will reveal it to the player.
  <p>
@@ -1622,6 +1781,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Unlock an achievement for the currently signed in player. If the achievement is hidden this
  will reveal it to the player.

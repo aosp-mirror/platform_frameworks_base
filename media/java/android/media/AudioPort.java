@@ -67,7 +67,7 @@ public class AudioPort {
 
 
     AudioHandle mHandle;
-    private final int mRole;
+    protected final int mRole;
     private final int[] mSamplingRates;
     private final int[] mChannelMasks;
     private final int[] mFormats;
@@ -176,8 +176,20 @@ public class AudioPort {
 
     @Override
     public String toString() {
-        return "{mHandle:" + mHandle
-                + ", mRole:" + mRole
+        String role = Integer.toString(mRole);
+        switch (mRole) {
+            case ROLE_NONE:
+                role = "NONE";
+                break;
+            case ROLE_SOURCE:
+                role = "SOURCE";
+                break;
+            case ROLE_SINK:
+                role = "SINK";
+                break;
+        }
+        return "{mHandle: " + mHandle
+                + ", mRole: " + role
                 + "}";
     }
 }

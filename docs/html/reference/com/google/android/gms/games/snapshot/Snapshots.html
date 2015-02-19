@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Snapshots</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -713,9 +782,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -725,17 +794,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     interface
 <h1 itemprop="name">Snapshots</h1>
 
 
 
+  
+  
+  
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -747,10 +819,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
     <tr>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.games.snapshot.Snapshots</td>
     </tr>
-
+    
 
 </table>
 
@@ -805,55 +877,75 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
 
 
-
+  
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.CommitSnapshotResult.html">Snapshots.CommitSnapshotResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been committed.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when a snapshot has been committed.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.DeleteSnapshotResult.html">Snapshots.DeleteSnapshotResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been deleted.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when a snapshot has been deleted.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when snapshot data has been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when snapshot data has been loaded.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been opened.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when a snapshot has been opened.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
 
 
 
@@ -871,29 +963,44 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#DISPLAY_LIMIT_NONE">DISPLAY_LIMIT_NONE</a></td>
-        <td class="jd-descrcol" width="100%">Constant passed to <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getSelectSnapshotIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean, boolean, int)">getSelectSnapshotIntent(GoogleApiClient, String, boolean, boolean, int)</a></code> indicating that the UI should not cap the
- number of displayed snapshots.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant passed to <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getSelectSnapshotIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean, boolean, int)">getSelectSnapshotIntent(GoogleApiClient, String, boolean, boolean, int)</a></code> indicating that the UI should not cap the
+ number of displayed snapshots.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#EXTRA_SNAPSHOT_METADATA">EXTRA_SNAPSHOT_METADATA</a></td>
-        <td class="jd-descrcol" width="100%">Intent extra used to pass a <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Intent extra used to pass a <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></code>.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#EXTRA_SNAPSHOT_NEW">EXTRA_SNAPSHOT_NEW</a></td>
-        <td class="jd-descrcol" width="100%">Intent extra used to indicate the user wants to create a new snapshot.</td>
+        <td class="jd-descrcol" width="100%">
+          Intent extra used to indicate the user wants to create a new snapshot.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -917,242 +1024,280 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.CommitSnapshotResult.html">Snapshots.CommitSnapshotResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#commitAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot, com.google.android.gms.games.snapshot.SnapshotMetadataChange)">commitAndClose</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a> snapshot, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a> metadataChange)</nobr>
+        
+        <div class="jd-descrdiv">
+          Commit any modifications made to the snapshot.
+          
+    
 
-        <div class="jd-descrdiv">Commit any modifications made to the snapshot.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.DeleteSnapshotResult.html">Snapshots.DeleteSnapshotResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#delete(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)">delete</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a> metadata)</nobr>
+        
+        <div class="jd-descrdiv">
+          Delete the specified snapshot.
+          
+    
 
-        <div class="jd-descrdiv">Delete the specified snapshot.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#discardAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot)">discardAndClose</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a> snapshot)</nobr>
+        
+        <div class="jd-descrdiv">
+          Discard the contents of the snapshot and close the contents.
+          
+    
 
-        <div class="jd-descrdiv">Discard the contents of the snapshot and close the contents.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getMaxCoverImageSize(com.google.android.gms.common.api.GoogleApiClient)">getMaxCoverImageSize</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the maximum data size per snapshot cover image in bytes.
+          
+    
 
-        <div class="jd-descrdiv">Gets the maximum data size per snapshot cover image in bytes.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getMaxDataSize(com.google.android.gms.common.api.GoogleApiClient)">getMaxDataSize</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the maximum data size per snapshot in bytes.
+          
+    
 
-        <div class="jd-descrdiv">Gets the maximum data size per snapshot in bytes.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getSelectSnapshotIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean, boolean, int)">getSelectSnapshotIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String title, boolean allowAddButton, boolean allowDelete, int maxSnapshots)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user select a snapshot.
+          
+    
 
-        <div class="jd-descrdiv">Returns an intent that will let the user select a snapshot.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getSnapshotFromBundle(android.os.Bundle)">getSnapshotFromBundle</a></span>(Bundle extras)</nobr>
+        
+        <div class="jd-descrdiv">
+          This method takes a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></code> provided.
+          
+    
 
-        <div class="jd-descrdiv">This method takes a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></code> provided.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#load(com.google.android.gms.common.api.GoogleApiClient, boolean)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean forceReload)</nobr>
+        
+        <div class="jd-descrdiv">
+          Asynchronously load the snapshot data for the currently signed-in player.
+          
+    
 
-        <div class="jd-descrdiv">Asynchronously load the snapshot data for the currently signed-in player.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#open(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean)">open</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String fileName, boolean createIfNotFound)</nobr>
+        
+        <div class="jd-descrdiv">
+          Open a snapshot with the given name.
+          
+    
 
-        <div class="jd-descrdiv">Open a snapshot with the given name.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#open(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)">open</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a> metadata)</nobr>
+        
+        <div class="jd-descrdiv">
+          Open a snapshot with the given metadata (usually returned from
+ <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#load(com.google.android.gms.common.api.GoogleApiClient, boolean)">load(GoogleApiClient, boolean)</a></code>.
+          
+    
 
-        <div class="jd-descrdiv">Open a snapshot with the given metadata (usually returned from
- <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#load(com.google.android.gms.common.api.GoogleApiClient, boolean)">load(GoogleApiClient, boolean)</a></code>.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.games.snapshot.SnapshotContents)">resolveConflict</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String conflictId, String snapshotId, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a> metadataChange, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a> snapshotContents)</nobr>
+        
+        <div class="jd-descrdiv">
+          Resolve a conflict using the provided data.
+          
+    
 
-        <div class="jd-descrdiv">Resolve a conflict using the provided data.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.games.snapshot.Snapshot)">resolveConflict</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String conflictId, <a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a> snapshot)</nobr>
+        
+        <div class="jd-descrdiv">
+          Resolve a conflict using the data from the provided snapshot.
+          
+    
 
-        <div class="jd-descrdiv">Resolve a conflict using the data from the provided snapshot.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.drive.Contents)">resolveConflict</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String conflictId, String snapshotId, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a> metadataChange, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
-
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    use
-            <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.games.snapshot.SnapshotContents)">resolveConflict(GoogleApiClient, String, String, SnapshotMetadataChange, SnapshotContents)</a></code>
-</em></div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1193,39 +1338,42 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="DISPLAY_LIMIT_NONE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         DISPLAY_LIMIT_NONE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant passed to <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#getSelectSnapshotIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean, boolean, int)">getSelectSnapshotIntent(GoogleApiClient, String, boolean, boolean, int)</a></code> indicating that the UI should not cap the
  number of displayed snapshots.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 -1
                 (0xffffffff)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1233,24 +1381,27 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="EXTRA_SNAPSHOT_METADATA"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         EXTRA_SNAPSHOT_METADATA
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Intent extra used to pass a <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -1258,16 +1409,16 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </ul>
   </div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "com.google.android.gms.games.SNAPSHOT_METADATA"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1275,24 +1426,27 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="EXTRA_SNAPSHOT_NEW"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         EXTRA_SNAPSHOT_NEW
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Intent extra used to indicate the user wants to create a new snapshot.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -1300,16 +1454,16 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </ul>
   </div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "com.google.android.gms.games.SNAPSHOT_NEW"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1337,14 +1491,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="commitAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot, com.google.android.gms.games.snapshot.SnapshotMetadataChange)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.CommitSnapshotResult.html">Snapshots.CommitSnapshotResult</a>&gt;
       </span>
       <span class="sympad">commitAndClose</span>
@@ -1352,12 +1506,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Commit any modifications made to the snapshot. This will cause the changes to be synced to
  the server in the background.
  <p>
@@ -1399,14 +1556,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="delete(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.DeleteSnapshotResult.html">Snapshots.DeleteSnapshotResult</a>&gt;
       </span>
       <span class="sympad">delete</span>
@@ -1414,12 +1571,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Delete the specified snapshot. This will delete the data of the snapshot locally and on the
  server.
  <p>
@@ -1450,14 +1610,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="discardAndClose(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.Snapshot)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">discardAndClose</span>
@@ -1465,12 +1625,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Discard the contents of the snapshot and close the contents. This will discard all changes
  made to the file, and close the snapshot to future changes until it is re-opened. The file
  will not be modified on the server.
@@ -1501,14 +1664,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getMaxCoverImageSize(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         int
       </span>
       <span class="sympad">getMaxCoverImageSize</span>
@@ -1516,12 +1679,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum data size per snapshot cover image in bytes. Guaranteed to be at least 800
  KB. May increase in the future.
  <p>
@@ -1550,14 +1716,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getMaxDataSize(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         int
       </span>
       <span class="sympad">getMaxDataSize</span>
@@ -1565,12 +1731,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum data size per snapshot in bytes. Guaranteed to be at least 3 MB. May
  increase in the future.
  <p>
@@ -1599,14 +1768,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getSelectSnapshotIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean, boolean, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         Intent
       </span>
       <span class="sympad">getSelectSnapshotIntent</span>
@@ -1614,12 +1783,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user select a snapshot. Note that this must be invoked
  using <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that the identity of the
  calling package can be established.
@@ -1676,14 +1848,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getSnapshotFromBundle(android.os.Bundle)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a>
       </span>
       <span class="sympad">getSnapshotFromBundle</span>
@@ -1691,12 +1863,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>This method takes a <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> object and extracts the <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></code> provided. If the
  <code><a href="/reference/android/os/Bundle.html">Bundle</a></code> is invalid or does not contain the correct data, this method returns null.</p></div>
   <div class="jd-tagdata">
@@ -1720,14 +1895,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="load(com.google.android.gms.common.api.GoogleApiClient, boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a>&gt;
       </span>
       <span class="sympad">load</span>
@@ -1735,12 +1910,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the snapshot data for the currently signed-in player.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1773,14 +1951,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="open(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;
       </span>
       <span class="sympad">open</span>
@@ -1788,12 +1966,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Open a snapshot with the given name. If <code>createIfNotFound</code> is set to true, the
  specified snapshot will be created if it does not already exist.
  <p>
@@ -1829,14 +2010,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="open(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.snapshot.SnapshotMetadata)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;
       </span>
       <span class="sympad">open</span>
@@ -1844,12 +2025,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Open a snapshot with the given metadata (usually returned from
  <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#load(com.google.android.gms.common.api.GoogleApiClient, boolean)">load(GoogleApiClient, boolean)</a></code>. To succeed, the snapshot must exist; i.e. this call
  will fail if the snapshot was deleted between the load and open calls.
@@ -1881,14 +2065,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.games.snapshot.SnapshotContents)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;
       </span>
       <span class="sympad">resolveConflict</span>
@@ -1896,12 +2080,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Resolve a conflict using the provided data. This will replace the data on the server with the
  specified metadata changes and contents. Note that it is possible for this operation to
  result in a conflict itself, in which case resolution should be repeated.
@@ -1955,14 +2142,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.games.snapshot.Snapshot)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;
       </span>
       <span class="sympad">resolveConflict</span>
@@ -1970,12 +2157,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Resolve a conflict using the data from the provided snapshot. This will replace the data on
  the server with the specified snapshot. Note that it is possible for this operation to result
  in a conflict itself, in which case resolution should be repeated.
@@ -2016,41 +2206,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
-<A NAME="resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.drive.Contents)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a>&gt;
-      </span>
-      <span class="sympad">resolveConflict</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String conflictId, String snapshotId, <a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a> metadataChange, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    use
-            <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String, com.google.android.gms.games.snapshot.SnapshotMetadataChange, com.google.android.gms.games.snapshot.SnapshotContents)">resolveConflict(GoogleApiClient, String, String, SnapshotMetadataChange, SnapshotContents)</a></code>
-
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
 
 
 
@@ -2062,17 +2217,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -2080,7 +2235,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -2093,7 +2248,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

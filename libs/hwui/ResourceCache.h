@@ -22,6 +22,7 @@
 #include <SkBitmap.h>
 
 #include <utils/KeyedVector.h>
+#include <utils/Singleton.h>
 
 #include <androidfw/ResourceTypes.h>
 
@@ -36,14 +37,12 @@ namespace uirenderer {
 enum ResourceType {
     kBitmap,
     kNinePatch,
-    kPath,
-    kLayer
+    kPath
 };
 
 class ResourceReference {
 public:
 
-    ResourceReference() { refCount = 0; recycled = false; destroyed = false;}
     ResourceReference(ResourceType type) {
         refCount = 0; recycled = false; destroyed = false; resourceType = type;
     }
@@ -54,10 +53,13 @@ public:
     ResourceType resourceType;
 };
 
-class ANDROID_API ResourceCache {
-public:
+class ANDROID_API ResourceCache: public Singleton<ResourceCache> {
     ResourceCache();
     ~ResourceCache();
+
+    friend class Singleton<ResourceCache>;
+
+public:
 
     /**
      * When using these two methods, make sure to only invoke the *Locked()
@@ -69,22 +71,18 @@ public:
     void incrementRefcount(const SkPath* resource);
     void incrementRefcount(const SkBitmap* resource);
     void incrementRefcount(const Res_png_9patch* resource);
-    void incrementRefcount(Layer* resource);
 
     void incrementRefcountLocked(const SkPath* resource);
     void incrementRefcountLocked(const SkBitmap* resource);
     void incrementRefcountLocked(const Res_png_9patch* resource);
-    void incrementRefcountLocked(Layer* resource);
 
     void decrementRefcount(const SkBitmap* resource);
     void decrementRefcount(const SkPath* resource);
     void decrementRefcount(const Res_png_9patch* resource);
-    void decrementRefcount(Layer* resource);
 
     void decrementRefcountLocked(const SkBitmap* resource);
     void decrementRefcountLocked(const SkPath* resource);
     void decrementRefcountLocked(const Res_png_9patch* resource);
-    void decrementRefcountLocked(Layer* resource);
 
     void destructor(SkPath* resource);
     void destructor(const SkBitmap* resource);

@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:paddingStart="@dimen/alert_dialog_padding_material"
-        android:paddingEnd="@dimen/alert_dialog_padding_material"
+        android:paddingStart="?attr/dialogPreferredPadding"
+        android:paddingEnd="?attr/dialogPreferredPadding"
         android:paddingTop="24dp"
         android:paddingBottom="24dp" />

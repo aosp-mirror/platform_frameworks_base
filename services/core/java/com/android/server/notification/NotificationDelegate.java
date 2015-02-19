@@ -20,13 +20,15 @@ public interface NotificationDelegate {
     void onSetDisabled(int status);
     void onClearAll(int callingUid, int callingPid, int userId);
     void onNotificationClick(int callingUid, int callingPid, String key);
+    void onNotificationActionClick(int callingUid, int callingPid, String key, int actionIndex);
     void onNotificationClear(int callingUid, int callingPid,
             String pkg, String tag, int id, int userId);
     void onNotificationError(int callingUid, int callingPid,
             String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
-    void onPanelRevealed();
+    void onPanelRevealed(boolean clearEffects);
     void onPanelHidden();
+    void clearEffects();
     void onNotificationVisibilityChanged(
             String[] newlyVisibleKeys, String[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);

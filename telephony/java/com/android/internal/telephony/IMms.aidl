@@ -39,7 +39,7 @@ interface IMms {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
-    void sendMessage(long subId, String callingPkg, in Uri contentUri,
+    void sendMessage(int subId, String callingPkg, in Uri contentUri,
             String locationUrl, in Bundle configOverrides, in PendingIntent sentIntent);
 
     /**
@@ -56,50 +56,16 @@ interface IMms {
      * @param downloadedIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is downloaded, or the download is failed
      */
-    void downloadMessage(long subId, String callingPkg, String locationUrl,
+    void downloadMessage(int subId, String callingPkg, String locationUrl,
             in Uri contentUri, in Bundle configOverrides,
             in PendingIntent downloadedIntent);
-
-    /**
-     * Update the status of a pending (send-by-IP) MMS message handled by the carrier app.
-     * If the carrier app fails to send this message, it may be resent via carrier network
-     * depending on the status code.
-     *
-     * The caller should have carrier privileges.
-     * @see android.telephony.TelephonyManager.hasCarrierPrivileges
-     *
-     * @param messageRef the reference number of the MMS message.
-     * @param pdu non-empty (contains the SendConf PDU) if the message was sent successfully,
-     *   otherwise, this param should be null.
-     * @param status send status. It can be Activity.RESULT_OK or one of the MMS error codes.
-     *   If status is Activity.RESULT_OK, the MMS was sent successfully.
-     *   If status is MMS_ERROR_RETRY, this message would be resent via carrier
-     *   network. The message will not be resent for other MMS error statuses.
-     */
-    void updateMmsSendStatus(int messageRef, in byte[] pdu, in int status);
-
-    /**
-     * Update the status of a pending (download-by-IP) MMS message handled by the carrier app.
-     * If the carrier app fails to download this message, it may be re-downloaded via carrier
-     * network depending on the status code.
-     *
-     * The caller should have carrier privileges.
-     * @see android.telephony.TelephonyManager.hasCarrierPrivileges
-     *
-     * @param messageRef the reference number of the MMS message.
-     * @param status download status.  It can be Activity.RESULT_OK or one of the MMS error codes.
-     *   If status is Activity.RESULT_OK, the MMS was downloaded successfully.
-     *   If status is MMS_ERROR_RETRY, this message would be re-downloaded via carrier
-     *   network. The message will not be re-downloaded for other MMS error statuses.
-     */
-    void updateMmsDownloadStatus(int messageRef, in int status);
 
     /**
      * Get carrier-dependent configuration values.
      *
      * @param subId the SIM id
      */
-    Bundle getCarrierConfigValues(long subId);
+    Bundle getCarrierConfigValues(int subId);
 
     /**
      * Import a text message into system's SMS store
@@ -204,7 +170,7 @@ interface IMms {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
      *  broadcast when the message is successfully sent, or failed
      */
-    void sendStoredMessage(long subId, String callingPkg, in Uri messageUri,
+    void sendStoredMessage(int subId, String callingPkg, in Uri messageUri,
             in Bundle configOverrides, in PendingIntent sentIntent);
 
     /**

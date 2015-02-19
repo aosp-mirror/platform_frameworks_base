@@ -12,15 +12,15 @@ page.title=Accessing the Wearable Data Layer
 
 <h2>Dependencies and Prerequisites</h2>
 <ol>
-  <li><a href="{@docRoot}training/wearables/apps/environment.html">Creating
-  Wearable Apps > Setting up Your Environment</a></li>
-  <li><a href="{@docRoot}training/wearables/apps/creating.html">Creating
+  <li><a href="{@docRoot}training/wearables/apps/creating.html#SetupEmulator">Creating
+  Wearable Apps > Set Up an Android Wear Emulator or Device</a></li>
+  <li><a href="{@docRoot}training/wearables/apps/creating.html#CreateProject">Creating
     Wearable Apps > Creating a Project</a></li>
 </ol>
 </div>
 </div>
 
-<p>To call the data layer API, create an instance of
+<p>To call the Data Layer API, create an instance of
 <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>,
 the main entry point for any of the Google Play services APIs.
 </p>
@@ -37,12 +37,12 @@ for more information about creating a <a href="{@docRoot}reference/com/google/an
 implementing its callbacks, and handling error cases.</p>
 
 <pre style="clear:right">
-GoogleApiClient mGoogleAppiClient = new GoogleApiClient.Builder(this)
+GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
         .addConnectionCallbacks(new ConnectionCallbacks() {
                 &#64;Override
                 public void onConnected(Bundle connectionHint) {
                     Log.d(TAG, "onConnected: " + connectionHint);
-                    // Now you can use the data layer API
+                    // Now you can use the Data Layer API
                 }
                 &#64;Override
                 public void onConnectionSuspended(int cause) {
@@ -55,13 +55,26 @@ GoogleApiClient mGoogleAppiClient = new GoogleApiClient.Builder(this)
                     Log.d(TAG, "onConnectionFailed: " + result);
                 }
             })
+        // Request access only to the Wearable API
         .addApi(Wearable.API)
         .build();
 </pre>
 
+<p class="caution">
+<strong>Important:</strong> To avoid client connection errors on devices that do not have the
+<a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear app</a> installed, use a separate <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance to access only the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
+Wearable}</a> API. For more information, see <a
+href="{@docRoot}google/auth/api-client.html#WearableApi">Access the Wearable API</a>.</p>
+
 <p>Before you use the data layer API, start a connection on your client by calling the
-<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a>
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">
+<code>connect()</code></a>
 method, as described in
-<a href="{@docRoot}google/auth/api-client.html#Starting">Accessing Google Play services APIs</a>.
-When the system invokes the <code>onConnected()</code> callback for your client, you're ready
-to use the data layer API.</p>
+<a href="{@docRoot}google/auth/api-client.html#Starting">Start a Connection</a>.
+When the system invokes the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">
+<code>onConnected()</code></a> callback for your client, you're ready to use the Data Layer API.</p>

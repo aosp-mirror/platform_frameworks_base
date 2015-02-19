@@ -195,6 +195,10 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_USER_IGNORE = 503;
     // User declines an incoming call
     public static final int CODE_USER_DECLINE = 504;
+    // Device declines/ends a call due to low battery
+    public static final int CODE_LOW_BATTERY = 505;
+    // Device declines call due to blacklisted call ID
+    public static final int CODE_BLACKLISTED_CALL_ID = 506;
     // IMS -> Telephony
     // The call is terminated by the network or remote user
     public static final int CODE_USER_TERMINATED_BY_REMOTE = 510;
@@ -223,6 +227,13 @@ public class ImsReasonInfo implements Parcelable {
      * ECBM
      */
     public static final int CODE_ECBM_NOT_SUPPORTED = 901;
+
+    /**
+     * Network string error messages.
+     * mExtraMessage may have these values.
+     */
+    public static final String EXTRA_MSG_SERVICE_NOT_AUTHORIZED
+            = "Forbidden. Not Authorized for Service";
 
     // For reason type
     public int mReasonType;

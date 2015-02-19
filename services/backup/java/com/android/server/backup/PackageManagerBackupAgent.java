@@ -220,7 +220,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
             // OR 3. it looks like we use the same home app + version as before, but
             //       the signatures don't match so we treat them as different apps.
             final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
-                    || Objects.equals(home, mStoredHomeComponent)
+                    || !Objects.equals(home, mStoredHomeComponent)
                     || (home != null
                         && !BackupManagerService.signaturesMatch(mStoredHomeSigHashes, homeInfo));
             if (needHomeBackup) {
@@ -534,6 +534,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                             + ", redoing from start");
                     return;
                 }
+                pkg = in.readUTF();
             } else {
                 // This is an older version of the state file in which the lead element
                 // is not a STATE_FILE_VERSION string.  If that's the case, we want to

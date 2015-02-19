@@ -493,16 +493,16 @@ public final class LinkProperties implements Parcelable {
     /**
      * Removes a stacked link.
      *
-     * If there a stacked link with the same interfacename as link, it is
+     * If there is a stacked link with the given interface name, it is
      * removed. Otherwise, nothing changes.
      *
-     * @param link The link to remove.
+     * @param iface The interface name of the link to remove.
      * @return true if the link was removed, false otherwise.
      * @hide
      */
-    public boolean removeStackedLink(LinkProperties link) {
-        if (link != null && link.getInterfaceName() != null) {
-            LinkProperties removed = mStackedLinks.remove(link.getInterfaceName());
+    public boolean removeStackedLink(String iface) {
+        if (iface != null) {
+            LinkProperties removed = mStackedLinks.remove(iface);
             return removed != null;
         }
         return false;
@@ -675,17 +675,38 @@ public final class LinkProperties implements Parcelable {
     }
 
     /**
-     * Returns true if this link is provisioned for global connectivity. For IPv6, this requires an
-     * IP address, default route, and DNS server. For IPv4, this requires only an IPv4 address,
-     * because WifiStateMachine accepts static configurations that only specify an address but not
-     * DNS servers or a default route.
+     * Returns true if this link is provisioned for global IPv4 connectivity.
+     * This requires an IP address, default route, and DNS server.
+     *
+     * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     */
+    private boolean hasIPv4() {
+        return (hasIPv4Address() &&
+                hasIPv4DefaultRoute() &&
+                hasIPv4DnsServer());
+    }
+
+    /**
+     * Returns true if this link is provisioned for global IPv6 connectivity.
+     * This requires an IP address, default route, and DNS server.
+     *
+     * @return {@code true} if the link is provisioned, {@code false} otherwise.
+     */
+    private boolean hasIPv6() {
+        return (hasGlobalIPv6Address() &&
+                hasIPv6DefaultRoute() &&
+                hasIPv6DnsServer());
+    }
+
+    /**
+     * Returns true if this link is provisioned for global connectivity,
+     * for at least one Internet Protocol family.
      *
      * @return {@code true} if the link is provisioned, {@code false} otherwise.
      * @hide
      */
     public boolean isProvisioned() {
-        return (hasIPv4Address() ||
-                (hasGlobalIPv6Address() && hasIPv6DefaultRoute() && hasIPv6DnsServer()));
+        return (hasIPv4() || hasIPv6());
     }
 
     /**

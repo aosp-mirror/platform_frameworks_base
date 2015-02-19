@@ -51,6 +51,7 @@ public final class BluetoothLeScanner {
 
     private static final String TAG = "BluetoothLeScanner";
     private static final boolean DBG = true;
+    private static final boolean VDBG = false;
 
     private final IBluetoothManager mBluetoothManager;
     private final Handler mHandler;
@@ -317,7 +318,7 @@ public final class BluetoothLeScanner {
          */
         @Override
         public void onScanResult(final ScanResult scanResult) {
-            if (DBG) Log.d(TAG, "onScanResult() - " + scanResult.toString());
+            if (VDBG) Log.d(TAG, "onScanResult() - " + scanResult.toString());
 
             // Check null in case the scan has been stopped
             synchronized (this) {
@@ -346,7 +347,7 @@ public final class BluetoothLeScanner {
 
         @Override
         public void onFoundOrLost(final boolean onFound, final ScanResult scanResult) {
-            if (DBG) {
+            if (VDBG) {
                 Log.d(TAG, "onFoundOrLost() - onFound = " + onFound +
                         " " + scanResult.toString());
             }

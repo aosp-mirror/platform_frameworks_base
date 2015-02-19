@@ -28,9 +28,9 @@ enabled.
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="@dimen/alert_dialog_padding_material"
-        android:paddingEnd="@dimen/alert_dialog_padding_material"
-        android:paddingTop="@dimen/alert_dialog_padding_material">
+        android:paddingStart="?attr/dialogPreferredPadding"
+        android:paddingEnd="?attr/dialogPreferredPadding"
+        android:paddingTop="?attr/dialogPreferredPadding">
         <ImageView android:id="@+id/left_icon"
             android:layout_width="32dip"
             android:layout_height="32dip"
@@ -47,6 +47,9 @@ enabled.
             android:scaleType="fitCenter"
             android:layout_marginStart="8dip" />
     </LinearLayout>
+
+    <View android:layout_width="match_parent"
+        android:layout_height="0dp" />
 
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"

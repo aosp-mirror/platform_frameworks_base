@@ -35,7 +35,9 @@
          TETHER_DUN_APN.  Value is a comma separated series of strings:
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">3hotspot,3hotspot,,,,,,,,,234,20,0,DUN</string>
+    <string-array translatable="false" name="config_tether_apndata">
+        <item>3hotspot,3hotspot,,,,,,,,,234,20,0,DUN</item>
+    </string-array>
 
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->

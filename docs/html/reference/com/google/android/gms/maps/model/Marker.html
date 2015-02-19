@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Marker</li>
       </ul>
     </div>
@@ -772,6 +841,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -951,7 +1023,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getAlpha()">getAlpha</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the alpha of the marker.</div>
+        <div class="jd-descrdiv">
+          Gets the alpha of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -969,7 +1046,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getId()">getId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets this marker's id.</div>
+        <div class="jd-descrdiv">
+          Gets this marker's id.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -987,7 +1069,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getPosition()">getPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the position of the marker.</div>
+        <div class="jd-descrdiv">
+          Returns the position of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1005,7 +1092,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getRotation()">getRotation</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the rotation of the marker.</div>
+        <div class="jd-descrdiv">
+          Gets the rotation of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1023,7 +1115,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getSnippet()">getSnippet</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the snippet of the marker.</div>
+        <div class="jd-descrdiv">
+          Gets the snippet of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1041,7 +1138,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#getTitle()">getTitle</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the title of the marker.</div>
+        <div class="jd-descrdiv">
+          Gets the title of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1075,7 +1177,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#hideInfoWindow()">hideInfoWindow</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Hides the info window if it is shown from this marker.</div>
+        <div class="jd-descrdiv">
+          Hides the info window if it is shown from this marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1093,7 +1200,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#isDraggable()">isDraggable</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the draggability of the marker.</div>
+        <div class="jd-descrdiv">
+          Gets the draggability of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1111,7 +1223,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#isFlat()">isFlat</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the flat setting of the Marker.</div>
+        <div class="jd-descrdiv">
+          Gets the flat setting of the Marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1246,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#isInfoWindowShown()">isInfoWindowShown</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns whether the info window is currently shown above this marker.</div>
+        <div class="jd-descrdiv">
+          Returns whether the info window is currently shown above this marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1163,7 +1285,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#remove()">remove</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Removes this marker from the map.</div>
+        <div class="jd-descrdiv">
+          Removes this marker from the map.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1181,7 +1308,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setAlpha(float)">setAlpha</a></span>(float alpha)</nobr>
         
-        <div class="jd-descrdiv">Sets the alpha (opacity) of the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the alpha (opacity) of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1199,7 +1331,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setAnchor(float, float)">setAnchor</a></span>(float anchorU, float anchorV)</nobr>
         
-        <div class="jd-descrdiv">Sets the anchor point for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the anchor point for the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1217,7 +1354,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setDraggable(boolean)">setDraggable</a></span>(boolean draggable)</nobr>
         
-        <div class="jd-descrdiv">Sets the draggability of the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the draggability of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1235,8 +1377,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setFlat(boolean)">setFlat</a></span>(boolean flat)</nobr>
         
-        <div class="jd-descrdiv">Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
- the camera <code>false</code>.</div>
+        <div class="jd-descrdiv">
+          Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
+ the camera <code>false</code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1254,7 +1401,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setIcon(com.google.android.gms.maps.model.BitmapDescriptor)">setIcon</a></span>(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> icon)</nobr>
         
-        <div class="jd-descrdiv">Sets the icon for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the icon for the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1272,8 +1424,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setInfoWindowAnchor(float, float)">setInfoWindowAnchor</a></span>(float anchorU, float anchorV)</nobr>
         
-        <div class="jd-descrdiv">Specifies the point in the marker image at which to anchor the info window when it is
- displayed.</div>
+        <div class="jd-descrdiv">
+          Specifies the point in the marker image at which to anchor the info window when it is
+ displayed.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1291,7 +1448,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setPosition(com.google.android.gms.maps.model.LatLng)">setPosition</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> latlng)</nobr>
         
-        <div class="jd-descrdiv">Sets the position of the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the position of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1309,7 +1471,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setRotation(float)">setRotation</a></span>(float rotation)</nobr>
         
-        <div class="jd-descrdiv">Sets the rotation of the marker in degrees clockwise about the marker's anchor point.</div>
+        <div class="jd-descrdiv">
+          Sets the rotation of the marker in degrees clockwise about the marker's anchor point.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1327,7 +1494,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setSnippet(java.lang.String)">setSnippet</a></span>(String snippet)</nobr>
         
-        <div class="jd-descrdiv">Sets the snippet of the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the snippet of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1345,7 +1517,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setTitle(java.lang.String)">setTitle</a></span>(String title)</nobr>
         
-        <div class="jd-descrdiv">Sets the title of the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the title of the marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1363,7 +1540,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#setVisible(boolean)">setVisible</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">Sets the visibility of this marker.</div>
+        <div class="jd-descrdiv">
+          Sets the visibility of this marker.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1381,7 +1563,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Marker.html#showInfoWindow()">showInfoWindow</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Shows the info window of this marker on the map, if this marker <code><a href="/reference/com/google/android/gms/maps/model/Marker.html#isVisible()">isVisible()</a></code>.</div>
+        <div class="jd-descrdiv">
+          Shows the info window of this marker on the map, if this marker <code><a href="/reference/com/google/android/gms/maps/model/Marker.html#isVisible()">isVisible()</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1667,6 +1854,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1695,6 +1885,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the alpha of the marker.</p></div>
   <div class="jd-tagdata">
@@ -1730,6 +1923,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets this marker's id. The id will be unique amongst all Markers on a map.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1763,6 +1959,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the position of the marker.</p></div>
   <div class="jd-tagdata">
@@ -1798,6 +1997,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the rotation of the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1831,6 +2033,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the snippet of the marker.</p></div>
   <div class="jd-tagdata">
@@ -1866,6 +2071,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the title of the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1900,6 +2108,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1928,6 +2139,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Hides the info window if it is shown from this marker.
  <p>
@@ -1960,6 +2174,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the draggability of the marker. When a marker is draggable, it can be moved by the user
  by long pressing on the marker.</p></div>
@@ -1996,6 +2213,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the flat setting of the Marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2031,6 +2251,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether the info window is currently shown above this marker. This does not consider
  whether or not the info window is actually visible on screen.
 </p></div>
@@ -2062,6 +2285,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2090,6 +2316,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Removes this marker from the map. After a marker has been removed, the behavior of all its
  methods is undefined.
@@ -2122,6 +2351,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the alpha (opacity) of the marker. This is a value from 0 to 1, where 0 means the marker
  is completely transparent and 1 means the marker is completely opaque.
 </p></div>
@@ -2152,6 +2384,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the anchor point for the marker.
  <p>
@@ -2225,6 +2460,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the draggability of the marker. When a marker is draggable, it can be moved by the user
  by long pressing on the marker.
 </p></div>
@@ -2256,6 +2494,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
  the camera <code>false</code>.
 </p></div>
@@ -2286,6 +2527,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the icon for the marker.</p></div>
   <div class="jd-tagdata">
@@ -2325,6 +2569,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the point in the marker image at which to anchor the info window when it is
  displayed. This is specified in the same coordinate system as the anchor. See
@@ -2374,6 +2621,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the position of the marker.
 </p></div>
 
@@ -2403,6 +2653,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the rotation of the marker in degrees clockwise about the marker's anchor point. The
  axis of rotation is perpendicular to the marker. A rotation of 0 corresponds to the default
@@ -2436,6 +2689,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the snippet of the marker.
 </p></div>
 
@@ -2465,6 +2721,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the title of the marker.
 </p></div>
@@ -2496,6 +2755,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility of this marker. If set to <code>false</code> and an info window is currently
  showing for this marker, this will hide the info window.
 </p></div>
@@ -2526,6 +2788,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Shows the info window of this marker on the map, if this marker <code><a href="/reference/com/google/android/gms/maps/model/Marker.html#isVisible()">isVisible()</a></code>.</p></div>
   <div class="jd-tagdata">

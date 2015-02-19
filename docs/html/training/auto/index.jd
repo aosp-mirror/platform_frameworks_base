@@ -1,0 +1,9 @@
+page.title=Building Apps for Auto
+page.trainingcourse=true
+page.metaDescription=Starting point for building apps for Auto, with guidelines, information, and examples.
+page.image=design/tv/images/focus.png
+@jd:body
+
+
+
+<p>These classes teach you how to build and extend apps to work with Auto devices.</p>

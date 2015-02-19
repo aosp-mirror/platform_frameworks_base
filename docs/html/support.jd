@@ -3,6 +3,7 @@ page.type=about
 fullpage=1
 page.metaDescription=Resources available to help you report and resolve issues while you are developing apps for Android.
 page.image=/images/android-support-card.png
+
 @jd:body
 
 <div class="wrap" style="width:940px;">
@@ -28,13 +29,20 @@ page.image=/images/android-support-card.png
   <a href="http://webchat.freenode.net/?channels=android">#android</a>, <a href="http://webchat.freenode.net/?channels=android-dev">#android-dev</a> <span style="color:#888">(IRC via irc.freenode.net)</span><br />
 </p>
 
+<p><b>
+<a target="_blank"
+href="https://helpouts.google.com/partner/ask?vertical=programming&tags=android&origin=http:%2F%2Fdeveloper.android.com%2Fsupport.html">Ask a question in Google Helpouts</a>
+</b></p>
+
 
 <h5>Send Feedback</h5>
 <p>
   <a href="http://code.google.com/p/android/issues/entry?template=Developer%20Documentation">Report documentation bug</a><br />
   <a href="https://code.google.com/p/android/issues/entry?template=User%20bug%20report">Report device bug</a><br />
   <a href="https://code.google.com/p/android/issues/entry?template=Developer%20bug%20report">Report platform bug</a><br />
-  
+</p>
+
+
   </div>
 
   

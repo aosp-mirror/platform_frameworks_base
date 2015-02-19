@@ -27,6 +27,7 @@
        <item><xliff:g id="id">sync_failing</xliff:g></item>
        <item><xliff:g id="id">sync_active</xliff:g></item>
        <item><xliff:g id="id">cast</xliff:g></item>
+       <item><xliff:g id="id">hotspot</xliff:g></item>
        <item><xliff:g id="id">location</xliff:g></item>
        <item><xliff:g id="id">bluetooth</xliff:g></item>
        <item><xliff:g id="id">nfc</xliff:g></item>
@@ -292,6 +293,7 @@
             }
 
         See src/com/android/settings/TetherSettings.java for more details.
+        For ui-less/periodic recheck support see config_mobile_hotspot_provision_app_no_ui
         -->
     <!-- The first element is the package name and the second element is the class name
          of the provisioning app -->
@@ -301,6 +303,43 @@
         <item>com.example.provisioning.Activity</item>
     -->
     </string-array>
+
+    <!-- If the mobile hotspot feature requires provisioning, an action can be provided
+         that will be broadcast in non-ui cases for checking the provisioning status.
+
+         A second broadcast, action defined by config_mobile_hotspot_provision_response,
+         will be sent back to notify if provisioning succeeded or not.  The response will
+         match that of the activity in config_mobile_hotspot_provision_app, but instead
+         contained within the int extra "EntitlementResult".
+
+         Example Usage:
+         String provisionAction = getString(R.string.config_mobile_hotspot_provision_check);
+         sendBroadcast(new Intent(provisionAction));
+
+         public void onReceive(Context context, Intent intent) {
+             String provisionResponse =
+                    getString(R.string.config_mobile_hotspot_provision_response);
+             if (provisionResponse.equals(intent.getAction())
+                    && intent.getIntExtra("EntitlementResult") == Activity.RESULT_OK) {
+                 //Mobile hotspot provisioning successful
+             } else {
+                 //Mobile hotspot provisioning failed
+             }
+         }
+        -->
+    <string translatable="false" name="config_mobile_hotspot_provision_app_no_ui"></string>
+    <!-- Sent in response to a provisioning check. The caller must hold the
+         permission android.permission.CONNECTIVITY_INTERNAL for Settings to
+         receive this response.
+
+         See config_mobile_hotspot_provision_response
+         -->
+    <string translatable="false" name="config_mobile_hotspot_provision_response"></string>
+    <!-- Number of hours between each background provisioning call -->
+    <integer translatable="false" name="config_mobile_hotspot_provision_check_period">24</integer>
+
+    <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
+    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.TetherService</string>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
     <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
@@ -322,9 +361,14 @@
 
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata"></string>
+         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
+         Or string format of ApnSettingV3.
+         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN"
+         Multiple entries are separated by using string-array:
+         "<item>[ApnSettingV3]Name,apn,,,,,,,,,123,45,,mms|*,IPV6,IP,true,14,,,,,,,spn,testspn</item>
+          <item>[ApnSettingV3]Name1,apn2,,,,,,,,,123,46,,mms|*,IPV6,IP,true,12,,,,,,,,</item>" -->
+    <string-array translatable="false" name="config_tether_apndata">
+    </string-array>
 
     <!-- Boolean indicating whether the wifi chipset has dual frequency band support -->
     <bool translatable="false" name="config_wifi_dual_band_support">false</bool>
@@ -380,6 +424,10 @@
     <!-- Integer indicating wpa_supplicant scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_supplicant_scan_interval">15000</integer>
 
+    <!-- Integer indicating amount of time failed networks areblacklisted for the purpose
+         of network switching in milliseconds -->
+    <integer translatable="false" name="config_wifi_network_switching_blacklist_time">172800000</integer>
+
     <!-- Integer indicating wpa_supplicant scan interval when p2p is connected in milliseconds -->
     <integer translatable="false" name="config_wifi_scan_interval_p2p_connected">60000</integer>
 
@@ -415,6 +463,12 @@
 
     <!-- Integer indicating minimum blacklisting delay of a wofo configuration due to connectin or auth errors -->
     <integer translatable="false" name="config_wifi_framework_network_black_list_min_time_milli">120000</integer>
+
+    <!-- Integer indicating RSSI boost given to current network -->
+    <integer translatable="false" name="config_wifi_framework_current_network_boost">25</integer>
+
+    <!-- Integer indicating how to handle beacons with uninitialized RSSI value of 0 -->
+    <integer translatable="false" name="config_wifi_framework_scan_result_rssi_level_patchup_value">-85</integer>
 
     <!-- Boolean indicating associated scan are allowed -->
     <bool translatable="false" name="config_wifi_framework_enable_associated_autojoin_scan">true</bool>
@@ -452,6 +506,30 @@
 
     <!-- If this is true, key chords can be used to take a screenshot on the device. -->
     <bool name="config_enableScreenshotChord">true</bool>
+
+    <!-- If this is true, allow wake from theater mode when plugged in or unplugged. -->
+    <bool name="config_allowTheaterModeWakeFromUnplug">false</bool>
+    <!-- If this is true, allow wake from theater mode from gesture. -->
+    <bool name="config_allowTheaterModeWakeFromGesture">false</bool>
+    <!-- If this is true, allow wake from theater mode from camera lens cover is switched. -->
+    <bool name="config_allowTheaterModeWakeFromCameraLens">false</bool>
+    <!-- If this is true, allow wake from theater mode from power key press. -->
+    <bool name="config_allowTheaterModeWakeFromPowerKey">true</bool>
+    <!-- If this is true, allow wake from theater mode from regular key press. Setting this value to
+         true implies config_allowTheaterModeWakeFromPowerKey is also true-->
+    <bool name="config_allowTheaterModeWakeFromKey">false</bool>
+    <!-- If this is true, allow wake from theater mode from motion. -->
+    <bool name="config_allowTheaterModeWakeFromMotion">false</bool>
+    <!-- If this is true, allow wake from theater mode from motion. -->
+    <bool name="config_allowTheaterModeWakeFromMotionWhenNotDreaming">false</bool>
+    <!-- If this is true, allow wake from theater mode from lid switch. -->
+    <bool name="config_allowTheaterModeWakeFromLidSwitch">false</bool>
+    <!-- If this is true, allow wake from theater mode when docked. -->
+    <bool name="config_allowTheaterModeWakeFromDock">false</bool>
+    <!-- If this is true, allow wake from theater mode from window layout flag. -->
+    <bool name="config_allowTheaterModeWakeFromWindowLayout">false</bool>
+    <!-- If this is true, go to sleep when theater mode is enabled from button press -->
+    <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
 
     <!-- Auto-rotation behavior -->
 
@@ -565,6 +643,7 @@
             0 - Nothing
             1 - Global actions menu
             2 - Power off (with confirmation)
+            3 - Power off (without confirmation)
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
@@ -575,6 +654,20 @@
             3 - Really go to sleep and go home (don't doze)
     -->
     <integer name="config_shortPressOnPowerBehavior">1</integer>
+
+    <!-- Control the behavior when the user double presses the power button.
+            0 - Nothing
+            1 - Toggle theater mode setting
+            2 - Brightness boost
+    -->
+    <integer name="config_doublePressOnPowerBehavior">0</integer>
+
+    <!-- Control the behavior when the user triple presses the power button.
+            0 - Nothing
+            1 - Toggle theater mode setting
+            2 - Brightness boost
+    -->
+    <integer name="config_triplePressOnPowerBehavior">0</integer>
 
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
@@ -738,7 +831,7 @@
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
-    <integer name="config_longPressOnHomeBehavior">1</integer>
+    <integer name="config_longPressOnHomeBehavior">0</integer>
 
     <!-- Control the behavior when the user double-taps the home button.
             0 - Nothing
@@ -764,6 +857,37 @@
          May be less than the minimum allowed brightness setting
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
+
+    <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
+    <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
+
+    <!-- Stability requirements in milliseconds for accepting a new brightness level.  This is used
+         for debouncing the light sensor.  Different constants are used to debounce the light sensor
+         when adapting to brighter or darker environments.  This parameter controls how quickly
+         brightness changes occur in response to an observed change in light level that exceeds the
+         hysteresis threshold. -->
+    <integer name="config_autoBrightnessBrighteningLightDebounce">4000</integer>
+    <integer name="config_autoBrightnessDarkeningLightDebounce">8000</integer>
+
+    <!-- Light sensor event rate in milliseconds for automatic brightness control. -->
+    <integer name="config_autoBrightnessLightSensorRate">250</integer>
+
+    <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
+         to reduce it to preserve the battery. Value of 100% means no scaling. -->
+    <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
+
+    <!-- When the screen is turned on, the previous estimate of the ambient light level at the time
+         the screen was turned off is restored and is used to determine the initial screen
+         brightness.
+
+         If this flag is true, then the ambient light level estimate will be promptly recomputed
+         after the warm-up interface and the screen brightness will be adjusted immediately.
+
+         If this flag is false, then the ambient light level estimate will be adjusted more
+         gradually in the same manner that normally happens when the screen is on according to the
+         brightening or dimming debounce thresholds.  As a result, it may take somewhat longer to
+         adapt to the environment.  This mode may be better suited for watches. -->
+    <bool name="config_autoBrightnessResetAmbientLuxAfterWarmUp">true</bool>
 
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
@@ -1022,6 +1146,9 @@
          available on *any* device with a telephony radio, even if the
          device is data-only. -->
     <bool name="config_voice_capable">true</bool>
+
+    <!-- Flag indicating if the user is notified when the mobile network access is restricted -->
+    <bool name="config_user_notification_of_restrictied_mobile_access">true</bool>
 
     <!-- Flag indicating whether the current device allows sms service.
          If true, this means that the device supports both sending and
@@ -1764,13 +1891,27 @@
         be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue() -->
     <bool name="imsServiceAllowTurnOff">true</bool>
 
-    <!-- Flag specifying whether VoLTE & VT is availasble on device -->
-    <bool name="config_device_volte_vt_available">false</bool>
+    <!-- Flag specifying whether VoLTE is available on device -->
+    <bool name="config_device_volte_available">false</bool>
 
-    <!-- Flag specifying whether VoLTE & VT should be available for carrier: independent of
+    <!-- Flag specifying whether VoLTE should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc -->
-    <bool name="config_carrier_volte_vt_available">false</bool>
+    <bool name="config_carrier_volte_available">false</bool>
+
+    <!-- Flag specifying whether VoLTE availability is based on provisioning -->
+    <bool name="config_carrier_volte_provisioned">false</bool>
+
+    <!-- Flag specifying whether VoLTE TTY is supported -->
+    <bool name="config_carrier_volte_tty_supported">true</bool>
+
+    <!-- Flag specifying whether VT is available on device -->
+    <bool name="config_device_vt_available">false</bool>
+
+    <!-- Flag specifying whether VT should be available for carrier: independent of
+         carrier provisioning. If false: hard disabled. If true: then depends on carrier
+         provisioning, availability etc -->
+    <bool name="config_carrier_vt_available">false</bool>
 
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
@@ -1853,4 +1994,62 @@
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
+
+    <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
+          when evaluating RSRP for LTE antenna bar display
+           0. Strict threshold
+           1. Lenient threshold
+    -->
+    <integer name="config_LTE_RSRP_threshold_type">1</integer>
+
+    <!-- Enabled built-in zen mode condition providers -->
+    <string-array translatable="false" name="config_system_condition_providers">
+        <item>countdown</item>
+        <item>downtime</item>
+        <item>next_alarm</item>
+    </string-array>
+
+    <!-- Show the next-alarm as a zen exit condition if it occurs in the next n hours. -->
+    <integer name="config_next_alarm_condition_lookahead_threshold_hrs">12</integer>
+
+    <!-- Show downtime as a zen exit condition if it starts in the next n hours. -->
+    <integer name="config_downtime_condition_lookahead_threshold_hrs">4</integer>
+
+    <!-- Flags enabling default window features. See Window.java -->
+    <bool name="config_defaultWindowFeatureOptionsPanel">true</bool>
+    <bool name="config_defaultWindowFeatureContextMenu">true</bool>
+
+    <!-- This config is used to check if the carrier requires converting destination
+         number before sending out a SMS.
+         Formats for this configuration as below:
+         [true or false][;optional gid]
+         The logic to pick up the configuration:
+         (1) If the "config_sms_convert_destination_number_support" array has no gid
+             special item, the last one will be picked
+         (2) If the "config_sms_convert_destination_number_support" array has gid special
+             item and it matches the current sim's gid, it will be picked.
+         (3) If the "config_sms_convert_destination_number_support" array has gid special
+             item but it doesn't match the current sim's gid, the last one without gid
+             will be picked -->
+    <string-array translatable="false" name="config_sms_convert_destination_number_support">
+        <item>false</item>
+    </string-array>
+
+    <!-- The maximum bitmap size that can be written to a MediaMetadata object. This value
+         is the max width/height allowed in dips.-->
+    <dimen name="config_mediaMetadataBitmapMaxSize">320dp</dimen>
+
+    <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">false</string>
+
+    <!-- An array of CDMA roaming indicators which means international roaming -->
+    <integer-array translatable="false" name="config_cdma_international_roaming_indicators" />
+
+    <!-- set the system language as value of EF LI/EF PL -->
+    <bool name="config_use_sim_language_file">true</bool>
+
+    <!-- Use ERI text for network name on CDMA LTE -->
+    <bool name="config_LTE_eri_for_network_name">true</bool>
+
+    <!-- Whether to start in touch mode -->
+    <bool name="config_defaultInTouchMode">true</bool>
 </resources>

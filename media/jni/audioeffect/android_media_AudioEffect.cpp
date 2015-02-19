@@ -803,28 +803,12 @@ static jobjectArray
 android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz __unused,
                                                      jint audioSession)
 {
-    // kDefaultNumEffects is a "reasonable" value ensuring that only one query will be enough on
-    // most devices to get all active audio pre processing on a given session.
-    static const uint32_t kDefaultNumEffects = 5;
-
-    effect_descriptor_t *descriptors = new effect_descriptor_t[kDefaultNumEffects];
-    uint32_t numEffects = kDefaultNumEffects;
+    effect_descriptor_t *descriptors = new effect_descriptor_t[AudioEffect::kMaxPreProcessing];
+    uint32_t numEffects = AudioEffect::kMaxPreProcessing;
 
     status_t status = AudioEffect::queryDefaultPreProcessing(audioSession,
                                            descriptors,
                                            &numEffects);
-    if ((status != NO_ERROR && status != NO_MEMORY) ||
-            numEffects == 0) {
-        delete[] descriptors;
-        return NULL;
-    }
-    if (status == NO_MEMORY) {
-        delete [] descriptors;
-        descriptors = new effect_descriptor_t[numEffects];
-        status = AudioEffect::queryDefaultPreProcessing(audioSession,
-                                               descriptors,
-                                               &numEffects);
-    }
     if (status != NO_ERROR || numEffects == 0) {
         delete[] descriptors;
         return NULL;

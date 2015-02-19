@@ -17,18 +17,27 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.IccCardConstants.State;
 
 
 /**
@@ -45,6 +54,24 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     private String mPinText;
     private StateMachine mStateMachine = new StateMachine();
     private AlertDialog mRemainingAttemptsDialog;
+    private int mSubId;
+    private ImageView mSimImageView;
+
+    KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onSimStateChanged(int subId, int slotId, State simState) {
+           if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
+           resetState();
+       };
+    };
+
+    public KeyguardSimPukView(Context context) {
+        this(context, null);
+    }
+
+    public KeyguardSimPukView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
     private class StateMachine {
         final int ENTER_PUK = 0;
@@ -89,7 +116,26 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             mPinText="";
             mPukText="";
             state = ENTER_PUK;
-            mSecurityMessageDisplay.setMessage(R.string.kg_puk_enter_puk_hint, true);
+            KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+            mSubId = monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED);
+            if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
+                int count = TelephonyManager.getDefault().getSimCount();
+                Resources rez = getResources();
+                final String msg;
+                int color = Color.WHITE;
+                if (count < 2) {
+                    msg = rez.getString(R.string.kg_puk_enter_puk_hint);
+                } else {
+                    SubscriptionInfo info = monitor.getSubscriptionInfoForSubId(mSubId);
+                    CharSequence displayName = info != null ? info.getDisplayName() : "";
+                    msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
+                    if (info != null) {
+                        color = info.getIconTint();
+                    }
+                }
+                mSecurityMessageDisplay.setMessage(msg, true);
+                mSimImageView.setImageTintList(ColorStateList.valueOf(color));
+            }
             mPasswordEntry.requestFocus();
         }
     }
@@ -109,14 +155,6 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (DEBUG) Log.d(LOG_TAG, "getPukPasswordErrorMessage:"
                 + " attemptsRemaining=" + attemptsRemaining + " displayMessage=" + displayMessage);
         return displayMessage;
-    }
-
-    public KeyguardSimPukView(Context context) {
-        this(context, null);
-    }
-
-    public KeyguardSimPukView(Context context, AttributeSet attrs) {
-        super(context, attrs);
     }
 
     public void resetState() {
@@ -143,6 +181,19 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (mEcaView instanceof EmergencyCarrierArea) {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
+        mSimImageView = (ImageView) findViewById(R.id.keyguard_sim);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
     }
 
     @Override
@@ -165,10 +216,12 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     private abstract class CheckSimPuk extends Thread {
 
         private final String mPin, mPuk;
+        private final int mSubId;
 
-        protected CheckSimPuk(String puk, String pin) {
+        protected CheckSimPuk(String puk, String pin, int subId) {
             mPuk = puk;
             mPin = pin;
+            mSubId = subId;
         }
 
         abstract void onSimLockChangedResponse(final int result, final int attemptsRemaining);
@@ -176,10 +229,12 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         @Override
         public void run() {
             try {
-                Log.v(TAG, "call supplyPukReportResult()");
+                if (DEBUG) Log.v(TAG, "call supplyPukReportResult()");
                 final int[] result = ITelephony.Stub.asInterface(ServiceManager
-                        .checkService("phone")).supplyPukReportResult(mPuk, mPin);
-                Log.v(TAG, "supplyPukReportResult returned: " + result[0] + " " + result[1]);
+                    .checkService("phone")).supplyPukReportResultForSubscriber(mSubId, mPuk, mPin);
+                if (DEBUG) {
+                    Log.v(TAG, "supplyPukReportResult returned: " + result[0] + " " + result[1]);
+                }
                 post(new Runnable() {
                     public void run() {
                         onSimLockChangedResponse(result[0], result[1]);
@@ -254,15 +309,17 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         getSimUnlockProgressDialog().show();
 
         if (mCheckSimPukThread == null) {
-            mCheckSimPukThread = new CheckSimPuk(mPukText, mPinText) {
+            mCheckSimPukThread = new CheckSimPuk(mPukText, mPinText, mSubId) {
                 void onSimLockChangedResponse(final int result, final int attemptsRemaining) {
                     post(new Runnable() {
                         public void run() {
                             if (mSimUnlockProgressDialog != null) {
                                 mSimUnlockProgressDialog.hide();
                             }
+                            resetPasswordText(true /* animate */);
                             if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
-                                KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
+                                KeyguardUpdateMonitor.getInstance(getContext())
+                                        .reportSimUnlocked(mSubId);
                                 mCallback.dismiss(true);
                             } else {
                                 if (result == PhoneConstants.PIN_PASSWORD_INCORRECT) {

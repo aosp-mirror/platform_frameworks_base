@@ -84,8 +84,8 @@ import com.android.internal.R;
  *
  * <p>Custom transition classes may be instantiated with a <code>transition</code> tag:</p>
  * <pre>&lt;transition class="my.app.transition.CustomTransition"/></pre>
- * <p>Custom transition classes loaded from XML must have a public nullary (no argument)
- * constructor.</p>
+ * <p>Custom transition classes loaded from XML should have a public constructor taking
+ * a {@link android.content.Context} and {@link android.util.AttributeSet}.</p>
  *
  * <p>Note that attributes for the transition are not required, just as they are
  * optional when declared in code; Transitions created from XML resources will use
@@ -955,7 +955,7 @@ public abstract class Transition implements Cloneable {
      * Views with different IDs, or no IDs whatsoever, will be ignored.
      *
      * <p>Note that using ids to specify targets implies that ids should be unique
-     * within the view hierarchy underneat the scene root.</p>
+     * within the view hierarchy underneath the scene root.</p>
      *
      * @see View#getId()
      * @param targetId The id of a target view, must be a positive number.
@@ -1790,6 +1790,10 @@ public abstract class Transition implements Cloneable {
 
     private static boolean isValueChanged(TransitionValues oldValues, TransitionValues newValues,
             String key) {
+        if (oldValues.values.containsKey(key) != newValues.values.containsKey(key)) {
+            // The transition didn't care about this particular value, so we don't care, either.
+            return false;
+        }
         Object oldValue = oldValues.values.get(key);
         Object newValue = newValues.values.get(key);
         boolean changed;

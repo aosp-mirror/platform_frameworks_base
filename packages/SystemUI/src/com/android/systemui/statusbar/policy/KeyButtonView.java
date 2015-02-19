@@ -17,38 +17,27 @@
 package com.android.systemui.statusbar.policy;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.CanvasProperty;
-import android.graphics.Paint;
-import android.graphics.RectF;
 import android.hardware.input.InputManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.MathUtils;
 import android.view.HapticFeedbackConstants;
-import android.view.HardwareCanvas;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.RenderNodeAnimator;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ImageView;
-import java.lang.Math;
-import java.util.ArrayList;
 
 import com.android.systemui.R;
 
@@ -120,6 +109,14 @@ public class KeyButtonView extends ImageView {
                 info.addAction(
                         new AccessibilityNodeInfo.AccessibilityAction(ACTION_LONG_CLICK, null));
             }
+        }
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility != View.VISIBLE) {
+            jumpDrawablesToCurrentState();
         }
     }
 

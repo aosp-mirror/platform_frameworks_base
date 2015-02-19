@@ -186,6 +186,7 @@ final class Constants {
 
     static final int INVALID_PORT_ID = HdmiDeviceInfo.PORT_INVALID;
     static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
+    static final int PATH_INTERNAL = HdmiDeviceInfo.PATH_INTERNAL;
 
     // Send result codes. It should be consistent with hdmi_cec.h's send_message error code.
     static final int SEND_RESULT_SUCCESS = 0;
@@ -204,13 +205,6 @@ final class Constants {
     static final int POLL_ITERATION_REVERSE_ORDER = 0x20000;
 
     static final int UNKNOWN_VOLUME = -1;
-
-    // IRT(Initiator Repetition Time) in millisecond as recommended in the standard.
-    // Outgoing UCP commands, when in 'Press and Hold' mode, should be this much apart
-    // from the adjacent one so as not to place unnecessarily heavy load on the CEC line.
-    // TODO: This value might need tweaking per product basis. Consider putting it
-    //       in config.xml to allow customization.
-    static final int IRT_MS = 300;
 
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
@@ -236,12 +230,16 @@ final class Constants {
     static final int OPTION_CEC_ENABLE = 2;
 
     // If set to disabled, system service yields control of CEC to sub-microcontroller.
-    // If enabled, it take the control back.
+    // If enabled, it takes the control back.
     static final int OPTION_CEC_SERVICE_CONTROL = 3;
 
     // Put other devices to standby when TV goes to standby. enabled by default.
     // If set to disabled, TV doesn't send <Standby> to other devices.
     static final int OPTION_CEC_AUTO_DEVICE_OFF = 4;
+
+    // Passes the language used in the system when updated. The value to use is the 3 byte
+    // code as defined in ISO/FDIS 639-2.
+    static final int OPTION_CEC_SET_LANGUAGE = 5;
 
     // If set to disabled, TV does not switch ports when mobile device is connected.
     static final int OPTION_MHL_INPUT_SWITCHING = 101;
@@ -251,6 +249,10 @@ final class Constants {
 
     // If set to disabled, all MHL commands are discarded.
     static final int OPTION_MHL_ENABLE = 103;
+
+    // If set to disabled, system service yields control of MHL to sub-microcontroller.
+    // If enabled, it takes the control back.
+    static final int OPTION_MHL_SERVICE_CONTROL = 104;
 
     static final int DISABLED = 0;
     static final int ENABLED = 1;

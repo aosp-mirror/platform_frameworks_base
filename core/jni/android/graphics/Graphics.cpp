@@ -365,6 +365,9 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkASSERT(canvas);
     SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
     jlong canvasHandle = env->GetLongField(canvas, gCanvas_nativeInstanceID);
+    if (!canvasHandle) {
+        return NULL;
+    }
     SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
     SkASSERT(c);
     return c;
@@ -489,19 +492,15 @@ AndroidPixelRef::AndroidPixelRef(JNIEnv* env, const SkImageInfo& info, void* sto
         SkMallocPixelRef(info, storage, rowBytes, ctable, (storageObj == NULL)),
         fWrappedPixelRef(NULL) {
     SkASSERT(storage);
+    SkASSERT(storageObj);
     SkASSERT(env);
 
     if (env->GetJavaVM(&fVM) != JNI_OK) {
         SkDebugf("------ [%p] env->GetJavaVM failed\n", env);
         sk_throw();
     }
-    fStorageObj = storageObj;
-    fHasGlobalRef = false;
-    fGlobalRefCnt = 0;
 
-    // If storageObj is NULL, the memory was NOT allocated on the Java heap
-    fOnJavaHeap = (storageObj != NULL);
-
+    fStorageObj = (jbyteArray) env->NewGlobalRef(storageObj);
 }
 
 AndroidPixelRef::AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, const SkImageInfo& info,
@@ -513,91 +512,18 @@ AndroidPixelRef::AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, const SkImage
     SkASSERT(fWrappedPixelRef);
     SkSafeRef(fWrappedPixelRef);
 
-    // don't need to initialize these, as all the relevant logic delegates to the wrapped ref
+    // don't need to initialize this, as all the relevant logic delegates to the wrapped ref
     fStorageObj = NULL;
-    fHasGlobalRef = false;
-    fGlobalRefCnt = 0;
-    fOnJavaHeap = false;
 }
 
 AndroidPixelRef::~AndroidPixelRef() {
     if (fWrappedPixelRef) {
         SkSafeUnref(fWrappedPixelRef);
-    } else if (fOnJavaHeap) {
+    } else {
+        SkASSERT(fStorageObj);
         JNIEnv* env = vm2env(fVM);
-
-        if (fStorageObj && fHasGlobalRef) {
-            env->DeleteGlobalRef(fStorageObj);
-        }
-        fStorageObj = NULL;
-    }
-}
-jbyteArray AndroidPixelRef::getStorageObj() {
-    if (fWrappedPixelRef) {
-        return fWrappedPixelRef->fStorageObj;
-    }
-    return fStorageObj;
-}
-
-void AndroidPixelRef::setLocalJNIRef(jbyteArray arr) {
-    if (fWrappedPixelRef) {
-        // delegate java obj management to the wrapped ref
-        fWrappedPixelRef->setLocalJNIRef(arr);
-    } else if (!fHasGlobalRef) {
-        fStorageObj = arr;
-    }
-}
-
-void AndroidPixelRef::globalRef(void* localref) {
-    if (fWrappedPixelRef) {
-        // delegate java obj management to the wrapped ref
-        fWrappedPixelRef->globalRef(localref);
-
-        // Note: we only ref and unref the wrapped AndroidPixelRef so that
-        // bitmap->pixelRef()->globalRef() and globalUnref() can be used in a pair, even if
-        // the bitmap has its underlying AndroidPixelRef swapped out/wrapped
-        return;
-    }
-    if (fOnJavaHeap && sk_atomic_inc(&fGlobalRefCnt) == 0) {
-        JNIEnv *env = vm2env(fVM);
-
-        // If JNI ref was passed, it is always used
-        if (localref) fStorageObj = (jbyteArray) localref;
-
-        if (fStorageObj == NULL) {
-            SkDebugf("No valid local ref to create a JNI global ref\n");
-            sk_throw();
-        }
-        if (fHasGlobalRef) {
-            // This should never happen
-            SkDebugf("Already holding a JNI global ref");
-            sk_throw();
-        }
-
-        fStorageObj = (jbyteArray) env->NewGlobalRef(fStorageObj);
-        // TODO: Check for failure here
-        fHasGlobalRef = true;
-    }
-    ref();
-}
-
-void AndroidPixelRef::globalUnref() {
-    if (fWrappedPixelRef) {
-        // delegate java obj management to the wrapped ref
-        fWrappedPixelRef->globalUnref();
-        return;
-    }
-    if (fOnJavaHeap && sk_atomic_dec(&fGlobalRefCnt) == 1) {
-        JNIEnv *env = vm2env(fVM);
-        if (!fHasGlobalRef) {
-            SkDebugf("We don't have a global ref!");
-            sk_throw();
-        }
         env->DeleteGlobalRef(fStorageObj);
-        fStorageObj = NULL;
-        fHasGlobalRef = false;
     }
-    unref();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -650,25 +576,6 @@ bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     fStorageObj = GraphicsJNI::allocateJavaPixelRef(env, bitmap, ctable);
     fAllocCount += 1;
     return fStorageObj != NULL;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-JavaHeapBitmapRef::JavaHeapBitmapRef(JNIEnv* env, SkBitmap* nativeBitmap, jbyteArray buffer) {
-    fEnv = env;
-    fNativeBitmap = nativeBitmap;
-    fBuffer = buffer;
-
-    // If the buffer is NULL, the backing memory wasn't allocated on the Java heap
-    if (fBuffer) {
-        ((AndroidPixelRef*) fNativeBitmap->pixelRef())->setLocalJNIRef(fBuffer);
-    }
-}
-
-JavaHeapBitmapRef::~JavaHeapBitmapRef() {
-    if (fBuffer) {
-        ((AndroidPixelRef*) fNativeBitmap->pixelRef())->setLocalJNIRef(NULL);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

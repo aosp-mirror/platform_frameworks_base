@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">DataSourcesRequest.Builder</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -708,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -729,12 +798,12 @@ Summary:
 
 
   <a href="#pubctors">Ctors</a>
-
+  
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -744,9 +813,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -756,23 +825,26 @@ Summary:
 
 <div id="jd-header">
     public
-    static
-
-
+    static 
+     
+    
     class
 <h1 itemprop="name">DataSourcesRequest.Builder</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -784,18 +856,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.request.DataSourcesRequest.Builder</td>
     </tr>
-
+    
 
 </table>
 
@@ -865,19 +937,19 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html#DataSourcesRequest.Builder()">DataSourcesRequest.Builder</a></span>()</nobr>
-
+        
   </td></tr>
 
 
@@ -894,57 +966,72 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html#build()">build</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Finishes building and returns the request.
+          
+    
 
-        <div class="jd-descrdiv">Finishes building and returns the request.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html">DataSourcesRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html#setDataSourceTypes(int...)">setDataSourceTypes</a></span>(int... dataSourceTypes)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the data source types that should be searched for in the data sources request.
+          
+    
 
-        <div class="jd-descrdiv">Sets the data source types that should be searched for in the data sources request.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html">DataSourcesRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html#setDataTypes(com.google.android.gms.fitness.data.DataType...)">setDataTypes</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType...</a> dataTypes)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the desired data types to search for on the data sources request.
+          
+    
 
-        <div class="jd-descrdiv">Sets the desired data types to search for on the data sources request.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -979,182 +1066,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1200,27 +1287,30 @@ From class
 
 <A NAME="DataSourcesRequest.Builder()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">DataSourcesRequest.Builder</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1244,14 +1334,14 @@ From class
 
 <A NAME="build()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a>
       </span>
       <span class="sympad">build</span>
@@ -1259,16 +1349,19 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Finishes building and returns the request.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>IllegalStateException</td>
             <td>if the builder doesn't have enough data to build
@@ -1284,14 +1377,14 @@ From class
 
 <A NAME="setDataSourceTypes(int...)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html">DataSourcesRequest.Builder</a>
       </span>
       <span class="sympad">setDataSourceTypes</span>
@@ -1299,12 +1392,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the data source types that should be searched for in the data sources request.  By
  default the data sources request will search for all source types.  Use this method if
  you'd like to restrict the search to only raw or only derived data sources.  Calling this
@@ -1328,14 +1424,14 @@ From class
 
 <A NAME="setDataTypes(com.google.android.gms.fitness.data.DataType...)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html">DataSourcesRequest.Builder</a>
       </span>
       <span class="sympad">setDataTypes</span>
@@ -1343,12 +1439,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the desired data types to search for on the data sources request.
  At least one data type should be set, or <code><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html#build()">build()</a></code> will throw an exception.</p></div>
   <div class="jd-tagdata">
@@ -1357,7 +1456,7 @@ From class
         <tr>
           <th>dataTypes</td>
           <td>the data types to search for.  These can be one of the data types
-     listed in <code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html">DataTypes</a></code>, or a custom app-specific data type.
+     listed in <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>, or a custom data type.
 </td>
         </tr>
       </table>
@@ -1378,17 +1477,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1396,7 +1495,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1409,7 +1508,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

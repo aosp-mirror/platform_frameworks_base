@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -129,16 +143,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -180,8 +244,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -212,8 +276,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -336,10 +400,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -361,7 +425,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -421,7 +490,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">com.google.android.gms.common</li>
       </ul>
     </div>
@@ -734,35 +803,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   
-    <h2>Interfaces</h2>
-    <div class="jd-sumtable">
-    
-  <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html">GooglePlayServicesClient</a></td>
-              <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    replaced with <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>
-</em>&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a></td>
-              <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    replaced with
-     <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a></code>
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a></td>
-              <td class="jd-descrcol" width="100%"><em>
-      This interface is deprecated.
-    replaced with
-     <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a></code>
-</em>&nbsp;</td>
-          </tr>
-  </table>
-    </div>
+
+
   
 
 
@@ -770,44 +812,96 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/AccountPicker.html">AccountPicker</a></td>
-              <td class="jd-descrcol" width="100%">Common account picker similar to the standard framework account picker introduced in ICS:
- <code><a href="/reference/android/accounts/AccountManager.html#newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, java.lang.String[], boolean, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle)">newChooseAccountIntent</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains all possible error codes for when a client fails to connect to Google Play services.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ErrorDialogFragment.html">ErrorDialogFragment</a></td>
-              <td class="jd-descrcol" width="100%">Wraps the <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> returned by
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/AccountPicker.html">AccountPicker</a></td>
+        <td class="jd-descrcol" width="100%">
+          Common account picker similar to the standard framework account picker introduced in ICS:
+ <code><a href="/reference/android/accounts/AccountManager.html#newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, java.lang.String[], boolean, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle)">newChooseAccountIntent</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains all possible error codes for when a client fails to connect to Google Play services.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/ErrorDialogFragment.html">ErrorDialogFragment</a></td>
+        <td class="jd-descrcol" width="100%">
+          Wraps the <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> returned by
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> by using
  <code><a href="/reference/android/app/DialogFragment.html">DialogFragment</a></code> so that it can be properly managed by the
- <code><a href="/reference/android/app/Activity.html">Activity</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html">GooglePlayServicesUtil</a></td>
-              <td class="jd-descrcol" width="100%">Utility class for verifying that the Google Play services APK is available and
- up-to-date on this device.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></td>
-              <td class="jd-descrcol" width="100%">OAuth 2.0 scopes for use with Google Play services.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/SignInButton.html">SignInButton</a></td>
-              <td class="jd-descrcol" width="100%">The Google sign-in button to authenticate the user.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/SupportErrorDialogFragment.html">SupportErrorDialogFragment</a></td>
-              <td class="jd-descrcol" width="100%">Wraps the <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> returned by
+ <code><a href="/reference/android/app/Activity.html">Activity</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html">GooglePlayServicesUtil</a></td>
+        <td class="jd-descrcol" width="100%">
+          Utility class for verifying that the Google Play services APK is available and
+ up-to-date on this device.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></td>
+        <td class="jd-descrcol" width="100%">
+          OAuth 2.0 scopes for use with Google Play services.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/SignInButton.html">SignInButton</a></td>
+        <td class="jd-descrcol" width="100%">
+          The Google sign-in button to authenticate the user.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/SupportErrorDialogFragment.html">SupportErrorDialogFragment</a></td>
+        <td class="jd-descrcol" width="100%">
+          Wraps the <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> returned by
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> by using
  <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> so that it can be properly managed by the
- <code><a href="/reference/android/app/Activity.html">Activity</a></code>.&nbsp;</td>
-          </tr>
+ <code><a href="/reference/android/app/Activity.html">Activity</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 
@@ -819,23 +913,47 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Exceptions</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesNotAvailableException.html">GooglePlayServicesNotAvailableException</a></td>
-              <td class="jd-descrcol" width="100%">Indicates Google Play services is not available.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesRepairableException.html">GooglePlayServicesRepairableException</a></td>
-              <td class="jd-descrcol" width="100%">GooglePlayServicesRepairableExceptions are special instances of
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesNotAvailableException.html">GooglePlayServicesNotAvailableException</a></td>
+        <td class="jd-descrcol" width="100%">
+          Indicates Google Play services is not available.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesRepairableException.html">GooglePlayServicesRepairableException</a></td>
+        <td class="jd-descrcol" width="100%">
+          GooglePlayServicesRepairableExceptions are special instances of
  <code><a href="/reference/com/google/android/gms/common/UserRecoverableException.html">UserRecoverableException</a></code>s which are thrown when Google Play Services is not installed,
- up-to-date, or enabled.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/UserRecoverableException.html">UserRecoverableException</a></td>
-              <td class="jd-descrcol" width="100%">UserRecoverableExceptions signal errors that can be recovered with user
- action, such as a user login.&nbsp;</td>
-          </tr>
+ up-to-date, or enabled.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/UserRecoverableException.html">UserRecoverableException</a></td>
+        <td class="jd-descrcol" width="100%">
+          UserRecoverableExceptions signal errors that can be recovered with user
+ action, such as a user login.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 

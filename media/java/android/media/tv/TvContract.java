@@ -856,6 +856,9 @@ public final class TvContract {
         /**
          * The start time of this TV program, in milliseconds since the epoch.
          * <p>
+         * The value should be equal to or larger than {@link #COLUMN_END_TIME_UTC_MILLIS} of the
+         * previous program in the same channel.
+         * </p><p>
          * Type: INTEGER (long)
          * </p>
          */
@@ -864,6 +867,9 @@ public final class TvContract {
         /**
          * The end time of this TV program, in milliseconds since the epoch.
          * <p>
+         * The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
+         * next program in the same channel.
+         * </p><p>
          * Type: INTEGER (long)
          * </p>
          */
@@ -1052,6 +1058,24 @@ public final class TvContract {
             /** The genre for Gaming. */
             public static final String GAMING = "GAMING";
 
+            /** The genre for Arts. */
+            public static final String ARTS = "ARTS";
+
+            /** The genre for Entertainment. */
+            public static final String ENTERTAINMENT = "ENTERTAINMENT";
+
+            /** The genre for Life Style. */
+            public static final String LIFE_STYLE = "LIFE_STYLE";
+
+            /** The genre for Music. */
+            public static final String MUSIC = "MUSIC";
+
+            /** The genre for Premier. */
+            public static final String PREMIER = "PREMIER";
+
+            /** The genre for Tech/Science. */
+            public static final String TECH_SCIENCE = "TECH_SCIENCE";
+
             private static final ArraySet<String> CANONICAL_GENRES = new ArraySet<String>();
             static {
                 CANONICAL_GENRES.add(FAMILY_KIDS);
@@ -1065,6 +1089,12 @@ public final class TvContract {
                 CANONICAL_GENRES.add(ANIMAL_WILDLIFE);
                 CANONICAL_GENRES.add(NEWS);
                 CANONICAL_GENRES.add(GAMING);
+                CANONICAL_GENRES.add(ARTS);
+                CANONICAL_GENRES.add(ENTERTAINMENT);
+                CANONICAL_GENRES.add(LIFE_STYLE);
+                CANONICAL_GENRES.add(MUSIC);
+                CANONICAL_GENRES.add(PREMIER);
+                CANONICAL_GENRES.add(TECH_SCIENCE);
             }
 
             private Genres() {}

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">TextTrackStyle</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -708,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -725,19 +794,19 @@ Summary:
 
 
   <a href="#constants">Constants</a>
-
+  
 
 
 
 
 
   &#124; <a href="#pubctors">Ctors</a>
-
+  
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -747,9 +816,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -759,23 +828,26 @@ Summary:
 
 <div id="jd-header">
     public
-
-    final
-
+     
+    final 
+    
     class
 <h1 itemprop="name">TextTrackStyle</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -787,18 +859,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.cast.TextTrackStyle</td>
     </tr>
-
+    
 
 </table>
 
@@ -863,182 +935,307 @@ Summary:
 <table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#COLOR_UNSPECIFIED">COLOR_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A color value that indicates an unspecified (unset) color.</td>
+        <td class="jd-descrcol" width="100%">
+          A color value that indicates an unspecified (unset) color.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">float</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#DEFAULT_FONT_SCALE">DEFAULT_FONT_SCALE</a></td>
-        <td class="jd-descrcol" width="100%">The default font scale.</td>
+        <td class="jd-descrcol" width="100%">
+          The default font scale.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_DEPRESSED">EDGE_TYPE_DEPRESSED</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating a depressed edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating a depressed edge.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_DROP_SHADOW">EDGE_TYPE_DROP_SHADOW</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating a drop shadow edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating a drop shadow edge.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_NONE">EDGE_TYPE_NONE</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating no edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating no edge.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_OUTLINE">EDGE_TYPE_OUTLINE</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating an outline edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating an outline edge.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_RAISED">EDGE_TYPE_RAISED</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating a raised edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating a raised edge.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_UNSPECIFIED">EDGE_TYPE_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating an unspecified edge type.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating an unspecified edge type.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_CASUAL">FONT_FAMILY_CASUAL</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Casual.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Casual.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_CURSIVE">FONT_FAMILY_CURSIVE</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Cursive.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Cursive.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_MONOSPACED_SANS_SERIF">FONT_FAMILY_MONOSPACED_SANS_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Monospaced Sans Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Monospaced Sans Serif.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_MONOSPACED_SERIF">FONT_FAMILY_MONOSPACED_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Monospaced Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Monospaced Serif.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_SANS_SERIF">FONT_FAMILY_SANS_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Sans Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Sans Serif.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_SERIF">FONT_FAMILY_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Serif.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_SMALL_CAPITALS">FONT_FAMILY_SMALL_CAPITALS</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Small Capitals.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Small Capitals.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_UNSPECIFIED">FONT_FAMILY_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating an unspecified font family.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating an unspecified font family.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_BOLD">FONT_STYLE_BOLD</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating a bold style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating a bold style.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_BOLD_ITALIC">FONT_STYLE_BOLD_ITALIC</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating a bold and italic style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating a bold and italic style.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_ITALIC">FONT_STYLE_ITALIC</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating an italic style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating an italic style.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_NORMAL">FONT_STYLE_NORMAL</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating a normal style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating a normal style.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_UNSPECIFIED">FONT_STYLE_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating an unspecified style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating an unspecified style.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_NONE">WINDOW_TYPE_NONE</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating no window type.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating no window type.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_NORMAL">WINDOW_TYPE_NORMAL</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating a normal window.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating a normal window.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating a window with rounded corners.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating a window with rounded corners.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_UNSPECIFIED">WINDOW_TYPE_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating an unspecified window type.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating an unspecified window type.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -1058,21 +1255,26 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#TextTrackStyle()">TextTrackStyle</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Constructs a new TextTrackStyle.
+          
+    
 
-        <div class="jd-descrdiv">Constructs a new TextTrackStyle.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1089,486 +1291,611 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#equals(java.lang.Object)">equals</a></span>(Object other)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             <a href="/reference/com/google/android/gms/cast/TextTrackStyle.html">TextTrackStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#fromSystemSettings(android.content.Context)">fromSystemSettings</a></span>(Context context)</nobr>
+        
+        <div class="jd-descrdiv">
+          Constructs a new TextTrackStyle based on the system's current closed caption style settings.
+          
+    
 
-        <div class="jd-descrdiv">Constructs a new TextTrackStyle based on the system's current closed caption style settings.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getBackgroundColor()">getBackgroundColor</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the text's background color.
+          
+    
 
-        <div class="jd-descrdiv">Gets the text's background color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             JSONObject</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getCustomData()">getCustomData</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the custom data object.
+          
+    
 
-        <div class="jd-descrdiv">Gets the custom data object.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getEdgeColor()">getEdgeColor</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the window's edge color.
+          
+    
 
-        <div class="jd-descrdiv">Gets the window's edge color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getEdgeType()">getEdgeType</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the caption window's edge type.
+          
+    
 
-        <div class="jd-descrdiv">Gets the caption window's edge type.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontFamily()">getFontFamily</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the text's font family.
+          
+    
 
-        <div class="jd-descrdiv">Gets the text's font family.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontGenericFamily()">getFontGenericFamily</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the text's generic font family.
+          
+    
 
-        <div class="jd-descrdiv">Gets the text's generic font family.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontScale()">getFontScale</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the font scale factor.
+          
+    
 
-        <div class="jd-descrdiv">Gets the font scale factor.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontStyle()">getFontStyle</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the text font style.
+          
+    
 
-        <div class="jd-descrdiv">Gets the text font style.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getForegroundColor()">getForegroundColor</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the text's foreground color.
+          
+    
 
-        <div class="jd-descrdiv">Gets the text's foreground color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getWindowColor()">getWindowColor</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the window's color.
+          
+    
 
-        <div class="jd-descrdiv">Gets the window's color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getWindowCornerRadius()">getWindowCornerRadius</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the window corner radius.
+          
+    
 
-        <div class="jd-descrdiv">Gets the window corner radius.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getWindowType()">getWindowType</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets the caption window type.
+          
+    
 
-        <div class="jd-descrdiv">Gets the caption window type.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#hashCode()">hashCode</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setBackgroundColor(int)">setBackgroundColor</a></span>(int backgroundColor)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the text's background color.
+          
+    
 
-        <div class="jd-descrdiv">Sets the text's background color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setCustomData(org.json.JSONObject)">setCustomData</a></span>(JSONObject customData)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the custom data object.
+          
+    
 
-        <div class="jd-descrdiv">Sets the custom data object.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setEdgeColor(int)">setEdgeColor</a></span>(int edgeColor)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the window's edge color.
+          
+    
 
-        <div class="jd-descrdiv">Sets the window's edge color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setEdgeType(int)">setEdgeType</a></span>(int edgeType)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the caption window's edge type.
+          
+    
 
-        <div class="jd-descrdiv">Sets the caption window's edge type.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontFamily(java.lang.String)">setFontFamily</a></span>(String fontFamily)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the text's font family.
+          
+    
 
-        <div class="jd-descrdiv">Sets the text's font family.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontGenericFamily(int)">setFontGenericFamily</a></span>(int fontGenericFamily)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the text's generic font family.
+          
+    
 
-        <div class="jd-descrdiv">Sets the text's generic font family.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontScale(float)">setFontScale</a></span>(float fontScale)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the font scale factor.
+          
+    
 
-        <div class="jd-descrdiv">Sets the font scale factor.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontStyle(int)">setFontStyle</a></span>(int fontStyle)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the text font style.
+          
+    
 
-        <div class="jd-descrdiv">Sets the text font style.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setForegroundColor(int)">setForegroundColor</a></span>(int foregroundColor)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the text's foreground color.
+          
+    
 
-        <div class="jd-descrdiv">Sets the text's foreground color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setWindowColor(int)">setWindowColor</a></span>(int windowColor)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the window's color.
+          
+    
 
-        <div class="jd-descrdiv">Sets the window's color.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setWindowCornerRadius(int)">setWindowCornerRadius</a></span>(int windowCornerRadius)</nobr>
+        
+        <div class="jd-descrdiv">
+          If the window type is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></code>, sets the radius for the window's
+ corners.
+          
+    
 
-        <div class="jd-descrdiv">If the window type is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></code>, sets the radius for the window's
- corners.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setWindowType(int)">setWindowType</a></span>(int windowType)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the window type.
+          
+    
 
-        <div class="jd-descrdiv">Sets the window type.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1603,182 +1930,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1819,37 +2146,40 @@ From class
 
 <A NAME="COLOR_UNSPECIFIED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         COLOR_UNSPECIFIED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A color value that indicates an unspecified (unset) color. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 0
                 (0x00000000)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1857,36 +2187,39 @@ From class
 
 <A NAME="DEFAULT_FONT_SCALE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         float
       </span>
         DEFAULT_FONT_SCALE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The default font scale. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1.0
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1894,37 +2227,40 @@ From class
 
 <A NAME="EDGE_TYPE_DEPRESSED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         EDGE_TYPE_DEPRESSED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating a depressed edge. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4
                 (0x00000004)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1932,37 +2268,40 @@ From class
 
 <A NAME="EDGE_TYPE_DROP_SHADOW"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         EDGE_TYPE_DROP_SHADOW
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating a drop shadow edge. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2
                 (0x00000002)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1970,37 +2309,40 @@ From class
 
 <A NAME="EDGE_TYPE_NONE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         EDGE_TYPE_NONE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating no edge. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 0
                 (0x00000000)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2008,37 +2350,40 @@ From class
 
 <A NAME="EDGE_TYPE_OUTLINE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         EDGE_TYPE_OUTLINE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating an outline edge. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1
                 (0x00000001)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2046,37 +2391,40 @@ From class
 
 <A NAME="EDGE_TYPE_RAISED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         EDGE_TYPE_RAISED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating a raised edge. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 3
                 (0x00000003)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2084,37 +2432,40 @@ From class
 
 <A NAME="EDGE_TYPE_UNSPECIFIED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         EDGE_TYPE_UNSPECIFIED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating an unspecified edge type. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 -1
                 (0xffffffff)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2122,37 +2473,40 @@ From class
 
 <A NAME="FONT_FAMILY_CASUAL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_CASUAL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Casual. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4
                 (0x00000004)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2160,37 +2514,40 @@ From class
 
 <A NAME="FONT_FAMILY_CURSIVE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_CURSIVE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Cursive. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 5
                 (0x00000005)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2198,37 +2555,40 @@ From class
 
 <A NAME="FONT_FAMILY_MONOSPACED_SANS_SERIF"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_MONOSPACED_SANS_SERIF
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Monospaced Sans Serif. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1
                 (0x00000001)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2236,37 +2596,40 @@ From class
 
 <A NAME="FONT_FAMILY_MONOSPACED_SERIF"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_MONOSPACED_SERIF
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Monospaced Serif. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 3
                 (0x00000003)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2274,37 +2637,40 @@ From class
 
 <A NAME="FONT_FAMILY_SANS_SERIF"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_SANS_SERIF
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Sans Serif. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 0
                 (0x00000000)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2312,37 +2678,40 @@ From class
 
 <A NAME="FONT_FAMILY_SERIF"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_SERIF
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Serif. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2
                 (0x00000002)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2350,37 +2719,40 @@ From class
 
 <A NAME="FONT_FAMILY_SMALL_CAPITALS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_SMALL_CAPITALS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Small Capitals. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 6
                 (0x00000006)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2388,37 +2760,40 @@ From class
 
 <A NAME="FONT_FAMILY_UNSPECIFIED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_FAMILY_UNSPECIFIED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating an unspecified font family. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 -1
                 (0xffffffff)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2426,37 +2801,40 @@ From class
 
 <A NAME="FONT_STYLE_BOLD"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_STYLE_BOLD
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating a bold style. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1
                 (0x00000001)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2464,37 +2842,40 @@ From class
 
 <A NAME="FONT_STYLE_BOLD_ITALIC"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_STYLE_BOLD_ITALIC
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating a bold and italic style. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 3
                 (0x00000003)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2502,37 +2883,40 @@ From class
 
 <A NAME="FONT_STYLE_ITALIC"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_STYLE_ITALIC
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating an italic style. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2
                 (0x00000002)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2540,37 +2924,40 @@ From class
 
 <A NAME="FONT_STYLE_NORMAL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_STYLE_NORMAL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating a normal style. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 0
                 (0x00000000)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2578,37 +2965,40 @@ From class
 
 <A NAME="FONT_STYLE_UNSPECIFIED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         FONT_STYLE_UNSPECIFIED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating an unspecified style. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 -1
                 (0xffffffff)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2616,37 +3006,40 @@ From class
 
 <A NAME="WINDOW_TYPE_NONE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         WINDOW_TYPE_NONE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating no window type. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 0
                 (0x00000000)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2654,37 +3047,40 @@ From class
 
 <A NAME="WINDOW_TYPE_NORMAL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         WINDOW_TYPE_NORMAL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating a normal window. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1
                 (0x00000001)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2692,37 +3088,40 @@ From class
 
 <A NAME="WINDOW_TYPE_ROUNDED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         WINDOW_TYPE_ROUNDED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating a window with rounded corners. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2
                 (0x00000002)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2730,37 +3129,40 @@ From class
 
 <A NAME="WINDOW_TYPE_UNSPECIFIED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         WINDOW_TYPE_UNSPECIFIED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating an unspecified window type. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 -1
                 (0xffffffff)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2780,27 +3182,30 @@ From class
 
 <A NAME="TextTrackStyle()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">TextTrackStyle</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new TextTrackStyle.
 </p></div>
 
@@ -2825,14 +3230,14 @@ From class
 
 <A NAME="equals(java.lang.Object)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">equals</span>
@@ -2840,12 +3245,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2854,14 +3262,14 @@ From class
 
 <A NAME="fromSystemSettings(android.content.Context)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         <a href="/reference/com/google/android/gms/cast/TextTrackStyle.html">TextTrackStyle</a>
       </span>
       <span class="sympad">fromSystemSettings</span>
@@ -2869,12 +3277,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new TextTrackStyle based on the system's current closed caption style settings.
  On platform levels below 19, this returns an object with "unspecified" values for all
  fields.</p></div>
@@ -2899,14 +3310,14 @@ From class
 
 <A NAME="getBackgroundColor()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getBackgroundColor</span>
@@ -2914,12 +3325,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's background color.
 </p></div>
 
@@ -2929,14 +3343,14 @@ From class
 
 <A NAME="getCustomData()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         JSONObject
       </span>
       <span class="sympad">getCustomData</span>
@@ -2944,12 +3358,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the custom data object.
 </p></div>
 
@@ -2959,14 +3376,14 @@ From class
 
 <A NAME="getEdgeColor()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getEdgeColor</span>
@@ -2974,12 +3391,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the window's edge color.
 </p></div>
 
@@ -2989,14 +3409,14 @@ From class
 
 <A NAME="getEdgeType()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getEdgeType</span>
@@ -3004,12 +3424,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the caption window's edge type.
 </p></div>
 
@@ -3019,14 +3442,14 @@ From class
 
 <A NAME="getFontFamily()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getFontFamily</span>
@@ -3034,12 +3457,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's font family.
 </p></div>
 
@@ -3049,14 +3475,14 @@ From class
 
 <A NAME="getFontGenericFamily()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getFontGenericFamily</span>
@@ -3064,12 +3490,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's generic font family.
 </p></div>
 
@@ -3079,14 +3508,14 @@ From class
 
 <A NAME="getFontScale()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         float
       </span>
       <span class="sympad">getFontScale</span>
@@ -3094,12 +3523,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the font scale factor.
 </p></div>
 
@@ -3109,14 +3541,14 @@ From class
 
 <A NAME="getFontStyle()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getFontStyle</span>
@@ -3124,12 +3556,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text font style.
 </p></div>
 
@@ -3139,14 +3574,14 @@ From class
 
 <A NAME="getForegroundColor()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getForegroundColor</span>
@@ -3154,12 +3589,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's foreground color.
 </p></div>
 
@@ -3169,14 +3607,14 @@ From class
 
 <A NAME="getWindowColor()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getWindowColor</span>
@@ -3184,12 +3622,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the window's color.
 </p></div>
 
@@ -3199,14 +3640,14 @@ From class
 
 <A NAME="getWindowCornerRadius()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getWindowCornerRadius</span>
@@ -3214,12 +3655,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the window corner radius.
 </p></div>
 
@@ -3229,14 +3673,14 @@ From class
 
 <A NAME="getWindowType()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getWindowType</span>
@@ -3244,12 +3688,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the caption window type.
 </p></div>
 
@@ -3259,14 +3706,14 @@ From class
 
 <A NAME="hashCode()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">hashCode</span>
@@ -3274,12 +3721,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3288,14 +3738,14 @@ From class
 
 <A NAME="setBackgroundColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setBackgroundColor</span>
@@ -3303,12 +3753,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's background color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3327,14 +3780,14 @@ From class
 
 <A NAME="setCustomData(org.json.JSONObject)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setCustomData</span>
@@ -3342,12 +3795,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the custom data object.
 </p></div>
 
@@ -3357,14 +3813,14 @@ From class
 
 <A NAME="setEdgeColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setEdgeColor</span>
@@ -3372,12 +3828,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the window's edge color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3396,14 +3855,14 @@ From class
 
 <A NAME="setEdgeType(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setEdgeType</span>
@@ -3411,12 +3870,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the caption window's edge type.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3435,14 +3897,14 @@ From class
 
 <A NAME="setFontFamily(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setFontFamily</span>
@@ -3450,12 +3912,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's font family.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3474,14 +3939,14 @@ From class
 
 <A NAME="setFontGenericFamily(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setFontGenericFamily</span>
@@ -3489,12 +3954,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's generic font family. This will be used if the font family specified with
  <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontFamily(java.lang.String)">setFontFamily(String)</a></code> (if any) is unavailable.</p></div>
   <div class="jd-tagdata">
@@ -3515,14 +3983,14 @@ From class
 
 <A NAME="setFontScale(float)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setFontScale</span>
@@ -3530,12 +3998,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the font scale factor. The default is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#DEFAULT_FONT_SCALE">DEFAULT_FONT_SCALE</a></code>.
 </p></div>
 
@@ -3545,14 +4016,14 @@ From class
 
 <A NAME="setFontStyle(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setFontStyle</span>
@@ -3560,12 +4031,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text font style.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3584,14 +4058,14 @@ From class
 
 <A NAME="setForegroundColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setForegroundColor</span>
@@ -3599,12 +4073,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's foreground color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3623,14 +4100,14 @@ From class
 
 <A NAME="setWindowColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setWindowColor</span>
@@ -3638,12 +4115,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the window's color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3662,14 +4142,14 @@ From class
 
 <A NAME="setWindowCornerRadius(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setWindowCornerRadius</span>
@@ -3677,12 +4157,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>If the window type is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></code>, sets the radius for the window's
  corners.</p></div>
   <div class="jd-tagdata">
@@ -3702,14 +4185,14 @@ From class
 
 <A NAME="setWindowType(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setWindowType</span>
@@ -3717,12 +4200,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the window type.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3750,17 +4236,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -3768,7 +4254,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -3781,7 +4267,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

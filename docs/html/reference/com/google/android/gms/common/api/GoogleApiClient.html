@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GoogleApiClient</li>
       </ul>
     </div>
@@ -726,7 +795,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <div id="jd-header">
     public
      
-
+     
     
     interface
 <h1 itemprop="name">GoogleApiClient</h1>
@@ -736,6 +805,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
   
   
+
+
+    
 
 
 </div><!-- end header -->
@@ -824,7 +896,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></td>
-      <td class="jd-descrcol" width="100%">Builder to configure a <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Builder to configure a <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -836,8 +913,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a></td>
-      <td class="jd-descrcol" width="100%">Provides callbacks that are called when the client is connected or disconnected from the
- service.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Provides callbacks that are called when the client is connected or disconnected from the
+ service.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -849,8 +931,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a></td>
-      <td class="jd-descrcol" width="100%">Provides callbacks for scenarios that result in a failed attempt to
- connect the client to the service.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Provides callbacks for scenarios that result in a failed attempt to
+ connect the client to the service.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -898,50 +985,89 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect()">blockingConnect</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect(long, java.util.concurrent.TimeUnit)">blockingConnect</a></span>(long timeout, TimeUnit unit)</nobr>
-
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Connects the client to Google Play services.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#blockingConnect(long, java.util.concurrent.TimeUnit)">blockingConnect</a></span>(long timeout, TimeUnit unit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Connects the client to Google Play services.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#clearDefaultAccountAndReconnect()">clearDefaultAccountAndReconnect</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Clears the account selected by the user and reconnects the client asking the user to pick an
+ account again if <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#useDefaultAccount()">useDefaultAccount()</a></code> was set.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Connects the client to Google Play services.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -953,13 +1079,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Closes the connection to Google Play services.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -971,14 +1102,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnected()">isConnected</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is currently connected to the service, so that requests to other methods
- will succeed.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is currently connected to the service, so that requests to other methods
+ will succeed.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -990,13 +1126,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnecting()">isConnecting</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is attempting to connect to the service.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is attempting to connect to the service.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1008,14 +1149,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection events.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1027,14 +1173,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection failed events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection failed events.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1046,13 +1197,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#reconnect()">reconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes the current connection to Google Play services and creates a new connection.</div>
+        <div class="jd-descrdiv">
+          Closes the current connection to Google Play services and creates a new connection.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1064,13 +1220,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GoogleApiClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection events from this <code>GoogleApiClient</code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1082,32 +1243,42 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection failed events from this
- <code>GoogleApiClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection failed events from this
+ <code>GoogleApiClient</code>.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#stopAutoManage(android.support.v4.app.FragmentActivity)">stopAutoManage</a></span>(FragmentActivity lifecycleActivity)</nobr>
+        
+        <div class="jd-descrdiv">
+          Disconnects the client and stops automatic lifecycle management.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#stopAutoManage(android.support.v4.app.FragmentActivity)">stopAutoManage</a></span>(FragmentActivity lifecycleActivity)</nobr>
-
-        <div class="jd-descrdiv">Disconnects the client and stops automatic lifecycle management.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1119,13 +1290,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection listener from this <code>GoogleApiClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection listener from this <code>GoogleApiClient</code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1137,7 +1313,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection failed listener from the <code>GoogleApiClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection failed listener from the <code>GoogleApiClient</code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1198,8 +1379,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
-
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a>
       </span>
       <span class="sympad">blockingConnect</span>
@@ -1207,12 +1388,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. Blocks until the connection either succeeds or
  fails. This is not allowed on the UI thread.</p></div>
   <div class="jd-tagdata">
@@ -1227,14 +1411,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="blockingConnect(long, java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a>
       </span>
       <span class="sympad">blockingConnect</span>
@@ -1242,12 +1426,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. Blocks until the connection is set or failed or
  has timed out. This is not allowed on the UI thread.</p></div>
   <div class="jd-tagdata">
@@ -1273,16 +1460,55 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
-<A NAME="connect()"></A>
+<A NAME="clearDefaultAccountAndReconnect()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
+        public 
          
          
-        abstract
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">clearDefaultAccountAndReconnect</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
 
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Clears the account selected by the user and reconnects the client asking the user to pick an
+ account again if <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#useDefaultAccount()">useDefaultAccount()</a></code> was set.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the pending result is fired once the default account has been cleared, but before
+ the client is reconnected - for that <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a></code> can be used.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="connect()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">connect</span>
@@ -1295,6 +1521,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. This method returns immediately, and connects to
  the service in the background. If the connection is successful,
@@ -1314,7 +1543,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         void
       </span>
@@ -1328,6 +1557,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Closes the connection to Google Play services. No calls can be made using this client after
  calling this method. Any method calls that haven't executed yet will be canceled.
@@ -1351,7 +1583,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         boolean
       </span>
@@ -1365,6 +1597,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is currently connected to the service, so that requests to other methods
  will succeed.  Applications should guard client actions caused by the user with a call to
@@ -1387,7 +1622,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         boolean
       </span>
@@ -1401,6 +1636,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is attempting to connect to the service.</p></div>
   <div class="jd-tagdata">
@@ -1421,7 +1659,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         boolean
       </span>
@@ -1435,6 +1673,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
  receive connection events.</p></div>
@@ -1470,7 +1711,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         boolean
       </span>
@@ -1484,6 +1725,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
  receive connection failed events.</p></div>
@@ -1519,7 +1763,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         void
       </span>
@@ -1533,6 +1777,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Closes the current connection to Google Play services and creates a new connection.
  <p>
@@ -1560,7 +1807,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         void
       </span>
@@ -1574,6 +1821,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GoogleApiClient</code>.
  If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
@@ -1612,7 +1862,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         void
       </span>
@@ -1626,6 +1876,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
  <code>GoogleApiClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">registerConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>, if the service
@@ -1658,14 +1911,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="stopAutoManage(android.support.v4.app.FragmentActivity)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">stopAutoManage</span>
@@ -1673,12 +1926,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Disconnects the client and stops automatic lifecycle management. Use this before creating a
  new client (which might be necessary when switching accounts, changing the set of used APIs
  etc.).
@@ -1695,7 +1951,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>IllegalStateException</td>
             <td>if called from outside of the main thread.</td>
@@ -1720,7 +1976,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         void
       </span>
@@ -1734,6 +1990,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GoogleApiClient</code>. Note that removing
  a listener does not generate any callbacks.
@@ -1763,7 +2022,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         public 
          
          
-        abstract
+        abstract 
          
         void
       </span>
@@ -1777,6 +2036,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Removes a connection failed listener from the <code>GoogleApiClient</code>.
  Note that removing a listener does not generate any callbacks.

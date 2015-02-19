@@ -27,11 +27,11 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PatternMatcher;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -39,9 +39,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
-import android.service.trust.TrustAgentService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -160,7 +158,7 @@ public class TrustAgentWrapper {
                     mTrustManagerService.updateTrust(mUserId, false);
                     break;
                 case MSG_RESTART_TIMEOUT:
-                    unbind();
+                    destroy();
                     mTrustManagerService.resetAgent(mName, mUserId);
                     break;
                 case MSG_SET_TRUST_AGENT_FEATURES_COMPLETED:
@@ -218,7 +216,7 @@ public class TrustAgentWrapper {
         }
 
         @Override
-        public void onSetTrustAgentFeaturesEnabledCompleted(boolean result, IBinder token) {
+        public void onConfigureCompleted(boolean result, IBinder token) {
             if (DEBUG) Slog.v(TAG, "onSetTrustAgentFeaturesEnabledCompleted(result=" + result);
             mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_COMPLETED,
                     result ? 1 : 0, 0, token).sendToTarget();
@@ -234,6 +232,12 @@ public class TrustAgentWrapper {
             mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
             setCallback(mCallback);
             updateDevicePolicyFeatures();
+
+            if (mTrustManagerService.isDeviceLockedInner(mUserId)) {
+                onDeviceLocked();
+            } else {
+                onDeviceUnlocked();
+            }
         }
 
         @Override
@@ -289,12 +293,35 @@ public class TrustAgentWrapper {
             onError(e);
         }
     }
+
     /**
      * @see android.service.trust.TrustAgentService#onUnlockAttempt(boolean)
      */
     public void onUnlockAttempt(boolean successful) {
         try {
             if (mTrustAgentService != null) mTrustAgentService.onUnlockAttempt(successful);
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
+     * @see android.service.trust.TrustAgentService#onDeviceLocked()
+     */
+    public void onDeviceLocked() {
+        try {
+            if (mTrustAgentService != null) mTrustAgentService.onDeviceLocked();
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
+     * @see android.service.trust.TrustAgentService#onDeviceUnlocked()
+     */
+    public void onDeviceUnlocked() {
+        try {
+            if (mTrustAgentService != null) mTrustAgentService.onDeviceUnlocked();
         } catch (RemoteException e) {
             onError(e);
         }
@@ -318,23 +345,19 @@ public class TrustAgentWrapper {
                 DevicePolicyManager dpm =
                     (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
 
-                if ((dpm.getKeyguardDisabledFeatures(null)
+                if ((dpm.getKeyguardDisabledFeatures(null, mUserId)
                         & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0) {
-                    List<String> features = dpm.getTrustAgentFeaturesEnabled(null, mName);
+                    List<PersistableBundle> config = dpm.getTrustAgentConfiguration(
+                            null, mName, mUserId);
                     trustDisabled = true;
-                    if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Features = "
-                            + features);
-                    if (features != null && features.size() > 0) {
-                        Bundle bundle = new Bundle();
-                        bundle.putStringArrayList(TrustAgentService.KEY_FEATURES,
-                                (ArrayList<String>)features);
+                    if (DEBUG) Slog.v(TAG, "Detected trust agents disabled. Config = " + config);
+                    if (config != null && config.size() > 0) {
                         if (DEBUG) {
                             Slog.v(TAG, "TrustAgent " + mName.flattenToShortString()
-                                    + " disabled until it acknowledges "+ features);
+                                    + " disabled until it acknowledges "+ config);
                         }
                         mSetTrustAgentFeaturesToken = new Binder();
-                        mTrustAgentService.setTrustAgentFeaturesEnabled(bundle,
-                                mSetTrustAgentFeaturesToken);
+                        mTrustAgentService.onConfigure(config, mSetTrustAgentFeaturesToken);
                     }
                 }
                 final long maxTimeToLock = dpm.getMaximumTimeToLock(null);
@@ -371,7 +394,9 @@ public class TrustAgentWrapper {
         return mMessage;
     }
 
-    public void unbind() {
+    public void destroy() {
+        mHandler.removeMessages(MSG_RESTART_TIMEOUT);
+
         if (!mBound) {
             return;
         }
@@ -382,7 +407,6 @@ public class TrustAgentWrapper {
         mTrustAgentService = null;
         mSetTrustAgentFeaturesToken = null;
         mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
-        mHandler.removeMessages(MSG_RESTART_TIMEOUT);
     }
 
     public boolean isConnected() {

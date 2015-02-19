@@ -21,6 +21,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
+import android.util.ArrayMap;
+import android.util.Log;
 
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
@@ -36,6 +38,8 @@ import android.os.RemoteException;
  */
 @SystemApi
 public final class HdmiControlManager {
+    private static final String TAG = "HdmiControlManager";
+
     @Nullable private final IHdmiControlService mService;
 
     /**
@@ -56,7 +60,7 @@ public final class HdmiControlManager {
 
     /**
      * Message used by TV to receive volume status from Audio Receiver. It should check volume value
-     * that is retrieved from extra value with the key {@link #EXTRA_MESSAGE_EXTRAM_PARAM1}. If the
+     * that is retrieved from extra value with the key {@link #EXTRA_MESSAGE_EXTRA_PARAM1}. If the
      * value is in range of [0,100], it is current volume of Audio Receiver. And there is another
      * value, {@link #AVR_VOLUME_MUTED}, which is used to inform volume mute.
      */
@@ -71,7 +75,7 @@ public final class HdmiControlManager {
      * Used as an extra field in the intent {@link #ACTION_OSD_MESSAGE}. Contains the extra value
      * of the message.
      */
-    public static final String EXTRA_MESSAGE_EXTRAM_PARAM1 =
+    public static final String EXTRA_MESSAGE_EXTRA_PARAM1 =
             "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
 
     /**
@@ -236,16 +240,24 @@ public final class HdmiControlManager {
     /** Clear timer error - CEC is disabled. */
     public static final int CLEAR_TIMER_STATUS_CEC_DISABLE = 0xA2;
 
+    /** The HdmiControlService is started. */
+    public static final int CONTROL_STATE_CHANGED_REASON_START = 0;
+    /** The state of HdmiControlService is changed by changing of settings. */
+    public static final int CONTROL_STATE_CHANGED_REASON_SETTING = 1;
+    /** The HdmiControlService is enabled to wake up. */
+    public static final int CONTROL_STATE_CHANGED_REASON_WAKEUP = 2;
+    /** The HdmiControlService will be disabled to standby. */
+    public static final int CONTROL_STATE_CHANGED_REASON_STANDBY = 3;
+
     // True if we have a logical device of type playback hosted in the system.
     private final boolean mHasPlaybackDevice;
     // True if we have a logical device of type TV hosted in the system.
     private final boolean mHasTvDevice;
 
     /**
-     * @hide - hide this constructor because it has a parameter of type
-     * IHdmiControlService, which is a system private class. The right way
-     * to create an instance of this class is using the factory
-     * Context.getSystemService.
+     * {@hide} - hide this constructor because it has a parameter of type IHdmiControlService,
+     * which is a system private class. The right way to create an instance of this class is
+     * using the factory Context.getSystemService.
      */
     public HdmiControlManager(IHdmiControlService service) {
         mService = service;
@@ -331,6 +343,9 @@ public final class HdmiControlManager {
         void onReceived(HdmiHotplugEvent event);
     }
 
+    private final ArrayMap<HotplugEventListener, IHdmiHotplugEventListener>
+            mHotplugEventListeners = new ArrayMap<>();
+
     /**
      * Listener used to get vendor-specific commands.
      */
@@ -339,11 +354,29 @@ public final class HdmiControlManager {
          * Called when a vendor command is received.
          *
          * @param srcAddress source logical address
+         * @param destAddress destination logical address
          * @param params vendor-specific parameters
          * @param hasVendorId {@code true} if the command is &lt;Vendor Command
          *        With ID&gt;. The first 3 bytes of params is vendor id.
          */
-        void onReceived(int srcAddress, byte[] params, boolean hasVendorId);
+        void onReceived(int srcAddress, int destAddress, byte[] params, boolean hasVendorId);
+
+        /**
+         * The callback is called:
+         * <ul>
+         *     <li> before HdmiControlService is disabled.
+         *     <li> after HdmiControlService is enabled and the local address is assigned.
+         * </ul>
+         * The client shouldn't hold the thread too long since this is a blocking call.
+         *
+         * @param enabled {@code true} if HdmiControlService is enabled.
+         * @param reason the reason code why the state of HdmiControlService is changed.
+         * @see #CONTROL_STATE_CHANGED_REASON_START
+         * @see #CONTROL_STATE_CHANGED_REASON_SETTING
+         * @see #CONTROL_STATE_CHANGED_REASON_WAKEUP
+         * @see #CONTROL_STATE_CHANGED_REASON_STANDBY
+         */
+        void onControlStateChanged(boolean enabled, int reason);
     }
 
     /**
@@ -357,12 +390,19 @@ public final class HdmiControlManager {
      */
     public void addHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
             return;
         }
+        if (mHotplugEventListeners.containsKey(listener)) {
+            Log.e(TAG, "listener is already registered");
+            return;
+        }
+        IHdmiHotplugEventListener wrappedListener = getHotplugEventListenerWrapper(listener);
+        mHotplugEventListeners.put(listener, wrappedListener);
         try {
-            mService.addHotplugEventListener(getHotplugEventListenerWrapper(listener));
+            mService.addHotplugEventListener(wrappedListener);
         } catch (RemoteException e) {
-            // Do nothing.
+            Log.e(TAG, "failed to add hotplug event listener: ", e);
         }
     }
 
@@ -373,12 +413,18 @@ public final class HdmiControlManager {
      */
     public void removeHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            return;
+        }
+        IHdmiHotplugEventListener wrappedListener = mHotplugEventListeners.remove(listener);
+        if (wrappedListener == null) {
+            Log.e(TAG, "tried to remove not-registered listener");
             return;
         }
         try {
-            mService.removeHotplugEventListener(getHotplugEventListenerWrapper(listener));
+            mService.removeHotplugEventListener(wrappedListener);
         } catch (RemoteException e) {
-            // Do nothing.
+            Log.e(TAG, "failed to remove hotplug event listener: ", e);
         }
     }
 

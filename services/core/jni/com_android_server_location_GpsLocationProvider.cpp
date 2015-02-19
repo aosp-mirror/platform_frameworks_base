@@ -1203,6 +1203,7 @@ static jobject translate_gps_measurement(JNIEnv* env, GpsMeasurement* measuremen
             usedInFixSetterMethod,
             (flags & GPS_MEASUREMENT_HAS_USED_IN_FIX) && measurement->used_in_fix);
 
+    env->DeleteLocalRef(gpsMeasurementClass);
     return gpsMeasurementObject;
 }
 

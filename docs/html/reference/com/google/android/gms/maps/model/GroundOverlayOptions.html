@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GroundOverlayOptions</li>
       </ul>
     </div>
@@ -725,13 +794,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -796,10 +858,13 @@ Summary:
   
       implements 
       
-        SafeParcelable
+        Parcelable 
       
   
   
+
+
+    
 
 
 </div><!-- end header -->
@@ -884,7 +949,12 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">float</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#NO_DIMENSION">NO_DIMENSION</a></td>
-        <td class="jd-descrcol" width="100%">Flag for when no dimension is specified for the height.</td>
+        <td class="jd-descrcol" width="100%">
+          Flag for when no dimension is specified for the height.
+          
+    
+
+        </td>
     </tr>
     
     
@@ -923,48 +993,27 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
 </table>
   </div>
 </div>
@@ -999,7 +1048,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#GroundOverlayOptions()">GroundOverlayOptions</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Creates a new set of ground overlay options.</div>
+        <div class="jd-descrdiv">
+          Creates a new set of ground overlay options.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1030,7 +1084,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#anchor(float, float)">anchor</a></span>(float u, float v)</nobr>
         
-        <div class="jd-descrdiv">Specifies the anchor to be at a particular point in the image.</div>
+        <div class="jd-descrdiv">
+          Specifies the anchor to be at a particular point in the image.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1048,29 +1107,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#bearing(float)">bearing</a></span>(float bearing)</nobr>
         
-        <div class="jd-descrdiv">Specifies the bearing of the ground overlay in degrees clockwise from north.</div>
+        <div class="jd-descrdiv">
+          Specifies the bearing of the ground overlay in degrees clockwise from north.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#describeContents()">describeContents</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1082,13 +1130,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getAnchorU()">getAnchorU</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Horizontal distance, normalized to [0, 1], of the anchor from the left edge.</div>
+        <div class="jd-descrdiv">
+          Horizontal distance, normalized to [0, 1], of the anchor from the left edge.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1100,13 +1153,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getAnchorV()">getAnchorV</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Vertical distance, normalized to [0, 1], of the anchor from the top edge.</div>
+        <div class="jd-descrdiv">
+          Vertical distance, normalized to [0, 1], of the anchor from the top edge.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1118,13 +1176,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getBearing()">getBearing</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the bearing set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the bearing set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1136,13 +1199,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getBounds()">getBounds</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the bounds set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the bounds set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1154,13 +1222,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getHeight()">getHeight</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the height set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the height set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1172,13 +1245,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getImage()">getImage</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the image set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the image set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1190,13 +1268,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getLocation()">getLocation</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the location set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the location set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1208,13 +1291,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getTransparency()">getTransparency</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the transparency set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the transparency set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1226,13 +1314,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getWidth()">getWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the width set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the width set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1244,13 +1337,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#getZIndex()">getZIndex</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the zIndex set for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the zIndex set for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1262,13 +1360,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#image(com.google.android.gms.maps.model.BitmapDescriptor)">image</a></span>(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> image)</nobr>
         
-        <div class="jd-descrdiv">Specifies the image for this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Specifies the image for this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1280,13 +1383,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#isVisible()">isVisible</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the visibility setting for this options object.</div>
+        <div class="jd-descrdiv">
+          Gets the visibility setting for this options object.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1298,14 +1406,19 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#position(com.google.android.gms.maps.model.LatLng, float, float)">position</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> location, float width, float height)</nobr>
         
-        <div class="jd-descrdiv">Specifies the position for this ground overlay using an anchor point (a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>),
- width and height (both in meters).</div>
+        <div class="jd-descrdiv">
+          Specifies the position for this ground overlay using an anchor point (a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>),
+ width and height (both in meters).
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1317,14 +1430,19 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#position(com.google.android.gms.maps.model.LatLng, float)">position</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> location, float width)</nobr>
         
-        <div class="jd-descrdiv">Specifies the position for this ground overlay using an anchor point (a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>)
- and the width (in meters).</div>
+        <div class="jd-descrdiv">
+          Specifies the position for this ground overlay using an anchor point (a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>)
+ and the width (in meters).
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1336,25 +1454,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#positionFromBounds(com.google.android.gms.maps.model.LatLngBounds)">positionFromBounds</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a> bounds)</nobr>
         
-        <div class="jd-descrdiv">Specifies the position for this ground overlay.</div>
-  
-  </td></tr>
+        <div class="jd-descrdiv">
+          Specifies the position for this ground overlay.
+          
+    
 
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html">GroundOverlayOptions</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#transparency(float)">transparency</a></span>(float transparency)</nobr>
-        
-        <div class="jd-descrdiv">Specifies the transparency of the ground overlay.</div>
+        </div>
   
   </td></tr>
 
@@ -1370,15 +1475,43 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             <a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html">GroundOverlayOptions</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#visible(boolean)">visible</a></span>(boolean visible)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#transparency(float)">transparency</a></span>(float transparency)</nobr>
         
-        <div class="jd-descrdiv">Specifies the visibility for the ground overlay.</div>
+        <div class="jd-descrdiv">
+          Specifies the transparency of the ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html">GroundOverlayOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#visible(boolean)">visible</a></span>(boolean visible)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies the visibility for the ground overlay.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1394,7 +1527,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1406,7 +1539,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html#zIndex(float)">zIndex</a></span>(float zIndex)</nobr>
         
-        <div class="jd-descrdiv">Specifies the ground overlay's zIndex, i.e., the order in which it will be drawn.</div>
+        <div class="jd-descrdiv">
+          Specifies the ground overlay's zIndex, i.e., the order in which it will be drawn.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1685,8 +1823,6 @@ From interface
 </td></tr>
 
 
-
-
 </table>
 
 
@@ -1735,6 +1871,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Flag for when no dimension is specified for the height. </p></div>
 
@@ -1788,6 +1927,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new set of ground overlay options. </p></div>
 
     </div>
@@ -1831,6 +1973,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the anchor to be at a particular point in the image.
  <p>
@@ -1895,6 +2040,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the bearing of the ground overlay in degrees clockwise from north. The rotation
  is performed about the anchor point. If not specified, the default is 0 (i.e., up on the
  image points north).
@@ -1916,35 +2064,6 @@ From interface
       <ul class="nolist"><li>this <code><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html">GroundOverlayOptions</a></code> object with a new bearing set.
 </li></ul>
   </div>
-
-    </div>
-</div>
-
-
-<A NAME="describeContents()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1972,6 +2091,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Horizontal distance, normalized to [0, 1], of the anchor from the left edge.</p></div>
   <div class="jd-tagdata">
@@ -2007,6 +2129,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Vertical distance, normalized to [0, 1], of the anchor from the top edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2041,6 +2166,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the bearing set for this options object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2074,6 +2202,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the bounds set for this options object.</p></div>
   <div class="jd-tagdata">
@@ -2111,6 +2242,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the height set for this options object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2145,6 +2279,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the image set for this options object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2178,6 +2315,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the location set for this options object.</p></div>
   <div class="jd-tagdata">
@@ -2214,6 +2354,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the transparency set for this options object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2247,6 +2390,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the width set for this options object.</p></div>
   <div class="jd-tagdata">
@@ -2282,6 +2428,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the zIndex set for this options object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2315,6 +2464,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the image for this ground overlay.
  <p>
@@ -2366,6 +2518,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the visibility setting for this options object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2399,6 +2554,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the position for this ground overlay using an anchor point (a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>),
  width and height (both in meters). When rendered, the image will be scaled to fit the
@@ -2474,6 +2632,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the position for this ground overlay using an anchor point (a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>)
  and the width (in meters). When rendered, the image will retain its proportions from the
  bitmap, i.e., the height will be calculated to preserve the original proportions of the
@@ -2546,6 +2707,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the position for this ground overlay. When rendered, the image will be scaled
  to fit the bounds (i.e., its proportions will not necessarily be preserved).</p></div>
   <div class="jd-tagdata">
@@ -2599,6 +2763,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the transparency of the ground overlay. The default transparency is <code>0</code>
  (opaque).</p></div>
@@ -2655,6 +2822,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the visibility for the ground overlay. The default visibility is <code>true</code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2689,6 +2859,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2717,6 +2890,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the ground overlay's zIndex, i.e., the order in which it will be drawn. See the
  documentation at the top of this class for more information about zIndex.</p></div>

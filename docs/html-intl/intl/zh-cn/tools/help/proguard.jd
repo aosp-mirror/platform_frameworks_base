@@ -1,0 +1,133 @@
+page.title=ProGuard
+parent.title=Tools
+parent.link=index.html
+page.type=工具
+@jd:body
+
+      <div id="qv-wrapper">
+      <div id="qv">
+        <h2>本文内容</h2>
+
+        <ol>
+          <li><a href="#enabling">启用 ProGuard</a></li>
+
+          <li><a href="#configuring">配置 ProGuard</a></li>
+
+          <li>
+            <a href="#decoding">解码混淆后的堆栈跟踪信息</a>
+
+            <ol>
+              <li><a href="#considerations">调试已发布应用时应注意的事项</a></li>
+            </ol>
+          </li>
+        </ol>
+
+        <h2>另请参见</h2>
+
+        <ol>
+          <li>
+            <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html">ProGuard 手册 »</a>
+          </li>
+          <li>
+            <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/retrace/introduction.html">ProGuard ReTrace 手册 »</a>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <p>ProGuard 工具通过移除无用的代码以及使用语义隐晦的名称来重命名类、字段和方法，从而达到压缩、优化和混淆代码的目的。最终您将获得一个较小的 <code>.apk</code> 文件，此文件更难于进行反向工程。由于 ProGuard 会使应用更难于进行反向工程，因此当应用使用对安全性要求极高的功能时（例如，当您<a href="{@docRoot}google/play/licensing/index.html">向应用授予许可</a>时），您必须使用此工具。</p>
+
+    <p>ProGuard 已集成到 Android 构建系统，所以您无需手动调用此工具。只有当您在发布模式下构建应用时，ProGuard 才会运行，因此当您在调试模式下构建应用时，就无需处理混淆后的代码。是否运行 ProGuard 完全由您决定，但我们强烈建议您运行该工具。</p>
+
+    <p>本文介绍如何启用和配置 ProGuard，以及如何使用 <code>retrace</code> 工具解码混淆后的堆栈跟踪信息。</p>
+
+    <h2 id="enabling">启用 ProGuard</h2>
+
+    <p>当您创建 Android 项目时，系统会在该项目的根目录中自动生成一个 <code>proguard.cfg</code> 文件。此文件将定义 ProGuard 会如何优化和混淆代码，因此您必须了解如何根据自己的需求对其进行自定义。默认的配置文件只涵盖一般的使用情形，因此您极有可能需要根据自己的需求对其进行修改。请参阅下文<a href="#configuring">配置 ProGuard</a> 这一部分，了解如何自定义 ProGuard 配置文件。</p>
+
+    <p>要启用 ProGuard，让其作为 Ant 或 Eclipse 构建环境的一部分运行，请在 <code>&lt;project_root&gt;/project.properties</code> 文件中设置 <code>proguard.config</code> 属性。该路径可以是绝对路径，也可以是项目根目录的相对路径。</p>
+
+  <p class="note"><strong>注意</strong>：在使用 Android Studio 时，您必须将 Proguard 添加到 <code>gradle.build</code> 文件的构建类型中。有关详情，请参阅 <a href="http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Running-ProGuard">Gradle 插件用户指南</a>。
+
+  <p>如果您将 <code>proguard.cfg</code> 文件留在默认位置（项目的根目录中），则可以按如下格式指定其位置：</p>
+  <pre class="no-pretty-print">
+  proguard.config=proguard.cfg
+  </pre>
+  <p>
+  您也可以将此文件移到任何所需的位置，然后按如下格式指定其绝对路径：
+  </p>
+  <pre class="no-pretty-print">
+  proguard.config=/path/to/proguard.cfg
+  </pre>
+
+
+    <p>当您在发布模式下构建应用时，无论是通过运行 <code>ant release</code> 还是通过使用 Eclipse 中的“导出向导”，构建系统都会自动检查是否设置了 <code>proguard.config</code> 属性。<em></em>如果已设置该属性，ProGuard 会自动处理应用的字节码，然后再将所有内容打包到 <code>.apk</code> 文件中。在调试模式下进行构建时之所以不调用 ProGuard，是因为该工具会加大调试难度。</p>
+
+    <p>ProGuard 在运行后会输出以下文件：</p>
+
+    <dl>
+      <dt><code>dump.txt</code></dt>
+      <dd>描述 <code>.apk</code> 文件中所有类文件的内部结构</dd>
+
+      <dt><code>mapping.txt</code></dt>
+      <dd>列出原始与混淆后的类、方法和字段名称之间的对应关系。如果您从发布版本收到问题报告，则必须使用此文件，因为通过它可将混淆后的堆栈跟踪信息转换为原始的类、方法和成员名称。有关详情，请参阅<a href="#decoding">解码混淆后的堆栈跟踪信息</a>。</dd>
+
+      <dt><code>seeds.txt</code></dt>
+      <dd>列出未混淆的类和成员</dd>
+
+      <dt><code>usage.txt</code></dt>
+      <dd>列出从 <code>.apk</code> 删除的代码</dd>
+    </dl>
+
+    <p>这些文件都位于以下目录中：</p>
+
+    <ul>
+      <li><code>&lt;project_root&gt;/bin/proguard</code>（如果您使用的是 Ant）。</li>
+
+      <li><code>&lt;project_root&gt;/proguard</code>（如果您使用的是 Eclipse）。</li>
+    </ul>
+
+
+    <p class="caution"><strong>注意</strong>：每当您在发布模式下构建版本时，这些文件都会被 ProGuard 最新生成的文件覆盖。请在每次发布应用时为这些文件保存一份副本，以便反混淆来自发布版本的问题报告。如需详细了解为何要保存这些文件，请参阅<a href="#considerations">调试已发布应用时应注意的事项</a>。
+    </p>
+
+    <h2 id="configuring">配置 ProGuard</h2>
+
+    <p>在某些情况下，<code>proguard.cfg</code> 文件中的默认配置足以满足您的需求。不过，在很多情况下，ProGuard 很难做出正确分析，因此可能会移除它认为无用而实际上您的应用却需要的代码。部分示例如下：</p>
+
+    <ul>
+      <li>一个只在 <code>AndroidManifest.xml</code> 文件中引用的类</li>
+
+      <li>一个通过 JNI 调用的方法</li>
+
+      <li>动态引用的字段和方法</li>
+    </ul>
+
+    <p>默认的 <code>proguard.cfg</code> 文件旨在涵盖一般的使用情形，但您可能会遇到异常情况，例如 <code>ClassNotFoundException</code>（此异常情况会在 ProGuard 删除您的应用调用的整个类时发生）。</p>
+
+    <p>您可以通过在 <code>proguard.cfg</code> 文件中添加一个 <code>-keep</code> 行，来修复因 ProGuard 在删除代码而造成的错误。例如：</p>
+    <pre>
+  -keep public class &lt;MyClass&gt;
+  </pre>
+
+    <p>在使用 <code>-keep</code> 选项时，您既有许多选择也有不少需要注意的方面，因此我们强烈建议您阅读 <a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html">ProGuard 手册</a>，详细了解如何自定义您的配置文件。该手册中的“Keep 选项概述”和“示例”部分尤其有用；<em></em><em></em><a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/troubleshooting.html">问题排查</a>部分则概述了在 ProGuard 删除代码后您可能会遇到的其他常见问题。</p>
+
+    <h2 id="decoding">解码混淆后的堆栈跟踪信息</h2>
+
+    <p>当混淆后的代码输出堆栈跟踪信息时，方法名称会被混淆，即便仍能进行调试，难度也会很大。幸运的是，ProGuard 在每次运行时都会输出一个 <code>&lt;project_root&gt;/bin/proguard/mapping.txt</code> 文件，其中会显示与混淆后的名称相对应的原始的类、方法和字段名称。</p>
+
+    <p>Windows 上的 <code>retrace.bat</code> 脚本以及 Linux 或 Mac OS X 上的 <code>retrace.sh</code> 脚本可以将混淆后的堆栈跟踪信息转换成可读文件，此文件位于 <code>&lt;sdk_root&gt;/tools/proguard/</code> 目录中。执行 <code>retrace</code> 工具的语法如下：</p>
+    <pre>retrace.bat|retrace.sh [-verbose] mapping.txt [&lt;stacktrace_file&gt;]</pre>
+    <p>例如：</p>
+
+    <pre>retrace.bat -verbose mapping.txt obfuscated_trace.txt</pre>
+
+    <p>如果您不为“&lt;stacktrace_file&gt;”指定值，<code>retrace</code> 工具会从标准输入中读取。<em></em></p>
+
+    <h3 id="considerations">调试已发布应用时应注意的事项</h3>
+
+    <p>每次向用户发布应用时，都请保存所发布版本的 <code>mapping.txt</code> 文件。这样一来，如果用户遇到问题，并向您提交混淆后的堆栈跟踪信息，您就可以利用为每个发布版本保存的 <code>mapping.txt</code> 文件副本调试问题。每当您构建发布版本时，项目的 <code>mapping.txt</code> 文件都会被覆盖，因此您必须谨慎保存所需的版本。</p>
+
+    <p>例如，假设您发布了某个应用，并继续开发该应用的新功能，以便将来发布新版本。之后不久您使用 ProGuard 构建发布版本。此版本覆盖了之前的 <code>mapping.txt</code> 文件。之后，某位用户提交了问题报告，其中包含来自当前已发布的应用的堆栈跟踪信息。但您已无法调试该用户的堆栈跟踪信息，因为与该用户设备上的版本相关联的 <code>mapping.txt</code> 文件已被覆盖。除此之外，其他一些情况也可能会导致您的 <code>mapping.txt</code> 文件被覆盖。因此，如果您预计需要进行调试，请务必在每次发布应用时都保存一份副本。</p>
+
+    <p>如何保存 <code>mapping.txt</code> 文件由您自行决定。例如，您可以将其重命名以使其名称中包含版本号，也可以对其（连同源代码一起）进行版本管理。</p>

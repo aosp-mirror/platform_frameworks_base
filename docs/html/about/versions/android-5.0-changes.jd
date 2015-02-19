@@ -1,0 +1,600 @@
+page.title=Android 5.0 Behavior Changes
+excludeFromSuggestions=true
+sdk.platform.version=5.0
+sdk.platform.apiLevel=21
+@jd:body
+
+<!-- video box -->
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#UI"><a href="#ART">ART Runtime</a></a></li>
+  <li><a href="#BehaviorNotifications">Notifications</a></li>
+  <li><a href="#BehaviorMediaControl">Media Controls</a></li>
+  <li><a href="#BehaviorGetRecentTasks">getRecentTasks()</a></li>
+  <li><a href="#64BitSupport">64-Bit Android NDK</a></li>
+  <li><a href="#BindService">Binding to a Service</a></li>
+  <li><a href="#Power"><a href="#BehaviorWebView">WebView</a></a></li>
+  <li><a href="#custom_permissions">Custom Permissions</a></li>
+  <li><a href="#ssl">TLS/SSL Configuration</a></li>
+  <li><a href="#managed_profiles">Support for Managed Profiles</a></li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
+</ol>
+
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/lollipop.html">Android Lollipop Highlights</a> </li>
+<li><a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API Overview</a> </li>
+</ol>
+
+
+</div>
+</div>
+
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=um1S2u022HA">
+<div>
+    <h3>Video</h3>
+    <p>Dev Byte: What's New in Android 5.0</p>
+</div>
+</a>
+
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<div>
+    <h3>Video</h3>
+    <p>Dev Byte: Notifications</p>
+</div>
+</a>
+
+<p>API Level: {@sdkPlatformApiLevel}</p>
+<p>Along with new features and capabilities, Android 5.0 includes a variety of
+system changes and API behavior changes. This document highlights
+some of the key changes that you should be understand and account for in your apps.</p>
+
+<p>If you have previously published an app for Android, be aware that your app
+  might be affected by these changes in Android 5.0.</p>
+
+
+<p>For a high-level look at the new platform features, instead
+see the
+<a href="{@docRoot}about/versions/lollipop.html">Android Lollipop
+highlights</a>.</p>
+
+
+
+<h2 id="ART">Android Runtime (ART)</h2>
+
+<p>In Android 5.0 the ART runtime replaces Dalvik as the platform default. The ART runtime was
+introduced in Android 4.4 on an experimental basis.</p>
+
+<p>For an overview of ART's new features, see
+<a href="https://source.android.com/devices/tech/dalvik/art.html">Introducing
+ART</a>. Some of the major new features are:</p>
+
+<ul>
+  <li>Ahead-of-time (AOT) compilation</li>
+  <li>Improved garbage collection (GC)</li>
+  <li>Improved debugging support</li>
+</ul>
+
+<p>Most Android apps should just work without any changes under ART. However, some
+techniques that work on Dalvik do not work on ART. For information about the
+most important issues, see
+<a href="{@docRoot}guide/practices/verifying-apps-art.html">Verifying App
+Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
+
+<ul>
+  <li>Your app uses Java Native Interface (JNI) to run C/C++ code.</li>
+  <li>You use development tools that generate non-standard code (such as some
+      obfuscators).</li>
+  <li>You use techniques that are incompatible with compacting garbage
+      collection.</li>
+</ul>
+
+
+<h2 id="BehaviorNotifications">Notifications</h2>
+
+<p>Make sure your notifications take these Android 5.0 changes into account.
+ To learn more about designing your notifications for Android 5.0 and higher,
+ see the <a href="{@docRoot}design/patterns/notifications.html">notifications design guide</a>.
+</p>
+
+<h3 id="NotificationsMaterialDesignStyle">Material design style</h3>
+<p>Notifications are drawn with dark text atop white (or very light) backgrounds
+  to match the new material design widgets. Make sure that all your
+  notifications look right with the new color scheme. If your notifications
+look wrong, fix them:</p>
+
+<ul>
+  <li>Use {@link android.app.Notification.Builder#setColor(int) setColor()}
+    to set an accent color in a circle behind your icon image. </li>
+  <li>Update or remove assets that involve color. The system ignores all
+    non-alpha channels in action icons and in the main notification icon. You
+    should assume that these icons will be alpha-only. The system draws
+    notification icons in white and action icons in dark gray.</li>
+</ul>
+
+<h3 id="NotificationsSoundVibration">Sound and vibration</h3>
+<p>If you are currently adding sounds and vibrations to your notifications by
+using the {@link android.media.Ringtone}, {@link android.media.MediaPlayer},
+or {@link android.os.Vibrator} classes, remove this code so that
+the system can present notifications correctly in
+<em>priority</em> mode. Instead, use
+{@link android.app.Notification.Builder} methods to add sounds and
+vibration.</p>
+
+<p>Setting the device to
+{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} causes
+the device to enter the new priority mode. The device leaves priority
+mode if you set it to
+{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} or
+{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}.</p>
+
+<p>Previously, Android used {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC}
+as the master stream to control volume on tablet devices. In Android 5.0, the
+master volume stream for both phone and tablet devices is now unified, and
+is controlled by {@link android.media.AudioManager#STREAM_RING STREAM_RING} or
+{@link android.media.AudioManager#STREAM_NOTIFICATION STREAM_NOTIFICATION}.</p>
+
+<h3 id="NotificationsLockscreenVisibility">Lock screen visibility</h3>
+<p>By default, notifications now appear on the user's lock screen in Android 5.0.
+Users can choose to protect sensitive information from being exposed, in which
+case the system automatically redacts the text displayed by the notification. To
+customize this redacted notification, use
+{@link android.app.Notification.Builder#setPublicVersion(android.app.Notification)
+  setPublicVersion()}.</p>
+<p>If the notification does not contain personal information, or if you want to
+allow media playback control on the notification, call the
+{@link android.app.Notification.Builder#setVisibility(int) setVisibility()}
+method and set the notification's visibility level to
+{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}.
+</p>
+
+<h3 id="NotificationsMediaPlayback">Media playback</h3>
+<p>If you are implementing notifications that present media playback
+status or transport controls, consider using the new
+{@link android.app.Notification.MediaStyle} template instead of a custom
+{@link android.widget.RemoteViews.RemoteView} object. Whichever approach you
+choose, make sure to set the notification's visibility to
+{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC} so that
+your controls are accessible from the lock screen. Note that beginning in
+Android 5.0, the system no longer shows
+{@link android.media.RemoteControlClient} objects on the lock screen. For more
+information, see
+<a href="#BehaviorMediaControl">If your app uses RemoteControlClient</a>.</p>
+
+<h3 id="NotificationsHeadsup">Heads-up notification</h3>
+<p>Notifications may now appear in a small floating window (also called a
+  heads-up notification) when the device is active (that is, the device is
+  unlocked and its screen is on). These notifications appear similar to the
+  compact form of your notification, except that the heads-up notification also
+  shows action buttons. Users can act on, or dismiss, a heads-up notification
+  without leaving the current app.</p>
+
+<p>Examples of conditions that may trigger heads-up notifications include:</p>
+
+<ul>
+  <li>The user's activity is in fullscreen mode (the app uses
+{@link android.app.Notification#fullScreenIntent})</li>
+  <li>The notification has high priority and uses ringtones or vibrations</li>
+</ul>
+
+<p>If your app implements notifications under any of those scenarios, make sure
+that heads-up notifications are presented correctly.</p>
+
+<h2 id="BehaviorMediaControl">Media Controls and RemoteControlClient</h2>
+<p>The {@link android.media.RemoteControlClient} class is now deprecated. Switch
+  to the new {@link android.media.session.MediaSession} API as
+  soon as possible.</p>
+
+<p>Lock screens in Android 5.0 do not show transport controls for
+your {@link android.media.session.MediaSession} or
+{@link android.media.RemoteControlClient}. Instead, your app can provide
+media playback control from the lock screen through a notification. This
+gives your app more control over the presentation of media buttons, while
+providing a consistent experience for users across locked and
+unlocked devices.</p>
+
+<p>Android 5.0 introduces a new
+{@link android.app.Notification.MediaStyle} template for this purpose.
+{@link android.app.Notification.MediaStyle} converts notification
+actions that you added with
+{@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence,
+  android.app.PendingIntent)
+Notification.Builder.addAction()} into compact buttons embedded in your app's
+media playback notifications. Pass your session token to the
+{@link android.app.Notification.MediaStyle#setMediaSession(android.media.session.MediaSession.Token)
+  setSession()} method to inform the system that this notification controls an
+  ongoing media session.</p>
+
+<p>Make sure to set the notification's visibility to
+  {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}
+  to mark the notification as safe to show on any lock screen (secure or
+  otherwise). For more information, see
+  <a href="#LockscreenNotifications">Lock screen notifications</a>.</p>
+
+<p>To display media playback controls if your app is running on the
+Android <a href="{@docRoot}tv/index.html">TV</a> or
+<a href="{@docRoot}wear/index.html">Wear</a> platform, implement the
+{@link android.media.session.MediaSession} class. You should also implement
+{@link android.media.session.MediaSession} if your app needs to receive media
+button events on Android devices.</p>
+
+<h2 id="BehaviorGetRecentTasks">getRecentTasks()</h2>
+
+<p>With the introduction of the new <em>concurrent documents and activities
+tasks</em> feature in Android 5.0 (see <a href="#Recents">Concurrent
+documents and activities in the recents screen</a> below),
+the {@link android.app.ActivityManager#getRecentTasks
+ActivityManager.getRecentTasks()} method is now deprecated to improve user
+privacy. For backward compatibility, this method still returns a small subset of
+its data, including the calling application’s own tasks and possibly some other
+non-sensitive tasks (such as Home). If your app is using this method to retrieve
+its own tasks, use {@link android.app.ActivityManager#getAppTasks() getAppTasks()}
+instead to retrieve that information.</p>
+
+<h2 id="64BitSupport">64-Bit Support in the Android NDK</h2>
+
+<p>Android 5.0 introduces support for 64-bit systems. The 64-bit enhancement
+  increases address space and improves performance, while still supporting
+  existing 32-bit apps fully. The 64-bit support also improves the performance of
+  OpenSSL for cryptography. In addition, this release introduces new native
+  media NDK APIs, as well as native OpenGL ES (GLES) 3.1 support.</p>
+
+<p>To use the 64-bit support provided in Android 5.0, download and install NDK
+  Revision 10c from the
+<a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK page</a>. Refer to the
+Revision 10c <a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">release notes</a>
+for more information about important changes and bug fixes to the NDK.</p>
+
+<h2 id="BindService">Binding to a Service</h2>
+
+<p>The
+  {@link android.content.Context#bindService(android.content.Intent, android.content.ServiceConnection, int) Context.bindService()}
+  method now requires an explicit {@link android.content.Intent},
+and throws an exception if given an implicit intent.
+To ensure your app is secure, use an explicit intent when starting or binding
+your {@link android.app.Service}, and do not declare intent filters for the service.</p>
+
+<h2 id="BehaviorWebView">WebView</h2>
+
+<p>Android 5.0 changes the default behavior for your app.</p>
+<ul>
+<li><strong>If your app targets API level 21 or higher:</strong>
+  <ul>
+    <li>The system
+  blocks <a href="https://developer.mozilla.org/en-US/docs/Security/MixedContent"
+  class="external-link">mixed content</a> and third party cookies by default. To allow mixed
+  content and third party cookies, use the
+  {@link android.webkit.WebSettings#setMixedContentMode(int) setMixedContentMode()}
+and {@link android.webkit.CookieManager#setAcceptThirdPartyCookies(android.webkit.WebView, boolean) setAcceptThirdPartyCookies()}
+methods respectively.</li>
+    <li>The system now intelligently chooses portions of the HTML
+      document to draw. This new default behavior helps to reduce memory
+      footprint and increase performance. If you want to
+      render the whole document at once, disable this optimization by calling
+      {@link android.webkit.WebView#enableSlowWholeDocumentDraw()}.</li>
+  </ul>
+</li>
+<li><strong>If your app targets API levels lower than 21:</strong> The system
+  allows mixed content and third party cookies, and always renders the whole
+  document at once.</li>
+</ul>
+
+<h2 id="custom_permissions">Uniqueness Requirement for Custom Permissions</h2>
+
+<p>
+  As documented in the <a href=
+  "{@docRoot}guide/topics/manifest/manifest-intro.html#perms">Permissions</a>
+  overview, Android apps can define custom permissions as a means of managing
+  access to components in a proprietary way, without using the platform’s
+  pre-defined system permissions. Apps define custom permissions in <a href=
+  "http://developer.android.com/guide/topics/manifest/permission-element.html"><code>
+  &lt;permission&gt;</code></a> elements declared in their manifest files.
+</p>
+
+<p>
+  There are a small number of scenarios where defining custom permissions is a
+  legitimate and secure approach. However, creating custom permissions is
+  sometimes unnecessary and can even introduce potential risk to an app,
+  depending on the protection level assigned to the permissions.
+</p>
+
+<p>
+  Android 5.0 includes a behavior change to ensure
+  that only one app can define a given custom permission, unless signed with the
+  same key as other apps defining the permission.
+</p>
+
+<h3>
+  Apps using duplicate custom permissions
+</h3>
+
+<p>
+  Any app can define any custom permission it wants, so it can happen
+  that multiple apps might <strong>define the same custom permission</strong>.
+  For example, if two apps offer a similar capability, they might derive the
+  same logical name for their custom permissions. Apps might also incorporate
+  common public libraries or code examples that themselves include the same
+  custom permission definitions.
+</p>
+
+<p>
+  In Android 4.4 and earlier, users were able to install multiple such
+  apps on a given device, although the system assigned the protection level
+  specified by the first-installed app.
+</p>
+
+<p>
+  Starting in Android 5.0, the system enforces a new
+  <strong>uniqueness restriction on custom permissions</strong> for
+  apps that are signed with different keys. Now only one app on a device can
+  define a given custom permission (as determined by its name), unless the
+  other app defining the permission is signed with the same key. If the user
+  tries to install an app with a duplicate custom permission and is not signed
+  with the same key as the resident app that defines the permission, the system
+  blocks the installation.
+</p>
+
+<h3>
+  Considerations for your app
+</h3>
+
+<p>
+  In Android 5.0 and later, apps can continue to define their own custom
+  permissions just as before and to request custom permissions from other apps
+  through the <code>&lt;uses-permission&gt;</code> mechanism. However with the
+  new requirement introduced in Android 5.0, you should carefully assess
+  possible impacts on your app.
+</p>
+
+<p>
+  Here are some points to consider:
+</p>
+
+<ul>
+  <li>Does your app declare any <a href=
+  "http://developer.android.com/guide/topics/manifest/permission-element.html">
+    <code>&lt;permission&gt;</code></a> elements in its manifest? If so, are
+    they actually necessary to the proper function of your app or service? Or
+    could you use a system default permission instead?
+  </li>
+
+  <li>If you have <a href=
+  "http://developer.android.com/guide/topics/manifest/permission-element.html">
+    <code>&lt;permission&gt;</code></a> elements in your app, do you know where
+    they came from?
+  </li>
+
+  <li>Do you actually intend for other apps to request your custom permissions
+  through <a href=
+  "http://developer.android.com/guide/topics/manifest/uses-permission-element.html">
+    <code>&lt;uses-permission&gt;</code></a>?
+  </li>
+
+  <li>Are you using boilerplate or example code in your app that includes
+  <a href=
+  "http://developer.android.com/guide/topics/manifest/permission-element.html">
+    <code>&lt;permission&gt;</code></a> elements? Are those permission elements
+    actually necessary?
+  </li>
+
+  <li>Do your custom permissions use names that are simple or based on common
+  terms that other apps might share?
+  </li>
+</ul>
+
+<h3>
+  New installs and updates
+</h3>
+
+<p>
+  As mentioned above, for new installs and updates of your app on devices
+  running Android 4.4 or earlier are unaffected and there is no change in
+  behavior. For new installs and updates on devices running Android 5.0 or
+  later, the system <strong>prevents installation of your app</strong> if it
+  defines a custom permission that is already defined by an existing resident
+  app.
+</p>
+
+<h3>
+  Existing installs with Android 5.0 system update
+</h3>
+
+<p>
+  If your app uses custom permissions and is widely distributed and installed,
+  there’s a chance that it will be affected when users receive update their
+  devices to Android 5.0. After the system update is installed, the system
+  revalidates installed apps, including a check of their custom permissions. If
+  your app defines a custom permission that is already defined by another app
+  that has already been validated, and your app is not signed with the same key
+  as the other app, the system <strong>does not re-install your app</strong>.
+</p>
+
+<h3>
+  Recommendations
+</h3>
+
+<p>
+  On devices running Android 5.0 or later, we recommend that you examine your
+  app immediately, make any adjustments needed, and publish the updated version
+  as soon as possible to your users.
+</p>
+
+<ul>
+  <li>If you are using custom permissions in your app, consider their origin
+  and whether you actually need them. Remove all <a href=
+  "http://developer.android.com/guide/topics/manifest/permission-element.html">
+    <code>&lt;permission&gt;</code></a> elements from your app, unless you are
+    certain that they are required for proper function of your app.
+  </li>
+
+  <li>Consider replacing your custom permissions with system default
+  permissions where possible.
+  </li>
+
+  <li>If your app requires custom permissions, rename your custom permissions
+  to be unique to your app, such as by appending them to the full package name
+  of your app.
+  </li>
+
+  <li>If you have a suite of apps <em>signed with different keys</em> and the apps
+  access a shared component by means of a custom permission, make sure that the
+  custom permission is only defined once, in the shared component. Apps that
+  use the shared component should not define the custom permission themselves,
+  but should instead request access through the <a href=
+  "{@docRoot}guide/topics/manifest/uses-permission-element.html">
+    <code>&lt;uses-permission&gt;</code></a> mechanism.
+  </li>
+
+  <li>If you have a suite of apps are <em>signed with the same key</em>,
+  each app can define the same custom permission(s) as <span style="white-space:nowrap;">needed
+  &mdash; the</span> system allows the apps to be installed in the usual way.
+  </li>
+
+</ul>
+
+
+<h2 id="ssl">
+  TLS/SSL Default Configuration Changes
+</h2>
+
+<p>
+  Android 5.0 introduces changes the default TLS/SSL configuration used by apps
+  for HTTPS and other TLS/SSL traffic:
+</p>
+
+<ul>
+  <li>TLSv1.2 and TLSv1.1 protocols are now enabled,</li>
+  <li>AES-GCM (AEAD) cipher suites are now enabled,</li>
+  <li>MD5, 3DES, export, and static key ECDH cipher suites are now disabled,</li>
+  <li>Forward Secrecy cipher suites (ECDHE and DHE) are preferred.</li>
+</ul>
+
+<p>
+  These changes may lead to breakages in HTTPS or TLS/SSL connectivity in a
+  small number of cases listed below.
+</p>
+
+<p>
+  Note that the security ProviderInstaller from Google Play services already
+  offers these changes across Android platform versions back to Android 2.3.
+</p>
+
+<h3>
+  Server does not support any of the enabled ciphers suites
+</h3>
+
+<p>
+  For example, a server might support only 3DES or MD5 cipher suites. The
+  preferred fix is to improve the server’s configuration to enable stronger and
+  more modern cipher suites and protocols. Ideally, TLSv1.2 and AES-GCM should
+  be enabled, and Forward Secrecy cipher suites (ECDHE, DHE) should be enabled
+  and preferred.
+</p>
+
+<p>
+  An alternative is to modify the app to use a custom SSLSocketFactory to
+  communicate with the server. The factory should be designed to create
+  SSLSocket instances which have some of the cipher suites required by the
+  server enabled in addition to default cipher suites.
+</p>
+
+<h3>
+  App is making wrong assumptions about cipher suites used to connect to server
+</h3>
+
+<p>
+  For example, some apps contain a custom X509TrustManager that breaks because
+  it expects the authType parameter to be RSA but encounters ECDHE_RSA or
+  DHE_RSA.
+</p>
+
+<h3>
+  Server is intolerant to TLSv1.1, TLSv1.2 or new TLS extensions
+</h3>
+
+<p>
+  For example, the TLS/SSL handshake with a server is erroneously rejected or
+  stalls. The preferred fix is to upgrade the server to comply with the TLS/SSL
+  protocol. This will make the server successfully negotiate these newer
+  protocols or negotiate TLSv1 or older protocols and ignore TLS extensions it
+  does not understand. In some cases disabling TLSv1.1 and TLSv1.2 on the
+  server may work as a stopgap measure until the server software is upgraded.
+</p>
+
+<p>
+  An alternative is to modify the app to use a custom SSLSocketFactory to
+  communicate with the server. The factory should be designed to create
+  SSLSocket instances with only those protocols enabled which are correctly
+  supported by the server.
+</p>
+
+<h2 id="managed_profiles">Support for Managed Profiles</h2>
+
+<p>
+  Device administrators can add a <em>managed profile</em> to a device. This
+  profile is owned by the administrator, giving the administrator control
+  over the managed profile while leaving the user's personal profile, and its
+  storage space, under the user's control.
+  This change can affect the behavior of your existing app in
+  the following ways.</p>
+
+<h3 id="mg_profile_intents">Handling intents</h3>
+
+<p>Device administrators can restrict access to system applications from the
+managed profile. In this case, if an app fires an intent from the managed
+profile that would ordinarily be handled by that application, and there is no
+suitable handler for the intent on the managed profile,
+the intent causes an exception. For example, the
+device administrator can restrict apps on the managed profile from accessing
+the system's camera application. If your app is running on the managed profile
+and calls {@link
+android.app.Activity#startActivityForResult startActivityForResult()} for {@link
+android.provider.MediaStore#ACTION_IMAGE_CAPTURE
+MediaStore.ACTION_IMAGE_CAPTURE}, and there is no app on the managed profile
+that can handle the intent, this results in an {@link
+android.content.ActivityNotFoundException}.</p>
+
+<p>You can prevent this by checking
+that there is at least one handler for any intent
+before firing it. To check for a valid handler, call {@link
+android.content.Intent#resolveActivity Intent.resolveActivity()}. You can see
+an example of this being done in <a
+href="{@docRoot}training/camera/photobasics.html#TaskCaptureIntent">Take Photos
+Simply: Take a Photo with the Camera App</a>.</p>
+
+<h3 id="mp_profile_file_sharing">Sharing files across profiles</h3>
+
+<p>Each profile has its own file storage. Since a file URI refers to a specific
+location in the file storage, this means that a file URI that is valid on one
+profile is not valid on the other one. This is not ordinarily a problem for an
+app, which usually just accesses the files it creates. However, if an app
+attaches a file to an intent, it is not safe to attach a file URI, since in some
+circumstances, the intent might be handled on the other profile.
+For example, a device administrator might specify that image capture events
+should be handled by the camera app on the personal profile. If the intent is
+fired by an app on the managed profile, the camera needs to be able to write the
+image to a location where the managed profile's apps can read it.</p>
+
+<p>To be safe, when
+you need to attach a file to an intent that might cross from one profile to the
+other, you should create and use a <em>content URI</em> for the file. For more
+information about sharing files with content URIs, see <a
+href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>.
+For example, the device administrator might whitelist {@link
+android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} to be
+handled by the camera in the personal profile. The firing intent's {@link
+android.provider.MediaStore#EXTRA_OUTPUT EXTRA_OUTPUT} should contain a content
+URI specifying where the photo should be stored. The camera app can write the
+image to the location specified by that URI, and the app that fired the intent
+would be able to read that file, even if the app is on the other profile. </p>

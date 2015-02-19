@@ -20,5 +20,5 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
         android:interpolator="@android:interpolator/decelerate_cubic">
     <translate android:fromYDelta="-100%" android:toYDelta="0"
-        android:duration="250"/>
+        android:duration="@integer/dock_enter_exit_duration"/>
 </set>

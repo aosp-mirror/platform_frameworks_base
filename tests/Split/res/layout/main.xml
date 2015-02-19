@@ -21,5 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:colorAccent="#ffffffff"
+        android:paddingStart="13dp"
         android:src="@drawable/image"/>
 </RelativeLayout>

@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/date_owner_info_margin"
             android:layout_gravity="center_horizontal"
-            android:textColor="#ccffffff"
+            android:textColor="@color/clock_gray"
             android:textSize="@dimen/widget_label_font_size"
             android:ellipsize="marquee"
             android:singleLine="true" />

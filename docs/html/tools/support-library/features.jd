@@ -8,6 +8,7 @@ page.title=Support Library Features
     <h2>In this document</h2>
     <ol>
       <li><a href="#v4">v4 Support Library</a></li>
+      <li><a href="#multidex">Multidex Support Library</a></li>
       <li><a href="#v7">v7 Support Libraries</a>
         <ol>
           <li><a href="#v7-appcompat">v7 appcompat library</a></li>
@@ -136,13 +137,42 @@ page.title=Support Library Features
   <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
   resources</a>.</p>
 
+<p class="caution"><strong>Caution:</strong> Using dynamic dependencies, especially for higher version
+numbers, can cause unexpected version updates and regression incompatibilities.</p>
+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v4:18.0.+
+com.android.support:support-v4:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
+
+
+<h2 id="multidex">Multidex Support Library</h2>
+
+<p>
+  This library provides support for building apps with multiple Dalvik Executable (DEX) files.
+  Apps that reference more than 65536 methods are required to use multidex configurations. For
+  more information about using multidex, see <a href="{@docRoot}tools/building/multidex.html">
+  Building Apps with Over 65K Methods</a>.
+</p>
+
+<p>
+  This library is located in the {@code &lt;sdk&gt;/extras/android/support/multidex/} directory
+  after you download the Android Support Libraries. The library does not contain user interface
+  resources. To include it in your application project, follow the instructions for <a href=
+  "{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+  resources</a>.
+</p>
+
+<p>
+  The Gradle build script dependency identifier for this library is as follows:
+</p>
+
+<pre>
+com.android.support:multidex:1.0.0
+</pre>
+
 
 
 <h2 id="v7">v7 Support Libraries</h2>
@@ -194,10 +224,10 @@ com.android.support:support-v4:18.0.+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:appcompat-v7:21.0.+
+com.android.support:appcompat-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+
 
 <h3 id="v7-cardview">v7 cardview library</h3>
 
@@ -216,10 +246,10 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:cardview-v7:21.0.+
+com.android.support:cardview-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+
 
 <h3 id="v7-gridlayout">v7 gridlayout library</h3>
 
@@ -237,10 +267,9 @@ com.android.support:cardview-v7:21.0.+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:gridlayout-v7:18.0.+
+com.android.support:gridlayout-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
 
 
 <h3 id="v7-mediarouter">v7 mediarouter library</h3>
@@ -271,10 +300,10 @@ both the <code>android-support-v7-mediarouter.jar</code> and
 
 <p>If you are using Android Studio, all you need to do is specify the Gradle build
 script dependency identifier <code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
-where "18.0.0" is the minimum revision at which the library is available. For example:</p>
+where "&lt;revision&gt;" is the minimum revision at which the library is available. For example:</p>
 
 <pre>
-com.android.support:mediarouter-v7:18.0.+
+com.android.support:mediarouter-v7:21.0.0
 </pre>
 
 <p class="caution">The v7 mediarouter library APIs introduced in Support Library
@@ -301,10 +330,10 @@ title card.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:palette-v7:21.0.+
+com.android.support:palette-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+
 
 <h3 id="v7-recyclerview">v7 recyclerview library</h3>
 
@@ -324,10 +353,10 @@ libraries with resources</a>.</p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:recyclerview-v7:21.0.+
+com.android.support:recyclerview-v7:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+
 
 <h2 id="v8">v8 Support Library</h2>
 
@@ -367,10 +396,10 @@ com.android.support:recyclerview-v7:21.0.+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:support-v13:18.0.+
+com.android.support:support-v13:18.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
+
 
 <h2 id="v17-leanback">v17 Leanback Library</h2>
 
@@ -408,7 +437,8 @@ with resources</a>. </p>
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
-com.android.support:leanback-v17:21.0.+
+com.android.support:leanback-v17:21.0.0
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+
+

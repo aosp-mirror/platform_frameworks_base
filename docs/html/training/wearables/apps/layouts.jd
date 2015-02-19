@@ -1,4 +1,6 @@
 page.title=Creating Custom Layouts
+page.tags=wear
+helpoutsWidget=true
 
 @jd:body
 
@@ -90,9 +92,10 @@ PendingIntent notificationPendingIntent = PendingIntent.getActivity(this, 0, not
 </ol>
 <h2 id="UiLibrary">Create Layouts with the Wearable UI Library</h2>
 <p>
-There's an unofficial UI library that is automatically included when you create your wearable
-app with the Android Studio Project Wizard. You can also add the library to your <code>build.gradle</code>
+The Wearable UI Library is automatically included when you create your wearable
+app with the Android Studio Project Wizard. You can also add this library to your <code>build.gradle</code>
 file with the following dependency declaration:
+</p>
 
 <pre>
 dependencies {
@@ -101,8 +104,11 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:+'
 }
 </pre>
-This library helps you build UIs that are designed for wearables. Here are some of the major classes:
-</p>
+
+<p>This library helps you build UIs that are designed for wearables. For more information, see
+<a href="{@docRoot}training/wearables/ui/index.html">Creating Custom UIs for Wear Devices</a>.</p>
+
+<p>Here are some of the major classes in the Wearable UI Library:</p>
 
 <ul>
     <li><code>BoxInsetLayout</code> - A FrameLayout that's aware of screen shape and can box its
@@ -112,7 +118,13 @@ This library helps you build UIs that are designed for wearables. Here are some 
     <li><code>CircledImageView</code> - An image view surrounded by a circle.</li>
     <li><code>ConfirmationActivity</code> - An activity that displays confirmation animations after the user
     completes an action.</li>
+    <li><code>CrossFadeDrawable</code> - A drawable that contains two child drawables and provides
+    methods to directly adjust the blend between the two.</li>
+    <li><code>DelayedConfirmationView</code> - A view that provides a circular countdown timer,
+    typically used to automatically confirm an operation after a short delay has elapsed.</li>
     <li><code>DismissOverlayView</code> - A view for implementing long-press-to-dismiss.</li>
+    <li><code>DotsPageIndicator</code> - A page indicator for GridViewPager that identifies the
+    current page in relation to all available pages on the current row.</li>
     <li><code>GridViewPager</code> - A layout manager that allows the user to both vertically and
     horizontally through pages of data. You supply an implementation of a GridPagerAdapter to
     generate the pages that the view shows.</li>
@@ -128,6 +140,18 @@ This library helps you build UIs that are designed for wearables. Here are some 
     </li>
 </ul>
 
-<p class="note"><a href="{@docRoot}shareables/training/wearable-support-docs.zip">Download the full API
-reference documentation</a> for the classes above. The documentation goes over how to use
-each UI widget.</p>
+<h3 id="UiLibReference">Wear UI library API reference</h3>
+
+<p>The reference documentation explains how to use each UI widget in detail. Browse the
+<a href="{@docRoot}reference/android/support/wearable/view/package-summary.html">Wear API
+reference documentation</a> for the classes above.</p>
+
+<h3 id="UiLibEclipse">Download the Wearable UI library for Eclipse ADT</h3>
+
+<p>If you are using the ADT plugin for Eclipse, download the
+<a href="{@docRoot}shareables/training/wearable-support-lib.zip">Wearable UI library</a> to
+include the Wearable UI library as a dependency in your project.</p>
+
+<p class="note"><strong>Note:</strong> We recommend
+<a href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear app
+development.</p>

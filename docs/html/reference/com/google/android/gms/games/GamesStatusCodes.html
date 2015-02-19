@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GamesStatusCodes</li>
       </ul>
     </div>
@@ -734,7 +803,7 @@ Summary:
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -773,6 +842,9 @@ Summary:
   
   
   
+
+
+    
 
 
 </div><!-- end header -->
@@ -858,354 +930,599 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_ACHIEVEMENT_NOT_INCREMENTAL">STATUS_ACHIEVEMENT_NOT_INCREMENTAL</a></td>
-        <td class="jd-descrcol" width="100%">Indicates that the call to increment achievement failed since the achievement is not an
- incremental achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Indicates that the call to increment achievement failed since the achievement is not an
+ incremental achievement.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_ACHIEVEMENT_UNKNOWN">STATUS_ACHIEVEMENT_UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">Could not find the achievement, so the operation to update the achievement failed.</td>
+        <td class="jd-descrcol" width="100%">
+          Could not find the achievement, so the operation to update the achievement failed.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_ACHIEVEMENT_UNLOCKED">STATUS_ACHIEVEMENT_UNLOCKED</a></td>
-        <td class="jd-descrcol" width="100%">Indicates that the incremental achievement was also unlocked when the call was made to
- increment the achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Indicates that the incremental achievement was also unlocked when the call was made to
+ increment the achievement.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_ACHIEVEMENT_UNLOCK_FAILURE">STATUS_ACHIEVEMENT_UNLOCK_FAILURE</a></td>
-        <td class="jd-descrcol" width="100%">An incremental achievement cannot be unlocked directly, so the call to unlock achievement
- failed.</td>
+        <td class="jd-descrcol" width="100%">
+          An incremental achievement cannot be unlocked directly, so the call to unlock achievement
+ failed.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_APP_MISCONFIGURED">STATUS_APP_MISCONFIGURED</a></td>
-        <td class="jd-descrcol" width="100%">The developer has misconfigured their application in some way.</td>
+        <td class="jd-descrcol" width="100%">
+          The developer has misconfigured their application in some way.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></td>
-        <td class="jd-descrcol" width="100%">The GoogleApiClient is in an inconsistent state and must reconnect to the service to resolve
- the issue.</td>
+        <td class="jd-descrcol" width="100%">
+          The GoogleApiClient is in an inconsistent state and must reconnect to the service to resolve
+ the issue.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_GAME_NOT_FOUND">STATUS_GAME_NOT_FOUND</a></td>
-        <td class="jd-descrcol" width="100%">The specified game ID was not recognized by the server.</td>
+        <td class="jd-descrcol" width="100%">
+          The specified game ID was not recognized by the server.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">An unspecified error occurred; no more specific information is available.</td>
+        <td class="jd-descrcol" width="100%">
+          An unspecified error occurred; no more specific information is available.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INTERRUPTED">STATUS_INTERRUPTED</a></td>
-        <td class="jd-descrcol" width="100%">Was interrupted while waiting for the result.</td>
+        <td class="jd-descrcol" width="100%">
+          Was interrupted while waiting for the result.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_INVALID_REAL_TIME_ROOM_ID">STATUS_INVALID_REAL_TIME_ROOM_ID</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the real-time room ID provided to the operation was not valid, or
- does not correspond to the currently active real-time room.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the real-time room ID provided to the operation was not valid, or
+ does not correspond to the currently active real-time room.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_LICENSE_CHECK_FAILED">STATUS_LICENSE_CHECK_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">The game is not licensed to the user.</td>
+        <td class="jd-descrcol" width="100%">
+          The game is not licensed to the user.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_ALREADY_REMATCHED">STATUS_MATCH_ERROR_ALREADY_REMATCHED</a></td>
-        <td class="jd-descrcol" width="100%">The specified match has already had a rematch created.</td>
+        <td class="jd-descrcol" width="100%">
+          The specified match has already had a rematch created.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_INACTIVE_MATCH">STATUS_MATCH_ERROR_INACTIVE_MATCH</a></td>
-        <td class="jd-descrcol" width="100%">The match is not currently active.</td>
+        <td class="jd-descrcol" width="100%">
+          The match is not currently active.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_INVALID_MATCH_RESULTS">STATUS_MATCH_ERROR_INVALID_MATCH_RESULTS</a></td>
-        <td class="jd-descrcol" width="100%">The match results provided in this API call are invalid.</td>
+        <td class="jd-descrcol" width="100%">
+          The match results provided in this API call are invalid.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_INVALID_MATCH_STATE">STATUS_MATCH_ERROR_INVALID_MATCH_STATE</a></td>
-        <td class="jd-descrcol" width="100%">The match is not in the correct state to perform the specified action.</td>
+        <td class="jd-descrcol" width="100%">
+          The match is not in the correct state to perform the specified action.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_INVALID_PARTICIPANT_STATE">STATUS_MATCH_ERROR_INVALID_PARTICIPANT_STATE</a></td>
-        <td class="jd-descrcol" width="100%">One or more participants in this match are not in valid states.</td>
+        <td class="jd-descrcol" width="100%">
+          One or more participants in this match are not in valid states.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_LOCALLY_MODIFIED">STATUS_MATCH_ERROR_LOCALLY_MODIFIED</a></td>
-        <td class="jd-descrcol" width="100%">The specified match has already been modified locally.</td>
+        <td class="jd-descrcol" width="100%">
+          The specified match has already been modified locally.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_ERROR_OUT_OF_DATE_VERSION">STATUS_MATCH_ERROR_OUT_OF_DATE_VERSION</a></td>
-        <td class="jd-descrcol" width="100%">The match data is out of date.</td>
+        <td class="jd-descrcol" width="100%">
+          The match data is out of date.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MATCH_NOT_FOUND">STATUS_MATCH_NOT_FOUND</a></td>
-        <td class="jd-descrcol" width="100%">The specified match cannot be found.</td>
+        <td class="jd-descrcol" width="100%">
+          The specified match cannot be found.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MILESTONE_CLAIMED_PREVIOUSLY">STATUS_MILESTONE_CLAIMED_PREVIOUSLY</a></td>
-        <td class="jd-descrcol" width="100%">This quest milestone was previously claimed (on this device or another).</td>
+        <td class="jd-descrcol" width="100%">
+          This quest milestone was previously claimed (on this device or another).
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MILESTONE_CLAIM_FAILED">STATUS_MILESTONE_CLAIM_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">This quest milestone is not available for claiming.</td>
+        <td class="jd-descrcol" width="100%">
+          This quest milestone is not available for claiming.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_DISABLED">STATUS_MULTIPLAYER_DISABLED</a></td>
-        <td class="jd-descrcol" width="100%">This game does not support multiplayer.</td>
+        <td class="jd-descrcol" width="100%">
+          This game does not support multiplayer.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_CREATION_NOT_ALLOWED">STATUS_MULTIPLAYER_ERROR_CREATION_NOT_ALLOWED</a></td>
-        <td class="jd-descrcol" width="100%">The user is not allowed to create a new multiplayer game at this time.</td>
+        <td class="jd-descrcol" width="100%">
+          The user is not allowed to create a new multiplayer game at this time.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_INVALID_MULTIPLAYER_TYPE">STATUS_MULTIPLAYER_ERROR_INVALID_MULTIPLAYER_TYPE</a></td>
-        <td class="jd-descrcol" width="100%">The match is not the right type to perform this action on.</td>
+        <td class="jd-descrcol" width="100%">
+          The match is not the right type to perform this action on.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION">STATUS_MULTIPLAYER_ERROR_INVALID_OPERATION</a></td>
-        <td class="jd-descrcol" width="100%">This multiplayer operation is not valid, and the server rejected it.</td>
+        <td class="jd-descrcol" width="100%">
+          This multiplayer operation is not valid, and the server rejected it.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER">STATUS_MULTIPLAYER_ERROR_NOT_TRUSTED_TESTER</a></td>
-        <td class="jd-descrcol" width="100%">The user attempted to invite another user who was not authorized to see the game.</td>
+        <td class="jd-descrcol" width="100%">
+          The user attempted to invite another user who was not authorized to see the game.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_NO_DATA">STATUS_NETWORK_ERROR_NO_DATA</a></td>
-        <td class="jd-descrcol" width="100%">A network error occurred while attempting to retrieve fresh data, and no data was available
- locally.</td>
+        <td class="jd-descrcol" width="100%">
+          A network error occurred while attempting to retrieve fresh data, and no data was available
+ locally.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_OPERATION_DEFERRED">STATUS_NETWORK_ERROR_OPERATION_DEFERRED</a></td>
-        <td class="jd-descrcol" width="100%">A network error occurred while attempting to modify data, but the data was successfully
- modified locally and will be updated on the network the next time the device is able to sync.</td>
+        <td class="jd-descrcol" width="100%">
+          A network error occurred while attempting to modify data, but the data was successfully
+ modified locally and will be updated on the network the next time the device is able to sync.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_OPERATION_FAILED">STATUS_NETWORK_ERROR_OPERATION_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">A network error occurred while attempting to perform an operation that requires network
- access.</td>
+        <td class="jd-descrcol" width="100%">
+          A network error occurred while attempting to perform an operation that requires network
+ access.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_NETWORK_ERROR_STALE_DATA">STATUS_NETWORK_ERROR_STALE_DATA</a></td>
-        <td class="jd-descrcol" width="100%">A network error occurred while attempting to retrieve fresh data, but some locally cached
- data was available.</td>
+        <td class="jd-descrcol" width="100%">
+          A network error occurred while attempting to retrieve fresh data, but some locally cached
+ data was available.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OK">STATUS_OK</a></td>
-        <td class="jd-descrcol" width="100%">The operation was successful.</td>
+        <td class="jd-descrcol" width="100%">
+          The operation was successful.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_OPERATION_IN_FLIGHT">STATUS_OPERATION_IN_FLIGHT</a></td>
-        <td class="jd-descrcol" width="100%">Trying to start a join/create operation while another is already in flight.</td>
+        <td class="jd-descrcol" width="100%">
+          Trying to start a join/create operation while another is already in flight.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_PARTICIPANT_NOT_CONNECTED">STATUS_PARTICIPANT_NOT_CONNECTED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the ID of the participant provided by the user is not currently
- connected to the client in the real-time room.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the ID of the participant provided by the user is not currently
+ connected to the client in the real-time room.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_QUEST_NOT_STARTED">STATUS_QUEST_NOT_STARTED</a></td>
-        <td class="jd-descrcol" width="100%">This quest is not available yet and cannot be accepted.</td>
+        <td class="jd-descrcol" width="100%">
+          This quest is not available yet and cannot be accepted.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_QUEST_NO_LONGER_AVAILABLE">STATUS_QUEST_NO_LONGER_AVAILABLE</a></td>
-        <td class="jd-descrcol" width="100%">This quest has expired or the developer has removed, and cannot be accepted.</td>
+        <td class="jd-descrcol" width="100%">
+          This quest has expired or the developer has removed, and cannot be accepted.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REAL_TIME_CONNECTION_FAILED">STATUS_REAL_TIME_CONNECTION_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">Failed to initialize the network connection for a real-time room.</td>
+        <td class="jd-descrcol" width="100%">
+          Failed to initialize the network connection for a real-time room.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REAL_TIME_INACTIVE_ROOM">STATUS_REAL_TIME_INACTIVE_ROOM</a></td>
-        <td class="jd-descrcol" width="100%">The room is not currently active.</td>
+        <td class="jd-descrcol" width="100%">
+          The room is not currently active.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REAL_TIME_MESSAGE_SEND_FAILED">STATUS_REAL_TIME_MESSAGE_SEND_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">Failed to send message to the peer participant for a real-time room.</td>
+        <td class="jd-descrcol" width="100%">
+          Failed to send message to the peer participant for a real-time room.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REAL_TIME_ROOM_NOT_JOINED">STATUS_REAL_TIME_ROOM_NOT_JOINED</a></td>
-        <td class="jd-descrcol" width="100%">Failed to send message to the peer participant for a real-time room, since the user has not
- joined the room.</td>
+        <td class="jd-descrcol" width="100%">
+          Failed to send message to the peer participant for a real-time room, since the user has not
+ joined the room.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REQUEST_UPDATE_PARTIAL_SUCCESS">STATUS_REQUEST_UPDATE_PARTIAL_SUCCESS</a></td>
-        <td class="jd-descrcol" width="100%">Some of the batched network operations succeeded.</td>
+        <td class="jd-descrcol" width="100%">
+          Some of the batched network operations succeeded.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_REQUEST_UPDATE_TOTAL_FAILURE">STATUS_REQUEST_UPDATE_TOTAL_FAILURE</a></td>
-        <td class="jd-descrcol" width="100%">All of the request update operations attempted failed.</td>
+        <td class="jd-descrcol" width="100%">
+          All of the request update operations attempted failed.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_COMMIT_FAILED">STATUS_SNAPSHOT_COMMIT_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">The attempt to commit the snapshot change failed.</td>
+        <td class="jd-descrcol" width="100%">
+          The attempt to commit the snapshot change failed.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT">STATUS_SNAPSHOT_CONFLICT</a></td>
-        <td class="jd-descrcol" width="100%">A conflict was detected for the snapshot.</td>
+        <td class="jd-descrcol" width="100%">
+          A conflict was detected for the snapshot.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONFLICT_MISSING">STATUS_SNAPSHOT_CONFLICT_MISSING</a></td>
-        <td class="jd-descrcol" width="100%">The conflict that was being resolved doesn't exist.</td>
+        <td class="jd-descrcol" width="100%">
+          The conflict that was being resolved doesn't exist.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE">STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE</a></td>
-        <td class="jd-descrcol" width="100%">An error occurred while attempting to open the contents of the snapshot.</td>
+        <td class="jd-descrcol" width="100%">
+          An error occurred while attempting to open the contents of the snapshot.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_CREATION_FAILED">STATUS_SNAPSHOT_CREATION_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">The attempt to create a snapshot failed.</td>
+        <td class="jd-descrcol" width="100%">
+          The attempt to create a snapshot failed.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_FOLDER_UNAVAILABLE">STATUS_SNAPSHOT_FOLDER_UNAVAILABLE</a></td>
-        <td class="jd-descrcol" width="100%">The root folder for snapshots could not be found or created.</td>
+        <td class="jd-descrcol" width="100%">
+          The root folder for snapshots could not be found or created.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_SNAPSHOT_NOT_FOUND">STATUS_SNAPSHOT_NOT_FOUND</a></td>
-        <td class="jd-descrcol" width="100%">The specified snapshot does not exist on the server.</td>
+        <td class="jd-descrcol" width="100%">
+          The specified snapshot does not exist on the server.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#STATUS_TIMEOUT">STATUS_TIMEOUT</a></td>
-        <td class="jd-descrcol" width="100%">The operation timed out while awaiting the result.</td>
+        <td class="jd-descrcol" width="100%">
+          The operation timed out while awaiting the result.
+          
+    
+
+        </td>
     </tr>
     
     
@@ -1232,21 +1549,26 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesStatusCodes.html#getStatusString(int)">getStatusString</a></span>(int statusCode)</nobr>
+        
+        <div class="jd-descrdiv">
+          Get the string associated with the status code.
+          
+    
 
-        <div class="jd-descrdiv">Get the string associated with the status code.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1515,6 +1837,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the call to increment achievement failed since the achievement is not an
  incremental achievement.
 </p></div>
@@ -1555,6 +1880,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Could not find the achievement, so the operation to update the achievement failed.
 </p></div>
 
@@ -1593,6 +1921,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the incremental achievement was also unlocked when the call was made to
  increment the achievement.
@@ -1634,6 +1965,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>An incremental achievement cannot be unlocked directly, so the call to unlock achievement
  failed.
 </p></div>
@@ -1673,6 +2007,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The developer has misconfigured their application in some way. The logs will contain more
  data about the error and the appropriate resolution.
@@ -1714,6 +2051,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The GoogleApiClient is in an inconsistent state and must reconnect to the service to resolve
  the issue. Further calls to the service using the current connection are unlikely to succeed.
 </p></div>
@@ -1754,6 +2094,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The specified game ID was not recognized by the server.
 </p></div>
 
@@ -1792,6 +2135,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>An unspecified error occurred; no more specific information is available. The device logs may
  provide additional data.
@@ -1833,6 +2179,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Was interrupted while waiting for the result. Only returned if using a
  <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> directly.
 </p></div>
@@ -1872,6 +2221,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the real-time room ID provided to the operation was not valid, or
  does not correspond to the currently active real-time room.
@@ -1913,6 +2265,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The game is not licensed to the user. Further calls will return the same code.
 </p></div>
 
@@ -1951,6 +2306,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The specified match has already had a rematch created. Only one rematch may be created for
  any initial match.
@@ -1992,6 +2350,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The match is not currently active. This action cannot be performed on an inactive match.
 </p></div>
 
@@ -2030,6 +2391,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The match results provided in this API call are invalid. This covers cases of duplicate
  results, results for players who are not in the match, etc.
@@ -2071,6 +2435,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The match is not in the correct state to perform the specified action.
 </p></div>
 
@@ -2109,6 +2476,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>One or more participants in this match are not in valid states. This could occur if a
  specified participant is not actually a participant of the match, or is invalid, or is in an
@@ -2151,6 +2521,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The specified match has already been modified locally. This operation cannot be performed
  until the match has been sent to the server.
 </p></div>
@@ -2190,6 +2563,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The match data is out of date. Someone else has modified the data on the server, so the
  request could not be completed safely.
@@ -2231,6 +2607,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The specified match cannot be found. The provided match ID does not correspond to any known
  match.
 </p></div>
@@ -2253,38 +2632,41 @@ From class
 
 <A NAME="STATUS_MILESTONE_CLAIMED_PREVIOUSLY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_MILESTONE_CLAIMED_PREVIOUSLY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>This quest milestone was previously claimed (on this device or another).
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 8000
                 (0x00001f40)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2292,39 +2674,42 @@ From class
 
 <A NAME="STATUS_MILESTONE_CLAIM_FAILED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_MILESTONE_CLAIM_FAILED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>This quest milestone is not available for claiming. You may want to refresh quests
  from the server when this happens, as the local cache is out of sync with the server.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 8001
                 (0x00001f41)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2349,6 +2734,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>This game does not support multiplayer. This could occur if the linked app is not configured
  appropriately in the developer console.
@@ -2390,6 +2778,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is not allowed to create a new multiplayer game at this time. This could occur if
  the user has too many outstanding invitations already.
 </p></div>
@@ -2429,6 +2820,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The match is not the right type to perform this action on. For example, this error will be
  returned when trying to take a turn in a real-time match.
@@ -2470,6 +2864,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>This multiplayer operation is not valid, and the server rejected it. Check the logs for more
  information.
 </p></div>
@@ -2509,6 +2906,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The user attempted to invite another user who was not authorized to see the game. This can
  occur if a trusted tester invites a user who is not a trusted tester while the game is
@@ -2551,6 +2951,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>A network error occurred while attempting to retrieve fresh data, and no data was available
  locally.
 </p></div>
@@ -2590,6 +2993,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>A network error occurred while attempting to modify data, but the data was successfully
  modified locally and will be updated on the network the next time the device is able to sync.
@@ -2631,6 +3037,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>A network error occurred while attempting to perform an operation that requires network
  access. The operation may be retried later.
 </p></div>
@@ -2670,6 +3079,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>A network error occurred while attempting to retrieve fresh data, but some locally cached
  data was available. The data returned may be stale and/or incomplete.
@@ -2711,6 +3123,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The operation was successful.
 </p></div>
 
@@ -2749,6 +3164,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Trying to start a join/create operation while another is already in flight.
 </p></div>
@@ -2789,6 +3207,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the ID of the participant provided by the user is not currently
  connected to the client in the real-time room.
 </p></div>
@@ -2811,38 +3232,41 @@ From class
 
 <A NAME="STATUS_QUEST_NOT_STARTED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_QUEST_NOT_STARTED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>This quest is not available yet and cannot be accepted.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 8003
                 (0x00001f43)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2850,38 +3274,41 @@ From class
 
 <A NAME="STATUS_QUEST_NO_LONGER_AVAILABLE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_QUEST_NO_LONGER_AVAILABLE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>This quest has expired or the developer has removed, and cannot be accepted.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 8002
                 (0x00001f42)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2906,6 +3333,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Failed to initialize the network connection for a real-time room.
 </p></div>
@@ -2946,6 +3376,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The room is not currently active. This action cannot be performed on an inactive room.
 </p></div>
 
@@ -2984,6 +3417,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Failed to send message to the peer participant for a real-time room.
 </p></div>
@@ -3024,6 +3460,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Failed to send message to the peer participant for a real-time room, since the user has not
  joined the room.
 </p></div>
@@ -3046,38 +3485,41 @@ From class
 
 <A NAME="STATUS_REQUEST_UPDATE_PARTIAL_SUCCESS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_REQUEST_UPDATE_PARTIAL_SUCCESS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Some of the batched network operations succeeded.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2000
                 (0x000007d0)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3085,38 +3527,41 @@ From class
 
 <A NAME="STATUS_REQUEST_UPDATE_TOTAL_FAILURE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_REQUEST_UPDATE_TOTAL_FAILURE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>All of the request update operations attempted failed. Retrying will not fix these errors.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2001
                 (0x000007d1)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3124,38 +3569,41 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_COMMIT_FAILED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_COMMIT_FAILED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The attempt to commit the snapshot change failed. See the device logs for more details.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4003
                 (0x00000fa3)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3163,39 +3611,42 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_CONFLICT"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_CONFLICT
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>A conflict was detected for the snapshot. Use <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.games.snapshot.Snapshot)">resolveConflict(GoogleApiClient, String, Snapshot)</a></code> to resolve
  this conflict.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4004
                 (0x00000fa4)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3203,40 +3654,43 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_CONFLICT_MISSING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_CONFLICT_MISSING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The conflict that was being resolved doesn't exist. This could occur if another device
  resolved this conflict first, or if an inappropriate conflict ID was provided to
  <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html#resolveConflict(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.games.snapshot.Snapshot)">resolveConflict(GoogleApiClient, String, Snapshot)</a></code>.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4006
                 (0x00000fa6)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3244,39 +3698,42 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_CONTENTS_UNAVAILABLE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>An error occurred while attempting to open the contents of the snapshot. See the device logs
  for more details.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4002
                 (0x00000fa2)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3284,38 +3741,41 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_CREATION_FAILED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_CREATION_FAILED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The attempt to create a snapshot failed. See the device logs for more details.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4001
                 (0x00000fa1)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3323,39 +3783,42 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_FOLDER_UNAVAILABLE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_FOLDER_UNAVAILABLE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The root folder for snapshots could not be found or created. See the device logs for more
  details on the failure.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4005
                 (0x00000fa5)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3363,38 +3826,41 @@ From class
 
 <A NAME="STATUS_SNAPSHOT_NOT_FOUND"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         STATUS_SNAPSHOT_NOT_FOUND
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The specified snapshot does not exist on the server.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 4000
                 (0x00000fa0)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3419,6 +3885,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The operation timed out while awaiting the result. Only returned if using a
  <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> directly.
@@ -3462,14 +3931,14 @@ From class
 
 <A NAME="getStatusString(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         String
       </span>
       <span class="sympad">getStatusString</span>
@@ -3477,12 +3946,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the string associated with the status code. This can be used for clearer logging messages
  to avoid having to look up error codes.
  TODO Consider replacing this with a generated class using annotations.</p></div>

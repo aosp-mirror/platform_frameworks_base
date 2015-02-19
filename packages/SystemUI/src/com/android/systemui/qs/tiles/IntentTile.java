@@ -31,11 +31,16 @@ import android.util.Log;
 
 import com.android.systemui.qs.QSTile;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class IntentTile extends QSTile<QSTile.State> {
     public static final String PREFIX = "intent(";
 
     private PendingIntent mOnClick;
     private String mOnClickUri;
+    private PendingIntent mOnLongClick;
+    private String mOnLongClickUri;
     private int mCurrentUserId;
 
     private IntentTile(Host host, String action) {
@@ -77,15 +82,24 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
+        sendIntent("click", mOnClick, mOnClickUri);
+    }
+
+    @Override
+    protected void handleLongClick() {
+        sendIntent("long-click", mOnLongClick, mOnLongClickUri);
+    }
+
+    private void sendIntent(String type, PendingIntent pi, String uri) {
         try {
-            if (mOnClick != null) {
-                mOnClick.send();
-            } else if (mOnClickUri != null) {
-                final Intent intent = Intent.parseUri(mOnClickUri, Intent.URI_INTENT_SCHEME);
+            if (pi != null) {
+                pi.send();
+            } else if (uri != null) {
+                final Intent intent = Intent.parseUri(uri, Intent.URI_INTENT_SCHEME);
                 mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
             }
         } catch (Throwable t) {
-            Log.w(TAG, "Error sending click intent", t);
+            Log.w(TAG, "Error sending " + type + " intent", t);
         }
     }
 
@@ -96,13 +110,11 @@ public class IntentTile extends QSTile<QSTile.State> {
         state.visible = intent.getBooleanExtra("visible", true);
         state.contentDescription = intent.getStringExtra("contentDescription");
         state.label = intent.getStringExtra("label");
-        state.iconId = 0;
         state.icon = null;
         final byte[] iconBitmap = intent.getByteArrayExtra("iconBitmap");
         if (iconBitmap != null) {
             try {
-                final Bitmap b = BitmapFactory.decodeByteArray(iconBitmap, 0, iconBitmap.length);
-                state.icon = new BitmapDrawable(mContext.getResources(), b);
+                state.icon = new BytesIcon(iconBitmap);
             } catch (Throwable t) {
                 Log.w(TAG, "Error loading icon bitmap, length " + iconBitmap.length, t);
             }
@@ -111,23 +123,16 @@ public class IntentTile extends QSTile<QSTile.State> {
             if (iconId != 0) {
                 final String iconPackage = intent.getStringExtra("iconPackage");
                 if (!TextUtils.isEmpty(iconPackage)) {
-                    state.icon = getPackageDrawable(iconPackage, iconId);
+                    state.icon = new PackageDrawableIcon(iconPackage, iconId);
                 } else {
-                    state.iconId = iconId;
+                    state.icon = ResourceIcon.get(iconId);
                 }
             }
         }
         mOnClick = intent.getParcelableExtra("onClick");
         mOnClickUri = intent.getStringExtra("onClickUri");
-    }
-
-    private Drawable getPackageDrawable(String pkg, int id) {
-        try {
-            return mContext.createPackageContext(pkg, 0).getDrawable(id);
-        } catch (Throwable t) {
-            Log.w(TAG, "Error loading package drawable pkg=" + pkg + " id=" + id, t);
-            return null;
-        }
+        mOnLongClick = intent.getParcelableExtra("onLongClick");
+        mOnLongClickUri = intent.getStringExtra("onLongClickUri");
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -136,4 +141,60 @@ public class IntentTile extends QSTile<QSTile.State> {
             refreshState(intent);
         }
     };
+
+    private static class BytesIcon extends Icon {
+        private final byte[] mBytes;
+
+        public BytesIcon(byte[] bytes) {
+            mBytes = bytes;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            final Bitmap b = BitmapFactory.decodeByteArray(mBytes, 0, mBytes.length);
+            return new BitmapDrawable(context.getResources(), b);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof BytesIcon && Arrays.equals(((BytesIcon) o).mBytes, mBytes);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("BytesIcon[len=%s]", mBytes.length);
+        }
+    }
+
+    private class PackageDrawableIcon extends Icon {
+        private final String mPackage;
+        private final int mResId;
+
+        public PackageDrawableIcon(String pkg, int resId) {
+            mPackage = pkg;
+            mResId = resId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof PackageDrawableIcon)) return false;
+            final PackageDrawableIcon other = (PackageDrawableIcon) o;
+            return Objects.equals(other.mPackage, mPackage) && other.mResId == mResId;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            try {
+                return context.createPackageContext(mPackage, 0).getDrawable(mResId);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error loading package drawable pkg=" + mPackage + " id=" + mResId, t);
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("PackageDrawableIcon[pkg=%s,id=0x%08x]", mPackage, mResId);
+        }
+    }
 }

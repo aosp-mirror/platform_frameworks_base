@@ -131,6 +131,9 @@
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
 
+    <!-- The maximum number of items to be displayed in quick settings -->
+    <integer name="quick_settings_detail_max_item_count">7</integer>
+
     <integer name="blinds_pop_duration_ms">10</integer>
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
@@ -139,49 +142,74 @@
     <!-- milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">10000</integer>
 
+    <!-- milliseconds after a heads up notification is pushed back
+     before the app can interrupt again. -->
+    <integer name="heads_up_default_snooze_length_ms">60000</integer>
+
     <!-- milliseconds before the heads up notification accepts touches. -->
     <integer name="heads_up_sensitivity_delay">700</integer>
 
     <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
     <integer name="recents_task_bar_dismiss_delay_seconds">1</integer>
+
     <!-- The min animation duration for animating views that are currently visible. -->
     <integer name="recents_filter_animate_current_views_duration">250</integer>
+
     <!-- The min animation duration for animating views that are newly visible. -->
     <integer name="recents_filter_animate_new_views_duration">250</integer>
-    <!-- The min animation duration for animating the task bar in. -->
-    <integer name="recents_animate_task_bar_enter_duration">225</integer>
-    <!-- The animation delay for animating the first task in. This should roughly be the animation
-     duration of the transition in to recents. -->
-    <integer name="recents_animate_task_bar_enter_delay">275</integer>
-    <!-- The min animation duration for animating the task bar out. -->
-    <integer name="recents_animate_task_exit_to_home_duration">225</integer>
-    <!-- The min animation duration for animating the task bar out. -->
-    <integer name="recents_animate_task_bar_exit_duration">125</integer>
-    <!-- The animation delay for animating the first task in. This should roughly be the animation
-     duration of the transition in to recents from home. -->
-    <integer name="recents_animate_task_enter_from_home_delay">150</integer>
-    <!-- The min animation duration for animating the task in when transitioning from home. -->
-    <integer name="recents_animate_task_enter_from_home_duration">250</integer>
-    <!-- The animation stagger to apply to each task animation when transitioning from home. -->
-    <integer name="recents_animate_task_enter_from_home_stagger_delay">12</integer>
-    <!-- The short duration when animating in/out the lock to app button. -->
-    <integer name="recents_animate_lock_to_app_button_short_duration">150</integer>
-    <!-- The long duration when animating in/out the lock to app button. -->
-    <integer name="recents_animate_lock_to_app_button_long_duration">300</integer>
+
+    <!-- The duration of the window transition when coming to Recents from an app.
+         In order to defer the in-app animations until after the transition is complete,
+         we also need to use this value as the starting delay when animating the first
+         task decorations in. -->
+    <integer name="recents_enter_from_app_transition_duration">325</integer>
+
+    <!-- The duration for animating the task decorations in after transitioning from an app. -->
+    <integer name="recents_task_enter_from_app_duration">200</integer>
+
+    <!-- The duration for animating the task decorations out before transitioning to an app. -->
+    <integer name="recents_task_exit_to_app_duration">125</integer>
+
+    <!-- The duration of the window transition when coming to Recents from the Launcher.
+         In order to defer the in-app animations until after the transition is complete,
+         we also need to use this value as the starting delay when animating the task views
+         in from the bottom of the screen. -->
+    <integer name="recents_enter_from_home_transition_duration">100</integer>
+
+    <!-- The duration for animating the task from the bottom of the screen when transitioning
+     from home. -->
+    <integer name="recents_task_enter_from_home_duration">225</integer>
+
+    <!-- The stagger for each task when animating the task from the bottom of the screen when 
+     transitioning from home. -->
+    <integer name="recents_task_enter_from_home_stagger_delay">12</integer>
+
+    <!-- The duration of the animation of the tasks to the bottom of the screen when leaving
+     Recents to go back to the Launcher. -->
+    <integer name="recents_task_exit_to_home_duration">225</integer>
+
     <!-- The min animation duration for animating the nav bar scrim in. -->
     <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
+
     <!-- The animation duration for animating the removal of a task view. -->
     <integer name="recents_animate_task_view_remove_duration">250</integer>
+
     <!-- The animation duration for scrolling the stack to a particular item. -->
     <integer name="recents_animate_task_stack_scroll_duration">225</integer>
+
     <!-- The minimum alpha for the dim applied to cards that go deeper into the stack. -->
     <integer name="recents_max_task_stack_view_dim">96</integer>
+
     <!-- The delay to enforce between each alt-tab key press. -->
     <integer name="recents_alt_tab_key_delay">200</integer>
+
     <!-- Transposes the search bar layout in landscape. -->
     <bool name="recents_has_transposed_search_bar">true</bool>
+
     <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
     <bool name="recents_has_transposed_nav_bar">true</bool>
+    <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
+    <integer name="recents_svelte_level">0</integer>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
@@ -211,26 +239,41 @@
     <!-- Doze: should the pickup sensor be used as a pulse signal? -->
     <bool name="doze_pulse_on_pick_up">false</bool>
 
+    <!-- Doze: check proximity sensor before pulsing? -->
+    <bool name="doze_proximity_check_before_pulse">true</bool>
+
     <!-- Doze: should notifications be used as a pulse signal? -->
     <bool name="doze_pulse_on_notifications">true</bool>
 
     <!-- Doze: when to pulse after a buzzworthy notification arrives -->
-    <string name="doze_pulse_schedule" translatable="false">1s,10s,30s,60s,120s</string>
+    <string name="doze_pulse_schedule" translatable="false">1s,10s,30s,60s</string>
 
     <!-- Doze: maximum number of times the notification pulse schedule can be reset -->
-    <integer name="doze_pulse_schedule_resets">3</integer>
+    <integer name="doze_pulse_schedule_resets">2</integer>
 
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
+    <!-- Doze: can we assume the pickup sensor includes a proximity check? -->
+    <bool name="doze_pickup_performs_proximity_check">false</bool>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
-    <integer name="doze_pulse_duration_in">1000</integer>
+    <integer name="doze_pulse_duration_in">900</integer>
+
+    <!-- Doze: pulse parameter - how long does it take to fade in after a pickup? -->
+    <integer name="doze_pulse_duration_in_pickup">300</integer>
+
+    <!-- Doze: pulse parameter - delay to wait for the screen to wake up -->
+    <integer name="doze_pulse_delay_in">200</integer>
+
+    <!-- Doze: pulse parameter - delay to wait for the screen to wake up after a pickup -->
+    <integer name="doze_pulse_delay_in_pickup">200</integer>
 
     <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
     <integer name="doze_pulse_duration_visible">3000</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade out? -->
-    <integer name="doze_pulse_duration_out">1000</integer>
+    <integer name="doze_pulse_duration_out">600</integer>
 
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
@@ -238,16 +281,19 @@
     <!-- Volume: time to delay dismissing the volume panel after a click is performed -->
     <integer name="volume_panel_dismiss_delay">200</integer>
 
-    <!-- Tiles with feature timeouts: number of days to show after feature is used. -->
-    <integer name="days_to_show_timeout_tiles">30</integer>
+    <!-- Hotspot tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_hotspot_tile">30</integer>
+
+    <!-- Color inversion tile: number of days to show after feature is used. -->
+    <integer name="days_to_show_color_inversion_tile">7</integer>
 
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>
 
-    <!-- Zen toast fade in/out duration -->
-    <integer name="zen_toast_animation_duration">500</integer>
+    <!-- Maximum number of total conditions to display in the zen mode selection panel -->
+    <integer name="zen_mode_max_conditions">5</integer>
 
-    <!-- Zen toast visibility duration -->
-    <integer name="zen_toast_visible_duration">500</integer>
+    <!-- Enable the default volume dialog -->
+    <bool name="enable_volume_ui">true</bool>
 </resources>
 

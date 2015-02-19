@@ -62,12 +62,12 @@
     <string name="battery_low_title">Battery is low</string>
 
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
-        appened to the subtitle of the low battery alert.  "number" is the percentage of battery
+        appened to the subtitle of the low battery alert.  "percentage" is the percentage of battery
         remaining [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format"><xliff:g id="number">%d%%</xliff:g> remaining</string>
+    <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
 
     <!-- Same as battery_low_percent_format, with a notice about battery saver if on. [CHAR LIMIT=none]-->
-    <string name="battery_low_percent_format_saver_started"><xliff:g id="number">%d%%</xliff:g> remaining. Battery saver is on.</string>
+    <string name="battery_low_percent_format_saver_started"><xliff:g id="percentage">%s</xliff:g> remaining. Battery saver is on.</string>
 
     <!-- A message that appears when a USB charger is plugged in and the device does not
     support charging on it.  That is, a charger that fits into the USB port and goes into
@@ -114,11 +114,6 @@
 
     <!-- Label in system panel saying the device will show notifications [CHAR LIMIT=30] -->
     <string name="status_bar_settings_notifications">Notifications</string>
-
-    <!-- Text to display next to the graphical battery meter.  [CHAR LIMIT=3] -->
-    <string name="status_bar_settings_battery_meter_format" translatable="false">
-        <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g>
-    </string>
 
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false">|</string>
@@ -559,10 +554,6 @@
 
     <!-- QuickSettings: Airplane mode [CHAR LIMIT=NONE] -->
     <string name="quick_settings_airplane_mode_label">Airplane mode</string>
-    <!-- QuickSettings: Battery Charging [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_battery_charging_label">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <!-- QuickSettings: Battery Charged [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_battery_charged_label">Charged</string>
     <!-- QuickSettings: Bluetooth [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_label">Bluetooth</string>
     <!-- QuickSettings: Bluetooth (Multiple) [CHAR LIMIT=NONE] -->
@@ -637,6 +628,8 @@
     <string name="quick_settings_done">Done</string>
     <!-- QuickSettings: Control panel: Label for connected device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connected">Connected</string>
+    <!-- QuickSettings: Control panel: Label for a connected Wi-Fi access point when the connection is established by a Wi-Fi assistant application. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_connected_via_wfa">Connected via Wi\u2011Fi assistant</string>
     <!-- QuickSettings: Control panel: Label for connecting device. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_connecting">Connecting...</string>
     <!-- QuickSettings: Tethering. [CHAR LIMIT=NONE] -->
@@ -654,7 +647,7 @@
     <!-- QuickSettings: Cellular detail panel, remaining data title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_remaining_data">Remaining data</string>
     <!-- QuickSettings: Cellular detail panel, over limit title [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_cellular_detail_over_limit">Limit reached &#8211; data usage paused</string>
+    <string name="quick_settings_cellular_detail_over_limit">Over limit</string>
     <!-- QuickSettings: Cellular detail panel, data used format string [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_data_used"><xliff:g id="data_used" example="2.0 GB">%s</xliff:g> used</string>
     <!-- QuickSettings: Cellular detail panel, data limit format string [CHAR LIMIT=NONE] -->
@@ -666,8 +659,8 @@
     <string name="recents_empty_message">Your recent screens appear here</string>
     <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
     <string name="recents_app_info_button_label">Application Info</string>
-    <!-- Recents: The lock-to-app button. [CHAR LIMIT=NONE] -->
-    <string name="recents_lock_to_app_button_label">lock to app</string>
+    <!-- Recents: The screen pinning button. [CHAR LIMIT=NONE] -->
+    <string name="recents_lock_to_app_button_label">screen pinning</string>
     <!-- Recents: Temporary string for the button in the recents search bar. [CHAR LIMIT=NONE] -->
     <string name="recents_search_bar_label">search</string>
     <!-- Recents: Launch error string. [CHAR LIMIT=NONE] -->
@@ -813,9 +806,6 @@
     <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
     <string name="battery_saver_notification_action_text">Turn off battery saver</string>
 
-    <!-- Battery level for expanded quick settings [CHAR LIMIT=2] -->
-    <string name="battery_level_template"><xliff:g id="level" example="45">%d</xliff:g>%%</string>
-
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
 
@@ -906,9 +896,26 @@
     <!-- continue action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
     <string name="hidden_notifications_setup">Set up</string>
 
-    <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
-    <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>
-
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
+
+    <!-- Screen pinning dialog title. -->
+    <string name="screen_pinning_title">Screen is pinned</string>
+    <!-- Screen pinning dialog description. -->
+    <string name="screen_pinning_description">This keeps it in view until you unpin. Touch and hold Back and Overview at the same time to unpin.</string>
+    <!-- Screen pinning dialog description when in accessibility mode. -->
+    <string name="screen_pinning_description_accessible">This keeps it in view until you unpin. Touch and hold Overview to unpin.</string>
+    <!-- Screen pinning positive response. -->
+    <string name="screen_pinning_positive">Got it</string>
+    <!-- Screen pinning negative response. -->
+    <string name="screen_pinning_negative">No thanks</string>
+
+    <!-- Hide quick settings tile confirmation title -->
+    <string name="quick_settings_reset_confirmation_title">Hide <xliff:g id="tile_label" example="Hotspot">%1$s</xliff:g>?</string>
+
+    <!-- Hide quick settings tile confirmation message -->
+    <string name="quick_settings_reset_confirmation_message">It will reappear the next time you turn it on in settings.</string>
+
+    <!-- Hide quick settings tile confirmation button -->
+    <string name="quick_settings_reset_confirmation_button">Hide</string>
 </resources>

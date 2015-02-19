@@ -57,19 +57,19 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
     }
 
     private float getNonBatteryClockAlphaFor(int mode) {
-        return mode == MODE_LIGHTS_OUT ? ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK
+        return isLightsOut(mode) ? ICON_ALPHA_WHEN_LIGHTS_OUT_NON_BATTERY_CLOCK
                 : !isOpaque(mode) ? ICON_ALPHA_WHEN_NOT_OPAQUE
                 : mIconAlphaWhenOpaque;
     }
 
     private float getBatteryClockAlpha(int mode) {
-        return mode == MODE_LIGHTS_OUT ? ICON_ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK
+        return isLightsOut(mode) ? ICON_ALPHA_WHEN_LIGHTS_OUT_BATTERY_CLOCK
                 : getNonBatteryClockAlphaFor(mode);
     }
 
     private boolean isOpaque(int mode) {
         return !(mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSLUCENT
-                || mode == MODE_TRANSPARENT);
+                || mode == MODE_TRANSPARENT || mode == MODE_LIGHTS_OUT_TRANSPARENT);
     }
 
     @Override
@@ -94,7 +94,7 @@ public final class PhoneStatusBarTransitions extends BarTransitions {
                     animateTransitionTo(mBattery, newAlphaBC),
                     animateTransitionTo(mClock, newAlphaBC)
                     );
-            if (mode == MODE_LIGHTS_OUT) {
+            if (isLightsOut(mode)) {
                 anims.setDuration(LIGHTS_OUT_DURATION);
             }
             anims.start();

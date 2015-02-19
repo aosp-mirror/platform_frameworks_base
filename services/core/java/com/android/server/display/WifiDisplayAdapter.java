@@ -68,6 +68,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     private static final String ACTION_DISCONNECT = "android.server.display.wfd.DISCONNECT";
 
+    // Unique id prefix for wifi displays
+    private static final String DISPLAY_NAME_PREFIX = "wifi:";
+
     private final WifiDisplayHandler mHandler;
     private final PersistentDataStore mPersistentDataStore;
     private final boolean mSupportsProtectedBuffers;
@@ -587,7 +590,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         public WifiDisplayDevice(IBinder displayToken, String name,
                 int width, int height, float refreshRate, int flags, String address,
                 Surface surface) {
-            super(WifiDisplayAdapter.this, displayToken);
+            super(WifiDisplayAdapter.this, displayToken, DISPLAY_NAME_PREFIX + address);
             mName = name;
             mWidth = width;
             mHeight = height;
@@ -622,9 +625,11 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             if (mInfo == null) {
                 mInfo = new DisplayDeviceInfo();
                 mInfo.name = mName;
+                mInfo.uniqueId = getUniqueId();
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.refreshRate = mRefreshRate;
+                mInfo.supportedRefreshRates = new float[] { mRefreshRate };
                 mInfo.presentationDeadlineNanos = 1000000000L / (int) mRefreshRate; // 1 frame
                 mInfo.flags = mFlags;
                 mInfo.type = Display.TYPE_WIFI;

@@ -72,16 +72,6 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
         super.tearDown();
     }
 
-    // help function to verify 3G connection
-    public void verifyCellularConnection() {
-        NetworkInfo extraNetInfo = mCm.getActiveNetworkInfo();
-        assertEquals("network type is not MOBILE", ConnectivityManager.TYPE_MOBILE,
-                extraNetInfo.getType());
-        assertTrue("not connected to cellular network", extraNetInfo.isConnected());
-    }
-
-
-
     // Test case 1: Test enabling Wifi without associating with any AP, no broadcast on network
     //              event should be expected.
     @LargeTest
@@ -335,5 +325,13 @@ public class ConnectivityManagerMobileTest extends  ConnectivityManagerTestBase 
         assertTrue("failed to disable wifi", disableWifi());
         assertTrue("wifi state not disabled", waitForWifiState(
                 WifiManager.WIFI_STATE_DISABLED, LONG_TIMEOUT));
+    }
+
+    // help function to verify 3G connection
+    private void verifyCellularConnection() {
+        NetworkInfo extraNetInfo = mCm.getActiveNetworkInfo();
+        assertEquals("network type is not MOBILE", ConnectivityManager.TYPE_MOBILE,
+                extraNetInfo.getType());
+        assertTrue("not connected to cellular network", extraNetInfo.isConnected());
     }
 }

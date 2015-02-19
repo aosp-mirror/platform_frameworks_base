@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"Tüm yazıcılar…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Yazdırma iletişim kutusu"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"Sayfa <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> / <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"Özet. Kopya sayısı: <xliff:g id="COPIES">%1$s</xliff:g>, kağıt boyutu: <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"Genişletme tutacağı"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Daraltma tutacağı"</string>
-    <string name="print_button" msgid="645164566271246268">"Yazdır"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"PDF\'ye kaydet"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"Yazdırma seçenekleri genişletildi"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"Yazdırma seçenekleri daraltıldı"</string>
     <string name="search" msgid="5421724265322228497">"Ara"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Tüm yazıcılar"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Hizmet ekle"</string>

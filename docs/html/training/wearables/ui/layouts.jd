@@ -88,8 +88,8 @@ dependencies {
 <p>The <code>'com.google.android.support:wearable'</code> dependency is required to implement
 the layout techniques shown in the following sections.</p>
 
-<p><a href="/shareables/training/wearable-support-docs.zip">Download the full API
-reference documentation</a> for the Wearable UI Library classes.</p>
+<p>Browse the <a href="{@docRoot}reference/android/support/wearable/view/package-summary.html">
+API reference documentation</a> for the Wearable UI Library classes.</p>
 
 
 <h2 id="different-layouts">Specify Different Layouts for Square and Round Screens</h2>
@@ -166,7 +166,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <h2 id="same-layout">Use a Shape-Aware Layout</h2>
 
-<div style="float:right;margin-left:25px;width:250px">
+<div style="float:right;margin-left:25px;width:260px">
 <img src="{@docRoot}wear/images/02_uilib.png" width="250" height="250" alt=""/>
 <p class="img-caption"><strong>Figure 2.</strong> Window insets on a round screen.</p>
 </div>

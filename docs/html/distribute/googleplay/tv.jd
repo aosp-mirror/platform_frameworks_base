@@ -1,0 +1,320 @@
+page.title=Distributing to Android TV
+page.image=/design/tv/images/atv-home.jpg
+meta.tags="tv", "publish", "quality"
+page.tags="tv", "publish", "googleplay"
+page.metaDescription=Distribute your apps, games, and content to Android TV.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>How to Participate</h2>
+<ol>
+<li><a href="#understand_guidelines">Understand the guidelines</a></li>
+<li><a href="#develop_app">Develop a great app for TV</a></li>
+<li><a href="#test_app">Test for TV App Quality</a></li>
+<li><a href="#opt_in">Opt-in</a></li>
+<li><a href="#track_review">Track your review</a></li>
+</ol>
+
+<h2>You Should Also Read</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">Core App Quality</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  If you've got a great app or game, Android TV and Google Play can help you
+  bring it to users right in their living rooms. You'll be able to offer your
+  apps and games in a storefront experience that’s optimized for TV. You can
+  extend your new or existing apps for TV and then publish them using familiar
+  tools and processes in Google Play.
+</p>
+
+<p>
+  To get started, review the sections in this document to learn how to
+  distribute your TV apps to users through Google Play. Be sure to read
+  <a href="{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a>
+  for information on the usability and quality standards that your apps should
+  meet. When your app is ready, you can opt-in to publishing in the Android TV
+  storefront from the Developer Console.
+</p>
+
+<h2 id="how_to_participate">
+  How to Participate
+</h2>
+
+<p>
+  Google Play lets you put your TV apps in front of a new audience of users in
+  their living rooms. You can develop and publish using your existing Developer
+  Console account and your current distribution and pricing settings. It's easy
+  to participate — the sections below outline the process.
+</p>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-tv-process.png">
+</div>
+
+<h3 id="understand_guidelines">
+  1. Understand guidelines and requirements
+</h3>
+
+<p>
+  To prepare for a successful launch on Android TV, start by reviewing the
+  guidelines for creating great app experiences on TV. See the <a href=
+  "{@docRoot}design/tv/index.html">Android TV design guidelines</a> for ideas
+  on extending your app for TV and details on design and usability.
+</p>
+
+<p>
+  As you get started designing your TV experience, make sure to read and
+  understand the quality criteria for TV apps. The Google Play experience for
+  Android TV <strong>showcases only apps that are usable on the TV</strong>
+  &mdash; your apps can participate if they meet a set of basic quality
+  criteria. See <a href="{@docRoot}distribute/essentials/quality/tv.html">TV
+  App Quality</a> for details.
+</p>
+
+<h3 id="develop_app">2. Develop a great app for TV</h3>
+
+<p>
+  A great app for TV is designed for living room use and takes advantage of the
+  capabilities of Android TV and related input accessories such as game
+  controllers, D-pads, and remotes. The app is refined to offer a polished,
+  high-quality experience on large screens and delivers a compelling feature
+  set for users.
+</p>
+
+<p>
+  As you consider your TV app, review the <a href=
+  "{@docRoot}training/tv/start/index.html">developer documentation</a> and
+  usability guidelines and plan on supporting them to the greatest extent
+  possible. Make sure to design a great leanback experience for users and build
+  it with the leanback library included in the SDK. You’ll want to optimize
+  other parts of your app for the TV use case and it's a good idea to identify
+  those early in your development process.
+</p>
+
+<p>
+  In most cases, we recommend delivering your TV experience as part of your
+  existing app for phones, tablets, and other devices, using the same package
+  name and store listing. This approach lets users upgrade to your TV experience
+  seamlessly and also lets you take advantage of the reviews and ratings you’ve
+  earned in your app for phones and tablets.
+</p>
+
+<p>
+  You can bundle your TV intents, leanback library, and TV-specific code and
+  resources as part of a single APK solution for all supported devices. If
+  necessary, you can use <a href=
+  "{@docRoot}google/play/publishing/multiple-apks.html">Multiple APK
+  Support</a> to deliver a custom binary to Android TV devices under the same
+  package name and store listing that you use for phones and tablets.
+</p>
+
+<p>
+  Throughout design and development, it's important to have a suitable device
+  on which to prototype and test your user experience. You should acquire one
+  or more Android TV devices or emulators and set up your testing environment
+  as early as possible. The recommended hardware device for testing in the
+  Android TV environment is Nexus Player, which is <a href=
+  "http://www.google.com/intl/all/nexus/player/">available from Google Play</a>
+  and other stores, and you should also acquire a game controller and other TV
+  input devices.
+</p>
+
+<h3 id="test_app">3. Test for TV App Quality</h3>
+
+<p>
+  Your TV apps should be designed to perform well, look great on Android TV,
+  and offer the best user experience possible. Google Play showcases
+  high-quality apps for easy discovery by users in Google Play. Here’s how you
+  can participate and deliver an Android TV app that users will enjoy.
+</p>
+
+<ul>
+  <li>Meet Core App Quality guidelines
+    <ul>
+      <li>Follow <a href="{@docRoot}design/index.html">Android Design
+      guidelines</a>. Pay special attention to using <a href=
+      "http://www.google.com/design/spec/material-design/introduction.html">material
+      design</a> in your app.
+      </li>
+
+      <li>Test your apps against the <a href=
+      "{@docRoot}distribute/essentials/quality/core.html">Core App Quality
+      guidelines</a>.
+      </li>
+    </ul>
+  </li>
+  <li>Meet <a href="{@docRoot}distribute/essentials/quality/tv.html">TV App
+  Quality</a> guidelines
+    <ul>
+      <li>Follow our best practices for <a href="{@docRoot}training/tv/index.html">
+      TV app development</a></li>
+      <li>Make sure your app meets all of the <a href=
+      "{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a> criteria</li>
+    </ul>
+  </li>
+  <li>Strive for simplicity and highest usability</li>
+</ul>
+
+<h3 id="opt_in">4. Opt-in to Android TV and publish</h3>
+
+<p>
+  When you've built your release-ready APK and tested to ensure that it meets
+  all of the <a href="{@docRoot}distribute/essentials/quality/tv.html">TV App
+  Quality</a> guidelines, upload it to the Developer Console. Update your store
+  listing with TV screenshots and TV banner, and set distribution options as
+  needed. If you aren't familiar with how to prepare for launch on Google Play,
+  see the <a href=
+  "{@docRoot}distribute/googleplay/publish/preparing.html">Launch
+  Checklist.</a>
+</p>
+
+<p>
+  Before you can publish to Android TV users, you need to opt-in to Android
+  TV from the <strong>Pricing and Distribution</strong> section of the
+  Developer Console. Opt-in means that you want your app to be made available
+  to Android TV users through Google Play, and that
+  your app meets <a href="{@docRoot}distribute/essentials/quality/tv.html">TV
+  App Quality</a> guidelines.
+</p>
+
+<p>
+  You can opt-in only if your app meets two preliminary quality
+  criteria that are automatically checked on APK upload:
+</p>
+
+<ul>
+  <li>Your app manifest must include an intent type of <a href=
+  "{@docRoot}reference/android/content/Intent.html#ACTION_MAIN"><code>ACTION_MAIN</code></a>
+  with category <a href=
+  "{@docRoot}reference/android/content/Intent.html#CATEGORY_LEANBACK_LAUNCHER">
+    <code>CATEGORY_LEANBACK_LAUNCHER</code></a>. Learn more <a href=
+    "{@docRoot}training/tv/start/start.html#tv-activity">here</a>.
+  </li>
+
+  <li>Your app must declare that it does not require a touchscreen. The
+  manifest must declare the <code>android.hardware.touchscreen</code> hardware
+  with <code>android:required="false”</code>. Learn more <a href=
+  "{@docRoot}training/tv/start/hardware.html#declare-hardware-requirements">here</a>.
+  </li>
+</ul>
+
+<p>
+  If your app meets the preliminary criteria, you’ll see an opt-in checkbox for
+  Android TV, as shown below. If the opt-in checkbox is not enabled, review
+  your APK to ensure it meets the preliminary criteria.
+</p>
+
+<p>
+  After you opt-in and save the changes, you can publish your app as usual.
+  Before making the app available to Android TV users, Google Play submits
+  your app for review against the <a href=
+  "{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a> criteria
+  and notifies you of the result. See the next section for details on how to
+  track the approval status of your app.
+</p>
+
+<p>
+  If your app meet <a href="{@docRoot}distribute/essentials/quality/tv.html">TV
+  App Quality</a> criteria, Google Play makes that app available to Android TV
+  users. Your app is alsoeligible for higher-visibility featuring in app
+  collections and promotions. To let users everywhere know that your app is
+  designed for Android TV, Google Play decorates the app’s store listing with a
+  TV badge.
+</p>
+
+<p>
+  Note that opt-in and review do not affect the availability of your app to
+  other devices in Google Play Store &mdash; on phones and tablets, for
+  example, your app is available as soon as you publish.
+</p>
+
+<p>
+  Here are the steps to opt-in to Android TV in the Developer Console:
+</p>
+
+<ol>
+  <li>Make sure your app meets all <a href=
+  "{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a> criteria
+  </li>
+
+  <li>Add TV screenshots and banner graphic to the app’s store listing
+  </li>
+
+  <li>In the <strong>All Applications</strong> page, click the app you want to opt-in.
+  </li>
+
+  <li>Under <strong>Pricing and Distribution</strong>, scroll down to find <em>Android TV</em> and the
+  opt-in checkbox.
+  </li>
+
+  <li>Click the checkbox next to <em>Distribute your app to Android TV</em>.
+  </li>
+
+  <li>Click <strong>Save</strong> to save your changes.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-tv-opt-in.png">
+  <p class="caption">
+    <strong>Opt-in for TV:</strong> Include your app in Android TV by opting-in from the
+    Developer Console.
+  </p>
+</div>
+
+<h3 id="track_review">5. Track your review and approval</h3>
+
+<p>
+  If your app meets the technical and quality criteria for Android TV, as described above,
+  your app will be available for users to enjoy on Android TV. If your app doesn’t meet
+  the criteria, you’ll receive a <strong>notification email sent to your developer account
+  address</strong>, with a summary of the areas that you need to address. When you’ve made
+  the necessary adjustments, you can upload a new version of your app to the Developer
+  Console. 
+</p>
+
+<p>
+  At any time, you can check the review and approval status of your app in the
+  Developer Console, under <em>Android TV</em> in the app's <strong>Pricing and Distribution</strong>
+  page.
+</p>
+
+<p>
+  There are three approval states:
+</p>
+
+<ul>
+  <li>
+    <em>Pending</em> — Your app was sent for review and the review is not yet
+    complete.
+  </li>
+
+  <li>
+    <em>Approved</em> — Your app was reviewed and approved. The app will be
+    made available directly to Android TV users. 
+  </li>
+
+  <li>
+    <em>Not approved</em> — Your app was reviewed and not approved. Check the
+    notification email for information about why the app was not approved. You
+    can address any issues and opt-in and publish again to initiate another
+    review.
+  </li>
+</ul>
+
+<p>To understand how your apps are evaluated, please see the <a href=
+"{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a> document. </p>
+
+
+  <h3>Related resources</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:tvlanding"
+    data-cardSizes="9x6, 6x3x2"
+    data-maxResults="6">
+  </div>

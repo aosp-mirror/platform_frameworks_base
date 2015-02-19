@@ -25,6 +25,7 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -1940,13 +1941,25 @@ public class StateMachine {
      * @param args
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        // Cannot just invoke pw.println(this.toString()) because if the
+        // resulting string is to long it won't be displayed.
         pw.println(getName() + ":");
         pw.println(" total records=" + getLogRecCount());
         for (int i = 0; i < getLogRecSize(); i++) {
-            pw.printf(" rec[%d]: %s\n", i, getLogRec(i).toString());
+            pw.println(" rec[" + i + "]: " + getLogRec(i).toString());
             pw.flush();
         }
         pw.println("curState=" + getCurrentState().getName());
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sr = new StringWriter();
+        PrintWriter pr = new PrintWriter(sr);
+        dump(null, pr, null);
+        pr.flush();
+        pr.close();
+        return sr.toString();
     }
 
     /**

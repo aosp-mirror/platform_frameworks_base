@@ -23,9 +23,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
-import com.android.systemui.R;
 
 /**
  * A view that can be used for both the dimmed and normal background of an notification.

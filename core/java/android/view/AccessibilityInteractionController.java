@@ -636,95 +636,6 @@ final class AccessibilityInteractionController {
         }
     }
 
-    public void computeClickPointInScreenClientThread(long accessibilityNodeId,
-            Region interactiveRegion, int interactionId,
-            IAccessibilityInteractionConnectionCallback callback, int interrogatingPid,
-            long interrogatingTid, MagnificationSpec spec) {
-        Message message = mHandler.obtainMessage();
-        message.what = PrivateHandler.MSG_COMPUTE_CLICK_POINT_IN_SCREEN;
-
-        SomeArgs args = SomeArgs.obtain();
-        args.argi1 = AccessibilityNodeInfo.getAccessibilityViewId(accessibilityNodeId);
-        args.argi2 = AccessibilityNodeInfo.getVirtualDescendantId(accessibilityNodeId);
-        args.argi3 = interactionId;
-        args.arg1 = callback;
-        args.arg2 = spec;
-        args.arg3 = interactiveRegion;
-
-        message.obj = args;
-
-        // If the interrogation is performed by the same thread as the main UI
-        // thread in this process, set the message as a static reference so
-        // after this call completes the same thread but in the interrogating
-        // client can handle the message to generate the result.
-        if (interrogatingPid == mMyProcessId && interrogatingTid == mMyLooperThreadId) {
-            AccessibilityInteractionClient.getInstanceForThread(
-                    interrogatingTid).setSameThreadMessage(message);
-        } else {
-            mHandler.sendMessage(message);
-        }
-    }
-
-    private void computeClickPointInScreenUiThread(Message message) {
-        SomeArgs args = (SomeArgs) message.obj;
-        final int accessibilityViewId = args.argi1;
-        final int virtualDescendantId = args.argi2;
-        final int interactionId = args.argi3;
-        final IAccessibilityInteractionConnectionCallback callback =
-                (IAccessibilityInteractionConnectionCallback) args.arg1;
-        final MagnificationSpec spec = (MagnificationSpec) args.arg2;
-        final Region interactiveRegion = (Region) args.arg3;
-        args.recycle();
-
-        boolean succeeded = false;
-        Point point = mTempPoint;
-        try {
-            if (mViewRootImpl.mView == null || mViewRootImpl.mAttachInfo == null) {
-                return;
-            }
-            View target = null;
-            if (accessibilityViewId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                target = findViewByAccessibilityId(accessibilityViewId);
-            } else {
-                target = mViewRootImpl.mView;
-            }
-            if (target != null && isShown(target)) {
-                AccessibilityNodeProvider provider = target.getAccessibilityNodeProvider();
-                if (provider != null) {
-                    // For virtual views just use the center of the bounds in screen.
-                    AccessibilityNodeInfo node = null;
-                    if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        node = provider.createAccessibilityNodeInfo(virtualDescendantId);
-                    } else {
-                        node = provider.createAccessibilityNodeInfo(
-                                AccessibilityNodeProvider.HOST_VIEW_ID);
-                    }
-                    if (node != null) {
-                        succeeded = true;
-                        Rect boundsInScreen = mTempRect;
-                        node.getBoundsInScreen(boundsInScreen);
-                        point.set(boundsInScreen.centerX(), boundsInScreen.centerY());
-                    }
-                } else if (virtualDescendantId == AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                    // For a real view, ask the view to compute the click point.
-                    succeeded = target.computeClickPointInScreenForAccessibility(
-                            interactiveRegion, point);
-                }
-            }
-        } finally {
-            try {
-                Point result = null;
-                if (succeeded) {
-                    applyAppScaleAndMagnificationSpecIfNeeded(point, spec);
-                    result = point;
-                }
-                callback.setComputeClickPointInScreenActionResult(result, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
-            }
-        }
-    }
-
     private View findViewByAccessibilityId(int accessibilityId) {
         View root = mViewRootImpl.mView;
         if (root == null) {
@@ -1109,15 +1020,17 @@ final class AccessibilityInteractionController {
                         || accessibilityViewId == providerHost.getAccessibilityViewId()) {
                     final AccessibilityNodeInfo parent;
                     if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        parent = provider.createAccessibilityNodeInfo(
-                                virtualDescendantId);
+                        parent = provider.createAccessibilityNodeInfo(virtualDescendantId);
                     } else {
-                        parent= provider.createAccessibilityNodeInfo(
+                        parent = provider.createAccessibilityNodeInfo(
                                 AccessibilityNodeProvider.HOST_VIEW_ID);
                     }
-                    if (parent != null) {
-                        outInfos.add(parent);
+                    if (parent == null) {
+                        // Couldn't obtain the parent, which means we have a
+                        // disconnected sub-tree. Abort prefetch immediately.
+                        return;
                     }
+                    outInfos.add(parent);
                     parentNodeId = parent.getParentNodeId();
                     accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
                             parentNodeId);
@@ -1199,7 +1112,6 @@ final class AccessibilityInteractionController {
         private final static int MSG_FIND_ACCESSIBILITY_NODE_INFO_BY_TEXT = 4;
         private final static int MSG_FIND_FOCUS = 5;
         private final static int MSG_FOCUS_SEARCH = 6;
-        private final static int MSG_COMPUTE_CLICK_POINT_IN_SCREEN = 7;
 
         public PrivateHandler(Looper looper) {
             super(looper);
@@ -1221,8 +1133,6 @@ final class AccessibilityInteractionController {
                     return "MSG_FIND_FOCUS";
                 case MSG_FOCUS_SEARCH:
                     return "MSG_FOCUS_SEARCH";
-                case MSG_COMPUTE_CLICK_POINT_IN_SCREEN:
-                    return "MSG_COMPUTE_CLICK_POINT_IN_SCREEN";
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);
             }
@@ -1249,9 +1159,6 @@ final class AccessibilityInteractionController {
                 } break;
                 case MSG_FOCUS_SEARCH: {
                     focusSearchUiThread(message);
-                } break;
-                case MSG_COMPUTE_CLICK_POINT_IN_SCREEN: {
-                    computeClickPointInScreenUiThread(message);
                 } break;
                 default:
                     throw new IllegalArgumentException("Unknown message type: " + type);

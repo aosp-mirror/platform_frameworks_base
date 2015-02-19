@@ -131,9 +131,9 @@ href="{@docRoot}/sdk/installing/studio-build.html#dependencies">Gradle dependenc
 
 <pre>
 dependencies {
-    compile 'com.android.support:appcompat-v7:+'
-    compile 'com.android.support:cardview-v7:+'
-    compile 'com.android.support:recyclerview-v7:+'
+    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:cardview-v7:21.0.+'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
 }
 </pre>
 

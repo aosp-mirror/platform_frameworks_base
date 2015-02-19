@@ -31,6 +31,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
@@ -201,7 +202,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 ICancellationSignal cancellationSignal) {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return rejectQuery(uri, projection, selection, selectionArgs, sortOrder,
                         CancellationSignal.fromTransport(cancellationSignal));
             }
@@ -227,7 +228,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
             }
             final String original = setCallingPackage(callingPkg);
@@ -242,7 +243,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public int bulkInsert(String callingPkg, Uri uri, ContentValues[] initialValues) {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             final String original = setCallingPackage(callingPkg);
@@ -270,13 +271,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                     operations.set(i, operation);
                 }
                 if (operation.isReadOperation()) {
-                    if (enforceReadPermission(callingPkg, uri)
+                    if (enforceReadPermission(callingPkg, uri, null)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
                 }
                 if (operation.isWriteOperation()) {
-                    if (enforceWritePermission(callingPkg, uri)
+                    if (enforceWritePermission(callingPkg, uri, null)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
@@ -285,10 +286,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final String original = setCallingPackage(callingPkg);
             try {
                 ContentProviderResult[] results = ContentProvider.this.applyBatch(operations);
-                for (int i = 0; i < results.length ; i++) {
-                    if (userIds[i] != UserHandle.USER_CURRENT) {
-                        // Adding the userId to the uri.
-                        results[i] = new ContentProviderResult(results[i], userIds[i]);
+                if (results != null) {
+                    for (int i = 0; i < results.length ; i++) {
+                        if (userIds[i] != UserHandle.USER_CURRENT) {
+                            // Adding the userId to the uri.
+                            results[i] = new ContentProviderResult(results[i], userIds[i]);
+                        }
                     }
                 }
                 return results;
@@ -301,7 +304,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public int delete(String callingPkg, Uri uri, String selection, String[] selectionArgs) {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             final String original = setCallingPackage(callingPkg);
@@ -317,7 +320,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String[] selectionArgs) {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceWritePermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             final String original = setCallingPackage(callingPkg);
@@ -330,11 +333,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public ParcelFileDescriptor openFile(
-                String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
-                throws FileNotFoundException {
+                String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal,
+                IBinder callerToken) throws FileNotFoundException {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, uri, mode);
+            enforceFilePermission(callingPkg, uri, mode, callerToken);
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openFile(
@@ -350,7 +353,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 throws FileNotFoundException {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, uri, mode);
+            enforceFilePermission(callingPkg, uri, mode, null);
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openAssetFile(
@@ -382,7 +385,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
             validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, uri, "r");
+            enforceFilePermission(callingPkg, uri, "r", null);
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openTypedAssetFile(
@@ -402,7 +405,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
             final String original = setCallingPackage(callingPkg);
@@ -418,7 +421,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+            if (enforceReadPermission(callingPkg, uri, null) != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
             final String original = setCallingPackage(callingPkg);
@@ -429,29 +432,33 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             }
         }
 
-        private void enforceFilePermission(String callingPkg, Uri uri, String mode)
-                throws FileNotFoundException, SecurityException {
+        private void enforceFilePermission(String callingPkg, Uri uri, String mode,
+                IBinder callerToken) throws FileNotFoundException, SecurityException {
             if (mode != null && mode.indexOf('w') != -1) {
-                if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                if (enforceWritePermission(callingPkg, uri, callerToken)
+                        != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
             } else {
-                if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                if (enforceReadPermission(callingPkg, uri, callerToken)
+                        != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
             }
         }
 
-        private int enforceReadPermission(String callingPkg, Uri uri) throws SecurityException {
-            enforceReadPermissionInner(uri);
+        private int enforceReadPermission(String callingPkg, Uri uri, IBinder callerToken)
+                throws SecurityException {
+            enforceReadPermissionInner(uri, callerToken);
             if (mReadOp != AppOpsManager.OP_NONE) {
                 return mAppOpsManager.noteOp(mReadOp, Binder.getCallingUid(), callingPkg);
             }
             return AppOpsManager.MODE_ALLOWED;
         }
 
-        private int enforceWritePermission(String callingPkg, Uri uri) throws SecurityException {
-            enforceWritePermissionInner(uri);
+        private int enforceWritePermission(String callingPkg, Uri uri, IBinder callerToken)
+                throws SecurityException {
+            enforceWritePermissionInner(uri, callerToken);
             if (mWriteOp != AppOpsManager.OP_NONE) {
                 return mAppOpsManager.noteOp(mWriteOp, Binder.getCallingUid(), callingPkg);
             }
@@ -467,7 +474,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /** {@hide} */
-    protected void enforceReadPermissionInner(Uri uri) throws SecurityException {
+    protected void enforceReadPermissionInner(Uri uri, IBinder callerToken)
+            throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -480,7 +488,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getReadPermission();
             if (componentPerm != null) {
-                if (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED) {
+                if (context.checkPermission(componentPerm, pid, uid, callerToken)
+                        == PERMISSION_GRANTED) {
                     return;
                 } else {
                     missingPerm = componentPerm;
@@ -497,7 +506,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getReadPermission();
                     if (pathPerm != null && pp.match(path)) {
-                        if (context.checkPermission(pathPerm, pid, uid) == PERMISSION_GRANTED) {
+                        if (context.checkPermission(pathPerm, pid, uid, callerToken)
+                                == PERMISSION_GRANTED) {
                             return;
                         } else {
                             // any denied <path-permission> means we lose
@@ -515,8 +525,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         // last chance, check against any uri grants
-        if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                == PERMISSION_GRANTED) {
+        final int callingUserId = UserHandle.getUserId(uid);
+        final Uri userUri = (mSingleUser && !UserHandle.isSameUser(mMyUid, uid))
+                ? maybeAddUserId(uri, callingUserId) : uri;
+        if (context.checkUriPermission(userUri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                callerToken) == PERMISSION_GRANTED) {
             return;
         }
 
@@ -529,7 +542,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /** {@hide} */
-    protected void enforceWritePermissionInner(Uri uri) throws SecurityException {
+    protected void enforceWritePermissionInner(Uri uri, IBinder callerToken)
+            throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -542,7 +556,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getWritePermission();
             if (componentPerm != null) {
-                if (context.checkPermission(componentPerm, pid, uid) == PERMISSION_GRANTED) {
+                if (context.checkPermission(componentPerm, pid, uid, callerToken)
+                        == PERMISSION_GRANTED) {
                     return;
                 } else {
                     missingPerm = componentPerm;
@@ -559,7 +574,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getWritePermission();
                     if (pathPerm != null && pp.match(path)) {
-                        if (context.checkPermission(pathPerm, pid, uid) == PERMISSION_GRANTED) {
+                        if (context.checkPermission(pathPerm, pid, uid, callerToken)
+                                == PERMISSION_GRANTED) {
                             return;
                         } else {
                             // any denied <path-permission> means we lose
@@ -577,8 +593,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         // last chance, check against any uri grants
-        if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                == PERMISSION_GRANTED) {
+        if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                callerToken) == PERMISSION_GRANTED) {
             return;
         }
 
@@ -1656,12 +1672,6 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     private void attachInfo(Context context, ProviderInfo info, boolean testing) {
-        /*
-         * We may be using AsyncTask from binder threads.  Make it init here
-         * so its static handler is on the main thread.
-         */
-        AsyncTask.init();
-
         mNoPerms = testing;
 
         /*

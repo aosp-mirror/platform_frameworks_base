@@ -49,7 +49,8 @@ import java.util.List;
  */
 public class ConnectivityManagerTestBase extends InstrumentationTestCase {
 
-    private static final String PING_IP_ADDR = "8.8.8.8";
+    private static final String[] PING_HOST_LIST = {
+        "www.google.com", "www.yahoo.com", "www.bing.com", "www.facebook.com", "www.ask.com"};
 
     protected static final int WAIT_FOR_SCAN_RESULT = 10 * 1000; //10 seconds
     protected static final int WIFI_SCAN_TIMEOUT = 50 * 1000; // 50 seconds
@@ -281,22 +282,14 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     }
 
     /**
-     * @param pingServerList a list of servers that can be used for ping test, can be null
      * @return true if the ping test is successful, false otherwise.
      */
-    protected boolean pingTest(String[] pingServerList) {
-        String[] hostList = {"www.google.com", "www.yahoo.com",
-                "www.bing.com", "www.facebook.com", "www.ask.com"};
-        if (pingServerList != null) {
-            hostList = pingServerList;
-        }
-
+    protected boolean pingTest() {
         long startTime = System.currentTimeMillis();
         while ((System.currentTimeMillis() - startTime) < PING_TIMER) {
             try {
                 // assume the chance that all servers are down is very small
-                for (int i = 0; i < hostList.length; i++ ) {
-                    String host = hostList[i];
+                for (String host : PING_HOST_LIST) {
                     logv("Start ping test, ping " + host);
                     Process p = Runtime.getRuntime().exec("ping -c 10 -w 100 " + host);
                     int status = p.waitFor();
@@ -312,6 +305,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
             } catch (InterruptedException e) {
                 logv("Ping test Fail: InterruptedException");
             }
+            SystemClock.sleep(SHORT_TIMEOUT);
         }
         // ping test timeout
         return false;
@@ -458,14 +452,7 @@ public class ConnectivityManagerTestBase extends InstrumentationTestCase {
     // use ping request against Google public DNS to verify connectivity
     protected boolean checkNetworkConnectivity() {
         assertTrue("no active network connection", waitForActiveNetworkConnection(LONG_TIMEOUT));
-        try {
-            Process proc = Runtime.getRuntime().exec(new String[]{
-                    "/system/bin/ping", "-W", "30", "-c", "1", PING_IP_ADDR});
-            return proc.waitFor() == 0;
-        } catch (InterruptedException | IOException e) {
-            Log.e(mLogTag, "Ping failed", e);
-        }
-        return false;
+        return pingTest();
     }
 
     @Override

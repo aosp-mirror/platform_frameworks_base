@@ -112,7 +112,7 @@ public class WifiApStress extends ConnectivityManagerTestBase {
             } catch (Exception e) {
                 // ignore
             }
-            assertTrue("no uplink data connection after Wi-Fi tethering", pingTest(null));
+            assertTrue("no uplink data connection after Wi-Fi tethering", pingTest());
             // disable wifi hotspot
             assertTrue("failed to disable wifi hotspot",
                     mWifiManager.setWifiApEnabled(config, false));

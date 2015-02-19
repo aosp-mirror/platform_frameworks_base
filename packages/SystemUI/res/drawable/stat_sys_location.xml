@@ -17,7 +17,7 @@
     android:insetLeft="1.5dp"
     android:insetRight="1.5dp">
         <vector
-            android:width="20dp"
+            android:width="17dp"
             android:height="17dp"
             android:viewportWidth="48.0"
             android:viewportHeight="48.0">

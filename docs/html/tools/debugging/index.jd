@@ -18,7 +18,7 @@ page.title=Debugging
 
   <p>The Android SDK provides most of the tools that you need to debug your applications. You need
   a JDWP-compliant debugger if you want to be able to do things such as step through code,
-  view variable values, and pause execution of an application. If you are using Eclipse, a
+  view variable values, and pause execution of an application. If you are using Android Studio, a
   JDWP-compliant debugger is already included and there is no setup required. If you are using
   another IDE, you can use the debugger that comes with it and attach the debugger to a special
   port so it can communicate with the application VMs on your devices. The main components that
@@ -27,7 +27,8 @@ page.title=Debugging
   <dl>
     <dt><a href="{@docRoot}tools/help/adb.html"><strong>adb</strong></a></dt>
 
-    <dd><code>adb</code> acts as a middleman between a device and your development system. It provides various
+    <dd><code>adb</code> acts as a middleman between a device and your development system. It 
+    provides various
     device management capabilities, including moving and syncing files to the emulator, running a
     UNIX shell on the device or emulator, and providing a general means to communicate with
     connected emulators and devices.</dd>
@@ -42,9 +43,9 @@ page.title=Debugging
     <dt><strong><a href="{@docRoot}tools/device.html">Device</a> or
     <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a></strong></dt>
 
-    <dd>Your application must run in a device or in an AVD so that it can be debugged. An <code>adb</code> device
-    daemon runs on the device or emulator and provides a means for the <code>adb</code> host daemon to
-    communicate with the device or emulator.</dd>
+    <dd>Your application must run in a device or in an AVD so that it can be debugged. An
+    <code>adb</code> device daemon runs on the device or emulator and provides a means for the
+    <code>adb</code> host daemon to communicate with the device or emulator.</dd>
 
     <dt><strong>JDWP debugger</strong></dt>
 
@@ -66,13 +67,13 @@ page.title=Debugging
         alt="Debugging workflow" />
   <p class="img-caption><strong>Figure 1. </strong> Debugging Workflow</p>
 
-  <p>On your emulator or device, each application runs in its own instance of a Dalvik VM. The <code>adb</code>
-  device daemon allows communication with the VMs from an outside party.</p>
+  <p>On your emulator or device, each application runs in its own instance of a Dalvik VM. The
+  <code>adb</code> device daemon allows communication with the VMs from an outside party.</p>
 
-  <p>On your development machine, the <code>adb</code> host daemon communicates with the <code>adb</code> device daemon and
-  allows tools such as DDMS to communicate with the device or emulator. The <code>adb</code> host daemon also
-  allows you to access shell commands on the device as well as providing capabilities such as
-  application installation and file transferring.</p>
+  <p>On your development machine, the <code>adb</code> host daemon communicates with the
+ <code>adb</code> device daemon and allows tools such as DDMS to communicate with the device or emulator. 
+ The <code>adb</code> host daemon also allows you to access shell commands on the device as well as 
+ providing capabilities such as application installation and file transferring.</p>
 
   <p>Each application VM on the device or emulator exposes a debugging port that you can attach to
   via DDMS. DDMS can forward any of these ports to a static debugging port (typically port 8700) by
@@ -80,10 +81,10 @@ page.title=Debugging
   attach to this static debugging port and debug all the applications that are running on the
   device or emulator without having to attach to multiple ports.</p>
 
-  <p>If you are using Eclipse, much of these interconnections are hidden from you. DDMS, <code>adb</code>, and a
-  JDWP debugger are all setup for you and you can access them through the Debug and DDMS
-  perspectives in Eclipse. If you are developing in a non-Eclipse environment, you have to invoke
-  these tools manually.</p>
+  <p>If you are using Android Studio, much of these interconnections are hidden from you. DDMS,
+  <code>adb</code>, and a
+  JDWP debugger are all setup for you and you can access them through the Debug and DDMS view. If
+  you are developing with another IDE environment, you may have to invoke these tools manually.</p>
 
   <h2 id="addltools">Additional Debugging Tools</h2>
 
@@ -134,8 +135,6 @@ Debugging with the Dev Tools App</a>.
 <dd>You can access dumpstate information from the <code>adb shell</code> commands. See
 <a href="{@docRoot}tools/help/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
-
-
 
 <dt><strong>Get wireless connectivity information</strong></dt>
 <dd>You can get information about wireless connectivity using DDMS.

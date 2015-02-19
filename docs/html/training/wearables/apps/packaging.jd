@@ -1,4 +1,6 @@
 page.title=Packaging Wearable Apps
+page.tags=wear
+helpoutsWidget=true
 
 @jd:body
 
@@ -14,7 +16,7 @@ page.title=Packaging Wearable Apps
 </div>
 </div>
 
-<p>When publishing to users, you must package a wearable app inside of a handheld app, 
+<p>When publishing to users, you must package a wearable app inside of a handheld app,
 because users cannot browse and install apps directly on the wearable. If packaged properly,
 when users download the handheld app, the system automatically pushes the wearable app to the
 paired wearable.
@@ -29,6 +31,14 @@ Android Studio directly to the wearable is required.</p>
 <p>To properly package a wearable app in Android Studio:</p>
 
 <ol>
+  <li>Include all the permissions declared in the manifest file of the wearable app module
+  in the manifest file of the handheld app module. For example, if you specify the {@link
+  android.Manifest.permission#VIBRATE} permission for the wearable app, you must also add that
+  permission to the handheld app.</li>
+
+  <li>Ensure that both the wearable and handheld app modules have the same package name and
+  version number.</li>
+
   <li>Declare a Gradle dependency in the handheld app's <code>build.gradle</code> file
   that points to the wearable app module:
 <pre>
@@ -43,39 +53,21 @@ dependencies {
   to specify your release keystore and sign your app. Android Studio exports the signed
   handheld app with the wearable app embedded in it automatically into your project's root folder.
 
-  <p>Alternatively, you can create a <code>signingConfig</code> rule in the wearable and handheld
-  modules' <code>build.gradle</code> file to sign them with your release key. Both apps must be
-  signed to have the automatic pushing of the wearable app work.
+  <p>Alternatively, you can sign both apps from the command line using the
+  <a href="{@docRoot}sdk/installing/studio-build.html#gradleWrapper">Gradle wrapper</a>. Both apps
+  must be signed to have the automatic pushing of the wearable app work.</p>
 
-<pre>
-android {
-  ...
-  signingConfigs {
-    release {
-      keyAlias 'myAlias'
-      keyPassword 'myPw'
-      storeFile file('path/to/release.keystore')
-      storePassword 'myPw'
-    }
-  }
-  buildTypes {
-    release {
-      ...
-      signingConfig signingConfigs.release
-    }
-  }
-  ...
-}
+  <p>Store your key file location and credentials in environment variables and run the Gradle
+  wrapper as follows:</p>
+
+<pre class="no-pretty-print">
+./gradlew assembleRelease \
+  -Pandroid.injected.signing.store.file=$KEYFILE \
+  -Pandroid.injected.signing.store.password=$STORE_PASSWORD \
+  -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+  -Pandroid.injected.signing.key.password=$KEY_PASSWORD
 </pre>
-  <p>Build the handheld app by clicking the Gradle button on the right vertical toolbar of
-  Android Studio and running the <b>assembleRelease</b> task. The task is located under
-  <b>Project name > Handheld module name > assembleRelease</b>.
-  </p>
-
-<p class="note"><b>Note:</b>This example embeds the password in your Gradle file, which might be undesirable. See
-<a href="{@docRoot}sdk/installing/studio-build.html#configureSigning">Configure signing settings</a>
-for information about how to create an environment variable for the passwords instead.
-</p>
+ </li>
 </ol>
 
 <h3>Signing the wearable and handheld app separately</h3>
@@ -101,6 +93,12 @@ if you are using another IDE or another method of building.
 </p>
 
 <ol>
+  <li>Include all the permissions declared in the manifest file of the wearable app
+  in the manifest file of the mobile app. For example, if you specify the {@link
+  android.Manifest.permission#VIBRATE} permission for the wearable app, you must also add that
+  permission to the mobile app.</li>
+  <li>Ensure that both the wearable and mobile APKs have the same package name and version
+  number.</li>
   <li>Copy the signed wearable app to your handheld project's <code>res/raw</code> directory. We'll
   refer to the APK as <code>wearable_app.apk</code>.</li>
   <li>Create a <code>res/xml/wearable_app_desc.xml</code> file that contains the version and
@@ -115,8 +113,8 @@ if you are using another IDE or another method of building.
 
 <p>
 The <code>package</code>, <code>versionCode</code>, and <code>versionName</code> are the
-same values specified in the wearable app's <code>AndroidManifest.xml</code> file. 
-The <code>rawPathResId</code> is the static variable name of the APK resource. For example, 
+same values specified in the wearable app's <code>AndroidManifest.xml</code> file.
+The <code>rawPathResId</code> is the static variable name of the APK resource. For example,
 for <code>wearable_app.apk</code>, the static variable name is <code>wearable_app</code>.
 </p>
 </li>
@@ -124,7 +122,7 @@ for <code>wearable_app.apk</code>, the static variable name is <code>wearable_ap
 Add a <code>meta-data</code> tag to your handheld app's <code>&lt;application&gt;</code> tag to
 reference the <code>wearable_app_desc.xml</code> file.
 <pre>
-  &lt;meta-data android:name="com.google.android.wearable.beta.app" 
+  &lt;meta-data android:name="com.google.android.wearable.beta.app"
                  android:resource="&#64;xml/wearable_app_desc"/&gt;
 </pre>
 </li>

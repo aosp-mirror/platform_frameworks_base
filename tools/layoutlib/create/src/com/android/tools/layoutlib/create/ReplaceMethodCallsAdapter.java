@@ -16,6 +16,9 @@
 
 package com.android.tools.layoutlib.create;
 
+import com.android.tools.layoutlib.java.LinkedHashMap_Delegate;
+import com.android.tools.layoutlib.java.System_Delegate;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -24,8 +27,10 @@ import org.objectweb.asm.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,13 +47,15 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             "([CI[CII)V", "([BI[BII)V", "([SI[SII)V", "([II[III)V",
             "([JI[JII)V", "([FI[FII)V", "([DI[DII)V", "([ZI[ZII)V"));
 
-    private static final List<MethodReplacer> METHOD_REPLACERS = new ArrayList<MethodReplacer>(2);
+    private static final List<MethodReplacer> METHOD_REPLACERS = new ArrayList<MethodReplacer>(5);
 
     private static final String ANDROID_LOCALE_CLASS =
             "com/android/layoutlib/bridge/android/AndroidLocale";
 
-    private static final String JAVA_LOCALE_CLASS = "java/util/Locale";
+    private static final String JAVA_LOCALE_CLASS = Type.getInternalName(java.util.Locale.class);
     private static final Type STRING = Type.getType(String.class);
+
+    private static final String JAVA_LANG_SYSTEM = Type.getInternalName(System.class);
 
     // Static initialization block to initialize METHOD_REPLACERS.
     static {
@@ -56,22 +63,22 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         METHOD_REPLACERS.add(new MethodReplacer() {
             @Override
             public boolean isNeeded(String owner, String name, String desc) {
-                return "java/lang/System".equals(owner) && "arraycopy".equals(name) &&
+                return JAVA_LANG_SYSTEM.equals(owner) && "arraycopy".equals(name) &&
                         ARRAYCOPY_DESCRIPTORS.contains(desc);
             }
 
             @Override
-            public void replace(int[] opcode, String[] methodInformation) {
-                assert methodInformation.length == 3 && isNeeded(methodInformation[0], methodInformation[1], methodInformation[2])
-                        && opcode.length == 1;
-                methodInformation[2] = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
+            public void replace(MethodInformation mi) {
+                assert isNeeded(mi.owner, mi.name, mi.desc);
+                mi.desc = "(Ljava/lang/Object;ILjava/lang/Object;II)V";
             }
         });
 
         // Case 2: java.util.Locale.toLanguageTag() and java.util.Locale.getScript()
         METHOD_REPLACERS.add(new MethodReplacer() {
 
-            String LOCALE_TO_STRING = Type.getMethodDescriptor(STRING, Type.getType(Locale.class));
+            private final String LOCALE_TO_STRING =
+                    Type.getMethodDescriptor(STRING, Type.getType(Locale.class));
 
             @Override
             public boolean isNeeded(String owner, String name, String desc) {
@@ -80,12 +87,11 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             }
 
             @Override
-            public void replace(int[] opcode, String[] methodInformation) {
-                assert methodInformation.length == 3 && isNeeded(methodInformation[0], methodInformation[1], methodInformation[2])
-                        && opcode.length == 1;
-                opcode[0] = Opcodes.INVOKESTATIC;
-                methodInformation[0] = ANDROID_LOCALE_CLASS;
-                methodInformation[2] = LOCALE_TO_STRING;
+            public void replace(MethodInformation mi) {
+                assert isNeeded(mi.owner, mi.name, mi.desc);
+                mi.opcode = Opcodes.INVOKESTATIC;
+                mi.owner = ANDROID_LOCALE_CLASS;
+                mi.desc = LOCALE_TO_STRING;
             }
         });
 
@@ -104,10 +110,51 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             }
 
             @Override
-            public void replace(int[] opcode, String[] methodInformation) {
-                assert methodInformation.length == 3 && isNeeded(methodInformation[0], methodInformation[1], methodInformation[2])
-                        && opcode.length == 1;
-                methodInformation[0] = ANDROID_LOCALE_CLASS;
+            public void replace(MethodInformation mi) {
+                assert isNeeded(mi.owner, mi.name, mi.desc);
+                mi.owner = ANDROID_LOCALE_CLASS;
+            }
+        });
+
+        // Case 4: java.lang.System.log?()
+        METHOD_REPLACERS.add(new MethodReplacer() {
+            @Override
+            public boolean isNeeded(String owner, String name, String desc) {
+                return JAVA_LANG_SYSTEM.equals(owner) && name.length() == 4
+                        && name.startsWith("log");
+            }
+
+            @Override
+            public void replace(MethodInformation mi) {
+                assert isNeeded(mi.owner, mi.name, mi.desc);
+                assert mi.desc.equals("(Ljava/lang/String;Ljava/lang/Throwable;)V")
+                        || mi.desc.equals("(Ljava/lang/String;)V");
+                mi.name = "log";
+                mi.owner = Type.getInternalName(System_Delegate.class);
+            }
+        });
+
+        // Case 5: java.util.LinkedHashMap.eldest()
+        METHOD_REPLACERS.add(new MethodReplacer() {
+
+            private final String VOID_TO_MAP_ENTRY =
+                    Type.getMethodDescriptor(Type.getType(Map.Entry.class));
+            private final String LINKED_HASH_MAP = Type.getInternalName(LinkedHashMap.class);
+
+            @Override
+            public boolean isNeeded(String owner, String name, String desc) {
+                return LINKED_HASH_MAP.equals(owner) &&
+                        "eldest".equals(name) &&
+                        VOID_TO_MAP_ENTRY.equals(desc);
+            }
+
+            @Override
+            public void replace(MethodInformation mi) {
+                assert isNeeded(mi.owner, mi.name, mi.desc);
+                mi.opcode = Opcodes.INVOKESTATIC;
+                mi.owner = Type.getInternalName(LinkedHashMap_Delegate.class);
+                mi.desc = Type.getMethodDescriptor(
+                        Type.getType(Map.Entry.class), Type.getType(LinkedHashMap.class));
             }
         });
     }
@@ -141,13 +188,12 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
             for (MethodReplacer replacer : METHOD_REPLACERS) {
                 if (replacer.isNeeded(owner, name, desc)) {
-                    String[] methodInformation = {owner, name, desc};
-                    int[] opcodeOut = {opcode};
-                    replacer.replace(opcodeOut, methodInformation);
-                    opcode = opcodeOut[0];
-                    owner = methodInformation[0];
-                    name = methodInformation[1];
-                    desc = methodInformation[2];
+                    MethodInformation mi = new MethodInformation(opcode, owner, name, desc);
+                    replacer.replace(mi);
+                    opcode = mi.opcode;
+                    owner = mi.owner;
+                    name = mi.name;
+                    desc = mi.desc;
                     break;
                 }
             }
@@ -155,19 +201,28 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         }
     }
 
+    private static class MethodInformation {
+        public int opcode;
+        public String owner;
+        public String name;
+        public String desc;
+
+        public MethodInformation(int opcode, String owner, String name, String desc) {
+            this.opcode = opcode;
+            this.owner = owner;
+            this.name = name;
+            this.desc = desc;
+        }
+    }
+
     private interface MethodReplacer {
         public boolean isNeeded(String owner, String name, String desc);
 
         /**
-         * This method must update the arrays with the new values of the method attributes -
+         * Updates the MethodInformation with the new values of the method attributes -
          * opcode, owner, name and desc.
-         * @param opcode This array should contain the original value of the opcode. The value is
-         *               modified by the method if needed. The size of the array must be 1.
          *
-         * @param methodInformation This array should contain the original values of the method
-         *                          attributes - owner, name and desc in that order. The values
-         *                          may be modified as needed. The size of the array must be 3.
          */
-        public void replace(int[] opcode, String[] methodInformation);
+        public void replace(MethodInformation mi);
     }
 }

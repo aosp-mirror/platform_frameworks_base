@@ -29,4 +29,15 @@
     <dimen name="keyguard_clock_notifications_margin_max">36dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">80dp</dimen>
+
+    <!-- Screen pinning request width (just a little bit bigger than the three buttons here -->
+    <dimen name="screen_pinning_request_width">490dp</dimen>
+    <!-- Screen pinning request bottom button circle widths -->
+    <dimen name="screen_pinning_request_button_width">162dp</dimen>
+    <!-- Screen pinning request, controls padding on bigger screens, bigger nav bar -->
+    <dimen name="screen_pinning_request_frame_padding">39dp</dimen>
+    <!-- Screen pinning request side views to match nav bar
+         In sw600dp we want the buttons centered so this fills the space,
+         (screen_pinning_request_width - 3 * screen_pinning_request_button_width) / 2 -->
+    <dimen name="screen_pinning_request_side_width">2dp</dimen>
 </resources>

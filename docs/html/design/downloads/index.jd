@@ -137,7 +137,84 @@ modify to match your theme, plus source files.</p>
 </div>
 
 
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Watch faces UI toolkit</h4>
+<p>Detailed specifications and measurements for the the background canvas, notification cards, and
+system indicators.
+</p>
 
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_DesignSpec_Icon.png" width="220">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Watch Face Specifications');"
+    href="{@docRoot}downloads/design/AndroidWear_DesignSpec_11.13.pdf">PDF Toolkit</a>
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Slide watch face</h4>
+<p>Example of a watch face design in AI format.
+</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_Slide_Ai_Icon.png" width="150"
+         style="width:150px;margin:0 auto;display:block">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Watch Face Example');"
+    href="{@docRoot}downloads/design/Slide.ai">Adobe&reg; Illustrator&reg; Design</a>
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Slide watch face specifications</h4>
+<p>Design specifications for the Slide watch face in PSD format.
+</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_Slide_Psd_Icon.png" width="150"
+         style="width:150px;margin:0 auto;display:block">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Watch Face Example Specifications');"
+    href="{@docRoot}downloads/design/Slide.psd">Adobe&reg; Photoshop&reg; Specifications</a>
+  </div>
+</div>
+
+
+<div class="layout-content-row">
+  <div class="layout-content-col span-5">
+  <h4>Watch face icon example</h4>
+<p>Template for creating watch face icons for the carousel on Android Wear devices.
+</p>
+
+  </div>
+  <div class="layout-content-col span-4">
+
+    <img src="{@docRoot}design/media/downloads_wear_Slide_IconExample.png" width="150"
+         style="width:150px;margin:0 auto;display:block">
+
+  </div>
+  <div class="layout-content-col span-4">
+  <a class="download-button"  onClick="ga('send', 'event', 'Design', 'Download', 'Wear Watch Face Example Specifications');"
+    href="{@docRoot}downloads/design/Slide_IconExample.psd">Adobe&reg; Photoshop&reg; Icon</a>
+  </div>
+</div>
 
 
 

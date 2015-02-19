@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.SystemApi;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -523,15 +524,6 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_MAGNIFICATION_OVERLAY = FIRST_SYSTEM_WINDOW+27;
 
         /**
-         * Window type: Recents. Same layer as {@link #TYPE_SYSTEM_DIALOG} but only appears on
-         * one user's screen.
-         * In multiuser systems shows on all users' windows.
-         * @hide
-         */
-        public static final int TYPE_RECENTS_OVERLAY = FIRST_SYSTEM_WINDOW+28;
-
-
-        /**
          * Window type: keyguard scrim window. Shows if keyguard needs to be restarted.
          * In multiuser systems shows on all users' windows.
          * @hide
@@ -549,6 +541,19 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_VOICE_INTERACTION = FIRST_SYSTEM_WINDOW+31;
+
+        /**
+         * Window type: Windows that are overlaid <em>only</em> by an {@link
+         * android.accessibilityservice.AccessibilityService} for interception of
+         * user interactions without changing the windows an accessibility service
+         * can introspect. In particular, an accessibility service can introspect
+         * only windows that a sighted user can interact with which is they can touch
+         * these windows or can type into these windows. For example, if there
+         * is a full screen accessibility overlay that is touchable, the windows
+         * below it will be introspectable by an accessibility service regardless
+         * they are covered by a touchable window.
+         */
+        public static final int TYPE_ACCESSIBILITY_OVERLAY = FIRST_SYSTEM_WINDOW+32;
 
         /**
          * End of types of system windows.
@@ -887,9 +892,6 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_TRANSLUCENT_NAVIGATION = 0x08000000;
 
-        // ----- HIDDEN FLAGS.
-        // These start at the high bit and go down.
-
         /**
          * Flag for a window in local focus mode.
          * Window in local focus mode can control focus independent of window manager using
@@ -912,17 +914,12 @@ public interface WindowManager extends ViewManager {
         public static final int FLAG_SLIPPERY = 0x20000000;
 
         /**
-         * Flag for a window belonging to an activity that responds to {@link KeyEvent#KEYCODE_MENU}
-         * and therefore needs a Menu key. For devices where Menu is a physical button this flag is
-         * ignored, but on devices where the Menu key is drawn in software it may be hidden unless
-         * this flag is set.
-         *
-         * (Note that Action Bars, when available, are the preferred way to offer additional
-         * functions otherwise accessed via an options menu.)
-         *
-         * {@hide}
+         * Window flag: When requesting layout with an attached window, the attached window may
+         * overlap with the screen decorations of the parent window such as the navigation bar. By
+         * including this flag, the window manager will layout the attached window within the decor
+         * frame of the parent window such that it doesn't overlap with screen decorations.
          */
-        public static final int FLAG_NEEDS_MENU_KEY = 0x40000000;
+        public static final int FLAG_LAYOUT_ATTACHED_IN_DECOR = 0x40000000;
 
         /**
          * Flag indicating that this Window is responsible for drawing the background for the
@@ -1065,16 +1062,6 @@ public interface WindowManager extends ViewManager {
          */
         public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
 
-        /**
-         * This is set for a window that has explicitly specified its
-         * FLAG_NEEDS_MENU_KEY, so we know the value on this window is the
-         * appropriate one to use.  If this is not set, we should look at
-         * windows behind it to determine the appropriate value.
-         *
-         * @hide
-         */
-        public static final int PRIVATE_FLAG_SET_NEEDS_MENU_KEY = 0x00000008;
-
         /** In a multiuser system if this flag is set and the owner is a system process then this
          * window will appear on all user screens. This overrides the default behavior of window
          * types that normally only appear on the owning user's screen. Refer to each window type
@@ -1116,10 +1103,56 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_KEYGUARD = 0x00000400;
 
         /**
+         * Flag that prevents the wallpaper behind the current window from receiving touch events.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 0x00000800;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
         public int privateFlags;
+
+        /**
+         * Value for {@link #needsMenuKey} for a window that has not explicitly specified if it
+         * needs {@link #NEEDS_MENU_SET_TRUE} or doesn't need {@link #NEEDS_MENU_SET_FALSE} a menu
+         * key. For this case, we should look at windows behind it to determine the appropriate
+         * value.
+         *
+         * @hide
+         */
+        public static final int NEEDS_MENU_UNSET = 0;
+
+        /**
+         * Value for {@link #needsMenuKey} for a window that has explicitly specified it needs a
+         * menu key.
+         *
+         * @hide
+         */
+        public static final int NEEDS_MENU_SET_TRUE = 1;
+
+        /**
+         * Value for {@link #needsMenuKey} for a window that has explicitly specified it doesn't
+         * needs a menu key.
+         *
+         * @hide
+         */
+        public static final int NEEDS_MENU_SET_FALSE = 2;
+
+        /**
+         * State variable for a window belonging to an activity that responds to
+         * {@link KeyEvent#KEYCODE_MENU} and therefore needs a Menu key. For devices where Menu is a
+         * physical button this variable is ignored, but on devices where the Menu key is drawn in
+         * software it may be hidden unless this variable is set to {@link #NEEDS_MENU_SET_TRUE}.
+         *
+         *  (Note that Action Bars, when available, are the preferred way to offer additional
+         * functions otherwise accessed via an options menu.)
+         *
+         * {@hide}
+         */
+        public int needsMenuKey = NEEDS_MENU_UNSET;
 
         /**
          * Given a particular set of window manager flags, determine whether
@@ -1129,9 +1162,9 @@ public interface WindowManager extends ViewManager {
          * flags and returns true if the combination of the two corresponds
          * to a window that needs to be behind the input method so that the
          * user can type into it.
-         * 
+         *
          * @param flags The current window manager flags.
-         * 
+         *
          * @return Returns true if such a window should be behind/interact
          * with an input method, false if not.
          */
@@ -1299,7 +1332,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public Rect surfaceInsets = new Rect();
+        public final Rect surfaceInsets = new Rect();
     
         /**
          * The desired bitmap format.  May be one of the constants in
@@ -1558,7 +1591,19 @@ public interface WindowManager extends ViewManager {
         public final CharSequence getTitle() {
             return mTitle;
         }
-    
+
+        /** @hide */
+        @SystemApi
+        public final void setUserActivityTimeout(long timeout) {
+            userActivityTimeout = timeout;
+        }
+
+        /** @hide */
+        @SystemApi
+        public final long getUserActivityTimeout() {
+            return userActivityTimeout;
+        }
+
         public int describeContents() {
             return 0;
         }
@@ -1596,14 +1641,15 @@ public interface WindowManager extends ViewManager {
             out.writeInt(surfaceInsets.top);
             out.writeInt(surfaceInsets.right);
             out.writeInt(surfaceInsets.bottom);
+            out.writeInt(needsMenuKey);
         }
-        
+
         public static final Parcelable.Creator<LayoutParams> CREATOR
                     = new Parcelable.Creator<LayoutParams>() {
             public LayoutParams createFromParcel(Parcel in) {
                 return new LayoutParams(in);
             }
-    
+
             public LayoutParams[] newArray(int size) {
                 return new LayoutParams[size];
             }
@@ -1643,8 +1689,9 @@ public interface WindowManager extends ViewManager {
             surfaceInsets.top = in.readInt();
             surfaceInsets.right = in.readInt();
             surfaceInsets.bottom = in.readInt();
+            needsMenuKey = in.readInt();
         }
-    
+
         @SuppressWarnings({"PointlessBitwiseExpression"})
         public static final int LAYOUT_CHANGED = 1<<0;
         public static final int TYPE_CHANGED = 1<<1;
@@ -1678,14 +1725,16 @@ public interface WindowManager extends ViewManager {
         /** {@hide} */
         public static final int PREFERRED_REFRESH_RATE_CHANGED = 1 << 21;
         /** {@hide} */
+        public static final int NEEDS_MENU_KEY_CHANGED = 1 << 22;
+        /** {@hide} */
         public static final int EVERYTHING_CHANGED = 0xffffffff;
 
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
-        
+
         public final int copyFrom(LayoutParams o) {
             int changes = 0;
-    
+
             if (width != o.width) {
                 width = o.width;
                 changes |= LAYOUT_CHANGED;
@@ -1822,9 +1871,14 @@ public interface WindowManager extends ViewManager {
                 changes |= SURFACE_INSETS_CHANGED;
             }
 
+            if (needsMenuKey != o.needsMenuKey) {
+                needsMenuKey = o.needsMenuKey;
+                changes |= NEEDS_MENU_KEY_CHANGED;
+            }
+
             return changes;
         }
-    
+
         @Override
         public String debug(String output) {
             output += "Contents of " + this + ":";
@@ -1927,6 +1981,10 @@ public interface WindowManager extends ViewManager {
             }
             if (!surfaceInsets.equals(Insets.NONE)) {
                 sb.append(" surfaceInsets=").append(surfaceInsets);
+            }
+            if (needsMenuKey != NEEDS_MENU_UNSET) {
+                sb.append(" needsMenuKey=");
+                sb.append(needsMenuKey);
             }
             sb.append('}');
             return sb.toString();

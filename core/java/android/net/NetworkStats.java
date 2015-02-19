@@ -733,6 +733,22 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Return text description of {@link #set} value.
+     */
+    public static String setToCheckinString(int set) {
+        switch (set) {
+            case SET_ALL:
+                return "all";
+            case SET_DEFAULT:
+                return "def";
+            case SET_FOREGROUND:
+                return "fg";
+            default:
+                return "unk";
+        }
+    }
+
+    /**
      * Return text description of {@link #tag} value.
      */
     public static String tagToString(int tag) {

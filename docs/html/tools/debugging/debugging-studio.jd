@@ -1,0 +1,406 @@
+page.title=Debugging with Android Studio
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#runDebug">Run your App in Debug Mode</a>
+    <ol>
+      <li><a href="#attachDebug">Attach the debugger to a running process</a></li>
+    </ol>
+  <li><a href="#systemLog">Use the System Log</a>
+    <ol>
+      <li><a href="#systemLogWrite">Write log messages in your code</a></li>
+      <li><a href="#systemLogView">View the system log</a></li>
+    </ol>
+  </li>
+  <li><a href="#breakPoints">Work with Breakpoints</a>
+    <ol>
+        <li><a href="#breakPointsView">View and configure breakpoints</a></li>
+        <li><a href="#breakPointsDebug">Debug your app with breakpoints</a></li>
+    </ol>
+  </li>
+  <li><a href="#allocTracker">Track Object Allocation</a></li>
+  <li><a href="#deviceMonitor">Analyze Runtime Metrics to Optimize your App</a></li>
+  <li><a href="#screenCap">Capture Screenshots and Videos</a></li>
+</ol>
+<h2>See also</h2>
+<ul>
+<li><a href="{@docRoot}sdk/installing/studio-tips.html">
+Android Studio Tips and Tricks</a></li>
+<li><a href="{@docRoot}tools/debugging/index.html">Debugging</a></li>
+<li><a href="{@docRoot}tools/help/monitor.html">Device Monitor</a></li>
+<li><a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a></li>
+</div>
+</div>
+
+<p>Android Studio enables you to debug apps running on the emulator or on an Android device.
+With Android Studio, you can:</p>
+
+<ul>
+    <li>Select a device to debug your app on.</li>
+    <li>View the system log.</li>
+    <li>Set breakpoints in your code.</li>
+    <li>Examine variables and evaluate expressions at run time.</li>
+    <li>Run the debugging tools from the Android SDK.</li>
+    <li>Capture screenshots and videos of your app.</li>
+</ul>
+
+<p>To debug your app, Android Studio builds a debuggable version of your app, connects
+to a device or to the emulator, installs the app and runs it. The IDE shows the system log
+while your app is running and provides debugging tools to filter log messages, work with
+breakpoints, and control the execution flow.</p>
+
+
+<h2 id="runDebug">Run your App in Debug Mode</h2>
+
+<div class="figure" style="width:419px">
+    <img src="{@docRoot}images/tools/as-debugdevices.png" alt=""/>
+    <p class="img-caption"><strong>Figure 1.</strong> The Choose Device window enables you to
+    select a physical Android device or a virtual device to debug your app.</p>
+</div>
+
+<p>To run your app in debug mode, you build an APK signed with a debug key and install it on a
+physical Android device or on the Android emulator.
+To set up an Android device for development, see <a href="{@docRoot}tools/device.html">Using
+Hardware Devices</a>. For more information about the emulator provided by the Android SDK, see
+<a href="{@docRoot}tools/devices/emulator.html">Using the Emulator.</a></p>
+
+<p>To debug your app in Android Studio:</p>
+
+<ol>
+    <li>Open your project in Android Studio.</li>
+    <li>Click <strong>Debug</strong> <img src="{@docRoot}images/tools/as-debugbutton.png"
+        style="vertical-align:bottom;margin:0;height:22px"  alt=""/> in the toolbar.</li>
+    <li>On the <em>Choose Device</em> window, select a hardware device from the list or
+        choose a virtual device.</li>
+    <li>Click <strong>OK</strong>. Your app starts on the selected device.</li>
+</ol>
+
+<p>Figure 1 shows the <em>Choose Device</em> window. The list shows all the Android devices
+connected to your computer. Select <strong>Launch Emulator</strong> to use an Android virtual device
+instead. Click the ellipsis <img src="{@docRoot}images/tools/as-launchavdm.png"
+style="vertical-align:bottom;margin:0;height:19px" alt=""/> to open the
+<a href="{@docRoot}tools/devices/managing-avds.html">Android Virtual Device Manager</a>.</p>
+
+<p>Android Studio opens the <em>Debug</em> tool window when you debug your app. To open the
+<em>Debug</em> window manually, click <strong>Debug</strong>
+<img src="{@docRoot}images/tools/as-debugwindowbutton.png"
+alt="" style="vertical-align:bottom;margin:0;height:20px"/>.
+This window shows threads and variables in the <em>Debugger</em> tab, the device status in the
+<em>Console</em> tab, and the system log in the <em>Logcat</em> tab. The <em>Debug</em> tool
+window also provides other debugging tools covered in the following sections.</p>
+
+<img src="{@docRoot}images/tools/as-debugview.png" alt="" />
+<p class="img-caption"><strong>Figure 2.</strong> The Debug tool window in Android Studio showing
+the current thread and the object tree for a variable.</p>
+
+<h3 id="attachDebug">Attach the debugger to a running process</h3>
+
+<p>You don't always have to restart your app to debug it. To debug an app that you're already
+running:</p>
+
+<ol>
+<li>Click <strong>Attach debugger to Android proccess</strong>
+<img src="{@docRoot}images/tools/as-attach.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/>.</li>
+<li>In the <em>Choose Process</em> window, select the device and app you want to attach the
+debugger to.</li>
+<li>To open the <em>Debug</em> tool window, click <strong>Debug</strong>
+<img src="{@docRoot}images/tools/as-debugwindowbutton.png"
+alt="" style="vertical-align:bottom;margin:0;height:20px"/>.</li>
+</ol>
+
+<h2 id="systemLog">Use the System Log</h2>
+
+<p>The system log shows system messages while you debug your app. These messages include
+information from apps running on the device. If you want to use the
+system log to debug your app, make sure your code writes log messages and prints the stack
+trace for exceptions while your app is in the development phase.</p>
+
+<h3 id="systemLogWrite">Write log messages in your code</h3>
+
+<p>To write log messages in your code, use the {@link android.util.Log} class. Log messages
+help you understand the execution flow by collecting the system debug output while you interact
+with your app. Log messages can tell you what part of your application failed. For more
+information about logging, see <a href="{@docRoot}tools/debugging/debugging-log.html">
+Reading and Writing Logs</a>.</p>
+
+<p>The following example shows how you might add log messages to determine if previous state
+information is available when your activity starts:</p>
+
+<pre>
+import android.util.Log;
+...
+public class MyActivity extends Activity {
+    private static final String TAG = MyActivity.class.getSimpleName();
+    ...
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            Log.d(TAG, "onCreate() Restoring previous state");
+            /* restore state */
+        } else {
+            Log.d(TAG, "onCreate() No saved state available");
+            /* initialize app */
+        }
+    }
+}
+</pre>
+
+<p>During development, your code can also catch exceptions and write the stack trace to the system
+log:</p>
+
+<pre>
+void someOtherMethod() {
+    try {
+        ...
+    } catch (SomeException e) {
+        Log.d(TAG, "someOtherMethod()", e);
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> Remove debug log messages and stack trace print calls from
+your code when you are ready to publish your app. You could do this by setting a <code>DEBUG</code>
+flag and placing debug log messages inside conditional statements.</p>
+
+
+<h3 id="systemLogView">View the system log</h3>
+
+<p>Both the <em>Android DDMS</em> (Dalvik Debug Monitor Server) and the <em>Debug</em> tool windows
+show the system log; however, the <em>Android DDMS</em> tool window lets you view only log messages
+for a particular process. To view the system log on the <em>Android DDMS</em> tool window:</p>
+
+<ol>
+    <li>Start your app as described in <a href="#runDebug">Run your App in Debug Mode</a>.</li>
+    <li>Click <strong>Android</strong> <img src="{@docRoot}images/tools/as-android.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/> to open the <em>Android DDMS</em>
+        tool window.</li>
+    <li>If the system log is empty in the <em>Logcat view</em>, click <strong>Restart</strong>
+        <img src="{@docRoot}images/tools/as-restart.png" alt=""
+        style="vertical-align:bottom;margin:0;height:22px"/>.</li>
+</ol>
+
+<img src="{@docRoot}images/tools/as-ddmslog.png" alt="" />
+<p class="img-caption"><strong>Figure 4.</strong> The system log in the Android DDMS tool
+window.</p>
+
+<p>The <em>Android DDMS</em> tool window gives you access to some DDMS features from Android Studio.
+For more information about DDMS, see <a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a>.
+</p>
+
+<p>The system log shows messages from Android services and other Android apps. To filter the log
+messages to view only the ones you are interested in, use the tools in the <em>Android DDMS</em>
+window:</p>
+
+<ul>
+    <li>To show only log messages for a particular process, select the process in the
+        <em>Devices</em> view and then click <strong>Only Show Logcat from Selected
+        Process</strong> <img src="{@docRoot}images/tools/as-currentproc.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>. If the <em>Devices</em> view
+        is not available, click <strong>Restore Devices View</strong>
+        <img src="{@docRoot}images/tools/as-showdevview.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/> on the right of the <em>Android
+        DDMS</em> tool window. This button is only visible when you hide the <em>Devices</em>
+        window.</li>
+    <li>To filter log messages by log level, select a level under <em>Log Level</em> on the top
+        of the <em>Android DDMS</em> window.</li>
+    <li>To show only log messages that contain a particular string, enter the string in the search
+        box and press <strong>Enter</strong>.</li>
+</ul>
+
+
+<h2 id="breakPoints">Work with Breakpoints</h2>
+
+<p>Breakpoints enable you to pause the execution of your app at a particular line of code, examine
+variables, evaluate expressions, and continue the execution line by line. Use breakpoints to
+determine the causes of run-time errors that you can't fix by looking at your code only. To debug
+your app using breakpoints:</p>
+
+<ol>
+    <li>Open the source file in which you want to set a breakpoint.</li>
+    <li>Locate the line where you want to set a breakpoint and click on it.</li>
+    <li>Click on the yellow portion of the side bar to the left of this line, as shown in figure 5.</li>
+    <li>Start your app as described in <a href="#runDebug">Run your App in Debug Mode</a>.</li>
+</ol>
+
+<p>Android Studio pauses the execution of your app when it reaches the breakpoint. You can then
+use the tools in the <em>Debug</em> tool window to identify the cause of the error.</p>
+
+<img src="{@docRoot}images/tools/as-breakpointline.png" alt="" />
+<p class="img-caption"><strong>Figure 5.</strong> A red dot appears next to the line when you set
+a breakpoint.</p>
+
+<h3 id="breakPointsView">View and configure breakpoints</h3>
+
+<p>To view all the breakpoints and configure breakpoint settings, click <strong>View
+Breakpoints</strong> <img src="{@docRoot}images/tools/as-viewbreakbutton.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/> on the left side of the <em>Debug</em> tool
+window. The <em>Breakpoints</em> window appears, as shown in figure 6.</p>
+
+<img src="{@docRoot}images/tools/as-breakpointswindow.png" alt="" />
+<p class="img-caption"><strong>Figure 6.</strong> The Breakpoints window lists all the current
+breakpoints and includes behavior settings for each.</p>
+
+<p>The <em>Breakpoints</em> window lets you enable or disable each breakpoint from the
+list on the left. If a breakpoint is disabled, Android Studio does not pause your app when
+it hits that breakpoint. Select a breakpoint from the list to configure its settings.
+You can configure a breakpoint to be disabled at first and have the system enable it after a
+different breakpoint is hit. You can also configure whether a breakpoint should be disabled after
+it is hit. To set a breakpoint for any exception, select <strong>Exception Breakpoints</strong>
+in the list of breakpoints.</p>
+
+<h3 id="breakPointsDebug">Debug your app with breakpoints</h3>
+
+<p>After you set breakpoints in your code, click <strong>Rerun</strong>
+<img src="{@docRoot}images/tools/as-restart.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/> to start the app again. When a breakpoint is
+hit, Android Studio pauses the app and highlights the breakpoint in the source code. The
+<em>Debug</em> tool window lets you examine variables and control the execution step by
+step:</p>
+
+<ul>
+    <li>
+        <p>To examine the object tree for a variable, expand it in the <em>Variables</em> view. If
+        the <em>Variables</em> view is not visible, click <strong>Restore Variables View</strong>
+        <img src="{@docRoot}images/tools/as-varviewbutton.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>.</p>
+    </li>
+    <li>
+        <p>To evaluate an expression at the current execution point, click <strong>Evaluate
+        Expression</strong> <img src="{@docRoot}images/tools/as-evalexpbutton.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>.</p>
+    </li>
+    <li>
+        <p>To advance to the next line in the code (without entering a method), click <strong>Step
+        Over</strong> <img src="{@docRoot}images/tools/as-stepoverbutton.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>.</p>
+    </li>
+    <li>
+        <p>To advance to the first line inside a method call, click <strong>Step
+        Into</strong> <img src="{@docRoot}images/tools/as-stepintobutton.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>.</p>
+    </li>
+    <li>
+        <p>To advance to the next line outside the current method, click <strong>Step
+        Out</strong> <img src="{@docRoot}images/tools/as-stepoutbutton.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>.</p>
+    </li>
+    <li>
+        <p>To continue running the app normally, click <strong>Resume Program</strong>
+        <img src="{@docRoot}images/tools/as-resumeprogrambutton.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/>.</p>
+    </li>
+</ul>
+
+<img src="{@docRoot}images/tools/as-variablesview.png" alt="" />
+<p class="img-caption"><strong>Figure 7.</strong> The Variables view in the Debug tool window.</p>
+
+
+<h2 id="allocTracker">Track Object Allocation</h2>
+
+<p>Android Studio lets you track objects that are being allocated on the Java heap and see which
+classes and threads are allocating these objects. This allows you to see the list of objects
+allocated during a period of interest. This information is valuable for assessing memory usage
+that can affect application performance.</p>
+
+<p>To track memory allocation of objects:</p>
+
+<ol>
+<li>Start your app as described in <a href="#runDebug">Run Your App in Debug Mode</a>.</li>
+<li>Click <strong>Android</strong> <img src="{@docRoot}images/tools/as-android.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/> to open the <em>Android DDMS</em>
+tool window.</li>
+<li>On the <em>Android DDMS</em> tool window, select the <strong>Devices | logcat tab</strong>.</li>
+<li>Select your device from the dropdown list.</li>
+<li>Select your app by its package name from the list of running apps.</li>
+<li>Click <strong>Start Allocation Tracking</strong>
+<img src="{@docRoot}images/tools/as-allocstart.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/></li>
+<li>Interact with your app on the device.</li>
+<li>Click <strong>Stop Allocation Tracking</strong>
+<img src="{@docRoot}images/tools/as-allocstop.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/></li>
+</ol>
+
+<p>Android Studio shows the objects that the system allocated with the following information:</p>
+
+<ul>
+<li>Allocation order</li>
+<li>Allocated class</li>
+<li>Allocation size</li>
+<li>Thread ID</li>
+<li>Allocation method, class, and line number</li>
+<li>Stack trace at the point of allocation</li>
+</ul>
+
+<img src="{@docRoot}images/tools/as-alloctrack.png" alt="" width="750" height="252" />
+<p class="img-caption"><strong>Figure 8.</strong> Object allocation tracking in Android Studio.</p>
+
+
+<h2 id="deviceMonitor">Analyze Runtime Metrics to Optimize your App</h2>
+
+<p>Even if your application does not generate runtime errors, this does not mean it is free of
+problems. You should also consider the following issues:</p>
+
+<ul>
+    <li>Does your app use memory efficiently?</li>
+    <li>Does your app generate unnecessary network traffic?</li>
+    <li>What methods should you focus your attention on to improve the performance of your app?</li>
+    <li>Does your app behave properly when the user receives a phone call or a message?</li>
+</ul>
+
+<p>The Android Device Monitor is a stand-alone tool with a graphical user interface for serveral
+Android application debugging and analysis tools, including the Dalvik Debug Monitor Server (DDMS).
+You can use the Android Device Monitor to analyze memory usage, profile methods,
+monitor network traffic and simulate incoming calls and messages.</p>
+
+<p>To open the Android Device Monitor from Android Studio, click
+<strong>Monitor</strong> <img src="{@docRoot}images/tools/as-monitorbutton.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/> on the toolbar. The Android Device Monitor
+opens in a new window.</p>
+
+<p>For more information about the Android Device Monitor and DDMS, see
+<a href="{@docRoot}tools/help/monitor.html">Device Monitor</a> and
+<a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a>.</p>
+
+
+<h2 id="screenCap">Capture Screenshots and Videos</h2>
+
+<p>Android Studio enables you to capture a screenshot or a short video of the device screen
+while your app is running. Screenshots and videos are useful as promotional materials for your
+app, and you can also attach them to bug reports that you send to your development team.</p>
+
+<p>To take a screenshot of your app:</p>
+
+<ol>
+    <li>Start your app as described in <a href="#runDebug">Run your App in Debug Mode</a>.</li>
+    <li>Click <strong>Android</strong> <img src="{@docRoot}images/tools/as-android.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/> to open the <em>Android DDMS</em>
+        tool window.</li>
+    <li>Click <strong>Screen Capture</strong> <img src="{@docRoot}images/tools/as-capture.png"
+        style="vertical-align:bottom;margin:0;height:22px" alt=""/> on the left side of the
+        <em>Android DDMS</em> tool window.</li>
+    <li>Optional: To add a device frame around your screenshot, enable the <em>Frame screenshot</em>
+        option.</li>
+    <li>Click <strong>Save</strong>.</li>
+</ol>
+
+<p>To take a video recording of your app:</p>
+
+<ol>
+    <li>Start your app as described in <a href="#runDebug">Run your App in Debug Mode</a>.</li>
+    <li>Click <strong>Android</strong> <img src="{@docRoot}images/tools/as-android.png" alt=""
+        style="vertical-align:bottom;margin:0;height:20px"/> to open the <em>Android DDMS</em>
+        tool window.</li>
+    <li>Click <strong>Screen Record</strong> <img src="{@docRoot}images/tools/as-record.png"
+        style="vertical-align:bottom;margin:0;height:22px" alt=""/> on the left side of the
+        <em>Android DDMS</em> tool window.</li>
+    <li>Click <strong>Start Recording</strong>.</li>
+    <li>Interact with your app.</li>
+    <li>Click <strong>Stop Recording</strong>.</li>
+    <li>Enter a file name for the recording and click <strong>OK</strong>.</li>
+</ol>

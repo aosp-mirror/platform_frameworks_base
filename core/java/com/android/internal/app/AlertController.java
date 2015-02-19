@@ -26,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -38,9 +37,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -449,11 +451,11 @@ public class AlertController {
     }
 
     private void setupView() {
-        final LinearLayout contentPanel = (LinearLayout) mWindow.findViewById(R.id.contentPanel);
+        final ViewGroup contentPanel = (ViewGroup) mWindow.findViewById(R.id.contentPanel);
         setupContent(contentPanel);
         final boolean hasButtons = setupButtons();
 
-        final LinearLayout topPanel = (LinearLayout) mWindow.findViewById(R.id.topPanel);
+        final ViewGroup topPanel = (ViewGroup) mWindow.findViewById(R.id.topPanel);
         final TypedArray a = mContext.obtainStyledAttributes(
                 null, R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
         final boolean hasTitle = setupTitle(topPanel);
@@ -521,13 +523,13 @@ public class AlertController {
         a.recycle();
     }
 
-    private boolean setupTitle(LinearLayout topPanel) {
+    private boolean setupTitle(ViewGroup topPanel) {
         boolean hasTitle = true;
 
         if (mCustomTitleView != null) {
             // Add the custom title view directly to the topPanel layout
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            LayoutParams lp = new LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
             topPanel.addView(mCustomTitleView, 0, lp);
 
@@ -571,7 +573,7 @@ public class AlertController {
         return hasTitle;
     }
 
-    private void setupContent(LinearLayout contentPanel) {
+    private void setupContent(ViewGroup contentPanel) {
         mScrollView = (ScrollView) mWindow.findViewById(R.id.scrollView);
         mScrollView.setFocusable(false);
 
@@ -588,13 +590,76 @@ public class AlertController {
             mScrollView.removeView(mMessageView);
 
             if (mListView != null) {
-                contentPanel.removeView(mWindow.findViewById(R.id.scrollView));
-                contentPanel.addView(mListView,
-                        new LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
-                contentPanel.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, 0, 1.0f));
+                final ViewGroup scrollParent = (ViewGroup) mScrollView.getParent();
+                final int childIndex = scrollParent.indexOfChild(mScrollView);
+                scrollParent.removeViewAt(childIndex);
+                scrollParent.addView(mListView, childIndex,
+                        new LayoutParams(MATCH_PARENT, MATCH_PARENT));
             } else {
                 contentPanel.setVisibility(View.GONE);
             }
+        }
+
+        // Set up scroll indicators (if present).
+        final View indicatorUp = mWindow.findViewById(R.id.scrollIndicatorUp);
+        final View indicatorDown = mWindow.findViewById(R.id.scrollIndicatorDown);
+        if (indicatorUp != null || indicatorDown != null) {
+            if (mMessage != null) {
+                // We're just showing the ScrollView, set up listener.
+                mScrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                        @Override
+                        public void onScrollChange(View v, int scrollX, int scrollY,
+                                int oldScrollX, int oldScrollY) {
+                            manageScrollIndicators(v, indicatorUp, indicatorDown);
+                        }
+                    });
+                // Set up the indicators following layout.
+                mScrollView.post(new Runnable() {
+                     @Override
+                     public void run() {
+                             manageScrollIndicators(mScrollView, indicatorUp, indicatorDown);
+                         }
+                     });
+
+            } else if (mListView != null) {
+                // We're just showing the AbsListView, set up listener.
+                mListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                        @Override
+                        public void onScrollStateChanged(AbsListView view, int scrollState) {
+                            // That's cool, I guess?
+                        }
+
+                        @Override
+                        public void onScroll(AbsListView v, int firstVisibleItem,
+                                int visibleItemCount, int totalItemCount) {
+                            manageScrollIndicators(v, indicatorUp, indicatorDown);
+                        }
+                    });
+                // Set up the indicators following layout.
+                mListView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            manageScrollIndicators(mListView, indicatorUp, indicatorDown);
+                        }
+                    });
+            } else {
+                // We don't have any content to scroll, remove the indicators.
+                if (indicatorUp != null) {
+                    contentPanel.removeView(indicatorUp);
+                }
+                if (indicatorDown != null) {
+                    contentPanel.removeView(indicatorDown);
+                }
+            }
+        }
+    }
+
+    private static void manageScrollIndicators(View v, View upIndicator, View downIndicator) {
+        if (upIndicator != null) {
+            upIndicator.setVisibility(v.canScrollVertically(-1) ? View.VISIBLE : View.INVISIBLE);
+        }
+        if (downIndicator != null) {
+            downIndicator.setVisibility(v.canScrollVertically(1) ? View.VISIBLE : View.INVISIBLE);
         }
     }
 
@@ -890,10 +955,10 @@ public class AlertController {
                 if (mIcon != null) {
                     dialog.setIcon(mIcon);
                 }
-                if (mIconId >= 0) {
+                if (mIconId != 0) {
                     dialog.setIcon(mIconId);
                 }
-                if (mIconAttrId > 0) {
+                if (mIconAttrId != 0) {
                     dialog.setIcon(dialog.getIconAttributeResId(mIconAttrId));
                 }
             }

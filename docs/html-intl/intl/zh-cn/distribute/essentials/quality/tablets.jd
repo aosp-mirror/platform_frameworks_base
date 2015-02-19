@@ -1,0 +1,582 @@
+page.title=平板电脑应用的质量
+page.metaDescription=平板电脑是一个快速增长的Android的安装基础，提供了新的机会，为你的应用程序提供了新的机会。
+page.image=/distribute/images/tablet-guidelines-color.jpg
+Xnonavpage=true
+page.type="배포"
+
+@jd:body
+
+      <div id="qv-wrapper"><div id="qv">
+  <h2>检查清单</h2>
+  <ol>
+  <li><a href="#core-app-quality">1. 测试平板电脑应用的基本质量</a></li>
+  <li><a href="#optimize-layouts">2. 优化布局</a></li>
+  <li><a href="#use-extra-space">3. 利用多出来的屏幕区域</a></li>
+  <li><a href="#use-tablet-icons">4. 使用专为平板电脑设计的图形资源</a></li>
+  <li><a href="#adjust-font-sizes">5. 调整字体和触控目标</a></li>
+  <li><a href="#adjust-widgets">6. 调整主屏幕小部件</a></li>
+  <li><a href="#offer-full-feature-set">7. 提供全套功能</a></li>
+  <li><a href="#android-versions">8. 确定合适的 Android 版本</a></li>
+  <li><a href="#hardware-requirements">9. 准确声明硬件功能依赖关系</a></li>
+  <li><a href="#support-screens">10. 声明对平板电脑屏幕的支持</a></li>
+  <li><a href="#google-play">11. 展示你的平板电脑界面</a></li>
+  <li><a href="#google-play-best-practices">12. 遵循在 Google Play 中发布应用的最佳做法</a></li>
+
+  </ol>
+  <h2>测试</h2>
+  <ol>
+  <li><a href="#test-environment">设置测试环境</a></li>
+  </ol>
+  </div></div>
+
+  <div class="todp-right-float" style="padding-right:0;margin-bottom:1em">
+    <img src="{@docRoot}distribute/images/tablet-guidelines-color.jpg" style="width:480px" />
+  </div>
+
+  <p>
+    现在越来越多的平板电脑选择安装 Android 系统，这就为开发者提供了<a href="{@docRoot}distribute/stories/tablets.html">与用户互动和获利</a>的新机会。本文档中介绍的相关指南旨在帮助你通过引人入胜的功能、精心设计的直观界面满足平板电脑用户的预期。
+  </p>
+
+  <p>
+    虽然这些指南按照编号排列，但你从哪一项开始着手都没问题。对于每条指南，你都应根据你的应用酌情考虑是否采用其中的建议。不过，为了给客户提供最好的产品，建议你尽可能遵循这些指南。
+  </p>
+
+  <p>
+    本文档中提供了相关资源的链接，这些资源可帮助你了解文中给出的各条建议。
+  </p>
+
+  <div class="headerLine"><h2 id="core-app-quality">1. 测试平板电脑应用的基本质量</h2></div>
+
+  <p>为了打造上佳的平板电脑应用体验，首先要根据应用适配的设备类型和尺寸，确保你的应用满足相应的“应用核心质量标准”<em></em>。有关完整信息，请参阅<a href="{@docRoot}distribute/essentials/quality/core.html">应用核心质量指南</a>。
+  </p>
+
+  <p>
+  在发布应用前，还应确保你的应用通过了基本的技术检查并符合相关发布标准，例如：
+  </p>
+
+  <ul>
+    <li><a href="#android-versions">面向相应的Android版本</a></li>
+    <li><a href="#hardware-requirements">正确描述所依托的硬件功能</a></li>
+    <li><a href="#support-screens">声明对相应屏幕的支持</a></li>
+    <li><a href="#use-extra-space">利用可用的屏幕空间</a></li>
+    <li><a href="#google-play">上传屏幕截图到Google Play</a></li>
+  </ul>
+
+  <p>如果你的应用已上传至 Google Play 开发者控制台，你可以浏览<a href="#google-play-optimization-tips">“优化提示”页</a>，了解以上各项检查的结果。</p>
+
+
+  <div class="headerLine">
+  <h2 id="optimize-layouts">2. 针对大屏幕优化布局</h2></div>
+
+  <p>
+    借助于 Android，开发在屏幕尺寸各异、外形规格不同的各类设备上都能良好运行的应用不再是难事。这种广泛的兼容性对你极其有利，因为你只需设计一个可广泛分发到所有适配设备的应用即可。不过，要让用户在各种屏幕配置下（特别是在平板电脑上）都能获得最佳体验，你需要针对各种适用的屏幕配置，优化应用的布局及其他界面组件。在平板电脑上，优化界面可让你充分利用多出来的可用屏幕空间，例如用来提供新功能、展示新内容或以其他方式提升用户体验，以加深与用户的互动。
+  </p>
+
+  <p>
+    如果你的应用是针对手机开发的，而现在你准备将其分发到平板电脑，则可以先对布局、字体和间距稍作调整。在某些情况下，例如对于 7 英寸平板电脑或画面较大的游戏，你可能只需做这些调整就能让应用实现出色的视觉效果。而在另外一些情况下，例如对于大屏幕的平板电脑，你就需要重新设计界面的各个组成部分，将拉伸变形的的界面替换为高效的多窗格界面、更便捷的导航控件以及其他内容。
+  </p>
+
+
+  <div style="width:500px;margin:1.5em">
+  <img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-bad.png" style="padding:4px;margin-bottom:0em" />
+  <p class="img-caption"><span style="font-weight:500">舍弃拉伸变形的界面</span>：在平板电脑上，单窗格布局会导致空白过多以及内容行过长。请利用内边距减少界面元素的宽度并考虑采用多窗格布局。</p>
+  </div>
+
+  <p>下面是一些建议：</p>
+
+
+  <ul>
+    <li>根据需要，针对 <code>large</code> 和 <code>xlarge</code> 屏幕提供自定义布局。你还可以提供会根据屏幕的<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">最短尺寸</a>或<a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">最小可用宽度和高度</a>加载的布局。
+    </li>
+
+    <li>至少要针对大屏幕自定义字体大小、外边距和间距等规格，以提高空间利用率和内容易读性。
+    </li>
+
+    <li>调整界面控件的位置，以便用户在手持平板电脑时能轻易触碰到这些控件，例如在横屏时将控件放于两侧。
+    </li>
+
+    <li>通常情况下，平板电脑上界面元素的内边距应比手机上的大一些。建议遵守 <a href="{@docRoot}design/style/metrics-grids.html#48dp-rhythm">48dp 定律</a>（以及 16dp 格栅）。
+    </li>
+
+    <li>为文本内容设置合理的内边距，使其不会直接沿屏幕边缘对齐。内容与屏幕边缘间至少保留 <code>16dp</code> 的内边距。
+    </li>
+  </ul>
+
+  <p>尤其需要注意的是，不要让你的布局在屏幕上出现拉伸变形的情况：</p>
+
+  <ul>
+  <li>文本行的长度不应过长：经过优化后，每行最多 100 个字符，最好在 50 至 75 个字符之间。</li>
+  <li><code>ListView</code>和菜单不应使用全屏宽度。</li>
+  <li>使用内边距管理屏幕上元素的宽度，或切换为适用于平板电脑的多窗格界面（参见下一节）。</li>
+  </ul>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/optimize" data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6"></div>
+
+
+  <div class="headerLine"><h2 id="use-extra-space">3. 充分利用多出来的屏幕区域</h2></div>
+
+  <div style="width:340px;float:right;margin:1.5em;margin-bottom:0;margin-top:0">
+  <img src="{@docRoot}images/training/app-navigation-multiple-sizes-multipane-good.png" style="padding:4px;margin-bottom:0em" />
+  <p class="img-caption"><span style="font-weight:500">多窗格布局</span>能在平板电脑屏幕上实现更好的视觉平衡效果，同时令实用性和可读性得到增强。</p>
+  </div>
+
+  <p>平板电脑屏幕可为你的应用提供更多的屏幕空间（横向模式下更是如此）。尤其是 10 英寸的平板电脑多出来的区域更大，但即使是 7 英寸的平板电脑，也提供了更多空间供你展示内容、吸引用户。</p>
+
+  <p>为在平板电脑上运行的应用设计界面时，请确保能够充分利用平板电脑上多出来的屏幕区域。下面是一些建议：</p>
+
+  <ul>
+  <li>看看是否有可能加入更多内容，或换种方式呈现现有内容。</li>
+  <li>在平板电脑屏幕上使用<a href="{@docRoot}design/patterns/multi-pane-layouts.html">多窗格布局</a>，将单一视图合并成复合视图。这样一来，你可以更有效地利用多出来的屏幕区域，让用户能更轻松地浏览你的应用。</li>
+  <li>确定在屏幕方向改变时如何重新排列复合视图的各个版块。</li>
+
+  <div style="width:490px;margin:1.5em auto 1.5em 0">
+  <div>
+  <img src="{@docRoot}images/ui-ex-single-panes.png" align="middle" style="width:490px;padding:4px;margin-bottom:0em" />
+  <img src="{@docRoot}images/ui-ex-multi-pane.png" style="width:490px;padding:4px;margin-bottom:0em" />
+  <p class="image-caption" style="padding:.5em"><span style="font-weight:500">复合视图</span>将手机界面的多个单一视图（如上图）合并成适用于平板电脑的更高效、内容更丰富的界面（如下图）。<em></em><em></em></p>
+  </div>
+  </div>
+
+  <li>如果单屏是用 <code><a href="{@docRoot}reference/android/app/Activity.html">Activity</a></code> 子类实现的，请考虑用 <code><a href="{@docRoot}reference/android/app/Fragment.html">Fragment</a></code> 子类实现各个内容版块。这样一来，你可以在不同外形规格的设备上以及内容相同的屏幕间最大程度地重复使用代码。</li>
+  <li>确定要在哪些屏幕尺寸上使用多窗格界面，然后在相应的屏幕尺寸单元（例如 <code>large</code>/<code>xlarge</code>）中提供合适的布局，或最小屏幕宽度（例如 <code>sw600dp</code>/<code>sw720</code>）。</li>
+  </ul>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/extrascreen" data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3" data-maxresults="6"></div>
+
+  <div class="headerLine"><h2 id="use-tablet-icons">4. 使用专为平板电脑屏幕设计的图形资源</h2></div>
+
+  <div><img src="{@docRoot}design/media/devices_displays_density@2x.png" /></div>
+
+  <p>为确保应用呈现最佳的视觉效果，请根据平板电脑普遍支持的屏幕密度，提供相应图标和位图。具体而言，你应按<a href="{@docRoot}design/style/iconography.html">图标</a>指南为操作栏、通知和启动器设计图标，并提供多种密度的图标，这样这些图标在所有屏幕上都会以合适的尺寸显示，而不会出现模糊或缩放等情况。</p>
+
+  <p class="table-caption"><strong>表 1</strong>：不同图标类型的原始资源尺寸。<table>
+  <tr>
+  <th>密度</th>
+  <th>启动器</th>
+  <th>操作栏</th>
+  <th>小图标/上下文图标</th>
+  <th>通知</th>
+  </tr>
+  <tr>
+  <td><code>mdpi</code></td>
+  <td>48x48 像素</td>
+  <td>32x32 像素</td>
+  <td>16x16 像素</td>
+  <td>24x24 像素</td>
+  </tr>
+  <tr>
+  <td><code>hdpi</code></td>
+  <td>72x72 像素</td>
+  <td>48x48 像素</td>
+  <td>24x24 像素</td>
+  <td>36x36 像素</td>
+  </tr>
+  <tr>
+  <td><code>tvdpi</code></td>
+  <td><em>（使用 hdpi）</em></td>
+  <td><em>（使用 hdpi）</em></td>
+  <td><em>（使用 hdpi）</em></td>
+  <td><em>（使用 hdpi）</em></td>
+  </tr>
+  <tr>
+  <td><code>xhdpi</code></td>
+  <td>96x96 像素</td>
+  <td>64x64 像素</td>
+  <td>32x32 像素</td>
+  <td>48x48 像素</td>
+  </tr>
+  <tr>
+  <td><code>xxhdpi</code></td>
+  <td>144x144 像素</td>
+  <td>96x96 像素</td>
+  <td>48x48 像素</td>
+  <td>72x72 像素</td>
+  </tr>
+
+  </table>
+
+  <p>
+    作为最低要求，要为以下常用的平板电脑屏幕密度中的<strong>至少一种</strong>密度，提供适用版本的图标和位图资源：
+  </p>
+  <ul>
+    <li><code>hdpi</code></li>
+    <li><code>xhdpi</code></li>
+    <li><code>xxhdpi</code></li>
+  </ul>
+
+  <p>其他提示：</p>
+
+  <ul>
+  <li>在设计图标时请使用矢量图形，这样图标在缩放时就不会损失细节或出现边缘模糊的情况。</li>
+  <li>使用针对特定密度的<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">资源限定符</a>，以便能为各种屏幕密度加载对应尺寸的图标。</li>
+  <li>平板电脑及其他大屏设备通常需要使用启动器图标，其密度比设备实际密度要大。因此，你提供的启用器图标应尽可能采用最高密度。例如，如果平板电脑的屏幕密度是 <code>xhdpi</code>，那么需要使用 <code>xxhdpi</code> 版本的启动器图标。</li>
+  </ul>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/assets" data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6"></div>
+
+  <div class="headerLine"><h2 id="adjust-font-sizes">5. 调整字体大小和触控目标</h2></div>
+
+  <p>要确保用户在平板电脑上能够轻松使用你的应用，请花些时间针对你要适配的各种屏幕配置调整平板电脑界面中的字体大小和触控目标。你可以通过<a href="{@docRoot}guide/topics/ui/themes.html">可设置样式的属性</a>或<a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">尺寸资源</a>调整字体大小，也可以通过布局和位图绘制工具调整触控目标，如上所述。</p>
+
+  <p>下面是一些注意事项：</p>
+  <ul>
+  <li>对于各种平板电脑屏幕尺寸和密度，显示的文字不应过大或过小。请确保标签的尺寸与其对应的界面元素大小相宜，并且不得在标签、标题及其他元素中使用不恰当的换行符。</li>
+  <li>建议将屏幕元素触控目标的尺寸设为 48dp（最小 32dp），但可能需要对平板电脑的界面做一些调整。请参阅<a href="{@docRoot}design/style/metrics-grids.html">度量单位和网格</a>，了解适用于大多数用户的实施策略。为了满足部分用户对辅助功能的需求，可能需要使用较大的触控目标尺寸。</li>
+  <li>如果可能，对于较小的图标，请使用 <code><a href="{@docRoot}reference/android/view/TouchDelegate.html">TouchDelegate</a></code> 将可触控区域扩展到 48dp 以上，或者将该图标放到透明按钮的中心位置。</li>
+  </ul>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/fonts" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,6x3,6x3" data-maxresults="6"></div>
+
+  <div class="headerLine"><h2 id="adjust-widgets">6. 调整主屏幕小部件的尺寸</h2></div>
+
+  <p>如果你的应用中包含主屏幕小部件，需要注意以下几点，以确保用户在平板电脑屏幕上获得良好体验：</p>
+
+  <ul>
+  <li>按照平板电脑的屏幕合理设置小部件的默认高度和宽度，以及最小和最大的伸缩高度和宽度。
+  </li>
+  <li>小部件应可拉伸到 420dp 或更高，占用主屏幕的 5 行或以上（如果是垂直或方形小部件），或者占用 5 列或以上（如果是水平或方形小部件）。</li>
+  <li>确保正确渲染 9-patch 图片。</li>
+  <li>使用默认的系统边距。</li>
+  <li>如果可能，将应用的 <code>targetSdkVersion</code> 设置为 14 或更高。</li>
+  </ul>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/widgets" data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6"></div>
+
+
+  <div class="headerLine"><h2 id="offer-full-feature-set">7. 提供适用于平板电脑用户的全套功能</h2></div>
+
+  <div class="centered-full-image" style="width:600px;margin:1.5em"><img src="{@docRoot}images/gp-tablets-full-feature-set.png" alt="平板电脑功能集" /></div>
+
+  <p>让你的平板电脑用户能够体验应用的最佳功能。下面是一些建议：</p>
+
+  <ul>
+    <li>在设计应用时，应至少确保其在平板电脑上的功能与在手机上的一样。
+    </li>
+
+    <li>在特殊情况下，例如硬件不支持或用户使用场景受到限制，则可以去掉或替换应用的某些功能。例如：
+      <ul>
+        <li>如果手机使用电话功能，但当前的平板电脑无法使用此功能，那么你可以去掉或替换相关功能。
+        </li>
+
+        <li>许多平板电脑都装有 GPS 传感器，但大多数用户在跑步时通常不会带着平板电脑。如果手机应用中提供的某项功能可让用户在跑步时通过手机记录 GPS 路线，就无需在平板电脑上也提供这项功能，因为这么做并没有什么吸引力。
+        </li>
+      </ul>
+    </li>
+
+    <li>如果你要从平板电脑界面上去掉某功能，请确保用户无法通过其他方式使用这项功能；或确保该功能可以“优雅降级”，以便为用户提供替代功能（另请参见下面关于硬件功能的部分）。
+    </li>
+  </ul>
+
+  <div class="headerLine"><h2 id="android-versions">8. 确定合适的 Android 版本</h2></div>
+
+  <p>
+    为确保你的应用适配尽可能多的平板电脑，你必须让应用定位到支持平板电脑的 Android 版本。对平板电脑的支持是从 <a href="{@docRoot}about/versions/android-3.0.html">Android 3.0</a>（API 级别 11）开始的；对平板电脑、手机及其他设备的统一界面框架支持是从 <a href="{@docRoot}about/versions/android-4.0.html">Android 4.0</a> 开始的
+  </p>
+
+  <p>
+    你可以在清单文件的 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 元素中设置应用定位的 Android 版本。在大多数情况下，你只要将该元素的 <code>targetSdkVersion</code> 属性设置为可用的最高 API 级别，即可正确定位合适的 Android 版本。
+  </p>
+
+  <p style="margin-bottom:.5em">
+    作为最低要求，请检查 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a> 元素以确保：
+  </p>
+
+  <ol style="list-style-type:lower-alpha;margin-top:0em">
+    <li>
+      使用 11 或更高值声明 <code>targetSdkVersion</code>（建议使用 14 或更高值）；或
+    </li>
+
+    <li>
+      使用 11 或更高值声明 <code>minSdkVersion</code>。
+    </li>
+
+    <li>如果声明 <code>maxSdkVersion</code> 属性，其值必须为 11 或更高。请注意，一般情况下不建议使用 <code>maxSdkVersion</code>。<em></em>
+    </li>
+  </ol>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/versions" data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6"></div>
+
+  <div class="headerLine"><h2 id="hardware-requirements">9. 准确声明硬件功能依赖关系</h2></div>
+
+  <p>
+    通常情况下，手机和平板电脑对传感器、相机、电话及其他功能提供的硬件支持会稍有不同。例如，许多平板电脑可以在“WLAN”配置下使用却不支持电话功能。
+  </p>
+
+  <p>
+    因此，你可以向你的所有手机和平板电脑用户分发一个 APK，但要确保你的应用不会要求调用平板电脑通常不提供的硬件功能。否则，请在应用清单中将硬件功能声明为“未要求”，如下所述。<em></em>
+  </p>
+
+  <ul>
+  <li>在应用清单中，找到所有 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 元素。尤其要注意的是，需要找到可能无法在某些平板电脑上使用的硬件功能，例如：
+
+  <ul>
+  <li><code>android.hardware.telephony</code></li>
+  <li><code>android.hardware.camera</code>（指后置摄像头），或</li>
+  <li><code>android.hardware.camera.front</code></li>
+  </ul></li>
+
+  <li>通过加入 <code>android:required=”false”</code> 属性将 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html"><code>&lt;uses-feature&gt;</code></a> 元素声明为“未要求”。<em></em>
+
+  <p>
+    例如，以下示例就准确声明了 <code>android.hardware.telephony</code> 的依赖关系。这样一来，你仍能广泛分发应用，甚至能分发到不提供电话功能的设备上：
+  </p>
+
+  <pre>&lt;uses-feature android:name="android.hardware.telephony" android:required="false" /&gt;</pre></li>
+
+  <li>与此类似，还请检查清单，找出<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions">表明硬件功能要求</a>不适用于平板电脑的 <a href="{@docRoot}guide/topics/manifest/permission-element.html"><code>&lt;permission&gt;</code></a> 元素。如果你找到这样的权限，请务必为功能明确声明对应的 <code>&lt;uses-feature&gt;</code> 元素并加入 <code>android:required=”false”</code> 属性。</li>
+  </ul>
+
+
+  <p>
+    将硬件功能声明为“未要求”后，请务必在各种设备上测试你的应用。<em></em>即使应用所需的硬件功能无法使用，应用功能也应该正常运行；如果可以，应用应该提供“优雅降级”和替代功能。
+  </p>
+
+  <p>
+    例如，如果应用通常使用 GPS 设置地理位置，但设备不支持 GPS，那么此应用可以让用户手动设置地理位置。应用可以在运行时检查设备硬件功能并根据需要执行相应处理。
+  </p>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/hardware" data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6"></div>
+
+  <div class="headerLine"><h2 id="support-screens">10. 声明对平板电脑屏幕的支持</h2></div>
+
+  <p>为确保能将应用分发到各式平板电脑上，你应在应用的清单文件中声明对各种平板电脑屏幕尺寸的支持，如下所示：</p>
+
+  <ul>
+    <li>如果声明 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 元素，就不要指定 <code>android:largeScreens="false"</code> 或 <code>android:xlargeScreens="false"</code>。</li>
+    <li>如果应用定位的 <code>minSdkVersion</code> 值小于 13，必须使用 <code>android:largeScreens="true"</code> 和 <code>android:xlargeScreens="true"</code> 声明 <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html"><code>&lt;supports-screens&gt;</code></a> 元素。</li>
+  </ul>
+
+  <p>如果应用在清单中声明了 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a> 元素，该元素应包含相关属性，用以列举应用适配的平板电脑屏幕的尺寸和密度组合。<em></em>请注意，如果可能，你应避免在应用中使用 <a href="{@docRoot}guide/topics/manifest/compatible-screens-element.html"><code>&lt;compatible-screens&gt;</code></a> 元素。</p>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/tabletscreens" data-sortorder="-timestamp" data-cardsizes="9x3,6x3,6x3" data-maxresults="6"></div>
+
+
+  <div class="headerLine"><h2 id="google-play">11. 在 Google Play 中展示你的平板电脑界面</h2></div>
+
+  <p>
+    为你的平板电脑应用创建了经过优化、内容丰富的界面后，请务必告知你的客户！下面是一些重要的方法，可帮助你向 Google Play 上的用户推广你的平板电脑应用。
+  </p>
+
+  <div><img class="border-img" src="{@docRoot}images/gp-tablet-quality-4.jpg" /></div>
+
+
+  <h4>
+    上传平板电脑界面的屏幕截图
+  </h4>
+
+  <p>
+    平板电脑用户需要了解你的应用在平板电脑设备上（而非手机上）的效果。如果你开发了一款平板电脑应用，请务必将平板电脑界面的屏幕截图上传至 Google Play 开发者控制台。下面是一些相关指南：
+    </p>
+
+  <ul style="margin-top:0">
+    <li>展示应用的核心功能，而不要展示启动或登录页面。用户会在应用的哪个位置花费最多时间，就在屏幕截图中展示这个位置。
+    </li>
+
+    <li>添加在 7 英寸和 10 英寸平板电脑上拍摄的屏幕截图。
+    </li>
+
+    <li>如果可能，添加横屏和竖屏拍摄的屏幕截图。
+    </li>
+
+    <li>如果可能，使用屏幕截图功能。避免在屏幕截图中展示实际的设备硬件。</li>
+
+    <li>建议对横屏和竖屏拍摄的平板电脑屏幕截图都使用 <strong>1280 x 720</strong> 或更高的分辨率。
+    </li>
+
+    <li>最好为 7 英寸的平板电脑界面上传 8 张屏幕截图，同时再为 10 英寸的平板电脑界面上传 8 张屏幕截图。
+    </li>
+  </ul>
+
+  <h4>
+    更新应用说明和版本说明
+  </h4>
+
+  <ul>
+    <li>在应用说明中，请务必着重介绍你的应用已针对平板电脑优化过界面，能为平板电脑用户提供卓越功能。添加一些详细信息，介绍平板电脑界面的工作原理及其独特优势。
+    </li>
+
+    <li>在应用的版本说明和更新信息中加入有关平板电脑支持的信息。
+    </li>
+  </ul>
+
+  <h4>
+    更新你的推广视频
+  </h4>
+
+  <p>
+    许多用户通过观看推广视频来了解应用，确定自己是否喜欢此应用。你可以根据用户的这一兴趣特点，在推广视频中着重介绍应用的平板电脑界面，以吸引平板电脑用户。下面是一些相关提示和指南：
+  </p>
+
+  <ul>
+    <li>添加一张或多张你的应用在平板电脑上运行时的截图。为了最有效地吸引平板电脑用户，建议你将平板电脑界面与手机界面的推广事宜尽量等同视之。
+    </li>
+
+    <li>尽早在视频中展示你的平板电脑界面。不要想当然地以为平板电脑用户会耐心看完手机界面上的功能演示。最好在前 10 秒内或者在介绍手机界面的同时就展示平板电脑界面，以立即吸引用户的注意力。
+    </li>
+
+    <li>为了让用户了解你是在展示平板电脑界面，请加入几张应用在手持平板电脑设备上运行时的截图。
+    </li>
+
+    <li>在视频的讲解或旁白中，着重介绍应用的平板电脑界面。
+    </li>
+  </ul>
+
+  <h4>
+    在推广活动中突显你的平板电脑界面
+  </h4>
+
+  <p>
+    确保平板电脑用户可以通过你的推广活动、网站、社交信息、广告及其他地方了解你的平板电脑界面。下面是一些建议：
+  </p>
+
+  <ul>
+    <li>安排营销或宣传活动，着重介绍你的应用在平板电脑上的使用情况。</li>
+
+    <li>在推广活动中展示你的平板电脑应用最突出的优势，使用 <a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art Generator</a> 快速生成一张应用在 7 英寸或 10 英寸平板电脑上运行时的高品质推广图片，屏幕方向自定，有无下拉阴影和屏幕反光均可。这项操作非常简单，只需截图、拖放即可。
+    </li>
+
+    <li>进行在线推广时加入 Google Play 徽章，让用户可以直接转入商店查看你应用的商品详情。你可以使用<a href="{@docRoot}distribute/tools/promote/badges.html">徽章生成器</a>生成各种语言的徽章。
+    </li>
+  </ul>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/showcase/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,9x3,9x3" data-maxresults="6"></div>
+
+  <div class="headerLine">
+    <h2 id="google-play-best-practices">
+      12. 遵循在 Google Play 中发布应用的最佳做法</h2>
+
+
+  </div>
+
+  <p>
+    下面是一些在 Google Play 中成功发布的平板电脑应用的最佳做法。
+  </p>
+
+  <div>
+    <img class="border-img" src="{@docRoot}images/gp-tablet-quality-5.jpg" />
+  </div>
+
+  <h4 id="google-play-optimization-tips">
+    检查应用的优化提示
+  </h4>
+
+  <p>Google Play 开发者控制台现在提供”优化提示“页，可让你快速了解你的应用是否很好地遵循了有关平板电脑应用分发和质量的基本指南。要访问此页面，请登录到开发者控制台，通过“所有应用”加载相应应用，然后点击左侧导航栏中的“优化提示”。</p>
+
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+  <h2>如何发送反馈意见</h2>
+
+  <p>请使用下面的链接发送反馈意见或申请人工审核你的“优化提示”。</p>
+
+  <p>在发送反馈意见之前，请务必先仔细阅读平板电脑应用质量指南的相关部分。</p>
+
+  <p><strong><a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">平板电脑专用联系表单 »</a></strong></p>
+  </div>
+  </div>
+
+  <p>开发者控制台通过运行一系列检查来验证你的应用是否符合基本质量标准，然后为其创建“优化提示”页。如果发现任何问题，开发者控制台会在“优化提示”页上列出“待优化事项”来提醒你。</p>
+
+  <p>如果你为应用开发了平板电脑版本，请务必访问“优化提示”页，了解你应用的基本检查结果。如果此页中列出问题，建议你在应用中进行解决，并上传一个新的二进制文件以供分发（如果需要）。</p>
+
+  <p>如果你认为“优化提示”页列出的“待优化事项”不适用于你的应用或会影响你的应用在平板电脑上的运行质量，请使用<a href="https://support.google.com/googleplay/android-developer/contact/tabletq" target="_googleplay" style="white-space:nowrap">平板电脑专用联系表单 »</a> 通知我们。我们会审核你的应用并视情况更新你的“优化提示”页。</p>
+
+
+  <h4>确认应用的适配设备</h4>
+
+  <p>
+    将应用上传至<a href="https://play.google.com/apps/publish/">开发者控制台</a>后，请检查 APK 的“受支持设备”列表，确保未遗漏任何应用要适配的平板电脑设备。
+  </p>
+
+  <h4>用一个 APK 进行分发</h4>
+
+  <p>
+    建议你针对所有屏幕尺寸（手机和平板电脑）用一个 APK 发布你的应用，并使用一份 Google Play 商品详情。这种做法有以下几大优点：
+  </p>
+
+  <ul style="margin-top:.25em">
+    <li>便于用户通过搜索、浏览或推广信息找到你的应用。
+    </li>
+
+    <li>便于用户在更换新设备后自动恢复你的应用。
+    </li>
+
+    <li>你的应用在所有设备上的评分和下载统计信息会得到汇总统计。
+    </li>
+
+    <li>再用一份商品详情发布平板电脑应用可能会降低你品牌的评分。
+    </li>
+  </ul>
+
+  <p>
+    如果需要，你也可以选择使用<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 支持</a>提供你的应用，不过在大多数情况下，强烈建议你使用一个 APK 覆盖所有设备。
+  </p>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/googleplay" data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6"></div>
+
+
+  <div class="headerLine">
+    <h2 id="test-environment">
+      为平板电脑创建测试环境
+    </h2>
+
+
+  </div>
+
+  <p>
+    使用合适的硬件或模拟器环境进行测试，既评估你的平板电脑应用的核心质量，也评估应用在平板电脑上的质量。
+  </p>
+
+  <p>
+    要测试应用对核心质量标准的遵循情况，可以使用<a href="{@docRoot}distribute/essentials/quality/core.html#test-environment">建议的测试环境</a>，要测试应用在平板电脑上的质量，还需要在建议环境的基础上加入中等大小的平板电脑以及具有更多或更少硬件/软件功能的平板电脑。
+  </p>
+
+  <p class="table-caption"><strong>表 1</strong>：下表列出了两种类型的设备，及其采用的平台版本、屏幕配置和硬件功能配置。典型的平板电脑测试环境可以包含其中的一类或两类设备。</p>
+
+  <table>
+  <tr>
+  <th>类型</th>
+  <th>尺寸</th>
+  <th>密度</th>
+  <th>版本</th>
+  <th>AVD 主题</th>
+  </tr>
+
+  <tr>
+  <td>7 英寸平板电脑</td>
+  <td><span style="white-space:nowrap"><code>large</code> 或</span><br /><code>-sw600</code></td>
+  <td><code>hdpi</code>、<br /><code>tvdpi</code></td>
+  <td>Android 4.0 及更高版本（API 级别 14 及更高）</td>
+  <td>WXGA800-7in</td>
+  </tr>
+  <tr>
+  <td><span style="white-space:nowrap">10 英寸</span>平板电脑</td>
+  <td><span style="white-space:nowrap"><code>xlarge</code> 或</span><br /><code>-sw800</code></td>
+  <td><code>mdpi</code>、<br /><code>hdpi</code>、<br /><code>xhdpi</code></td>
+  <td>Android 3.2 及更高版本（API 级别 13 及更高）</td>
+  <td>WXGA800</td>
+  </tr>
+  </table>
+
+  <div class="headerLine"><h2 id="related-resources">相关资源</h2></div>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/tabletguidelines/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6"></div>
+      </p></div>

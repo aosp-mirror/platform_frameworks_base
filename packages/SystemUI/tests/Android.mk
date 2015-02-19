@@ -17,11 +17,20 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.systemui:com.android.keyguard
+LOCAL_SRC_FILES := $(call all-java-files-under, src) \
+    $(call all-java-files-under, ../src) \
+    src/com/android/systemui/EventLogTags.logtags
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res \
+    frameworks/base/packages/SystemUI/res \
+    frameworks/base/packages/Keyguard/res
+
+LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
 
 LOCAL_PACKAGE_NAME := SystemUITests
+
+LOCAL_STATIC_JAVA_LIBRARIES := mockito-target Keyguard
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken

@@ -59,6 +59,14 @@ public final class MediaSessionManager {
     private Context mContext;
 
     /**
+     * Special flag for sending the mute key to dispatchAdjustVolume used by the
+     * system.
+     *
+     * @hide
+     */
+    public static final int DIRECTION_MUTE = -99;
+
+    /**
      * @hide
      */
     public MediaSessionManager(Context context) {

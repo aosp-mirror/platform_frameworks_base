@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
@@ -112,7 +113,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called when the view needs to be shown.
      */
-    public void show() {
+    public void showPrimarySecurityScreen() {
         if (DEBUG) Log.d(TAG, "show()");
         mSecurityContainer.showPrimarySecurityScreen(false);
     }
@@ -149,6 +150,16 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     protected void announceCurrentSecurityMethod() {
         mSecurityContainer.announceCurrentSecurityMethod();
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            event.getText().add(mSecurityContainer.getCurrentSecurityModeContentDescription());
+            return true;
+        } else {
+            return super.dispatchPopulateAccessibilityEvent(event);
+        }
     }
 
     protected KeyguardSecurityContainer getSecurityContainer() {
@@ -224,7 +235,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
      */
     public void onResume() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
-        mSecurityContainer.showPrimarySecurityScreen(false);
         mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
         requestFocus();
     }
@@ -471,6 +481,10 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     public SecurityMode getSecurityMode() {
         return mSecurityContainer.getSecurityMode();
+    }
+
+    public SecurityMode getCurrentSecurityMode() {
+        return mSecurityContainer.getCurrentSecurityMode();
     }
 
     protected abstract void onUserSwitching(boolean switching);

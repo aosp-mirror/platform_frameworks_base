@@ -1,10 +1,8 @@
 page.title=Recreating an Activity
-parent.title=Managing the Activity Lifecycle
-parent.link=index.html
+page.tags=activity lifecycle
+helpoutsWidget=true
 
 trainingnavtop=true
-previous.title=Stopping and Restarting an Activity
-previous.link=stopping.html
 
 @jd:body
 

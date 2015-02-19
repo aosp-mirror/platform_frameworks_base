@@ -284,6 +284,24 @@ public final class BluetoothGattServer implements BluetoothProfile {
                     Log.w(TAG, "Unhandled exception: " + ex);
                 }
             }
+
+            /**
+             * The MTU for a connection has changed
+             * @hide
+             */
+            public void onMtuChanged(String address, int mtu) {
+                if (DBG) Log.d(TAG, "onMtuChanged() - "
+                    + "device=" + address + ", mtu=" + mtu);
+
+                BluetoothDevice device = mAdapter.getRemoteDevice(address);
+                if (device == null) return;
+
+                try {
+                    mCallback.onMtuChanged(device, mtu);
+                } catch (Exception ex) {
+                    Log.w(TAG, "Unhandled exception: " + ex);
+                }
+            }
         };
 
     /**

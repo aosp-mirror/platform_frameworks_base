@@ -110,6 +110,7 @@ public final class Formatter {
     private static final int SECONDS_PER_MINUTE = 60;
     private static final int SECONDS_PER_HOUR = 60 * 60;
     private static final int SECONDS_PER_DAY = 24 * 60 * 60;
+    private static final int MILLIS_PER_MINUTE = 1000 * 60;
 
     /**
      * Returns elapsed time for the given millis, in the following format:
@@ -170,5 +171,25 @@ public final class Formatter {
         } else {
             return context.getString(com.android.internal.R.string.durationSeconds, seconds);
         }
+    }
+
+    /**
+     * Returns elapsed time for the given millis, in the following format:
+     * 1 day 5 hrs; will include at most two units, can go down to minutes precision.
+     * @param context the application context
+     * @param millis the elapsed time in milli seconds
+     * @return the formatted elapsed time
+     * @hide
+     */
+    public static String formatShortElapsedTimeRoundingUpToMinutes(Context context, long millis) {
+        long minutesRoundedUp = (millis + MILLIS_PER_MINUTE - 1) / MILLIS_PER_MINUTE;
+
+        if (minutesRoundedUp == 0) {
+            return context.getString(com.android.internal.R.string.durationMinutes, 0);
+        } else if (minutesRoundedUp == 1) {
+            return context.getString(com.android.internal.R.string.durationMinute, 1);
+        }
+
+        return formatShortElapsedTime(context, minutesRoundedUp * MILLIS_PER_MINUTE);
     }
 }

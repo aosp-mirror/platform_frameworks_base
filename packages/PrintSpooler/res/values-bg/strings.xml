@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"Всички принтери…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Диалогов прозорец за отпечатване"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"Страница <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> от <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"Обобщена информация: копия – <xliff:g id="COPIES">%1$s</xliff:g>, размер на хартията – <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"Манипулатор за разгъване"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Манипулатор за свиване"</string>
-    <string name="print_button" msgid="645164566271246268">"Печат"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"Запазване като PDF файл"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"Опциите за отпечатване са разгънати"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"Опциите за отпечатване са свити"</string>
     <string name="search" msgid="5421724265322228497">"Търсене"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Всички принтери"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Добавяне на услуга"</string>

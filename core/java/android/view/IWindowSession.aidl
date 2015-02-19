@@ -36,15 +36,16 @@ import android.view.Surface;
  */
 interface IWindowSession {
     int add(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, out Rect outContentInsets,
+            in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets,
             out InputChannel outInputChannel);
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out InputChannel outInputChannel);
+            out Rect outStableInsets, out InputChannel outInputChannel);
     int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, out Rect outContentInsets);
+            in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
-            in int viewVisibility, in int layerStackId, out Rect outContentInsets);
+            in int viewVisibility, in int layerStackId, out Rect outContentInsets,
+            out Rect outStableInsets);
     void remove(IWindow window);
 
     /**

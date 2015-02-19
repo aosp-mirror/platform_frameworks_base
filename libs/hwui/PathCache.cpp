@@ -255,7 +255,7 @@ void PathCache::trim() {
 
 PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *path,
         const SkPaint* paint) {
-    ATRACE_CALL();
+    ATRACE_NAME("Generate Path Texture");
 
     float left, top, offset;
     uint32_t width, height;

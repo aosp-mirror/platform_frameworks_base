@@ -26,9 +26,10 @@ import java.util.Objects;
 
 /**
  * Describes the cause of a disconnected call. This always includes a code describing the generic
- * cause of the disconnect. Optionally, it may include a localized label and/or localized description
- * to display to the user which is provided by the {@link ConnectionService}. It also may contain a
- * reason for the the disconnect, which is intended for logging and not for display to the user.
+ * cause of the disconnect. Optionally, it may include a label and/or description to display to the
+ * user. It is the responsibility of the {@link ConnectionService} to provide localized versions of
+ * the label and description. It also may contain a reason for the disconnect, which is intended for
+ * logging and not for display to the user.
  * @hide
  */
 @SystemApi
@@ -60,6 +61,11 @@ public final class DisconnectCause implements Parcelable {
     public static final int RESTRICTED = 8;
     /** Disconnected for reason not described by other disconnect codes. */
     public static final int OTHER = 9;
+    /**
+     * Disconnected because the connection manager did not support the call. The call will be tried
+     * again without a connection manager. See {@link PhoneAccount#CAPABILITY_CONNECTION_MANAGER}.
+     */
+    public static final int CONNECTION_MANAGER_NOT_SUPPORTED = 10;
 
     private int mDisconnectCode;
     private CharSequence mDisconnectLabel;
@@ -88,6 +94,7 @@ public final class DisconnectCause implements Parcelable {
 
     /**
      * Creates a new DisconnectCause.
+     *
      * @param label The localized label to show to the user to explain the disconnect.
      * @param code The code for the disconnect cause.
      * @param description The localized description to show to the user to explain the disconnect.
@@ -221,7 +228,10 @@ public final class DisconnectCause implements Parcelable {
     @Override
     public String toString() {
         String code = "";
-        switch (getCode()) {
+        switch (mDisconnectCode) {
+            case UNKNOWN:
+                code = "UNKNOWN";
+                break;
             case ERROR:
                 code = "ERROR";
                 break;
@@ -230,6 +240,9 @@ public final class DisconnectCause implements Parcelable {
                 break;
             case REMOTE:
                 code = "REMOTE";
+                break;
+            case CANCELED:
+                code = "CANCELED";
                 break;
             case MISSED:
                 code = "MISSED";
@@ -246,9 +259,12 @@ public final class DisconnectCause implements Parcelable {
             case OTHER:
                 code = "OTHER";
                 break;
-            case UNKNOWN:
+            case CONNECTION_MANAGER_NOT_SUPPORTED:
+                code = "CONNECTION_MANAGER_NOT_SUPPORTED";
+                break;
             default:
-                code = "UNKNOWN";
+                code = "invalid code: " + mDisconnectCode;
+                break;
         }
         String label = mDisconnectLabel == null ? "" : mDisconnectLabel.toString();
         String description = mDisconnectDescription == null

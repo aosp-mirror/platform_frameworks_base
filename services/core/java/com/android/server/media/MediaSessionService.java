@@ -40,6 +40,7 @@ import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -76,6 +77,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private static final int WAKELOCK_TIMEOUT = 5000;
 
+    /* package */final IBinder mICallback = new Binder();
+
     private final SessionManagerImpl mSessionManagerImpl;
     private final MediaSessionStack mPriorityStack;
 
@@ -86,9 +89,11 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final Object mLock = new Object();
     private final MessageHandler mHandler = new MessageHandler();
     private final PowerManager.WakeLock mMediaEventWakeLock;
+    private final boolean mUseMasterVolume;
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
+    private AudioManager mAudioManager;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
 
@@ -104,6 +109,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         mPriorityStack = new MediaSessionStack();
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
+        mUseMasterVolume = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
     }
 
     @Override
@@ -114,6 +121,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
+        mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();
@@ -133,6 +141,20 @@ public class MediaSessionService extends SystemService implements Monitor {
             mPriorityStack.onSessionStateChange(record);
         }
         mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, record.getUserId(), 0);
+    }
+
+    /**
+     * Tells the system UI that volume has changed on a remote session.
+     */
+    public void notifyRemoteVolumeChanged(int flags, MediaSessionRecord session) {
+        if (mRvc == null) {
+            return;
+        }
+        try {
+            mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
+        } catch (Exception e) {
+            Log.wtf(TAG, "Error sending volume change to system UI.", e);
+        }
     }
 
     public void onSessionPlaystateChange(MediaSessionRecord record, int oldState, int newState) {
@@ -424,7 +446,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private int findIndexOfSessionsListenerLocked(IActiveSessionsListener listener) {
         for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
-            if (mSessionsListeners.get(i).mListener == listener) {
+            if (mSessionsListeners.get(i).mListener.asBinder() == listener.asBinder()) {
                 return i;
             }
         }
@@ -440,7 +462,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             List<MediaSessionRecord> records = mPriorityStack.getActiveSessions(userId);
             int size = records.size();
-            if (size > 0) {
+            if (size > 0 && records.get(0).isPlaybackActive(false)) {
                 rememberMediaButtonReceiverLocked(records.get(0));
             }
             ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
@@ -699,8 +721,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             try {
                 synchronized (mLock) {
+                    // If we don't have a media button receiver to fall back on
+                    // include non-playing sessions for dispatching
+                    boolean useNotPlayingSessions = mUserRecords.get(
+                            ActivityManager.getCurrentUser()).mLastMediaButtonReceiver == null;
                     MediaSessionRecord session = mPriorityStack
-                            .getDefaultMediaButtonSession(mCurrentUserId);
+                            .getDefaultMediaButtonSession(mCurrentUserId, useNotPlayingSessions);
                     if (isVoiceKey(keyEvent.getKeyCode())) {
                         handleVoiceKeyEventLocked(keyEvent, needWakeLock, session);
                     } else {
@@ -713,8 +739,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void dispatchAdjustVolume(int suggestedStream, int delta, int flags)
-                throws RemoteException {
+        public void dispatchAdjustVolume(int suggestedStream, int delta, int flags) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -761,6 +786,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println();
 
             synchronized (mLock) {
+                pw.println(mSessionsListeners.size() + " sessions listeners.");
                 int count = mAllSessions.size();
                 pw.println(count + " Sessions:");
                 for (int i = 0; i < count; i++) {
@@ -805,7 +831,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                         + flags + ", suggestedStream=" + suggestedStream);
 
             }
-            if (session == null) {
+            boolean preferSuggestedStream = false;
+            if (isValidLocalStreamType(suggestedStream)
+                    && AudioSystem.isStreamActive(suggestedStream, 0)) {
+                preferSuggestedStream = true;
+            }
+            if (session == null || preferSuggestedStream) {
                 if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0
                         && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
                     if (DEBUG) {
@@ -814,22 +845,39 @@ public class MediaSessionService extends SystemService implements Monitor {
                     return;
                 }
                 try {
-                    mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream, flags,
-                            getContext().getOpPackageName());
+                    String packageName = getContext().getOpPackageName();
+                    if (mUseMasterVolume) {
+                        boolean isMasterMute = mAudioService.isMasterMute();
+                        if (direction == MediaSessionManager.DIRECTION_MUTE) {
+                            mAudioService.setMasterMute(!isMasterMute, flags, packageName, mICallback);
+                        } else {
+                            mAudioService.adjustMasterVolume(direction, flags, packageName);
+                            // Do not call setMasterMute when direction = 0 which is used just to
+                            // show the UI.
+                            if (isMasterMute && direction != 0) {
+                                mAudioService.setMasterMute(false, flags, packageName, mICallback);
+                            }
+                        }
+                    } else {
+                        boolean isStreamMute = mAudioService.isStreamMute(suggestedStream);
+                        if (direction == MediaSessionManager.DIRECTION_MUTE) {
+                            mAudioManager.setStreamMute(suggestedStream, !isStreamMute);
+                        } else {
+                            mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
+                                    flags, packageName);
+                            // Do not call setStreamMute when direction = 0 which is used just to
+                            // show the UI.
+                            if (isStreamMute && direction != 0) {
+                                mAudioManager.setStreamMute(suggestedStream, false);
+                            }
+                        }
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error adjusting default volume.", e);
                 }
             } else {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
                         UserHandle.myUserId(), true);
-                if (session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE
-                        && mRvc != null) {
-                    try {
-                        mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
-                    } catch (Exception e) {
-                        Log.wtf(TAG, "Error sending volume change to system UI.", e);
-                    }
-                }
             }
         }
 
@@ -957,6 +1005,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private boolean isVoiceKey(int keyCode) {
             return keyCode == KeyEvent.KEYCODE_HEADSETHOOK;
+        }
+
+        // we only handle public stream types, which are 0-5
+        private boolean isValidLocalStreamType(int streamType) {
+            return streamType >= AudioManager.STREAM_VOICE_CALL
+                    && streamType <= AudioManager.STREAM_NOTIFICATION;
         }
 
         private KeyEventWakeLockReceiver mKeyEventReceiver = new KeyEventWakeLockReceiver(mHandler);

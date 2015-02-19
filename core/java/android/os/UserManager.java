@@ -56,6 +56,7 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from changing Wi-Fi
      * access points. The default value is <code>false</code>.
+     * <p/>This restriction has no effect in a managed profile.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -87,8 +88,10 @@ public class UserManager {
     public static final String DISALLOW_UNINSTALL_APPS = "no_uninstall_apps";
 
     /**
-     * Specifies if a user is disallowed from toggling location sharing.
+     * Specifies if a user is disallowed from turning on location sharing.
      * The default value is <code>false</code>.
+     * <p/>In a managed profile, location sharing always reflects the primary user's setting, but
+     * can be overridden and forced off by setting this restriction to true in the managed profile.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -112,6 +115,7 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from configuring bluetooth.
      * The default value is <code>false</code>.
+     * <p/>This restriction has no effect in a managed profile.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -144,8 +148,10 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
 
     /**
-     * Specifies if a user is disallowed from removing itself and other
-     * users. The default value is <code>false</code>.
+     * When set on the primary user this specifies if the user can remove other users.
+     * When set on a secondary user, this specifies if the user can remove itself.
+     * This restriction has no effect on managed profiles.
+     * The default value is <code>false</code>.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -168,6 +174,7 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from configuring VPN.
      * The default value is <code>false</code>.
+     * This restriction has no effect in a managed profile.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -192,6 +199,8 @@ public class UserManager {
      * Specifies if a user is disallowed from factory resetting
      * from Settings. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
+     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * primary user can factory reset the device.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -204,6 +213,8 @@ public class UserManager {
      * Specifies if a user is disallowed from adding new users and
      * profiles. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
+     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * primary user can add other users.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -227,6 +238,8 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring cell
      * broadcasts. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
+     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * primary user can configure cell broadcasts.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -239,6 +252,8 @@ public class UserManager {
      * Specifies if a user is disallowed from configuring mobile
      * networks. This can only be set by device owners and profile owners on the primary user.
      * The default value is <code>false</code>.
+     * <p/>This restriction has no effect on secondary users and managed profiles since only the
+     * primary user can configure mobile networks.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -307,6 +322,8 @@ public class UserManager {
      * Specifies that the user is not allowed to make outgoing
      * phone calls. Emergency calls are still permitted.
      * The default value is <code>false</code>.
+     * <p/>This restriction has no effect on managed profiles since call intents are normally
+     * forwarded to the primary user.
      *
      * <p/>Key for user restrictions.
      * <p/>Type: Boolean
@@ -367,9 +384,28 @@ public class UserManager {
      * <p/>Type: Boolean
      * @see #setUserRestrictions(Bundle)
      * @see #getUserRestrictions()
-     * @hide
      */
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
+
+    /**
+     * Application restriction key that is used to indicate the pending arrival
+     * of real restrictions for the app.
+     *
+     * <p>
+     * Applications that support restrictions should check for the presence of this key.
+     * A <code>true</code> value indicates that restrictions may be applied in the near
+     * future but are not available yet. It is the responsibility of any
+     * management application that sets this flag to update it when the final
+     * restrictions are enforced.
+     *
+     * <p/>Key for application restrictions.
+     * <p/>Type: Boolean
+     * @see android.app.admin.DevicePolicyManager#setApplicationRestrictions(
+     *      android.content.ComponentName, String, Bundle)
+     * @see android.app.admin.DevicePolicyManager#getApplicationRestrictions(
+     *      android.content.ComponentName, String)
+     */
+    public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
 
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;

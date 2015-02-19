@@ -16,14 +16,13 @@
 ** limitations under the License.
 */
 -->
-
+<!-- Launcher Activity -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
      android:shareInterpolator="false"
      android:zAdjustment="top">
   <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
-  		 android:startOffset="50"
          android:fillEnabled="true"
          android:fillBefore="true" android:fillAfter="true"
          android:interpolator="@android:interpolator/linear_out_slow_in"
-         android:duration="100"/>
+         android:duration="@integer/recents_enter_from_home_transition_duration"/>
 </set>

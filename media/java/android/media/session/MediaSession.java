@@ -104,6 +104,7 @@ public final class MediaSession {
     public @interface SessionFlags { }
 
     private final Object mLock = new Object();
+    private final int mMaxBitmapSize;
 
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
@@ -147,6 +148,8 @@ public final class MediaSession {
         if (TextUtils.isEmpty(tag)) {
             throw new IllegalArgumentException("tag cannot be null or empty");
         }
+        mMaxBitmapSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
         mCbStub = new CallbackStub(this);
         MediaSessionManager manager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
@@ -286,7 +289,9 @@ public final class MediaSession {
         if (volumeProvider == null) {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
-        mVolumeProvider = volumeProvider;
+        synchronized (mLock) {
+            mVolumeProvider = volumeProvider;
+        }
         volumeProvider.setCallback(new VolumeProvider.Callback() {
             @Override
             public void onVolumeChanged(VolumeProvider volumeProvider) {
@@ -407,6 +412,9 @@ public final class MediaSession {
      * @param metadata The new metadata
      */
     public void setMetadata(@Nullable MediaMetadata metadata) {
+        if (metadata != null ) {
+            metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
+        }
         try {
             mBinder.setMetadata(metadata);
         } catch (RemoteException e) {
@@ -449,6 +457,27 @@ public final class MediaSession {
     }
 
     /**
+     * Set the style of rating used by this session. Apps trying to set the
+     * rating should use this style. Must be one of the following:
+     * <ul>
+     * <li>{@link Rating#RATING_NONE}</li>
+     * <li>{@link Rating#RATING_3_STARS}</li>
+     * <li>{@link Rating#RATING_4_STARS}</li>
+     * <li>{@link Rating#RATING_5_STARS}</li>
+     * <li>{@link Rating#RATING_HEART}</li>
+     * <li>{@link Rating#RATING_PERCENTAGE}</li>
+     * <li>{@link Rating#RATING_THUMB_UP_DOWN}</li>
+     * </ul>
+     */
+    public void setRatingType(int type) {
+        try {
+            mBinder.setRatingType(type);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setRatingType.", e);
+        }
+    }
+
+    /**
      * Set some extras that can be associated with the {@link MediaSession}. No assumptions should
      * be made as to how a {@link MediaController} will handle these extras.
      * Keys should be fully qualified (e.g. com.example.MY_EXTRA) to avoid conflicts.
@@ -470,9 +499,11 @@ public final class MediaSession {
      * @hide
      */
     public void notifyRemoteVolumeChanged(VolumeProvider provider) {
-        if (provider == null || provider != mVolumeProvider) {
-            Log.w(TAG, "Received update from stale volume provider");
-            return;
+        synchronized (mLock) {
+            if (provider == null || provider != mVolumeProvider) {
+                Log.w(TAG, "Received update from stale volume provider");
+                return;
+            }
         }
         try {
             mBinder.setCurrentVolume(provider.getCurrentVolume());
@@ -535,6 +566,14 @@ public final class MediaSession {
 
     private void dispatchMediaButton(Intent mediaButtonIntent) {
         postToCallback(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
+    }
+
+    private void dispatchAdjustVolume(int direction) {
+        postToCallback(CallbackMessageHandler.MSG_ADJUST_VOLUME, direction);
+    }
+
+    private void dispatchSetVolumeTo(int volume) {
+        postToCallback(CallbackMessageHandler.MSG_SET_VOLUME, volume);
     }
 
     private void postToCallback(int what) {
@@ -988,9 +1027,7 @@ public final class MediaSession {
         public void onAdjustVolume(int direction) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                if (session.mVolumeProvider != null) {
-                    session.mVolumeProvider.onAdjustVolume(direction);
-                }
+                session.dispatchAdjustVolume(direction);
             }
         }
 
@@ -998,9 +1035,7 @@ public final class MediaSession {
         public void onSetVolumeTo(int value) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                if (session.mVolumeProvider != null) {
-                    session.mVolumeProvider.onSetVolumeTo(value);
-                }
+                session.dispatchSetVolumeTo(value);
             }
         }
 
@@ -1117,6 +1152,8 @@ public final class MediaSession {
         private static final int MSG_CUSTOM_ACTION = 13;
         private static final int MSG_MEDIA_BUTTON = 14;
         private static final int MSG_COMMAND = 15;
+        private static final int MSG_ADJUST_VOLUME = 16;
+        private static final int MSG_SET_VOLUME = 17;
 
         private MediaSession.Callback mCallback;
 
@@ -1145,6 +1182,7 @@ public final class MediaSession {
 
         @Override
         public void handleMessage(Message msg) {
+            VolumeProvider vp;
             switch (msg.what) {
                 case MSG_PLAY:
                     mCallback.onPlay();
@@ -1191,6 +1229,22 @@ public final class MediaSession {
                 case MSG_COMMAND:
                     Command cmd = (Command) msg.obj;
                     mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
+                    break;
+                case MSG_ADJUST_VOLUME:
+                    synchronized (mLock) {
+                        vp = mVolumeProvider;
+                    }
+                    if (vp != null) {
+                        vp.onAdjustVolume((int) msg.obj);
+                    }
+                    break;
+                case MSG_SET_VOLUME:
+                    synchronized (mLock) {
+                        vp = mVolumeProvider;
+                    }
+                    if (vp != null) {
+                        vp.onSetVolumeTo((int) msg.obj);
+                    }
                     break;
             }
         }

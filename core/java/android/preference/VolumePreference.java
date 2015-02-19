@@ -67,6 +67,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
 
         final SeekBar seekBar = (SeekBar) view.findViewById(com.android.internal.R.id.seekbar);
         mSeekBarVolumizer = new SeekBarVolumizer(getContext(), mStreamType, null, this);
+        mSeekBarVolumizer.start();
         mSeekBarVolumizer.setSeekBar(seekBar);
 
         getPreferenceManager().registerOnActivityStopListener(this);
@@ -116,7 +117,7 @@ public class VolumePreference extends SeekBarDialogPreference implements
 
     public void onActivityStop() {
         if (mSeekBarVolumizer != null) {
-            mSeekBarVolumizer.postStopSample();
+            mSeekBarVolumizer.stopSample();
         }
     }
 
@@ -146,6 +147,16 @@ public class VolumePreference extends SeekBarDialogPreference implements
         if (mSeekBarVolumizer != null && volumizer != mSeekBarVolumizer) {
             mSeekBarVolumizer.stopSample();
         }
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
+        // noop
+    }
+
+    @Override
+    public void onMuted(boolean muted) {
+        // noop
     }
 
     @Override

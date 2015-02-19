@@ -314,10 +314,6 @@ public class RatingBar extends AbsSeekBar {
         dispatchRatingChange(true);
     }
 
-    @Override
-    void animateSetProgress(int progress) {
-    }
-
     void dispatchRatingChange(boolean fromUser) {
         if (mOnRatingBarChangeListener != null) {
             mOnRatingBarChangeListener.onRatingChanged(this, getRating(),

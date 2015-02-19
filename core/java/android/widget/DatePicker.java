@@ -51,12 +51,19 @@ import java.util.TimeZone;
 import libcore.icu.ICU;
 
 /**
- * This class is a widget for selecting a date. The date can be selected by a
- * year, month, and day spinners or a {@link CalendarView}. The set of spinners
- * and the calendar view are automatically synchronized. The client can
- * customize whether only the spinners, or only the calendar view, or both to be
- * displayed. Also the minimal and maximal date from which dates to be selected
- * can be customized.
+ * Provides a widget for selecting a date.
+ * <p>
+ * When the {@link android.R.styleable#DatePicker_datePickerMode} attribute is
+ * set to {@code spinner}, the date can be selected using year, month, and day
+ * spinners or a {@link CalendarView}. The set of spinners and the calendar
+ * view are automatically synchronized. The client can customize whether only
+ * the spinners, or only the calendar view, or both to be displayed.
+ * </p>
+ * <p>
+ * When the {@link android.R.styleable#DatePicker_datePickerMode} attribute is
+ * set to {@code calendar}, the month and day can be selected using a
+ * calendar-style view while the year can be selected separately using a list.
+ * </p>
  * <p>
  * See the <a href="{@docRoot}guide/topics/ui/controls/pickers.html">Pickers</a>
  * guide.
@@ -80,6 +87,7 @@ import libcore.icu.ICU;
  * @attr ref android.R.styleable#DatePicker_yearListItemTextAppearance
  * @attr ref android.R.styleable#DatePicker_yearListSelectorColor
  * @attr ref android.R.styleable#DatePicker_calendarTextColor
+ * @attr ref android.R.styleable#DatePicker_datePickerMode
  */
 @Widget
 public class DatePicker extends FrameLayout {
@@ -357,6 +365,10 @@ public class DatePicker extends FrameLayout {
 
     /**
      * Gets the {@link CalendarView}.
+     * <p>
+     * This method returns {@code null} when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
      * @return The calendar view.
      * @see #getCalendarViewShown()
@@ -367,6 +379,10 @@ public class DatePicker extends FrameLayout {
 
     /**
      * Sets whether the {@link CalendarView} is shown.
+     * <p>
+     * Calling this method has no effect when the
+     * {@link android.R.styleable#DatePicker_datePickerMode} attribute is set
+     * to {@code calendar}.
      *
      * @param shown True if the calendar view is to be shown.
      */

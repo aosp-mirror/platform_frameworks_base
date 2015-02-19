@@ -29,20 +29,17 @@ public class NetworkState implements Parcelable {
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
     public final NetworkCapabilities networkCapabilities;
-    /** Currently only used by testing. */
+    public final Network network;
     public final String subscriberId;
     public final String networkId;
 
     public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities) {
-        this(networkInfo, linkProperties, networkCapabilities, null, null);
-    }
-
-    public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities, String subscriberId, String networkId) {
+            NetworkCapabilities networkCapabilities, Network network, String subscriberId,
+            String networkId) {
         this.networkInfo = networkInfo;
         this.linkProperties = linkProperties;
         this.networkCapabilities = networkCapabilities;
+        this.network = network;
         this.subscriberId = subscriberId;
         this.networkId = networkId;
     }
@@ -51,6 +48,7 @@ public class NetworkState implements Parcelable {
         networkInfo = in.readParcelable(null);
         linkProperties = in.readParcelable(null);
         networkCapabilities = in.readParcelable(null);
+        network = in.readParcelable(null);
         subscriberId = in.readString();
         networkId = in.readString();
     }
@@ -65,6 +63,7 @@ public class NetworkState implements Parcelable {
         out.writeParcelable(networkInfo, flags);
         out.writeParcelable(linkProperties, flags);
         out.writeParcelable(networkCapabilities, flags);
+        out.writeParcelable(network, flags);
         out.writeString(subscriberId);
         out.writeString(networkId);
     }
@@ -80,5 +79,4 @@ public class NetworkState implements Parcelable {
             return new NetworkState[size];
         }
     };
-
 }

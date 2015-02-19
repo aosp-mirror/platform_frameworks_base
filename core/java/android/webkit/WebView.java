@@ -1634,11 +1634,12 @@ public class WebView extends AbsoluteLayout
      * the portion of the HTML document that needs to be drawn. These
      * optimizations are transparent to the developers. However, under certain
      * circumstances, an App developer may want to disable them:
-     * 1. When an app uses {@link #onDraw} to do own drawing and accesses portions
-     * of the page that is way outside the visible portion of the page.
-     * 2. When an app uses {@link #capturePicture} to capture a very large HTML document.
-     * Note that capturePicture is a deprecated API.
-     *
+     * <ol>
+     *   <li>When an app uses {@link #onDraw} to do own drawing and accesses portions
+     *       of the page that is way outside the visible portion of the page.</li>
+     *   <li>When an app uses {@link #capturePicture} to capture a very large HTML document.
+     *       Note that capturePicture is a deprecated API.</li>
+     * </ol>
      * Enabling drawing the entire HTML document has a significant performance
      * cost. This method should be called before any WebViews are created.
      */

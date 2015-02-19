@@ -80,7 +80,9 @@ using your mouse or keyboard to generate events for your application. It also
 provides a screen in which your application is displayed, together with any other
 active Android applications. </p>
 
-<img src="{@docRoot}images/emulator-wvga800l.png" width="367" height="349" />
+<img src="{@docRoot}images/emulator@2x.png"
+srcset="{@docRoot}images/emulator.png 1x, {@docRoot}images/emulator@2x.png 2x" alt=""
+  width="367" height="330"/>
 
 <p>To let you model and test your application more easily, the emulator utilizes
 Android Virtual Device (AVD) configurations. AVDs let you define certain hardware
@@ -120,7 +122,7 @@ machine.</p>
 mobile devices, including: </p>
 
 <ul>
-  <li>An ARMv5 CPU and the corresponding memory-management unit (MMU)</li>
+  <li>An ARMv5, ARMv7, or x86 CPU</li>
   <li>A 16-bit LCD display</li>
   <li>One or more keyboards (a Qwerty-based keyboard and associated Dpad/Phone
 buttons)</li>
@@ -158,7 +160,7 @@ href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a>.</p>
 
 <p>During development and testing of your application, you install and run your
 application in the Android emulator. You can launch the emulator as a standalone
-application from a command line, or you can run it from within your Eclipse
+application from a command line, or you can run it from within your Android Studio
 development environment. In either case, you specify the AVD configuration to
 load and any startup options you want to use, as described in this document.
 </p>
@@ -186,13 +188,13 @@ window. For more information about command line options for the emulator, see th
 instances of the emulator concurrently, each with its own AVD configuration and
 storage area for user data, SD card, and so on.</p>
 
-<p>If you are working in Eclipse, the ADT plugin for Eclipse installs your
-application and starts the emulator automatically, when you run or debug
-the application. You can specify emulator startup options in the Run/Debug
+<p>When you run your app from Android Studio, it installs and launches the
+app on your connected device or emulator (launching the emulator, if necessary).
+You can specify emulator startup options in the Run/Debug
 dialog, in the Target tab. When the emulator is running, you can issue
 console commands as described later in this document.</p>
 
-<p>If you are not working in Eclipse, see <a href="#apps">Installing Applications
+<p>If you are not working in Android Studio, see <a href="#apps">Installing Applications
 on the Emulator</a> for information about how to install your application.</p>
 
 <p>To stop an emulator instance, just close the emulator's window.</p>
@@ -204,7 +206,7 @@ reference.</p>
 
 <h2 id="apps">Installing Applications on the Emulator</h2>
 
-<p>If you don't have access to Eclipse or the ADT Plugin, you can install your application on the
+<p>If you don't have access to Android Studio, you can install your application on the
 emulator using the <a href="{@docRoot}tools/help/adb.html#move">adb</a> utility. Before
 installing the application, you need to build and package it into an <code>.apk</code> as described
 in <a href="{@docRoot}tools/building/index.html">Building and
@@ -285,16 +287,17 @@ option:
 Android 4.0.3 (API Level 15, revision 3) or higher system image target. Graphics acceleration is not
 available for earlier system images.</p>
   </li>
-  <li>If you are running the emulator from Eclipse, run your Android application using an AVD with
-the {@code -gpu on} option enabled:
+  <li>If you are running the emulator from Android Studio, run your Android application using an AVD
+with the {@code -gpu on} option enabled:
     <ol>
-      <li>In Eclipse, click your Android project folder and then select <strong>Run > Run
-Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run Configurations</strong> dialog, select your Android
-project run configuration or create a new configuration.</li>
-      <li>Click the <strong>Target</strong> tab.</li>
-      <li>Select the AVD you created in the previous procedure.</li>
-      <li>In the <strong>Additional Emulator Command Line Options</strong> field, enter:<br>
+      <li>In Android Studio, click your Android application module folder and then select
+      <strong>Run > Edit Configurations...</strong></li>
+      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
+      run configuration or create a new configuration.</li>
+      <li>Under the <strong>Target Device </strong> options,
+      select the AVD you created in the previous procedure.</li>
+      <li>In the <strong>Emulator</strong> tab, in the
+      <strong>Additional command line options</strong> field, enter:<br>
         {@code -gpu on}</li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
@@ -412,15 +415,15 @@ SERVICE_NAME: intelhaxm
     <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
 name, otherwise VM acceleration will not be enabled.</p>
   </li>
-  <li>If you are running the emulator from Eclipse, run your Android application with an x86-based
+  <li>If you are running the emulator from Android Studio, run your Android application with an x86-based
 AVD:
     <ol>
-      <li>In Eclipse, click your Android project folder and then select <strong>Run > Run
+      <li>In Android Studio, click your Android project folder and then select <strong>Run > Edit
 Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run Configurations</strong> dialog, select your Android
-project run configuration or create a new configuration.</li>
-      <li>Click the <strong>Target</strong> tab.</li>
-      <li>Select the x86-based AVD you created previously.</li>
+      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
+run configuration or create a new configuration.</li>
+      <li>Under the <strong>Target Device</strong> options, select the x86-based AVD you created
+previously.</li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
   </li>
@@ -465,15 +468,15 @@ opening a terminal window and running the following command:
     <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
 name, otherwise VM acceleration will not be enabled.</p>
   </li>
-  <li>If you are running the emulator from Eclipse, run your Android application with an x86-based
+  <li>If you are running the emulator from Andriod Studio, run your Android application with an x86-based
 AVD:
     <ol>
-      <li>In Eclipse, click your Android project folder and then select <strong>Run > Run
+      <li>In Android Studio, click your Android module folder and then select <strong>Run > Edit
 Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run Configurations</strong> dialog, select your Android
-project run configuration or create a new configuration.</li>
-      <li>Click the <strong>Target</strong> tab.</li>
-      <li>Select the x86-based AVD you created previously.</li>
+      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
+run configuration or create a new configuration.</li>
+      <li>Under the <strong>Target Device</strong> options,
+      select the x86-based AVD you created previously.</li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
   </li>
@@ -511,17 +514,18 @@ AVD and include the KVM options:
     <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
 name, otherwise VM acceleration will not be enabled.</p>
   </li>
-  <li>If you are running the emulator from Eclipse, run your Android application with an x86-based
-AVD and include the KVM options:
+  <li>If you are running the emulator from Android Studio, run your Android application with an
+  x86-based AVD and include the KVM options:
     <ol>
-      <li>In Eclipse, click your Android project folder and then select <strong>Run > Run
+      <li>In Android Studio, click your Android module folder and then select <strong>Run > Edit
 Configurations...</strong></li>
-      <li>In the left panel of the <strong>Run Configurations</strong> dialog, select your Android
-project run configuration or create a new configuration.</li>
-      <li>Click the <strong>Target</strong> tab.</li>
-      <li>Select the x86-based AVD you created previously.</li>
-      <li>In the <strong>Additional Emulator Command Line Options</strong> field, enter:
-        <pre>-qemu -m 512 -enable-kvm</pre>
+      <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
+run configuration or create a new configuration.</li>
+      <li>Under the <strong>Target Device</strong> options, select the x86-based AVD you created
+previously.</li>
+      <li>In the <strong>Emulator</strong> tab, in the
+      <strong>Additional command line options</strong> field, enter:
+      <pre>-qemu -m 512 -enable-kvm</pre>
       </li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
@@ -719,7 +723,7 @@ in the AVD directory, or in a custom location (if you specified a path with the 
   <td>Override using <code>-data &lt;filepath&gt;</code>, where <code>&lt;filepath&gt;</code> is the
 path the image, relative to the current working directory. If you supply a filename only,
 the emulator looks for the file in the current working directory. If the file at <code>&lt;filepath&gt;</code> does
-not exist, the emulator creates an image from the default userdata.img, stores it under the name you
+not exist, the emulator creates an image from the default <code>userdata.img</code>, stores it under the name you
 specified, and persists user data to it at shutdown. </td>
 </tr>
 

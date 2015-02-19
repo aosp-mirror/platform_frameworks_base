@@ -131,6 +131,10 @@ public final class PdfRenderer implements AutoCloseable {
      * </p>
      *
      * @param input Seekable file descriptor to read from.
+     *
+     * @throws java.io.IOException If an error occurs while reading the file.
+     * @throws java.lang.SecurityException If the file requires a password or
+     *         the security scheme is not supported.
      */
     public PdfRenderer(@NonNull ParcelFileDescriptor input) throws IOException {
         if (input == null) {

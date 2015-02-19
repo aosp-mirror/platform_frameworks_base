@@ -15,12 +15,8 @@
      limitations under the License.
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <objectAnimator
-        android:duration="3300"
-        android:propertyName="rotation"
-        android:valueFrom="0"
-        android:valueTo="360"
-        android:repeatCount="-1" />
-</set>
+<objectAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="3300"
+    android:propertyName="rotation"
+    android:valueFrom="0"
+    android:valueTo="450" />

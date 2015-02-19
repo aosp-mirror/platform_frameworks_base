@@ -29,11 +29,15 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.util.Slog;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.DecelerateInterpolator;
@@ -51,9 +55,9 @@ public class LLand extends FrameLayout {
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean DEBUG_DRAW = false; // DEBUG
 
-    public static final void L(String s, Object ... objects) {
+    public static void L(String s, Object ... objects) {
         if (DEBUG) {
-            Log.d(TAG, String.format(s, objects));
+            Slog.d(TAG, objects.length == 0 ? s : String.format(s, objects));
         }
     }
 
@@ -61,17 +65,18 @@ public class LLand extends FrameLayout {
     public static final boolean HAVE_STARS = true;
 
     public static final float DEBUG_SPEED_MULTIPLIER = 1f; // 0.1f;
-    public static final boolean DEBUG_IDDQD = false;
+    public static final boolean DEBUG_IDDQD = Log.isLoggable(TAG + ".iddqd", Log.DEBUG);
 
     final static int[] POPS = {
-            // resid                // spinny!
-            R.drawable.pop_belt,    0,
-            R.drawable.pop_droid,   0,
-            R.drawable.pop_pizza,   1,
-            R.drawable.pop_stripes, 0,
-            R.drawable.pop_swirl,   1,
-            R.drawable.pop_vortex,  1,
-            R.drawable.pop_vortex2, 1,
+            // resid                // spinny!  // alpha
+            R.drawable.pop_belt,    0,          255,
+            R.drawable.pop_droid,   0,          255,
+            R.drawable.pop_pizza,   1,          255,
+            R.drawable.pop_stripes, 0,          255,
+            R.drawable.pop_swirl,   1,          255,
+            R.drawable.pop_vortex,  1,          255,
+            R.drawable.pop_vortex2, 1,          255,
+            R.drawable.pop_ball,    0,          190,
     };
 
     private static class Params {
@@ -117,10 +122,20 @@ public class LLand extends FrameLayout {
             PLAYER_Z = res.getDimensionPixelSize(R.dimen.player_z);
             PLAYER_Z_BOOST = res.getDimensionPixelSize(R.dimen.player_z_boost);
             HUD_Z = res.getDimensionPixelSize(R.dimen.hud_z);
+
+            // Sanity checking
+            if (OBSTACLE_MIN <= OBSTACLE_WIDTH / 2) {
+                Slog.e(TAG, "error: obstacles might be too short, adjusting");
+                OBSTACLE_MIN = OBSTACLE_WIDTH / 2 + 1;
+            }
         }
     }
 
     private TimeAnimator mAnim;
+    private Vibrator mVibrator;
+    private AudioManager mAudioManager;
+    private final AudioAttributes mAudioAttrs = new AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_GAME).build();
 
     private TextView mScoreField;
     private View mSplash;
@@ -158,9 +173,14 @@ public class LLand extends FrameLayout {
 
     public LLand(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         setFocusable(true);
         PARAMS = new Params(getResources());
         mTimeOfDay = irand(0, SKIES.length);
+
+        // we assume everything will be laid out left|top
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
     }
 
     @Override
@@ -198,7 +218,15 @@ public class LLand extends FrameLayout {
 
     final float hsv[] = {0, 0, 0};
 
-    private void reset() {
+    private void thump() {
+        if (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_SILENT) {
+            // No interruptions. Not even game haptics.
+            return;
+        }
+        mVibrator.vibrate(80, mAudioAttrs);
+    }
+
+    public void reset() {
         L("reset");
         final Drawable sky = new GradientDrawable(
                 GradientDrawable.Orientation.BOTTOM_TOP,
@@ -313,14 +341,16 @@ public class LLand extends FrameLayout {
 
     private void setScore(int score) {
         mScore = score;
-        if (mScoreField != null) mScoreField.setText(String.valueOf(score));
+        if (mScoreField != null) {
+            mScoreField.setText(DEBUG_IDDQD ? "??" : String.valueOf(score));
+        }
     }
 
     private void addScore(int incr) {
         setScore(mScore + incr);
     }
 
-    private void start(boolean startPlaying) {
+    public void start(boolean startPlaying) {
         L("start(startPlaying=%s)", startPlaying?"true":"false");
         if (startPlaying) {
             mPlaying = true;
@@ -352,7 +382,7 @@ public class LLand extends FrameLayout {
         }
     }
 
-    private void stop() {
+    public void stop() {
         if (mAnimating) {
             mAnim.cancel();
             mAnim = null;
@@ -417,8 +447,10 @@ public class LLand extends FrameLayout {
         if (mPlaying && mDroid.below(mHeight)) {
             if (DEBUG_IDDQD) {
                 poke();
+                unpoke();
             } else {
                 L("player hit the floor");
+                thump();
                 stop();
             }
         }
@@ -429,6 +461,7 @@ public class LLand extends FrameLayout {
             final Obstacle ob = mObstaclesInPlay.get(j);
             if (mPlaying && ob.intersects(mDroid) && !DEBUG_IDDQD) {
                 L("player hit an obstacle");
+                thump();
                 stop();
             } else if (ob.cleared(mDroid)) {
                 if (ob instanceof Stem) passedBarrier = true;
@@ -459,8 +492,9 @@ public class LLand extends FrameLayout {
         // 3. Time for more obstacles!
         if (mPlaying && (t - mLastPipeTime) > PARAMS.OBSTACLE_PERIOD) {
             mLastPipeTime = t;
-            final int obstacley = (int) (Math.random()
-                    * (mHeight - 2*PARAMS.OBSTACLE_MIN - PARAMS.OBSTACLE_GAP)) + PARAMS.OBSTACLE_MIN;
+            final int obstacley =
+                    (int)(frand() * (mHeight - 2*PARAMS.OBSTACLE_MIN - PARAMS.OBSTACLE_GAP)) +
+                    PARAMS.OBSTACLE_MIN;
 
             final int inset = (PARAMS.OBSTACLE_WIDTH - PARAMS.OBSTACLE_STEM_WIDTH) / 2;
             final int yinset = PARAMS.OBSTACLE_WIDTH/2;
@@ -539,7 +573,7 @@ public class LLand extends FrameLayout {
     
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        if (DEBUG) L("touch: %s", ev);
+        L("touch: %s", ev);
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 poke();
@@ -553,7 +587,7 @@ public class LLand extends FrameLayout {
 
     @Override
     public boolean onTrackballEvent(MotionEvent ev) {
-        if (DEBUG) L("trackball: %s", ev);
+        L("trackball: %s", ev);
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 poke();
@@ -567,7 +601,7 @@ public class LLand extends FrameLayout {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent ev) {
-        if (DEBUG) L("keyDown: %d", keyCode);
+        L("keyDown: %d", keyCode);
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_DPAD_UP:
@@ -582,7 +616,7 @@ public class LLand extends FrameLayout {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent ev) {
-        if (DEBUG) L("keyDown: %d", keyCode);
+        L("keyDown: %d", keyCode);
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_DPAD_UP:
@@ -597,7 +631,7 @@ public class LLand extends FrameLayout {
 
     @Override
     public boolean onGenericMotionEvent (MotionEvent ev) {
-        if (DEBUG) L("generic: %s", ev);
+        L("generic: %s", ev);
         return false;
     }
 
@@ -684,6 +718,10 @@ public class LLand extends FrameLayout {
 
         private boolean mBoosting;
 
+        private final int[] sColors = new int[] {
+                0xFF78C557,
+        };
+
         private final float[] sHull = new float[] {
                 0.3f,  0f,    // left antenna
                 0.7f,  0f,    // right antenna
@@ -692,7 +730,7 @@ public class LLand extends FrameLayout {
                 0.6f,  1f,    // right foot
                 0.4f,  1f,    // left foot BLUE!
                 0.08f, 0.75f, // sinistram
-                0.08f, 0.33f,  // cold shoulder
+                0.08f, 0.33f, // cold shoulder
         };
         public final float[] corners = new float[sHull.length];
 
@@ -701,7 +739,7 @@ public class LLand extends FrameLayout {
 
             setBackgroundResource(R.drawable.android);
             getBackground().setTintMode(PorterDuff.Mode.SRC_ATOP);
-            getBackground().setTint(0xFF00FF00);
+            getBackground().setTint(sColors[0]);
             setOutlineProvider(new ViewOutlineProvider() {
                 @Override
                 public void getOutline(View view, Outline outline) {
@@ -822,8 +860,9 @@ public class LLand extends FrameLayout {
         int cx, cy, r;
         public Pop(Context context, float h) {
             super(context, h);
-            int idx = 2*irand(0, POPS.length/2);
+            int idx = 3*irand(0, POPS.length/3);
             setBackgroundResource(POPS[idx]);
+            setAlpha((float)(POPS[idx+2])/255);
             setScaleX(frand() < 0.5f ? -1 : 1);
             mRotate = POPS[idx+1] == 0 ? 0 : (frand() < 0.5f ? -1 : 1);
             setOutlineProvider(new ViewOutlineProvider() {

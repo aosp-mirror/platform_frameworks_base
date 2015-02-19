@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -917,6 +918,20 @@ public abstract class Drawable {
     }
 
     /**
+     * Clears the mutated state, allowing this drawable to be cached and
+     * mutated again.
+     * <p>
+     * This is hidden because only framework drawables can be cached, so
+     * custom drawables don't need to support constant state, mutate(), or
+     * clearMutated().
+     *
+     * @hide
+     */
+    public void clearMutated() {
+        // Default implementation is no-op.
+    }
+
+    /**
      * Create a drawable from an inputstream
      */
     public static Drawable createFromStream(InputStream is, String srcName) {
@@ -1044,54 +1059,72 @@ public abstract class Drawable {
         final Drawable drawable;
 
         final String name = parser.getName();
-        if (name.equals("selector")) {
-            drawable = new StateListDrawable();
-        } else if (name.equals("animated-selector")) {
-            drawable = new AnimatedStateListDrawable();
-        } else if (name.equals("level-list")) {
-            drawable = new LevelListDrawable();
-        } else if (name.equals("layer-list")) {
-            drawable = new LayerDrawable();
-        } else if (name.equals("transition")) {
-            drawable = new TransitionDrawable();
-        } else if (name.equals("ripple")) {
-            drawable = new RippleDrawable();
-        } else if (name.equals("color")) {
-            drawable = new ColorDrawable();
-        } else if (name.equals("shape")) {
-            drawable = new GradientDrawable();
-        } else if (name.equals("vector")) {
-            drawable = new VectorDrawable();
-        } else if (name.equals("animated-vector")) {
-            drawable = new AnimatedVectorDrawable();
-        } else if (name.equals("scale")) {
-            drawable = new ScaleDrawable();
-        } else if (name.equals("clip")) {
-            drawable = new ClipDrawable();
-        } else if (name.equals("rotate")) {
-            drawable = new RotateDrawable();
-        } else if (name.equals("animated-rotate")) {
-            drawable = new AnimatedRotateDrawable();
-        } else if (name.equals("animation-list")) {
-            drawable = new AnimationDrawable();
-        } else if (name.equals("inset")) {
-            drawable = new InsetDrawable();
-        } else if (name.equals("bitmap")) {
-            //noinspection deprecation
-            drawable = new BitmapDrawable(r);
-            if (r != null) {
-               ((BitmapDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
-            }
-        } else if (name.equals("nine-patch")) {
-            drawable = new NinePatchDrawable();
-            if (r != null) {
-                ((NinePatchDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
-             }
-        } else {
-            throw new XmlPullParserException(parser.getPositionDescription() +
-                    ": invalid drawable tag " + name);
-        }
+        switch (name) {
+            case "selector":
+                drawable = new StateListDrawable();
+                break;
+            case "animated-selector":
+                drawable = new AnimatedStateListDrawable();
+                break;
+            case "level-list":
+                drawable = new LevelListDrawable();
+                break;
+            case "layer-list":
+                drawable = new LayerDrawable();
+                break;
+            case "transition":
+                drawable = new TransitionDrawable();
+                break;
+            case "ripple":
+                drawable = new RippleDrawable();
+                break;
+            case "color":
+                drawable = new ColorDrawable();
+                break;
+            case "shape":
+                drawable = new GradientDrawable();
+                break;
+            case "vector":
+                drawable = new VectorDrawable();
+                break;
+            case "animated-vector":
+                drawable = new AnimatedVectorDrawable();
+                break;
+            case "scale":
+                drawable = new ScaleDrawable();
+                break;
+            case "clip":
+                drawable = new ClipDrawable();
+                break;
+            case "rotate":
+                drawable = new RotateDrawable();
+                break;
+            case "animated-rotate":
+                drawable = new AnimatedRotateDrawable();
+                break;
+            case "animation-list":
+                drawable = new AnimationDrawable();
+                break;
+            case "inset":
+                drawable = new InsetDrawable();
+                break;
+            case "bitmap":
+                drawable = new BitmapDrawable(r);
+                if (r != null) {
+                    ((BitmapDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
+                }
+                break;
+            case "nine-patch":
+                drawable = new NinePatchDrawable();
+                if (r != null) {
+                    ((NinePatchDrawable) drawable).setTargetDensity(r.getDisplayMetrics());
+                }
+                break;
+            default:
+                throw new XmlPullParserException(parser.getPositionDescription() +
+                        ": invalid drawable tag " + name);
 
+        }
         drawable.inflate(r, parser, attrs, theme);
         return drawable;
     }
@@ -1202,7 +1235,7 @@ public abstract class Drawable {
          * implemented for drawables that can have a theme applied.
          */
         public Drawable newDrawable(Resources res, Theme theme) {
-            return newDrawable();
+            return newDrawable(null);
         }
 
         /**
@@ -1212,10 +1245,16 @@ public abstract class Drawable {
         public abstract int getChangingConfigurations();
 
         /**
+         * @return Total pixel count
          * @hide
          */
-        public Bitmap getBitmap() {
-            return null;
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            return 0;
+        }
+
+        /** @hide */
+        protected final boolean isAtlasable(Bitmap bitmap) {
+            return bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888;
         }
 
         /**

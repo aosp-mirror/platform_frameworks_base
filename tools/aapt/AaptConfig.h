@@ -80,6 +80,12 @@ android::String8 getVersion(const android::ResTable_config& config);
  */
 bool isSameExcept(const android::ResTable_config& a, const android::ResTable_config& b, int configMask);
 
+/**
+ * Returns true if the configuration only has the density specified. In the case
+ * of 'anydpi', the version is ignored.
+ */
+bool isDensityOnly(const android::ResTable_config& config);
+
 } // namespace AaptConfig
 
 #endif // __AAPT_CONFIG_H

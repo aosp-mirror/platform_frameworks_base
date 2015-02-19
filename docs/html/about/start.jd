@@ -5,12 +5,13 @@ walkthru=0
 @jd:body
 
 <p>Everything you need to start developing apps for Android is available here on
-developer.android.com. You'll find everything from the developer SDK, API documentation, and design
-guidelines, to information about the current device landscape and how you can distribute and
-monetize your app.</p>
+<em>developer.android.com</em>. You'll find everything from the API documentation
+and design guidelines, to information about the current device landscape and how you can distribute
+and monetize your app.</p>
+
 
 <p>No two apps are built in the same way, but we've structured the information you need to build an
-app into the following three sections that represent the general order for app development. 
+app into the following three sections that represent the general order for app development.
 
 
 <style>
@@ -32,7 +33,7 @@ the Android user experience. Although you may know what a user will <em>do</em> 
 should pause to focus on how a user will <em>interact</em> with it. Your design should be sleek,
 simple, powerful, and tailored to the Android experience.</p>
 
-<p>So whether you're a one-man shop or a large team, you should study the <a
+<p>So whether you're creating an app alone or you're part of a team, study the <a
 href="{@docRoot}design/index.html">Design</a> guidelines first.</p>
 </div>
 
@@ -59,6 +60,10 @@ types of devices your app supports. Everything you need to get started with this
 available in the <a href="{@docRoot}distribute/index.html">Distribute</a> section.</p>
 </div>
 
+<p style="clear:both;height:0">&nbsp;</p>
 
-<p style="clear:both">Now that you know what's available, get started by installing the <a
-href="{@docRoot}sdk/index.html">Android SDK</a>.</p>
+<h2>Go!</h2>
+<p>Get started by installing <a
+href="{@docRoot}sdk/index.html">Android Studio</a>&mdash;the official IDE for Android development,
+which includes the Android SDK tools. Then when you're ready to begin coding, follow the training
+for <a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>.</p>

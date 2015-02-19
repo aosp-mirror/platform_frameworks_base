@@ -132,7 +132,7 @@ int Program::getUniform(const char* name) {
 }
 
 GLuint Program::buildShader(const char* source, GLenum type) {
-    ATRACE_CALL();
+    ATRACE_NAME("Build GL Shader");
 
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, 0);
@@ -141,11 +141,12 @@ GLuint Program::buildShader(const char* source, GLenum type) {
     GLint status;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
     if (status != GL_TRUE) {
+        ALOGE("Error while compiling this shader:\n===\n%s\n===", source);
         // Some drivers return wrong values for GL_INFO_LOG_LENGTH
         // use a fixed size instead
         GLchar log[512];
         glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
-        LOG_ALWAYS_FATAL("Error while compiling shader: %s", log);
+        LOG_ALWAYS_FATAL("Shader info log: %s", log);
         return 0;
     }
 

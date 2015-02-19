@@ -95,6 +95,10 @@ public final class BridgeWindow implements IWindow {
     }
 
     @Override
+    public void dispatchWindowShown() {
+    }
+
+    @Override
     public IBinder asBinder() {
         // pass for now.
         return null;

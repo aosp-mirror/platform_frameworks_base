@@ -64,6 +64,9 @@ final class ProcessRecord {
     ProcessStats.ProcessState baseProcessTracker;
     BatteryStatsImpl.Uid.Proc curProcBatteryStats;
     int pid;                    // The process of this application; 0 if none
+    int[] gids;                 // The gids this process was launched with
+    String requiredAbi;         // The ABI this process was launched with
+    String instructionSet;      // The instruction set this process was launched with
     boolean starting;           // True if the process is being started
     long lastActivityTime;      // For managing the LRU list
     long lastPssTime;           // Last time we retrieved PSS data
@@ -183,7 +186,17 @@ final class ProcessRecord {
         if (uid != info.uid) {
             pw.print(" ISOLATED uid="); pw.print(uid);
         }
-        pw.println();
+        pw.print(" gids={");
+        if (gids != null) {
+            for (int gi=0; gi<gids.length; gi++) {
+                if (gi != 0) pw.print(", ");
+                pw.print(gids[gi]);
+
+            }
+        }
+        pw.println("}");
+        pw.print(prefix); pw.print("requiredAbi="); pw.print(requiredAbi);
+                pw.print(" instructionSet="); pw.println(instructionSet);
         if (info.className != null) {
             pw.print(prefix); pw.print("class="); pw.println(info.className);
         }

@@ -31,94 +31,96 @@ import java.lang.ref.WeakReference;
  */
 
 class AudioPortEventHandler {
-    private final Handler mHandler;
-    private ArrayList<AudioManager.OnAudioPortUpdateListener> mListeners;
-    private AudioManager mAudioManager;
+    private Handler mHandler;
+    private final ArrayList<AudioManager.OnAudioPortUpdateListener> mListeners =
+            new ArrayList<AudioManager.OnAudioPortUpdateListener>();
 
-    private static String TAG = "AudioPortEventHandler";
+    private static final String TAG = "AudioPortEventHandler";
 
     private static final int AUDIOPORT_EVENT_PORT_LIST_UPDATED = 1;
     private static final int AUDIOPORT_EVENT_PATCH_LIST_UPDATED = 2;
     private static final int AUDIOPORT_EVENT_SERVICE_DIED = 3;
     private static final int AUDIOPORT_EVENT_NEW_LISTENER = 4;
 
-    AudioPortEventHandler(AudioManager audioManager) {
-        mAudioManager = audioManager;
-        mListeners = new ArrayList<AudioManager.OnAudioPortUpdateListener>();
+    void init() {
+        synchronized (this) {
+            if (mHandler != null) {
+                return;
+            }
+            // find the looper for our new event handler
+            Looper looper = Looper.getMainLooper();
 
-        // find the looper for our new event handler
-        Looper looper = Looper.getMainLooper();
-
-        if (looper != null) {
-            mHandler = new Handler(looper) {
-                @Override
-                public void handleMessage(Message msg) {
-                    ArrayList<AudioManager.OnAudioPortUpdateListener> listeners;
-                    synchronized (this) {
-                        if (msg.what == AUDIOPORT_EVENT_NEW_LISTENER) {
-                            listeners = new ArrayList<AudioManager.OnAudioPortUpdateListener>();
-                            if (mListeners.contains(msg.obj)) {
-                                listeners.add((AudioManager.OnAudioPortUpdateListener)msg.obj);
+            if (looper != null) {
+                mHandler = new Handler(looper) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        ArrayList<AudioManager.OnAudioPortUpdateListener> listeners;
+                        synchronized (this) {
+                            if (msg.what == AUDIOPORT_EVENT_NEW_LISTENER) {
+                                listeners = new ArrayList<AudioManager.OnAudioPortUpdateListener>();
+                                if (mListeners.contains(msg.obj)) {
+                                    listeners.add((AudioManager.OnAudioPortUpdateListener)msg.obj);
+                                }
+                            } else {
+                                listeners = mListeners;
                             }
-                        } else {
-                            listeners = mListeners;
                         }
-                    }
-                    if (listeners.isEmpty()) {
-                        return;
-                    }
-                    // reset audio port cache if the event corresponds to a change coming
-                    // from audio policy service or if mediaserver process died.
-                    if (msg.what == AUDIOPORT_EVENT_PORT_LIST_UPDATED ||
-                            msg.what == AUDIOPORT_EVENT_PATCH_LIST_UPDATED ||
-                            msg.what == AUDIOPORT_EVENT_SERVICE_DIED) {
-                        mAudioManager.resetAudioPortGeneration();
-                    }
-                    ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
-                    ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
-                    if (msg.what != AUDIOPORT_EVENT_SERVICE_DIED) {
-                        int status = mAudioManager.updateAudioPortCache(ports, patches);
-                        if (status != AudioManager.SUCCESS) {
+                        if (listeners.isEmpty()) {
                             return;
                         }
-                    }
-
-                    switch (msg.what) {
-                    case AUDIOPORT_EVENT_NEW_LISTENER:
-                    case AUDIOPORT_EVENT_PORT_LIST_UPDATED:
-                        AudioPort[] portList = ports.toArray(new AudioPort[0]);
-                        for (int i = 0; i < listeners.size(); i++) {
-                            listeners.get(i).onAudioPortListUpdate(portList);
+                        // reset audio port cache if the event corresponds to a change coming
+                        // from audio policy service or if mediaserver process died.
+                        if (msg.what == AUDIOPORT_EVENT_PORT_LIST_UPDATED ||
+                                msg.what == AUDIOPORT_EVENT_PATCH_LIST_UPDATED ||
+                                msg.what == AUDIOPORT_EVENT_SERVICE_DIED) {
+                            AudioManager.resetAudioPortGeneration();
                         }
-                        if (msg.what == AUDIOPORT_EVENT_PORT_LIST_UPDATED) {
+                        ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
+                        ArrayList<AudioPatch> patches = new ArrayList<AudioPatch>();
+                        if (msg.what != AUDIOPORT_EVENT_SERVICE_DIED) {
+                            int status = AudioManager.updateAudioPortCache(ports, patches);
+                            if (status != AudioManager.SUCCESS) {
+                                return;
+                            }
+                        }
+
+                        switch (msg.what) {
+                        case AUDIOPORT_EVENT_NEW_LISTENER:
+                        case AUDIOPORT_EVENT_PORT_LIST_UPDATED:
+                            AudioPort[] portList = ports.toArray(new AudioPort[0]);
+                            for (int i = 0; i < listeners.size(); i++) {
+                                listeners.get(i).onAudioPortListUpdate(portList);
+                            }
+                            if (msg.what == AUDIOPORT_EVENT_PORT_LIST_UPDATED) {
+                                break;
+                            }
+                            // FALL THROUGH
+
+                        case AUDIOPORT_EVENT_PATCH_LIST_UPDATED:
+                            AudioPatch[] patchList = patches.toArray(new AudioPatch[0]);
+                            for (int i = 0; i < listeners.size(); i++) {
+                                listeners.get(i).onAudioPatchListUpdate(patchList);
+                            }
+                            break;
+
+                        case AUDIOPORT_EVENT_SERVICE_DIED:
+                            for (int i = 0; i < listeners.size(); i++) {
+                                listeners.get(i).onServiceDied();
+                            }
+                            break;
+
+                        default:
                             break;
                         }
-                        // FALL THROUGH
-
-                    case AUDIOPORT_EVENT_PATCH_LIST_UPDATED:
-                        AudioPatch[] patchList = patches.toArray(new AudioPatch[0]);
-                        for (int i = 0; i < listeners.size(); i++) {
-                            listeners.get(i).onAudioPatchListUpdate(patchList);
-                        }
-                        break;
-
-                    case AUDIOPORT_EVENT_SERVICE_DIED:
-                        for (int i = 0; i < listeners.size(); i++) {
-                            listeners.get(i).onServiceDied();
-                        }
-                        break;
-
-                    default:
-                        break;
                     }
-                }
-            };
-        } else {
-            mHandler = null;
+                };
+                native_setup(new WeakReference<AudioPortEventHandler>(this));
+            } else {
+                mHandler = null;
+            }
         }
-
-        native_setup(new WeakReference<AudioPortEventHandler>(this));
     }
+
     private native void native_setup(Object module_this);
 
     @Override

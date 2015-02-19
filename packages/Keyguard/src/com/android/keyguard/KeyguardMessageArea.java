@@ -153,7 +153,8 @@ class KeyguardMessageArea extends TextView {
         mUpdateMonitor.registerCallback(mInfoCallback);
         mHandler = new Handler(Looper.myLooper());
 
-        mSeparator = getResources().getString(R.string.kg_text_message_separator);
+        mSeparator = getResources().getString(
+                com.android.internal.R.string.kg_text_message_separator);
 
         update();
     }

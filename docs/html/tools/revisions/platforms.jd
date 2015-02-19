@@ -1,4 +1,5 @@
-page.title=Platforms
+page.title=SDK Platforms Release Notes
+
 @jd:body
 
 <div id="qv-wrapper">
@@ -20,10 +21,16 @@ Highlights and APIs</a></li>
 
 
 
-<p>This document provides information about Android platform releases. In order to compile your
-application against a particular platform release, you must download and install the SDK Platform
-for that release. If you want to test your application on an emulator, you must also download at
-least one system image for that platform release.</p>
+<p>This document provides release information about the SDK Platform packages required
+for app development. If you want details about the features and APIs added in each Android
+version, instead read the highlights in the <a href="{@docRoot}about/index.html">About</a>
+section.</p>
+
+<p>In order to compile your application against a particular version of Android, you must use the
+<a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> to download and install the SDK
+Platform for that release. If you want to test your application on an emulator, you must also
+download at least one System Image for that Android version.</p>
+
 
 <p>Each platform release includes system images that support a specific processor architecture,
 such as ARM EABI, Intel x86 or MIPS. Platform releases also include a system image that contains
@@ -44,7 +51,7 @@ platform system images under each platform version header, for example:</p>
 <p class="caution"><strong>Important:</strong> To download the most recent Android
 system components from the Android SDK Manager, you must first update the SDK Tools to the
 most recent release and restart the SDK Manager. If you do not, the latest Android system
-components will not be available for download.</p>
+packages may not be available for download.</p>
 
 
 <h2 id="5.0">Android 5.0</h2>
@@ -52,12 +59,30 @@ components will not be available for download.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Updated layouts in the Support Library and fixed various issues.</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r21 or higher is required.</li>
+      <li>Android SDK Tools 23.0.5 or higher is required.</li>
+    </ul>
+  </div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
   </p>
 
   <div class="toggle-content-toggleme">
 
     <p>Initial release for Android 5.0 (API level 21).</p>
+    <p>Also see the
+    <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 APIs overview</a>.</p>
     <p>Dependencies:</p>
     <ul>
       <li>Android SDK Platform-tools r21 or higher is required.</li>
@@ -79,6 +104,23 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
 
 
 <h2 id="4.4">Android 4.4W</h2>
+
+<div class="toggle-content open">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(October 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Updated the rendering library.  </p>
+
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r20 or higher is required.</li>
+      <li>Android SDK Tools 23.0 or higher is required.</li>
+    </ul>
+  </div>
 
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
@@ -118,6 +160,8 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2013)</em>
   <div class="toggle-content-toggleme">
 
     <p>Maintenance release. The system version is 4.4.2.</p>
+    <p>Also see the
+    <a href="{@docRoot}about/versions/android-4.4.html">Android 4.4 APIs overview</a>.</p>
     <dl>
       <dt>Dependencies:</dt>
       <dd>Android SDK Platform-tools r19 or higher is required.</dd>
@@ -136,6 +180,8 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2013)</em>
   <div class="toggle-content-toggleme">
 
     <p>Initial release. The system version is 4.4.</p>
+    <p>Also see the
+    <a href="{@docRoot}about/versions/android-4.4.html">Android 4.4 APIs overview</a>.</p>
     <dl>
       <dt>Dependencies:</dt>
       <dd>Android SDK Platform-tools r19 or higher is required.</dd>

@@ -291,4 +291,23 @@ interface IBackupManager {
      * {@hide}
      */
     void opComplete(int token);
+
+    /**
+     * Make the device's backup and restore machinery (in)active.  When it is inactive,
+     * the device will not perform any backup operations, nor will it deliver data for
+     * restore, although clients can still safely call BackupManager methods.
+     *
+     * @param whichUser User handle of the defined user whose backup active state
+     *     is to be adjusted.
+     * @param makeActive {@code true} when backup services are to be made active;
+     *     {@code false} otherwise.
+     */
+    void setBackupServiceActive(int whichUser, boolean makeActive);
+
+    /**
+     * Queries the activity status of backup service as set by {@link #setBackupServiceActive}.
+     * @param whichUser User handle of the defined user whose backup active state
+     *     is being queried.
+     */
+    boolean isBackupServiceActive(int whichUser);
 }

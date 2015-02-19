@@ -1,0 +1,314 @@
+page.title= TV ハードウェアを処理する
+page.tags=tv
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>学習の目的</h2>
+  <ol>
+    <li><a href="#runtime-check">TV 端末をチェックする</a>
+    <li><a href="#handle-features">サポートされていないハードウェア機能を処理する</a></li>
+    <li><a href="#controllers">ハードウェア コントローラを管理する</a>
+    </li>
+  </ol>
+</div>
+</div>
+
+<p>
+  TV のハードウェアは、他の Android 端末とは大きく異なります。TV には、タッチスクリーン、カメラ、GPS 受信機など、他の Android 端末でよく使われるハードウェア機能がありません。そして TV は、2 次ハードウェア端末に完全に依存しています。つまり、ユーザーはリモコンやゲーム機のコントローラで TV アプリを操作する必要があります。TV アプリをビルドする際は、ハードウェア上の制限や TV 向けハードウェアの操作要件を慎重に考慮する必要があります。
+</p>
+
+<p>
+  このレッスンでは、TV でアプリが正常に動作するかどうかチェックする方法や、サポートされていないハードウェア機能を処理する方法、そして TV 端末用のコントローラを処理するための要件について説明します。
+</p>
+
+
+<h2 id="runtime-check">TV 端末をチェックする</h2>
+
+<p>
+  TV 端末やその他の端末の両方で動作するアプリをビルドする場合、アプリが実行される端末の種類をチェックして、アプリの動作を調整する必要があります。たとえば、{@link android.content.Intent} を介して起動するアプリの場合、アクティビティをテレビ向けに起動するか、携帯電話向けに起動するかを判断するために、アプリ側で端末のプロパティをチェックする必要があります。
+</p>
+
+<p>
+  TV 端末でアプリが正常に動作するかどうかを判断するには、{@link android.app.UiModeManager#getCurrentModeType UiModeManager.getCurrentModeType()} メソッドを使用して、その端末がアプリの TV モードで正常に動作するかどうかをチェックすることをお勧めします。次のコード例では、TV 端末でアプリが正常に動作するかどうかチェックする方法を示します。
+</p>
+
+<pre>
+public static final String TAG = "DeviceTypeRuntimeCheck";
+
+UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+    Log.d(TAG, "Running on a TV Device")
+} else {
+    Log.d(TAG, "Running on a non-TV Device")
+}
+</pre>
+
+
+<h2 id="handle-features">サポートされていないハードウェア機能を処理する</h2>
+
+<p>
+  アプリのデザインと機能によっては、特定のハードウェア機能を利用できないという事態を回避できる場合があります。このセクションでは、一般的に TV で使用できないハードウェア機能や、それらを検出する方法、そしてそれらの機能の代替案について説明します。
+</p>
+
+
+<h3 id="unsupported-features">サポートされていない TV ハードウェア機能</h3>
+
+<p>
+  TV には他の端末と異なる用途がありますので、他の Android 端末で提供されることの多いハードウェア機能がない場合があります。このため、Android システムは TV 端末では次の機能をサポートしていません。
+</p>
+
+<table>
+  <tr>
+    <th>ハードウェア</th>
+    <th>Android の Feature Descriptor</th>
+  </tr>
+  <tr>
+    <td>タッチスクリーン</td>
+    <td>{@code android.hardware.touchscreen}</td>
+  </tr>
+  <tr>
+    <td>電話</td>
+    <td>{@code android.hardware.telephony}</td>
+  </tr>
+  <tr>
+    <td>カメラ</td>
+    <td>{@code android.hardware.camera}</td>
+  </tr>
+  <tr>
+    <td>近距離無線通信（NFC）</td>
+    <td>{@code android.hardware.nfc}</td>
+  </tr>
+  <tr>
+    <td>GPS</td>
+    <td>{@code android.hardware.location.gps}</td>
+  </tr>
+  <tr>
+    <td>マイク</td>
+    <td>{@code android.hardware.microphone}</td>
+  </tr>
+</table>
+
+
+<h3 id="declare-hardware-requirements">TV のハードウェア要件を宣言する</h3>
+
+<p>
+  Android アプリでは、機能提供がない端末にインストールされてしまわないように、アプリのマニフェストでハードウェア機能の要件を宣言できます。TV 向けに既存のアプリを拡張している場合は、TV 端末へのインストールを阻害する可能性のあるハードウェア要件を宣言しているかどうかについて、アプリのマニフェストを詳細に見直す必要があります。
+</p>
+
+<p>
+  アプリでは TV で使用できないハードウェア機能（タッチスクリーンやカメラなど）を使用しているが、TV 向けにはそれらの機能がなくても構わない場合、アプリのマニフェストを編集して、それが不要な機能であることを示します。次のマニフェストのコード スニペットでは、TV 端末で使用できないハードウェア機能を（TV 以外の端末には提供する可能性がある場合でも）不要と宣言する方法を示します。
+</p>
+
+<pre>
+&lt;uses-feature android:name="android.hardware.touchscreen"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.telephony"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.camera"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.nfc"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.gps"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.microphone"
+        android:required="false"/&gt;
+</pre>
+
+<p>
+  なお、TV 端末向けのすべてのアプリは、<a href="{@docRoot}training/tv/start/start.html#no-touchscreen">TV アプリのビルドを開始する</a>で説明したように、タッチスクリーン機能が不要であることを宣言する必要があります。アプリで上記の機能を 1 つ以上使用している場合は、マニフェストで該当する機能の {@code android:required} 属性の設定を {@code false} に変更します。
+</p>
+
+<p class="caution">
+  <strong>警告:</strong>この値を {@code true} に設定してハードウェア機能を必要と宣言すると、TV 端末にインストールされず、Android 版 TV のホーム スクリーン ランチャーにもアプリが表示されなくなります。
+</p>
+
+<p>
+  アプリのハードウェア機能をオプションにする場合は、実行時にこれらの機能が利用できるかをチェックしてから、アプリの動作を調整する必要があります。次のセクションでは、ハードウェア機能をチェックする方法と、アプリの動作を変更するためのいくつかのアプローチについて説明します。
+</p>
+
+<p>
+  マニフェスト内でのフィルタリングと機能の宣言については、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code uses-feature}</a>ガイドを参照してください。
+</p>
+
+
+<h3 id="hardware-permissions">ハードウェア機能を暗示するパーミッションを宣言する</h3>
+
+<p>
+  <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code uses-permission}</a> のマニフェストにおける宣言には、<em>ハードウェア機能を暗示する</em>ものがあります。これは、アプリのマニフェストでいくつかのパーミッションを要求すると、アプリが TV 端末にインストールされず、使用されなくなることを意味します。次の一般によく要求されるパーミッションにより、暗黙的なハードウェア機能の要件が作成されます。
+</p>
+
+<table>
+  <tr>
+    <th>パーミッション</th>
+    <th>暗黙的なハードウェア機能</th>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#RECORD_AUDIO}</td>
+    <td>{@code android.hardware.microphone}</td>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#CAMERA}</td>
+    <td>{@code android.hardware.camera} <em>と</em> <br/> {@code android.hardware.camera.autofocus}</td>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#ACCESS_COARSE_LOCATION}</td>
+    <td>{@code android.hardware.location} <em>と</em> <br/> {@code android.hardware.location.network}</td>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#ACCESS_FINE_LOCATION}</td>
+    <td>{@code android.hardware.location} <em>と</em> <br/> {@code android.hardware.location.gps}</td>
+  </tr>
+</table>
+
+<p>
+  ハードウェア機能の要件を暗示するパーミッション要求を網羅したリストについては、<a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features">{@code uses-feature}</a>ガイドを参照してください。アプリが上記の機能のいずれかを要求する場合、暗示されたハードウェア機能についてマニフェストに <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code uses-feature}</a> 宣言を含めて、不要であることを示します（{@code android:required="false"}）。
+</p>
+
+
+<h3 id="check-features">ハードウェア機能をチェックする</h2>
+
+<p>
+  Android のフレームワークでは、アプリを実行している端末でハードウェア機能が使用できない場合を判別できます。{@link android.content.pm.PackageManager#hasSystemFeature(String)} メソッドを使用して、実行時に特定の機能をチェックできます。この場合、チェック対象の機能を指定する単一の文字列の引数を使用します。
+</p>
+
+<p>次のコード例では、アプリの実行時にハードウェア機能の利用可能性を検出する方法を示します。</p>
+
+<pre>
+// Check if the telephony hardware feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.telephony")) {
+    Log.d("HardwareFeatureTest", "Device can make phone calls");
+}
+
+// Check if android.hardware.touchscreen feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.touchscreen")) {
+    Log.d("HardwareFeatureTest", "Device has a touch screen.");
+}
+</pre>
+
+
+<h4 id="no-touchscreen">タッチスクリーン</h4>
+
+<p>
+  TV には通常タッチスクリーンがないので、Android は TV 端末向けにはタッチスクリーン操作をサポートしていません。そもそも、タッチスクリーン操作は、ユーザーが 10 フィート離れた場所から視聴するという TV 特有の使用環境にそぐわないものです。
+</p>
+
+<p>
+  TV 端末ではリモコンの矢印ボタンによるナビゲーションをサポートして、TV 特有のインタラクション モデルに適したアプリをデザインする必要があります。TV 向けのコントロールを使用してナビゲーションを適切にサポートする方法については、<a href="{@docRoot}training/tv/start/navigation.html">TV 用のナビゲーションを作成する</a>を参照してください。
+</p>
+
+
+<h4 id="no-camera">カメラ</h4>
+
+<p>
+  TV にはカメラがないことが一般的ですが、カメラ関連アプリを提供することは可能です。たとえば、写真の撮影、表示、編集の機能があるアプリの場合、TV 向けに撮影機能を無効にながら、写真をの表示や編集は可能にすることができます。カメラ関連アプリをTV 向けにする場合、アプリのマニフェストには次の機能の宣言を追加します。
+</p>
+
+<pre>
+&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;
+</pre>
+
+<p>
+  カメラ機能を除いてアプリを動作させる場合、カメラ機能の存在を検出し、アプリの動作を調整するためのコードを追加します。次のコード例では、カメラ機能の存在を検出する方法を示します。
+</p>
+
+<pre>
+// Check if the camera hardware feature is available.
+if (getPackageManager().hasSystemFeature("android.hardware.camera")) {
+    Log.d("Camera test", "Camera available!");
+} else {
+    Log.d("Camera test", "No camera available. View and edit features only.");
+}
+</pre>
+
+
+<h4 id="no-gps">GPS</h4>
+
+<p>
+  TV は据え付けタイプの室内用端末であり、全地球測位システム（GPS）の受信機を内蔵していません。アプリが位置情報を使用している場合、TV 端末のセットアップ時に郵便番号などの静的なロケーション プロバイダを構成して、ユーザーが位置を調べたり、それらを使用できるようにすることが可能です。
+</p>
+
+<pre>
+// Request a static location from the location manager
+LocationManager locationManager = (LocationManager) this.getSystemService(
+        Context.LOCATION_SERVICE);
+Location location = locationManager.getLastKnownLocation("static");
+
+// Attempt to get postal or zip code from the static location object
+Geocoder geocoder = new Geocoder(this);
+Address address = null;
+try {
+  address = geocoder.getFromLocation(location.getLatitude(),
+          location.getLongitude(), 1).get(0);
+  Log.d("Zip code", address.getPostalCode());
+
+} catch (IOException e) {
+  Log.e(TAG, "Geocoder error", e);
+}
+</pre>
+
+
+<h2 id="controllers">コントローラを処理する</h2>
+
+<p>
+  TV 端末ではベーシックなタイプのリモコン、ゲーム機のコントローラといった、アプリを操作するための2 次ハードウェア端末が必要となります。これは、アプリで矢印ボタンによる入力をサポートする必要がある、ということです。そして、コントローラのオフライン操作と複数のタイプのコントローラによる入力を処理することも必要です。
+</p>
+
+
+<h3 id="d-pad-minimum">矢印ボタンによる最小限のコントロール</h3>
+
+<p>
+  TV 端末のデフォルト コントローラはリモコン端末の矢印ボタンです。すなわち、上下、左右、[選択]、[戻る]、[ホーム] ボタンのみを使用して、アプリを操作できるようにする必要があります。ゲーム アプリの場合、通常は追加のコントロール機能のあるゲーム機のコントローラが必要ですが、TV ではリモコン端末の矢印ボタンでプレイできるようにする必要があります。この場合、コントローラが必要な旨をユーザーに警告した上で、リモコン端末の矢印ボタンでゲームを終了できるようにする必要があります。TV のリモコン端末の矢印ボタンによるナビゲーションを処理する方法については、<a href="{@docRoot}training/tv/start/navigation.html">TV 用のナビゲーションを作成する</a>を参照してください。
+</p>
+
+
+<h3 id="controller-disconnects">コントローラの接続の切断を処理する</h3>
+
+<p>
+  TV 用コントローラは Bluetooth 端末であることが多く、定期的にスリープ モードに入って TV との接続を切断し、消費電力を節約しようとする場合があります。この場合、アプリ側で再接続イベントの処理を構成していないと、アプリが中断したり再起動する可能性が生じます。これらのイベントは、次のいずれかの場合に発生する可能性があります。
+</p>
+
+<ul>
+  <li>ビデオ（数分程度）を見ている間にリモコン端末かゲーム機のコントローラがスリープ モードになり、TV 端末との接続が失われ、その後再び接続される場合。
+  </li>
+  <li>ゲームプレイ中に、新しいプレイヤーがオフライン状態のゲーム機のコントローラを使用してゲームに参加した場合。
+  </li>
+  <li>ゲームプレイ中に、プレイヤーがゲームを中断し、ゲーム機のントローラとの接続が失われた場合。
+  </li>
+</ul>
+
+<p>
+  接続の切断や再接続の対象となる TV アプリのアクティビティはすべて、アプリのマニフェストで再接続イベントを処理できるように構成する必要があります。次のコード サンプルでは、キーボードやナビゲーション端末の接続、切断、再接続などを含む構成の変更を処理するアクティビティの記述方法を示します。
+</p>
+
+<pre>
+&lt;activity
+  android:name="com.example.android.TvActivity"
+  android:label="&#64;string/app_name"
+  <strong>android:configChanges="keyboard|keyboardHidden|navigation"</strong>
+  android:theme="&#64;style/Theme.Leanback"&gt;
+
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.MAIN" /&gt;
+    &lt;category android:name="android.intent.category.LEANBACK_LAUNCHER" /&gt;
+  &lt;/intent-filter&gt;
+  ...
+&lt;/activity&gt;
+</pre>
+
+<p>
+  この構成の変更により、Android のフレームワークによる再起動（ユーザー エクスペリエンスの観点から望ましくない）ではなく、再接続イベントを介してアプリの中断を回避することが可能です。
+</p>
+
+
+<h3 id="d-pad-variants">矢印ボタンによる入力のバリエーションを処理する</h3>
+
+<p>
+  TV 端末のユーザーは、複数のタイプのコントローラを使用して TV を操作する場合があります。たとえば、ベーシックなタイプのリモコンとゲーム機のコントローラを使用している場合があります。TV リモコンの矢印ボタンの機能をゲーム機のコントローラで実行する場合、送信されるキーコードはリモコン本体が送信するキーコードとは異なる場合があります。
+</p>
+
+<p>
+  ユーザーがアプリ操作のためにコントローラとリモコンを持ち替える必要がないよう、アプリでは、ゲーム機のコントローラからの矢印ボタンによる入力のバリエーションを処理する必要があります。入力のバリエーションの処理については、<a href="{@docRoot}training/game-controllers/controller-input.html#dpad">コントローラのアクションを処理する</a>を参照してください。
+</p>

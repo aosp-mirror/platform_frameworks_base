@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">LocationRequest</li>
       </ul>
     </div>
@@ -725,13 +794,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -793,10 +855,13 @@ Summary:
   
       implements 
       
-        SafeParcelable
+        Parcelable 
       
   
   
+
+
+    
 
 
 </div><!-- end header -->
@@ -927,29 +992,49 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_BALANCED_POWER_ACCURACY">PRIORITY_BALANCED_POWER_ACCURACY</a></td>
-        <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request "block" level accuracy.</td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request "block" level accuracy.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_HIGH_ACCURACY">PRIORITY_HIGH_ACCURACY</a></td>
-        <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request the most accurate locations available.</td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request the most accurate locations available.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_LOW_POWER">PRIORITY_LOW_POWER</a></td>
-        <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request "city" level accuracy.</td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request "city" level accuracy.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html#PRIORITY_NO_POWER">PRIORITY_NO_POWER</a></td>
-        <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request the best accuracy possible with zero additional
- power consumption.</td>
+        <td class="jd-descrcol" width="100%">
+          Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request the best accuracy possible with zero additional
+ power consumption.
+          
+    
+
+        </td>
     </tr>
     
     
@@ -988,48 +1073,27 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
 </table>
   </div>
 </div>
@@ -1068,7 +1132,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#create()">create</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Create a location request with default parameters.</div>
+        <div class="jd-descrdiv">
+          Create a location request with default parameters.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1118,7 +1187,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#getExpirationTime()">getExpirationTime</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Get the request expiration time, in milliseconds since boot.</div>
+        <div class="jd-descrdiv">
+          Get the request expiration time, in milliseconds since boot.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1136,7 +1210,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#getFastestInterval()">getFastestInterval</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Get the fastest interval of this request, in milliseconds.</div>
+        <div class="jd-descrdiv">
+          Get the fastest interval of this request, in milliseconds.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1154,7 +1233,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#getInterval()">getInterval</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Get the desired interval of this request, in milliseconds.</div>
+        <div class="jd-descrdiv">
+          Get the desired interval of this request, in milliseconds.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1172,7 +1256,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#getNumUpdates()">getNumUpdates</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Get the number of updates requested.</div>
+        <div class="jd-descrdiv">
+          Get the number of updates requested.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1190,7 +1279,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#getPriority()">getPriority</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Get the quality of the request.</div>
+        <div class="jd-descrdiv">
+          Get the quality of the request.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1208,9 +1302,14 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#getSmallestDisplacement()">getSmallestDisplacement</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Get the minimum displacement between location updates in meters
+        <div class="jd-descrdiv">
+          Get the minimum displacement between location updates in meters
 
- <p>By default this is 0.</div>
+ <p>By default this is 0.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1244,7 +1343,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setExpirationDuration(long)">setExpirationDuration</a></span>(long millis)</nobr>
         
-        <div class="jd-descrdiv">Set the duration of this request, in milliseconds.</div>
+        <div class="jd-descrdiv">
+          Set the duration of this request, in milliseconds.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1262,7 +1366,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setExpirationTime(long)">setExpirationTime</a></span>(long millis)</nobr>
         
-        <div class="jd-descrdiv">Set the request expiration time, in millisecond since boot.</div>
+        <div class="jd-descrdiv">
+          Set the request expiration time, in millisecond since boot.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1280,7 +1389,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setFastestInterval(long)">setFastestInterval</a></span>(long millis)</nobr>
         
-        <div class="jd-descrdiv">Explicitly set the fastest interval for location updates, in milliseconds.</div>
+        <div class="jd-descrdiv">
+          Explicitly set the fastest interval for location updates, in milliseconds.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1298,7 +1412,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">setInterval</a></span>(long millis)</nobr>
         
-        <div class="jd-descrdiv">Set the desired interval for active location updates, in milliseconds.</div>
+        <div class="jd-descrdiv">
+          Set the desired interval for active location updates, in milliseconds.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1316,7 +1435,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setNumUpdates(int)">setNumUpdates</a></span>(int numUpdates)</nobr>
         
-        <div class="jd-descrdiv">Set the number of location updates.</div>
+        <div class="jd-descrdiv">
+          Set the number of location updates.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1334,7 +1458,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority</a></span>(int priority)</nobr>
         
-        <div class="jd-descrdiv">Set the priority of the request.</div>
+        <div class="jd-descrdiv">
+          Set the priority of the request.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1352,9 +1481,14 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationRequest.html#setSmallestDisplacement(float)">setSmallestDisplacement</a></span>(float smallestDisplacementMeters)</nobr>
         
-        <div class="jd-descrdiv">Set the minimum displacement between location updates in meters
+        <div class="jd-descrdiv">
+          Set the minimum displacement between location updates in meters
 
- <p>By default this is 0.</div>
+ <p>By default this is 0.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1665,8 +1799,6 @@ From interface
 </td></tr>
 
 
-
-
 </table>
 
 
@@ -1716,6 +1848,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request "block" level accuracy.
 
  <p>Block level accuracy is considered to be about 100 meter accuracy. Using a coarse
@@ -1758,6 +1893,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request the most accurate locations available.
 
  <p>This will return the finest location available.
@@ -1798,6 +1936,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request "city" level accuracy.
 
@@ -1840,6 +1981,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Used with <code><a href="/reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)">setPriority(int)</a></code> to request the best accuracy possible with zero additional
  power consumption.
@@ -1907,6 +2051,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Create a location request with default parameters.
 
  <p>Default parameters are for a block accuracy, slowly updated location. It can then be
@@ -1945,6 +2092,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1974,6 +2124,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2002,6 +2155,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Get the request expiration time, in milliseconds since boot.
 
@@ -2040,6 +2196,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the fastest interval of this request, in milliseconds.
 
  <p>The system will never provide location updates faster than the minimum of
@@ -2077,6 +2236,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the desired interval of this request, in milliseconds.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2110,6 +2272,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Get the number of updates requested.
 
@@ -2148,6 +2313,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the quality of the request.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2181,6 +2349,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Get the minimum displacement between location updates in meters
 
@@ -2218,6 +2389,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2246,6 +2420,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Set the duration of this request, in milliseconds.
 
@@ -2298,6 +2475,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the request expiration time, in millisecond since boot.
 
  <p>This expiration time uses the same time base as <code><a href="/reference/android/os/SystemClock.html#elapsedRealtime()">elapsedRealtime()</a></code>.
@@ -2347,6 +2527,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Explicitly set the fastest interval for location updates, in milliseconds.
 
@@ -2419,6 +2602,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the desired interval for active location updates, in milliseconds.
 
  <p>The location client will actively try to obtain location updates for your application
@@ -2490,6 +2676,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the number of location updates.
 
  <p>By default locations are continuously updated until the request is explicitly removed,
@@ -2551,6 +2740,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Set the priority of the request.
 
@@ -2616,6 +2808,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the minimum displacement between location updates in meters
 
  <p>By default this is 0.</p></div>
@@ -2671,6 +2866,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2699,6 +2897,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

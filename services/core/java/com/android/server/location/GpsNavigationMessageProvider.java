@@ -18,7 +18,9 @@ package com.android.server.location;
 
 import android.location.GpsNavigationMessageEvent;
 import android.location.IGpsNavigationMessageListener;
+import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * An base implementation for GPS navigation messages provider.
@@ -29,8 +31,10 @@ import android.os.RemoteException;
  */
 public abstract class GpsNavigationMessageProvider
         extends RemoteListenerHelper<IGpsNavigationMessageListener> {
-    public GpsNavigationMessageProvider() {
-        super("GpsNavigationMessageProvider");
+    private static final String TAG = "GpsNavigationMessageProvider";
+
+    public GpsNavigationMessageProvider(Handler handler) {
+        super(handler, TAG);
     }
 
     public void onNavigationMessageAvailable(final GpsNavigationMessageEvent event) {
@@ -42,7 +46,57 @@ public abstract class GpsNavigationMessageProvider
                         listener.onGpsNavigationMessageReceived(event);
                     }
                 };
-
         foreach(operation);
+    }
+
+    public void onCapabilitiesUpdated(boolean isGpsNavigationMessageSupported) {
+        int status = isGpsNavigationMessageSupported ?
+                GpsNavigationMessageEvent.STATUS_READY :
+                GpsNavigationMessageEvent.STATUS_NOT_SUPPORTED;
+        setSupported(isGpsNavigationMessageSupported, new StatusChangedOperation(status));
+    }
+
+    @Override
+    protected ListenerOperation<IGpsNavigationMessageListener> getHandlerOperation(int result) {
+        final int status;
+        switch (result) {
+            case RESULT_SUCCESS:
+                status = GpsNavigationMessageEvent.STATUS_READY;
+                break;
+            case RESULT_NOT_AVAILABLE:
+            case RESULT_NOT_SUPPORTED:
+            case RESULT_INTERNAL_ERROR:
+                status = GpsNavigationMessageEvent.STATUS_NOT_SUPPORTED;
+                break;
+            case RESULT_GPS_LOCATION_DISABLED:
+                status = GpsNavigationMessageEvent.STATUS_GPS_LOCATION_DISABLED;
+                break;
+            default:
+                Log.v(TAG, "Unhandled addListener result: " + result);
+                return null;
+        }
+        return new StatusChangedOperation(status);
+    }
+
+    @Override
+    protected void handleGpsEnabledChanged(boolean enabled) {
+        int status = enabled ?
+                GpsNavigationMessageEvent.STATUS_READY :
+                GpsNavigationMessageEvent.STATUS_GPS_LOCATION_DISABLED;
+        foreach(new StatusChangedOperation(status));
+    }
+
+    private class StatusChangedOperation
+            implements ListenerOperation<IGpsNavigationMessageListener> {
+        private final int mStatus;
+
+        public StatusChangedOperation(int status) {
+            mStatus = status;
+        }
+
+        @Override
+        public void execute(IGpsNavigationMessageListener listener) throws RemoteException {
+            listener.onStatusChanged(mStatus);
+        }
     }
 }

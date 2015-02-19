@@ -193,14 +193,9 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
     }
 
     public void destroy(Runnable callback) {
-        if (mPageAdapter.isOpened()) {
-            Message operation = mHandler.obtainMessage(MyHandler.MSG_CLOSE);
-            mHandler.enqueueOperation(operation);
-        }
-
-        Message operation = mHandler.obtainMessage(MyHandler.MSG_DESTROY);
-        operation.obj = callback;
-        mHandler.enqueueOperation(operation);
+        mHandler.cancelQueuedOperations();
+        mRecyclerView.setAdapter(null);
+        mPageAdapter.destroy(callback);
     }
 
     @Override
@@ -226,7 +221,6 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
     private final class MyHandler extends Handler {
         public static final int MSG_OPEN = 1;
         public static final int MSG_CLOSE = 2;
-        public static final int MSG_DESTROY = 3;
         public static final int MSG_UPDATE = 4;
         public static final int MSG_START_PRELOAD = 5;
 
@@ -244,6 +238,10 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
+        }
+
+        public void cancelQueuedOperations() {
+            mPendingOperations.clear();
         }
 
         public void enqueueOperation(Message message) {
@@ -292,13 +290,6 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
                             mOnAsyncOperationDoneCallback.run();
                         }
                     });
-                } break;
-
-                case MSG_DESTROY: {
-                    Runnable callback = (Runnable) message.obj;
-                    mRecyclerView.setAdapter(null);
-                    mPageAdapter.destroy(callback);
-                    handleNextOperation();
                 } break;
 
                 case MSG_UPDATE: {

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="root"
+    android:alpha="1.0"
+    android:height="48dp"
+    android:width="48dp"
+    android:viewportHeight="48"
+    android:viewportWidth="48" >
+    <group
+        android:name="ic_signal_flashlight"
+        android:translateX="21.9995"
+        android:translateY="25.73401" >
+        <group
+            android:name="ic_signal_flashlight_pivot"
+            android:translateX="-23.21545"
+            android:translateY="-18.86649" >
+            <clip-path
+                android:name="mask"
+                android:pathData="M 37.8337860107,-39.2849731445 c 0.0,0.0 -35.8077850342,31.5523681641 -35.8077850342,31.5523681641 c 0.0,0.0 9.55097961426,9.55285644531 9.55097961426,9.55285644531 c 0.0,0.0 -2.61698913574,2.09387207031 -2.61698913574,2.09387207031 c 0.0,0.0 -9.75096130371,-9.56428527832 -9.75096130371,-9.56428527832 c 0.0,0.0 -34.6200408936,25.4699249268 -34.6200408936,25.4699249268 c 0.0,0.0 55.9664764404,69.742401123 55.9664764404,69.742401123 c 0.0,0.0 73.2448120117,-59.1047973633 73.2448120117,-59.1047973633 c 0.0,0.0 -55.9664916992,-69.7423400879 -55.9664916992,-69.7423400879 Z" />
+            <group
+                android:name="cross" >
+                <path
+                    android:name="cross_1"
+                    android:pathData="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0"
+                    android:strokeWidth="3.5"
+                    android:fillColor="#00000000" />
+            </group>
+            <group
+                android:name="flashlight"
+                android:translateX="25.06235"
+                android:translateY="22.48294" >
+                <path
+                    android:name="light"
+                    android:pathData="M -9.40809631348,-23.6970062256 c 0.0,0.0 18.8699951172,0.0 18.8699951172,0.0 c 0.0,0.0 0.0,3.91700744629 0.0,3.91700744629 c 0.0,0.0 -18.8699951172,0.0 -18.8699951172,0.0 c 0.0,0.0 0.0,-3.91700744629 0.0,-3.91700744629 Z M 9.4615020752,-15.6629943848 c 0.0,0.0 0.0,-0.639999389648 0.0,-0.639999389649 c 0.0,0.0 -18.8699951172,0.0 -18.8699951172,0.0 c 0.0,0.0 0.0,0.639999389648 0.0,0.639999389649 c 0.0,0.0 -0.581008911133,5.18899536133 3.82598876953,7.52299499512 c 0.0,0.0 0.0,24.4429931641 0.0,24.4429931641 c 0.0,0.0 11.2129974365,0.0 11.2129974365,0.0 c 0.0,0.0 0.0,-24.4769897461 0.0,-24.4769897461 c 4.35900878906,-2.35301208496 3.83100891113,-7.48899841309 3.83100891113,-7.48899841309 Z M 0.0234985351562,0 c -1.52299499512,0 -2.75700378418,-1.23399353027 -2.75700378418,-2.75700378418 c 0.0,-1.52299499512 1.23400878906,-2.75700378418 2.75700378418,-2.75700378418 c 1.52299499512,0.0 2.75700378418,1.23400878906 2.75700378418,2.75700378418 c 0.0,1.52200317383 -1.23400878906,2.75700378418 -2.75700378418,2.75700378418 Z"
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1" />
+            </group>
+        </group>
+    </group>
+</vector>

@@ -18,13 +18,14 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.media.session.MediaController;
-import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -101,10 +102,12 @@ public abstract class Window {
      */
     public static final int FEATURE_SWIPE_TO_DISMISS = 11;
     /**
-     * Flag for requesting that window content changes should be represented
-     * with scenes and transitions.
+     * Flag for requesting that window content changes should be animated using a
+     * TransitionManager.
      *
-     * TODO Add docs
+     * <p>The TransitionManager is set using
+     * {@link #setTransitionManager(android.transition.TransitionManager)}. If none is set,
+     * a default TransitionManager will be used.</p>
      *
      * @see #setContentView
      */
@@ -155,7 +158,11 @@ public abstract class Window {
     public static final String NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME =
             "android:navigation:background";
 
-    /** The default features enabled */
+    /**
+     * The default features enabled.
+     * @deprecated use {@link #getDefaultFeatures(android.content.Context)} instead.
+     */
+    @Deprecated
     @SuppressWarnings({"PointlessBitwiseExpression"})
     protected static final int DEFAULT_FEATURES = (1 << FEATURE_OPTIONS_PANEL) |
             (1 << FEATURE_CONTEXT_MENU);
@@ -184,8 +191,8 @@ public abstract class Window {
     private boolean mSetCloseOnTouchOutside = false;
     private int mForcedWindowFlags = 0;
 
-    private int mFeatures = DEFAULT_FEATURES;
-    private int mLocalFeatures = DEFAULT_FEATURES;
+    private int mFeatures;
+    private int mLocalFeatures;
 
     private boolean mHaveWindowFormat = false;
     private boolean mHaveDimAmount = false;
@@ -363,7 +370,7 @@ public abstract class Window {
         /**
          * This hook is called whenever the window focus changes.  See
          * {@link View#onWindowFocusChanged(boolean)
-         * View.onWindowFocusChanged(boolean)} for more information.
+         * View.onWindowFocusChangedNotLocked(boolean)} for more information.
          *
          * @param hasFocus Whether the window now has focus.
          */
@@ -443,6 +450,7 @@ public abstract class Window {
 
     public Window(Context context) {
         mContext = context;
+        mFeatures = mLocalFeatures = getDefaultFeatures(context);
     }
 
     /**
@@ -801,9 +809,6 @@ public abstract class Window {
     public void setFlags(int flags, int mask) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.flags = (attrs.flags&~mask) | (flags&mask);
-        if ((mask&WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0) {
-            attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY;
-        }
         mForcedWindowFlags |= mask;
         dispatchWindowAttributesChanged(attrs);
     }
@@ -811,6 +816,15 @@ public abstract class Window {
     private void setPrivateFlags(int flags, int mask) {
         final WindowManager.LayoutParams attrs = getAttributes();
         attrs.privateFlags = (attrs.privateFlags & ~mask) | (flags & mask);
+        dispatchWindowAttributesChanged(attrs);
+    }
+
+    /**
+     * {@hide}
+     */
+    protected void setNeedsMenuKey(int value) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.needsMenuKey = value;
         dispatchWindowAttributesChanged(attrs);
     }
 
@@ -890,6 +904,14 @@ public abstract class Window {
             mCloseOnTouchOutside = close;
             mSetCloseOnTouchOutside = true;
         }
+    }
+
+    /** @hide */
+    @SystemApi
+    public void setDisableWallpaperTouchEvents(boolean disable) {
+        setPrivateFlags(disable
+                ? WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS : 0,
+                WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS);
     }
 
     /** @hide */
@@ -999,10 +1021,16 @@ public abstract class Window {
      * <p>Note that calling this function "locks in" various characteristics
      * of the window that can not, from this point forward, be changed: the
      * features that have been requested with {@link #requestFeature(int)},
-     * and certain window flags as described in {@link #setFlags(int, int)}.
+     * and certain window flags as described in {@link #setFlags(int, int)}.</p>
+     *
+     * <p>If {@link #FEATURE_CONTENT_TRANSITIONS} is set, the window's
+     * TransitionManager will be used to animate content from the current
+     * content View to view.</p>
      *
      * @param view The desired content to display.
      * @param params Layout parameters for the view.
+     * @see #getTransitionManager()
+     * @see #setTransitionManager(android.transition.TransitionManager)
      */
     public abstract void setContentView(View view, ViewGroup.LayoutParams params);
 
@@ -1069,17 +1097,40 @@ public abstract class Window {
     public abstract void onConfigurationChanged(Configuration newConfig);
 
     /**
+     * Sets the window elevation.
+     * <p>
+     * Changes to this property take effect immediately and will cause the
+     * window surface to be recreated. This is an expensive operation and as a
+     * result, this property should not be animated.
+     *
+     * @param elevation The window elevation.
+     * @see View#setElevation(float)
+     * @see android.R.styleable#Window_windowElevation
+     */
+    public void setElevation(float elevation) {}
+
+    /**
+     * Sets whether window content should be clipped to the outline of the
+     * window background.
+     *
+     * @param clipToOutline Whether window content should be clipped to the
+     *                      outline of the window background.
+     * @see View#setClipToOutline(boolean)
+     * @see android.R.styleable#Window_windowClipToOutline
+     */
+    public void setClipToOutline(boolean clipToOutline) {}
+
+    /**
      * Change the background of this window to a Drawable resource. Setting the
      * background to null will make the window be opaque. To make the window
      * transparent, you can use an empty drawable (for instance a ColorDrawable
      * with the color 0 or the system drawable android:drawable/empty.)
      *
-     * @param resid The resource identifier of a drawable resource which will be
-     *              installed as the new background.
+     * @param resId The resource identifier of a drawable resource which will
+     *              be installed as the new background.
      */
-    public void setBackgroundDrawableResource(int resid)
-    {
-        setBackgroundDrawable(mContext.getDrawable(resid));
+    public void setBackgroundDrawableResource(int resId) {
+        setBackgroundDrawable(mContext.getDrawable(resId));
     }
 
     /**
@@ -1125,31 +1176,31 @@ public abstract class Window {
      * Set an explicit Drawable value for feature of this window. You must
      * have called requestFeature(featureId) before calling this function.
      *
-     * @param featureId The desired drawable feature to change.
-     * Features are constants defined by Window.
+     * @param featureId The desired drawable feature to change. Features are
+     *                  constants defined by Window.
      * @param drawable A Drawable object to display.
      */
     public abstract void setFeatureDrawable(int featureId, Drawable drawable);
 
     /**
-     * Set a custom alpha value for the given drawale feature, controlling how
+     * Set a custom alpha value for the given drawable feature, controlling how
      * much the background is visible through it.
      *
-     * @param featureId The desired drawable feature to change.
-     * Features are constants defined by Window.
+     * @param featureId The desired drawable feature to change. Features are
+     *                  constants defined by Window.
      * @param alpha The alpha amount, 0 is completely transparent and 255 is
      *              completely opaque.
      */
     public abstract void setFeatureDrawableAlpha(int featureId, int alpha);
 
     /**
-     * Set the integer value for a feature.  The range of the value depends on
-     * the feature being set.  For FEATURE_PROGRESSS, it should go from 0 to
-     * 10000. At 10000 the progress is complete and the indicator hidden.
+     * Set the integer value for a feature. The range of the value depends on
+     * the feature being set. For {@link #FEATURE_PROGRESS}, it should go from
+     * 0 to 10000. At 10000 the progress is complete and the indicator hidden.
      *
-     * @param featureId The desired feature to change.
-     * Features are constants defined by Window.
-     * @param value The value for the feature.  The interpretation of this
+     * @param featureId The desired feature to change. Features are constants
+     *                  defined by Window.
+     * @param value The value for the feature. The interpretation of this
      *              value is feature-specific.
      */
     public abstract void setFeatureInt(int featureId, int value);
@@ -1243,6 +1294,25 @@ public abstract class Window {
     protected final int getFeatures()
     {
         return mFeatures;
+    }
+
+    /**
+     * Return the feature bits set by default on a window.
+     * @param context The context used to access resources
+     */
+    public static int getDefaultFeatures(Context context) {
+        int features = 0;
+
+        final Resources res = context.getResources();
+        if (res.getBoolean(com.android.internal.R.bool.config_defaultWindowFeatureOptionsPanel)) {
+            features |= 1 << FEATURE_OPTIONS_PANEL;
+        }
+
+        if (res.getBoolean(com.android.internal.R.bool.config_defaultWindowFeatureContextMenu)) {
+            features |= 1 << FEATURE_CONTEXT_MENU;
+        }
+
+        return features;
     }
 
     /**
@@ -1405,6 +1475,7 @@ public abstract class Window {
      * {@link #setContentView}) if {@link #FEATURE_CONTENT_TRANSITIONS} has been granted.</p>
      *
      * @return This window's content TransitionManager or null if none is set.
+     * @attr ref android.R.styleable#Window_windowContentTransitionManager
      */
     public TransitionManager getTransitionManager() {
         return null;
@@ -1415,6 +1486,7 @@ public abstract class Window {
      * Requires {@link #FEATURE_CONTENT_TRANSITIONS}.
      *
      * @param tm The TransitionManager to use for scene changes.
+     * @attr ref android.R.styleable#Window_windowContentTransitionManager
      */
     public void setTransitionManager(TransitionManager tm) {
         throw new UnsupportedOperationException();

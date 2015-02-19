@@ -293,8 +293,30 @@ dependencies {
       android:targetSdkVersion="17" /&gt;
 </pre>
 
-<p>This change tells Google Play that your application can be installed on devices with Android
-  2.1 (API level 7) and higher.</p>
+<p>The manifest setting tells Google Play that your application can be installed on devices with Android
+  2.1 (API level 7) and higher.  </p>
+
+<p>If you are using Gradle build files, the <code>minSdkVersion</code> setting in the build file
+  overrides the manifest settings.  </p>
+
+<pre>
+apply plugin: 'com.android.application'
+
+android {
+    ...
+
+    defaultConfig {
+        minSdkVersion 8
+        ...
+    }
+    ...
+}
+</pre>
+
+<p>In this case, the build file setting tells Google Play that the default build variant of your
+  application can be installed on devices with Android 2.2 (API level 8) and higher. For more
+  information about build variants, see
+  <a href="{@docRoot}sdk/installing/studio-build.html">Build System Overview</a>. </p>
 
 <p class="note">
   <strong>Note:</strong> If you are including the v4 support and v7 appcompat libraries in your

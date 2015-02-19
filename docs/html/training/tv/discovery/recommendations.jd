@@ -1,5 +1,6 @@
 page.title=Recommending TV Content
-page.tags="recommendation","recommend"
+page.tags=tv, recommendations
+helpoutsWidget=true
 
 trainingnavtop=true
 
@@ -13,6 +14,11 @@ trainingnavtop=true
     <li><a href="#build">Build Recommendations</a></li>
     <li><a href="#run-service">Run Recommendations Service</a></li>
   </ol>
+  <h2>Try it out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
+      Leanback sample app</a></li>
+  </ul>
 </div>
 </div>
 
@@ -24,7 +30,7 @@ trainingnavtop=true
 
 <p>
   The Android framework assists with minimum-input interaction by providing a recommendations row
-  on the home screen. Content recommendations appear as the first row of the TV launch screen after
+  on the home screen. Content recommendations appear as the first row of the TV home screen after
   the first use of the device. Contributing recommendations from your app's content catalog can help
   bring users back to your app.
 </p>
@@ -36,7 +42,9 @@ trainingnavtop=true
 
 <p>
   This lesson teaches you how to create recommendations and provide them to the Android framework
-  so your app content can be easily discovered and enjoyed by users.
+  so users can easily discover and enjoy your app content. This discussion describes some code from
+  the <a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
+  Leanback sample app</a>.
 </p>
 
 
@@ -45,7 +53,7 @@ trainingnavtop=true
 <p>
   Content recommendations are created with background processing. In order for your application to
   contribute to recommendations, create a service that periodically adds listings from your
-  app's catalog to the system list of recommendations.
+  app's catalog to the system's list of recommendations.
 </p>
 
 <p>
@@ -54,25 +62,44 @@ trainingnavtop=true
 </p>
 
 <pre>
-public class RecommendationsService extends IntentService {
+public class UpdateRecommendationsService extends IntentService {
+    private static final String TAG = "UpdateRecommendationsService";
     private static final int MAX_RECOMMENDATIONS = 3;
 
-    public RecommendationsService() {
+    public UpdateRecommendationsService() {
         super("RecommendationService");
     }
 
     &#64;Override
     protected void onHandleIntent(Intent intent) {
-        MovieDatabase database = MovieDatabase.instance(getApplicationContext());
-        List<Movie> recommendations = database.recommendations();
+        Log.d(TAG, "Updating recommendation cards");
+        HashMap&lt;String, List&lt;Movie&gt;&gt; recommendations = VideoProvider.getMovieList();
+        if (recommendations == null) return;
 
         int count = 0;
 
         try {
-            for (Movie movie : recommendations) {
-                // build the individual content recommendations
-                buildRecommendation(getApplicationContext(), movie);
+            RecommendationBuilder builder = new RecommendationBuilder()
+                    .setContext(getApplicationContext())
+                    .setSmallIcon(R.drawable.videos_by_google_icon);
 
+            for (Map.Entry&lt;String, List&lt;Movie&gt;&gt; entry : recommendations.entrySet()) {
+                for (Movie movie : entry.getValue()) {
+                    Log.d(TAG, "Recommendation - " + movie.getTitle());
+
+                    builder.setBackground(movie.getCardImageUrl())
+                            .setId(count + 1)
+                            .setPriority(MAX_RECOMMENDATIONS - count)
+                            .setTitle(movie.getTitle())
+                            .setDescription(getString(R.string.popular_header))
+                            .setImage(movie.getCardImageUrl())
+                            .setIntent(buildPendingIntent(movie))
+                            .build();
+
+                    if (++count >= MAX_RECOMMENDATIONS) {
+                        break;
+                    }
+                }
                 if (++count >= MAX_RECOMMENDATIONS) {
                     break;
                 }
@@ -80,6 +107,21 @@ public class RecommendationsService extends IntentService {
         } catch (IOException e) {
             Log.e(TAG, "Unable to update recommendation", e);
         }
+    }
+
+    private PendingIntent buildPendingIntent(Movie movie) {
+        Intent detailsIntent = new Intent(this, DetailsActivity.class);
+        detailsIntent.putExtra("Movie", movie);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(DetailsActivity.class);
+        stackBuilder.addNextIntent(detailsIntent);
+        // Ensure a unique PendingIntents, otherwise all recommendations end up with the same
+        // PendingIntent
+        detailsIntent.setAction(Long.toString(movie.getId()));
+
+        PendingIntent intent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        return intent;
     }
 }
 </pre>
@@ -94,120 +136,147 @@ public class RecommendationsService extends IntentService {
   &lt;application ... &gt;
     ...
 
-    &lt;service android:name=&quot;.RecommendationsService&quot;
-             android:enabled=&quot;true&quot; android:exported=&quot;true&quot;/&gt;
+    &lt;service
+            android:name="com.example.android.tvleanback.UpdateRecommendationsService"
+            android:enabled="true" /&gt;
   &lt;/application&gt;
 &lt;/manifest&gt;
 </pre>
 
+<h3 id="refreshing">Refreshing Recommendations</h3>
+
+<p>Base your recommendations on user behavior and data such as play lists, wish lists, and associated
+content. When refreshing recommendations, don't just remove and repost them, because doing so causes
+the recommendations to appear at the end of the recommendations row. Once a content item, such as a
+movie, has been played, <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Removing">
+remove it</a> from the recommendations.</p>
+
+<p>The order of an app's recommendations is preserved according to the order in which the app
+provides them. The framework interleaves app recommendations based on recommendation quality,
+as measured by user behavior. Better recommendations make an app's recommendations more likely
+to appear near the front of the list.</p>
 
 <h2 id="build">Build Recommendations</h2>
 
 <p>
-  Once your recommendation server starts running, it must create recommendations and pass them to
+  Once your recommendation service starts running, it must create recommendations and pass them to
   the Android framework. The framework receives the recommendations as {@link
   android.app.Notification} objects that use a specific template and are marked with a specific
   category.
 </p>
 
+<h3 id="setting-ui">Setting the Values</h3>
+
+<p>To set the UI element values for the recommendation card, you create a builder class that follows
+the builder pattern described as follows. First, you set the values of the recommendation card
+elements.</p>
+
+<pre>
+public class RecommendationBuilder {
+    ...
+
+    public RecommendationBuilder setTitle(String title) {
+            mTitle = title;
+            return this;
+        }
+
+        public RecommendationBuilder setDescription(String description) {
+            mDescription = description;
+            return this;
+        }
+
+        public RecommendationBuilder setImage(String uri) {
+            mImageUri = uri;
+            return this;
+        }
+
+        public RecommendationBuilder setBackground(String uri) {
+            mBackgroundUri = uri;
+            return this;
+        }
+...
+</pre>
+
+<h3 id="create-notification">Creating the Notification</h3>
+
 <p>
-  The following code example demonstrates how to get an instance of the {@link
-  android.app.NotificationManager}, build a recommendation, and post it to the manager:
+  Once you've set the values, you then build the notification, assigning the values from the builder
+  class to the notification, and calling {@link android.support.v4.app.NotificationCompat.Builder#build()
+  NotificationCompat.Builder.build()}.
+</p>
+
+<p>
+  Also, be sure to call
+  {@link android.support.v4.app.NotificationCompat.Builder#setLocalOnly(boolean) setLocalOnly()}
+  so the {@link android.support.v4.app.NotificationCompat.BigPictureStyle} notification won't show up
+  on other devices.
+</p>
+
+<p>
+  The following code example demonstrates how to build a recommendation.
 </p>
 
 <pre>
-public class RecommendationsService extends IntentService {
-
+public class RecommendationBuilder {
     ...
 
-    public Notification buildRecommendation(Context context, Movie movie)
-            throws IOException {
+    public Notification build() throws IOException {
+        ...
 
-        if (mNotificationManager == null) {
-            mNotificationManager = (NotificationManager)
-                    mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        }
-
-        Bundle extras = new Bundle();
-        if (mBackgroundUri != movie.getBackgroundUri()) {
-            extras.putString(EXTRA_BACKGROUND_IMAGE_URL, movie.getBackgroundUri());
-        }
-
-        // build the recommendation as a Notification object
         Notification notification = new NotificationCompat.BigPictureStyle(
-                new NotificationCompat.Builder(context)
-                        .setContentTitle(movie.getTitle())
-                        .setContentText(movie.getDescription())
-                        .setContentInfo(APP_NAME)
-                        .setGroup("ActionMovies")
-                        .setSortKey("0.8")
-                        .setPriority(movie.getPriority())
-                        .setColor(#FFFF2020)
-                        .setCategory("recommendation")
-                        .setLargeIcon(movie.getImage())
-                        .setSmallIcon(movie.getSmallIcon())
-                        .setContentIntent(buildPendingIntent(movie.getId()))
+                new NotificationCompat.Builder(mContext)
+                        .setContentTitle(mTitle)
+                        .setContentText(mDescription)
+                        .setPriority(mPriority)
+                        .setLocalOnly(true)
+                        .setOngoing(true)
+                        .setColor(mContext.getResources().getColor(R.color.fastlane_background))
+                        .setCategory(Notification.CATEGORY_RECOMMENDATION)
+                        .setLargeIcon(image)
+                        .setSmallIcon(mSmallIcon)
+                        .setContentIntent(mIntent)
                         .setExtras(extras))
                 .build();
 
-        // post the recommendation to the NotificationManager
-        mNotificationManager.notify(movie.getId(), notification);
-        mNotificationManager = null;
         return notification;
-    }
-
-    private PendingIntent buildPendingIntent(long id) {
-        Intent detailsIntent = new Intent(this, DetailsActivity.class);
-        detailsIntent.putExtra("id", id);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(DetailsActivity.class);
-        stackBuilder.addNextIntent(detailsIntent);
-        // Ensure each PendingIntent is unique
-        detailsIntent.setAction(Long.toString(id));
-
-        PendingIntent intent = stackBuilder.getPendingIntent(
-                0, PendingIntent.FLAG_UPDATE_CURRENT);
-        return intent;
     }
 }
 </pre>
 
-
-<h3 id="run-service">Run Recommendations Service</h3>
+<h2 id="run-service">Run Recommendations Service</h3>
 
 <p>
   Your app's recommendation service must run periodically in order to create current
   recommendations. To run your service, create a class that runs a timer and invokes
   it at regular intervals. The following code example extends the {@link
   android.content.BroadcastReceiver} class to start periodic execution of a recommendation service
-  every 12 hours:
+  every half hour:
 </p>
 
 <pre>
-public class BootupReceiver extends BroadcastReceiver {
+public class BootupActivity extends BroadcastReceiver {
     private static final String TAG = "BootupActivity";
 
     private static final long INITIAL_DELAY = 5000;
 
     &#64;Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "BootupActivity initiated");
         if (intent.getAction().endsWith(Intent.ACTION_BOOT_COMPLETED)) {
             scheduleRecommendationUpdate(context);
         }
     }
 
     private void scheduleRecommendationUpdate(Context context) {
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(
-                Context.ALARM_SERVICE);
-        Intent recommendationIntent = new Intent(context,
-                UpdateRecommendationsService.class);
-        PendingIntent alarmIntent = PendingIntent.getService(context, 0,
-                recommendationIntent, 0);
+        Log.d(TAG, "Scheduling recommendations update");
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent recommendationIntent = new Intent(context, UpdateRecommendationsService.class);
+        PendingIntent alarmIntent = PendingIntent.getService(context, 0, recommendationIntent, 0);
 
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 INITIAL_DELAY,
-                AlarmManager.INTERVAL_HALF_DAY,
+                AlarmManager.INTERVAL_HALF_HOUR,
                 alarmIntent);
     }
 }
@@ -223,7 +292,8 @@ public class BootupReceiver extends BroadcastReceiver {
 <pre>
 &lt;manifest ... &gt;
   &lt;application ... &gt;
-    &lt;receiver android:name=&quot;.BootupReceiver&quot; android:enabled=&quot;true&quot;
+    &lt;receiver android:name=&quot;com.example.android.tvleanback.BootupActivity&quot;
+              android:enabled=&quot;true&quot;
               android:exported=&quot;false&quot;&gt;
       &lt;intent-filter&gt;
         &lt;action android:name=&quot;android.intent.action.BOOT_COMPLETED&quot;/&gt;
@@ -233,8 +303,17 @@ public class BootupReceiver extends BroadcastReceiver {
 &lt;/manifest&gt;
 </pre>
 
-<p class="important">
+<p class="note">
   <strong>Important:</strong> Receiving a boot completed notification requires that your app
   requests the {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission.
   For more information, see {@link android.content.Intent#ACTION_BOOT_COMPLETED}.
 </p>
+
+<p>In your recommendation service class' {@link android.app.IntentService#onHandleIntent(android.content.Intent)
+onHandleIntent()}
+method, post the recommendation to the manager as follows:</p>
+
+<pre>
+Notification notification = notificationBuilder.build();
+mNotificationManager.notify(id, notification);
+</pre>

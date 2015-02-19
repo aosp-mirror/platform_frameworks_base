@@ -17,44 +17,38 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="?attr/listPreferredItemHeightSmall"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dip"
-    android:paddingEnd="12dip"
-    android:minHeight="?attr/listPreferredItemHeightSmall"
-    android:background="@color/transparent">
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?attr/listPreferredItemPaddingEnd">
 
-    <RadioButton
-        android:id="@+id/radio"
-        android:layout_width="35dip"
+    <RadioButton android:id="@+id/radio"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="12dip"
+        android:paddingEnd="16dp"
         android:gravity="center_vertical"
         android:focusable="false"
         android:clickable="false" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
         android:gravity="center_vertical">
 
-        <TextView android:id="@android:id/text1"
+        <TextView android:id="@id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textColor="?attr/textColorAlertDialogListItem"
-            android:gravity="center_vertical|start"
             android:singleLine="true"
             android:ellipsize="marquee" />
 
-        <TextView android:id="@android:id/text2"
+        <TextView android:id="@id/text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceListItemSecondary"
-            android:textColor="?attr/textColorAlertDialogListItem"
-            android:gravity="center_vertical|start"
             android:singleLine="true"
             android:ellipsize="marquee" />
 

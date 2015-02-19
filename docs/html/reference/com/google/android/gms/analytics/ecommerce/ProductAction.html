@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">ProductAction</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -708,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -725,19 +794,19 @@ Summary:
 
 
   <a href="#constants">Constants</a>
-
+  
 
 
 
 
 
   &#124; <a href="#pubctors">Ctors</a>
-
+  
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -747,9 +816,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -759,23 +828,26 @@ Summary:
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     class
 <h1 itemprop="name">ProductAction</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -787,18 +859,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.analytics.ecommerce.ProductAction</td>
     </tr>
-
+    
 
 </table>
 
@@ -876,74 +948,119 @@ Summary:
 <table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_ADD">ACTION_ADD</a></td>
-        <td class="jd-descrcol" width="100%">Action to use when a product is added to the cart.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to use when a product is added to the cart.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT">ACTION_CHECKOUT</a></td>
-        <td class="jd-descrcol" width="100%">Action to use for hits with checkout data.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to use for hits with checkout data.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></td>
-        <td class="jd-descrcol" width="100%">Action to be used for supplemental checkout data that needs to be provided after a checkout
- hit.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to be used for supplemental checkout data that needs to be provided after a checkout
+ hit.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTIONS">ACTION_CHECKOUT_OPTIONS</a></td>
-        <td class="jd-descrcol" width="100%"><em>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This constant is deprecated.
     Use <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> instead.
-</em></td>
+</em>
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CLICK">ACTION_CLICK</a></td>
-        <td class="jd-descrcol" width="100%">Action to use when the user clicks on a set of products.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to use when the user clicks on a set of products.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_DETAIL">ACTION_DETAIL</a></td>
-        <td class="jd-descrcol" width="100%">Action to use when the user views detailed descriptions of products.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to use when the user views detailed descriptions of products.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></td>
-        <td class="jd-descrcol" width="100%">Action that is used to report all the transaction data to GA.</td>
+        <td class="jd-descrcol" width="100%">
+          Action that is used to report all the transaction data to GA.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></td>
-        <td class="jd-descrcol" width="100%">Action to use while reporting refunded transactions to GA.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to use while reporting refunded transactions to GA.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REMOVE">ACTION_REMOVE</a></td>
-        <td class="jd-descrcol" width="100%">Action to use when a product is removed from the cart.</td>
+        <td class="jd-descrcol" width="100%">
+          Action to use when a product is removed from the cart.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -963,21 +1080,26 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ProductAction(java.lang.String)">ProductAction</a></span>(String action)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the product action for all the products included in the hit.
+          
+    
 
-        <div class="jd-descrdiv">Sets the product action for all the products included in the hit.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -994,183 +1116,233 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setCheckoutOptions(java.lang.String)">setCheckoutOptions</a></span>(String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the label associated with the checkout.
+          
+    
 
-        <div class="jd-descrdiv">Sets the label associated with the checkout.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setCheckoutStep(int)">setCheckoutStep</a></span>(int value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the checkout processes's progress.
+          
+    
 
-        <div class="jd-descrdiv">Sets the checkout processes's progress.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setProductActionList(java.lang.String)">setProductActionList</a></span>(String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the list name associated with the products in the analytics hit.
+          
+    
 
-        <div class="jd-descrdiv">Sets the list name associated with the products in the analytics hit.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setProductListSource(java.lang.String)">setProductListSource</a></span>(String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the list source name associated with the products in the analytics hit.
+          
+    
 
-        <div class="jd-descrdiv">Sets the list source name associated with the products in the analytics hit.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setTransactionAffiliation(java.lang.String)">setTransactionAffiliation</a></span>(String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the transaction's affiliation value.
+          
+    
 
-        <div class="jd-descrdiv">Sets the transaction's affiliation value.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setTransactionCouponCode(java.lang.String)">setTransactionCouponCode</a></span>(String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the coupon code used in a transaction.
+          
+    
 
-        <div class="jd-descrdiv">Sets the coupon code used in a transaction.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setTransactionId(java.lang.String)">setTransactionId</a></span>(String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          The unique id associated with the transaction.
+          
+    
 
-        <div class="jd-descrdiv">The unique id associated with the transaction.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setTransactionRevenue(double)">setTransactionRevenue</a></span>(double value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the transaction's total revenue.
+          
+    
 
-        <div class="jd-descrdiv">Sets the transaction's total revenue.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setTransactionShipping(double)">setTransactionShipping</a></span>(double value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the transaction's shipping costs.
+          
+    
 
-        <div class="jd-descrdiv">Sets the transaction's shipping costs.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setTransactionTax(double)">setTransactionTax</a></span>(double value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the transaction's total tax.
+          
+    
 
-        <div class="jd-descrdiv">Sets the transaction's total tax.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1205,182 +1377,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1421,37 +1593,40 @@ From class
 
 <A NAME="ACTION_ADD"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_ADD
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to use when a product is added to the cart.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "add"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1459,39 +1634,42 @@ From class
 
 <A NAME="ACTION_CHECKOUT"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_CHECKOUT
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to use for hits with checkout data. This action can have accompanying fields like
  checkout step <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setCheckoutStep(int)">setCheckoutStep(int)</a></code>, checkout label <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setCheckoutOptions(java.lang.String)">setCheckoutOptions(String)</a></code> and
  checkout options <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setCheckoutOptions(java.lang.String)">setCheckoutOptions(String)</a></code>.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "checkout"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1499,38 +1677,41 @@ From class
 
 <A NAME="ACTION_CHECKOUT_OPTION"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_CHECKOUT_OPTION
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to be used for supplemental checkout data that needs to be provided after a checkout
  hit. This action can additionally have the same fields as the checkout action.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "checkout_option"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1538,23 +1719,26 @@ From class
 
 <A NAME="ACTION_CHECKOUT_OPTIONS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_CHECKOUT_OPTIONS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       <p>
   <p class="caution"><strong>
       This constant is deprecated.</strong><br/>
@@ -1564,16 +1748,16 @@ From class
   <div class="jd-tagdata jd-tagdescr"><p>Action to be used for supplemental checkout data that needs to be provided after a checkout
  hit. This action can additionally have the same fields as the checkout action.</p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "checkout_options"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1581,39 +1765,42 @@ From class
 
 <A NAME="ACTION_CLICK"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_CLICK
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to use when the user clicks on a set of products. This action can have accompanying
  fields like product action list name <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setProductActionList(java.lang.String)">setProductActionList(String)</a></code> and product list source
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setProductListSource(java.lang.String)">setProductListSource(String)</a></code>.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "click"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1621,39 +1808,42 @@ From class
 
 <A NAME="ACTION_DETAIL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_DETAIL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to use when the user views detailed descriptions of products. This action can have
  accompanying fields like product action list name <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setProductActionList(java.lang.String)">setProductActionList(String)</a></code> and product
  list source <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#setProductListSource(java.lang.String)">setProductListSource(String)</a></code>.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "detail"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1661,40 +1851,43 @@ From class
 
 <A NAME="ACTION_PURCHASE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_PURCHASE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action that is used to report all the transaction data to GA. This is equivalent to the
  transaction hit type which was available in previous versions of the SDK. This action can
  can also have accompanying fields like transaction id, affiliation, revenue, tax, shipping
  and coupon code. These fields can be specified with methods defined in this class.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "purchase"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1702,37 +1895,40 @@ From class
 
 <A NAME="ACTION_REFUND"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_REFUND
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to use while reporting refunded transactions to GA.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "refund"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1740,37 +1936,40 @@ From class
 
 <A NAME="ACTION_REMOVE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ACTION_REMOVE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Action to use when a product is removed from the cart.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "remove"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1790,27 +1989,30 @@ From class
 
 <A NAME="ProductAction(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">ProductAction</span>
       <span class="normal">(String action)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the product action for all the products included in the hit. Valid values include
  "detail", "click", "add", "remove", "checkout", "checkout_option", "purchase" and "refund".
  All these values are also defined in this class for ease of use. You also also send
@@ -1848,14 +2050,14 @@ From class
 
 <A NAME="setCheckoutOptions(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setCheckoutOptions</span>
@@ -1863,12 +2065,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the label associated with the checkout. This value is used with <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT">ACTION_CHECKOUT</a></code>
  and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -1892,14 +2097,14 @@ From class
 
 <A NAME="setCheckoutStep(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setCheckoutStep</span>
@@ -1907,12 +2112,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the checkout processes's progress. This value is used with <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT">ACTION_CHECKOUT</a></code> and
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CHECKOUT_OPTION">ACTION_CHECKOUT_OPTION</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -1936,14 +2144,14 @@ From class
 
 <A NAME="setProductActionList(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setProductActionList</span>
@@ -1951,12 +2159,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the list name associated with the products in the analytics hit. This value is used
  with <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_DETAIL">ACTION_DETAIL</a></code> and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CLICK">ACTION_CLICK</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -1980,14 +2191,14 @@ From class
 
 <A NAME="setProductListSource(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setProductListSource</span>
@@ -1995,12 +2206,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the list source name associated with the products in the analytics hit. This value is
  used with <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_DETAIL">ACTION_DETAIL</a></code> and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_CLICK">ACTION_CLICK</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2024,14 +2238,14 @@ From class
 
 <A NAME="setTransactionAffiliation(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setTransactionAffiliation</span>
@@ -2039,12 +2253,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the transaction's affiliation value. This value is used for <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></code> and
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2068,14 +2285,14 @@ From class
 
 <A NAME="setTransactionCouponCode(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setTransactionCouponCode</span>
@@ -2083,12 +2300,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the coupon code used in a transaction. This value is used for <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></code>
  and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2112,14 +2332,14 @@ From class
 
 <A NAME="setTransactionId(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setTransactionId</span>
@@ -2127,12 +2347,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>The unique id associated with the transaction. This value is used for
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></code> and <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2156,14 +2379,14 @@ From class
 
 <A NAME="setTransactionRevenue(double)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setTransactionRevenue</span>
@@ -2171,12 +2394,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the transaction's total revenue. This value is used for <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></code> and
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2200,14 +2426,14 @@ From class
 
 <A NAME="setTransactionShipping(double)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setTransactionShipping</span>
@@ -2215,12 +2441,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the transaction's shipping costs. This value is used for <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></code> and
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2244,14 +2473,14 @@ From class
 
 <A NAME="setTransactionTax(double)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html">ProductAction</a>
       </span>
       <span class="sympad">setTransactionTax</span>
@@ -2259,12 +2488,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the transaction's total tax. This value is used for <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_PURCHASE">ACTION_PURCHASE</a></code> and
  <code><a href="/reference/com/google/android/gms/analytics/ecommerce/ProductAction.html#ACTION_REFUND">ACTION_REFUND</a></code> actions.</p></div>
   <div class="jd-tagdata">
@@ -2297,17 +2529,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -2315,7 +2547,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -2328,7 +2560,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

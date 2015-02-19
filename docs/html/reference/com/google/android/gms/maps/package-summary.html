@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -129,16 +143,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -180,8 +244,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -212,8 +276,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -336,10 +400,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -361,7 +425,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -421,7 +490,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">com.google.android.gms.maps</li>
       </ul>
     </div>
@@ -734,57 +803,140 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   
+
+
+  
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.CancelableCallback.html">GoogleMap.CancelableCallback</a></td>
-              <td class="jd-descrcol" width="100%">A callback interface for reporting when a task is complete or cancelled.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.InfoWindowAdapter.html">GoogleMap.InfoWindowAdapter</a></td>
-              <td class="jd-descrcol" width="100%">Provides views for customized rendering of info windows.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnCameraChangeListener.html">GoogleMap.OnCameraChangeListener</a></td>
-              <td class="jd-descrcol" width="100%">Defines signatures for methods that are called when the camera changes position.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnIndoorStateChangeListener.html">GoogleMap.OnIndoorStateChangeListener</a></td>
-              <td class="jd-descrcol" width="100%">A listener for when the indoor state changes.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnInfoWindowClickListener.html">GoogleMap.OnInfoWindowClickListener</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for click/tap events on a marker's info window.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapClickListener.html">GoogleMap.OnMapClickListener</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for when the user taps on the map.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLoadedCallback.html">GoogleMap.OnMapLoadedCallback</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for when the map has finished rendering.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLongClickListener.html">GoogleMap.OnMapLongClickListener</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for when the user long presses on the map.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMarkerClickListener.html">GoogleMap.OnMarkerClickListener</a></td>
-              <td class="jd-descrcol" width="100%">Defines signatures for methods that are called when a marker is clicked or tapped.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMarkerDragListener.html">GoogleMap.OnMarkerDragListener</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for drag events on markers.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationButtonClickListener.html">GoogleMap.OnMyLocationButtonClickListener</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for when the My Location button is clicked.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationChangeListener.html">GoogleMap.OnMyLocationChangeListener</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.CancelableCallback.html">GoogleMap.CancelableCallback</a></td>
+        <td class="jd-descrcol" width="100%">
+          A callback interface for reporting when a task is complete or cancelled.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.InfoWindowAdapter.html">GoogleMap.InfoWindowAdapter</a></td>
+        <td class="jd-descrcol" width="100%">
+          Provides views for customized rendering of info windows.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnCameraChangeListener.html">GoogleMap.OnCameraChangeListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines signatures for methods that are called when the camera changes position.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnIndoorStateChangeListener.html">GoogleMap.OnIndoorStateChangeListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          A listener for when the indoor state changes.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnInfoWindowClickListener.html">GoogleMap.OnInfoWindowClickListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for click/tap events on a marker's info window.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapClickListener.html">GoogleMap.OnMapClickListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the user taps on the map.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLoadedCallback.html">GoogleMap.OnMapLoadedCallback</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the map has finished rendering.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMapLongClickListener.html">GoogleMap.OnMapLongClickListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the user long presses on the map.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMarkerClickListener.html">GoogleMap.OnMarkerClickListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines signatures for methods that are called when a marker is clicked or tapped.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMarkerDragListener.html">GoogleMap.OnMarkerDragListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for drag events on markers.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationButtonClickListener.html">GoogleMap.OnMyLocationButtonClickListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the My Location button is clicked.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationChangeListener.html">GoogleMap.OnMyLocationChangeListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This interface is deprecated.
     use <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code> instead.
  FusedLocationProviderApi provides improved location finding and power usage and is used by
@@ -792,35 +944,106 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  for example example code, or the
  <a href="https://developers.google.com/maps/documentation/android/map/location">
  Location Developer Guide</a>.
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface to notify when the snapshot has been taken.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/LocationSource.html">LocationSource</a></td>
-              <td class="jd-descrcol" width="100%">Defines an interface for providing location data, typically to a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> object.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/LocationSource.OnLocationChangedListener.html">LocationSource.OnLocationChangedListener</a></td>
-              <td class="jd-descrcol" width="100%">Handles a location update.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener</a></td>
-              <td class="jd-descrcol" width="100%">A listener for when the StreetViewPanoramaCamera changes
-&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaChangeListener</a></td>
-              <td class="jd-descrcol" width="100%">A listener for when the Street View panorama loads a new panorama
-&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaClickListener.html">StreetViewPanorama.OnStreetViewPanoramaClickListener</a></td>
-              <td class="jd-descrcol" width="100%">Callback interface for when the user taps on the panorama.&nbsp;</td>
-          </tr>
+</em>&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface to notify when the snapshot has been taken.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/LocationSource.html">LocationSource</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines an interface for providing location data, typically to a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> object.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/LocationSource.OnLocationChangedListener.html">LocationSource.OnLocationChangedListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Handles a location update.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/OnMapReadyCallback.html">OnMapReadyCallback</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the map is ready to be used.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/OnStreetViewPanoramaReadyCallback.html">OnStreetViewPanoramaReadyCallback</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the Street View panorama is ready to be used.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaCameraChangeListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          A listener for when the StreetViewPanoramaCamera changes
+&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaChangeListener.html">StreetViewPanorama.OnStreetViewPanoramaChangeListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          A listener for when the Street View panorama loads a new panorama
+&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.OnStreetViewPanoramaClickListener.html">StreetViewPanorama.OnStreetViewPanoramaClickListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback interface for when the user taps on the panorama.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 
@@ -829,72 +1052,180 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></td>
-              <td class="jd-descrcol" width="100%">Defines a camera move.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html">CameraUpdateFactory</a></td>
-              <td class="jd-descrcol" width="100%">A class containing methods for creating <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> objects that change a map's camera.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></td>
-              <td class="jd-descrcol" width="100%">This is the main class of the Google Maps Android API and is the entry point for all methods
- related to the map.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines configuration GoogleMapOptions for a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></td>
-              <td class="jd-descrcol" width="100%">A Map component in an app.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/MapsInitializer.html">MapsInitializer</a></td>
-              <td class="jd-descrcol" width="100%">Use this class to initialize the Google Maps Android API if features need to be used before
- obtaining a map.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/MapView.html">MapView</a></td>
-              <td class="jd-descrcol" width="100%">A View which displays a map (with data obtained from the Google Maps service).&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/Projection.html">Projection</a></td>
-              <td class="jd-descrcol" width="100%">A projection is used to translate between on screen location and geographic coordinates on the
- surface of the Earth (<code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>).&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html">StreetViewPanorama</a></td>
-              <td class="jd-descrcol" width="100%">This is the main class of the Street View feature in the Google Maps Android API and is the
- entry point for all methods related to Street View panoramas.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanoramaFragment.html">StreetViewPanoramaFragment</a></td>
-              <td class="jd-descrcol" width="100%">A StreetViewPanorama component in an app.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanoramaOptions.html">StreetViewPanoramaOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines configuration PanoramaOptions for a <code><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html">StreetViewPanorama</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanoramaView.html">StreetViewPanoramaView</a></td>
-              <td class="jd-descrcol" width="100%">A View which displays a Street View panorama (with data obtained from the Google Maps service).&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/SupportMapFragment.html">SupportMapFragment</a></td>
-              <td class="jd-descrcol" width="100%">A Map component in an app.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/SupportStreetViewPanoramaFragment.html">SupportStreetViewPanoramaFragment</a></td>
-              <td class="jd-descrcol" width="100%">A StreetViewPanorama component in an app.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/UiSettings.html">UiSettings</a></td>
-              <td class="jd-descrcol" width="100%">Settings for the user interface of a GoogleMap.&nbsp;</td>
-          </tr>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines a camera move.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html">CameraUpdateFactory</a></td>
+        <td class="jd-descrcol" width="100%">
+          A class containing methods for creating <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> objects that change a map's camera.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></td>
+        <td class="jd-descrcol" width="100%">
+          This is the main class of the Google Maps Android API and is the entry point for all methods
+ related to the map.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines configuration GoogleMapOptions for a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></td>
+        <td class="jd-descrcol" width="100%">
+          A Map component in an app.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/MapsInitializer.html">MapsInitializer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Use this class to initialize the Google Maps Android API if features need to be used before
+ obtaining a map.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/MapView.html">MapView</a></td>
+        <td class="jd-descrcol" width="100%">
+          A View which displays a map (with data obtained from the Google Maps service).&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/Projection.html">Projection</a></td>
+        <td class="jd-descrcol" width="100%">
+          A projection is used to translate between on screen location and geographic coordinates on the
+ surface of the Earth (<code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>).&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html">StreetViewPanorama</a></td>
+        <td class="jd-descrcol" width="100%">
+          This is the main class of the Street View feature in the Google Maps Android API and is the
+ entry point for all methods related to Street View panoramas.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanoramaFragment.html">StreetViewPanoramaFragment</a></td>
+        <td class="jd-descrcol" width="100%">
+          A StreetViewPanorama component in an app.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanoramaOptions.html">StreetViewPanoramaOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines configuration PanoramaOptions for a <code><a href="/reference/com/google/android/gms/maps/StreetViewPanorama.html">StreetViewPanorama</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/StreetViewPanoramaView.html">StreetViewPanoramaView</a></td>
+        <td class="jd-descrcol" width="100%">
+          A View which displays a Street View panorama (with data obtained from the Google Maps service).&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/SupportMapFragment.html">SupportMapFragment</a></td>
+        <td class="jd-descrcol" width="100%">
+          A Map component in an app.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/SupportStreetViewPanoramaFragment.html">SupportStreetViewPanoramaFragment</a></td>
+        <td class="jd-descrcol" width="100%">
+          A StreetViewPanorama component in an app.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/UiSettings.html">UiSettings</a></td>
+        <td class="jd-descrcol" width="100%">
+          Settings for the user interface of a GoogleMap.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 

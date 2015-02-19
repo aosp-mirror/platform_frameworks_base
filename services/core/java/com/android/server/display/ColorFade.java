@@ -463,12 +463,12 @@ final class ColorFade {
             try {
                 SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
                         SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), s);
+                st.updateTexImage();
+                st.getTransformMatrix(mTexMatrix);
             } finally {
                 s.release();
+                st.release();
             }
-
-            st.updateTexImage();
-            st.getTransformMatrix(mTexMatrix);
 
             // Set up texture coordinates for a quad.
             // We might need to change this if the texture ends up being

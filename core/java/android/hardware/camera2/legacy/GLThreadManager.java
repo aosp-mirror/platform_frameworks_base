@@ -22,6 +22,8 @@ import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.util.Pair;
+import android.util.Size;
 import android.view.Surface;
 
 import java.util.Collection;
@@ -57,11 +59,11 @@ public class GLThreadManager {
      */
     private static class ConfigureHolder {
         public final ConditionVariable condition;
-        public final Collection<Surface> surfaces;
+        public final Collection<Pair<Surface, Size>> surfaces;
         public final CaptureCollector collector;
 
-        public ConfigureHolder(ConditionVariable condition, Collection<Surface> surfaces,
-                               CaptureCollector collector) {
+        public ConfigureHolder(ConditionVariable condition, Collection<Pair<Surface,
+                Size>> surfaces, CaptureCollector collector) {
             this.condition = condition;
             this.surfaces = surfaces;
             this.collector = collector;
@@ -202,10 +204,12 @@ public class GLThreadManager {
      * Configure the GL renderer for the given set of output surfaces, and block until
      * this configuration has been applied.
      *
-     * @param surfaces a collection of {@link android.view.Surface}s to configure.
+     * @param surfaces a collection of pairs of {@link android.view.Surface}s and their
+     *                 corresponding sizes to configure.
      * @param collector a {@link CaptureCollector} to retrieve requests from.
      */
-    public void setConfigurationAndWait(Collection<Surface> surfaces, CaptureCollector collector) {
+    public void setConfigurationAndWait(Collection<Pair<Surface, Size>> surfaces,
+                                        CaptureCollector collector) {
         checkNotNull(collector, "collector must not be null");
         Handler handler = mGLHandlerThread.getHandler();
 

@@ -39,6 +39,8 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Pealkirjata&gt;"</string>
+    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Telefoninumbrit pole)"</string>
     <string name="unknownName" msgid="2277556546742746522">"(Tundmatu)"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Kõnepost"</string>
@@ -68,8 +70,6 @@
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Sissetuleva kõne helistaja ID"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Väljuva kõne helistaja ID"</string>
-    <string name="ColpMmi" msgid="3065121483740183974">"Ühendatud liini ID"</string>
-    <string name="ColrMmi" msgid="4996540314421889589">"Ühendatud liini ID piiramine"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Kõnede suunamine"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Koputus"</string>
     <string name="BaMmi" msgid="455193067926770581">"Kõnepiirang"</string>
@@ -298,8 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Võimaldab rakendusel vastu võtta ja töödelda Bluetoothi MAP-sõnumeid. See tähendab, et rakendus saab teie seadmesse saadetud sõnumeid jälgida või kustutada ilma neid teile näitamata."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"Käitatud rakenduste toomine"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Võimaldab rakendusel tuua teavet praegu ja hiljuti käitatud ülesannete kohta. See võib lubada rakendusel avastada teavet selle kohta, milliseid rakendusi seadmes kasutatakse."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"viimaste ülesannete hulgast ülesande alustamine"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Lubab rakendusel kasutada objekti ActivityManager.RecentTaskInfo, et käivitada mittetoimiv ülesanne, mis tagastati loendist ActivityManager.getRecentTaskList()."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"toimingud erinevatel kasutajakontodel"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Lubab rakendusel teha toiminguid seadme erinevatel kasutajakontodel. Pahatahtlikud rakendused võivad kasutada seda kasutajatevahelise kaitse rikkumiseks."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"täielik litsents teha toiminguid erinevatel kasutajakontodel"</string>
@@ -411,12 +413,12 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Lubab omanikul siduda rakenduse kaugekraani ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vidinateenusega sidumine"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lubab omanikul siduda vidina teenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"sidumine marsruudi pakkumisteenusega"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Lubab õiguste omajal luua seosed kõikide registreeritud marsruutide pakkujatega. Pole kunagi vajalik tavaliste rakenduste korral."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"seadme administraatoriga suhtlemine"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Võimaldab omanikul saata kavatsusi seadme administraatorile. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"sidumine TV-sisendiga"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Lubab omanikul siduda TV-sisendi ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"vanemliku järelevalve muutmine"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Lubab omanikul muuta süsteemi vanemliku järelevalve andmeid. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"seadme administraatori lisamine või eemaldamine"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Võimaldab omanikul lisada või eemaldada aktiivseid seadme administraatoreid. Tavarakenduste puhul ei tohiks see kunagi vajalik olla."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuda ekraani paigutust"</string>
@@ -609,8 +611,6 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"lülita telefon sisse või välja"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Võimaldab rakendusel tahvelarvutit sisse või välja lülitada."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Võimaldab rakendusel telefoni sisse või välja lülitada."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"ekraanikuva ajalõpu lähtestamine"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Lubab rakendusel lähtestada ekraanikuva ajalõpu."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"käivita tehase testrežiimis"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Käitage madalatasemelise tootjatestina, mis annab täieliku juurdepääsu tahvelarvuti riistvarale. Saadaval ainult siis, kui tahvelarvuti töötab tootjatesti režiimis."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Käivitage madalatasemelise tootjatestina, mis võimaldab täielikku juurdepääsu telefoni riistvarale. Kasutatav ainult juhul, kui telefon töötab tootja testrežiimis."</string>
@@ -662,9 +662,6 @@
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"luba Bluetoothi sidumist rakendusega"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Lubab rakendusel siduda ennast kaugseadmetega kasutaja sekkumiseta."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Lubab rakendusel siduda ennast kaugseadmetega kasutaja sekkumiseta."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"juurdepääs Bluetoothi MAP-andmetele"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Võimaldab rakendusel pääseda juurde Bluetoothi MAP-andmetele."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Võimaldab rakendusel pääseda juurde Bluetoothi MAP-andmetele."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-iga ühenduse loomine ja ühenduse katkestamine"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Võimaldab rakendusel määrata, kas WiMAX on lubatud, ja vaadata teavet kõikide ühendatud WiMAX-võrkude kohta."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-i oleku muutmine"</string>
@@ -710,14 +707,10 @@
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Võimaldab rakenduse kõikidel kasutajatel pöörduda välismäluseadme poole."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"juurdepääs vahemälu failisüsteemile"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Võimaldab rakendusel vahemälu failisüsteemi lugeda ja kirjutada."</string>
-    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP-kõnede tegemine/vastuvõtmine"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"Lubab rakendusel teha ja vastu võtta SIP-kõnesid."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ekraani Kõne pooleli kasutamine"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Lubab rakendusel juhtida, millal ja kuidas kasutajale kuvatakse ekraan Kõne pooleli."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"telefoniteenustega suhtlemine"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Võimaldab rakendusel telefoniteenustega kõnede tegemiseks ja vastuvõtmiseks suhelda."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"funktsiooni Kõne pooleli kasutuskogemuse pakkumine"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Lubab rakendusel pakkuda kasutuskogemust funktsiooni Kõne pooleli kasutamisel."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"Interneti-kõnede tegemine/vastuvõtmine"</string>
+    <string name="permdesc_use_sip" msgid="4717632000062674294">"Võimaldab rakendusel kasutada SIP-teenust Interneti-kõnede valimiseks/vastuvõtmiseks."</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"ekraani Kõne pooleli kasutamine"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Lubab rakendusel juhtida, millal ja kuidas kasutajale kuvatakse ekraan Kõne pooleli."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"võrgukasutuse ajaloo lugemine"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Võimaldab rakendusel lugeda võrgukasutuse ajalugu teatud võrkude ja rakenduste puhul."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"võrgueeskirjade haldamine"</string>
@@ -730,6 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Võimaldab omanikul siduda märguannete kuulamisteenuse ülemise taseme kasutajaliidese. Seda ei tohiks tavarakenduste puhul kunagi vaja olla."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"seo tingimuse pakkuja teenusega"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Lubab omanikul siduda tingimuse pakkuja teenuse ülataseme liidesega. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"meediumi marsruutimise teenusega sidumine"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Lubab omanikul siduda meediumi marsruutimise teenuse ülataseme liidesega. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"sidumine uneteenusega"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Lubab omanikul siduda uneteenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operaatoripoolse konfiguratsioonirakenduse aktiveerimine"</string>
@@ -742,8 +737,6 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Lubab rakendusel ette valmistada ja kasutada DRM-i sertifikaate. Tavarakenduste puhul ei tohiks see vajalik olla."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Android Beami ülekande oleku vastuvõtmine"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Lubab rakendusel saada teavet praeguste Android Beami ülekannete kohta"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-sertifikaatide eemaldamine"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Lubab rakendusel eemaldada DRM-sertifikaate. Pole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parooli reeglite määramine"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrollige ekraaniluku avamise paroolide pikkust ja tähemärke."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekraani avamiskatsed"</string>
@@ -912,13 +905,11 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-kaart puudub või on loetamatu. Sisestage SIM-kaart."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Kasutamiskõlbmatu SIM-kaart."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kaart on jäädavalt keelatud.\n Teise SIM-kaardi saamiseks võtke ühendust oma traadita side teenusepakkujaga."</string>
-    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Eelmine lugu"</string>
-    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Järgmine lugu"</string>
-    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Peata"</string>
-    <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Esita"</string>
-    <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Peata"</string>
-    <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Keri tagasi"</string>
-    <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Keri edasi"</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Eelmise loo nupp"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Nupp Järgmine rada"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Nupp Peata"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Nupp Esita"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Nupp Peata"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Ainult hädaabikõned"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Võrk suletud"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM-kaart on PUK-lukus."</string>
@@ -1117,7 +1108,6 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tekstitoimingud"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> töötab"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Puudutage lisateabe saamiseks või rakenduse peatamiseks."</string>
     <string name="ok" msgid="5970060430562524910">"OK"</string>
@@ -1136,10 +1126,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Muutmine rakendusega %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Jagamine:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Jagamine rakendusega %1$s"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Avaekraani rakenduse valimine"</string>
-    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Rakenduse %1$s kasutamine avaekraanina"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Avalehe rakenduse valimine"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Kasuta vaikimisi selleks toiminguks."</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"Teise rakenduse kasutamine"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Tühjendage vaikeandmed valikutes Süsteemiseaded &gt; Rakendused &gt; Allalaaditud."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Toimingu valimine"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"USB-seadme jaoks rakenduse valimine"</string>
@@ -1231,8 +1219,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Luba"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Keela"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; soovib saata sõnumi aadressile &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="5873295990846059400">"Sellega võivad teie mobiilikontol "<b>"kaasneda kulud"</b>"."</string>
-    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Sellega kaasnevad teie mobiilikontol kulud."</b></string>
+    <string name="sms_short_code_details" msgid="3492025719868078457">"See "<font fgcolor="#ffffb060">"võib põhjustada kulusid"</font>" teie mobiilikontole."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"See lisab kulusid teie mobiilikontole."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Saada"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Tühista"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Jäta minu valik meelde"</string>
@@ -1285,9 +1273,9 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Vorminda"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-silumine ühendatud"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Puudutage USB-silumise keelamiseks."</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Klaviatuuri muutmine"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Vali klaviatuurid"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Sisestusmeetodi kuvamine"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Valige sisestusmeetod"</string>
+    <string name="configure_input_methods" msgid="9091652157722495116">"Seadista sisestusmeetodid"</string>
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Füüsiline klaviatuur"</string>
     <string name="hardware" msgid="7517821086888990278">"Riistvara"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Klaviatuuri paigutuse valimine"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Puudutage klaviatuuri paigutuse valimiseks."</string>
@@ -1338,10 +1326,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Lubab rakendusel ennast siduda usaldusväärse agendi teenusega."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Suhtlemine värskenduse ja taastesüsteemiga"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Lubab rakendusel suhelda taastesüsteemi ja süsteemivärskendustega."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Meedia projektsiooniseansi haldamine"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Lubab rakendusel hallata meedia projektsiooniseansse. Need seansid võivad anda rakendusele võimaluse hõivata ekraanikuva ja heli sisu. Pole kunagi vajalik tavalise rakenduse puhul."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Installiseansside lugemine"</string>
-    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Lubab rakendusel lugeda installiseansse. See võimaldab näha aktiivse paketi installimise üksikasju."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Meediumi projitseerimise seansi loomine"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Lubab rakendusel luua meediumi projitsiooni seanssi. Need seansid võivad annda rakendustele võimaluse hõivata kuva- ja helisisu. Ei ole kunagi vajalik tavaliste rakenduste puhul."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Suumi juhtimiseks puudutage kaks korda"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Vidinat ei saanud lisada."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Mine"</string>
@@ -1360,8 +1346,6 @@
     <string name="deny" msgid="2081879885755434506">"Keela"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Taotletud luba"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Luba on taotletud\nkontole <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Kasutate rakendust väljaspool tööprofiili"</string>
-    <string name="forward_intent_to_work" msgid="621480743856004612">"Kasutate seda rakendust oma tööprofiilil"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Sisestusmeetod"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sünkroonimine"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Juurdepääsetavus"</string>
@@ -1468,11 +1452,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Muuda"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Andmete kasutamise hoiatus"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Kasutuse/sätete vaat. puudutage."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2G-, 3G-andmeside limiit on täis"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4G-andmeside limiit on täis"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Mobiilse andmes. limiit on täis"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"WiFi-andmeside limiit on täis"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Andmed on ülej. tsükliks peatat."</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"2G–3G andmeside on väljalülitatud"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"4G andmeside on väljalülitatud"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Mob. andmeside väljalülitatud"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"WiFi andmeside väljalülitatud"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Limiit on täis"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G andmemahupiirang ületatud"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G andmemahupiirang ületatud"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Mob. andmeside limiit ületatud"</string>
@@ -1503,7 +1487,6 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"Kas vastata kõnele?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Alati"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Ainult üks kord"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ei toeta tööprofiili"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tahvelarvuti"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kõrvaklapid"</string>
@@ -1512,7 +1495,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Süsteem"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Bluetooth-heli"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Juhtmeta ekraan"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"Ülekandmine"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Seadmega ühendamine"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Ekraanikuva ülekandmine seadmesse"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Seadmete otsimine …"</string>
@@ -1528,6 +1512,11 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Ülekate nr .<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", turvaline"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Ekraanikuva ülekandmine"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Ühendamine ekraaniga <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Ekraanikuva ülekandmine"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Ühendatud ekraaniga <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Katkesta ühendus"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Hädaabikõne"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Unustasin mustri"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Vale muster"</string>
@@ -1566,15 +1555,14 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%d</xliff:g> sekundi pärast."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eemalda"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Kas suurendada helitugevuse taset üle soovitatud taseme?\n\nPikaajaline valju helitugevusega kuulamine võib kuulmist kahjustada."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Kas suurendada helitugevust üle soovitatud taseme?\nPikaajaline suure helitugevusega muusika kuulamine võib kahjustada kuulmist."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hõlbustuse lubamiseks hoidke kaht sõrme all."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Hõlbustus on lubatud."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Hõlbustus on tühistatud."</string>
     <string name="user_switched" msgid="3768006783166984410">"Praegune kasutaja <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Üleminek kasutajale <xliff:g id="NAME">%1$s</xliff:g> ..."</string>
     <string name="owner_name" msgid="2716755460376028154">"Omanik"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Viga"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"Administraator ei luba sellist muudatust teha"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"See rakendus ei toeta piiratud profiilide kontosid"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Selle toimingu käsitlemiseks ei leitud ühtegi rakendust"</string>
     <string name="revoke" msgid="5404479185228271586">"Tühista"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1693,28 +1681,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> on valitud"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> on kustutatud"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Ekraanikuva vabastamiseks puudutage pikalt samal ajal nuppe Tagasi ja Ülevaade."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ekraanikuva vabastamiseks puudutage pikalt nuppu Ülevaade."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ekraan on kinnitatud. Teie organisatsioon ei luba vabastamist."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Kas kasutada ekraanikuva kinnitamist?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Ekraanikuva kinnitamine lukustab ekraani ühele vaatele.\n\nVabastamiseks puudutage pikalt samal ajal nuppe Tagasi ja Ülevaade."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Ekraanikuva kinnitamine lukustab ekraani ühele vaatele.\n\nVabastamiseks puudutage pikalt nuppu Ülevaade."</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Seade on režiimis Rakendusele lukustamine. Väljumiseks vajutage pikalt nuppu Hiljutised."</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Seade on režiimis Rakendusele lukustamine."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"Kas soovite kasutada Rakendusele lukustamist?"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"Rakendusele lukustamise funktsioon lukustab kuva ühele rakendusele.\n\nVäljumiseks vajutage pikalt nuppu Hiljutised."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"TÄNAN, EI"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"KÄIVITA"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Ekraan on kinnitatud"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekraan on vabastatud"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Enne vabastamist küsi PIN-koodi"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Enne vabastamist küsi avamismustrit"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Enne vabastamist küsi parooli"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Aku kestuse parandamiseks vähendab akusäästja teie seadme jõudlust ja piirab vibratsiooni ning suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Kuni seisakuaja lõppemiseni kell <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Üheks minutiks"</item>
-    <item quantity="other" msgid="6924190729213550991">"%d minutiks"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Üheks tunniks"</item>
-    <item quantity="other" msgid="5408537517529822157">"%d tunniks"</item>
-  </plurals>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Määramata ajaks"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Rakendusele lukustamine"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Pole enam režiimis Rakendusele lukustamine"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Küsi %1$s enne väljumist"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN-koodi"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"avamismustrit"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"parooli"</string>
 </resources>

@@ -105,10 +105,7 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @hide
      */
-    public int callDrawGLFunction(long drawGLFunction) {
-        // Noop - this is done in the display list recorder subclass
-        return RenderNode.STATUS_DONE;
-    }
+    public abstract int callDrawGLFunction2(long drawGLFunction);
 
     public abstract void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint);

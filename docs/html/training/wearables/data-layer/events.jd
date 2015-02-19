@@ -14,14 +14,14 @@ page.title=Handling Data Layer Events
 </div>
 </div>
 
-<p>When you make calls with the data layer, you can receive the status
+<p>When you make calls to the Data Layer API, you can receive the status
 of the call when it completes as well as listen for any changes that
 the call ends up making with listeners.
 </p>
 
 <h2 id="Wait">Wait for the Status of Data Layer Calls</h2>
 
-<p>You'll notice that calls to the data layer API sometimes return a
+<p>You'll notice that calls to the Data Layer API sometimes return a
 <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>,
 such as
 <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>putDataItem()</code></a>.
@@ -33,9 +33,9 @@ after the operation completes, so the
 lets you wait for the result status, either synchronously or asynchronously.
 </p>
 
-<h3 id="async-waiting">Asynchronously waiting</h3>
-<p>If your code is running on the main UI thread, do not making blocking calls
-to the data layer API. You can run the calls asynchronously by adding a callback
+<h3 id="async-waiting">Asynchronous calls</h3>
+<p>If your code is running on the main UI thread, do not make blocking calls
+to the Data Layer API. You can run the calls asynchronously by adding a callback method
 to the <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a> object,
 which fires when the operation is completed:</p>
 <pre>
@@ -49,12 +49,14 @@ pendingResult.setResultCallback(new ResultCallback&lt;DataItemResult&gt;() {
 });
 </pre>
 
-<h3 id="sync-waiting">Synchronously waiting</h3>
+<h3 id="sync-waiting">Synchronous calls</h3>
 <p>If your code is running on a separate handler thread in a background service (which is the case
 in a <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>),
 it's fine for the calls to block. In this case, you can call
 <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html#await()"><code>await()</code></a>
-on the PendingResult object, which will block until the request has completed, and return a Result
+on the <a href="{@docRoot}reference/com/google/android/gms/common/api/PendingResult.html"><code>PendingResult</code></a>
+object, which blocks until the request completes and returns a
+<a href="{@docRoot}reference/com/google/android/gms/common/api/Result.html"><code>Result</code></a>
 object:
 </p>
 
@@ -82,14 +84,14 @@ are created, messages are received, or when the wearable and handset are connect
   </li>
 </ul>
 
-<p>With both these options, you override any of the data event callbacks that you care about
-handling in your implementation.</p>
+<p>With both these options, you override the data event callback methods for the events you
+are interested in handling.</p>
 
 <h3 id="listener-service">With a WearableListenerService</h3>
 
 <p>
 You typically create instances of this service in both your wearable and handheld apps. If you
-don't care about data events in one of these apps, then you don't need to implement this
+are not interested in data events in one of these apps, then you don't need to implement this
 service in that particular app.</p>
 
 <p>For example, you can have a handheld app that sets and gets data item objects and a wearable app
@@ -107,8 +109,9 @@ triggers this callback on both sides.</li>
 -  A message sent from one side of a connection triggers this callback on the other side of the connection.</li>
   <li><a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onMessageReceived(com.google.android.gms.wearable.MessageEvent)"><code>onPeerConnected()</code></a>
   and <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerDisconnected(com.google.android.gms.wearable.Node)"><code>onPeerDisconnected()</code></a> -
-  Called when connection with the handheld or wearable is connected or disconnected.
-  Changes in connection state on one side of the connection triggers these callbacks on both sides of the connection.
+  Called when the connection with the handheld or wearable is connected or disconnected.
+  Changes in connection state on one side of the connection trigger these callbacks on both sides
+  of the connection.
   </li>
 </ul>
 
@@ -118,8 +121,8 @@ triggers this callback on both sides.</li>
   <li>Create a class that extends
   <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>.
   </li>
-  <li>Listen for the events that you care about, such as
-  <a href="{@docRoot}/reference/com/google/android/gms/wearable/WearableListenerService.html#onDataChanged(com.google.android.gms.wearable.DataEventBuffer)"><code>onDataChanged()</code></a>.
+  <li>Listen for the events that you're interested in, such as
+  <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onDataChanged(com.google.android.gms.wearable.DataEventBuffer)"><code>onDataChanged()</code></a>.
   </li>
   <li>Declare an intent filter in your Android manifest to notify the system about your
   <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>.
@@ -159,13 +162,13 @@ public class DataLayerListenerService extends WearableListenerService {
         }
 
         // Loop through the events and send a message
-        / to the node that created the data item.
+        // to the node that created the data item.
         for (DataEvent event : events) {
             Uri uri = event.getDataItem().getUri();
 
             // Get the node id from the host value of the URI
             String nodeId = uri.getHost();
-            // Set the data of the message to be the bytes of the URI.
+            // Set the data of the message to be the bytes of the URI
             byte[] payload = uri.toString().getBytes();
 
             // Send the RPC
@@ -189,7 +192,8 @@ public class DataLayerListenerService extends WearableListenerService {
 
 <h4>Permissions within Data Layer Callbacks</h4>
 
-<p>In order to deliver callbacks to your application for data layer events, Google Play services
+<p>
+To deliver callbacks to your application for data layer events, Google Play services
 binds to your <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>WearableListenerService</code></a>,
 and calls your callbacks via IPC. This has the consequence
 that your callbacks inherit the permissions of the calling process.</p>
@@ -233,7 +237,7 @@ of the following interfaces:
 <li>Implement the desired interfaces.</li>
 <li>In {@link android.app.Activity#onCreate}, create an instance of
 <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>GoogleApiClient</code></a>
-to work with the data layer API.
+to work with the Data Layer API.
 <li>
 In {@link android.app.Activity#onStart onStart()}, call <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"><code>connect()</code></a> to connect the client to Google Play services.
 </li>
@@ -263,6 +267,8 @@ or <a href="{@docRoot}reference/com/google/android/gms/wearable/NodeApi.html#rem
 public class MainActivity extends Activity implements
         DataApi.DataListener, ConnectionCallbacks, OnConnectionFailedListener {
 
+    private GoogleApiClient mGoogleApiClient;
+
     &#64;Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -283,7 +289,7 @@ public class MainActivity extends Activity implements
         }
     }
 
-   &#64;Override
+    &#64;Override
     public void onConnected(Bundle connectionHint) {
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             Log.d(TAG, "Connected to Google Api Service");
@@ -306,8 +312,9 @@ public class MainActivity extends Activity implements
             if (event.getType() == DataEvent.TYPE_DELETED) {
                 Log.d(TAG, "DataItem deleted: " + event.getDataItem().getUri());
             } else if (event.getType() == DataEvent.TYPE_CHANGED) {
-                 Log.d(TAG, "DataItem changed: " + event.getDataItem().getUri());
+                Log.d(TAG, "DataItem changed: " + event.getDataItem().getUri());
             }
         }
     }
+}
 </pre>

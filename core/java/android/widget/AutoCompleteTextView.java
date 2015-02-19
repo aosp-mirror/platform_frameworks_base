@@ -1005,6 +1005,12 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
+
+        if (mTemporaryDetach) {
+            // If we are temporarily in the detach state, then do nothing.
+            return;
+        }
+
         // Perform validation if the view is losing focus.
         if (!focused) {
             performValidation();

@@ -17,28 +17,48 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_detail_item_height"
+    android:layout_marginBottom="@dimen/zen_mode_condition_detail_item_spacing"
     android:layout_marginStart="@dimen/zen_mode_condition_detail_button_padding"
     android:layout_marginEnd="@dimen/zen_mode_condition_detail_button_padding" >
 
     <RadioButton
         android:id="@android:id/checkbox"
         android:layout_width="40dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="1dp"
+        android:layout_marginStart="7dp"
+        android:layout_marginEnd="4dp"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:gravity="center" />
 
-    <TextView
-        android:id="@android:id/title"
+    <LinearLayout
+        android:id="@android:id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
         android:layout_toEndOf="@android:id/checkbox"
-        android:layout_toStartOf="@android:id/button1"
-        android:ellipsize="end"
-        android:gravity="center_vertical"
-        android:maxLines="1"
-        android:textAppearance="@style/TextAppearance.QS.DetailItemPrimary" />
+        android:layout_toStartOf="@android:id/button1">
+
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:textAlignment="viewStart"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.QS.DetailItemPrimary" />
+
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/zen_mode_condition_detail_item_interline_spacing"
+            android:ellipsize="end"
+            android:textAlignment="viewStart"
+            android:maxLines="1"
+            android:textAppearance="@style/TextAppearance.QS.DetailItemSecondary" />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@android:id/button1"
@@ -46,7 +66,6 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="@dimen/zen_mode_condition_detail_button_padding"
         android:scaleType="center"
         android:layout_toStartOf="@android:id/button2"
         android:contentDescription="@string/accessibility_quick_settings_less_time"

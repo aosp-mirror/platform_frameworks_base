@@ -180,7 +180,10 @@ public class DefaultContainerService extends IntentService {
             }
 
             ret.packageName = pkg.packageName;
+            ret.splitNames = pkg.splitNames;
             ret.versionCode = pkg.versionCode;
+            ret.baseRevisionCode = pkg.baseRevisionCode;
+            ret.splitRevisionCodes = pkg.splitRevisionCodes;
             ret.installLocation = pkg.installLocation;
             ret.verifiers = pkg.verifiers;
             ret.recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,

@@ -168,8 +168,8 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     private void addInputWindowHandleLw(final InputWindowHandle inputWindowHandle,
-            final WindowState child, int flags, int privateFlags, final int type,
-            final boolean isVisible, final boolean hasFocus, final boolean hasWallpaper) {
+            final WindowState child, int flags, final int type, final boolean isVisible,
+            final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
         final boolean modal = (flags & (WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -184,7 +184,6 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             child.getTouchableRegion(inputWindowHandle.touchableRegion);
         }
         inputWindowHandle.layoutParamsFlags = flags;
-        inputWindowHandle.layoutParamsPrivateFlags = privateFlags;
         inputWindowHandle.layoutParamsType = type;
         inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
         inputWindowHandle.visible = isVisible;
@@ -243,6 +242,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         final WindowStateAnimator universeBackground = mService.mAnimator.mUniverseBackground;
         final int aboveUniverseLayer = mService.mAnimator.mAboveUniverseLayer;
         boolean addedUniverse = false;
+        boolean disableWallpaperTouchEvents = false;
 
         // If there's a drag in flight, provide a pseudowindow to catch drag input
         final boolean inDrag = (mService.mDragState != null);
@@ -283,8 +283,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
                 final boolean hasFocus = (child == mInputFocus);
                 final boolean isVisible = child.isVisibleLw();
+                if ((privateFlags
+                        & WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS)
+                            != 0) {
+                    disableWallpaperTouchEvents = true;
+                }
                 final boolean hasWallpaper = (child == mService.mWallpaperTarget)
-                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0;
+                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0
+                        && !disableWallpaperTouchEvents;
                 final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
 
                 // If there's a drag in progress and 'child' is a potential drop target,
@@ -298,15 +304,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
                     final WindowState u = universeBackground.mWin;
                     if (u.mInputChannel != null && u.mInputWindowHandle != null) {
                         addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
-                                u.mAttrs.privateFlags, u.mAttrs.type,
-                                true, u == mInputFocus, false);
+                                u.mAttrs.type, true, u == mInputFocus, false);
                     }
                     addedUniverse = true;
                 }
 
                 if (child.mWinAnimator != universeBackground) {
-                    addInputWindowHandleLw(inputWindowHandle, child, flags, privateFlags, type,
-                            isVisible, hasFocus, hasWallpaper);
+                    addInputWindowHandleLw(inputWindowHandle, child, flags, type, isVisible,
+                            hasFocus, hasWallpaper);
                 }
             }
         }

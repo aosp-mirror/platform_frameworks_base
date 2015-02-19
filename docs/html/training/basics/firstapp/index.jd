@@ -3,20 +3,19 @@ page.metaDescription=If you're new to Android app development, this where you sh
 
 trainingnavtop=true
 startpage=true
-next.title=Creating an Android Project
-next.link=creating-project.html
+
+page.tags=sdk tools
+helpoutsWidget=true
 
 @jd:body
 
 <div id="tb-wrapper">
 <div id="tb">
 
-<h2>Dependencies and prerequisites</h2>
+<h2>Dependencies</h2>
 
 <ul>
-  <li><a href="http://developer.android.com/sdk/index.html">Android SDK</a></li>
-  <li><a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT Plugin</a> 22.6.2 or higher
-    (if you're using Eclipse)</li>
+  <li><a href="{@docRoot}sdk/index.html">Android Studio</a></li>
 </ul>
 
 </div>
@@ -28,25 +27,21 @@ next.link=creating-project.html
 project and run a debuggable version of the app. You'll also learn some fundamentals of Android app
 design, including how to build a simple user interface and handle user input.</p>
 
+<h2>Set Up Your Environment</h2>
+
 <p>Before you start this class, be sure you have your development environment set up. You need
 to:</p>
 <ol>
-  <li>Download the Android SDK.</li>
-  <li>Install the ADT plugin for Eclipse (if you’ll use the Eclipse IDE).</li>
-  <li>Download the latest SDK tools and platforms using the SDK Manager.</li>
+  <li>Download <a href="{@docRoot}sdk/index.html">Android Studio</a>.</li>
+  <li>Download the latest SDK tools and platforms using the
+  <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
 </ol>
 
-<p class="note"><strong>Note:</strong> Make sure you install the most recent versions of the ADT
-plugin and the Android SDK before you start this class. The procedures described in this class may
-not apply to earlier versions.</p>
+<p class="note"><strong>Note:</strong> Although most of this training class
+expects that you're using Android Studio, some procedures include alternative
+instructions for using
+the SDK tools from the command line instead.</p>
 
-<p>If you haven't already done these tasks, start by downloading the
-  <a href="{@docRoot}sdk/index.html">Android SDK</a> and following the install steps.
-  Once you've finished the setup, you're ready to begin this class.</p>
-
-<p>This class uses a tutorial format that incrementally builds a small Android app that teaches
+<p>This class uses a tutorial format to create a small Android app that teaches
 you some fundamental concepts about Android development, so it's important that you follow each
 step.</p>
-
-<p><strong><a href="creating-project.html">Start the first lesson &rsaquo;</a></strong></p>
-

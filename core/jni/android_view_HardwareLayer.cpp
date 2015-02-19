@@ -81,12 +81,6 @@ static void android_view_HardwareLayer_updateSurfaceTexture(JNIEnv* env, jobject
     layer->updateTexImage();
 }
 
-static jlong android_view_HardwareLayer_getLayer(JNIEnv* env, jobject clazz,
-        jlong layerUpdaterPtr) {
-    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    return reinterpret_cast<jlong>( layer->backingLayer() );
-}
-
 static jint android_view_HardwareLayer_getTexName(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
@@ -111,7 +105,6 @@ static JNINativeMethod gMethods[] = {
             (void*) android_view_HardwareLayer_setSurfaceTexture },
     { "nUpdateSurfaceTexture",   "(J)V",       (void*) android_view_HardwareLayer_updateSurfaceTexture },
 
-    { "nGetLayer",               "(J)J",       (void*) android_view_HardwareLayer_getLayer },
     { "nGetTexName",             "(J)I",       (void*) android_view_HardwareLayer_getTexName },
 #endif
 };

@@ -1,0 +1,107 @@
+fullpage=true
+page.viewport_width=970
+excludeFromSuggestions=true
+page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
+page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
+
+@jd:body
+
+
+
+
+
+<div class="home-new-carousel-1">
+  <div class="fullscreen-carousel-content">
+    <div class="vcenter">
+      <div class="wrap clearfix">
+
+        <div class="static resource-flow-layout wrap col-16">
+          <div class="resource resource-card resource-card-18x6">
+
+      <div class="landing-section-header">
+            <div class="col-10"><img src="{@docRoot}images/home/l-hero_2x.png"
+                 srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x"
+                 width="510" style="margin:20px 30px 0 30px"></div>
+            <div class="col-5" style=" margin-top:70px ">
+            <h3 stye="font-weight:300;">Android 5.0 Lollipop</h3>
+            <p>在 Android 5.0 的版本更新中，我们添加了多种可用于你的应用程序的新功能，比如锁屏通知,一个全新的相机API，OpenGL ES 3.1，以及新的 Material Design 界面等等。</p>
+            <a href="{@docRoot}about/versions/lollipop.html" class="landing-button landing-primary">了解详情</a>
+            </div>
+          </div>
+          </div>
+        </div>
+       <h2>&nbsp;</h2>
+        
+        <div style="margin-top:20px" class="resource-widget resource-flow-layout wrap col-16
+        no-section" data-query="collection:index/primary/zhcn" data-resourcestyle="card"
+        data-sortorder="-timestamp" data-maxresults="3" data-cardsizes="6x2,6x2,6x2"></div> 
+
+      </div> <!-- end .wrap -->
+    </div> <!-- end .vcenter -->
+  </div> <!-- end .fullscreen-carousel-content -->
+</div> <!-- end .fullscreen-carousel -->
+
+
+
+
+<div class="actions-bar" style="margin-top:20px">
+  <div class="wrap">
+    <div class="actions">
+      <div><a href="/sdk/index.html">下载 SDK</a></div>
+      <div><a href="/samples/index.html">浏览示例</a></div>
+      <div><a href="//www.youtube.com/user/androiddevelopers">观看视频</a></div>
+      <div><a href="/distribute/googleplay/developer-console.html">管理应用</a></div>
+    </div><!-- end .actions -->
+  </div><!-- end .wrap -->
+</div><!-- end .actions-bar -->
+
+
+
+<div class="landing-rest-of-page">
+  <div class="landing-section">
+    <div class="wrap">
+      <div class="landing-section-header">
+        
+            <div class="landing-h1" style="margin-top:0px">专为跨屏世界打造</div>
+        <div class="landing-subhead" style="margin-top:20px">
+          全球数亿手持设备安装的都是 Android 系统。<br />
+          现在 Android 系统还支持以下这些备受期待的新设备。
+        </div>
+      </div>
+      <div class="landing-body" style="margin-top:50px">
+        <div class="landing-breakout cols">
+          <div class="col-3-wide">
+              <img src="{@docRoot}images/home/wear-wordmark.png" />
+              <img src="{@docRoot}images/home/wear.png" />
+              <p class="landing-small">
+                让用户随时随地获得需要的信息。
+            </p>
+            <p class="landing-small">
+              <a href="/wear/index.html">了解 Android Wear</a>
+            </p>
+          </div>
+          <div class="col-3-wide">
+              <img src="{@docRoot}images/home/tv-wordmark.png" />
+             <img src="{@docRoot}images/home/tv.png" />
+              <p class="landing-small">
+                针对大屏幕打造应用，使你的内容引人入胜。
+              </p>
+            <p class="landing-small">
+              <a href="/tv/index.html">了解 Android TV</a>
+
+            </p>
+          </div>
+          <div class="col-3-wide">
+              <img src="{@docRoot}images/home/auto-wordmark.png" />
+              <img src="{@docRoot}images/home/auto.png" />
+              <p class="landing-small">
+                将你的音乐应用扩展到车载娱乐系统。
+             </p>
+            <p class="landing-small">
+              <a href="/auto/index.html">了解 Android Auto</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>  <!-- end .wrap -->
+  </div> <!-- end .landing-section -->

@@ -33,40 +33,46 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
         return;
     }
 
+    ATRACE_NAME("AssetAtlas::init");
+
     mImage = new Image(buffer);
-
     if (mImage->getTexture()) {
-        Caches& caches = Caches::getInstance();
-
-        mTexture = new Texture(caches);
-        mTexture->id = mImage->getTexture();
-        mTexture->width = buffer->getWidth();
-        mTexture->height = buffer->getHeight();
-
-        createEntries(caches, map, count);
+        if (!mTexture) {
+            Caches& caches = Caches::getInstance();
+            mTexture = new Texture(caches);
+            mTexture->width = buffer->getWidth();
+            mTexture->height = buffer->getHeight();
+            createEntries(caches, map, count);
+        }
     } else {
         ALOGW("Could not create atlas image");
-
         delete mImage;
         mImage = NULL;
-        mTexture = NULL;
     }
 
-    mGenerationId++;
+    updateTextureId();
 }
 
 void AssetAtlas::terminate() {
     if (mImage) {
         delete mImage;
         mImage = NULL;
+        updateTextureId();
+    }
+}
 
-        delete mTexture;
-        mTexture = NULL;
 
-        for (size_t i = 0; i < mEntries.size(); i++) {
-            delete mEntries.valueAt(i);
-        }
-        mEntries.clear();
+void AssetAtlas::updateTextureId() {
+    mTexture->id = mImage ? mImage->getTexture() : 0;
+    if (mTexture->id) {
+        // Texture ID changed, force-set to defaults to sync the wrapper & GL
+        // state objects
+        mTexture->setWrap(GL_CLAMP_TO_EDGE, false, true);
+        mTexture->setFilter(GL_NEAREST, false, true);
+    }
+    for (size_t i = 0; i < mEntries.size(); i++) {
+        AssetAtlas::Entry* entry = mEntries.valueAt(i);
+        entry->texture->id = mTexture->id;
     }
 }
 
@@ -131,7 +137,6 @@ void AssetAtlas::createEntries(Caches& caches, int64_t* map, int count) {
                 y / height, (y + bitmap->height()) / height);
 
         Texture* texture = new DelegateTexture(caches, mTexture);
-        texture->id = mTexture->id;
         texture->blend = !bitmap->isOpaque();
         texture->width = bitmap->width();
         texture->height = bitmap->height();

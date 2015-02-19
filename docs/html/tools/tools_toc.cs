@@ -13,27 +13,21 @@
   </li>
 
 
-  <li class="nav-section">
+<!-- Android Studio menu-->
+
+ <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>sdk/installing/studio.html">Android Studio</a>
+      <a href="<?cs var:toroot?>tools/studio/index.html">Android Studio</a>
     </div>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
-          Migrating from Eclipse</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/create-project.html">
-          Creating a Project</a></li>
       <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
           Tips and Tricks</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-androidview.html">
-          Using the Android Project View</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
-          Using the Layout Editor</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-build.html">
-          Building Your Project with Gradle</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-debug.html">
-          Debugging with Android Studio</a></li>
-      </ul>
-  </li>
+    </ul>
+
+ </li><!-- End of Android Studio menu -->
+
+
+<!-- Workflow menu-->
 
   <li class="nav-section">
     <div class="nav-section-header">
@@ -56,9 +50,9 @@
         </ul>
       </li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Setting Up Projects</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Managing Projects</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/create-project.html"><span class="en">From Android Studio</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/projects/templates.html"><span class="en">Using Code Templates</span></a></li>
         </ul>
@@ -66,10 +60,15 @@
 
 
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/building/index.html"><span class="en">Building and Running</span></a></div>
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/building/index.html">
+          <span class="en">Building and Running</span></a>
+        </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html"><span class="en">From the Command Line</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/building/building-studio.html">
+            <span class="en">From Android Studio</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
+            <span class="en">From the Command Line</span></a></li>
         </ul>
       </li>
 
@@ -123,7 +122,7 @@
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/debugging/index.html"><span class="en">Debugging</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html"><span class="en">From Eclipse with ADT</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-studio.html"><span class="en">From Android Studio</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects-cmdline.html"><span class="en">From Other IDEs</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/ddms.html"><span class="en">Using DDMS</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-log.html"><span class="en">Reading and Writing Logs</span></a></li>
@@ -136,9 +135,9 @@
     </ul>
   </li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html"><span class="en">Publishing</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html" zh-cn-lang="发布概述"><span class="en">Publishing</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/publishing/preparing.html"><span class="en">Preparing for Release</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/publishing/preparing.html" zh-cn-lang="准备发布"><span class="en">Preparing for Release</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/publishing/versioning.html"><span class="en">Versioning Your Apps</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/publishing/app-signing.html"><span class="en">Signing Your Apps</span></a></li>
         </ul>
@@ -146,27 +145,12 @@
     </ul>
   </li>
 
-  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/support-library/index.html"><span
-class="en">Support Library</span></a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/support-library/features.html">Features</a></li>
-      <li><a href="<?cs var:toroot ?>tools/support-library/setup.html">Setup</a></li>
-    </ul>
-  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
 class="en">Tools Help</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
-      <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/adt.html">ADT</a></div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
-              <span class="en">Installing the Eclipse Plugin</span></a></li>
-        </ul>
-      </li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
@@ -194,7 +178,7 @@ class="en">MonkeyImage</span></a></li>
 class="en">MonkeyRunner</span></a></li>
         </ul>
       </li>
-       <li><a href="<?cs var:toroot ?>tools/help/proguard.html">ProGuard</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
@@ -218,21 +202,57 @@ class="en">MonkeyRunner</span></a></li>
     </ul>
   </li>
 
+  </li><!-- end of tools help -->
+
+
+<!-- Build System menu-->
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>sdk/installing/studio-build.html">Build System</a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/building/configuring-gradle.html">
+        <span class="en">Configuring Gradle Builds</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/building/plugin-for-gradle.html">
+        <span class="en">Android Plugin for Gradle</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/building/multidex.html">
+        <span class="en">Apps Over 65K Methods</span></a></li>
+      </ul>
+  </li><!-- end of build system -->
+
+
+<!-- Support Library menu-->
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/support-library/index.html"><span
+class="en">Support Library</span></a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/support-library/features.html">Features</a></li>
+      <li><a href="<?cs var:toroot ?>tools/support-library/setup.html">Setup</a></li>
+    </ul>
+  </li><!-- end of support library -->
+
+
+<!-- Revision menu-->
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
     <ul>
+      <li><a href="<?cs var:toroot ?>tools/revisions/studio.html">
+        <span class="en">Android Studio</span>
+      </a></li>
       <li><a href="<?cs var:toroot ?>tools/sdk/tools-notes.html">
         <span class="en">SDK Tools</span>
       </a></li>
-      <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
-        <span class="en">ADT Plugin</span>
-      </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/build-tools.html">
-        <span class="en">Build Tools</span>
+        <span class="en">SDK Build Tools</span>
       </a></li>
-      <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html"><span
-class="en">Platforms</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html">
+        <span class="en">SDK Platforms</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
+        <span class="en">ADT Plugin</span></a></li>
     </ul>
   </li>
 
@@ -252,6 +272,28 @@ class="en">Platforms</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/adk/adk.html">ADK 2011 Guide</a></li>
     </ul>
   </li>
+
+
+<!-- Eclipse ADT menu-->
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+    <a href="<?cs var:toroot ?>tools/help/adt.html">
+      <span class="en">Eclipse with ADT</span></a>
+    </div>
+    <ul>
+    <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+    <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
+        <span class="en">Installing the Eclipse Plugin</span></a></li>
+    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
+    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
+    <li><a href="<?cs var:toroot ?>tools/building/building-cmdline-ant.html">Building with Ant</a></li>
+    <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing</a></li>
+    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
+    <li><a href="<?cs var:toroot ?>tools/publishing/app-signing-eclipse.html">Signing Your Apps</a></li>
+    </ul>
+  </li><!-- end of Eclipse  -->
+
 
 </ul><!-- nav -->
 

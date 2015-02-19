@@ -48,6 +48,8 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.UserInfoController;
 
+import java.text.NumberFormat;
+
 /**
  * The view to manage the header area in the expanded status bar.
  */
@@ -300,9 +302,6 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
         updateSystemIconsLayoutParams();
         updateClickTargets();
         updateMultiUserSwitch();
-        if (mQSPanel != null) {
-            mQSPanel.setExpanded(mExpanded);
-        }
         updateClockScale();
         updateAvatarScale();
         updateClockLp();
@@ -395,7 +394,8 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
 
     @Override
     public void onBatteryLevelChanged(int level, boolean pluggedIn, boolean charging) {
-        mBatteryLevel.setText(getResources().getString(R.string.battery_level_template, level));
+        String percentage = NumberFormat.getPercentInstance().format((double) level / 100.0);
+        mBatteryLevel.setText(percentage);
     }
 
     @Override
@@ -777,9 +777,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 v.bringToFront();
                 v.setVisibility(VISIBLE);
             }
+            if (v.hasOverlappingRendering()) {
+                v.animate().withLayer();
+            }
             v.animate()
                     .alpha(in ? 1 : 0)
-                    .withLayer()
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {

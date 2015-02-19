@@ -24,7 +24,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
+import android.net.IpPrefix;
 import android.net.LinkAddress;
+import android.net.Network;
 import android.net.RouteInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -99,6 +101,7 @@ public class VpnConfig implements Parcelable {
     public boolean allowBypass;
     public boolean allowIPv4;
     public boolean allowIPv6;
+    public Network[] underlyingNetworks;
 
     public void updateAllowedFamilies(InetAddress address) {
         if (address instanceof Inet4Address) {
@@ -115,9 +118,7 @@ public class VpnConfig implements Parcelable {
         String[] routes = routesStr.trim().split(" ");
         for (String route : routes) {
             //each route is ip/prefix
-            String[] split = route.split("/");
-            RouteInfo info = new RouteInfo(new LinkAddress
-                    (InetAddress.parseNumericAddress(split[0]), Integer.parseInt(split[1])), null);
+            RouteInfo info = new RouteInfo(new IpPrefix(route), null);
             this.routes.add(info);
             updateAllowedFamilies(info.getDestination().getAddress());
         }
@@ -130,9 +131,7 @@ public class VpnConfig implements Parcelable {
         String[] addresses = addressesStr.trim().split(" ");
         for (String address : addresses) {
             //each address is ip/prefix
-            String[] split = address.split("/");
-            LinkAddress addr = new LinkAddress(InetAddress.parseNumericAddress(split[0]),
-                    Integer.parseInt(split[1]));
+            LinkAddress addr = new LinkAddress(address);
             this.addresses.add(addr);
             updateAllowedFamilies(addr.getAddress());
         }
@@ -162,6 +161,7 @@ public class VpnConfig implements Parcelable {
         out.writeInt(allowBypass ? 1 : 0);
         out.writeInt(allowIPv4 ? 1 : 0);
         out.writeInt(allowIPv6 ? 1 : 0);
+        out.writeTypedArray(underlyingNetworks, flags);
     }
 
     public static final Parcelable.Creator<VpnConfig> CREATOR =
@@ -186,6 +186,7 @@ public class VpnConfig implements Parcelable {
             config.allowBypass = in.readInt() != 0;
             config.allowIPv4 = in.readInt() != 0;
             config.allowIPv6 = in.readInt() != 0;
+            config.underlyingNetworks = in.createTypedArray(Network.CREATOR);
             return config;
         }
 

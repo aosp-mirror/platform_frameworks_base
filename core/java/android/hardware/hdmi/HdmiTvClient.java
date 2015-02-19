@@ -24,6 +24,9 @@ import android.util.Log;
 
 import libcore.util.EmptyArray;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * HdmiTvClient represents HDMI-CEC logical device of type TV in the Android system
  * which acts as TV/Display. It provides with methods that manage, interact with other
@@ -40,13 +43,13 @@ public final class HdmiTvClient extends HdmiClient {
      */
     public static final int VENDOR_DATA_SIZE = 16;
 
-    HdmiTvClient(IHdmiControlService service) {
+    /* package */ HdmiTvClient(IHdmiControlService service) {
         super(service);
     }
 
     // Factory method for HdmiTvClient.
     // Declared package-private. Accessed by HdmiControlManager only.
-    static HdmiTvClient create(IHdmiControlService service) {
+    /* package */ static HdmiTvClient create(IHdmiControlService service) {
         return new HdmiTvClient(service);
     }
 
@@ -68,7 +71,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Select a CEC logical device to be a new active source.
+     * Selects a CEC logical device to be a new active source.
      *
      * @param logicalAddress logical address of the device to select
      * @param callback callback to get the result with
@@ -95,7 +98,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Select a HDMI port to be a new route path.
+     * Selects a HDMI port to be a new route path.
      *
      * @param portId HDMI port to select
      * @param callback callback to get the result with
@@ -125,7 +128,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Set the listener used to get informed of the input change event.
+     * Sets the listener used to get informed of the input change event.
      *
      * @param listener listener object
      */
@@ -150,7 +153,22 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Set system audio volume
+     * Returns all the CEC devices connected to TV.
+     *
+     * @return list of {@link HdmiDeviceInfo} for connected CEC devices.
+     *         Empty list is returned if there is none.
+     */
+    public List<HdmiDeviceInfo> getDeviceList() {
+        try {
+            return mService.getDeviceList();
+        } catch (RemoteException e) {
+            Log.e("TAG", "Failed to call getDeviceList():", e);
+            return Collections.<HdmiDeviceInfo>emptyList();
+        }
+    }
+
+    /**
+     * Sets system audio volume
      *
      * @param oldIndex current volume index
      * @param newIndex volume index to be set
@@ -165,7 +183,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Set system audio mute status
+     * Sets system audio mute status
      *
      * @param mute {@code true} if muted; otherwise, {@code false}
      */
@@ -178,7 +196,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Set record listener
+     * Sets record listener
      *
      * @param listener
      */
@@ -198,7 +216,7 @@ public final class HdmiTvClient extends HdmiClient {
             @Override
             public byte[] getOneTouchRecordSource(int recorderAddress) {
                 HdmiRecordSources.RecordSource source =
-                        callback.getOneTouchRecordSource(recorderAddress);
+                        callback.onOneTouchRecordSourceRequested(recorderAddress);
                 if (source == null) {
                     return EmptyArray.BYTE;
                 }
@@ -208,31 +226,31 @@ public final class HdmiTvClient extends HdmiClient {
             }
 
             @Override
-            public void onOneTouchRecordResult(int result) {
-                callback.onOneTouchRecordResult(result);
+            public void onOneTouchRecordResult(int recorderAddress, int result) {
+                callback.onOneTouchRecordResult(recorderAddress, result);
             }
 
             @Override
-            public void onTimerRecordingResult(int result) {
-                callback.onTimerRecordingResult(
+            public void onTimerRecordingResult(int recorderAddress, int result) {
+                callback.onTimerRecordingResult(recorderAddress,
                         HdmiRecordListener.TimerStatusData.parseFrom(result));
             }
 
             @Override
-            public void onClearTimerRecordingResult(int result) {
-                callback.onClearTimerRecordingResult(result);
+            public void onClearTimerRecordingResult(int recorderAddress, int result) {
+                callback.onClearTimerRecordingResult(recorderAddress, result);
             }
         };
     }
 
     /**
-     * Start one touch recording with the given recorder address and recorder source.
+     * Starts one touch recording with the given recorder address and recorder source.
      * <p>
      * Usage
      * <pre>
      * HdmiTvClient tvClient = ....;
      * // for own source.
-     * OwnSource ownSource = ownHdmiRecordSources.ownSource();
+     * OwnSource ownSource = HdmiRecordSources.ofOwnSource();
      * tvClient.startOneTouchRecord(recorderAddress, ownSource);
      * </pre>
      */
@@ -251,7 +269,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Stop one touch record.
+     * Stops one touch record.
      *
      * @param recorderAddress recorder address where recoding will be stopped
      */
@@ -264,7 +282,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Start timer recording with the given recoder address and recorder source.
+     * Starts timer recording with the given recoder address and recorder source.
      * <p>
      * Usage
      * <pre>
@@ -313,7 +331,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Clear timer recording with the given recorder address and recording source.
+     * Clears timer recording with the given recorder address and recording source.
      * For more details, please refer {@link #startTimerRecording(int, int, TimerRecordSource)}.
      */
     public void clearTimerRecording(int recorderAddress, int sourceType, TimerRecordSource source) {
@@ -339,7 +357,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Set {@link HdmiMhlVendorCommandListener} to get incoming MHL vendor command.
+     * Sets {@link HdmiMhlVendorCommandListener} to get incoming MHL vendor command.
      *
      * @param listener to receive incoming MHL vendor command
      */
@@ -365,7 +383,7 @@ public final class HdmiTvClient extends HdmiClient {
     }
 
     /**
-     * Send MHL vendor command to the device connected to a port of the given portId.
+     * Sends MHL vendor command to the device connected to a port of the given portId.
      *
      * @param portId id of port to send MHL vendor command
      * @param offset offset in the in given data

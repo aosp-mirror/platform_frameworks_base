@@ -19,5 +19,7 @@
     <target
         android:name="pie1"
         android:animation="@anim/trim_path_animation_progress_bar" />
-
+    <target
+        android:name="root_bar"
+        android:animation="@anim/alpha_animation_progress_bar" />
 </animated-vector>

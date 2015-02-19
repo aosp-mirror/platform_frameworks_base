@@ -52,7 +52,8 @@
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"解鎖區域已展開。"</string>
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"解鎖區域已收合。"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小工具。"</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"使用者選取工具"</string>
+    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"用戶選取工具"</string>
+    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"狀態"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"相機"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"媒體控制"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"已開始為小工具重新排列次序。"</string>
@@ -78,7 +79,6 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"已取消啟動"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"拖放「<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>」即可刪除。"</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"「<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>」將不會被刪除。"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"已設定下一個鬧鐘時間：<xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"？123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -98,7 +98,7 @@
     <string name="description_direction_down" msgid="5087739728639014595">"向下滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_right" msgid="8034433242579600980">"向右滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="user_switched" msgid="3768006783166984410">"目前的使用者是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
+    <string name="user_switched" msgid="3768006783166984410">"目前的用戶是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"緊急電話"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘記圖案"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖案錯誤"</string>
@@ -119,17 +119,17 @@
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 碼不符"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"圖案嘗試次數過多"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"如要解鎖，請以 Google 帳戶登入。"</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"使用者名稱 (電子郵件)"</string>
+    <string name="kg_login_username_hint" msgid="5718534272070920364">"用戶名稱 (電子郵件)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密碼"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登入"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"無效的使用者名稱或密碼。"</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘記使用者名稱或密碼？\n請瀏覽 "<b>"google.com/accounts/recovery"</b>"。"</string>
+    <string name="kg_login_invalid_input" msgid="5754664119319872197">"無效的用戶名稱或密碼。"</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘記用戶名稱或密碼？\n請瀏覽 "<b>"google.com/accounts/recovery"</b>"。"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"正在檢查帳戶…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"您嘗試了 <xliff:g id="NUMBER_0">%d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，平板電腦將回復原廠設定，所有使用者資料均會失去。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"您嘗試了 <xliff:g id="NUMBER_0">%d</xliff:g> 次仍未能成功解開這部上鎖的手機。如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，手機將回復原廠設定，所有使用者資料均會失去。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"您嘗試了 <xliff:g id="NUMBER_0">%d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，平板電腦將回復原廠設定，所有用戶資料均會失去。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"您嘗試了 <xliff:g id="NUMBER_0">%d</xliff:g> 次仍未能成功解開這部上鎖的手機。如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，手機將回復原廠設定，所有用戶資料均會失去。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"您嘗試了 <xliff:g id="NUMBER">%d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。平板電腦現在將回復原廠設定。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您嘗試了 <xliff:g id="NUMBER">%d</xliff:g> 次仍未能成功解開這部上鎖的手機。手機現在將回復原廠設定。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>

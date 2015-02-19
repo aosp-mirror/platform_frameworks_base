@@ -27,11 +27,11 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import com.android.systemui.R;
 
 /**
@@ -42,13 +42,13 @@ import com.android.systemui.R;
 public class NotificationContentView extends FrameLayout {
 
     private static final long ANIMATION_DURATION_LENGTH = 170;
-    private static final Paint INVERT_PAINT = createInvertPaint();
-    private static final ColorFilter NO_COLOR_FILTER = new ColorFilter();
 
     private final Rect mClipBounds = new Rect();
 
     private View mContractedChild;
     private View mExpandedChild;
+
+    private NotificationViewWrapper mContractedWrapper;
 
     private int mSmallHeight;
     private int mClipTopAmount;
@@ -60,11 +60,21 @@ public class NotificationContentView extends FrameLayout {
     private boolean mDark;
 
     private final Paint mFadePaint = new Paint();
+    private boolean mAnimate;
+    private ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
+            = new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            mAnimate = true;
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            return true;
+        }
+    };
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-        reset();
+        reset(true);
     }
 
     @Override
@@ -73,7 +83,13 @@ public class NotificationContentView extends FrameLayout {
         updateClipping();
     }
 
-    public void reset() {
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        updateVisibility();
+    }
+
+    public void reset(boolean resetActualHeight) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
         }
@@ -84,8 +100,10 @@ public class NotificationContentView extends FrameLayout {
         mContractedChild = null;
         mExpandedChild = null;
         mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mActualHeight = mSmallHeight;
         mContractedVisible = true;
+        if (resetActualHeight) {
+            mActualHeight = mSmallHeight;
+        }
     }
 
     public View getContractedChild() {
@@ -104,7 +122,9 @@ public class NotificationContentView extends FrameLayout {
         sanitizeContractedLayoutParams(child);
         addView(child);
         mContractedChild = child;
+        mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
+        mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
     }
 
     public void setExpandedChild(View child) {
@@ -117,9 +137,31 @@ public class NotificationContentView extends FrameLayout {
         selectLayout(false /* animate */, true /* force */);
     }
 
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        updateVisibility();
+    }
+
+    private void updateVisibility() {
+        setVisible(isShown());
+    }
+
+    private void setVisible(final boolean isVisible) {
+        if (isVisible) {
+
+            // We only animate if we are drawn at least once, otherwise the view might animate when
+            // it's shown the first time
+            getViewTreeObserver().addOnPreDrawListener(mEnableAnimationPredrawListener);
+        } else {
+            getViewTreeObserver().removeOnPreDrawListener(mEnableAnimationPredrawListener);
+            mAnimate = false;
+        }
+    }
+
     public void setActualHeight(int actualHeight) {
         mActualHeight = actualHeight;
-        selectLayout(true /* animate */, false /* force */);
+        selectLayout(mAnimate /* animate */, false /* force */);
         updateClipping();
     }
 
@@ -203,44 +245,20 @@ public class NotificationContentView extends FrameLayout {
 
     public void notifyContentUpdated() {
         selectLayout(false /* animate */, true /* force */);
+        if (mContractedChild != null) {
+            mContractedWrapper.notifyContentUpdated();
+            mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
+        }
     }
 
     public boolean isContentExpandable() {
         return mExpandedChild != null;
     }
 
-    public void setDark(boolean dark, boolean fade) {
+    public void setDark(boolean dark, boolean fade, long delay) {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
-        setImageViewDark(dark, fade, com.android.internal.R.id.right_icon);
-        setImageViewDark(dark, fade, com.android.internal.R.id.icon);
-    }
-
-    private void setImageViewDark(boolean dark, boolean fade, int imageViewId) {
-        // TODO: implement fade
-        final ImageView v = (ImageView) mContractedChild.findViewById(imageViewId);
-        if (v == null) return;
-        final Drawable d = v.getBackground();
-        if (dark) {
-            v.setLayerType(LAYER_TYPE_HARDWARE, INVERT_PAINT);
-            if (d != null) {
-                v.setTag(R.id.doze_saved_filter_tag, d.getColorFilter() != null ? d.getColorFilter()
-                        : NO_COLOR_FILTER);
-                d.setColorFilter(getResources().getColor(R.color.doze_small_icon_background_color),
-                        PorterDuff.Mode.SRC_ATOP);
-                v.setImageAlpha(getResources().getInteger(R.integer.doze_small_icon_alpha));
-            }
-        } else {
-            v.setLayerType(LAYER_TYPE_NONE, null);
-            if (d != null)  {
-                final ColorFilter filter = (ColorFilter) v.getTag(R.id.doze_saved_filter_tag);
-                if (filter != null) {
-                    d.setColorFilter(filter == NO_COLOR_FILTER ? null : filter);
-                    v.setTag(R.id.doze_saved_filter_tag, null);
-                }
-                v.setImageAlpha(0xff);
-            }
-        }
+        mContractedWrapper.setDark(dark, fade, delay);
     }
 
     @Override
@@ -249,17 +267,5 @@ public class NotificationContentView extends FrameLayout {
         // This is not really true, but good enough when fading from the contracted to the expanded
         // layout, and saves us some layers.
         return false;
-    }
-
-    private static Paint createInvertPaint() {
-        final Paint p = new Paint();
-        final float[] invert = {
-            -1f,  0f,  0f, 1f, 1f,
-             0f, -1f,  0f, 1f, 1f,
-             0f,  0f, -1f, 1f, 1f,
-             0f,  0f,  0f, 1f, 0f
-        };
-        p.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(invert)));
-        return p;
     }
 }

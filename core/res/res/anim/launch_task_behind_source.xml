@@ -22,38 +22,27 @@
 
     <alpha android:fromAlpha="1.0" android:toAlpha="0.6"
         android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@interpolator/accelerate_cubic"
-        android:duration="133"/>
+        android:interpolator="@interpolator/linear_out_slow_in"
+        android:duration="417"/>
 
-    <translate android:fromYDelta="0" android:toYDelta="10%"
-        android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@interpolator/accelerate_cubic"
-        android:duration="350"/>
-
-    <scale android:fromXScale="1.0" android:toXScale="0.9"
-        android:fromYScale="1.0" android:toYScale="0.9"
+    <scale android:fromXScale="1.0" android:toXScale="0.918"
+        android:fromYScale="1.0" android:toYScale="0.918"
         android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
         android:pivotX="50%p" android:pivotY="50%p"
-        android:interpolator="@interpolator/fast_out_slow_in"
-        android:duration="350" />
+        android:interpolator="@interpolator/launch_task_behind_source_scale_1"
+        android:duration="417" />
 
     <alpha android:fromAlpha="1.0" android:toAlpha="1.6666666666"
         android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-        android:interpolator="@interpolator/decelerate_cubic"
-        android:startOffset="433"
-        android:duration="133"/>
+        android:interpolator="@interpolator/linear"
+        android:startOffset="500"
+        android:duration="167"/>
 
-    <translate android:fromYDelta="0%" android:toYDelta="-8.8888888888%"
-        android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-        android:interpolator="@interpolator/decelerate_cubic"
-        android:startOffset="433"
-        android:duration="350"/>
-
-    <scale android:fromXScale="1.0" android:toXScale="1.1111111111"
-        android:fromYScale="1.0" android:toYScale="1.1111111111"
+    <scale android:fromXScale="1.0" android:toXScale="1.08932461873638"
+        android:fromYScale="1.0" android:toYScale="1.08932461873638"
         android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
         android:pivotX="50%p" android:pivotY="50%p"
-        android:interpolator="@interpolator/decelerate_cubic"
-        android:startOffset="433"
-        android:duration="350" />
+        android:interpolator="@interpolator/launch_task_behind_source_scale_2"
+        android:startOffset="500"
+        android:duration="317" />
 </set>

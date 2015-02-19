@@ -95,7 +95,7 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
         sendCommand(mGivePowerStatus, new SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
-                if (error == Constants.SEND_RESULT_NAK) {
+                if (error != Constants.SEND_RESULT_SUCCESS) {
                     invokeCallback(HdmiControlManager.RESULT_COMMUNICATION_FAILED);
                     finish();
                     return;
@@ -168,6 +168,10 @@ final class DeviceSelectAction extends HdmiCecFeatureAction {
     }
 
     private void sendSetStreamPath() {
+        // Turn the active source invalidated, which remains so till <Active Source> comes from
+        // the selected device.
+        tv().getActiveSource().invalidate();
+        tv().setActivePath(mTarget.getPhysicalAddress());
         sendCommand(HdmiCecMessageBuilder.buildSetStreamPath(
                 getSourceAddress(), mTarget.getPhysicalAddress()));
         invokeCallback(HdmiControlManager.RESULT_SUCCESS);

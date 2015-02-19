@@ -63,6 +63,12 @@ public class ActivityOptions {
     public static final String KEY_ANIM_EXIT_RES_ID = "android:animExitRes";
 
     /**
+     * Custom in-place animation resource ID.
+     * @hide
+     */
+    public static final String KEY_ANIM_IN_PLACE_RES_ID = "android:animInPlaceRes";
+
+    /**
      * Bitmap for thumbnail animation.
      * @hide
      */
@@ -132,11 +138,14 @@ public class ActivityOptions {
     public static final int ANIM_THUMBNAIL_ASPECT_SCALE_UP = 8;
     /** @hide */
     public static final int ANIM_THUMBNAIL_ASPECT_SCALE_DOWN = 9;
+    /** @hide */
+    public static final int ANIM_CUSTOM_IN_PLACE = 10;
 
     private String mPackageName;
     private int mAnimationType = ANIM_NONE;
     private int mCustomEnterResId;
     private int mCustomExitResId;
+    private int mCustomInPlaceResId;
     private Bitmap mThumbnail;
     private int mStartX;
     private int mStartY;
@@ -195,6 +204,30 @@ public class ActivityOptions {
         opts.mCustomEnterResId = enterResId;
         opts.mCustomExitResId = exitResId;
         opts.setOnAnimationStartedListener(handler, listener);
+        return opts;
+    }
+
+    /**
+     * Creates an ActivityOptions specifying a custom animation to run in place on an existing
+     * activity.
+     *
+     * @param context Who is defining this.  This is the application that the
+     * animation resources will be loaded from.
+     * @param animId A resource ID of the animation resource to use for
+     * the incoming activity.
+     * @return Returns a new ActivityOptions object that you can use to
+     * supply these options as the options Bundle when running an in-place animation.
+     * @hide
+     */
+    public static ActivityOptions makeCustomInPlaceAnimation(Context context, int animId) {
+        if (animId == 0) {
+            throw new RuntimeException("You must specify a valid animation.");
+        }
+
+        ActivityOptions opts = new ActivityOptions();
+        opts.mPackageName = context.getPackageName();
+        opts.mAnimationType = ANIM_CUSTOM_IN_PLACE;
+        opts.mCustomInPlaceResId = animId;
         return opts;
     }
 
@@ -351,6 +384,8 @@ public class ActivityOptions {
      * of the animation.
      * @param startX The x starting location of the bitmap, relative to <var>source</var>.
      * @param startY The y starting location of the bitmap, relative to <var>source</var>.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
      * @param listener Optional OnAnimationStartedListener to find out when the
      * requested animation has started running.  If for some reason the animation
      * is not executed, the callback will happen immediately.
@@ -360,9 +395,9 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeThumbnailAspectScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
-            OnAnimationStartedListener listener) {
+            Handler handler, OnAnimationStartedListener listener) {
         return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
-                targetWidth, targetHeight, listener, true);
+                targetWidth, targetHeight, handler, listener, true);
     }
 
     /**
@@ -375,6 +410,8 @@ public class ActivityOptions {
      * of the animation.
      * @param startX The x end location of the bitmap, relative to <var>source</var>.
      * @param startY The y end location of the bitmap, relative to <var>source</var>.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
      * @param listener Optional OnAnimationStartedListener to find out when the
      * requested animation has started running.  If for some reason the animation
      * is not executed, the callback will happen immediately.
@@ -384,14 +421,14 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
             Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
-            OnAnimationStartedListener listener) {
+            Handler handler, OnAnimationStartedListener listener) {
         return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
-                targetWidth, targetHeight, listener, false);
+                targetWidth, targetHeight, handler, listener, false);
     }
 
     private static ActivityOptions makeAspectScaledThumbnailAnimation(View source, Bitmap thumbnail,
             int startX, int startY, int targetWidth, int targetHeight,
-            OnAnimationStartedListener listener, boolean scaleUp) {
+            Handler handler, OnAnimationStartedListener listener, boolean scaleUp) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = scaleUp ? ANIM_THUMBNAIL_ASPECT_SCALE_UP :
@@ -403,7 +440,7 @@ public class ActivityOptions {
         opts.mStartY = pts[1] + startY;
         opts.mWidth = targetWidth;
         opts.mHeight = targetHeight;
-        opts.setOnAnimationStartedListener(source.getHandler(), listener);
+        opts.setOnAnimationStartedListener(handler, listener);
         return opts;
     }
 
@@ -540,6 +577,10 @@ public class ActivityOptions {
                         opts.getBinder(KEY_ANIM_START_LISTENER));
                 break;
 
+            case ANIM_CUSTOM_IN_PLACE:
+                mCustomInPlaceResId = opts.getInt(KEY_ANIM_IN_PLACE_RES_ID, 0);
+                break;
+
             case ANIM_SCALE_UP:
                 mStartX = opts.getInt(KEY_ANIM_START_X, 0);
                 mStartY = opts.getInt(KEY_ANIM_START_Y, 0);
@@ -589,6 +630,11 @@ public class ActivityOptions {
     /** @hide */
     public int getCustomExitResId() {
         return mCustomExitResId;
+    }
+
+    /** @hide */
+    public int getCustomInPlaceResId() {
+        return mCustomInPlaceResId;
     }
 
     /** @hide */
@@ -689,6 +735,9 @@ public class ActivityOptions {
                 }
                 mAnimationStartedListener = otherOptions.mAnimationStartedListener;
                 break;
+            case ANIM_CUSTOM_IN_PLACE:
+                mCustomInPlaceResId = otherOptions.mCustomInPlaceResId;
+                break;
             case ANIM_SCALE_UP:
                 mStartX = otherOptions.mStartX;
                 mStartY = otherOptions.mStartY;
@@ -755,6 +804,9 @@ public class ActivityOptions {
                 b.putInt(KEY_ANIM_EXIT_RES_ID, mCustomExitResId);
                 b.putBinder(KEY_ANIM_START_LISTENER, mAnimationStartedListener
                         != null ? mAnimationStartedListener.asBinder() : null);
+                break;
+            case ANIM_CUSTOM_IN_PLACE:
+                b.putInt(KEY_ANIM_IN_PLACE_RES_ID, mCustomInPlaceResId);
                 break;
             case ANIM_SCALE_UP:
                 b.putInt(KEY_ANIM_START_X, mStartX);

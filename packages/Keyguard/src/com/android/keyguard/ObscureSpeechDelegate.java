@@ -19,6 +19,7 @@ package com.android.keyguard;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -85,8 +86,8 @@ class ObscureSpeechDelegate extends AccessibilityDelegate {
     @SuppressWarnings("deprecation")
     private boolean shouldObscureSpeech() {
         // The user can optionally force speaking passwords.
-        if (Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0) != 0) {
+        if (Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0, UserHandle.USER_CURRENT) != 0) {
             return false;
         }
 

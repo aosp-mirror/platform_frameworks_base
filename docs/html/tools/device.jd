@@ -27,7 +27,7 @@ environment and Android-powered device for testing and debugging on the device.<
 <p>You can use any Android-powered device as an environment for running,
 debugging, and testing your applications. The tools included in the SDK make it easy to install and
 run your application on the device each time you compile. You can install your application on the
-device directly from Eclipse or from the command line with ADB. If
+device directly from Android Studio or from the command line with ADB. If
 you don't yet have a device, check with the service providers in your area to determine which
 Android-powered devices are available.</p>
 
@@ -73,13 +73,21 @@ screen to find Developer options at the bottom.</p>
 would on the emulator. Before you can start, there are just a few things to do:</p>
 
 <ol>
-  <li>Declare your application as "debuggable" in your Android Manifest.
-    <p>When using Eclipse, you can skip this step, because running your app directly from
-the Eclipse IDE automatically enables debugging.</p>
+  <li>Verify that your application is "debuggable" in your manifest or <em>build.gradle</em> file.
+    <p>In the build file, make sure the <em>debuggable</em> property in the <em>debug</em> build
+    type is set to true. The build type property overrides the manifest setting. </p>
+<pre>
+android {
+    buildTypes {
+        debug {
+            debuggable true
+        }
+</pre>
+
     <p>In the <code>AndroidManifest.xml</code> file, add <code>android:debuggable="true"</code> to
 the <code>&lt;application></code> element.</p>
     <p class="note"><strong>Note:</strong> If you manually enable debugging in the manifest
- file, be sure to disable it before you build for release (your published application
+ file, be sure to disable it in your release build (your published application
 should usually <em>not</em> be debuggable).</p></li>
   <li>Enable <strong>USB debugging</strong> on your device.
     <ul>
@@ -148,7 +156,7 @@ higher.</p>
 devices</code> from your SDK {@code platform-tools/} directory. If connected,
 you'll see the device name listed as a "device."</p>
 
-<p>If using Eclipse, run or debug your application as usual. You will be
+<p>If using Android Studio, run or debug your application as usual. You will be
 presented with a <b>Device Chooser</b> dialog that lists the available
 emulator(s) and connected device(s). Select the device upon which you want to
 install and run the application.</p>

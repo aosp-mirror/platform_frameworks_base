@@ -55,6 +55,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="28"
+                    android:contentDescription="@string/keyguard_accessibility_pin_area"
                     />
             <ImageButton
                     android:id="@+id/delete_button"

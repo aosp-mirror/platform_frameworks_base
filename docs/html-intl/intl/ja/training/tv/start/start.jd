@@ -1,0 +1,232 @@
+page.title=TV アプリのビルドを開始する
+page.tags=tv, leanback, recyclerview
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>学習の目的</h2>
+  <ol>
+    <li><a href="#dev-project">TV プロジェクトをセットアップする</a></li>
+    <li><a href="#tv-libraries">TV サポート ライブラリを追加する</a></li>
+    <li><a href="#build-it">TV アプリをビルドする</a></li>
+    <li><a href="#run">TV アプリを実行する</a></li>
+  </ol>
+  <h2>関連コンテンツ</h2>
+  <ol>
+    <li><a href="{@docRoot}design/tv/index.html">TV 向けデザイン</a></li>
+    <li><a href="{@docRoot}training/tv/start/layouts.html">TV 用のレイアウトをビルドする</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  TV アプリでは、携帯電話やタブレット向けのものと同じ構造を使用します。つまり、Android アプリのビルドに関する既知の技術を使用して新たな TV アプリを作成したり、既存のアプリを TV 端末でも使用できるように編集したりできます。
+</p>
+
+<p class="note">
+  <strong>重要:</strong>Google Play で Android TV アプリを提供するには、特定の要件を満たす必要があります。詳細については、<a href="{@docRoot}distribute/essentials/quality/tv.html">TV アプリの品質</a>に記載されている要件を参照してください。
+</p>
+
+<p>
+  このレッスンでは、TV アプリのビルドの際の開発環境の準備方法と、TV 端末上でアプリを使用できるようにするために最低限必要な変更について説明します。
+</p>
+
+
+<h2 id="dev-project">TV プロジェクトをセットアップする</h2>
+
+<p>
+  このセクションでは、TV 端末向けに既存のアプリを変更したり、新しく作成する方法について説明します。TV 端末向けアプリを作成する際に使用する必要がある主なコンポーネントは次のとおりです。
+</p>
+
+<ul>
+  <li><strong>TV 用のアクティビティ</strong>（必須） - アプリのマニフェストで、TV 端末上で動作させるアクティビティを宣言します。</li>
+  <li><strong>TV サポート ライブラリ</strong>（任意） - ユーザー インターフェースのビルド用にウィジェットを提供する、TV 端末向けの<a href="#tv-libraries">サポート ライブラリ</a>をいくつか利用できます。</li>
+</ul>
+
+
+<h3 id="prerequisites">前提条件</h3>
+
+<p>TV 向けアプリのビルドを開始するには:</p>
+
+<ul>
+  <li><strong><a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">SDK ツールをバージョン 24.0.0 以降にアップデートする</a></strong>
+    <br/> SDK ツールをアップデートすると、TV 向けアプリのビルドとテストができるようになります。
+  </li>
+  <li><strong><a href="{@docRoot}sdk/installing/adding-packages.html#GetTools">SDK ツールを Android 5.0（API レベル 21）以降を使用してアップデートする</a></strong>
+    <br/> アップデート後のプラットフォームのバージョンでは、TV アプリ向けの新しい API を提供しています。
+  </li>
+  <li><strong><a href="{@docRoot}sdk/installing/create-project.html">アプリのプロジェクトを作成またはアップデートする</a></strong>
+    <br/> TV 端末用の新しい API にアクセスするには、プロジェクトを作成するか、Android 5.0（API レベル 21）以降をターゲットとする既存のプロジェクトを変更する必要があります。
+  </li>
+</ul>
+
+
+<h3 id="tv-activity">TV アクティビティを宣言する</h3>
+
+<p>TV 端末向けアプリでは、{@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} のインテント フィルタを使用して、アプリのマニフェストで TV 用ランチャーのアクティビティを宣言する必要があります。このフィルタは、アプリが TV 向けになっていることを判別しますので、Google Play 内で TV アプリと認識される上で必要です。この宣言は、ユーザーが TV のホーム スクリーンでアプリのアイコンを選択したときに、アプリ内のどのアクティビティが起動するかについても判別します。</p>
+
+<p>次のコード スニペットでは、マニフェストにインテント フィルタを含める方法を示します。</p>
+
+<pre>
+&lt;application
+  android:banner="&#64;drawable/banner" &gt;
+  ...
+  &lt;activity
+    android:name="com.example.android.MainActivity"
+    android:label="@string/app_name" &gt;
+
+    &lt;intent-filter&gt;
+      &lt;action android:name="android.intent.action.MAIN" /&gt;
+      &lt;category android:name="android.intent.category.LAUNCHER" /&gt;
+    &lt;/intent-filter&gt;
+  &lt;/activity&gt;
+
+  &lt;activity
+    android:name="com.example.android.<strong>TvActivity</strong>"
+    android:label="&#64;string/app_name"
+    android:theme="&#64;style/Theme.Leanback"&gt;
+
+    &lt;intent-filter&gt;
+      &lt;action android:name="android.intent.action.MAIN" /&gt;
+      &lt;category android:name="<strong>android.intent.category.LEANBACK_LAUNCHER</strong>" /&gt;
+    &lt;/intent-filter&gt;
+
+  &lt;/activity&gt;
+&lt;/application&gt;
+</pre>
+
+<p>
+  この例では、2 番目のアクティビティのマニフェスト エントリが、TV 端末で起動するアクティビティを指定しています。
+</p>
+
+<p class="caution">
+  <strong>警告:</strong>アプリに {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} インテント フィルタを含めない場合、TV 端末で Google Play ストアを開いているユーザーにアプリが表示されません。開発者ツールを使用して TV 端末にロードする際にこのフィルタがない場合も、TV のユーザー にはアプリインターフェースが表示されません。
+</p>
+
+<p>
+  TV 向け用途で既存のアプリを変更する場合は、携帯電話やタブレットと同じアクティビティのレイアウトを使用しないでください。TV アプリや既存のアプリの TV 向け部分については、ソファでくつろぎながら TV リモコンを使用して、簡単にナビゲートできるシンプルなユーザー インターフェースを提供する必要があります。TV 向けアプリをデザインする際のガイドラインについては、<a href="{@docRoot}design/tv/index.html">TV 向けデザイン</a>ガイドを参照してください。TV のインターフェースのレイアウトに関する最低限の実装要件については<a href="{@docRoot}training/tv/start/layouts.html">TV 用のレイアウトをビルドする</a>を参照してください。
+</p>
+
+
+<h3 id="no-touchscreen">タッチスクリーンの不要を宣言する</h3>
+
+<p>
+  TV 端末向けアプリでは、入力はタッチスクリーンに依存しません 。これを明確にするために、TV アプリのマニフェストで {@code android.hardware.touchscreen} 機能が不要であることを宣言する必要があります。この設定により、アプリが TV 端末向けであると判別しますので、Google Play 内で TV アプリと認識される上で必要です。次のコード例では、マニフェストに宣言を含める方法を示します。
+</p>
+
+<pre>
+&lt;manifest&gt;
+    <strong>&lt;uses-feature android:name="android.hardware.touchscreen"
+              android:required="false" /&gt;</strong>
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p class="caution">
+  <strong>警告:</strong>このコード例のようにアプリのマニフェストでタッチスクリーンが不要であると宣言しないと、アプリが TV 端末の Google Play ストアに表示されません。
+</p>
+
+<h3 id="banner">ホーム スクリーンにバナーを配置する</h3>
+
+<p>
+  アプリに Leanback ランチャーのインテント フィルタが含まれている場合は、ホーム スクリーンにバナーを配置する必要があります。バナーは、アプリやゲームの行のホーム スクリーン上に表示されるアプリの起動ポイントです。次のようにマニフェストにバナーを記述します。
+</p>
+
+<pre>
+&lt;application
+    ...
+    android:banner="&#64;drawable/banner" &gt;
+
+    ...
+&lt;/application&gt;
+</pre>
+
+<p>
+  <a href="{@docRoot}guide/topics/manifest/application-element.html#banner">{@code android:banner}</a> 属性を使用して、<a href="{@docRoot}guide/topics/manifest/application.html"><code>&lt;application&gt;</code></a> タグとともにアプリのすべてのアクティビティにデフォルトのバナーを配置するか、<a href="{@docRoot}guide/topics/manifest/activity-element.html"><code>&lt;activity&gt;</code></a> タグとともに特定のアクティビティにバナーを配置します。
+</p>
+
+<p>
+  TV 向けデザインの UI パターンガイドの<a href="{@docRoot}design/tv/patterns.html#banner">バナー</a>を参照してください。
+</p>
+
+<h2 id="tv-libraries">TV サポート ライブラリを追加する</h3>
+
+<p>
+  Android SDK には、TV アプリ向けのサポート ライブラリが用意されています。これらのライブラリでは、TV 端末向けに使用できる API とユーザー インターフェース ウィジェットを提供しています。同ライブラリは {@code &lt;sdk&gt;/extras/android/support/} ディレクトリにあります。ライブラリとその全般的な用途の一覧を次に示します。
+</p>
+
+<ul>
+  <li><a href="{@docRoot}tools/support-library/features.html#v17-leanback"> <strong>v17 leanback ライブラリ</strong></a> - 特にメディア再生用のアプリ向けに、TV アプリのユーザー インターフェース ウィジェットを提供します。
+  </li>
+  <li><a href="{@docRoot}tools/support-library/features.html#v7-recyclerview"> <strong>v7 recyclerview ライブラリ</strong></a> - メモリ効率に配慮した方法で、項目の多いリストの表示を管理するためのクラスを提供します。 v17 leanback ライブラリ内のクラスの一部は、このライブラリ内のクラスに依存します。
+  </li>
+  <li><a href="{@docRoot}tools/support-library/features.html#v7-cardview"> <strong>v7 cardview ライブラリ</strong></a> - メディア アイテムの画像や説明などの情報カードを表示するためのユーザー インターフェース ウィジェットを提供します。
+  </li>
+</ul>
+
+<p class="note">
+  <strong>注意:</strong>これらのサポート ライブラリは TV アプリに必須ではありませんが、特にメディア カタログのブラウジング インターフェースを提供するアプリについては使用することを強くお勧めします。
+</p>
+
+<p>
+  v17 leanback ライブラリを使用する場合、<a href="{@docRoot}tools/support-library/features.html#v4">v4 サポート ライブラリ</a> に依存していることに注意してください。つまり、leanback ライブラリを使用するアプリには、次のサポート ライブラリをすべて含める必要があります。
+</p>
+
+<ul>
+  <li>v4 サポート ライブラリ</li>
+  <li>v7 recyclerview サポート ライブラリ</li>
+  <li>v17 leanback サポート ライブラリ</li>
+</ul>
+
+<p>
+  v17 leanback ライブラリには、アプリのプロジェクトに含める際に、特定の手順を踏む必要があるリソースが含まれています。リソースを使用してサポート ライブラリをインポートする手順については、<a href="{@docRoot}tools/support-library/setup.html#libs-with-res">サポート ライブラリのセットアップ</a>を参照してください。
+</p>
+
+
+<h2 id="build-it">TV アプリをビルドする</h2>
+
+<p>上記の手順を完了したら、TV 向けアプリのビルドに取りかかりましょう。TV アプリのビルドに役立つ次の補足的なトピックに目を通してください。 <ul>
+  <li>
+    <a href="{@docRoot}training/tv/playback/index.html">TV 再生アプリのビルド</a> - TV は娯楽用途に特化されていますので、Android では、ユーザーがビデオや音楽を再生したり、必要なコンテンツをブラウズできたりする TV アプリのビルド向けに、ユーザー インターフェース ツールとウィジェット一式を提供しています。
+  </li>
+  <li>
+    <a href="{@docRoot}training/tv/search/index.html">TV でのコンテンツの露出</a> - ユーザーがすべてのコンテンツを見ながら、お目当てのコンテンツを探し出せるようにすることは、コンテンツ自体の提供と同程度に重要です。このトレーニングでは、TV 端末上にコンテンツを露出させる方法について説明します。
+  </li>
+  <li>
+    <a href="{@docRoot}training/tv/games/index.html">TV 向けゲーム</a> - TV 端末は、ゲームに非常に適したプラットフォームです。TV 向けの優れたゲーム エクスペリエンスのビルド方法については、このトピックを参照してください。
+  </li>
+</ul>
+
+
+<h2 id="run">TV アプリを実行する</h2>
+
+<p>
+  アプリの実行は、開発プロセスの重要な一部です。Android SDK の AVD Manager では端末定義を提供しており、アプリの実行やテスト用の仮想 TV 端末を作成することができます。
+</p>
+
+<p>仮想 TV 端末を作成するには:</p>
+
+<ol>
+  <li>AVD Manager を起動します。詳細については、<a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a> のヘルプを参照してください。</li>
+  <li>[AVD Manager] ダイアログで [<strong>端末定義</strong>] タブをクリックします。</li>
+  <li>Android の TV 端末定義を選択し、[<strong>AVD の作成</strong>] をクリックします。</li>
+  <li>エミュレータのオプションを選択して、[<strong>OK</strong>] をクリックして AVD を作成します。 <p class="note">
+      <strong>注意:</strong>TV 用のエミュレータ端末で最高のパフォーマンスを得るには、[<strong>ホスト GPU を使用</strong>] オプションを有効にし、サポートされている場合には、仮想端末のアクセラレーションを使用します。エミュレータのハードウェア アクセラレーションについては、<a href="{@docRoot}tools/devices/emulator.html#acceleration">エミュレータを使用する</a>を参照してください。
+    </p>
+  </li>
+</ol>
+
+<p>仮想 TV 端末上でアプリをテストするには:</p>
+
+<ol>
+  <li>自分の開発環境に TV アプリをコンパイルします。</li>
+  <li>自分の開発環境からアプリを実行し、ターゲットの TV 仮想端末を選択します。</li>
+</ol>
+
+<p>
+  エミュレータの使用方法については、<a href="{@docRoot}tools/devices/emulator.html">エミュレータを使用する</a>を参照してください。Android Studio から仮想端末へのアプリのデプロイについては、<a href="{@docRoot}sdk/installing/studio-debug.html">Android Studio を使用してデバッグする</a>を参照してください。ADT を使用した Eclipse からエミュレータへのアプリのデプロイについては、<a href="{@docRoot}tools/building/building-eclipse.html">Eclipse から ADT を使用してビルド、実行する</a>を参照してください。
+</p>

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">BleApi</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -713,9 +782,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -725,17 +794,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     interface
 <h1 itemprop="name">BleApi</h1>
 
 
 
+  
+  
+  
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -747,10 +819,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
     <tr>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.BleApi</td>
     </tr>
-
+    
 
 </table>
 
@@ -764,8 +836,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Google Fit Bluetooth Low Energy API provides methods for scanning, claiming, and using
- Bluetooth smart devices in Google Fit.
+<p itemprop="articleBody">API for scanning, claiming, and using Bluetooth Low Energy devices in Google Fit.
  <p>
  Most BLE devices will accept connections from any other device, without the need for pairing.
  To prevent Google Fit from using data from a device the user does not own,
@@ -789,15 +860,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
              .setDataTypes(DataTypes.STEP_COUNT_DELTA)
              .setBleScanCallback(bleScanCallback)
              .build());
-
- <p>
- In case Bluetooth is required (for example for
- <code><a href="/reference/com/google/android/gms/fitness/BleApi.html#startBleScan(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.StartBleScanRequest)">startBleScan(GoogleApiClient, StartBleScanRequest)</a></code>), but is disabled, Google Fit
- will send back a result with status code set to <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#DISABLED_BLUETOOTH">DISABLED_BLUETOOTH</a></code>.
+ </pre>
+ <h2>Enabling Bluetooth</h2>
+ Many methods in this class require Bluetooth to be enabled.  In case it isn't,
+ the method will return a result with status code set to
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#DISABLED_BLUETOOTH">DISABLED_BLUETOOTH</a></code>.
  In this case, the app should use <code><a href="/reference/com/google/android/gms/common/api/Status.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code> to show
  the dialog allowing the user to enable Bluetooth.
  <p>
- Example of handling disabled Bluetooth:
+ Example:
  <pre>
      public class MyActivity extends FragmentActivity {
 
@@ -904,129 +975,164 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)">claimBleDevice</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BleDevice</a> bleDevice)</nobr>
+        
+        <div class="jd-descrdiv">
+          Associates a BLE device with the current user.
+          
+    
 
-        <div class="jd-descrdiv">Associates a BLE device with a user.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">claimBleDevice</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String deviceAddress)</nobr>
+        
+        <div class="jd-descrdiv">
+          Associates a BLE device with the current user, using only the device address.
+          
+    
 
-        <div class="jd-descrdiv">Associates a BLE device with a user.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/BleDevicesResult.html">BleDevicesResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#listClaimedBleDevices(com.google.android.gms.common.api.GoogleApiClient)">listClaimedBleDevices</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
+        
+        <div class="jd-descrdiv">
+          Lists all BLE devices that are associated with the current user.
+          
+    
 
-        <div class="jd-descrdiv">Lists all BLE devices that are associated with the current user.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#startBleScan(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.StartBleScanRequest)">startBleScan</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/StartBleScanRequest.html">StartBleScanRequest</a> request)</nobr>
+        
+        <div class="jd-descrdiv">
+          Starts a scan for BLE devices compatible with Google Fit.
+          
+    
 
-        <div class="jd-descrdiv">Starts a scan for BLE devices compatible with Google Fit.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#stopBleScan(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.BleScanCallback)">stopBleScan</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/BleScanCallback.html">BleScanCallback</a> callback)</nobr>
+        
+        <div class="jd-descrdiv">
+          Stops a BLE devices scan.
+          
+    
 
-        <div class="jd-descrdiv">Stops a BLE devices scan.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#unclaimBleDevice(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">unclaimBleDevice</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String deviceAddress)</nobr>
+        
+        <div class="jd-descrdiv">
+          Disassociates a BLE device with the current user, using the device's address.
+          
+    
 
-        <div class="jd-descrdiv">Disassociates a BLE device with a user.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/BleApi.html#unclaimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)">unclaimBleDevice</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BleDevice</a> bleDevice)</nobr>
+        
+        <div class="jd-descrdiv">
+          Disassociates a BLE device with the current user.
+          
+    
 
-        <div class="jd-descrdiv">Disassociates a BLE device with a user.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1080,14 +1186,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">claimBleDevice</span>
@@ -1095,13 +1201,16 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Associates a BLE device with a user.  When a device is claimed by a user,
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Associates a BLE device with the current user.  When a device is claimed by a user,
  the device will be available through Google Fit.
  <p>
  Prior to calling this method, you should stop any active Bluetooth scans you have started.
@@ -1112,8 +1221,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <table class="jd-tagtable">
         <tr>
           <th>client</td>
-          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
-     this call, but the claim operation will be delayed until the connection is complete.</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
           <th>bleDevice</td>
@@ -1133,14 +1241,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">claimBleDevice</span>
@@ -1148,14 +1256,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Associates a BLE device with a user.  When a device is claimed by a user,
- the device will be available through Google Fit.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Associates a BLE device with the current user, using only the device address.  When a device
+ is claimed by a user, the device will be available through Google Fit.  If a full
+ <code><a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BleDevice</a></code> is available, calling <code><a href="/reference/com/google/android/gms/fitness/BleApi.html#claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)">claimBleDevice(GoogleApiClient, BleDevice)</a></code>
+ is preferred.
  <p>
  Prior to calling this method, you should stop any active Bluetooth scans you have started.
  In order to prevent Bluetooth issues, the application should avoid connecting directly to
@@ -1168,8 +1281,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <table class="jd-tagtable">
         <tr>
           <th>client</td>
-          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
-     this call, but the claim operation will be delayed until the connection is complete.</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
           <th>deviceAddress</td>
@@ -1190,14 +1302,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="listClaimedBleDevices(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/BleDevicesResult.html">BleDevicesResult</a>&gt;
       </span>
       <span class="sympad">listClaimedBleDevices</span>
@@ -1205,12 +1317,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Lists all BLE devices that are associated with the current user.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1234,14 +1349,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="startBleScan(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.StartBleScanRequest)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">startBleScan</span>
@@ -1249,12 +1364,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Starts a scan for BLE devices compatible with Google Fit.  Results are returned
  asynchronously through the BleScanCallback in the request.  The callback's
  <code><a href="/reference/com/google/android/gms/fitness/request/BleScanCallback.html#onDeviceFound(com.google.android.gms.fitness.data.BleDevice)">onDeviceFound(BleDevice)</a></code> method may be called multiple times, for each device
@@ -1278,14 +1396,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="stopBleScan(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.BleScanCallback)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">stopBleScan</span>
@@ -1293,12 +1411,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Stops a BLE devices scan.  Should be called immediately after scanning is no longer needed.
  <p>
  If the scan is already stopped, or if it was never started,
@@ -1332,14 +1453,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="unclaimBleDevice(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">unclaimBleDevice</span>
@@ -1347,27 +1468,25 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Disassociates a BLE device with a user.  The device's associated
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>s will no longer be available exposed in
- Google Fit.
- <p>
- All of the registrations for this device will be removed.
- <p>
- This should be called after first calling <code><a href="/reference/com/google/android/gms/fitness/BleApi.html#claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)">claimBleDevice(GoogleApiClient, BleDevice)</a></code>.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Disassociates a BLE device with the current user, using the device's address.  The device's
+ associated <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSources</a></code> will no longer be available in Google Fit,
+ and all of the registrations for this device will be removed.
  .</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>client</td>
-          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
-     this call, but the unclaim operation will be delayed until the connection is complete.</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
           <th>deviceAddress</td>
@@ -1387,14 +1506,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="unclaimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">unclaimBleDevice</span>
@@ -1402,27 +1521,25 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Disassociates a BLE device with a user.  The device's associated
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>s will no longer be available exposed in
- Google Fit.
- <p>
- All of the registrations for this device will be removed.
- <p>
- This should be called after first calling <code><a href="/reference/com/google/android/gms/fitness/BleApi.html#claimBleDevice(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.BleDevice)">claimBleDevice(GoogleApiClient, BleDevice)</a></code>.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Disassociates a BLE device with the current user.  The device's associated
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSources</a></code> will no longer be available in Google Fit, and
+ all of the registrations for this device will be removed.
  .</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>client</td>
-          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
-     this call, but the unclaim operation will be delayed until the connection is complete.</td>
+          <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
           <th>bleDevice</td>
@@ -1451,17 +1568,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1469,7 +1586,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1482,7 +1599,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

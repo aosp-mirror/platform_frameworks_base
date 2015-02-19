@@ -27,6 +27,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.graphics.FontFamily_Delegate.getFontLocation;
+
 /**
  * Delegate implementing the native methods of android.graphics.Typeface
  *
@@ -48,8 +50,6 @@ public final class Typeface_Delegate {
     private static final DelegateManager<Typeface_Delegate> sManager =
             new DelegateManager<Typeface_Delegate>(Typeface_Delegate.class);
 
-    // ---- delegate helper data ----
-    private static String sFontLocation;
 
     // ---- delegate data ----
 
@@ -61,11 +61,8 @@ public final class Typeface_Delegate {
 
     private static long sDefaultTypeface;
 
+
     // ---- Public Helper methods ----
-    public static synchronized void setFontLocation(String fontLocation) {
-        sFontLocation = fontLocation;
-        FontFamily_Delegate.setFontLocation(fontLocation);
-    }
 
     public static Typeface_Delegate getDelegate(long nativeTypeface) {
         return sManager.getDelegate(nativeTypeface);
@@ -131,6 +128,18 @@ public final class Typeface_Delegate {
         return fonts;
     }
 
+    /**
+     * Clear the default typefaces when disposing bridge.
+     */
+    public static void resetDefaults() {
+        // Sometimes this is called before the Bridge is initialized. In that case, we don't want to
+        // initialize Typeface because the SDK fonts location hasn't been set.
+        if (FontFamily_Delegate.getFontLocation() != null) {
+            Typeface.sDefaults = null;
+        }
+    }
+
+
     // ---- native methods ----
 
     @LayoutlibDelegate
@@ -193,7 +202,7 @@ public final class Typeface_Delegate {
 
     @LayoutlibDelegate
     /*package*/ static File getSystemFontConfigLocation() {
-        return new File(sFontLocation);
+        return new File(getFontLocation());
     }
 
     // ---- Private delegate/helper methods ----

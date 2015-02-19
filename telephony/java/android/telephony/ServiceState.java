@@ -167,10 +167,40 @@ public class ServiceState implements Parcelable {
 
     private int mVoiceRegState = STATE_OUT_OF_SERVICE;
     private int mDataRegState = STATE_OUT_OF_SERVICE;
-    private boolean mRoaming;
-    private String mOperatorAlphaLong;
-    private String mOperatorAlphaShort;
-    private String mOperatorNumeric;
+
+    /**
+     * Roaming type
+     * HOME : in home network
+     * @hide
+     */
+    public static final int ROAMING_TYPE_NOT_ROAMING = 0;
+    /**
+     * Roaming type
+     * UNKNOWN : in a roaming network, but we can not tell if it's domestic or international
+     * @hide
+     */
+    public static final int ROAMING_TYPE_UNKNOWN = 1;
+    /**
+     * Roaming type
+     * DOMESTIC : in domestic roaming network
+     * @hide
+     */
+    public static final int ROAMING_TYPE_DOMESTIC = 2;
+    /**
+     * Roaming type
+     * INTERNATIONAL : in international roaming network
+     * @hide
+     */
+    public static final int ROAMING_TYPE_INTERNATIONAL = 3;
+
+    private int mVoiceRoamingType;
+    private int mDataRoamingType;
+    private String mVoiceOperatorAlphaLong;
+    private String mVoiceOperatorAlphaShort;
+    private String mVoiceOperatorNumeric;
+    private String mDataOperatorAlphaLong;
+    private String mDataOperatorAlphaShort;
+    private String mDataOperatorNumeric;
     private boolean mIsManualNetworkSelection;
 
     private boolean mIsEmergencyOnly;
@@ -185,6 +215,29 @@ public class ServiceState implements Parcelable {
     private int mCdmaDefaultRoamingIndicator;
     private int mCdmaEriIconIndex;
     private int mCdmaEriIconMode;
+
+    /**
+     * get String description of roaming type
+     * @hide
+     */
+    public static final String getRoamingLogString(int roamingType) {
+        switch (roamingType) {
+            case ROAMING_TYPE_NOT_ROAMING:
+                return "home";
+
+            case ROAMING_TYPE_UNKNOWN:
+                return "roaming";
+
+            case ROAMING_TYPE_DOMESTIC:
+                return "Domestic Roaming";
+
+            case ROAMING_TYPE_INTERNATIONAL:
+                return "International Roaming";
+
+            default:
+                return "UNKNOWN";
+        }
+    }
 
     /**
      * Create a new ServiceState from a intent notifier Bundle
@@ -221,10 +274,14 @@ public class ServiceState implements Parcelable {
     protected void copyFrom(ServiceState s) {
         mVoiceRegState = s.mVoiceRegState;
         mDataRegState = s.mDataRegState;
-        mRoaming = s.mRoaming;
-        mOperatorAlphaLong = s.mOperatorAlphaLong;
-        mOperatorAlphaShort = s.mOperatorAlphaShort;
-        mOperatorNumeric = s.mOperatorNumeric;
+        mVoiceRoamingType = s.mVoiceRoamingType;
+        mDataRoamingType = s.mDataRoamingType;
+        mVoiceOperatorAlphaLong = s.mVoiceOperatorAlphaLong;
+        mVoiceOperatorAlphaShort = s.mVoiceOperatorAlphaShort;
+        mVoiceOperatorNumeric = s.mVoiceOperatorNumeric;
+        mDataOperatorAlphaLong = s.mDataOperatorAlphaLong;
+        mDataOperatorAlphaShort = s.mDataOperatorAlphaShort;
+        mDataOperatorNumeric = s.mDataOperatorNumeric;
         mIsManualNetworkSelection = s.mIsManualNetworkSelection;
         mRilVoiceRadioTechnology = s.mRilVoiceRadioTechnology;
         mRilDataRadioTechnology = s.mRilDataRadioTechnology;
@@ -244,10 +301,14 @@ public class ServiceState implements Parcelable {
     public ServiceState(Parcel in) {
         mVoiceRegState = in.readInt();
         mDataRegState = in.readInt();
-        mRoaming = in.readInt() != 0;
-        mOperatorAlphaLong = in.readString();
-        mOperatorAlphaShort = in.readString();
-        mOperatorNumeric = in.readString();
+        mVoiceRoamingType = in.readInt();
+        mDataRoamingType = in.readInt();
+        mVoiceOperatorAlphaLong = in.readString();
+        mVoiceOperatorAlphaShort = in.readString();
+        mVoiceOperatorNumeric = in.readString();
+        mDataOperatorAlphaLong = in.readString();
+        mDataOperatorAlphaShort = in.readString();
+        mDataOperatorNumeric = in.readString();
         mIsManualNetworkSelection = in.readInt() != 0;
         mRilVoiceRadioTechnology = in.readInt();
         mRilDataRadioTechnology = in.readInt();
@@ -264,10 +325,14 @@ public class ServiceState implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mVoiceRegState);
         out.writeInt(mDataRegState);
-        out.writeInt(mRoaming ? 1 : 0);
-        out.writeString(mOperatorAlphaLong);
-        out.writeString(mOperatorAlphaShort);
-        out.writeString(mOperatorNumeric);
+        out.writeInt(mVoiceRoamingType);
+        out.writeInt(mDataRoamingType);
+        out.writeString(mVoiceOperatorAlphaLong);
+        out.writeString(mVoiceOperatorAlphaShort);
+        out.writeString(mVoiceOperatorNumeric);
+        out.writeString(mDataOperatorAlphaLong);
+        out.writeString(mDataOperatorAlphaShort);
+        out.writeString(mDataOperatorNumeric);
         out.writeInt(mIsManualNetworkSelection ? 1 : 0);
         out.writeInt(mRilVoiceRadioTechnology);
         out.writeInt(mRilDataRadioTechnology);
@@ -337,10 +402,45 @@ public class ServiceState implements Parcelable {
      *
      * @return true if TS 27.007 7.2 roaming is true
      *              and ONS is different from SPN
-     *
      */
     public boolean getRoaming() {
-        return mRoaming;
+        return getVoiceRoaming() || getDataRoaming();
+    }
+
+    /**
+     * Get current voice network roaming status
+     * @return roaming status
+     * @hide
+     */
+    public boolean getVoiceRoaming() {
+        return mVoiceRoamingType != ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    /**
+     * Get current voice network roaming type
+     * @return roaming type
+     * @hide
+     */
+    public int getVoiceRoamingType() {
+        return mVoiceRoamingType;
+    }
+
+    /**
+     * Get current data network roaming type
+     * @return roaming type
+     * @hide
+     */
+    public boolean getDataRoaming() {
+        return mDataRoamingType != ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    /**
+     * Get current data network roaming type
+     * @return roaming type
+     * @hide
+     */
+    public int getDataRoamingType() {
+        return mDataRoamingType;
     }
 
     /**
@@ -387,7 +487,25 @@ public class ServiceState implements Parcelable {
      * @return long name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaLong() {
-        return mOperatorAlphaLong;
+        return mVoiceOperatorAlphaLong;
+    }
+
+    /**
+     * Get current registered voice network operator name in long alphanumeric format.
+     * @return long name of operator
+     * @hide
+     */
+    public String getVoiceOperatorAlphaLong() {
+        return mVoiceOperatorAlphaLong;
+    }
+
+    /**
+     * Get current registered data network operator name in long alphanumeric format.
+     * @return long name of voice operator
+     * @hide
+     */
+    public String getDataOperatorAlphaLong() {
+        return mDataOperatorAlphaLong;
     }
 
     /**
@@ -398,7 +516,25 @@ public class ServiceState implements Parcelable {
      * @return short name of operator, null if unregistered or unknown
      */
     public String getOperatorAlphaShort() {
-        return mOperatorAlphaShort;
+        return mVoiceOperatorAlphaShort;
+    }
+
+    /**
+     * Get current registered voice network operator name in short alphanumeric format.
+     * @return short name of operator, null if unregistered or unknown
+     * @hide
+     */
+    public String getVoiceOperatorAlphaShort() {
+        return mVoiceOperatorAlphaShort;
+    }
+
+    /**
+     * Get current registered data network operator name in short alphanumeric format.
+     * @return short name of operator, null if unregistered or unknown
+     * @hide
+     */
+    public String getDataOperatorAlphaShort() {
+        return mDataOperatorAlphaShort;
     }
 
     /**
@@ -414,7 +550,25 @@ public class ServiceState implements Parcelable {
      * {@link com.android.internal.telephony.MccTable#countryCodeForMcc(int)}.
      */
     public String getOperatorNumeric() {
-        return mOperatorNumeric;
+        return mVoiceOperatorNumeric;
+    }
+
+    /**
+     * Get current registered voice network operator numeric id.
+     * @return numeric format of operator, null if unregistered or unknown
+     * @hide
+     */
+    public String getVoiceOperatorNumeric() {
+        return mVoiceOperatorNumeric;
+    }
+
+    /**
+     * Get current registered data network operator numeric id.
+     * @return numeric format of operator, null if unregistered or unknown
+     * @hide
+     */
+    public String getDataOperatorNumeric() {
+        return mDataOperatorNumeric;
     }
 
     /**
@@ -430,11 +584,15 @@ public class ServiceState implements Parcelable {
     public int hashCode() {
         return ((mVoiceRegState * 31)
                 + (mDataRegState * 37)
-                + (mRoaming ? 1 : 0)
+                + mVoiceRoamingType
+                + mDataRoamingType
                 + (mIsManualNetworkSelection ? 1 : 0)
-                + ((null == mOperatorAlphaLong) ? 0 : mOperatorAlphaLong.hashCode())
-                + ((null == mOperatorAlphaShort) ? 0 : mOperatorAlphaShort.hashCode())
-                + ((null == mOperatorNumeric) ? 0 : mOperatorNumeric.hashCode())
+                + ((null == mVoiceOperatorAlphaLong) ? 0 : mVoiceOperatorAlphaLong.hashCode())
+                + ((null == mVoiceOperatorAlphaShort) ? 0 : mVoiceOperatorAlphaShort.hashCode())
+                + ((null == mVoiceOperatorNumeric) ? 0 : mVoiceOperatorNumeric.hashCode())
+                + ((null == mDataOperatorAlphaLong) ? 0 : mDataOperatorAlphaLong.hashCode())
+                + ((null == mDataOperatorAlphaShort) ? 0 : mDataOperatorAlphaShort.hashCode())
+                + ((null == mDataOperatorNumeric) ? 0 : mDataOperatorNumeric.hashCode())
                 + mCdmaRoamingIndicator
                 + mCdmaDefaultRoamingIndicator
                 + (mIsEmergencyOnly ? 1 : 0));
@@ -456,11 +614,15 @@ public class ServiceState implements Parcelable {
 
         return (mVoiceRegState == s.mVoiceRegState
                 && mDataRegState == s.mDataRegState
-                && mRoaming == s.mRoaming
                 && mIsManualNetworkSelection == s.mIsManualNetworkSelection
-                && equalsHandlesNulls(mOperatorAlphaLong, s.mOperatorAlphaLong)
-                && equalsHandlesNulls(mOperatorAlphaShort, s.mOperatorAlphaShort)
-                && equalsHandlesNulls(mOperatorNumeric, s.mOperatorNumeric)
+                && mVoiceRoamingType == s.mVoiceRoamingType
+                && mDataRoamingType == s.mDataRoamingType
+                && equalsHandlesNulls(mVoiceOperatorAlphaLong, s.mVoiceOperatorAlphaLong)
+                && equalsHandlesNulls(mVoiceOperatorAlphaShort, s.mVoiceOperatorAlphaShort)
+                && equalsHandlesNulls(mVoiceOperatorNumeric, s.mVoiceOperatorNumeric)
+                && equalsHandlesNulls(mDataOperatorAlphaLong, s.mDataOperatorAlphaLong)
+                && equalsHandlesNulls(mDataOperatorAlphaShort, s.mDataOperatorAlphaShort)
+                && equalsHandlesNulls(mDataOperatorNumeric, s.mDataOperatorNumeric)
                 && equalsHandlesNulls(mRilVoiceRadioTechnology, s.mRilVoiceRadioTechnology)
                 && equalsHandlesNulls(mRilDataRadioTechnology, s.mRilDataRadioTechnology)
                 && equalsHandlesNulls(mCssIndicator, s.mCssIndicator)
@@ -548,10 +710,17 @@ public class ServiceState implements Parcelable {
         String radioTechnology = rilRadioTechnologyToString(mRilVoiceRadioTechnology);
         String dataRadioTechnology = rilRadioTechnologyToString(mRilDataRadioTechnology);
 
-        return (mVoiceRegState + " " + mDataRegState + " " + (mRoaming ? "roaming" : "home")
-                + " " + mOperatorAlphaLong
-                + " " + mOperatorAlphaShort
-                + " " + mOperatorNumeric
+        return (mVoiceRegState + " " + mDataRegState
+                + " "
+                + "voice " + getRoamingLogString(mVoiceRoamingType)
+                + " "
+                + "data " + getRoamingLogString(mDataRoamingType)
+                + " " + mVoiceOperatorAlphaLong
+                + " " + mVoiceOperatorAlphaShort
+                + " " + mVoiceOperatorNumeric
+                + " " + mDataOperatorAlphaLong
+                + " " + mDataOperatorAlphaShort
+                + " " + mDataOperatorNumeric
                 + " " + (mIsManualNetworkSelection ? "(manual)" : "")
                 + " " + radioTechnology
                 + " " + dataRadioTechnology
@@ -567,10 +736,14 @@ public class ServiceState implements Parcelable {
         if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setNullState=" + state);
         mVoiceRegState = state;
         mDataRegState = state;
-        mRoaming = false;
-        mOperatorAlphaLong = null;
-        mOperatorAlphaShort = null;
-        mOperatorNumeric = null;
+        mVoiceRoamingType = ROAMING_TYPE_NOT_ROAMING;
+        mDataRoamingType = ROAMING_TYPE_NOT_ROAMING;
+        mVoiceOperatorAlphaLong = null;
+        mVoiceOperatorAlphaShort = null;
+        mVoiceOperatorNumeric = null;
+        mDataOperatorAlphaLong = null;
+        mDataOperatorAlphaShort = null;
+        mDataOperatorNumeric = null;
         mIsManualNetworkSelection = false;
         mRilVoiceRadioTechnology = 0;
         mRilDataRadioTechnology = 0;
@@ -610,9 +783,29 @@ public class ServiceState implements Parcelable {
     }
 
     public void setRoaming(boolean roaming) {
-        mRoaming = roaming;
+        mVoiceRoamingType = (roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
+        mDataRoamingType = mVoiceRoamingType;
     }
 
+    /** @hide */
+    public void setVoiceRoaming(boolean roaming) {
+        mVoiceRoamingType = (roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
+    }
+
+    /** @hide */
+    public void setVoiceRoamingType(int type) {
+        mVoiceRoamingType = type;
+    }
+
+    /** @hide */
+    public void setDataRoaming(boolean dataRoaming) {
+        mDataRoamingType = (dataRoaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
+    }
+
+    /** @hide */
+    public void setDataRoamingType(int type) {
+        mDataRoamingType = type;
+    }
 
     /**
      * @hide
@@ -650,9 +843,26 @@ public class ServiceState implements Parcelable {
     }
 
     public void setOperatorName(String longName, String shortName, String numeric) {
-        mOperatorAlphaLong = longName;
-        mOperatorAlphaShort = shortName;
-        mOperatorNumeric = numeric;
+        mVoiceOperatorAlphaLong = longName;
+        mVoiceOperatorAlphaShort = shortName;
+        mVoiceOperatorNumeric = numeric;
+        mDataOperatorAlphaLong = longName;
+        mDataOperatorAlphaShort = shortName;
+        mDataOperatorNumeric = numeric;
+    }
+
+    /** @hide */
+    public void setVoiceOperatorName(String longName, String shortName, String numeric) {
+        mVoiceOperatorAlphaLong = longName;
+        mVoiceOperatorAlphaShort = shortName;
+        mVoiceOperatorNumeric = numeric;
+    }
+
+    /** @hide */
+    public void setDataOperatorName(String longName, String shortName, String numeric) {
+        mDataOperatorAlphaLong = longName;
+        mDataOperatorAlphaShort = shortName;
+        mDataOperatorNumeric = numeric;
     }
 
     /**
@@ -662,7 +872,18 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public void setOperatorAlphaLong(String longName) {
-        mOperatorAlphaLong = longName;
+        mVoiceOperatorAlphaLong = longName;
+        mDataOperatorAlphaLong = longName;
+    }
+
+    /** @hide */
+    public void setVoiceOperatorAlphaLong(String longName) {
+        mVoiceOperatorAlphaLong = longName;
+    }
+
+    /** @hide */
+    public void setDataOperatorAlphaLong(String longName) {
+        mDataOperatorAlphaLong = longName;
     }
 
     public void setIsManualSelection(boolean isManual) {
@@ -689,10 +910,14 @@ public class ServiceState implements Parcelable {
     private void setFromNotifierBundle(Bundle m) {
         mVoiceRegState = m.getInt("voiceRegState");
         mDataRegState = m.getInt("dataRegState");
-        mRoaming = m.getBoolean("roaming");
-        mOperatorAlphaLong = m.getString("operator-alpha-long");
-        mOperatorAlphaShort = m.getString("operator-alpha-short");
-        mOperatorNumeric = m.getString("operator-numeric");
+        mVoiceRoamingType = m.getInt("voiceRoamingType");
+        mDataRoamingType = m.getInt("dataRoamingType");
+        mVoiceOperatorAlphaLong = m.getString("operator-alpha-long");
+        mVoiceOperatorAlphaShort = m.getString("operator-alpha-short");
+        mVoiceOperatorNumeric = m.getString("operator-numeric");
+        mDataOperatorAlphaLong = m.getString("data-operator-alpha-long");
+        mDataOperatorAlphaShort = m.getString("data-operator-alpha-short");
+        mDataOperatorNumeric = m.getString("data-operator-numeric");
         mIsManualNetworkSelection = m.getBoolean("manual");
         mRilVoiceRadioTechnology = m.getInt("radioTechnology");
         mRilDataRadioTechnology = m.getInt("dataRadioTechnology");
@@ -713,10 +938,14 @@ public class ServiceState implements Parcelable {
     public void fillInNotifierBundle(Bundle m) {
         m.putInt("voiceRegState", mVoiceRegState);
         m.putInt("dataRegState", mDataRegState);
-        m.putBoolean("roaming", Boolean.valueOf(mRoaming));
-        m.putString("operator-alpha-long", mOperatorAlphaLong);
-        m.putString("operator-alpha-short", mOperatorAlphaShort);
-        m.putString("operator-numeric", mOperatorNumeric);
+        m.putInt("voiceRoamingType", mVoiceRoamingType);
+        m.putInt("dataRoamingType", mDataRoamingType);
+        m.putString("operator-alpha-long", mVoiceOperatorAlphaLong);
+        m.putString("operator-alpha-short", mVoiceOperatorAlphaShort);
+        m.putString("operator-numeric", mVoiceOperatorNumeric);
+        m.putString("data-operator-alpha-long", mDataOperatorAlphaLong);
+        m.putString("data-operator-alpha-short", mDataOperatorAlphaShort);
+        m.putString("data-operator-numeric", mDataOperatorNumeric);
         m.putBoolean("manual", Boolean.valueOf(mIsManualNetworkSelection));
         m.putInt("radioTechnology", mRilVoiceRadioTechnology);
         m.putInt("dataRadioTechnology", mRilDataRadioTechnology);
@@ -863,5 +1092,24 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EVDO_A
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EVDO_B
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EHRPD;
+    }
+
+    /**
+     * Returns a merged ServiceState consisting of the base SS with voice settings from the
+     * voice SS. The voice SS is only used if it is IN_SERVICE (otherwise the base SS is returned).
+     * @hide
+     * */
+    public static ServiceState mergeServiceStates(ServiceState baseSs, ServiceState voiceSs) {
+        if (voiceSs.mVoiceRegState != STATE_IN_SERVICE) {
+            return baseSs;
+        }
+
+        ServiceState newSs = new ServiceState(baseSs);
+
+        // voice overrides
+        newSs.mVoiceRegState = voiceSs.mVoiceRegState;
+        newSs.mIsEmergencyOnly = false; // only get here if voice is IN_SERVICE
+
+        return newSs;
     }
 }

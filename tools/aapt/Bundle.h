@@ -14,18 +14,7 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
-enum {
-    SDK_CUPCAKE = 3,
-    SDK_DONUT = 4,
-    SDK_ECLAIR = 5,
-    SDK_ECLAIR_0_1 = 6,
-    SDK_MR1 = 7,
-    SDK_FROYO = 8,
-    SDK_HONEYCOMB_MR2 = 13,
-    SDK_ICE_CREAM_SANDWICH = 14,
-    SDK_ICE_CREAM_SANDWICH_MR1 = 15,
-    SDK_L = 21,
-};
+#include "SdkConstants.h"
 
 /*
  * Things we can do.
@@ -190,6 +179,8 @@ public:
     void setVersionName(const char* val) { mVersionName = val; }
     bool getReplaceVersion() { return mReplaceVersion; }
     void setReplaceVersion(bool val) { mReplaceVersion = val; }
+    const android::String8& getRevisionCode() { return mRevisionCode; }
+    void setRevisionCode(const char* val) { mRevisionCode = android::String8(val); }
     const char* getCustomPackage() const { return mCustomPackage; }
     void setCustomPackage(const char* val) { mCustomPackage = val; }
     const char* getExtraPackages() const { return mExtraPackages; }
@@ -308,6 +299,7 @@ private:
 
     android::String8 mFeatureOfPackage;
     android::String8 mFeatureAfterPackage;
+    android::String8 mRevisionCode;
     const char* mManifestMinSdkVersion;
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;

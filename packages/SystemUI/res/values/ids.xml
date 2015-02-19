@@ -35,5 +35,6 @@
     <item type="id" name="top_inset_animator_start_value_tag"/>
     <item type="id" name="height_animator_start_value_tag"/>
     <item type="id" name="doze_saved_filter_tag"/>
+    <item type="id" name="qs_icon_tag"/>
 </resources>
 

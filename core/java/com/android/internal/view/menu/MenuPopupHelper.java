@@ -54,6 +54,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private final boolean mOverflowOnly;
     private final int mPopupMaxWidth;
     private final int mPopupStyleAttr;
+    private final int mPopupStyleRes;
 
     private View mAnchorView;
     private ListPopupWindow mPopup;
@@ -73,21 +74,27 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private int mDropDownGravity = Gravity.NO_GRAVITY;
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
-        this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle);
+        this(context, menu, null, false, com.android.internal.R.attr.popupMenuStyle, 0);
     }
 
     public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView) {
-        this(context, menu, anchorView, false, com.android.internal.R.attr.popupMenuStyle);
+        this(context, menu, anchorView, false, com.android.internal.R.attr.popupMenuStyle, 0);
     }
 
     public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView,
             boolean overflowOnly, int popupStyleAttr) {
+        this(context, menu, anchorView, overflowOnly, popupStyleAttr, 0);
+    }
+
+    public MenuPopupHelper(Context context, MenuBuilder menu, View anchorView,
+            boolean overflowOnly, int popupStyleAttr, int popupStyleRes) {
         mContext = context;
         mInflater = LayoutInflater.from(context);
         mMenu = menu;
         mAdapter = new MenuAdapter(mMenu);
         mOverflowOnly = overflowOnly;
         mPopupStyleAttr = popupStyleAttr;
+        mPopupStyleRes = popupStyleRes;
 
         final Resources res = context.getResources();
         mPopupMaxWidth = Math.max(res.getDisplayMetrics().widthPixels / 2,
@@ -122,7 +129,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     }
 
     public boolean tryShow() {
-        mPopup = new ListPopupWindow(mContext, null, mPopupStyleAttr);
+        mPopup = new ListPopupWindow(mContext, null, mPopupStyleAttr, mPopupStyleRes);
         mPopup.setOnDismissListener(this);
         mPopup.setOnItemClickListener(this);
         mPopup.setAdapter(mAdapter);

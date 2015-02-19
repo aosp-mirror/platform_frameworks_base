@@ -1,0 +1,637 @@
+page.title=Android 5.0 API
+excludeFromSuggestions=true
+sdk.platform.version=5.0
+sdk.platform.apiLevel=21
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>在本文档中 <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle"> <span class="more">展开</span><span class="less" style="display:none">合拢</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#ApiLevel">更新目标 API 级别</a></li>
+  <li><a href="#Behaviors">重要的行为变更</a>
+    <ol>
+      <li><a href="#ART">如果您尚未针对新的 Android 运行时 (ART) 测试您的应用…</a></li>
+      <li><a href="#BehaviorNotifications">如果您的应用实施通知…</a></li>
+      <li><a href="#BehaviorMediaControl">如果您的应用使用 RemoteControlClient…</a></li>
+<li><a href="#BehaviorGetRecentTasks">如果您的应用使用 getRecentTasks()…</a></li>
+<li><a href="#64BitSupport">如果您使用的是 Android 原生开发工具包 (NDK)…</a></li>
+<li><a href="#BindService">如果您的应用绑定到某项服务…</a></li>
+<li><a href="#BehaviorWebView">如果您的应用使用 WebView…</a></li>
+    </ol>
+  </li>
+  <li><a href="#UI">界面</a>
+    <ol>
+      <li><a href="#MaterialDesign">Material Design 设计支持</a></li>
+      <li><a href="#Recents">“最近用过”屏幕中的并行文档和活动</a></li>
+      <li><a href="#WebView">WebView 更新</a></li>
+      <li><a href="#ScreenCapture">屏幕截图和共享</a></li>
+    </ol>
+  </li>
+  <li><a href="#Notifications">通知</a>
+    <ol>
+      <li><a href="#LockscreenNotifications">锁定屏幕通知</a></li>
+      <li><a href="#NotificationsMetadata">通知元数据</a></li>
+    </ol>
+  </li>
+  <li><a href="#Graphics">图形</a>
+    <ol>
+      <li><a href="#OpenGLES-3-1">支持 OpenGL ES 3.1</a></li>
+      <li><a href="#AndroidExtensionPack">Android 扩展程序包</a></li>
+    </ol>
+  </li>
+  <li><a href="#Media">媒体</a>
+    <ol>
+      <li><a href="#Camera-v2">提供高级摄像头功能的摄像头 API</a></li>
+      <li><a href="#AudioPlayback">音频播放</a></li>
+      <li><a href="#MediaPlaybackControl">媒体播放控件</a></li>
+      <li><a href="#MediaBrowsing">媒体浏览</a></li>
+    </ol>
+  </li>
+  <li><a href="#Storage">存储</a>
+    <ol>
+      <li><a href="#DirectorySelection">目录选择</a></li>
+    </ol>
+  </li>
+  <li><a href="#Wireless">无线和连接</a>
+    <ol>
+      <li><a href="#Multinetwork">多个网络连接</a></li>
+      <li><a href="#BluetoothBroadcasting">蓝牙广播</a></li>
+      <li><a href="#NFCEnhancements">NFC 增强功能</a></li>
+    </ol>
+  </li>
+  <li><a href="#Power">Project Volta</a>
+    <ol>
+      <li><a href="#JobScheduler">安排作业</a></li>
+      <li><a href="#PowerMeasurementTools">用于查询耗电信息的开发者工具</a>
+    </ol>
+  </li>
+  <li><a href="#Enterprise">Android 在办公和教育中的应用</a>
+    <ol>
+      <li><a href="#ManagedProvisioning">托管配置</a></li>
+      <li><a href="#DeviceOwner">设备所有者</a></li>
+      <li><a href="#ScreenPinning">固定屏幕</a></li>
+    </ol>
+  </li>
+  <li><a href="#System">系统</a>
+    <ol>
+      <li><a href="#AppUsageStatistics">应用使用情况统计信息</a></li>
+    </ol>
+  </li>
+  <li><a href="#Printing">打印框架</a>
+    <ol>
+      <li><a href="#PDFRender">使用位图来呈现 PDF 文件</a></li>
+    </ol>
+  </li>
+  <li><a href="#TestingA11y">测试和辅助功能</a>
+    <ol>
+      <li><a href="#TestingA11yImprovements">测试和辅助功能改进</a></li>
+    </ol>
+  </li>
+  <li><a href="#IME">IME</a>
+    <ol>
+      <li><a href="#Switching">更轻松地切换输入语言</a></li>
+    </ol>
+  </li>
+  <li><a href="#Manifest">清单声明</a>
+    <ol>
+      <li><a href="#ManifestFeatures">应声明的必需功能</a></li>
+      <li><a href="#Permissions">用户权限</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/android-5.0-changes.html">Android 5.0 Behavior Changes</a> </li>
+<li><a href="{@docRoot}about/versions/lollipop.html">Android Lollipop Highlights</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>API 级别：{@sdkPlatformApiLevel}</p>
+
+<p>Android 5.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#LOLLIPOP">LOLLIPOP</a>) 为用户和应用开发者提供了新的功能。本文档介绍了最值得注意的新 API。</p>
+
+<p>有关新平台功能的扼要介绍，另请参阅 <a href="{@docRoot}about/versions/lollipop.html">Android Lollipop 集锦</a>。</p>
+
+
+<h3 id="Start">开始开发</h3>
+
+<p>要构建 Android 5.0 版应用，您必须先<a href="{@docRoot}sdk/index.html">下载 Android SDK</a>，然后使用 <a href="{@docRoot}tools/help/sdk-manager.html">SDK 管理器</a>下载 Android 5.0 SDK 平台和系统映像。</p>
+
+
+
+<h3 id="ApiLevel">更新您的目标 API 级别</h3>
+
+<p>要进一步针对运行 Android {@sdkPlatformVersion} 的设备优化您的应用，请将 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> 设置为 <code>"{@sdkPlatformApiLevel}"</code>，在 Android {@sdkPlatformVersion} 系统映像上安装该应用并予以测试，然后将更改后的新版应用发布出去。</p>
+
+<p>您既可以使用 {@sdkPlatformVersion} API，也可以支持旧版本，方法是在代码中构建条件，确保先检查系统 API 级别再执行 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> 不支持的 API。要详细了解有关保持向后兼容的信息，请参阅<a href="{@docRoot}training/basics/supporting-devices/platforms.html">支持不同平台版本</a>。</p>
+
+<p>要详细了解有关各个 API 级别运行方式的信息，请参阅<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">什么是 API 级别？</a></p>
+
+<h2 id="Behaviors">重要的行为变更</h2>
+
+<p>请注意，如果您之前发布了 Android 版应用，那么您的应用可能会受到 Android 5.0 变化的影响。</p>
+
+<h3 id="ART">如果您尚未针对新的 Android 运行时 (ART) 测试您的应用…</h3>
+
+<p>第 4.4 版引入了一个全新的实验性功能，即 Android 运行时 (ART)。在第 4.4 版中，ART 是可选的，默认运行时仍为 Dalvik。对于 Android 5.0，默认运行时现在是 ART。</p>
+
+<p>有关 ART 新功能的概述，请参阅 <a href="https://source.android.com/devices/tech/dalvik/art.html">ART 简介</a>。主要包括下面的一些新功能：</p>
+
+<ul>
+  <li>预先 (AOT) 编译</li>
+  <li>经过改进的垃圾回收 (GC)</li>
+  <li>经过改进的调试支持</li>
+</ul>
+
+<p>大多数 Android 应用应该不用做出任何更改即可直接在 ART 下运行。不过，Dalvik 上运行的部分技术在 ART 上无法运行。要了解最重要的问题，请参阅<a href="{@docRoot}guide/practices/verifying-apps-art.html">在 Android 运行时 (ART) 上验证应用行为</a>。请特别注意以下情况：</p>
+
+<ul>
+  <li>您的应用使用 Java 原生接口 (JNI) 运行 C/C++ 代码。</li>
+  <li>您使用的开发工具可生成非标准代码（例如某些混淆代码）。</li>
+  <li>您使用的技术与垃圾回收压缩不兼容。（虽然 ART 当前没有实施垃圾回收压缩，但在 Android 开放源代码项目中，垃圾回收压缩正处于开发阶段）。</li>
+</ul>
+
+<h3 id="BehaviorNotifications">如果您的应用实施通知…</h3>
+
+<p>请确保您的通知能够反映出 Android 5.0 的这些变化。要详细了解如何设计适用于 Android 5.0 及更高版本的通知，请参阅<a href="{@docRoot}design/patterns/notifications.html">通知设计指南</a>。
+</p>
+
+<h4 id="NotificationsMaterialDesignStyle">Material Design 设计样式</h4>
+<p>通知是在白色（或颜色非常浅的）背景上绘制的深色文本，以便与新的 Material Design 设计小部件协调一致。请确保所有通知在新的配色方案下都能够正常显示。如果通知无法正常显示，请予以修复：</p>
+
+<ul>
+  <li>使用 {@link android.app.Notification.Builder#setColor(int) setColor()} 在图标图片后面的圆圈中设置一种强调色彩。 </li>
+  <li>更新或移除有颜色的资源。系统会忽略操作图标和主通知图标中的所有非 Alpha 通道。您应当假定这些图标仅包含 Alpha 通道。系统会用白色来绘制通知图标，而用深灰色来绘制操作图标。</li>
+</ul>
+
+<h4 id="NotificationsSoundVibration">声音和振动</h4>
+<p>如果您当前在使用 {@link android.media.Ringtone}、{@link android.media.MediaPlayer} 或 {@link android.os.Vibrator} 类为通知添加声音和振动，请移除该代码，这样系统才能以优先模式正常呈现通知。<em></em>若要添加声音和振动，请改用 {@link android.app.Notification.Builder} 方法。</p>
+
+<p>将设备设置为 {@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} 会导致它进入新的优先模式。如果将设备设置为 {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} 或 {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}，则会使其退出优先模式。</p>
+
+<p>以前，Android 将 {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC} 用作主音量流，以此来控制平板电脑设备的音量。在 Android 5.0 中，手机和平板电脑设备的主音量流现已统一，均由 {@link android.media.AudioManager#STREAM_RING STREAM_RING} 或 {@link android.media.AudioManager#STREAM_NOTIFICATION STREAM_NOTIFICATION} 控制。</p>
+
+<h4 id="NotificationsLockscreenVisibility">通知在锁定屏幕上的公开程度</h4>
+<p>在 Android 5.0 中，通知现在默认显示在用户的锁定屏幕上。用户可以选择不公开敏感信息，这样的话系统会自动修改通知显示文本。要自定义这种经过修改的通知，请使用 {@link android.app.Notification.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}。</p>
+<p>如果通知不包含个人信息，或者您希望在通知中显示媒体播放控件，请调用 {@link android.app.Notification.Builder#setVisibility(int) setVisibility()} 方法，并将通知的公开程度的级别设置为 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}。
+</p>
+
+<h4 id="NotificationsMediaPlayback">媒体播放</h4>
+<p>如果您要实施可呈现媒体播放状态或传输控件的通知，请考虑使用新的 {@link android.app.Notification.MediaStyle} 模板，而不是自定义 {@link android.widget.RemoteViews.RemoteView} 对象。无论您选择使用哪种方法，请务必将通知的公开程度设置为 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}，以便用户可以在锁定屏幕中使用您的控件。请注意，从 Android 5.0 开始，系统不再在锁定屏幕中显示 {@link android.media.RemoteControlClient} 对象。有关详情，请参阅<a href="#BehaviorMediaControl">如果您的应用使用 RemoteControlClient</a>。</p>
+
+<h4 id="NotificationsHeadsup">提醒通知</h4>
+<p>现在，当设备处于活动状态（即设备未锁定且屏幕亮起）时，通知可以显示在小型浮动窗口中（也称为提醒通知）。此类通知采用的显示形式与紧凑型通知采用的形式类似，不同的是提醒通知还会显示操作按钮。用户无需退出当前应用，即可根据提醒通知执行操作或关闭提醒通知。</p>
+
+<p>可以触发提醒通知的情景示例包括：</p>
+
+<ul>
+  <li>用户在全屏模式下执行操作（应用使用 {@link android.app.Notification#fullScreenIntent}）</li>
+  <li>通知的优先级较高，并且使用铃声或振动</li>
+</ul>
+
+<p>如果您的应用在上述任意一种情景下实施通知，请确保提醒通知能够正常呈现。</p>
+
+<h3 id="BehaviorMediaControl">如果您的应用使用 RemoteControlClient…</h3>
+<p>{@link android.media.RemoteControlClient} 类现已被弃用。请尽快改用全新的 {@link android.media.session.MediaSession} API。</p>
+
+<p>对于 {@link android.media.session.MediaSession} 或 {@link android.media.RemoteControlClient}，Android 5.0 中的锁定屏幕不会显示传输控件。相反，您的应用可以通过通知在锁定屏幕中提供媒体播放控件。这样，您的应用就能够更好地控制媒体按钮的展现方式，同时还能让用户无论在设备处于锁定还是解锁状态下都可以执行同样的操作。</p>
+
+<p>为此，Android 5.0 引入了一个新的 {@link android.app.Notification.MediaStyle} 模板。{@link android.app.Notification.MediaStyle} 将您通过 {@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence, android.app.PendingIntent) Notification.Builder.addAction()} 添加的通知操作转换到在您应用的媒体播放通知中内嵌的紧凑型按钮中。将会话令牌传递到 {@link android.app.Notification.MediaStyle#setMediaSession(android.media.session.MediaSession.Token) setSession()} 方法，指示系统此通知控制正在进行的媒体会话。</p>
+
+<p>请务必将通知的公开程度设置为 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}，将通知标为安全通知，以便在任何锁定屏幕（安全屏幕或其他屏幕）上显示。有关详情，请参阅<a href="#LockscreenNotifications">在锁定屏幕上显示通知</a>。</p>
+
+<p>如果您的应用是在 Android <a href="{@docRoot}tv/index.html">TV</a> 或 <a href="{@docRoot}wear/index.html">Wear</a> 平台上运行，请通过实施 {@link android.media.session.MediaSession} 类来显示媒体播放控件。如果您的应用需要在 Android 设备上接收媒体按钮事件，您还应当实施 {@link android.media.session.MediaSession}。</p>
+
+<h3 id="BehaviorGetRecentTasks">如果您的应用使用 getRecentTasks()…</h3>
+
+<p><em></em>由于 Android 5.0 中引入了并行文档和活动任务这一新功能（请参阅下文中的<a href="#Recents">“最近用过”屏幕中的并行文档和活动</a>），{@link android.app.ActivityManager#getRecentTasks ActivityManager.getRecentTasks()} 方法现已被弃用，以更好地保护用户隐私。为了实现向后兼容性，此方法仍会返回它的一小部分数据，包括调用应用自身的任务，同时还可能包括其他一些非敏感任务（例如“首页”）。如果您的应用在使用此方法检索它自身的任务，请改用 {@link android.app.ActivityManager#getAppTasks() getAppTasks()} 检索该信息。</p>
+
+<h3 id="64BitSupport">如果您使用的是 Android 原生开发工具包 (NDK)…</h3>
+
+<p>Android 5.0 支持 64 位系统。64 位增强功能增加了寻址空间并提高了性能，同时仍能全面支持现有的 32 位应用。64 位支持还提高了 OpenSSL 的加密性能。另外，此版本还引入了新的原生媒体 NDK API 以及原生 OpenGL ES (GLES) 3.1 支持。</p>
+
+<p>要利用 Android 5.0 中提供的 64 位支持，请从 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK 页面</a>下载并安装 NDK 10c 版。要详细了解 NDK 的重要变化和错误修复，请参阅 10c 版<a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">版本说明</a>。</p>
+
+<h3 id="BindService">如果您的应用绑定到某项服务…</h3>
+
+<p>{@link android.content.Context#bindService(android.content.Intent, android.content.ServiceConnection, int) Context.bindService()} 方法现在要求获取显式 {@link android.content.Intent}；如果获取的是隐式 intent，则会引发异常。为了确保您的应用是安全的，请在启动或绑定 {@link android.app.Service} 时使用显式 intent，并且不要为此服务声明 intent 过滤器。</p>
+
+<h3 id="BehaviorWebView">如果您的应用使用 WebView…</h3>
+
+<p>Android 5.0 会更改您应用的默认行为。</p>
+<ul>
+<li><strong>如果您的应用的目标 API 级别不低于 21</strong>：
+  <ul>
+    <li>默认情况下，系统会屏蔽<a href="https://developer.mozilla.org/en-US/docs/Security/MixedContent" class="external-link">混合内容</a>和第三方 Cookie。要让系统不屏蔽混合内容和第三方 Cookie，请分别使用 {@link android.webkit.WebSettings#setMixedContentMode(int) setMixedContentMode()} 和 {@link android.webkit.CookieManager#setAcceptThirdPartyCookies(android.webkit.WebView, boolean) setAcceptThirdPartyCookies()} 方法。</li>
+    <li>系统现在可以智能选择要绘制的 HTML 文档部分。这一新的默认行为有助于降低内存占用量并提高性能。如果您要一次性呈现整个文档，请调用 {@link android.webkit.WebView#enableSlowWholeDocumentDraw()} 停用此优化行为。</li>
+  </ul>
+</li>
+<li><strong>如果您的应用的目标 API 级别低于 21</strong>：系统不会屏蔽混合内容和第三方 Cookie，并且始终会一次性呈现整个文档。</li>
+</ul>
+
+<h2 id="UI">界面</h2>
+
+<h3 id="MaterialDesign">Material Design 设计支持</h3>
+
+<p><em></em>即将发布的版本新增了对 Android 新 Material Design 设计样式的支持。您可以借助 Material Design 设计样式创建应用，使其呈现动态的视觉效果并为用户提供自然的界面元素过渡效果。此支持包括：</p>
+
+<ul>
+
+  <li>素材主题背景</li>
+  <li>视图阴影</li>
+  <li>{@link android.support.v7.widget.RecyclerView} 小部件</li>
+  <li>可绘制的动画和样式效果</li>
+  <li>Material Design 设计动画和活动过渡效果</li>
+  <li>基于视图状态的视图属性动画生成器</li>
+  <li>可自定义的界面小部件和应用栏（含您可以控制的调色板）</li>
+  <li>基于 XML 矢量图形的动画和非动画图形内容</li>
+</ul>
+
+<p>要详细了解如何向您的应用添加 Material Design 设计功能，请参阅 <a href="{@docRoot}training/material/index.html">Material Design 设计</a>。</p>
+
+<h3 id="Recents">“最近用过”屏幕中的并行文档和活动</h3>
+
+<p>在以前的版本中，对于用户最近与之互动的每个应用，<a href="{@docRoot}guide/components/recents.html">“最近用过”屏幕</a>都只能显示一个任务。现在，您的应用可以视需要针对其他并行活动或文档打开多个任务。通过此功能，用户可以在“最近用过”屏幕中快速切换各个活动和文档，并能在所有应用之间获得一致的切换体验，从而实现多任务处理。此类并行任务示例可能包括：网络浏览器应用中打开的标签页、效率类应用中的文档、游戏中的并行对局或信息应用中的聊天。您的应用可以通过 {@link android.app.ActivityManager.AppTask} 类管理任务。</p>
+
+<p>要插入逻辑中断，以便系统能够将您的活动视为一个新任务，请在通过 {@link android.app.Activity#startActivity(android.content.Intent) startActivity()} 启动活动时使用 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}。您还可以在清单中将 <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a> 元素的 {@code documentLaunchMode} 属性设置为 {@code "intoExisting"} 或 {@code "always"}，从而实现该行为。</p>
+
+<p>为了避免“最近用过”屏幕过于混乱，您可以设置应用能够在该屏幕中显示的任务数上限。为此，请设置 <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> 的 {@link android.R.attr#maxRecents android:maxRecents} 属性。目前可以指定的上限为，每个用户 50 个任务（对于 RAM 较小的设备，则为每个用户 25 个任务）。</a></p>
+
+<p>您可以将“最近用过”屏幕中的任务设置为在重新启动过程中保持不变。要控制这一持续行为，请使用 <a href="{@docRoot}reference/android/R.attr.html#persistableMode">android:persistableMode</a> 属性。您也可以通过调用 {@link android.app.Activity#setTaskDescription(android.app.ActivityManager.TaskDescription) setTaskDescription()} 方法，来更改“最近用过”屏幕中活动的视觉属性，如活动的颜色、标签和图标。</p>
+
+<h3 id="WebView">WebView 更新</h3>
+<p>Android 5.0 将 {@link android.webkit.WebView} 实施更新为  Chromium M37，不仅提高了安全性和稳定性，还修复了多项错误。Android 5.0 上运行的 {@link android.webkit.WebView} 的默认用户代理字符串已更新为采用 37.0.0.0 作为版本号。</p>
+
+<p>此版本引入了 {@link android.webkit.PermissionRequest} 类，该类允许您的应用 <a href="https://developer.mozilla.org/en-US/docs/NavigatorUserMedia.getUserMedia" class="external-link">getUserMedia()</a> 之类的 Web API 向 {@link android.webkit.WebView} 授予对受保护资源（例如摄像头和麦克风）的访问权限。您的应用必须拥有对这些资源的相应 Android 权限，才能向 {@link android.webkit.WebView} 授予权限。</p>
+
+<p>借助新的 <code><a href="{@docRoot}reference/android/webkit/WebChromeClient.html#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams)">onShowFileChooser()</a></code> 方法，您现在不但可以在 {@link android.webkit.WebView} 中使用输入表单字段，而且可以启动文件选择器从 Android 设备中选择图片和文件。</p>
+
+<p>另外，此版本还支持 <a href="http://webaudio.github.io/web-audio-api/" class="external-link">WebAudio</a>、<a href="https://www.khronos.org/webgl/" class="external-link">WebGL</a> 和 <a href="http://www.webrtc.org/" class="external-link">WebRTC</a> 等开放标准。要详细了解此版本中的新增功能，请参阅 <a href="https://developer.chrome.com/multidevice/webview/overview" class="external-link">Android 版 WebView</a>。</p>
+
+<h3 id="ScreenCapture">屏幕截图和共享</h3>
+<p>通过 Android 5.0，您可以使用新的 {@link android.media.projection} API 向您的应用添加屏幕截图和屏幕共享功能。例如，如果您希望在视频会议应用中启用屏幕共享，则会发现此功能非常实用。</p>
+
+<p>通过新的 {@link android.media.projection.MediaProjection#createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler) createVirtualDisplay()} 方法，您的应用可以将主屏幕内容（默认显示屏）捕获到 {@link android.view.Surface} 对象中，然后通过网络发送该对象。该 API 仅允许捕获非安全的屏幕内容，不允许捕获系统音频。要开始屏幕截图，您的应用必须先使用通过 {@link android.media.projection.MediaProjectionManager#createScreenCaptureIntent()} 方法获取的 {@link android.content.Intent} 启动屏幕截图对话框，来请求用户向其授予相应权限。</p>
+
+<p>有关新 API 的使用示例，请参阅示例项目中的 {@code MediaProjectionDemo} 类。</p>
+
+<h2 id="Notifications">通知</h2>
+
+<h3 id="LockscreenNotifications">锁定屏幕通知</h3>
+<p>Android 5.0 中的锁定屏幕能够呈现通知。<em></em>用户可以通过“设置”来选择是否允许在安全的锁定屏幕上显示敏感的通知内容。</p>
+
+<p>您的应用可以控制其通知在安全的锁定屏幕上显示时的具体公开程度。要控制公开程度的级别，请调用 {@link android.app.Notification.Builder#setVisibility(int) setVisibility()} 并指定下列值之一：</p>
+
+<ul>
+<li>{@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}：显示基本信息（例如通知图标），但隐藏通知的全部内容。</li>
+<li>{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}：显示通知的全部内容。</li>
+<li>{@link android.app.Notification#VISIBILITY_SECRET VISIBILITY_SECRET}：不显示任何内容，甚至连通知图标也不显示。</li>
+</ul>
+
+<p>如果公开程度级别为 {@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}，您还可以提供隐藏了个人详细信息的通知内容修改版本。例如，短信应用的通知可能会显示“您有 3 条新短信”，但隐藏短信内容和发送者。要提供此备用通知，请先使用 {@link android.app.Notification.Builder} 创建替代通知。当创建不公开的通知对象时，请通过 {@link android.app.Notification.Builder#setPublicVersion(android.app.Notification) setPublicVersion()} 方法为其附加替代通知。</p>
+
+<h3 id="NotificationsMetadata">通知元数据</h3>
+<p>Android 5.0 使用与您的应用通知关联的元数据更智能地对通知进行排序。要设置元数据，请在构建通知时调用 {@link android.app.Notification.Builder} 中的以下方法：</p>
+
+<ul>
+<li>{@link android.app.Notification.Builder#setCategory(java.lang.String) setCategory()}：告诉系统当设备处于“优先”<em></em>模式时如何处理您的应用通知（例如，当通知表示来电、即时消息或警报时）。
+<li>{@link android.app.Notification.Builder#setPriority(int) setPriority()}：将通知标记为重要性高于或低于普通通知。如果还带有声音或振动，则优先级字段设置为 {@link android.app.Notification#PRIORITY_MAX PRIORITY_MAX} 或 {@link android.app.Notification#PRIORITY_HIGH PRIORITY_HIGH} 的通知将出现在一个小的浮动窗口中。</li>
+<li>{@link android.app.Notification.Builder#addPerson(java.lang.String) addPerson()}：允许您向通知添加一个或多个相关的人员。利用此方法，您的应用可指示系统将来自指定人员的通知归成一组，或者将来自这些人员的通知归类为重要性高于普通通知。</li>
+</ul>
+
+<h2 id="Graphics">显卡</h2>
+
+<h3 id="OpenGLES-3-1">支持 OpenGL ES 3.1</h3>
+<p>Android 5.0 针对 OpenGL ES 3.1 添加了 Java 接口和原生支持。OpenGL ES 3.1 中提供的主要新功能包括：</p>
+
+<ul>
+<li>对着色器进行计算
+<li>单独的着色器对象
+<li>间接绘图命令
+<li>多样本和模版纹理
+<li>对着色语言的改进
+<li>用于高级混合模式和调试的扩展
+<li>对 OpenGL ES 2.0 和 3.0 的向后兼容性
+</ul>
+
+<p>Android 上 OpenGL ES 3.1 的 Java 接口是通过 {@link android.opengl.GLES31} 提供的。当使用 OpenGL ES 3.1 时，请务必在您的清单文件中使用 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> 标记和 {@code android:glEsVersion} 属性声明它。例如：</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:glEsVersion="0x00030001" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>有关使用 OpenGL ES 的更多信息，包括如何在运行时检查设备支持的 OpenGL ES 版本，请参阅 <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API 指南</a>。</p>
+
+<h3 id="AndroidExtensionPack">Android 扩展程序包</h3>
+
+<p>除了 OpenGL ES 3.1 之外，本版本还提供了一个扩展程序包，该程序包具有适用于高级显卡功能的 Java 接口和原生支持。Android 将这些扩展程序视为一个程序包。（如果存在 {@code ANDROID_extension_pack_es31a} 扩展程序，则您的应用可以假定该程序包中的所有扩展都存在，并可通过单个 {@code #extension} 语句启用着色语言功能。）</p>
+
+<p>该扩展程序包支持：</p>
+
+<ul>
+<li>对着色器存储缓冲区、图片和原子的有保证片段着色器支持（片段着色器支持在 OpenGL ES 3.1 中是可选的。）</li>
+<li>曲面细分和几何着色器</li>
+<li>ASTC (LDR) 纹理压缩格式</li>
+<li>按样本插值和着色</li>
+<li>为帧缓冲区中的每个颜色附件使用不同的混合模式</li>
+</ul>
+
+<p>该扩展程序包的 Java 接口是通过 {@link android.opengl.GLES31Ext} 提供的。在您的应用清单中，您可以声明您的应用必须仅安装在支持该扩展程序包的设备上。例如：</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:name=“android.hardware.opengles.aep”
+        android:required="true" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="Media">媒体</h2>
+
+<h3 id="Camera-v2">用于高级摄像头功能的摄像头 API</h3>
+
+<p>Android 5.0 引入了新的 <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">android.hardware.camera2</a> API 来帮助执行精细的照片拍摄和图片处理。您现在可以通过 {@link android.hardware.camera2.CameraManager#getCameraIdList() getCameraIdList()} 以编程方式访问可供系统使用的摄像头设备，并通过 {@link android.hardware.camera2.CameraManager#openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateCallback, android.os.Handler) openCamera()} 连接到特定设备。要开始拍摄图片，请创建一个 {@link android.hardware.camera2.CameraCaptureSession} 并指定 {@link android.view.Surface} 对象来发送所拍摄的图片。您可以将 {@link android.hardware.camera2.CameraCaptureSession} 配置为单拍或连拍。</p>
+
+<p>要想在拍摄了新图片时收到通知，请实施 {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} 监听器并将其设置在您的拍摄请求中。现在，当系统完成图片拍摄请求时，您的 {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} 监听器将收到对 {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback#onCaptureCompleted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult) onCaptureCompleted()} 的调用，在 {@link android.hardware.camera2.CaptureResult} 中向您提供图片拍摄元数据。</p>
+
+<p>{@link android.hardware.camera2.CameraCharacteristics} 类允许您的应用检测设备上有哪些摄像头功能可用。对象的 {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL INFO_SUPPORTED_HARDWARE_LEVEL} 属性表示摄像头的功能级别。</p>
+
+<ul>
+  <li>所有设备都至少支持 {@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY} 硬件级别，该级别的功能大致等同于已弃用的 {@link android.hardware.Camera} API 的功能。</li>
+  <li>支持 {@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL INFO_SUPPORTED_HARDWARE_LEVEL_FULL} 硬件级别的设备不仅能让用户手动控制拍摄和后期处理，而且能够以高帧速率拍摄高分辨率图片。</li>
+</ul>
+
+<p>要了解如何使用更新后的<a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">摄像头</a> API，请参考本版本中的 {@code Camera2Basic} 和 {@code Camera2Video} 实施样本。</p>
+
+<h3 id="AudioPlayback">音频播放</h3>
+<p>此版本对 {@link android.media.AudioTrack} 进行了以下更改：</p>
+<ul>
+  <li>您的应用现在能够以浮点格式 ({@link android.media.AudioFormat#ENCODING_PCM_FLOAT ENCODING_PCM_FLOAT}) 提供音频数据。这允许更大的动态范围、更一致的精度以及更大的动态余量。浮点算法在中间计算期间尤其有用。播放端点为音频数据使用整数格式，并且具有较低的位深度。（在 Android 5.0 中，内部管线的某些部分尚未采用浮点格式。）
+  <li>您的应用现在可以将音频数据提供为 {@link java.nio.ByteBuffer}，所用格式与 {@link android.media.MediaCodec} 提供的格式相同。
+  <li>{@link android.media.AudioTrack#WRITE_NON_BLOCKING WRITE_NON_BLOCKING} 选项可以简化某些应用的缓冲和多线程处理。
+</ul>
+
+<h3 id="MediaPlaybackControl">媒体播放控件</h3>
+<p>使用新的通知和媒体 API，可确保系统界面能够了解您的媒体播放并提取和显示专辑封面。而借助新的 {@link android.media.session.MediaSession} 和 {@link android.media.session.MediaController} 类，您现在则可更轻松地跨界面和服务控制媒体播放。</p>
+
+<p>新的 {@link android.media.session.MediaSession} 类替代了被弃用的 {@link android.media.RemoteControlClient} 类，并且提供了一组用于处理传输控件和媒体按钮的回调方法。如果您的应用提供媒体播放并且在 Android <a href="{@docRoot}tv/index.html">TV</a> 或 <a href="{@docRoot}wear/index.html">Wear</a> 平台上运行，请使用 {@link android.media.session.MediaSession} 类和相同的回调方法来处理您的传输控件。</p>
+
+<p>您现在可以通过新的 {@link android.media.session.MediaController} 类构建您自己的媒体控制器应用。此类提供了一种线程安全方法，可让您通过自己的应用界面流程来监控媒体播放。在创建控制器时，请指定一个 {@link android.media.session.MediaSession.Token} 对象，以便您的应用可以与给定的 {@link android.media.session.MediaSession} 进行互动。通过使用 {@link android.media.session.MediaController.TransportControls} 方法，您可以发送诸如 {@link android.media.session.MediaController.TransportControls#play() play()}、{@link android.media.session.MediaController.TransportControls#stop() stop()}、{@link android.media.session.MediaController.TransportControls#skipToNext() skipToNext()} 和 {@link android.media.session.MediaController.TransportControls#setRating(android.media.Rating) setRating()} 之类的命令来控制该会话中的媒体播放。创建好控制器之后，您还可以注册一个 {@link android.media.session.MediaController.Callback} 对象来监听该会话中的元数据和状态更改。</p>
+
+<p>此外，您还可以通过新的 {@link android.app.Notification.MediaStyle} 类创建允许将播放控件关联到媒体会话的丰富通知。</p>
+
+<h3 id="MediaBrowsing">媒体浏览</h3>
+<p>Android 5.0 通过新的 <a href="{@docRoot}reference/android/media/browse/package-summary.html">android.media.browse</a> API 引入了允许应用浏览其他应用的媒体内容库的功能。要公开您的应用中的媒体内容，请扩展 {@link android.service.media.MediaBrowserService} 类。您的 {@link android.service.media.MediaBrowserService} 实施应当提供对 {@link android.media.session.MediaSession.Token} 的访问权限，以便应用可以播放通过您的服务提供的媒体内容。</p>
+<p>要与媒体浏览器服务进行互动，请使用 {@link android.media.browse.MediaBrowser} 类。在创建 {@link android.media.browse.MediaBrowser} 实例时，请为 {@link android.media.session.MediaSession} 指定组件名称。然后，您的应用可以使用该浏览器实例连接到关联的服务，并获取 {@link android.media.session.MediaSession.Token} 对象来播放通过该服务公开的内容。</p>
+
+<h2 id="Storage">存储</h2>
+
+<h3 id="DirectorySelection">目录选择</h3>
+
+<p>Android 5.0 对<a href="{@docRoot}guide/topics/providers/document-provider.html">存储访问框架</a>进行了扩展，允许用户选择整个目录子树，并向应用授予对其中包含的所有文档的读/写访问权限（无需请求用户逐项确认）。</p>
+
+<p>要选择目录子树，请构建并发送 {@link android.content.Intent#ACTION_OPEN_DOCUMENT_TREE OPEN_DOCUMENT_TREE} intent。系统将显示支持子树选择的所有 {@link android.provider.DocumentsProvider} 实例，允许用户进行浏览并选择目录。返回的 URI 表示对所选子树的访问权限。然后，您可以使用 {@link android.provider.DocumentsContract#buildChildDocumentsUriUsingTree(android.net.Uri, java.lang.String) buildChildDocumentsUriUsingTree()} 和 {@link android.provider.DocumentsContract#buildDocumentUriUsingTree(android.net.Uri, java.lang.String) buildDocumentUriUsingTree()} 以及 {@link android.content.ContentResolver#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) query()} 来深入了解此子树。</p>
+
+<p>新的 {@link android.provider.DocumentsContract#createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String) createDocument()} 方法允许您在子树下的任何位置创建新的文档或目录。要管理现有文档，请使用 {@link android.provider.DocumentsContract#renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String) renameDocument()} 和 {@link android.provider.DocumentsProvider#deleteDocument(java.lang.String) deleteDocument()}。在发出这些调用之前，请检查 {@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS} 以验证服务提供方是否支持这些调用。</p>
+
+<p>如果您在实施 {@link android.provider.DocumentsProvider} 并希望支持子树选择，请实施 {@link android.provider.DocumentsProvider#isChildDocument(java.lang.String, java.lang.String) isChildDocument()} 并在您的 {@link android.provider.DocumentsContract.Root#COLUMN_FLAGS COLUMN_FLAGS} 中添加 {@link android.provider.DocumentsContract.Root#FLAG_SUPPORTS_IS_CHILD FLAG_SUPPORTS_IS_CHILD}。</p>
+
+<p>Android 5.0 还在共享的存储空间内引入了程序包专用的新目录，您的应用可将要添加到 {@link android.provider.MediaStore} 中的媒体文件放置在这些目录中。新的 {@link android.content.Context#getExternalMediaDirs()} 将返回这些目录在所有共享的存储设备上的路径。与 {@link android.content.Context#getExternalFilesDir(java.lang.String) getExternalFilesDir()} 类似，您的应用不需要额外的权限即可访问所返回的路径。平台将定期扫描这些目录中的新媒体，但您也可使用 {@link android.media.MediaScannerConnection} 对新内容进行显式扫描。</p>
+
+<h2 id="Wireless">无线和连接</h2>
+
+<h3 id="Multinetwork">多个网络连接</h3>
+<p>Android 5.0 提供了新的多网络 API，它们允许您的应用动态扫描具有特定功能的可用网络，然后与这些网络建立连接。如果您的应用需要一个专用网络（例如 SUPL、MMS 或运营商计费的网络），或者如果您希望使用某种特定类型的传输协议来发送数据，则此功能非常有用。</p>
+
+<p>要从您的应用动态选择并连接到某个网络，请执行以下步骤：</p>
+
+<ol>
+ <li>创建一个 {@link android.net.ConnectivityManager}。</li>
+ <li>使用 {@link android.net.NetworkRequest.Builder} 类创建一个 {@link android.net.NetworkRequest} 对象并指定您的应用感兴趣的网络功能和传输类型。</li>
+<li>要扫描合适的网络，请调用 {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} 或 {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}，并传入 {@link android.net.NetworkRequest} 对象和一个 {@link android.net.ConnectivityManager.NetworkCallback} 实施。如果希望在检测到合适的网络后主动切换到该网络，请使用 {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} 方法；如果希望仅接收网络扫描结果通知而不主动切换，请使用 {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()} 方法。</li>
+</ol>
+
+<p>当系统检测到合适的网络时，它将连接到该网络并调用 {@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()} 回调。您可以在回调中使用 {@link android.net.Network} 对象来获取关于该网络的更多信息，或者指示通信使用选定的网络。</p>
+
+<h3 id="BluetoothBroadcasting">低功耗蓝牙</h3>
+<p>Android 4.3 中作为重头戏引入了对<a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">低功耗蓝牙</a>（“低功耗蓝牙”<em></em>）的平台支持。在 Android 5.0 中，Android 设备现在可以用作低功耗蓝牙<em>外围设备</em>。应用可以使用此功能使附近的设备知道它的存在。例如，您可以构建相应的应用来允许设备用作计步器或健康检测器并与另一低功耗蓝牙设备交换其数据。</p> 
+<p>新的 {@link android.bluetooth.le} API 允许您的应用对公告进行广播，扫描响应，以及与附近的低功能蓝牙设备建立连接。要使用新的公告和扫描功能，请在您的清单中添加 {@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN} 权限。当用户从 Play 商店更新或下载您的应用时，会要求他们向您的应用授予以下权限：“蓝牙连接信息：允许应用控制蓝牙，包括向附近的蓝牙设备进行广播以及获取关于这些设备的信息。”</p>
+
+<p>要开始低功耗蓝牙公告以便其他设备可以发现您的应用，请调用 {@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()} 并传入 {@link android.bluetooth.le.AdvertiseCallback} 类的一个实施。回调对象将收到关于公告操作成功或失败的报告。</p>
+
+<p> Android 5.0 引入了 {@link android.bluetooth.le.ScanFilter} 类，以便您的应用可以仅扫描它感兴趣的特定类型的设备。要开始扫描低功耗蓝牙设备，请调用 {@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback) startScan()} 并传入一个过滤器列表。在该方法调用中，您还必须提供 {@link android.bluetooth.le.ScanCallback} 的一个实施以便在发现低功耗蓝牙公告时进行报告。 </p>
+
+<h3 id="NFCEnhancements">NFC 增强功能</h3>
+<p>Android 5.0 添加了以下增强功能以实现更广泛和更灵活的 NFC 使用：</p>
+
+<ul>
+<li>“分享”<em></em>菜单中现在提供了 Android Beam。</li>
+<li>您的应用可以通过调用 {@link android.nfc.NfcAdapter#invokeBeam(android.app.Activity) invokeBeam()} 在用户的设备上调用 Android Beam 来分享数据。这不需要用户对着另一个具有 NFC 功能的设备手动点按设备即可完成数据传输。</li>
+<li>您可以使用新的 {@link android.nfc.NdefRecord#createTextRecord(java.lang.String, java.lang.String) createTextRecord()} 方法来创建包含 UTF-8 文本数据的 NDEF 记录。</li>
+<li>如果您在开发支付应用，则您现在能够通过调用 <code><a href="{@docRoot}reference/android/nfc/cardemulation/CardEmulation.html#registerAidsForService(android.content.ComponentName, java.lang.String, java.util.List<java.lang.String>)">registerAidsForService()</a></code> 动态注册 NFC 应用 ID (AID)。您还可以使用 {@link android.nfc.cardemulation.CardEmulation#setPreferredService(android.app.Activity, android.content.ComponentName) setPreferredService()} 设置当某个特定的活动处于前台时应当使用的首选卡仿真服务。</li>
+</ul>
+
+<h2 id="Power">Project Volta</h2>
+
+<p>除了新功能之前，Android 5.0 还重点对电池寿命进行了改进。可以使用新的 API 和工具来了解并优化您的应用的功耗。</p>
+
+<h3 id="JobScheduler">调度作业</h3>
+<p>Android 5.0 提供了一个新的 {@link android.app.job.JobScheduler} API，它允许您通过为系统定义要在以后的某个时间或在指定的条件下（例如，当设备在充电时）异步运行的作业来优化电池寿命。作业调度在下列情况下非常有用：</p>
+<ul>
+  <li>应用具有您可以推迟的非面向用户的工作。</li>
+  <li>应用具有当插入设备时您希望优先执行的工作。</li>
+  <li>应用具有需要访问网络或 Wi-Fi 连接的任务。</li>
+  <li>应用具有您希望作为一个批次定期运行的许多任务。</li>
+
+</ul>
+
+<p>工作单元由一个 {@link android.app.job.JobInfo} 对象进行封装。此对象指定了调度条件。</p>
+
+<p>使用 {@link android.app.job.JobInfo.Builder} 类配置调度的任务应当如何运行。您可以将任务调度为在特定的条件下运行，例如：</p>
+
+<ul>
+  <li>当设备充电时启动</li>
+  <li>当设备连接到不限流量网络时启动</li>
+  <li>当设备空闲时启动</li>
+  <li>在特定的截止期限之前或以最小的延迟完成</li>
+</ul>
+
+<p>例如，您可以添加如下代码以在不限流量网络上运行您的任务：</p>
+
+<pre>
+JobInfo uploadTask = new JobInfo.Builder(mJobId,
+                                         mServiceComponent /* JobService component */)
+        .setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED)
+        .build();
+JobScheduler jobScheduler =
+        (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+jobScheduler.schedule(uploadTask);
+</pre>
+
+<p>如果设备具有稳定的电源（也就是说，它已插入了 2 分钟以上并且电池处于<a href="{@docRoot}reference/android/content/Intent.html#ACTION_BATTERY_OKAY">健康水平</a>），则系统将运行任何已就绪可运行的已调度作业，即使作业的截止期限尚未到期也是如此。</p>
+
+<p>要查看有关如何使用 {@link android.app.job.JobScheduler} API 的示例，请参考本版本中的 {@code JobSchedulerSample} 实施样本。</p>
+
+<h3 id="PowerMeasurementTools">用于查询耗电量信息的开发者工具</h3>
+
+<p>新的 {@code dumpsys batterystats} 命令将生成关于设备上耗电量信息的有趣统计数据，该数据按唯一用户 ID (UID) 进行组织。该统计信息包括：</p>
+
+<ul>
+<li>与电池相关的事件的历史记录
+<li>设备的全局统计信息
+<li>每个 UID 和系统组件的大致用电量
+<li>每个数据包的每个手机应用毫秒数
+<li>系统 UID 汇总统计信息
+<li>应用 UID 汇总统计信息
+</ul>
+
+<p>可使用 {@code --help} 选项了解用于对输出进行自定义的各种选项。例如，要输出自设备上次充电后给定应用包的耗电量统计信息，请运行以下命令：
+<pre>
+$ adb shell dumpsys batterystats --charged &lt;package-name&gt;
+</pre>
+
+<p>您可以对 {@code dumpsys} 命令的输出使用 <a href="https://github.com/google/battery-historian" class="external-link">Battery Historian</a> 工具从日志中生成与电量相关的事件的 HTML 可视形式。此信息使您可以更轻松地了解和诊断任何与电池相关的问题。</p>
+
+<h2 id="Enterprise">办公场所和教育环境中的 Android</h2>
+<h3 id="ManagedProvisioning">托管配置</h3>
+
+<p>Android 5.0 提供了用于在企业环境内运行应用的新功能。如果用户具有现有的个人帐户，则<a href="{@docRoot}guide/topics/admin/device-admin.html">设备管理员</a>可以启动托管配置流程来向设备添加一个共存但单独的“托管配置文件”<em></em>。与托管配置文件关联的应用将与非托管应用一起出现在用户的启动器、“最近用过”屏幕以及通知中。</p>
+
+<p>要启动托管配置流程，请在 {@link android.content.Intent} 中发送 {@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE ACTION_PROVISION_MANAGED_PROFILE}。如果调用成功，则系统将触发 {@link android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete(android.content.Context, android.content.Intent) onProfileProvisioningComplete()} 回调。然后，您可以调用 {@link android.app.admin.DevicePolicyManager#setProfileEnabled(android.content.ComponentName) setProfileEnabled()} 来启用此托管配置文件。</p>
+
+<p>默认情况下，在托管配置文件中只会启用一小部分应用。您可以通过调用 {@link android.app.admin.DevicePolicyManager#enableSystemApp(android.content.ComponentName, android.content.Intent) enableSystemApp()} 在托管配置文件中安装额外的应用。</p>
+
+<p>如果您在开发启动器应用，则可以使用新的 {@link android.content.pm.LauncherApps} 类来获取当前用户的可启动活动的列表以及任何关联的托管配置文件。您的启动器可以通过向图标绘图添加一个工作标记，使托管应用更加惹人注目。要检索带标记的图标，请调用 {@link android.content.pm.PackageManager#getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle) getUserBadgedIcon()}。</p>
+
+<p>要查看如何使用此新功能，请参考本版本中的 {@code BasicManagedProfile} 实施样本。</p>
+
+<h3 id="DeviceOwner">设备所有者</h3>
+<p>Android 5.0 引入了部署设备所有者应用的功能。“设备所有者”<em></em>是一类特殊的<a href="{@docRoot}guide/topics/admin/device-admin.html">设备管理员</a>，具有在设备上创建和移除辅助用户以及配置全局设置的额外能力。您的设备所有者应用可以使用 {@link android.app.admin.DevicePolicyManager} 类中的方法来对托管设备上的配置、安全性和应用进行精细控制。一个设备在任一时刻只能有一个处于活动状态的设备所有者。</p>
+
+<p>要部署并激活设备所有者，您必须在设备处于未配置状态时执行从编程应用到设备的 NFC 数据传输。此数据传输发送的信息与<a href="#ManagedProvisioning">托管配置</a>中描述的配置 intent 中的信息相同。</p>
+
+<h3 id="ScreenPinning">屏幕固定</h3>
+
+<p>Android 5.0 引入了一个新的屏幕固定 API，它允许您暂时防止用户离开您的任务或被通知打扰。例如，如果您在开发一个教育应用以在 Android 或单用途或资讯服务应用上支持高风险评估需求，则可以使用此功能。一旦您的应用激活了屏幕固定，则用户将无法看到通知、访问其他应用或者返回到主屏幕，直到您的应用退出该模式。</p>
+
+<p>有两种方法用来激活屏幕固定：</p>
+
+<ul>
+<li><strong>手动</strong>：用户可以在“设置”&gt;“安全性”&gt;“屏幕固定”<em></em>中启用屏幕固定，并通过在“最近用过”屏幕上点触屏幕固定图标来选择他们要固定的任务。</li> <li><strong>以编程方式</strong>：要以编程方式激活屏幕固定，请在您的应用中调用 {@link android.app.Activity#startLockTask() startLockTask()}。如果请求方应用不是设备所有者，则会提示用户确认。设备所有者应用可以调用 {@link android.app.admin.DevicePolicyManager#setLockTaskPackages(android.content.ComponentName, java.lang.String[]) setLockTaskPackages()} 方法来使应用成为可固定的，不需要经历用户确认步骤。</li>
+</ul>
+
+<p>当任务锁定处于活动状态时，会发生以下行为：</p>
+
+<ul>
+<li>状态栏为空，并且用户通知和状态信息被隐藏。</li>
+<li>首页和“最近的应用”按钮被隐藏。</li>
+<li>其他应用无法启动新活动。</li>
+<li>当前应用可以启动新活动，只要这样做不会创建新任务即可。</li>
+<li>当屏幕固定是由设备所有者调用的时，用户将保持锁定到您的应用，直到该应用调用 {@link android.app.Activity#stopLockTask() stopLockTask()}。</li>
+<li>如果屏幕固定是由设备所有者之外另一应用或者是由用户直接调用的活动时，用户可以通过同时按住“返回”和“最近”按钮退出。</li>
+
+</ul>
+
+<h2 id="Printing">打印框架</h2>
+
+<h3 id="PDFRender">使用位图来呈现 PDF 文件</h3>
+<p>您现在可以使用新的 {@link android.graphics.pdf.PdfRenderer} 类将 PDF 文档页呈现为位图图片以便打印。您必须指定系统将可打印内容写入其中的一个可查找的（也就是说，可以随机访问内容）{@link android.os.ParcelFileDescriptor}。您的应用可以通过 {@link android.graphics.pdf.PdfRenderer#openPage(int) openPage()} 获取页面进行呈现，然后调用 {@link android.graphics.pdf.PdfRenderer.Page#render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int) render()} 将已打开的 {@link android.graphics.pdf.PdfRenderer.Page} 转变为位图。如果您只希望将文档的一部分转变为位图图片（例如，要实施<a href="http://en.wikipedia.org/wiki/Tiled_rendering" class="external-link">平铺渲染</a>以放大文档），则还可以设置其他参数。</p>
+
+<p>有关如何使用新 API 的示例，请参阅 {@code PdfRendererBasic} 样本。</p>
+
+<h2 id="System">系统</h2>
+<h3 id="AppUsageStatistics">应用使用情况统计信息</h3>
+<p>您现在可以通过新的 {@link android.app.usage} API 访问 Android 设备上的应用使用情况历史记录。此 API 提供了比被弃用的 {@link android.app.ActivityManager#getRecentTasks(int, int) getRecentTasks()} 方法更详细的使用情况信息。要使用此 API，必须先在您的清单中声明 {@code "android.permission.PACKAGE_USAGE_STATS"} 权限。用户还必须通过“设置”&gt;“安全性”&gt;“应用”<em></em>使用“使用情况访问”启用对此应用的访问权限。</p>
+
+<p>系统将以每个应用为单位收集使用情况数据，并按每天、每周、每月和每年时间间隔对数据进行汇总。系统保留此数据的最大持续时间如下所述：</p>
+
+<ul>
+  <li>每天数据：7 天</li>
+  <li>每周数据：4 周</li>
+  <li>每月数据：6 个月</li>
+  <li>每年数据：2 年</li>
+</ul>
+
+<p>对于每个应用，系统将记录以下数据：</p>
+<ul>
+<li>上次使用应用的时间</li>
+<li>应用在该时间间隔内（按天、周、月或年）处于前台的总时间长度</li>
+<li>组件（由程序包和活动名称予以标识）在一天中移动到前台或后台时的时间戳捕获</li>
+<li>设备配置更改时（例如当设备配置因为旋转而更改时）的时间戳捕获</li>
+</ul>
+
+<h2 id="TestingA11y">测试和辅助功能 </h2>
+
+<h3 id="TestingA11yImprovements">测试和辅助功能改进</h3>
+<p>Android 5.0 对测试和辅助功能增加了以下支持：</p>
+
+<ul>
+<li>新的 {@link android.app.UiAutomation#getWindowAnimationFrameStats() getWindowAnimationFrameStats()} 和 {@link android.app.UiAutomation#getWindowContentFrameStats(int) getWindowContentFrameStats()} 方法将捕获窗口动画和内容的帧统计信息。这些方法允许您编写仪器测试来评估某个应用是否在以足够的刷新频率来呈现帧以提供流畅的用户体验。</li>
+
+<li>新的 {@link android.app.UiAutomation#executeShellCommand(java.lang.String) executeShellCommand()} 方法允许您通过仪器测试执行 shell 命令。命令执行类似于从连接到设备的主机运行 {@code adb shell}，允许您使用基于 shell 的工具，例如 {@code dumpsys}、{@code am} {@code content} 和 {@code pm}。</li>
+
+<li>使用辅助功能 API（例如 <a href="{@docRoot}tools/help/uiautomator/index.html">{@code UiAutomator}</a>）的辅助服务和测试工具现在可以检索有视力的用户可以与之进行互动的屏幕上窗口的属性的详细信息。要检索 {@link android.view.accessibility.AccessibilityWindowInfo} 对象的列表，请调用新的 {@link android.accessibilityservice.AccessibilityService#getWindows() getWindows()} 方法。</li>
+
+<li>新的 {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} 类允许您定义可以对 {@link android.view.accessibility.AccessibilityNodeInfo} 执行的标准或自定义操作。新的 {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} 类替换了以前在 {@link android.view.accessibility.AccessibilityNodeInfo} 中提供的与操作相关的 API。</li>
+
+<li>Android 5.0 对您的应用中的文本到语音合成提供了更细粒度的控制。新的 {@link android.speech.tts.Voice} 类允许您的应用使用与特定区域设置、质量和延迟评级以及特定于文本到语音引擎的参数关联的语音配置文件。</li>
+</ul>
+
+<h2 id="IME">IME</h2>
+
+<h3 id="Switching">更轻松地在输入语言之间切换</h3>
+
+<p>从 Android 5.0 开始，用户可以更轻松地在该平台支持的所有<a href="{@docRoot}guide/topics/text/creating-input-method.html">输入法编辑器 (IME)</a> 之间进行切换。执行指定的切换操作（通常是触摸软键盘上的一个地球图标）将循环经过所有此类 IME。此行为更改是由 {@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod(android.os.IBinder) shouldOfferSwitchingToNextInputMethod()} 方法实施的。</p>
+
+<p>此外，框架现在还将检查下一个 IME 究竟是否包括切换机制（并因此检查该 IME 是否支持切换到它之后的 IME）。具有切换机制的 IME 不会切换到没有切换机制的 IME。此行为更改是由 {@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod(android.os.IBinder, boolean) switchToNextInputMethod()} 方法实施的。
+
+<p>要查看有关如何使用更新的 IME 切换 API 的示例，请参考本版本中更新的软键盘实施样本。要详细了解如何实施 IME 切换，请参阅<a href="{@docRoot}guide/topics/text/creating-input-method.html">创建输入法</a>。
+</p>
+
+<h2 id="Manifest">清单声明</h2>
+
+<h3 id="ManifestFeatures">声明必需的功能</h3>
+<p><a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> 元素中现在支持下列值，因此，您可以确保您的应用仅安装在提供了您的应用所需功能的设备上。</p>
+
+<ul>
+<li>{@link android.content.pm.PackageManager#FEATURE_AUDIO_OUTPUT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_POST_PROCESSING}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_SENSOR}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_RAW}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_LEVEL_FULL}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_GAMEPAD}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LIVE_TV}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_MANAGED_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LEANBACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_OPENGLES_EXTENSION_PACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SECURELY_REMOVES_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_AMBIENT_TEMPERATURE}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_HEART_RATE_ECG}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_RELATIVE_HUMIDITY}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_VERIFIED_BOOT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_WEBVIEW}</li>
+</ul>
+
+<h3 id="Permissions">用户权限</h3>
+
+<p><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code <uses-permission>}</a> 元素中现在支持以下权限来声明您的应用访问特定 API 时所需的权限。</p>
+
+<ul>
+<li>{@link android.Manifest.permission#BIND_DREAM_SERVICE}：当针对 API 级别 21 和更高级别时，<a href="{@docRoot}about/versions/android-4.2.html#Daydream">Daydream</a> 服务需要此权限来确保只有系统可以绑定到它。</li>
+</ul>

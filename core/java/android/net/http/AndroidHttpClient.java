@@ -74,7 +74,13 @@ import java.util.zip.GZIPOutputStream;
  * To retain cookies, simply add a cookie store to the HttpContext:</p>
  *
  * <pre>context.setAttribute(ClientContext.COOKIE_STORE, cookieStore);</pre>
+ *
+ * @deprecated Please use {@link java.net.URLConnection} and friends instead.
+ *     The Apache HTTP client is no longer maintained and may be removed in a future
+ *     release. Please visit <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">this webpage</a>
+ *     for further details.
  */
+@Deprecated
 public final class AndroidHttpClient implements HttpClient {
 
     // Gzip of data shorter than this probably won't be worthwhile
@@ -108,7 +114,13 @@ public final class AndroidHttpClient implements HttpClient {
      * @param userAgent to report in your HTTP requests
      * @param context to use for caching SSL sessions (may be null for no caching)
      * @return AndroidHttpClient for you to use for all your requests.
+     *
+     * @deprecated Please use {@link java.net.URLConnection} and friends instead. See
+     *     {@link android.net.SSLCertificateSocketFactory} for SSL cache support. If you'd
+     *     like to set a custom useragent, please use {@link java.net.URLConnection#setRequestProperty(String, String)}
+     *     with {@code field} set to {@code User-Agent}.
      */
+    @Deprecated
     public static AndroidHttpClient newInstance(String userAgent, Context context) {
         HttpParams params = new BasicHttpParams();
 
@@ -148,7 +160,13 @@ public final class AndroidHttpClient implements HttpClient {
      * Create a new HttpClient with reasonable defaults (which you can update).
      * @param userAgent to report in your HTTP requests.
      * @return AndroidHttpClient for you to use for all your requests.
+     *
+     * @deprecated Please use {@link java.net.URLConnection} and friends instead. See
+     *     {@link android.net.SSLCertificateSocketFactory} for SSL cache support. If you'd
+     *     like to set a custom useragent, please use {@link java.net.URLConnection#setRequestProperty(String, String)}
+     *     with {@code field} set to {@code User-Agent}.
      */
+    @Deprecated
     public static AndroidHttpClient newInstance(String userAgent) {
         return newInstance(userAgent, null /* session cache */);
     }

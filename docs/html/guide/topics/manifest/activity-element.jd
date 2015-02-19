@@ -9,6 +9,7 @@ parent.link=manifest-intro.html
           android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
           android:<a href="#always">alwaysRetainTaskState</a>=["true" | "false"]
           android:<a href="#autoremrecents">autoRemoveFromRecents</a>=["true" | "false"]
+          android:<a href="#banner">banner</a>="<i>drawable resource</i>"
           android:<a href="#clear">clearTaskOnLaunch</a>=["true" | "false"]
           android:<a href="#config">configChanges</a>=["mcc", "mnc", "locale",
                                  "touchscreen", "keyboard", "keyboardHidden",
@@ -151,6 +152,29 @@ task is completed. If {@code true}, the task is
 automatically removed from the overview screen. This overrides the caller's use of
 {@link android.content.Intent#FLAG_ACTIVITY_RETAIN_IN_RECENTS}. It must be a boolean value, either
 "{@code true}" or "{@code false}".</dd>
+
+
+<dt><a name="banner"></a>{@code android:banner}</dt>
+<dd>A <a href="{@docRoot}guide/topics/resources/drawable-resource.html">drawable resource</a>
+providing an extended graphical banner for its associated item. Use with the
+{@code &lt;activity&gt;} tag to supply a default banner for a specific activity, or with the
+<a href="{@docRoot}guide/topics/manifest/application-element.html"><code>&lt;application&gt;</code></a>
+tag to supply a banner for all application activities.
+
+<p>The system uses the banner to represent an app in
+the Android TV home screen. Since the banner is displayed only in the home screen, it
+should only be specified by applications with an activity that handles the
+{@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} intent.</p>
+
+<p>This attribute must be set as a reference to a drawable resource containing
+the image (for example {@code "&#64;drawable/banner"}). There is no default banner.
+</p>
+
+<p>
+See <a href="{@docRoot}design/tv/patterns.html#banner">
+Banners</a> in the UI Patterns for TV design guide, and <a href="{@docRoot}training/tv/start/start.html#banner">
+Provide a home screen banner</a> in Get Started with TV Apps for more information.
+</p></dd>
 
 
 <dt><a name="clear"></a>{@code android:clearTaskOnLaunch}</dt>
@@ -662,7 +686,9 @@ visible on screen &mdash; "{@code true}" if it should be finished, and
 <p>
 A value of "{@code true}" means that the activity will not leave a
 historical trace.  It will not remain in the activity stack for the task,
-so the user will not be able to return to it.
+so the user will not be able to return to it. In this case,
+{@link android.app.Activity#onActivityResult onActivityResult()} is never called if you
+start another activity for a result from this activity.
 </p>
 
 <p>

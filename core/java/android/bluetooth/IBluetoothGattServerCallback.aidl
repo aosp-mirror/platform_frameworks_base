@@ -59,4 +59,5 @@ oneway interface IBluetoothGattServerCallback {
                                      in byte[] value);
     void onExecuteWrite(in String address, in int transId, in boolean execWrite);
     void onNotificationSent(in String address, in int status);
+    void onMtuChanged(in String address, in int mtu);
 }

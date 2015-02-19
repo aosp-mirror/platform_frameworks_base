@@ -1,5 +1,6 @@
 page.title=Google Play Services
 header.hide=1
+page.metaDescription=With Google Play services, your app can take advantage of the latest Google-powered features such as Maps, Analytics, and more: platform updates are distributed automatically as an APK through the Google Play Store.
 
 @jd:body
 
@@ -60,10 +61,103 @@ about your users' Android version.</p>
 
 <h2 style="margin-top:0" id="newfeatures">New Features</h2>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+    class="toggle-content-img"
+      alt=""/>Google Play services, Version 6.5</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+<dt>Highlights in Version 6.5</dt>
+
+<dd>
+<p>For a summary of the feature highlights in Google Play services 6.5, see the
+announcement
+<a href="http://android-developers.blogspot.com/2014/11/google-play-services-65.html"
+class="external-link">blog post</a>.</p>
+<ul>
+  <li><strong>Maps</strong> - The new <em>lite mode</em> lets your app display a
+bitmap image of a map, while still being able to control markers and shapes
+client-side. This is particularly useful when you're showing a number of small
+maps. You can enable or disable a new map toolbar that lets users open
+<a href="https://www.google.com/maps" class="external-link">Google Maps</a> and
+get directions and turn by turn navigation to the selected marker. The
+{@code getMap()} method in
+<a href="{@docRoot}reference/com/google/android/gms/maps/MapView.html">{@code MapView}</a>
+and
+<a href="{@docRoot}reference/com/google/android/gms/maps/MapFragment.html">{@code MapFragment}</a>
+is now deprecated in favor of the new {@code getMapAsync()} method. Similarly,
+the new {@code getStreetViewPanoramaAsync()} method in
+<a href="{@docRoot}reference/com/google/android/gms/maps/StreetViewPanoramaView.html">{@code StreetViewPanoramaView}</a> and
+<a href="{@docRoot}reference/com/google/android/gms/maps/StreetViewPanoramaFragment.html">{@code StreetViewPanoramaFragment}</a>
+enables you to get a ready-to-use Street View panorama.
+    <ul>
+      <li><a href="https://developers.google.com/maps/documentation/android/lite.html"
+        class="external-link">Lite mode maps developer guide</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/android/interactivity.html#toolbar"
+        class="external-link">Map toolbar developer guide</a></li>
+    </ul>
+  </li>
+  <li><strong>Drive</strong> - This release introduces support for inserting or
+  updating custom properties. You can now create empty files (for example, a user
+  preference file that is empty until the user defines some application property).
+    <ul>
+      <li><a href="{@docRoot}reference/com/google/android/gms/drive/metadata/CustomPropertyKey.html">{@code CustomPropertyKey} API reference</a></li>
+      <li><a href="https://developers.google.com/drive/android/create-file.html"
+        class="external-link">Creating empty files developer guide</a></li>
+    </ul>
+  </li>
+  <li><strong>Fit</strong> - The Fit API now supports activity segments
+    (<a href="{@docRoot}reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">{@code DataType.TYPE_ACTIVITY_SEGMENT}</a>), which
+    enable you to represent pauses within a workout session and to annotate time
+    intervals inside a session with different fitness activities.
+  </li>
+  <li><strong>Wallet</strong> - You can now enable donations from your Android
+    app in the same way you enable purchases. To do so, create a
+    <a href="{@docRoot}reference/com/google/android/gms/wallet/fragment/WalletFragment.html">{@code WalletFragment}</a> and specify the
+    <a href="{@docRoot}reference/com/google/android/gms/wallet/fragment/WalletFragmentMode.html#BUY_BUTTON">{@code BUY_BUTTON}</a>
+    mode, then set the button text to
+    <a href="{@docRoot}reference/com/google/android/gms/wallet/fragment/BuyButtonText.html#DONATE_WITH_GOOGLE">{@code DONATE_WITH_GOOGLE}</a>.
+    <p class="note"><strong>Note:</strong> Use of the <em>Donate with Google</em>
+    button is limited to 501(c)(3) organizations. For more information, see the
+    <a href="https://support.google.com/wallet/business/answer/75724?hl=en&rd=1" class="external-link">Content policies</a>.</p>
+      <ul>
+        <li><a href="https://developers.google.com/wallet/instant-buy/android/tutorial.html" class="external-link">Setting button text developer guide</a></li>
+      </ul>
+  </li>
+  <li><strong>Granular dependency management</strong> - If the number of
+    references in your app exceeds the
+    <a href="{@docRoot}tools/building/multidex.html">65K method reference limit</a>,
+    your app may fail to compile. To avoid this problem, you can include just
+    the specific Google Play services APIs your app uses, instead of all of them,
+    when compiling your app. For more details, see the Android Studio setup
+    instructions in
+    <a href="{@docRoot}google/play-services/setup.html">Setting Up Google Play Services</a>.
+  </li>
+  <li><strong>Deprecated clients</strong> - The {@code ActivityRecognitionClient},
+    {@code LocationClient}, and {@code PlusClient} classes are deprecated. If
+    you used those APIs in your app and want to call Google Play services 6.5
+    or higher APIs, you must switch to the new programming model that utilizes
+    <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code GoogleApiClient}</a>. For more information about using <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code GoogleApiClient}</a>, see <a href="{@docRoot}google/auth/api-client.html">Accessing Google APIs</a>.
+    <p>Use these APIs instead of the deprecated APIs:</p>
+    <ul>
+      <li>If you were previously using {@code ActivityRecognitionClient}, call
+        <a href="{@docRoot}reference/com/google/android/gms/location/ActivityRecognition.html">{@code ActivityRecognition}</a> instead.</li>
+      <li>If you were previously using {@code LocationClient}, call the APIs in the
+        <a href="{@docRoot}reference/com/google/android/gms/location/package-summary.html">{@code com.google.android.gms.location} package</a> instead.</li>
+      <li>If you were previously using {@code PlusClient}, call the APIs in the
+        <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html">{@code com.google.android.gms.plus} package</a> instead.</li>
+    </ul>
+  </li>
+</ul>
+</dd>
+</dl>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
     class="toggle-content-img"
       alt=""/>Google Play services, Version 6.1</a> <em>(October 2014)</em>
   </p>
@@ -86,7 +180,8 @@ class="external-link">blog post</a>.</p>
     <a href="{@docRoot}reference/com/google/android/gms/drive/OpenFileActivityBuilder.html">
     <code>OpenFileActivityBuilder</code><a/>, and the user interface has been
     updated to use
-      <a href="{@docRoot}preview/material/index.html">material design</a>. A new
+      <a href="http://www.google.com/design/spec/material-design/introduction.html"
+      class="external-link">material design</a>. A new
     <a href="{@docRoot}reference/com/google/android/gms/drive/DriveResource.html#setParents(com.google.android.gms.common.api.GoogleApiClient, java.util.Set<com.google.android.gms.drive.DriveId>)">
       DriveResource.setParents()</a> method makes it possible to organize files
     and folders. In addition, the

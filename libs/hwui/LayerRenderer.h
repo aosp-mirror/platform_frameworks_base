@@ -60,7 +60,6 @@ public:
     static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
             bool isOpaque, bool forceFilter, GLenum renderTarget, float* textureTransform);
     static void destroyLayer(Layer* layer);
-    ANDROID_API static void destroyLayerDeferred(Layer* layer);
     static bool copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap);
 
     static void flushLayer(RenderState& renderState, Layer* layer);

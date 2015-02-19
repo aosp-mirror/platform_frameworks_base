@@ -16,15 +16,18 @@
 #include "RenderState.h"
 
 #include "renderthread/CanvasContext.h"
+#include "renderthread/EglManager.h"
 
 namespace android {
 namespace uirenderer {
 
-RenderState::RenderState()
-        : mCaches(NULL)
+RenderState::RenderState(renderthread::RenderThread& thread)
+        : mRenderThread(thread)
+        , mCaches(NULL)
         , mViewportWidth(0)
         , mViewportHeight(0)
         , mFramebuffer(0) {
+    mThreadId = pthread_self();
 }
 
 RenderState::~RenderState() {
@@ -35,11 +38,15 @@ void RenderState::onGLContextCreated() {
     mCaches = &Caches::getInstance();
     mCaches->init();
     mCaches->setRenderState(this);
+    mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
+}
+
+static void layerLostGlContext(Layer* layer) {
+    layer->onGlContextLost();
 }
 
 void RenderState::onGLContextDestroyed() {
 /*
-    AutoMutex _lock(mLayerLock);
     size_t size = mActiveLayers.size();
     if (CC_UNLIKELY(size != 0)) {
         ALOGE("Crashing, have %d contexts and %d layers at context destruction. isempty %d",
@@ -70,6 +77,8 @@ void RenderState::onGLContextDestroyed() {
         LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
     }
 */
+    std::for_each(mActiveLayers.begin(), mActiveLayers.end(), layerLostGlContext);
+    mAssetAtlas.terminate();
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {
@@ -144,6 +153,35 @@ void RenderState::debugOverdraw(bool enable, bool clear) {
             mCaches->stencil.disable();
         }
     }
+}
+
+void RenderState::requireGLContext() {
+    assertOnGLThread();
+    mRenderThread.eglManager().requireGlContext();
+}
+
+void RenderState::assertOnGLThread() {
+    pthread_t curr = pthread_self();
+    LOG_ALWAYS_FATAL_IF(!pthread_equal(mThreadId, curr), "Wrong thread!");
+}
+
+
+class DecStrongTask : public renderthread::RenderTask {
+public:
+    DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
+
+    virtual void run() {
+        mObject->decStrong(0);
+        mObject = 0;
+        delete this;
+    }
+
+private:
+    VirtualLightRefBase* mObject;
+};
+
+void RenderState::postDecStrong(VirtualLightRefBase* object) {
+    mRenderThread.queue(new DecStrongTask(object));
 }
 
 } /* namespace uirenderer */

@@ -95,7 +95,8 @@ value for display to users.</p>
 </ul>
 
 <p>You define both of these version attributes in the
-<code>&lt;manifest&gt;</code> element of the manifest file. </p>
+<code>&lt;manifest&gt;</code> element of the manifest file or the Gradle build file. See
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
 
 <p>Here's an example manifest that shows the <code>android:versionCode</code>
 and <code>android:versionName</code> attributes in the
@@ -171,4 +172,6 @@ maximum API Level. </p>
 <p>For more information, see the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html"><code>&lt;uses-sdk&gt;</code></a>
 manifest element documentation and the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document.</p>
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API Levels</a> document. For
+Gradle build settings, see
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>

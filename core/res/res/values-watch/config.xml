@@ -23,7 +23,7 @@
 
     <!-- Only show settings item due to smaller real estate. -->
     <string-array translatable="false" name="config_globalActionsList">
-        <item>settings</item>
+        <item>voiceassist</item>
     </string-array>
 
     <!-- Base "touch slop" value used by ViewConfiguration as a
@@ -40,4 +40,7 @@
          Reduced intentionally for watches to retain minimal memory footprint -->
     <integer name="config_notificationServiceArchiveSize">1</integer>
 
+    <!-- Flags enabling default window features. See Window.java -->
+    <bool name="config_defaultWindowFeatureOptionsPanel">false</bool>
+    <bool name="config_defaultWindowFeatureContextMenu">false</bool>
 </resources>

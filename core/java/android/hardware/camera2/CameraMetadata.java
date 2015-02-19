@@ -450,6 +450,64 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
 
+    /**
+     * <p>The camera device supports accurately reporting the sensor settings for many of
+     * the sensor controls while the built-in 3A algorithm is running.  This allows
+     * reporting of sensor settings even when these settings cannot be manually changed.</p>
+     * <p>The values reported for the following controls are guaranteed to be available
+     * in the CaptureResult, including when 3A is enabled:</p>
+     * <ul>
+     * <li>Exposure control<ul>
+     * <li>{@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</li>
+     * </ul>
+     * </li>
+     * <li>Sensitivity control<ul>
+     * <li>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</li>
+     * </ul>
+     * </li>
+     * <li>Lens controls (if the lens is adjustable)<ul>
+     * <li>{@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance}</li>
+     * <li>{@link CaptureRequest#LENS_APERTURE android.lens.aperture}</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * <p>This capability is a subset of the MANUAL_SENSOR control capability, and will
+     * always be included if the MANUAL_SENSOR capability is available.</p>
+     *
+     * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5;
+
+    /**
+     * <p>The camera device supports capturing maximum-resolution
+     * images at &gt;= 20 frames per second, in at least the
+     * uncompressed YUV format, when post-processing settings
+     * are set to FAST.</p>
+     * <p>More specifically, this means that a size matching the
+     * camera device's active array size is listed as a
+     * supported size for the YUV_420_888 format in
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, the minimum frame
+     * duration for that format and size is &lt;= 1/20 s, and
+     * the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
+     * lists at least one FPS range where the minimum FPS is</p>
+     * <blockquote>
+     * <p>= 1 / minimumFrameDuration for the maximum-size
+     * YUV_420_888 format.</p>
+     * </blockquote>
+     * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
+     * guaranted to have a value between 0 and 4, inclusive.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -791,7 +849,8 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The camera device will automatically adapt its
      * antibanding routine to the current illumination
-     * conditions. This is the default.</p>
+     * condition. This is the default mode if AUTO is
+     * available on given camera device.</p>
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     public static final int CONTROL_AE_ANTIBANDING_MODE_AUTO = 3;
@@ -807,9 +866,21 @@ public abstract class CameraMetadata<TKey> {
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are used by the camera
      * device, along with android.flash.* fields, if there's
      * a flash unit for this camera device.</p>
+     * <p>Note that auto-white balance (AWB) and auto-focus (AF)
+     * behavior is device dependent when AE is in OFF mode.
+     * To have consistent behavior across different devices,
+     * it is recommended to either set AWB and AF to OFF mode
+     * or lock AWB and AF before setting AE to OFF.
+     * See {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode},
+     * {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}, and {@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}
+     * for more details.</p>
      * <p>LEGACY devices do not support the OFF mode and will
      * override attempts to use this value to ON.</p>
      *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
@@ -1577,11 +1648,41 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
 
     /**
-     * <p>Turn on custom high dynamic range (HDR) mode.</p>
-     * <p>This is intended for LEGACY mode devices only;
-     * HAL3+ camera devices should not implement this mode.</p>
+     * <p>Turn on a device-specific high dynamic range (HDR) mode.</p>
+     * <p>In this scene mode, the camera device captures images
+     * that keep a larger range of scene illumination levels
+     * visible in the final image. For example, when taking a
+     * picture of a object in front of a bright window, both
+     * the object and the scene through the window may be
+     * visible when using HDR mode, while in normal AUTO mode,
+     * one or the other may be poorly exposed. As a tradeoff,
+     * HDR mode generally takes much longer to capture a single
+     * image, has no user control, and may have other artifacts
+     * depending on the HDR method used.</p>
+     * <p>Therefore, HDR captures operate at a much slower rate
+     * than regular captures.</p>
+     * <p>In this mode, on LIMITED or FULL devices, when a request
+     * is made with a {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} of
+     * STILL_CAPTURE, the camera device will capture an image
+     * using a high dynamic range capture technique.  On LEGACY
+     * devices, captures that target a JPEG-format output will
+     * be captured with HDR, and the capture intent is not
+     * relevant.</p>
+     * <p>The HDR capture may involve the device capturing a burst
+     * of images internally and combining them into one, or it
+     * may involve the device using specialized high dynamic
+     * range capture hardware. In all cases, a single image is
+     * produced in response to a capture request submitted
+     * while in HDR mode.</p>
+     * <p>Since substantial post-processing is generally needed to
+     * produce an HDR image, only YUV and JPEG outputs are
+     * supported for LIMITED/FULL device HDR captures, and only
+     * JPEG outputs are supported for LEGACY HDR
+     * captures. Using a RAW output for HDR capture is not
+     * supported.</p>
+     *
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_SCENE_MODE
-     * @hide
      */
     public static final int CONTROL_SCENE_MODE_HDR = 18;
 

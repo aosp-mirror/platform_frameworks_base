@@ -10,73 +10,110 @@ parent.link=index.html
       <ol>
         <li><a href="#createavd">Creating an AVD</a>
           <ol>
+            <li><a href="#CreateDefinition">Creating a device definition</a></li>
             <li><a href="#hardwareopts">Hardware options</a></li>
           </ol>
-        </li>        
+        </li>
+        <li><a href="#skins">Creating Emulator Skins</a></li>
       </ol>
     </div>
   </div>
 
-  <p>The AVD Manager is an easy to use user interface to manage your AVD (Android Virtual Device)
-  configurations. An AVD is a device configuration for the Android emulator that allows you to
-  model different configurations of Android-powered devices. When you start the AVD Manager in Eclipse 
-  or navigate to your SDK's {@code tools/} directory and execute
-  <code>android avd</code>. You will see the AVD Manager as shown in
-  figure 1.</p>
-  
-  <img src="{@docRoot}images/avd-manager.png">
-  
-  <p class="img-caption"><strong>Figure 1. </strong>Screenshot of the AVD Manager. </p>
-  
-  <p>From the main screen, you can create, delete, repair and start AVDs as well as see the details
-  of each AVD. </p>
+  <p>The AVD Manager is a tool you can use
+  to create and manage Android virtual devices (AVDs), which define device configurations
+  for the <a href="{@docRoot}tools/devices/emulator.html"
+  >Android Emulator</a>.</p>
 
-  
+<p>To launch the AVD Manager:</p>
+<ul>
+  <li>In Android Studio, select <strong>Tools &gt; Android &gt; AVD Manager</strong>, or click
+  the AVD Manager icon <img src="{@docRoot}images/tools/avd-manager-studio.png"
+  style="vertical-align:bottom;margin:0;height:19px"> in the toolbar.</li>
+
+  <li>Or, use the command line to navigate to your SDK's <code>tools/</code> directory and execute:
+  <pre class="no-prettyprint classic">$ android avd</pre>
+  </li>
+</ul>
+
+  <p>The AVD Manager main screen shows your current virtual devices, as shown in figure 1.</p>
+
+
+   <img src="{@docRoot}images/studio-avdmgr-firstscreen.png" alt="">
+   <p class="img-caption"><strong>Figure 1.</strong> The AVD Manager main screen shows your current
+   virtual devices.</p>
+
+
+<p class="note"><strong>Note:</strong> If you launch the AVD Manager from the command line, the UI
+is different than how it appears in Android Studio, as documented here. Most of the same
+functionality is available, but the command-line version of the AVD Manager
+is currently not documented.</p>
+
+
   <h2 id="createavd">Creating an AVD</h2>
 
-  <p>You can create as many AVDs as you would like to test on. It is recommended that you test your
-  applications on all API levels higher than the target API level for your application.</p>
+  <p>You can create as many AVDs as you would like to use with the Android Emulator.
+  To effectively test your app, you should create an AVD that models each device type for which
+  you have designed your app to support. For instance, you should create an AVD for each
+  API level equal to and higher than the minimum version you've specified in your manifest
+  <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html" style="white-space: nowrap;"
+  >{@code &lt;uses-sdk>}</a> tag.</p>
 
-  <p>To create an AVD:</p>
+  <p>To create an AVD based on an existing device definition:</p>
 
   <ol>
-    <li>Start the AVD Manager:
+    <li>From the main screen (figure 1), click <strong>Create Virtual Device</strong>.</li>
 
-      <ul>
-        <li>In Eclipse: select <strong>Window &gt; AVD Manager</strong>, or click
-        the AVD Manager icon in the Eclipse toolbar.</li>
+    <li><p>In the Select Hardware window, select a device configuration, such as Nexus 6,
+    then click <strong>Next</strong>.</p>
 
-        <li>In other IDEs: Navigate to your SDK's <code>tools/</code> directory and execute the
-        <code>android</code> tool with no arguments.</li>
-      </ul>
+      <img src="{@docRoot}images/studio-avdmgr-selecthdwr.png" alt="">
+      <p class="img-caption"><strong>Figure 2.</strong> The Select Hardware window.</p>
     </li>
-
-    <li><p>In the <em>Virtual Devices</em> panel, you'll see a list of existing AVDs. Click
-    <strong>New</strong> to create a new AVD. The <strong>Create New AVD</strong> dialog appears.</p>
-      
-      <img src="{@docRoot}images/developing/avd-dialog.png" alt="AVD Dialog">
-      <p class="img-caption"><strong>Figure 2.</strong> Screenshot of the Create AVD window</p>
+    <li>Select the desired system version for the AVD and click <strong>Next</strong>.
     </li>
-
-    <li>Fill in the details for the AVD.
-
-      <p>Give it a name, a platform target, an SD card size, and a skin (HVGA is default). You can
-      also add specific hardware features of the emulated device by clicking the
-      <strong>New...</strong> button and selecting the feature. For a list of hardware features,
-      see <a href="#hardwareopts">Hardware options</a>.</p>
-
-      <p class="note"><strong>Note:</strong> Be sure to define a target for your AVD that satisfies
-      your application's Build Target (the AVD platform target must have an API Level equal to or
-      greater than the API Level that your application compiles against).</p>
+    <li>Verify the configuration settings, then click <strong>Finish</strong>.
+    <p>If necessary, click <strong>Show Advanced Settings</strong> to select a custom skin
+      for the hardware profile and adjust other hardware settings.</p>
     </li>
-
-    <li>Click <strong>Create AVD</strong>.</li>
   </ol>
 
-  <p>Your AVD is now ready and you can either close the AVD Manager, create more AVDs, or
-  launch an emulator with the AVD by selecting a device and clicking <strong>Start</strong>.</p>
+  <p>To launch the AVD in the Android Emulator, click the launch button
+  <img src="{@docRoot}images/tools/as-avd-start.png"
+  style="vertical-align:bottom;margin:0;height:19px">
+   in the list of AVDs.</p>
+
+
+<h3 id="CreateDefinition">Creating a device definition</h3>
+
+<p>In case the available device definitions do not match the device type you'd like to emulate,
+you can create a custom device definition for your AVD:</p>
+<ol>
+  <li>From the main screen (figure 1), click <strong>Create Virtual Device</strong>.</li>
+  <li>To begin you custom device by using an existing device profile as a template, select
+  a device profile then click <strong>Clone Device</strong>.
+  <p>Or, to start from scratch, click <strong>New Hardware Profile</strong>.</p>
+  </li>
+  <li>
+<p>The following Configure Hardware Profile window (figure 3) allows you to specify various
+configurations such as the screen size, memory options, input type, and sensors.</p>
+
+    <p>When you're done configuring the device, click <strong>Finish</strong>.</p>
+
+      <img src="{@docRoot}images/studio-avdmgr-confighardwareprof.png" alt="">
+      <p class="img-caption"><strong>Figure 3.</strong> The Configure Hardware window when
+      creating a custom device configuration.</p>
+    </li>
+  <li>Your custom device configuration is now available in the list of device definitions
+  (shown after you click <strong>Create Virtual Device</strong>). To continue preparing an AVD
+  with your custom device configuration, select the new configuration and follow the instructions
+  above to create an AVD with an existing device definition (and select your new definition).</li>
+
+  </ol>
+
+
 
 <h3 id="hardwareopts">Hardware options</h3>
+
 <p>If you are creating a new AVD, you can specify the following hardware options for the AVD
 to emulate:</p>
 
@@ -235,4 +272,65 @@ to emulate:</p>
       <td>hw.lcd.density</td>
     </tr>
   </table>
+
+
+<h2 id="skins">Creating Emulator Skins</h2>
+
+<p>An Android emulator skin is a collection of files that define the visual and control elements of
+an emulator display. If the skin definitions available in the AVD settings don't meet your needs,
+you can create your own custom skin definition, then apply it to your AVD from the
+advanced settings on the Verify Configuration screen.</p>
+
+<p>Each emulator skin contains:</p>
+   <ul>
+      <li>A <code>hardware.ini</code> file</li>
+      <li>Layout files for supported orientations (landscape, portrait) and physical configuration</li>
+      <li>Image files for display elements, such as background, keys and buttons</li>
+    </ul>
+<p>To create and use a custom skin:</p>
+ <ol>
+    <li>Create a new directory where you will save your skin configuration files. </li>
+    <li>Define the visual appearance of the skin in a text file named
+    <code>layout</code>. This file defines many characteristics of the skin, such as the
+    size and image assets for specific buttons. For example:
+<pre class="no-prettyprint">
+parts {
+    device {
+        display {
+            width   320
+            height  480
+            x       0
+            y       0
+        }
+    }
+
+    portrait {
+        background {
+            image background_port.png
+        }
+
+        buttons {
+            power {
+                image  button_vertical.png
+                x 1229
+                y 616
+            }
+        }
+    }
+    ...
+}
+</pre></li>
+
+  <li>Add the bitmap files of the device images in the same directory.</li>
+  <li>Specify additional hardware-specific device configurations an <code>hardware.ini</code>
+  file for the device settings, such as <code>hw.keyboard</code> and
+  <code>hw.lcd.density</code>.</li>
+  <li>Archive the files in the skin folder and select the archive file as a custom skin. </li>
+</ol>
+
+<p>For more detailed information about creating emulator skins, see the
+<a href="https://android.googlesource.com/platform/external/qemu.git/+/master/docs/ANDROID-SKIN-FILES.TXT"
+>Android Emulator Skin File Specification</a> in the tools source code.</p>
+
+
 

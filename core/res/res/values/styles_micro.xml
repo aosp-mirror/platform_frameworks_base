@@ -25,6 +25,14 @@
         <item name="taskOpenExitAnimation">@null</item>
         <item name="taskCloseEnterAnimation">@null</item>
         <item name="taskCloseExitAnimation">@anim/slide_out_micro</item>
+        <item name="wallpaperOpenEnterAnimation">@null</item>
+        <item name="wallpaperOpenExitAnimation">@anim/slide_out_micro</item>
+        <item name="wallpaperCloseEnterAnimation">@anim/slide_in_micro</item>
+        <item name="wallpaperCloseExitAnimation">@null</item>
+        <item name="wallpaperIntraOpenEnterAnimation">@null</item>
+        <item name="wallpaperIntraOpenExitAnimation">@anim/slide_out_micro</item>
+        <item name="wallpaperIntraCloseEnterAnimation">@anim/slide_in_micro</item>
+        <item name="wallpaperIntraCloseExitAnimation">@null</item>
     </style>
 
     <style name="AlertDialog.Micro" parent="AlertDialog.Holo.Light">

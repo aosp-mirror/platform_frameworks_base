@@ -1,0 +1,698 @@
+page.title=本地化检查清单
+page.metaDescription=把握 Android 和 Google Play 所提供的全世界观众的优势。阅读此清单以获得如何将产品送到世界各地的市场的概述。
+page.image=/distribute/images/localization-checklist.jpg
+page.type="배포"
+
+@jd:body
+
+    <div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>检查清单</h2>
+    <ol>
+      <li><a href="#identify-languages">1. 确定目标语言和语言区域</a></li>
+      <li><a href="#design">2. 本地化设计</a></li>
+      <li><a href="#manage-strings">3. 管理字符串本地化</a></li>
+      <li><a href="#translate-strings">4. 翻译界面字符串和其他资源</a></li>
+      <li><a href="#test">5. 测试已本地化的应用</a></li>
+      <li><a href="#prepare-launch">6. 准备国际化发布</a></li>
+      <li><a href="#support-users">7. 在发布之后为国际用户提供支持</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px">
+  <img src="{@docRoot}distribute/images/localization-checklist.jpg">
+</div>
+<p>
+  Android 和 Google Play 让你可以面向全球的用户提供应用，其中日本、韩国、印度、巴西和俄罗斯等国家/地区的目标用户群正在迅速扩展。有鉴于此，我们强烈建议你本地化你的应用，因为这样可以最大程度地增加应用的分发范围，获得全球各地用户的评分。
+</p>
+
+<p>
+  本地化涉及到很多任务，贯穿应用开发的整个周期，因此务必要提前做出规划。本文旨在帮助你了解本地化的主要方面，以便你做好准备，通过 Google Play 向全球成功发布自己的应用。
+</p>
+
+<div class="headerLine">
+  <h2 id="identify-languages" style="margin-bottom:0px">
+    1. 确定目标语言和语言区域
+  </h2>
+
+
+</div>
+
+<p>
+  确定要向哪些国家/地区发布你的应用并了解这些国家/地区所用的语言，是准备本地化的过程中基本且重要的一步。对于具有巨大市场商机、但英语或其他国际性语言并不普及的国家/地区来讲，将应用本地化尤为重要。
+</p>
+
+<p>
+    对于国际用户，你可以从以下这三个主要方面来管理自己的应用：国家/地区、语言区域和语言。其中，语言是本地化的主要考虑因素（语言区域也很重要，因为日期的格式、时间、货币及其他类似信息也都存在差异）。用户可以控制其 Android 设备上使用的语言和语言区域，反过来这些因素也会影响应用的显示方式。
+
+</p>
+
+<p>
+  通常来说，你首先要根据整体市场规模和商机、应用类别、竞争格局、本地定价和金融状况等因素来确定要定位的国家/地区，然后再基于你的国家/地区定位，确定应用要支持的语言。
+</p>
+
+<p>
+  随后，你可以决定是针对目标国家/地区的部分语言还是全部语言进行本地化。合理的做法是，先针对一种主要的地区性语言进行本地化，然后随着用户群的扩大增添更多语言。
+</p>
+
+<p>
+  确定目标语言之后，你就可以安排开发、翻译、测试和市场营销工作重点围绕这些市场展开。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/identifylocales/zhcn"
+data-sortorder="-timestamp" data-cardsizes="9x3," data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="design" style="margin-bottom:0px">
+    2. 本地化设计
+  </h2>
+
+
+</div>
+
+<p>  确定本地化的目标语言之后，请评估在应用中支持这些语言需要完成哪些工作并提早做出规划。要考虑的事项包括每种语言的词汇扩展、脚本要求、字符间距、换行限制、支持文字“从左到右”和“从右到左”，以及其他可能遇到的问题。
+</p>
+
+<h4>
+  <strong>设计一套灵活的布局</strong>
+</h4>
+
+<p>
+  在创建布局时，确保包含文字的界面元素拥有充足的空间。最好在满足你的语言的基础上多出部分空间（通常留出 30% 的空间）以适应其他语言。
+</p>
+
+<p>
+  另外，元素应能够横向或纵向扩展，以便可以适应不同宽度和高度的界面字符串或输入文本。任何目标语言的字符串都不应与边框或屏幕边缘重叠。
+</p>
+
+<p>
+  如果界面设计得当，通常你就可以针对所有支持的语言使用一套布局。有关详情，请参阅<a href="{@docRoot}training/basics/fragments/fragment-ui.html">构建灵活的界面</a>。
+</p>
+
+<h4>
+  <strong>根据需要使用备用布局</strong>
+</h4>
+
+<p>
+  如果你的界面不能很好地适应某种目标语言，那么你可以单独为该语言创建一套<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">备用布局</a>。Android 可让你很轻松地针对特定语言、语言区域、屏幕尺寸等，声明要加载的多种布局和其他资源，只需使用相应的资源限定符做出标记即可。虽然备用布局可提供相应的灵活性，但使用它会导致随着时间推移，应用的维护难度增加。因此一般来说，建议你最好使用一套更灵活的布局。
+</p>
+
+<h4>
+  <strong>支持 RTL 布局和文本</strong>
+</h4>
+
+<p>
+  如果你要发布应用的国家/地区使用从右到左 (RTL) 的文字阅读方向，则你应该考虑尽可能地支持 RTL 布局以及相应的文本显示和编辑。
+</p>
+
+<p>
+  Android 4.1 引入了对双向文字的有限支持，支持应用以从左到右 (LTR) 和从右到左 (RTL) 的方向显示和编辑文本。Android 4.2 增加了<a href="http://android-developers.blogspot.fr/2013/03/native-rtl-support-in-android-42.html">对 RTL 布局的完整原生支持</a>（包括布局镜像），因此你可以为所有用户提供一致的优质体验。
+</p>
+
+<p>
+  Android 4.2 用户至少可以轻松添加基本的 RTL 布局镜像，这对满足 RTL 用户需求大有帮助。
+</p>
+
+<h4>
+  <strong>针对日期、时间、数字和货币采用系统提供的格式</strong>
+</h4>
+
+<p>
+  如果你的应用需要指定因语言区域不同而不同的日期、时间、数字、货币和其他实体，请务必使用系统提供的格式，而不要使用应用专有的格式。请注意，并非所有的语言区域都使用相同的千位分隔符、小数点或百分比符号。
+</p>
+
+<p>
+  Android 提供了多种实用工具，用于在不同的语言区域中设置格式、进行转换：例如适用于日期的 <a href="{@docRoot}reference/android/text/format/DateUtils.html">DateUtils</a> 和 <a href="{@docRoot}reference/java/text/DateFormat.html">DateFormat</a>；适用于数字和货币的 <a href="{@docRoot}reference/java/lang/String.html#format(java.lang.String, java.lang.Object...)">String.format()</a> 或 <a href="{@docRoot}reference/java/text/DecimalFormat.html">DecimalFormat</a>；适用于电话号码的 <a href="{@docRoot}reference/android/telephony/PhoneNumberUtils.html">PhoneNumberUtils</a> 等。
+</p>
+
+<p>
+  假定用户的语言区域并据此强制设置格式，会导致在用户更改语言区域时引发问题。强烈建议你使用系统提供的格式和各种实用工具。
+</p>
+
+<h4>
+  <strong>包括一套完整的默认资源</strong>
+</h4>
+
+<p>
+  提供一整套默认资源可以确保无论是何种语言或语言区域，你的应用都能正常运行。应用的默认资源是指没有使用任何语言或语言区域限定符标记的资源，例如 res/drawable/ 和 res/values/ 中存储的资源。<em></em>如果你的应用试图加载目前的语言或默认资源集中没有的资源，则会崩溃。
+</p>
+
+<p>
+  无论你在应用中使用的默认语言是什么，请务必在默认的资源目录中存储相关的布局、图形内容和字符串，且不使用语言或语言区域限定符。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/tools/loc/designforloc" data-sortorder="-timestamp"
+data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="manage-strings" style="margin-bottom:0px">
+    3. 管理字符串的本地化</h2>
+
+
+</div>
+
+<p>
+  妥善管理应用的界面字符串非常重要，这样你才能为用户提供优质的体验，并让本地化工作事半功倍。
+</p>
+
+<h4>
+  <strong>将所有字符串放入 strings.xml 中</strong>
+</h4>
+
+<p>
+  在构建应用时，请注意不要硬编码任何字符串，而是在默认的 strings.xml 文件中将所有字符串声明为资源，这样便于更新和进行本地化。<em></em>strings.xml 文件中的字符串可以抽取出来、进行翻译，然后再集成回应用（使用相应的限定符），无需对编译后的代码进行任何更改。
+</p>
+
+<p>
+  如果你生成带有文字的图片，也请将这些字符串放入 strings.xml，并在翻译之后重新生成图片。
+</p>
+
+<h4>
+  <strong>遵循针对界面字符串的 Android 指南</strong>
+</h4>
+
+<p>
+  在设计和开发界面时，请务必密切注意你与用户交流的方式。<em></em>一般而言，使用友好而不失简洁、<a href="{@docRoot}design/style/writing.html">简明而且精炼的风格</a>，并且整个界面应采用一致的风格。</p>
+
+<p>
+  请务必阅读并遵循<a href="{@docRoot}design/style/writing.html">写作风格和字词选择</a>方面的 Android 设计建议。这样做能够让你的应用更加美观，并且有助于用户快速理解你的界面。
+</p>
+
+<p>
+  另外，请尽可能使用 Android 标准术语，例如对于界面元素，使用“操作栏”、“选项菜单”、“系统栏”、“通知”等。确保 Android 术语的正确性和一致性可让翻译工作更容易进行，从而为用户带来更好的最终产品。
+</p>
+
+<h4>
+  <strong>为声明的字符串提供充分的上下文</strong>
+</h4>
+
+<p>
+  在 strings.xml 文件中声明字符串时，确保清楚说明使用该字符串的上下文。此信息对翻译人员来说十分重要，有助于提高翻译质量，也有助于你始终有效地管理字符串。
+</p>
+
+<p>
+  下面是一个例子：
+</p>
+
+<pre class="prettyprint"><span class="com">&lt;!-- 用于提交表单的操作。此文本显示在可容纳 30 个字符的按钮上--&gt;</span><span class="pln"><br /></span><span class="tag">&lt;string</span><span class="pln"> </span><span class="atn">name</span><span class="pun">=</span><span class="atv">"login_submit_button"</span><span class="tag">&gt;</span><span class="pln">Sign in</span><span class="tag">&lt;/string&gt;</span></pre>
+<p>
+  你需要提供的上下文信息包括：
+</p>
+
+<ul>
+  <li>
+    <p>
+      字符串有何用途？它在何时/哪里呈现给用户？
+    </p>
+  </li>
+
+  <li>
+    <p>
+      它在布局中的什么位置？例如，如果它是按钮，那么翻译的灵活性就不如文本框。
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>标记不应翻译的信息部分</strong>
+</h4>
+
+<p>
+  有时候字符串中包含不应被翻译为其他语言的文本。常见的示例包括代码、某个值的占位符、特殊符号或名称。在准备翻译字符串时，请查找并标记应该保留原样而不用翻译的文本，这样翻译人员就不会更改这些内容。
+</p>
+
+<p>
+  要标记不应翻译的文本，请使用 <code>&lt;xliff:g&gt;</code> 占位符标记。以下示例标记可确保文本“%1$s”在翻译过程中不会被更改（否则这条消息会被破坏）：
+</p>
+
+<pre class="prettyprint"><span class="tag">&lt;string</span><span class="pln"> </span><span class="atn">name</span><span class="pun">=</span><span class="atv">"countdown"</span><span class="tag">&gt;</span><span class="pln"><br />    </span><span class="tag">&lt;xliff:g</span><span class="pln"> </span><span class="atn">id</span><span class="pun">=</span><span class="atv">"time"</span><span class="pln"> </span><span class="atn">example</span><span class="pun">=</span><span class="atv">"5 days&gt;</span><span class="pln">%1$s</span><span class="tag">&lt;/xliff:g&gt;</span><span class="pln">until holiday<br /></span><span class="tag">&lt;/string&gt;</span></pre>
+<p>
+  在声明占位符标记时，请务必添加说明此占位符用途的 ID 属性。如果你的应用稍后会替换占位符值，请务必提供示例属性来说明预期用途。
+</p>
+
+<p>
+  以下是其他一些占位符标记的示例；
+</p>
+
+<pre>
+&lt;resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"&gt;
+
+&lt;!-- 特殊 Unicode 符号的占位符示例 --&gt;
+
+&lt;string name="star_rating"&gt;Check out our 5
+
+    &lt;xliff:g id="star"&gt;\u2605&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- 网址的占位符示例 --&gt;
+
+&lt;string name="app_homeurl"&gt;
+
+    Visit us at &lt;xliff:g id="application_homepage"&gt;http://my/app/home.html&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- 名称的占位符示例 --&gt;
+
+&lt;string name="prod_name"&gt;
+
+    Learn more at &lt;xliff:g id="prod_gamegroup"&gt;Game Group&lt;/xliff:g&gt;
+
+&lt;/string&gt;
+
+&lt;!-- 实值的占位符示例 --&gt;
+
+&lt;string name="promo_message"&gt;
+
+    Please use the "&lt;xliff:g id="promotion_code"&gt;ABCDEFG&lt;/xliff:g&gt;” to get a discount.
+
+&lt;/string&gt;
+
+...
+
+&lt;/resources&gt;
+</pre>
+
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/managestrings/zhcn"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="translate-strings" style="margin-bottom:0px">
+    4. 翻译界面字符串和其他资源
+  </h2>
+
+
+</div>
+
+<p>
+  将应用的界面字符串和资源翻译为目标语言是本地化过程中的关键阶段，需要给予最多关注并做出规划。
+</p>
+
+<p>
+  我们建议你与专业翻译人员合作（请参阅<a href="{@docRoot}distribute/tools/localization-checklist.html#gp-trans">聘请专业翻译公司</a>），以确保获得高品质的翻译，提升应用的价值。你也可以选择机器翻译，但用户体验不如人工翻译。
+</p>
+
+<h4>
+  <strong>准备翻译</strong>
+</h4>
+
+<p>
+  翻译工作的质量在一定程度上取决于你为翻译提供的源资料，因此请确保你的 strings.xml 文件条理清晰、注释完善，而且完全准确。
+</p>
+
+<p>
+  以下是一些在翻译之前准备字符串的方法：
+</p>
+
+<ul>
+  <li>
+    <p>
+      确保字符串格式的正确性和一致性。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      遵循上文<a href="{@docRoot}distribute/tools/localization-checklist.html#manage-strings">管理字符串的本地化</a>中列出的有关字符串的建议。
+    </p>
+  </li>
+
+  <li>
+    <p>
+       清理 strings.xml 文件，删除不用的字符串。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      在文件中加入注释，以标识所有者、来源和文件版本，以及针对翻译人员的特别说明。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      提供现有翻译（如果有的话），用 zip 文件或其他文件包发送给翻译人员。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      标识需要翻译的图形内容或其他资源，并将它们加入给翻译人员的文件包中。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      此外，考虑翻译你的应用在 Google Play 商店的商品详情（应用标题和说明、发行说明等）以及其他国际化营销资料。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      创建术语表，用来解释你的产品、市场或所用重要技术中出现的关键术语的含义和用途。将列表添加到给翻译人员的文件包中。
+    </p>
+  </li>
+</ul>
+
+<h4>
+  <strong>发送字符串进行翻译</strong>
+</h4>
+
+<p>
+  在开发阶段的初期，你就可以与专业的翻译供应商联系，商定费用和周转时间，而且你的费用应该包含多次反复工作的费用。你可以寻找在线翻译供应商或直接使用 Google Play 开发者控制台提供的翻译服务（请参阅<a href="{@docRoot}distribute/tools/localization-checklist.html#gp-trans">聘请专业翻译公司</a>）。
+</p>
+
+<p>
+  翻译完成后，请进行初步检查。查看所有文件是否均已翻译，是否存在潜在编码问题，并确保声明格式未被破坏。
+</p>
+
+<p>
+  如果一切正常，请小心地将已本地化的目录和文件移回应用的资源中。请务必使用正确的语言和语言区域限定符标记目录，以便以后能够正确加载这些目录。
+</p>
+
+<p>
+  在将翻译合并到你的应用之后，请开始<a href="{@docRoot}distribute/tools/localization-checklist.html#test">测试已本地化的应用</a>。
+</p>
+
+<h4 id="gp-trans">
+  <strong>通过 Google Play 聘请专业翻译公司</strong>
+</h4>
+
+<p>
+  Google Play 应用翻译服务可以帮助你为应用快速寻找和购买翻译服务。在开发者控制台中，你可以浏览已由 Google 认证的第三方供应商列表，这些供应商能够以有竞争力的价格为你提供高品质的翻译。你可以上传要翻译的字符串，选择翻译的目标语言，并根据时间和价格选择翻译供应商。
+</p>
+
+<p>
+  购买翻译之后，你会收到来自供应商的电子邮件。这是你与供应商之间的直接业务往来，你需要直接与供应商合作，管理翻译流程并解决所有支持问题。
+</p>
+
+<div>
+  <img src="{@docRoot}images/gp-localization-trans-0.png" class="border-img">
+</div>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/translatestrings"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test" style="margin-bottom:0px">
+    5. 测试已本地化的应用
+  </h2>
+
+
+</div>
+
+<p>
+  收到翻译的字符串和资源并放入应用之后，你需要对应用进行测试，确保应用能够向国际用户发布。
+</p>
+
+<p>
+  人工测试可以帮助你发现布局和字符串中的本地化问题，这些问题可能影响用户满意度，最终影响应用的用户评分。
+</p>
+
+<h4>
+  <strong>设置测试环境</strong>
+</h4>
+
+<p>
+  要测试已本地化的应用，你需要根据你的目标市场和适配设备，设置包含多种设备（或虚拟设备）和屏幕尺寸的测试环境。请注意，不同地区可用的设备可能不同。如果可能，请将你的测试设备设置为用户能够使用的实际设备。
+</p>
+
+<h4>
+  <strong>查找常见的本地化问题</strong>
+</h4>
+
+<p>
+  在每台测试设备上，在“设置”中设定语言或语言区域。安装并启动应用，然后浏览所有界面流程、对话框和用户互动。在需要输入内容的部分输入文本。要查找的内容包括：
+</p>
+
+<ul>
+  <li>
+    <p>
+      截断的文本，或者与界面元素或屏幕边缘重叠的文本
+    </p>
+  </li>
+
+  <li>
+    <p>
+      不合理的换行
+    </p>
+  </li>
+
+  <li>
+    <p>
+      错误的字词中断或标点符号错误
+    </p>
+  </li>
+
+  <li>
+    <p>
+      错误的字母顺序排序
+    </p>
+  </li>
+
+  <li>
+    <p>
+      错误的布局方向或文字方向
+    </p>
+  </li>
+
+  <li>
+    <p>
+      未翻译的文本。如果显示的是默认字符串而不是翻译过的字符串，那么你可能忽略了这些字符串的翻译或是使用了错误的语言限定符标记了资源目录。
+    </p>
+  </li>
+</ul>
+
+<p>
+  如果翻译后的字符串变得过于臃肿，不能适应布局，建议你尝试简化默认文本、简化译文文本或调整默认布局。如果问题仍然不能解决，请为该语言创建自定义布局。
+</p>
+
+<h4>
+  <strong>测试默认资源</strong>
+</h4>
+
+<p>
+  使用所有目标语言和语言区域测试应用之后，请务必使用不支持的语言和语言区域再次测试。<em></em>这有助于确保你的应用包括完整的默认字符串和资源，可供所有用户使用，不论用户设置了哪种首选语言。
+</p>
+
+<h4>
+  <strong>邀请母语使用者进行复查</strong>
+</h4>
+
+<p>
+  在测试过程中或之后，建议你邀请相应的母语使用者对本地化的应用进行复查。一种方法是让目标地区的用户进行 Beta 版测试，Google Play 可以帮助你开展这项工作。<!-- --></p>
+
+
+<div class="headerLine">
+  <h2 id="prepare-launch" style="margin-bottom:0px">
+    6. 准备国际化发布
+  </h2>
+
+
+</div>
+
+<p>
+  翻译应用是本地化过程中的关键部分，但是要让你的产品吸引用户、获得关注，你应该做好在目标国家/地区发布应用的准备，并针对国际用户制定更广泛的发布和营销计划。
+</p>
+
+<h4>
+  <strong>本地化你的 Google Play 商品详情</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right">
+  <div class="sidebox">
+    <h2>
+      本地化你的 Google Play 商品详情
+    </h2>
+
+    <p>
+      Google Play 商店的商品详情是国际用户对你应用的第一印象。你应该向所有用户重点介绍应用的优势！在开发者控制台中本地化商品详情时，需要本地化的内容包括：</p>
+
+    <ul>
+      <li>应用标题和说明
+      </li>
+
+      <li>应用在手机和平板电脑上的屏幕截图
+      </li>
+
+      <li>宣传图片和视频
+      </li>
+    </ul>
+  </div>
+</div>
+
+<p>
+  如果你想让应用在国际市场中取得成功，则务必要本地化你的 Google Play 商品详情。你可以在开发者控制台中管理已本地化的商品详情。
+</p>
+
+<p>
+  在发布之前，请决定你的应用标题、说明、宣传文字、营销主题和计划以及其他文字和图片。请提早发送你的商品详情文字和图片进行翻译，确保这些内容在 Beta 版测试开始时就准备就绪。收到译文后，你可以通过开发者控制台添加译文。
+</p>
+
+<div class="sidebox-wrapper" style="float:right">
+  <div class="sidebox">
+    <h2>
+      Google Play 中的商品详情翻译
+    </h2>
+
+    <p>
+      你可以使用 Google Play 上的应用翻译服务翻译你的商品详情。准备包含商品详情信息的 XML 文件，并像上传 strings.xml 文件一样上传此文件（请参阅<a href="{@docRoot}distribute/tools/localization-checklist.html#gp-trans">聘请专业翻译公司</a>）
+    </p>
+  </div>
+</div>
+
+<p>
+  另外，你已经创建了优秀的本地化应用，那么就应该让用户知晓。截取各个语言版本的界面在手机和平板电脑（7 英寸和 10 英寸）上的截图。你可以将所有目标语言版本的屏幕截图上传到开发者控制台。这对于使用其他语言浏览你的应用商品详情的用户来说有很重要的参考价值。
+</p>
+
+<p>
+  你还有必要准备本地化版本的宣传图片和视频。例如，你应用的置顶大图可能包括应该翻译的文字，翻译之后能达到最佳效果，或者你可能希望在某个国家/地区呈现与众不同的视觉效果。你可以为每种目标语言创建相应版本的宣传图片，并将它们上传到开发者控制台。如果你提供宣传视频，则可以创建本地化版本的视频，然后添加指向各目标语言版本的视频的链接。
+</p>
+
+<h4>
+  <strong>在主要国家/地区计划 Beta 版的发布</strong>
+</h4>
+
+<div class="sidebox-wrapper" style="float:right">
+  <div class="sidebox">
+    <h2>
+      简单的 Beta 测试
+    </h2>
+
+    <p>
+      现在，Google Play 允许你在世界范围内设立 Alpha 版和 Beta 版测试者小组。下次登录到开发者控制台时请别忘记了解这一强大的功能。
+    </p>
+  </div>
+</div>
+
+<p>
+  在发布应用之前收集用户的真实反馈是很有必要的做法，特别是使用新的语言、在新的国家或地区发布应用时，应该收集更多反馈。在这种情况下，我们强烈建议你向主要目标市场的用户发布应用的预览版本，以便这些用户能够方便地向你提供反馈和报告错误。
+</p>
+
+<p>
+  Google Play 可以帮助你为应用设置 Beta 测试计划。登录到开发者控制台并上传你的 APK 之后，你可以设立用户小组，以便进行应用的 Alpha 版和 Beta 版测试。你可以先进行小范围的 Alpha 版测试，然后推进到更大范围的 Beta 版测试。
+</p>
+
+<p>
+  用户被添加到小组之后，他们可以访问你应用的商品详情并安装应用。<strong>Alpha 或 Beta 版本的用户不能留下评论或评分</strong>，因此你在 Google Play 上的<strong>评分不会受到不利影响</strong>，不过这意味着你需要为测试者设置一种机制以便他们提供反馈：不妨创建一个 <a href="http://www.google.com/+/business/">Google+</a> 页面或 <a href="https://groups.google.com/forum/#!overview">Google 网上论坛</a>。
+</p>
+
+<p>
+  收到的反馈可以帮助你调整界面、翻译和商品详情，以确保为用户提供优质体验。
+</p>
+
+<h4>
+  <strong>计划国际化营销</strong>
+</h4>
+
+<p>
+  为了在更多国家/地区获得最高的关注度，请考虑制定国际化营销或广告计划。计划的覆盖范围取决于你能支持的预算，但一般来说，在发布时和发布后针对特定国家/地区开展营销是经济、高效的措施。
+</p>
+
+<h4>
+  <strong>创建本地化的 Google Play 徽章</strong>
+</h4>
+
+<p>
+  如果你正在准备国际化营销，请务必加入<a href="{@docRoot}distribute/tools/promote/badges.html">本地化的 Google Play 徽章</a>，让用户知道你是在 Google Play 上发布应用的。你可以使用徽章生成器快速构建本地化的徽章，然后用到你的网站或营销材料中。你还可以获得高分辨率的资源。
+</p>
+
+<h4>
+  <strong>创建本地化的 Device Art</strong>
+</h4>
+
+<p>
+  如果你有应用在 Android 设备上运行的产品截图，请确保这些截图拥有精美外观，能够反映应用在 Android 设备上的最新状态。为帮助你准备高品质的营销材料，请使用 <a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art Generator</a>，只需拖放即可快速获得在 Nexus 设备上的屏幕截图。
+</p>
+
+<h4>
+  <strong>查看你的优化提示</strong>
+</h4>
+
+<p>
+  在准备发布时，请务必登录到开发者控制台，查看为你的应用提供的“优化提示”。通过优化提示，你可以了解本地化的商品详情是否有所遗漏，还可以获得其他有用的提示，帮助你实现成功的本地化发布。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/toolsreference/localizationchecklist/preplaunch/zhcn"
+data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3"
+data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users" style="margin-bottom:0px">
+    7. 在发布后为国际用户提供支持
+  </h2>
+
+
+</div>
+
+<p>
+  在国际范围内发布应用之后，你应该准备好为各种语言和时区的用户提供支持。能为国际用户提供什么样的支持取决于你的预算，不过你至少要在发布后认真查看应用获得的评分、评论和下载统计信息。
+</p>
+
+<p>
+  以下是一些建议：
+</p>
+
+<ul>
+  <li>
+    <p>
+      使用开发者控制台中的应用统计信息比较不同语言和国家/地区的下载量、安装量、卸载量和评分。如果某些语言或国家/地区的下载量和评分相对落后，请考虑采取一些措施来改善你的产品或改变营销方法。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      定期查看评论。Google Play 会为你翻译所有用户评论，因此你可以及时了解国际用户对应用的评价，以及用户喜欢的功能和困扰他们的问题。通过查看评论，你可以发现可能影响特定国家/地区用户的技术问题，然后进行修正并更新你的应用。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      尽可能回复评论。使用用户的语言或通用语言与用户互动是一种很好的做法。如果不可行，你可以尝试使用翻译工具，不过效果可能会打折扣。如果你应用的某种语言版本十分受欢迎，请考虑由该语言的母语使用者帮助你为用户提供支持。
+    </p>
+  </li>
+
+  <li>
+    <p>
+      确保提供链接，让用户能够转到你网站上的所有支持资源。考虑建立按语言分组的用户小组、Google+ 社区或其他支持论坛。
+    </p>
+  </li>
+</ul>
+
+<p>
+  按照这里介绍的做法本地化你的应用、向国际用户宣传和营销你的应用，并为用户提供持续的支持，你的应用就能吸引很多新用户并始终赢得他们的青睐。
+</p>
+
+<p>
+  请务必阅读<a href="{@docRoot}distribute/tools/launch-checklist.html">发布检查清单</a>，以详细了解如何在 Google Play 上计划、构建和发布你的应用。
+</p>
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13"
+  data-query="collection:distribute/toolsreference/localizationchecklist/supportlaunch/zhcn"
+  data-sortOrder="-timestamp"
+  data-cardSizes="9x3,9x3,6x3,9x3,9x3,9x3"
+  data-maxResults="6"></div>

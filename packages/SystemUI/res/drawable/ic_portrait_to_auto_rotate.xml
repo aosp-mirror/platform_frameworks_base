@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="48dp"
+    android:width="48dp"
+    android:viewportHeight="48"
+    android:viewportWidth="48" >
+    <group
+        android:name="icon"
+        android:translateX="24"
+        android:translateY="24" >
+        <group
+            android:name="icon_pivot"
+            android:translateX="-24.15"
+            android:translateY="-24.25" >
+            <group
+                android:name="arrows"
+                android:translateX="24.1"
+                android:translateY="24.1"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
+                android:rotation="-221" >
+                <group
+                    android:name="arrows_pivot"
+                    android:translateX="-24.1"
+                    android:translateY="-24.1" >
+                    <path
+                        android:name="arrow_top"
+                        android:pathData="M 33.1499938965,5.25 c 6.5,3.10000610352 11.1999969482,9.40000915527 11.8999938965,17.0 c 0.0,0.0 3.00001525879,0.0 3.00001525879,0.0 c -1.00001525879,-12.3000030518 -11.3000030518,-22.0 -23.9000091553,-22.0 c -0.399993896484,0.0 -0.899993896484,0.0 -1.30000305176,0.100006103516 c 0.0,0.0 7.60000610352,7.59999084473 7.60000610352,7.59999084473 c 0.0,0.0 2.69999694824,-2.69999694824 2.69999694824,-2.69999694824 Z"
+                        android:fillColor="#FFFFFFFF"
+                        android:fillAlpha="0" />
+                    <path
+                        android:name="arrow_bottom"
+                        android:pathData="M 15.1499938965,43.25 c -6.5,-3.09999084473 -11.1999969482,-9.5 -11.8999938965,-17.0 c 0.0,0.0 -3.0,0.0 -3.0,0.0 c 1.0,12.3000030518 11.299987793,22.0 23.8999938965,22.0 c 0.399993896484,0.0 0.899993896484,0.0 1.30000305176,-0.0999908447266 c 0.0,0.0 -7.60000610352,-7.60000610352 -7.60000610352,-7.60000610352 c 0.0,0.0 -2.69999694824,2.69999694824 -2.69999694824,2.69999694824 Z"
+                        android:fillColor="#FFFFFFFF"
+                        android:fillAlpha="0" />
+                </group>
+            </group>
+            <group
+                android:name="device"
+                android:translateX="24.14999"
+                android:translateY="24.25"
+                android:rotation="-135" >
+                <path
+                    android:name="device_1"
+                    android:pathData="M -3.34053039551,-22.9980926514 c -1.3207244873,-1.3207244873 -3.46876525879,-1.26383972168 -4.74829101563,0.125762939453 c 0.0,0.0 -14.8512420654,14.7411804199 -14.8512420654,14.7411804199 c -1.39259338379,1.392578125 -1.44947814941,3.54061889648 -0.125762939453,4.74827575684 c 0.0,0.0 26.4143981934,26.4144134521 26.4143981934,26.4144134521 c 1.3207244873,1.3207244873 3.46876525879,1.26382446289 4.74829101562,-0.125762939453 c 0.0,0.0 14.7381896973,-14.7381896973 14.7381896973,-14.7381896973 c 1.392578125,-1.39259338379 1.44947814941,-3.54061889648 0.125762939453,-4.74829101562 c 0.0,0.0 -26.3013458252,-26.417388916 -26.3013458252,-26.417388916 Z M 2.87156677246,16.9857940674 c 0.0,0.0 -19.7573547363,-19.7573699951 -19.7573547363,-19.7573699951 c 0.0,0.0 14.0142059326,-14.2142181396 14.0142059326,-14.2142181396 c 0.0,0.0 19.7573699951,19.7573699951 19.7573699951,19.7573699951 c 0.0,0.0 -14.0142211914,14.2142181396 -14.0142211914,14.2142181396 Z"
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1" />
+            </group>
+        </group>
+    </group>
+</vector>

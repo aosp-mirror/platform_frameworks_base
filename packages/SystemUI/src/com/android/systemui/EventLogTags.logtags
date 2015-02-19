@@ -7,6 +7,16 @@ option java_package com.android.systemui;
 # ---------------------------
 36000 sysui_statusbar_touch (type|1),(x|1),(y|1),(enabled|1)
 36001 sysui_heads_up_status (key|3),(visible|1)
+36002 sysui_fullscreen_notification (key|3)
+36003 sysui_heads_up_escalation (key|3)
+# sysui_status_bar_state: Logged whenever the status bar / keyguard state changes
+## state: 0: SHADE, 1: KEYGUARD, 2: SHADE_LOCKED
+## keyguardShowing: 1: Keyguard shown to the user (or keyguardOccluded)
+## keyguardOccluded: 1: Keyguard active, but another activity is occluding it
+## bouncerShowing: 1: Bouncer currently shown to the user
+## secure: 1: The user has set up a secure unlock method (PIN, password, etc.)
+## currentlyInsecure: 1: No secure unlock method set up (!secure), or trusted environment (TrustManager)
+36004 sysui_status_bar_state (state|1),(keyguardShowing|1),(keyguardOccluded|1),(bouncerShowing|1),(secure|1),(currentlyInsecure|1)
 
 # ---------------------------
 # PhoneStatusBarView.java
@@ -17,6 +27,15 @@ option java_package com.android.systemui;
 # NotificationPanelView.java
 # ---------------------------
 36020 sysui_notificationpanel_touch (type|1),(x|1),(y|1)
+## type: 1: SWIPE_UP_UNLOCK           Swiped up to dismiss the lockscreen.
+##       2: SWIPE_DOWN_FULL_SHADE     Swiped down to enter full shade.
+##       3: TAP_UNLOCK_HINT           Tapped in empty area, causes unlock hint.
+##       4: SWIPE_CAMERA              Swiped the camera icon, launches.
+##       5: SWIPE_DIALER              Swiped the dialer icon, launches.
+##       6: TAP_LOCK                  Tapped the (unlocked) lock icon, locks the device.
+##       7: TAP_NOTIFICATION_ACTIVATE Tapped a lockscreen notification, causes "tap again" hint.
+##                                    Note: Second tap logged as notification_clicked.
+36021 sysui_lockscreen_gesture (type|1),(lengthDp|1),(velocityDp|1)
 
 # ---------------------------
 # SettingsPanelView.java

@@ -502,7 +502,7 @@ public class BluetoothGattCharacteristic {
      * @return Cached value of the characteristic
      */
     public String getStringValue(int offset) {
-        if (offset > mValue.length) return null;
+        if (mValue == null || offset > mValue.length) return null;
         byte[] strBytes = new byte[mValue.length - offset];
         for (int i=0; i != (mValue.length-offset); ++i) strBytes[i] = mValue[offset+i];
         return new String(strBytes);

@@ -26,10 +26,10 @@
         android:layout_height="match_parent"
         androidprv:layout_maxWidth="@dimen/keyguard_security_width"
         androidprv:layout_maxHeight="@dimen/keyguard_security_max_height"
-        android:gravity="center_horizontal"
-        android:contentDescription="@string/keyguard_accessibility_pin_unlock">
+        android:gravity="center_horizontal">
 
     <ImageView
+            android:id="@+id/keyguard_sim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_lockscreen_sim"/>
@@ -61,6 +61,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="28"
+                    android:contentDescription="@string/keyguard_accessibility_sim_pin_area"
                     />
             <ImageButton
                     android:id="@+id/delete_button"

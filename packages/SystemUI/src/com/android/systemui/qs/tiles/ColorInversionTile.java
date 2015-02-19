@@ -26,6 +26,10 @@ import com.android.systemui.qs.UsageTracker;
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
+    private final AnimationIcon mEnable
+            = new AnimationIcon(R.drawable.ic_invert_colors_enable_animation);
+    private final AnimationIcon mDisable
+            = new AnimationIcon(R.drawable.ic_invert_colors_disable_animation);
     private final SecureSetting mSetting;
     private final UsageTracker mUsageTracker;
 
@@ -37,14 +41,17 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         mSetting = new SecureSetting(mContext, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
             @Override
-            protected void handleValueChanged(int value) {
-                mUsageTracker.trackUsage();
+            protected void handleValueChanged(int value, boolean observedChange) {
+                if (value != 0 || observedChange) {
+                    mUsageTracker.trackUsage();
+                }
                 if (mListening) {
                     handleRefreshState(value);
                 }
             }
         };
-        mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class);
+        mUsageTracker = new UsageTracker(host.getContext(), ColorInversionTile.class,
+                R.integer.days_to_show_color_inversion_tile);
         if (mSetting.getValue() != 0 && !mUsageTracker.isRecentlyUsed()) {
             mUsageTracker.trackUsage();
         }
@@ -78,6 +85,21 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         mSetting.setValue(mState.value ? 0 : 1);
+        mEnable.setAllowAnimation(true);
+        mDisable.setAllowAnimation(true);
+    }
+
+    @Override
+    protected void handleLongClick() {
+        if (mState.value) return;  // don't allow usage reset if inversion is active
+        final String title = mContext.getString(R.string.quick_settings_reset_confirmation_title,
+                mState.label);
+        mUsageTracker.showResetConfirmation(title, new Runnable() {
+            @Override
+            public void run() {
+                refreshState();
+            }
+        });
     }
 
     @Override
@@ -87,7 +109,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         state.visible = enabled || mUsageTracker.isRecentlyUsed();
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
-        state.iconId = enabled ? R.drawable.ic_qs_inversion_on : R.drawable.ic_qs_inversion_off;
+        state.icon = enabled ? mEnable : mDisable;
     }
 
     @Override

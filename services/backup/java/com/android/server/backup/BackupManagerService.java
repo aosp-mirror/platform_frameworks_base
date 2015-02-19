@@ -130,6 +130,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -153,7 +154,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import libcore.io.IoUtils;
 
-public class BackupManagerService extends IBackupManager.Stub {
+public class BackupManagerService {
 
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
@@ -322,8 +323,12 @@ public class BackupManagerService extends IBackupManager.Stub {
     // Watch the device provisioning operation during setup
     ContentObserver mProvisionedObserver;
 
-    static BackupManagerService sInstance;
-    static BackupManagerService getInstance() {
+    // The published binder is actually to a singleton trampoline object that calls
+    // through to the proper code.  This indirection lets us turn down the heavy
+    // implementation object on the fly without disturbing binders that have been
+    // cached elsewhere in the system.
+    static Trampoline sInstance;
+    static Trampoline getInstance() {
         // Always constructed during system bringup, so no need to lazy-init
         return sInstance;
     }
@@ -332,7 +337,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         public Lifecycle(Context context) {
             super(context);
-            sInstance = new BackupManagerService(context);
+            sInstance = new Trampoline(context);
         }
 
         @Override
@@ -342,11 +347,17 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                sInstance.initialize(UserHandle.USER_OWNER);
+            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 ContentResolver r = sInstance.mContext.getContentResolver();
                 boolean areEnabled = Settings.Secure.getInt(r,
                         Settings.Secure.BACKUP_ENABLED, 0) != 0;
-                sInstance.setBackupEnabled(areEnabled);
+                try {
+                    sInstance.setBackupEnabled(areEnabled);
+                } catch (RemoteException e) {
+                    // can't happen; it's a local object
+                }
             }
         }
     }
@@ -371,6 +382,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                     // we're now good to go, so start the backup alarms
                     if (MORE_DEBUG) Slog.d(TAG, "Now provisioned, so starting backups");
                     startBackupAlarmsLocked(FIRST_BACKUP_INTERVAL);
+                    scheduleNextFullBackupJob();
                 }
             }
         }
@@ -934,7 +946,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Main service implementation -----
 
-    public BackupManagerService(Context context) {
+    public BackupManagerService(Context context, Trampoline parent) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
@@ -944,7 +956,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
 
-        mBackupManagerBinder = asInterface(asBinder());
+        mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
 
         // spin up the backup/restore handler thread
         mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
@@ -1451,7 +1463,6 @@ public class BackupManagerService extends IBackupManager.Stub {
         return false;
     }
 
-    @Override
     public boolean setBackupPassword(String currentPw, String newPw) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupPassword");
@@ -1532,7 +1543,6 @@ public class BackupManagerService extends IBackupManager.Stub {
         return false;
     }
 
-    @Override
     public boolean hasBackupPassword() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "hasBackupPassword");
@@ -2688,6 +2698,84 @@ public class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
+        // SHA-1 a byte array and return the result in hex
+        private String SHA1Checksum(byte[] input) {
+            final byte[] checksum;
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-1");
+                checksum = md.digest(input);
+            } catch (NoSuchAlgorithmException e) {
+                Slog.e(TAG, "Unable to use SHA-1!");
+                return "00";
+            }
+
+            StringBuffer sb = new StringBuffer(checksum.length * 2);
+            for (int i = 0; i < checksum.length; i++) {
+                sb.append(Integer.toHexString(checksum[i]));
+            }
+            return sb.toString();
+        }
+
+        private void writeWidgetPayloadIfAppropriate(FileDescriptor fd, String pkgName)
+                throws IOException {
+            byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName,
+                    UserHandle.USER_OWNER);
+            // has the widget state changed since last time?
+            final File widgetFile = new File(mStateDir, pkgName + "_widget");
+            final boolean priorStateExists = widgetFile.exists();
+
+            if (MORE_DEBUG) {
+                if (priorStateExists || widgetState != null) {
+                    Slog.i(TAG, "Checking widget update: state=" + (widgetState != null)
+                            + " prior=" + priorStateExists);
+                }
+            }
+
+            if (!priorStateExists && widgetState == null) {
+                // no prior state, no new state => nothing to do
+                return;
+            }
+
+            // if the new state is not null, we might need to compare checksums to
+            // determine whether to update the widget blob in the archive.  If the
+            // widget state *is* null, we know a priori at this point that we simply
+            // need to commit a deletion for it.
+            String newChecksum = null;
+            if (widgetState != null) {
+                newChecksum = SHA1Checksum(widgetState);
+                if (priorStateExists) {
+                    final String priorChecksum;
+                    try (
+                        FileInputStream fin = new FileInputStream(widgetFile);
+                        DataInputStream in = new DataInputStream(fin)
+                    ) {
+                        priorChecksum = in.readUTF();
+                    }
+                    if (Objects.equals(newChecksum, priorChecksum)) {
+                        // Same checksum => no state change => don't rewrite the widget data
+                        return;
+                    }
+                }
+            } // else widget state *became* empty, so we need to commit a deletion
+
+            BackupDataOutput out = new BackupDataOutput(fd);
+            if (widgetState != null) {
+                try (
+                    FileOutputStream fout = new FileOutputStream(widgetFile);
+                    DataOutputStream stateOut = new DataOutputStream(fout)
+                ) {
+                    stateOut.writeUTF(newChecksum);
+                }
+
+                out.writeEntityHeader(KEY_WIDGET_STATE, widgetState.length);
+                out.writeEntityData(widgetState, widgetState.length);
+            } else {
+                // Widget state for this app has been removed; commit a deletion
+                out.writeEntityHeader(KEY_WIDGET_STATE, -1);
+                widgetFile.delete();
+            }
+        }
+
         @Override
         public void operationComplete() {
             // Okay, the agent successfully reported back to us!
@@ -2726,17 +2814,7 @@ public class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 // Piggyback the widget state payload, if any
-                BackupDataOutput out = new BackupDataOutput(fd);
-                byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName,
-                        UserHandle.USER_OWNER);
-                if (widgetState != null) {
-                    out.writeEntityHeader(KEY_WIDGET_STATE, widgetState.length);
-                    out.writeEntityData(widgetState, widgetState.length);
-                } else {
-                    // No widget state for this app, but push a 'delete' operation for it
-                    // in case they're trying to play games with the payload.
-                    out.writeEntityHeader(KEY_WIDGET_STATE, -1);
-                }
+                writeWidgetPayloadIfAppropriate(fd, pkgName);
             } catch (IOException e) {
                 // Hard disk error; recovery/failure policy TBD.  For now roll back,
                 // but we may want to consider this a transport-level failure (i.e.
@@ -2779,21 +2857,30 @@ public class BackupManagerService extends IBackupManager.Stub {
                         addBackupTrace("finishing op on transport");
                         mStatus = mTransport.finishBackup();
                         addBackupTrace("finished: " + mStatus);
+                    } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                        addBackupTrace("transport rejected package");
                     }
                 } else {
                     if (DEBUG) Slog.i(TAG, "no backup data written; not calling transport");
                     addBackupTrace("no data to send");
                 }
 
-                // After successful transport, delete the now-stale data
-                // and juggle the files so that next time we supply the agent
-                // with the new state file it just created.
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
+                    // After successful transport, delete the now-stale data
+                    // and juggle the files so that next time we supply the agent
+                    // with the new state file it just created.
                     mBackupDataName.delete();
                     mNewStateName.renameTo(mSavedStateName);
                     EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, pkgName, size);
                     logBackupComplete(pkgName);
+                } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                    // The transport has rejected backup of this specific package.  Roll it
+                    // back but proceed with running the rest of the queue.
+                    mBackupDataName.delete();
+                    mNewStateName.delete();
+                    EventLogTags.writeBackupAgentFailure(pkgName, "Transport rejected");
                 } else {
+                    // Actual transport-level failure to communicate the data to the backend
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
                 }
             } catch (Exception e) {
@@ -2804,15 +2891,17 @@ public class BackupManagerService extends IBackupManager.Stub {
                 try { if (backupData != null) backupData.close(); } catch (IOException e) {}
             }
 
-            // If we encountered an error here it's a transport-level failure.  That
-            // means we need to halt everything and reschedule everything for next time.
             final BackupState nextState;
-            if (mStatus != BackupTransport.TRANSPORT_OK) {
+            if (mStatus == BackupTransport.TRANSPORT_OK
+                    || mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                // Success or single-package rejection.  Proceed with the next app if any,
+                // otherwise we're done.
+                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
+            } else {
+                // Any other error here indicates a transport-level failure.  That means
+                // we need to halt everything and reschedule everything for next time.
                 revertAndEndBackup();
                 nextState = BackupState.FINAL;
-            } else {
-                // Success!  Proceed with the next app if any, otherwise we're done.
-                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
             }
 
             executeNextState(nextState);
@@ -3766,6 +3855,16 @@ public class BackupManagerService extends IBackupManager.Stub {
             PackageInfo currentPackage;
 
             try {
+                if (!mEnabled || !mProvisioned) {
+                    // Backups are globally disabled, so don't proceed.
+                    if (DEBUG) {
+                        Slog.i(TAG, "full backup requested but e=" + mEnabled
+                                + " p=" + mProvisioned + "; ignoring");
+                    }
+                    mUpdateSchedule = false;
+                    return;
+                }
+
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
                     Slog.w(TAG, "Transport not present; full data backup not performed");
@@ -4062,6 +4161,17 @@ public class BackupManagerService extends IBackupManager.Stub {
     boolean beginFullBackup(FullBackupJob scheduledJob) {
         long now = System.currentTimeMillis();
         FullBackupEntry entry = null;
+
+        if (!mEnabled || !mProvisioned) {
+            // Backups are globally disabled, so don't proceed.  We also don't reschedule
+            // the job driving automatic backups; that job will be scheduled again when
+            // the user enables backup.
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "beginFullBackup but e=" + mEnabled
+                        + " p=" + mProvisioned + "; ignoring");
+            }
+            return false;
+        }
 
         if (DEBUG_SCHEDULING) {
             Slog.i(TAG, "Beginning scheduled full backup operation");
@@ -7657,7 +7767,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             // If this was a full-system restore, record the ancestral
             // dataset information
-            if (mIsSystemRestore) {
+            if (mIsSystemRestore && mPmAgent != null) {
                 mAncestralPackages = mPmAgent.getRestoredPackages();
                 mAncestralToken = mToken;
                 writeRestoreTokens();
@@ -7956,8 +8066,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         // Record that we need a backup pass for the caller.  Since multiple callers
         // may share a uid, we need to note all candidates within that uid and schedule
         // a backup pass for each of them.
-        EventLog.writeEvent(EventLogTags.BACKUP_DATA_CHANGED, packageName);
-
         if (targets == null) {
             Slog.w(TAG, "dataChanged but no participant pkg='" + packageName + "'"
                    + " uid=" + Binder.getCallingUid());
@@ -8146,7 +8254,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     //
     // This is the variant used by 'adb backup'; it requires on-screen confirmation
     // by the user because it can be used to offload data over untrusted USB.
-    @Override
     public void fullBackup(ParcelFileDescriptor fd, boolean includeApks,
             boolean includeObbs, boolean includeShared, boolean doWidgets,
             boolean doAllApps, boolean includeSystem, boolean compress, String[] pkgList) {
@@ -8218,7 +8325,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    @Override
     public void fullTransportBackup(String[] pkgNames) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "fullTransportBackup");
@@ -8248,7 +8354,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    @Override
     public void fullRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
 
@@ -8344,7 +8449,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Confirm that the previously-requested full backup/restore operation can proceed.  This
     // is used to require a user-facing disclosure about the operation.
-    @Override
     public void acknowledgeFullBackupOrRestore(int token, boolean allow,
             String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
         if (DEBUG) Slog.d(TAG, "acknowledgeFullBackupOrRestore : token=" + token
@@ -8392,8 +8496,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    // Enable/disable the backup service
-    @Override
+    // Enable/disable backups
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
@@ -8799,7 +8902,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Note that a currently-active backup agent has notified us that it has
     // completed the given outstanding asynchronous backup/restore operation.
-    @Override
     public void opComplete(int token) {
         if (MORE_DEBUG) Slog.v(TAG, "opComplete: " + Integer.toHexString(token));
         Operation op = null;
@@ -9148,7 +9250,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 

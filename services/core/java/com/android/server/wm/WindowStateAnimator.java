@@ -40,6 +40,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
@@ -52,10 +53,13 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
+import com.android.internal.R;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -96,6 +100,8 @@ class WindowStateAnimator {
     boolean mWasAnimating;      // Were we animating going into the most recent animation step?
     int mAnimLayer;
     int mLastLayer;
+    long mAnimationStartTime;
+    long mLastAnimationTime;
 
     SurfaceControl mSurfaceControl;
     SurfaceControl mPendingDestroySurface;
@@ -141,7 +147,12 @@ class WindowStateAnimator {
     // an enter animation.
     boolean mEnterAnimationPending;
 
-    boolean keyguardGoingAwayAnimation;
+    /** Used to indicate that this window is undergoing an enter animation. Used for system
+     * windows to make the callback to View.dispatchOnWindowShownCallback(). Set when the
+     * window is first added or shown, cleared when the callback has been made. */
+    boolean mEnteringAnimation;
+
+    boolean mKeyguardGoingAwayAnimation;
 
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
@@ -161,14 +172,14 @@ class WindowStateAnimator {
     private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
-    static String drawStateToString(int state) {
-        switch (state) {
+    String drawStateToString() {
+        switch (mDrawState) {
             case NO_SURFACE: return "NO_SURFACE";
             case DRAW_PENDING: return "DRAW_PENDING";
             case COMMIT_DRAW_PENDING: return "COMMIT_DRAW_PENDING";
             case READY_TO_SHOW: return "READY_TO_SHOW";
             case HAS_DRAWN: return "HAS_DRAWN";
-            default: return Integer.toString(state);
+            default: return Integer.toString(mDrawState);
         }
     }
     int mDrawState;
@@ -204,7 +215,7 @@ class WindowStateAnimator {
         mIsWallpaper = win.mIsWallpaper;
     }
 
-    public void setAnimation(Animation anim) {
+    public void setAnimation(Animation anim, long startTime) {
         if (localLOGV) Slog.v(TAG, "Setting animation in " + this + ": " + anim);
         mAnimating = false;
         mLocalAnimating = false;
@@ -215,6 +226,11 @@ class WindowStateAnimator {
         mTransformation.clear();
         mTransformation.setAlpha(mLastHidden ? 0 : 1);
         mHasLocalTransformation = true;
+        mAnimationStartTime = startTime;
+    }
+
+    public void setAnimation(Animation anim) {
+        setAnimation(anim, -1);
     }
 
     public void clearAnimation() {
@@ -223,7 +239,7 @@ class WindowStateAnimator {
             mLocalAnimating = false;
             mAnimation.cancel();
             mAnimation = null;
-            keyguardGoingAwayAnimation = false;
+            mKeyguardGoingAwayAnimation = false;
         }
     }
 
@@ -293,11 +309,14 @@ class WindowStateAnimator {
                     final DisplayInfo displayInfo = displayContent.getDisplayInfo();
                     mAnimDw = displayInfo.appWidth;
                     mAnimDh = displayInfo.appHeight;
-                    mAnimation.setStartTime(currentTime);
+                    mAnimation.setStartTime(mAnimationStartTime != -1
+                            ? mAnimationStartTime
+                            : currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
                 }
                 if ((mAnimation != null) && mLocalAnimating) {
+                    mLastAnimationTime = currentTime;
                     if (stepAnimation(currentTime)) {
                         return true;
                     }
@@ -345,7 +364,7 @@ class WindowStateAnimator {
             + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
         mAnimating = false;
-        keyguardGoingAwayAnimation = false;
+        mKeyguardGoingAwayAnimation = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();
@@ -428,6 +447,22 @@ class WindowStateAnimator {
             mWin.mChildWindows.get(i).mWinAnimator.finishExit();
         }
 
+        if (mEnteringAnimation && mWin.mAppToken == null) {
+            try {
+                mEnteringAnimation = false;
+                mWin.mClient.dispatchWindowShown();
+            } catch (RemoteException e) {
+            }
+        }
+
+        if (!isWindowAnimating()) {
+            //TODO (multidisplay): Accessibility is supported only for the default display.
+            if (mService.mAccessibilityController != null
+                    && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+            }
+        }
+
         if (!mWin.mExiting) {
             return;
         }
@@ -472,17 +507,17 @@ class WindowStateAnimator {
     }
 
     boolean finishDrawingLocked() {
-        if (DEBUG_STARTING_WINDOW &&
-                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+        final boolean startingWindow =
+                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+        if (DEBUG_STARTING_WINDOW && startingWindow) {
             Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
-                    + drawStateToString(mDrawState));
+                    + drawStateToString());
         }
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
                         + mSurfaceControl);
-            if (DEBUG_STARTING_WINDOW &&
-                    mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+            if (DEBUG_STARTING_WINDOW && startingWindow) {
                 Slog.v(TAG, "Draw state now committed in " + mWin);
             }
             mDrawState = COMMIT_DRAW_PENDING;
@@ -496,21 +531,20 @@ class WindowStateAnimator {
         if (DEBUG_STARTING_WINDOW &&
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
             Slog.i(TAG, "commitFinishDrawingLocked: " + mWin + " cur mDrawState="
-                    + drawStateToString(mDrawState));
+                    + drawStateToString());
         }
-        if (mDrawState != COMMIT_DRAW_PENDING) {
+        if (mDrawState != COMMIT_DRAW_PENDING && mDrawState != READY_TO_SHOW) {
             return false;
         }
         if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) {
             Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurfaceControl);
         }
         mDrawState = READY_TO_SHOW;
-        final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mWin.mAppToken;
-        if (atoken == null || atoken.allDrawn || starting) {
-            performShowLocked();
+        if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
+            return performShowLocked();
         }
-        return true;
+        return false;
     }
 
     static class SurfaceTrace extends SurfaceControl {
@@ -961,11 +995,6 @@ class WindowStateAnimator {
             mSurfaceControl = null;
             mWin.mHasSurface = false;
             mDrawState = NO_SURFACE;
-        }
-
-        // Destroy any deferred thumbnail surfaces
-        if (mAppAnimator != null) {
-            mAppAnimator.clearDeferredThumbnail();
         }
     }
 
@@ -1775,9 +1804,17 @@ class WindowStateAnimator {
      * @return true if an animation has been loaded.
      */
     boolean applyAnimationLocked(int transit, boolean isEntrance) {
-        if (mLocalAnimating && mAnimationIsEntrance == isEntrance) {
+        if ((mLocalAnimating && mAnimationIsEntrance == isEntrance)
+                || mKeyguardGoingAwayAnimation) {
             // If we are trying to apply an animation, but already running
             // an animation of the same type, then just leave that one alone.
+
+            // If we are in a keyguard exit animation, and the window should animate away, modify
+            // keyguard exit animation such that it also fades out.
+            if (mAnimation != null && mKeyguardGoingAwayAnimation
+                    && transit == WindowManagerPolicy.TRANSIT_PREVIEW_DONE) {
+                applyFadeoutDuringKeyguardExitAnimation();
+            }
             return true;
         }
 
@@ -1835,6 +1872,28 @@ class WindowStateAnimator {
         return mAnimation != null;
     }
 
+    private void applyFadeoutDuringKeyguardExitAnimation() {
+        long startTime = mAnimation.getStartTime();
+        long duration = mAnimation.getDuration();
+        long elapsed = mLastAnimationTime - startTime;
+        long fadeDuration = duration - elapsed;
+        if (fadeDuration <= 0) {
+            // Never mind, this would be no visible animation, so abort the animation change.
+            return;
+        }
+        AnimationSet newAnimation = new AnimationSet(false /* shareInterpolator */);
+        newAnimation.setDuration(duration);
+        newAnimation.setStartTime(startTime);
+        newAnimation.addAnimation(mAnimation);
+        Animation fadeOut = AnimationUtils.loadAnimation(
+                mContext, com.android.internal.R.anim.app_starting_exit);
+        fadeOut.setDuration(fadeDuration);
+        fadeOut.setStartOffset(elapsed);
+        newAnimation.addAnimation(fadeOut);
+        newAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(), mAnimDw, mAnimDh);
+        mAnimation = newAnimation;
+    }
+
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mAnimating || mLocalAnimating || mAnimationIsEntrance
                 || mAnimation != null) {
@@ -1854,7 +1913,7 @@ class WindowStateAnimator {
             if (dumpAll) {
                 pw.print(prefix); pw.print("mSurface="); pw.println(mSurfaceControl);
                 pw.print(prefix); pw.print("mDrawState=");
-                pw.print(drawStateToString(mDrawState));
+                pw.print(drawStateToString());
                 pw.print(" mLastHidden="); pw.println(mLastHidden);
             }
             pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);

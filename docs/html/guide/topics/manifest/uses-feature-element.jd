@@ -27,12 +27,12 @@ page.tags=filtering,features,google play filters,permissions
 </div>
 </div>
 
- <div class="sidebox-wrapper"> 
+ <div class="sidebox-wrapper">
  <div class="sidebox">
-    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;"> 
-    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p> 
+    <img src="{@docRoot}assets/images/icon_play.png" style="float:left;margin:0;padding:0;">
+    <p style="color:#669999;padding-top:1em;">Google Play Filtering</p>
     <p style="padding-top:1em;">Google Play uses the <code>&lt;uses-feature&gt;</code>
-    elements declared in your app manifest to filter your app from devices 
+    elements declared in your app manifest to filter your app from devices
     that do not meet it's hardware and software feature requirements. </p>
 
 <p style="margin-top:1em;">By specifying the features that your application requires,
@@ -98,7 +98,7 @@ application requires.</p>
 <p>Declared <code>&lt;uses-feature></code> elements are informational only, meaning
 that the Android system itself does not check for matching feature support on
 the device before installing an application. However, other services
-(such as Google Play) or applications may check your application's 
+(such as Google Play) or applications may check your application's
 <code>&lt;uses-feature></code> declarations as part of handling or interacting
 with your application. For this reason, it's very important that you declare all of
 the features (from the list below) that your application uses. </p>
@@ -124,7 +124,7 @@ permission grants your application access to the appropriate hardware and
 software, while declaring the features used by your application ensures proper
 device compatibility.</p>
 
-</dd> 
+</dd>
 
 
 <dt>attributes:</dt>
@@ -352,7 +352,7 @@ not offer a camera.</p>
 
 <p>If you don't want Google Play to filter based on a specific implied
 feature, you can disable that behavior. To do so, declare the feature explicitly
-in a <code>&lt;uses-feature&gt;</code> element and include an 
+in a <code>&lt;uses-feature&gt;</code> element and include an
 <code>android:required="false"</code> attribute. For example, to disable
 filtering derived from the <code>CAMERA</code> permission, you would declare
 the feature as shown below.</p>
@@ -560,7 +560,7 @@ is sensitive to delays or lag in sound input or output.</td>
        <td></td>
     </tr>
     <tr>
-       <td rowspan="5">Camera</td>
+       <td rowspan="6">Camera</td>
        <td><code>android.hardware.camera</code></td>
        <td>The application uses the device's camera. If the device supports
            multiple cameras, the application uses the camera that facing
@@ -592,6 +592,22 @@ external camera device if one is connected. Use this in preference to
 <tr>
   <td><code>android.hardware.camera.external</code></td>
   <td>The application uses an external camera device if one is connected.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.level.full</code></td>
+  <td>The application uses a camera device with <code>FULL</code>-level support.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.manual_sensor</code></td>
+  <td>The application uses a a camera device with the <code>MANUAL_SENSOR</code> capability.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.manual_post_processing</code></td>
+  <td>The application uses a a camera device with the <code>MANUAL_POST_PROCESSING</code> capability.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.raw</code></td>
+  <td>The application uses a a camera device with the <code>RAW</code> capability.</td>
 </tr>
 
 <tr>
@@ -741,9 +757,9 @@ device.</td>
   <td>Television</td>
   <td><code>android.hardware.type.television</code></td>
   <td>The application is designed for a television user experience.</td>
-  <td>This feature defines "television" to be a typical living room television experience: 
-  displayed on a big screen, where the user is sitting far away and the dominant form of 
-  input is something like a d-pad, and generally not through touch or a 
+  <td>This feature defines "television" to be a typical living room television experience:
+  displayed on a big screen, where the user is sitting far away and the dominant form of
+  input is something like a d-pad, and generally not through touch or a
   mouse/pointer-device.</td>
 </tr>
 
@@ -880,9 +896,9 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
 
 
   <table>
-<tr> 
+<tr>
   <th>Feature</th>
-  <th>Attribute Value</th> 
+  <th>Attribute Value</th>
   <th>Description</th>
 </tr>
 <tr>
@@ -965,7 +981,7 @@ filtering based on the <code>CAMERA</code> permission, you would add this
 <pre>&lt;uses-feature android:name="android.hardware.camera" android:required="false" /&gt;</pre>
 
 <table id="permissions-features" >
-  <tr> 
+  <tr>
     <th>Category</th>
     <th>This Permission...</th>
     <th>Implies This Feature Requirement</th>

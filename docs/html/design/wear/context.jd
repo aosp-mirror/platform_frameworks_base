@@ -1,0 +1,152 @@
+page.title=Context Awareness on Android Wear
+@jd:body
+
+<style>
+div.slide-wrapper {
+  width:780px;
+  overflow:visible;
+}
+div.slide {
+  width:370px;
+  float:left;
+  margin:0 20px 0 0;
+}
+div.slide p {
+  height:40px;
+}
+div.slide img {
+  height: 208px;
+}
+</style>
+
+
+<p>Some of the most powerful user experiences with Android Wear are based on context-aware
+notifications and actions. By using device sensors and other contextual cues, your app can reveal
+information and functionality precisely when the user needs it, at a glance.</p>
+
+<p>For example, if you’re building a social app for restaurants, you can recommend popular menu
+items when your app recognizes that the user is at a restaurant. More examples below provide basic
+ideas about what you can do with a notification and action confirmation in your Android Wear
+app.</p>
+
+
+<div class="slide-wrapper">
+
+<div class="slide">
+<h2>Pinterest</h2>
+<p>Displays a notification when one of your geo-tagged pins is within walking distance.</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.005.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.005.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.005_2x.png 2x" />
+</div>
+
+<div class="slide">
+<h2>Trulia</h2>
+<p>Displays property details and contact options when you are near a new home.</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.006.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.006.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.006_2x.png 2x" />
+</div>
+
+
+
+<div class="slide">
+<h2>Ski Conditions</h2>
+<p>Displays lift status and slope conditions when you arrive at a ski resort.</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.008.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.008.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.008_2x.png 2x" />
+</div>
+
+<div class="slide">
+<h2>Thermostat</h2>
+<p>Controls automatically appear when you are at home.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.007.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.007.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.007_2x.png 2x" />
+</div>
+
+
+
+<div class="slide">
+<h2>Airport</h2>
+<p>Displays air miles while you are waiting at the gate.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.009.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.009.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.009_2x.png 2x" />
+</div>
+
+<div class="slide">
+<h2>Hotel</h2>
+<p>Displays late check out option on the morning of your departure.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.010.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.010.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.010_2x.png 2x" />
+</div>
+
+
+
+<div class="slide">
+<h2>Conference</h2>
+<p>Shows which of your friends are also attending the conference.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.011.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.011.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.011_2x.png 2x" />
+</div>
+
+<div class="slide">
+<h2>Restaurant</h2>
+<p>Provides suggestions for the healthiest items on the menu when in a restaurant.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.012.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.012.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.012_2x.png 2x" />
+</div>
+
+
+
+<div class="slide">
+<h2>Oil Change</h2>
+<p>Offers to set a reminder to change the oil again in six months while waiting at the garage.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.013.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.013.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.013_2x.png 2x" />
+</div>
+
+<div class="slide">
+<h2>Car Sharing</h2>
+<p>Unlocks the car as you approach it.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.016.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.016.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.016_2x.png 2x" />
+</div>
+
+
+
+<div class="slide">
+<h2>Zoo</h2>
+<p>Notifies visitors when the penguins are going to be fed.
+</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.014.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.014.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.014_2x.png 2x" />
+</div>
+
+<div class="slide">
+<h2>Location-based Query</h2>
+<p>Ask things like, "Are there any picnic tables free at the park?" and get answers from 
+people who are there.</p>
+<img src="{@docRoot}design/media/wear/ContextualExample.015.png" alt=""
+     srcset="{@docRoot}design/media/wear/ContextualExample.015.png 1x,
+             {@docRoot}design/media/wear/ContextualExample.015_2x.png 2x" />
+</div>
+
+
+
+</div>

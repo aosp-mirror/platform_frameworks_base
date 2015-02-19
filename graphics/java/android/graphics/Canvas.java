@@ -353,25 +353,51 @@ public class Canvas {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Saveflags {}
 
-    /** restore the current matrix when restore() is called */
+    /**
+     * Restore the current matrix when restore() is called.
+     */
     public static final int MATRIX_SAVE_FLAG = 0x01;
-    /** restore the current clip when restore() is called */
+
+    /**
+     * Restore the current clip when restore() is called.
+     */
     public static final int CLIP_SAVE_FLAG = 0x02;
-    /** the layer needs to per-pixel alpha */
+
+    /**
+     * The layer requires a per-pixel alpha channel.
+     */
     public static final int HAS_ALPHA_LAYER_SAVE_FLAG = 0x04;
-    /** the layer needs to 8-bits per color component */
+
+    /**
+     * The layer requires full 8-bit precision for each color channel.
+     */
     public static final int FULL_COLOR_LAYER_SAVE_FLAG = 0x08;
-    /** clip against the layer's bounds */
+
+    /**
+     * Clip drawing to the bounds of the offscreen layer, omit at your own peril.
+     * <p class="note"><strong>Note:</strong> it is strongly recommended to not
+     * omit this flag for any call to <code>saveLayer()</code> and
+     * <code>saveLayerAlpha()</code> variants. Not passing this flag generally
+     * triggers extremely poor performance with hardware accelerated rendering.
+     */
     public static final int CLIP_TO_LAYER_SAVE_FLAG = 0x10;
-    /** restore everything when restore() is called */
+
+    /**
+     * Restore everything when restore() is called (standard save flags).
+     * <p class="note"><strong>Note:</strong> for performance reasons, it is
+     * strongly recommended to pass this - the complete set of flags - to any
+     * call to <code>saveLayer()</code> and <code>saveLayerAlpha()</code>
+     * variants.
+     */
     public static final int ALL_SAVE_FLAG = 0x1F;
 
     /**
-     * Saves the current matrix and clip onto a private stack. Subsequent
-     * calls to translate,scale,rotate,skew,concat or clipRect,clipPath
-     * will all operate as usual, but when the balancing call to restore()
-     * is made, those calls will be forgotten, and the settings that existed
-     * before the save() will be reinstated.
+     * Saves the current matrix and clip onto a private stack.
+     * <p>
+     * Subsequent calls to translate,scale,rotate,skew,concat or clipRect,
+     * clipPath will all operate as usual, but when the balancing call to
+     * restore() is made, those calls will be forgotten, and the settings that
+     * existed before the save() will be reinstated.
      *
      * @return The value to pass to restoreToCount() to balance this save()
      */
@@ -381,10 +407,15 @@ public class Canvas {
 
     /**
      * Based on saveFlags, can save the current matrix and clip onto a private
-     * stack. Subsequent calls to translate,scale,rotate,skew,concat or
-     * clipRect,clipPath will all operate as usual, but when the balancing
-     * call to restore() is made, those calls will be forgotten, and the
-     * settings that existed before the save() will be reinstated.
+     * stack.
+     * <p class="note"><strong>Note:</strong> if possible, use the
+     * parameter-less save(). It is simpler and faster than individually
+     * disabling the saving of matrix or clip with this method.
+     * <p>
+     * Subsequent calls to translate,scale,rotate,skew,concat or clipRect,
+     * clipPath will all operate as usual, but when the balancing call to
+     * restore() is made, those calls will be forgotten, and the settings that
+     * existed before the save() will be reinstated.
      *
      * @param saveFlags flag bits that specify which parts of the Canvas state
      *                  to save/restore
@@ -395,19 +426,33 @@ public class Canvas {
     }
 
     /**
-     * This behaves the same as save(), but in addition it allocates an
-     * offscreen bitmap. All drawing calls are directed there, and only when
-     * the balancing call to restore() is made is that offscreen transfered to
-     * the canvas (or the previous layer). Subsequent calls to translate,
-     * scale, rotate, skew, concat or clipRect, clipPath all operate on this
-     * copy. When the balancing call to restore() is made, this copy is
-     * deleted and the previous matrix/clip state is restored.
+     * This behaves the same as save(), but in addition it allocates and
+     * redirects drawing to an offscreen bitmap.
+     * <p class="note"><strong>Note:</strong> this method is very expensive,
+     * incurring more than double rendering cost for contained content. Avoid
+     * using this method, especially if the bounds provided are large, or if
+     * the {@link #CLIP_TO_LAYER_SAVE_FLAG} is omitted from the
+     * {@code saveFlags} parameter. It is recommended to use a
+     * {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
+     * to apply an xfermode, color filter, or alpha, as it will perform much
+     * better than this method.
+     * <p>
+     * All drawing calls are directed to a newly allocated offscreen bitmap.
+     * Only when the balancing call to restore() is made, is that offscreen
+     * buffer drawn back to the current target of the Canvas (either the
+     * screen, it's target Bitmap, or the previous layer).
+     * <p>
+     * Attributes of the Paint - {@link Paint#getAlpha() alpha},
+     * {@link Paint#getXfermode() Xfermode}, and
+     * {@link Paint#getColorFilter() ColorFilter} are applied when the
+     * offscreen bitmap is drawn back when restore() is called.
      *
      * @param bounds May be null. The maximum size the offscreen bitmap
      *               needs to be (in local coordinates)
      * @param paint  This is copied, and is applied to the offscreen when
      *               restore() is called.
-     * @param saveFlags  see _SAVE_FLAG constants
+     * @param saveFlags see _SAVE_FLAG constants, generally {@link #ALL_SAVE_FLAG} is recommended
+     *               for performance reasons.
      * @return       value to pass to restoreToCount() to balance this save()
      */
     public int saveLayer(@Nullable RectF bounds, @Nullable Paint paint, @Saveflags int saveFlags) {
@@ -442,19 +487,31 @@ public class Canvas {
     }
 
     /**
-     * This behaves the same as save(), but in addition it allocates an
-     * offscreen bitmap. All drawing calls are directed there, and only when
-     * the balancing call to restore() is made is that offscreen transfered to
-     * the canvas (or the previous layer). Subsequent calls to translate,
-     * scale, rotate, skew, concat or clipRect, clipPath all operate on this
-     * copy. When the balancing call to restore() is made, this copy is
-     * deleted and the previous matrix/clip state is restored.
+     * This behaves the same as save(), but in addition it allocates and
+     * redirects drawing to an offscreen bitmap.
+     * <p class="note"><strong>Note:</strong> this method is very expensive,
+     * incurring more than double rendering cost for contained content. Avoid
+     * using this method, especially if the bounds provided are large, or if
+     * the {@link #CLIP_TO_LAYER_SAVE_FLAG} is omitted from the
+     * {@code saveFlags} parameter. It is recommended to use a
+     * {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
+     * to apply an xfermode, color filter, or alpha, as it will perform much
+     * better than this method.
+     * <p>
+     * All drawing calls are directed to a newly allocated offscreen bitmap.
+     * Only when the balancing call to restore() is made, is that offscreen
+     * buffer drawn back to the current target of the Canvas (either the
+     * screen, it's target Bitmap, or the previous layer).
+     * <p>
+     * The {@code alpha} parameter is applied when the offscreen bitmap is
+     * drawn back when restore() is called.
      *
      * @param bounds    The maximum size the offscreen bitmap needs to be
      *                  (in local coordinates)
      * @param alpha     The alpha to apply to the offscreen when when it is
                         drawn during restore()
-     * @param saveFlags see _SAVE_FLAG constants
+     * @param saveFlags see _SAVE_FLAG constants, generally {@link #ALL_SAVE_FLAG} is recommended
+     *                  for performance reasons.
      * @return          value to pass to restoreToCount() to balance this call
      */
     public int saveLayerAlpha(@Nullable RectF bounds, int alpha, @Saveflags int saveFlags) {
@@ -1644,6 +1701,9 @@ public class Canvas {
      */
     public void drawText(@NonNull CharSequence text, int start, int end, float x, float y,
             @NonNull Paint paint) {
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,

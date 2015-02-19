@@ -111,13 +111,15 @@ public final class BluetoothLeAdvertiser {
             if (callback == null) {
                 throw new IllegalArgumentException("callback cannot be null");
             }
-            if (!mBluetoothAdapter.isMultipleAdvertisementSupported()) {
+            if (!mBluetoothAdapter.isMultipleAdvertisementSupported() &&
+                    !mBluetoothAdapter.isPeripheralModeSupported()) {
                 postStartFailure(callback,
                         AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED);
                 return;
             }
-            if (totalBytes(advertiseData) > MAX_ADVERTISING_DATA_BYTES ||
-                    totalBytes(scanResponse) > MAX_ADVERTISING_DATA_BYTES) {
+            boolean isConnectable = settings.isConnectable();
+            if (totalBytes(advertiseData, isConnectable) > MAX_ADVERTISING_DATA_BYTES ||
+                    totalBytes(scanResponse, false) > MAX_ADVERTISING_DATA_BYTES) {
                 postStartFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE);
                 return;
             }
@@ -169,10 +171,11 @@ public final class BluetoothLeAdvertiser {
         mLeAdvertisers.clear();
     }
 
-    // Compute the size of the advertise data.
-    private int totalBytes(AdvertiseData data) {
+    // Compute the size of advertisement data or scan resp
+    private int totalBytes(AdvertiseData data, boolean isFlagsIncluded) {
         if (data == null) return 0;
-        int size = FLAGS_FIELD_BYTES; // flags field is always set.
+        // Flags field is omitted if the advertising is not connectable.
+        int size = (isFlagsIncluded) ? FLAGS_FIELD_BYTES : 0;
         if (data.getServiceUuids() != null) {
             int num16BitUuids = 0;
             int num32BitUuids = 0;

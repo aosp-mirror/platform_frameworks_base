@@ -22,9 +22,9 @@
 #include <androidfw/misc.h>
 
 #include <sys/stat.h>
-#include <string.h>
+#include <cstring>
 #include <errno.h>
-#include <stdio.h>
+#include <cstdio>
 
 using namespace android;
 

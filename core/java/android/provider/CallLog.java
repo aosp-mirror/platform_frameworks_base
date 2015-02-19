@@ -391,6 +391,7 @@ public class CallLog {
                     start, duration, dataUsage, false);
         }
 
+
         /**
          * Adds a call to the call log.
          *
@@ -463,6 +464,7 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_COMPONENT_NAME, accountComponentString);
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(NEW, Integer.valueOf(1));
+
             if (callType == MISSED_TYPE) {
                 values.put(IS_READ, Integer.valueOf(0));
             }
@@ -592,7 +594,7 @@ public class CallLog {
             resolver.update(feedbackUri, new ContentValues(), null, null);
         }
 
-        /**
+        /*
          * Update the normalized phone number for the given dataId in the ContactsProvider, based
          * on the user's current country.
          */
@@ -601,18 +603,15 @@ public class CallLog {
             if (TextUtils.isEmpty(number) || TextUtils.isEmpty(dataId)) {
                 return;
             }
-
             final String countryIso = getCurrentCountryIso(context);
             if (TextUtils.isEmpty(countryIso)) {
                 return;
             }
-
             final String normalizedNumber = PhoneNumberUtils.formatNumberToE164(number,
                     getCurrentCountryIso(context));
             if (TextUtils.isEmpty(normalizedNumber)) {
                 return;
             }
-
             final ContentValues values = new ContentValues();
             values.put(Phone.NORMALIZED_NUMBER, normalizedNumber);
             resolver.update(Data.CONTENT_URI, values, Data._ID + "=?", new String[] {dataId});

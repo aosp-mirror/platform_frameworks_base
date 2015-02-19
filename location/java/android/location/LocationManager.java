@@ -1579,10 +1579,11 @@ public class LocationManager {
      * Adds a GPS Measurement listener.
      *
      * @param listener a {@link GpsMeasurementsEvent.Listener} object to register.
-     * @return {@code true} if the listener was successfully registered, {@code false} otherwise.
+     * @return {@code true} if the listener was added successfully, {@code false} otherwise.
      *
      * @hide
      */
+    @SystemApi
     public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
         return mGpsMeasurementListenerTransport.add(listener);
     }
@@ -1594,6 +1595,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
         mGpsMeasurementListenerTransport.remove(listener);
     }
@@ -1602,10 +1604,11 @@ public class LocationManager {
      * Adds a GPS Navigation Message listener.
      *
      * @param listener a {@link GpsNavigationMessageEvent.Listener} object to register.
-     * @return {@code true} if the listener was successfully registered, {@code false} otherwise.
+     * @return {@code true} if the listener was added successfully, {@code false} otherwise.
      *
      * @hide
      */
+    @SystemApi
     public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
         return mGpsNavigationMessageListenerTransport.add(listener);
     }
@@ -1617,6 +1620,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void removeGpsNavigationMessageListener(
             GpsNavigationMessageEvent.Listener listener) {
         mGpsNavigationMessageListenerTransport.remove(listener);

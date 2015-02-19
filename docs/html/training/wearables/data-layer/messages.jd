@@ -22,20 +22,16 @@ and attach the following items to the message:</p>
   <li>A path that uniquely identifies the message's action</li>
 </ul>
 <p>
-Unlike data items, there is no syncing between the handheld and wearable apps.
+Unlike with data items, there is no syncing between the handheld and wearable apps.
 Messages are a one-way communication mechanism that's good for remote procedure calls (RPC),
-such as sending a message to the wearable
-to start an activity. You can also use messages in request/response model
-where one side of the connection sends a message, does some work,
-sends back a response message.</p>
+such as sending a message to the wearable to start an activity.</p>
 
 <h2 id="SendMessage">Send a Message</h2>
 
 <p>The following example shows how to send a message that indicates to the other
-side of the connect to start an activity.
-This call is made synchronously, which blocks until the message
-is received or when the request times out:
-</p>
+side of the connection to start an activity.
+This call is synchronous and blocks processing until the message is received or until the request
+times out:</p>
 
 <p class="note"><b>Note:</b> Read more about asynchronous and synchronous calls
 to Google Play services and when to use each in
@@ -43,16 +39,24 @@ to Google Play services and when to use each in
 </p>
 
 <pre>
-Node node; // the connected device to send the message to
 GoogleApiClient mGoogleApiClient;
-public static final START_ACTIVITY_PATH = "/start/MainActivity";
+public static final String START_ACTIVITY_PATH = "/start/MainActivity";
 ...
 
-    SendMessageResult result = Wearable.MessageApi.sendMessage(
-            mGoogleApiClient, node, START_ACTIVITY_PATH, null).await();
-    if (!result.getStatus().isSuccess()) {
-        Log.e(TAG, "ERROR: failed to send Message: " + result.getStatus());
-    }
+private void sendStartActivityMessage(String nodeId) {
+    Wearable.MessageApi.sendMessage(
+      mGoogleApiClient, nodeId, START_ACTIVITY_PATH, new byte[0]).setResultCallback(
+          new ResultCallback&lt;SendMessageResult>() {
+              &#64;Override
+              public void onResult(SendMessageResult sendMessageResult) {
+                  if (!sendMessageResult.getStatus().isSuccess()) {
+                      Log.e(TAG, "Failed to send message with status code: "
+                              + sendMessageResult.getStatus().getStatusCode());
+                  }
+              }
+          }
+      );
+}
 </pre>
 
 <p>
@@ -61,7 +65,7 @@ send messages to:</p>
 
 <pre>
 private Collection&lt;String&gt; getNodes() {
-    HashSet &lt;String&gt;results= new HashSet&lt;String&gt;();
+    HashSet &lt;String&gt;results = new HashSet&lt;String&gt;();
     NodeApi.GetConnectedNodesResult nodes =
             Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
     for (Node node : nodes.getNodes()) {
@@ -71,14 +75,17 @@ private Collection&lt;String&gt; getNodes() {
 }
 </pre>
 
-<h2 id="ReceiveMessage">Receiving a Message</h2>
+<h2 id="ReceiveMessage">Receive a Message</h2>
 
 <p>
-
-To be notified of received messages, you implement a listener for message events.
-This example shows how you might do this by checking the <code>START_ACTIVITY_PATH</code>
-that the previous example used to send the message. If this condition is <code>true</code>,
-a specific activity is started.
+To be notified of received messages, you implement the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.MessageListener.html">
+<code>MessageListener</code></a> interface to provide a listener for message events. Then you register your
+listener with the
+<a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.MessageApi.MessageListener)">
+<code>MessageApi.addListener()</code></a> method. This example shows how you might implement the listener
+to check the <code>START_ACTIVITY_PATH</code> that the previous example used to send the message.
+If this condition is <code>true</code>, a specific activity is started.
 </p>
 
 <pre>
@@ -95,5 +102,6 @@ public void onMessageReceived(MessageEvent messageEvent) {
 <p>
 This is just a snippet that requires more implementation details. Learn about
 how to implement a full listener service or activity in
-<a href="{@docRoot}training/wearables/data-layer/events.html">Listening for Data Layer Events</a>.
+<a href="{@docRoot}training/wearables/data-layer/events.html#Listen">Listening for Data Layer
+Events</a>.
 </p>

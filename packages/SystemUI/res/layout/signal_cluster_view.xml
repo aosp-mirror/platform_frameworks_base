@@ -24,6 +24,7 @@
     android:layout_width="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
+    android:paddingEnd="@dimen/signal_cluster_battery_padding"
     >
     <ImageView
         android:id="@+id/vpn"
@@ -49,27 +50,18 @@
         android:layout_height="4dp"
         android:visibility="gone"
         />
-    <FrameLayout
+    <LinearLayout
+        android:id="@+id/mobile_signal_group"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         >
-        <FrameLayout
-            android:id="@+id/mobile_combo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
-            <ImageView
-                android:id="@+id/mobile_signal"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                />
-            <ImageView
-                android:id="@+id/mobile_type"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                />
-        </FrameLayout>
-    </FrameLayout>
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/no_sims"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:src="@drawable/stat_sys_no_sims"
+        />
     <View
         android:id="@+id/wifi_airplane_spacer"
         android:layout_width="4dp"

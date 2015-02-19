@@ -88,6 +88,14 @@ public class ColorDrawable extends Drawable {
         return this;
     }
 
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         final ColorFilter colorFilter = mPaint.getColorFilter();
@@ -244,6 +252,11 @@ public class ColorDrawable extends Drawable {
     }
 
     @Override
+    public boolean canApplyTheme() {
+        return mColorState.canApplyTheme() || super.canApplyTheme();
+    }
+
+    @Override
     public void applyTheme(Theme t) {
         super.applyTheme(t);
 
@@ -291,17 +304,12 @@ public class ColorDrawable extends Drawable {
 
         @Override
         public Drawable newDrawable() {
-            return new ColorDrawable(this, null, null);
+            return new ColorDrawable(this);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new ColorDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new ColorDrawable(this, res, theme);
+            return new ColorDrawable(this);
         }
 
         @Override
@@ -310,14 +318,8 @@ public class ColorDrawable extends Drawable {
         }
     }
 
-    private ColorDrawable(ColorState state, Resources res, Theme theme) {
-        if (theme != null && state.canApplyTheme()) {
-            mColorState = new ColorState(state);
-            applyTheme(theme);
-        } else {
-            mColorState = state;
-        }
-
+    private ColorDrawable(ColorState state) {
+        mColorState = state;
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 }

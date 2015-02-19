@@ -17,37 +17,37 @@
 package android.accounts;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.BroadcastReceiver;
 import android.content.res.Resources;
 import android.database.SQLException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.os.Parcelable;
-import android.os.Build;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 import android.text.TextUtils;
+import android.util.Log;
+
+import com.android.internal.R;
+import com.google.android.collect.Maps;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.TimeUnit;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.android.internal.R;
-import com.google.android.collect.Maps;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This class provides access to a centralized registry of the user's
@@ -747,13 +747,17 @@ public class AccountManager {
      *     null for the main thread
      * @return An {@link AccountManagerFuture} which resolves to a Boolean,
      *     true if the account has been successfully removed
+     * @deprecated use
+     *     {@link #removeAccount(Account, Activity, AccountManagerCallback, Handler)}
+     *     instead
      */
+    @Deprecated
     public AccountManagerFuture<Boolean> removeAccount(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler) {
         if (account == null) throw new IllegalArgumentException("account is null");
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
-                mService.removeAccount(mResponse, account);
+                mService.removeAccount(mResponse, account, false);
             }
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
@@ -765,9 +769,60 @@ public class AccountManager {
     }
 
     /**
+     * Removes an account from the AccountManager. Does nothing if the account
+     * does not exist.  Does not delete the account from the server.
+     * The authenticator may have its own policies preventing account
+     * deletion, in which case the account will not be deleted.
+     *
+     * <p>This method may be called from any thread, but the returned
+     * {@link AccountManagerFuture} must not be used on the main thread.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#MANAGE_ACCOUNTS}.
+     *
+     * @param account The {@link Account} to remove
+     * @param activity The {@link Activity} context to use for launching a new
+     *     authenticator-defined sub-Activity to prompt the user to delete an
+     *     account; used only to call startActivity(); if null, the prompt
+     *     will not be launched directly, but the {@link Intent} may be
+     *     returned to the caller instead
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Bundle with
+     *     {@link #KEY_BOOLEAN_RESULT} if activity was specified and an account
+     *     was removed or if active. If no activity was specified, the returned
+     *     Bundle contains only {@link #KEY_INTENT} with the {@link Intent}
+     *     needed to launch the actual account removal process, if authenticator
+     *     needs the activity launch. If an error occurred,
+     *     {@link AccountManagerFuture#getResult()} throws:
+     * <ul>
+     * <li> {@link AuthenticatorException} if no authenticator was registered for
+     *      this account type or the authenticator failed to respond
+     * <li> {@link OperationCanceledException} if the operation was canceled for
+     *      any reason, including the user canceling the creation process or
+     *      adding accounts (of this type) has been disabled by policy
+     * </ul>
+     */
+    public AccountManagerFuture<Bundle> removeAccount(final Account account,
+            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        return new AmsTask(activity, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.removeAccount(mResponse, account, activity != null);
+            }
+        }.start();
+    }
+
+    /**
      * @see #removeAccount(Account, AccountManagerCallback, Handler)
      * @hide
+     * @deprecated use
+     *     {@link #removeAccountAsUser(Account, Activity, AccountManagerCallback, Handler)}
+     *     instead
      */
+    @Deprecated
     public AccountManagerFuture<Boolean> removeAccountAsUser(final Account account,
             AccountManagerCallback<Boolean> callback, Handler handler,
             final UserHandle userHandle) {
@@ -775,7 +830,7 @@ public class AccountManager {
         if (userHandle == null) throw new IllegalArgumentException("userHandle is null");
         return new Future2Task<Boolean>(handler, callback) {
             public void doWork() throws RemoteException {
-                mService.removeAccountAsUser(mResponse, account, userHandle.getIdentifier());
+                mService.removeAccountAsUser(mResponse, account, false, userHandle.getIdentifier());
             }
             public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
                 if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
@@ -784,6 +839,52 @@ public class AccountManager {
                 return bundle.getBoolean(KEY_BOOLEAN_RESULT);
             }
         }.start();
+    }
+
+    /**
+     * @see #removeAccount(Account, Activity, AccountManagerCallback, Handler)
+     * @hide
+     */
+    public AccountManagerFuture<Bundle> removeAccountAsUser(final Account account,
+            final Activity activity, AccountManagerCallback<Bundle> callback, Handler handler,
+            final UserHandle userHandle) {
+        if (account == null)
+            throw new IllegalArgumentException("account is null");
+        if (userHandle == null)
+            throw new IllegalArgumentException("userHandle is null");
+        return new AmsTask(activity, handler, callback) {
+            public void doWork() throws RemoteException {
+                mService.removeAccountAsUser(mResponse, account, activity != null,
+                        userHandle.getIdentifier());
+            }
+        }.start();
+    }
+
+    /**
+     * Removes an account directly. Normally used by authenticators, not
+     * directly by applications. Does not delete the account from the server.
+     * The authenticator may have its own policies preventing account deletion,
+     * in which case the account will not be deleted.
+     * <p>
+     * It is safe to call this method from the main thread.
+     * <p>
+     * This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and to have the
+     * same UID or signature as the account's authenticator.
+     *
+     * @param account The {@link Account} to delete.
+     * @return True if the account was successfully deleted, false if the
+     *         account did not exist, the account is null, or another error
+     *         occurs.
+     */
+    public boolean removeAccountExplicitly(Account account) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        try {
+            return mService.removeAccountExplicitly(account);
+        } catch (RemoteException e) {
+            // won't ever happen
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -1339,6 +1440,40 @@ public class AccountManager {
             // won't ever happen
             throw new RuntimeException(re);
         }
+    }
+
+    /**
+     * Copies an account from the primary user to another user.
+     * @param account the account to copy
+     * @param user the target user
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated wether it
+     * succeeded.
+     * @hide
+     */
+    public AccountManagerFuture<Boolean> copyAccountToUser(
+            final Account account, final UserHandle user,
+            AccountManagerCallback<Boolean> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (user == null) throw new IllegalArgumentException("user is null");
+
+        return new Future2Task<Boolean>(handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.copyAccountToUser(
+                        mResponse, account, UserHandle.USER_OWNER, user.getIdentifier());
+            }
+            @Override
+            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
+                    throw new AuthenticatorException("no result in response");
+                }
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
+            }
+        }.start();
     }
 
     /**

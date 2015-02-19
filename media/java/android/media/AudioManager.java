@@ -17,6 +17,7 @@
 package android.media;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -45,9 +46,9 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import java.util.HashMap;
 import java.util.ArrayList;
-
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -64,7 +65,7 @@ public class AudioManager {
     private final boolean mUseFixedVolume;
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
-    AudioPortEventHandler mAudioPortEventHandler;
+    private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -87,6 +88,17 @@ public class AudioManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String RINGER_MODE_CHANGED_ACTION = "android.media.RINGER_MODE_CHANGED";
+
+    /**
+     * @hide
+     * Sticky broadcast intent action indicating that the internal ringer mode has
+     * changed. Includes the new ringer mode.
+     *
+     * @see #EXTRA_RINGER_MODE
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String INTERNAL_RINGER_MODE_CHANGED_ACTION =
+            "android.media.INTERNAL_RINGER_MODE_CHANGED_ACTION";
 
     /**
      * The new ringer mode.
@@ -124,6 +136,17 @@ public class AudioManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
+
+    /**
+     * @hide Broadcast intent when a stream mute state changes.
+     * Includes the stream that changed and the new mute state
+     *
+     * @see #EXTRA_VOLUME_STREAM_TYPE
+     * @see #EXTRA_STREAM_VOLUME_MUTED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String STREAM_MUTE_CHANGED_ACTION =
+        "android.media.STREAM_MUTE_CHANGED_ACTION";
 
     /**
      * @hide Broadcast intent when the master volume changes.
@@ -207,6 +230,13 @@ public class AudioManager {
      */
     public static final String EXTRA_MASTER_VOLUME_MUTED =
         "android.media.EXTRA_MASTER_VOLUME_MUTED";
+
+    /**
+     * @hide The new stream volume mute state for the stream mute changed intent.
+     * Value is boolean
+     */
+    public static final String EXTRA_STREAM_VOLUME_MUTED =
+        "android.media.EXTRA_STREAM_VOLUME_MUTED";
 
     /**
      * Broadcast Action: Wired Headset plugged in or unplugged.
@@ -353,21 +383,6 @@ public class AudioManager {
      */
     @Deprecated public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
-
-    /**  @hide Default volume index values for audio streams */
-    public static final int[] DEFAULT_STREAM_VOLUME = new int[] {
-        4,  // STREAM_VOICE_CALL
-        7,  // STREAM_SYSTEM
-        5,  // STREAM_RING
-        11, // STREAM_MUSIC
-        6,  // STREAM_ALARM
-        5,  // STREAM_NOTIFICATION
-        7,  // STREAM_BLUETOOTH_SCO
-        7,  // STREAM_SYSTEM_ENFORCED
-        11, // STREAM_DTMF
-        11  // STREAM_TTS
-    };
-
     /**
      * Increase the ringer volume.
      *
@@ -484,6 +499,49 @@ public class AudioManager {
     public static final int FLAG_SHOW_UI_WARNINGS = 1 << 10;
 
     /**
+     * Adjusting the volume down from vibrated was prevented, display a hint in the UI.
+     * @hide
+     */
+    public static final int FLAG_SHOW_VIBRATE_HINT = 1 << 11;
+
+    private static final String[] FLAG_NAMES = {
+        "FLAG_SHOW_UI",
+        "FLAG_ALLOW_RINGER_MODES",
+        "FLAG_PLAY_SOUND",
+        "FLAG_REMOVE_SOUND_AND_VIBRATE",
+        "FLAG_VIBRATE",
+        "FLAG_FIXED_VOLUME",
+        "FLAG_BLUETOOTH_ABS_VOLUME",
+        "FLAG_SHOW_SILENT_HINT",
+        "FLAG_HDMI_SYSTEM_AUDIO_VOLUME",
+        "FLAG_ACTIVE_MEDIA_ONLY",
+        "FLAG_SHOW_UI_WARNINGS",
+        "FLAG_SHOW_VIBRATE_HINT",
+    };
+
+    /** @hide */
+    public static String flagsToString(int flags) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < FLAG_NAMES.length; i++) {
+            final int flag = 1 << i;
+            if ((flags & flag) != 0) {
+                if (sb.length() > 0) {
+                    sb.append(',');
+                }
+                sb.append(FLAG_NAMES[i]);
+                flags &= ~flag;
+            }
+        }
+        if (flags != 0) {
+            if (sb.length() > 0) {
+                sb.append(',');
+            }
+            sb.append(flags);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -512,8 +570,11 @@ public class AudioManager {
      */
     public static final int RINGER_MODE_NORMAL = 2;
 
-    // maximum valid ringer mode value. Values must start from 0 and be contiguous.
-    private static final int RINGER_MODE_MAX = RINGER_MODE_NORMAL;
+    /**
+     * Maximum valid ringer mode value. Values must start from 0 and be contiguous.
+     * @hide
+     */
+    public static final int RINGER_MODE_MAX = RINGER_MODE_NORMAL;
 
     /**
      * Vibrate type that corresponds to the ringer.
@@ -585,9 +646,9 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
-        mAudioPortEventHandler = new AudioPortEventHandler(this);
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
+        sAudioPortEventHandler.init();
     }
 
     private static IAudioService getService()
@@ -685,11 +746,7 @@ public class AudioManager {
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 if (event.getRepeatCount() == 0) {
-                    if (mUseMasterVolume) {
-                        setMasterMute(!isMasterMute());
-                    } else {
-                        // TODO: Actually handle MUTE.
-                    }
+                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
                 }
                 break;
         }
@@ -719,6 +776,9 @@ public class AudioManager {
                     }
                 }
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
+                break;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
                 break;
         }
     }
@@ -868,7 +928,7 @@ public class AudioManager {
     public int getRingerMode() {
         IAudioService service = getService();
         try {
-            return service.getRingerMode();
+            return service.getRingerModeExternal();
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getRingerMode", e);
             return RINGER_MODE_NORMAL;
@@ -887,7 +947,13 @@ public class AudioManager {
         if (ringerMode < 0 || ringerMode > RINGER_MODE_MAX) {
             return false;
         }
-        return true;
+        IAudioService service = getService();
+        try {
+            return service.isValidRingerMode(ringerMode);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isValidRingerMode", e);
+            return false;
+        }
     }
 
     /**
@@ -982,21 +1048,12 @@ public class AudioManager {
      * @see #isVolumeFixed()
      */
     public void setRingerMode(int ringerMode) {
-        setRingerMode(ringerMode, true /*checkZen*/);
-    }
-
-    /**
-     * @see #setRingerMode(int)
-     * @param checkZen  Update zen mode if necessary to compensate.
-     * @hide
-     */
-    public void setRingerMode(int ringerMode, boolean checkZen) {
         if (!isValidRingerMode(ringerMode)) {
             return;
         }
         IAudioService service = getService();
         try {
-            service.setRingerMode(ringerMode, checkZen);
+            service.setRingerModeExternal(ringerMode, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setRingerMode", e);
         }
@@ -1216,6 +1273,9 @@ public class AudioManager {
      * @hide
      */
     public void forceVolumeControlStream(int streamType) {
+        if (mUseMasterVolume) {
+            return;
+        }
         IAudioService service = getService();
         try {
             service.forceVolumeControlStream(streamType, mICallBack);
@@ -2207,6 +2267,8 @@ public class AudioManager {
                             listener = findFocusListener((String)msg.obj);
                         }
                         if (listener != null) {
+                            Log.d(TAG, "AudioManager dispatching onAudioFocusChange("
+                                    + msg.what + ") for " + msg.obj);
                             listener.onAudioFocusChange(msg.what);
                         }
                     }
@@ -2276,6 +2338,14 @@ public class AudioManager {
      * A successful focus change request.
      */
     public static final int AUDIOFOCUS_REQUEST_GRANTED = 1;
+     /**
+      * @hide
+      * A focus change request whose granting is delayed: the request was successful, but the
+      * requester will only be granted audio focus once the condition that prevented immediate
+      * granting has ended.
+      * See {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+      */
+    public static final int AUDIOFOCUS_REQUEST_DELAYED = 2;
 
 
     /**
@@ -2297,20 +2367,168 @@ public class AudioManager {
      */
     public int requestAudioFocus(OnAudioFocusChangeListener l, int streamType, int durationHint) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
+
+        try {
+            // status is guaranteed to be either AUDIOFOCUS_REQUEST_FAILED or
+            // AUDIOFOCUS_REQUEST_GRANTED as focus is requested without the
+            // AUDIOFOCUS_FLAG_DELAY_OK flag
+            status = requestAudioFocus(l,
+                    new AudioAttributes.Builder()
+                            .setInternalLegacyStreamType(streamType).build(),
+                    durationHint,
+                    0 /* flags, legacy behavior */);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Audio focus request denied due to ", e);
+        }
+
+        return status;
+    }
+
+    // when adding new flags, add them to the relevant AUDIOFOCUS_FLAGS_APPS or SYSTEM masks
+    /**
+     * @hide
+     * Use this flag when requesting audio focus to indicate it is ok for the requester to not be
+     * granted audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
+     * the system is in a state where focus cannot change, but be granted focus later when
+     * this condition ends.
+     */
+    @SystemApi
+    public static final int AUDIOFOCUS_FLAG_DELAY_OK = 0x1 << 0;
+    /**
+     * @hide
+     * Use this flag when requesting audio focus to indicate that the requester
+     * will pause its media playback (if applicable) when losing audio focus with
+     * {@link #AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}, rather than ducking.
+     * <br>On some platforms, the ducking may be handled without the application being aware of it
+     * (i.e. it will not transiently lose focus). For applications that for instance play spoken
+     * content, such as audio book or podcast players, ducking may never be acceptable, and will
+     * thus always pause. This flag enables them to be declared as such whenever they request focus.
+     */
+    @SystemApi
+    public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 0x1 << 1;
+    /**
+     * @hide
+     * Use this flag to lock audio focus so granting is temporarily disabled.
+     * <br>This flag can only be used by owners of a registered
+     * {@link android.media.audiopolicy.AudioPolicy} in
+     * {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int, AudioPolicy)}
+     */
+    @SystemApi
+    public static final int AUDIOFOCUS_FLAG_LOCK     = 0x1 << 2;
+    /** @hide */
+    public static final int AUDIOFOCUS_FLAGS_APPS = AUDIOFOCUS_FLAG_DELAY_OK
+            | AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS;
+    /** @hide */
+    public static final int AUDIOFOCUS_FLAGS_SYSTEM = AUDIOFOCUS_FLAG_DELAY_OK
+            | AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS | AUDIOFOCUS_FLAG_LOCK;
+
+    /**
+     * @hide
+     * Request audio focus.
+     * Send a request to obtain the audio focus. This method differs from
+     * {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)} in that it can express
+     * that the requester accepts delayed grants of audio focus.
+     * @param l the listener to be notified of audio focus changes. It is not allowed to be null
+     *     when the request is flagged with {@link #AUDIOFOCUS_FLAG_DELAY_OK}.
+     * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
+     *     requesting audio focus.
+     * @param durationHint use {@link #AUDIOFOCUS_GAIN_TRANSIENT} to indicate this focus request
+     *      is temporary, and focus will be abandonned shortly. Examples of transient requests are
+     *      for the playback of driving directions, or notifications sounds.
+     *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
+     *      the previous focus owner to keep playing if it ducks its audio output.
+     *      Alternatively use {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE} for a temporary request
+     *      that benefits from the system not playing disruptive sounds like notifications, for
+     *      usecases such as voice memo recording, or speech recognition.
+     *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
+     *      as the playback of a song or a video.
+     * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK}
+     *     and {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}.
+     *     <br>Use 0 when not using any flags for the request, which behaves like
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
+     *     focus is granted immediately, or the grant request fails because the system is in a
+     *     state where focus cannot change (e.g. a phone call).
+     * @return {@link #AUDIOFOCUS_REQUEST_FAILED}, {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     *     or {@link #AUDIOFOCUS_REQUEST_DELAYED}.
+     *     The return value is never {@link #AUDIOFOCUS_REQUEST_DELAYED} when focus is requested
+     *     without the {@link #AUDIOFOCUS_FLAG_DELAY_OK} flag.
+     * @throws IllegalArgumentException
+     */
+    @SystemApi
+    public int requestAudioFocus(OnAudioFocusChangeListener l,
+            @NonNull AudioAttributes requestAttributes,
+            int durationHint,
+            int flags) throws IllegalArgumentException {
+        if (flags != (flags & AUDIOFOCUS_FLAGS_APPS)) {
+            throw new IllegalArgumentException("Invalid flags 0x"
+                    + Integer.toHexString(flags).toUpperCase());
+        }
+        return requestAudioFocus(l, requestAttributes, durationHint,
+                flags & AUDIOFOCUS_FLAGS_APPS,
+                null /* no AudioPolicy*/);
+    }
+
+    /**
+     * @hide
+     * Request or lock audio focus.
+     * This method is to be used by system components that have registered an
+     * {@link android.media.audiopolicy.AudioPolicy} to request audio focus, but also to "lock" it
+     * so focus granting is temporarily disabled.
+     * @param l see the description of the same parameter in
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+     * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
+     *     requesting audio focus.
+     * @param durationHint see the description of the same parameter in
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+     * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK},
+     *     {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}, and {@link #AUDIOFOCUS_FLAG_LOCK}.
+     *     <br>Use 0 when not using any flags for the request, which behaves like
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
+     *     focus is granted immediately, or the grant request fails because the system is in a
+     *     state where focus cannot change (e.g. a phone call).
+     * @param ap a registered {@link android.media.audiopolicy.AudioPolicy} instance when locking
+     *     focus, or null.
+     * @return see the description of the same return value in
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+     * @throws IllegalArgumentException
+     */
+    @SystemApi
+    public int requestAudioFocus(OnAudioFocusChangeListener l,
+            @NonNull AudioAttributes requestAttributes,
+            int durationHint,
+            int flags,
+            AudioPolicy ap) throws IllegalArgumentException {
+        // parameter checking
+        if (requestAttributes == null) {
+            throw new IllegalArgumentException("Illegal null AudioAttributes argument");
+        }
         if ((durationHint < AUDIOFOCUS_GAIN) ||
                 (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)) {
-            Log.e(TAG, "Invalid duration hint, audio focus request denied");
-            return status;
+            throw new IllegalArgumentException("Invalid duration hint");
         }
+        if (flags != (flags & AUDIOFOCUS_FLAGS_SYSTEM)) {
+            throw new IllegalArgumentException("Illegal flags 0x"
+                + Integer.toHexString(flags).toUpperCase());
+        }
+        if (((flags & AUDIOFOCUS_FLAG_DELAY_OK) == AUDIOFOCUS_FLAG_DELAY_OK) && (l == null)) {
+            throw new IllegalArgumentException(
+                    "Illegal null focus listener when flagged as accepting delayed focus grant");
+        }
+        if (((flags & AUDIOFOCUS_FLAG_LOCK) == AUDIOFOCUS_FLAG_LOCK) && (ap == null)) {
+            throw new IllegalArgumentException(
+                    "Illegal null audio policy when locking audio focus");
+        }
+
+        int status = AUDIOFOCUS_REQUEST_FAILED;
         registerAudioFocusListener(l);
-        //TODO protect request by permission check?
         IAudioService service = getService();
         try {
-            status = service.requestAudioFocus(streamType, durationHint, mICallBack,
+            status = service.requestAudioFocus(requestAttributes, durationHint, mICallBack,
                     mAudioFocusDispatcher, getIdForAudioFocusListener(l),
-                    mContext.getOpPackageName() /* package name */);
+                    mContext.getOpPackageName() /* package name */, flags,
+                    ap != null ? ap.cb() : null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocus() on AudioService due to "+e);
+            Log.e(TAG, "Can't call requestAudioFocus() on AudioService:", e);
         }
         return status;
     }
@@ -2328,11 +2546,15 @@ public class AudioManager {
     public void requestAudioFocusForCall(int streamType, int durationHint) {
         IAudioService service = getService();
         try {
-            service.requestAudioFocus(streamType, durationHint, mICallBack, null,
+            service.requestAudioFocus(new AudioAttributes.Builder()
+                        .setInternalLegacyStreamType(streamType).build(),
+                    durationHint, mICallBack, null,
                     MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
-                    mContext.getOpPackageName());
+                    mContext.getOpPackageName(),
+                    AUDIOFOCUS_FLAG_LOCK,
+                    null /* policy token */);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService due to "+e);
+            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService:", e);
         }
     }
 
@@ -2345,9 +2567,10 @@ public class AudioManager {
     public void abandonAudioFocusForCall() {
         IAudioService service = getService();
         try {
-            service.abandonAudioFocus(null, MediaFocusControl.IN_VOICE_COMM_FOCUS_ID);
+            service.abandonAudioFocus(null, MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
+                    null /*AudioAttributes, legacy behavior*/);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService due to "+e);
+            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService:", e);
         }
     }
 
@@ -2357,18 +2580,29 @@ public class AudioManager {
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
      */
     public int abandonAudioFocus(OnAudioFocusChangeListener l) {
+        return abandonAudioFocus(l, null /*AudioAttributes, legacy behavior*/);
+    }
+
+    /**
+     * @hide
+     * Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
+     *  @param l the listener with which focus was requested.
+     * @param aa the {@link AudioAttributes} with which audio focus was requested
+     * @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     */
+    @SystemApi
+    public int abandonAudioFocus(OnAudioFocusChangeListener l, AudioAttributes aa) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
         unregisterAudioFocusListener(l);
         IAudioService service = getService();
         try {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
-                    getIdForAudioFocusListener(l));
+                    getIdForAudioFocusListener(l), aa);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService due to "+e);
+            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService:", e);
         }
         return status;
     }
-
 
     //====================================================================
     // Remote Control
@@ -2653,25 +2887,30 @@ public class AudioManager {
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
      * Register the given {@link AudioPolicy}.
      * This call is synchronous and blocks until the registration process successfully completed
      * or failed to complete.
-     * @param policy the {@link AudioPolicy} to register.
+     * @param policy the non-null {@link AudioPolicy} to register.
      * @return {@link #ERROR} if there was an error communicating with the registration service
      *    or if the user doesn't have the required
      *    {@link android.Manifest.permission#MODIFY_AUDIO_ROUTING} permission,
      *    {@link #SUCCESS} otherwise.
      */
-    public int registerAudioPolicy(AudioPolicy policy) {
+    @SystemApi
+    public int registerAudioPolicy(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
         IAudioService service = getService();
         try {
-            if (!service.registerAudioPolicy(policy.getConfig(), policy.token())) {
+            String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
+                    policy.hasFocusListener());
+            if (regId == null) {
                 return ERROR;
+            } else {
+                policy.setRegistration(regId);
             }
+            // successful registration
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerAudioPolicyAsync()", e);
             return ERROR;
@@ -2681,16 +2920,17 @@ public class AudioManager {
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @param policy the {@link AudioPolicy} to unregister.
+     * @param policy the non-null {@link AudioPolicy} to unregister.
      */
-    public void unregisterAudioPolicyAsync(AudioPolicy policy) {
+    @SystemApi
+    public void unregisterAudioPolicyAsync(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
         IAudioService service = getService();
         try {
-            service.unregisterAudioPolicyAsync(policy.token());
+            service.unregisterAudioPolicyAsync(policy.cb());
+            policy.setRegistration(null);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);
         }
@@ -3152,6 +3392,31 @@ public class AudioManager {
     }
 
     /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public void setRingerModeInternal(int ringerMode) {
+        try {
+            getService().setRingerModeInternal(ringerMode, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling setRingerModeInternal", e);
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public int getRingerModeInternal() {
+        try {
+            return getService().getRingerModeInternal();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling getRingerModeInternal", e);
+            return RINGER_MODE_NORMAL;
+        }
+    }
+
+    /**
      * Set Hdmi Cec system audio mode.
      *
      * @param on whether to be on system audio mode
@@ -3342,7 +3607,7 @@ public class AudioManager {
      * @hide
      */
     public void registerAudioPortUpdateListener(OnAudioPortUpdateListener l) {
-        mAudioPortEventHandler.registerListener(l);
+        sAudioPortEventHandler.registerListener(l);
     }
 
     /**
@@ -3350,7 +3615,7 @@ public class AudioManager {
      * @hide
      */
     public void unregisterAudioPortUpdateListener(OnAudioPortUpdateListener l) {
-        mAudioPortEventHandler.unregisterListener(l);
+        sAudioPortEventHandler.unregisterListener(l);
     }
 
     //
@@ -3358,23 +3623,23 @@ public class AudioManager {
     //
 
     static final int AUDIOPORT_GENERATION_INIT = 0;
-    Integer mAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
-    ArrayList<AudioPort> mAudioPortsCached = new ArrayList<AudioPort>();
-    ArrayList<AudioPatch> mAudioPatchesCached = new ArrayList<AudioPatch>();
+    static Integer sAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
+    static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
+    static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
 
-    int resetAudioPortGeneration() {
+    static int resetAudioPortGeneration() {
         int generation;
-        synchronized (mAudioPortGeneration) {
-            generation = mAudioPortGeneration;
-            mAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
+        synchronized (sAudioPortGeneration) {
+            generation = sAudioPortGeneration;
+            sAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
         }
         return generation;
     }
 
-    int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches) {
-        synchronized (mAudioPortGeneration) {
+    static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches) {
+        synchronized (sAudioPortGeneration) {
 
-            if (mAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
+            if (sAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
                 int[] patchGeneration = new int[1];
                 int[] portGeneration = new int[1];
                 int status;
@@ -3385,11 +3650,13 @@ public class AudioManager {
                     newPorts.clear();
                     status = AudioSystem.listAudioPorts(newPorts, portGeneration);
                     if (status != SUCCESS) {
+                        Log.w(TAG, "updateAudioPortCache: listAudioPorts failed");
                         return status;
                     }
                     newPatches.clear();
                     status = AudioSystem.listAudioPatches(newPatches, patchGeneration);
                     if (status != SUCCESS) {
+                        Log.w(TAG, "updateAudioPortCache: listAudioPatches failed");
                         return status;
                     }
                 } while (patchGeneration[0] != portGeneration[0]);
@@ -3398,38 +3665,53 @@ public class AudioManager {
                     for (int j = 0; j < newPatches.get(i).sources().length; j++) {
                         AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sources()[j],
                                                                    newPorts);
-                        if (portCfg == null) {
-                            return ERROR;
-                        }
                         newPatches.get(i).sources()[j] = portCfg;
                     }
                     for (int j = 0; j < newPatches.get(i).sinks().length; j++) {
                         AudioPortConfig portCfg = updatePortConfig(newPatches.get(i).sinks()[j],
                                                                    newPorts);
-                        if (portCfg == null) {
-                            return ERROR;
-                        }
                         newPatches.get(i).sinks()[j] = portCfg;
                     }
                 }
+                for (Iterator<AudioPatch> i = newPatches.iterator(); i.hasNext(); ) {
+                    AudioPatch newPatch = i.next();
+                    boolean hasInvalidPort = false;
+                    for (AudioPortConfig portCfg : newPatch.sources()) {
+                        if (portCfg == null) {
+                            hasInvalidPort = true;
+                            break;
+                        }
+                    }
+                    for (AudioPortConfig portCfg : newPatch.sinks()) {
+                        if (portCfg == null) {
+                            hasInvalidPort = true;
+                            break;
+                        }
+                    }
+                    if (hasInvalidPort) {
+                        // Temporarily remove patches with invalid ports. One who created the patch
+                        // is responsible for dealing with the port change.
+                        i.remove();
+                    }
+                }
 
-                mAudioPortsCached = newPorts;
-                mAudioPatchesCached = newPatches;
-                mAudioPortGeneration = portGeneration[0];
+                sAudioPortsCached = newPorts;
+                sAudioPatchesCached = newPatches;
+                sAudioPortGeneration = portGeneration[0];
             }
             if (ports != null) {
                 ports.clear();
-                ports.addAll(mAudioPortsCached);
+                ports.addAll(sAudioPortsCached);
             }
             if (patches != null) {
                 patches.clear();
-                patches.addAll(mAudioPatchesCached);
+                patches.addAll(sAudioPatchesCached);
             }
         }
         return SUCCESS;
     }
 
-    AudioPortConfig updatePortConfig(AudioPortConfig portCfg, ArrayList<AudioPort> ports) {
+    static AudioPortConfig updatePortConfig(AudioPortConfig portCfg, ArrayList<AudioPort> ports) {
         AudioPort port = portCfg.port();
         int k;
         for (k = 0; k < ports.size(); k++) {

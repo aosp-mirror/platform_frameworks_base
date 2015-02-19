@@ -17,7 +17,7 @@
 <animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/on" android:state_checked="true"
         android:drawable="@drawable/vector_drawable_favorite" />
-    <item android:id="@+id/off"
+    <item android:id="@+id/off" android:state_checked="false"
         android:drawable="@drawable/vector_drawable_favorite" />
     <transition android:fromId="@+id/off" android:toId="@+id/on"
         android:drawable="@drawable/animation_vector_drawable_favorite"

@@ -20,10 +20,13 @@ import android.os.Parcelable;
 import android.os.Parcel;
 import android.system.ErrnoException;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.ProxySelector;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
@@ -240,16 +243,46 @@ public class Network implements Parcelable {
      * @see java.net.URL#openConnection()
      */
     public URLConnection openConnection(URL url) throws IOException {
+        final ConnectivityManager cm = ConnectivityManager.getInstance();
+        // TODO: Should this be optimized to avoid fetching the global proxy for every request?
+        ProxyInfo proxyInfo = cm.getGlobalProxy();
+        if (proxyInfo == null) {
+            // TODO: Should this be optimized to avoid fetching LinkProperties for every request?
+            final LinkProperties lp = cm.getLinkProperties(this);
+            if (lp != null) proxyInfo = lp.getHttpProxy();
+        }
+        java.net.Proxy proxy = null;
+        if (proxyInfo != null) {
+            proxy = proxyInfo.makeProxy();
+        } else {
+            proxy = java.net.Proxy.NO_PROXY;
+        }
+        return openConnection(url, proxy);
+    }
+
+    /**
+     * Opens the specified {@link URL} on this {@code Network}, such that all traffic will be sent
+     * on this Network. The URL protocol must be {@code HTTP} or {@code HTTPS}.
+     *
+     * @param proxy the proxy through which the connection will be established.
+     * @return a {@code URLConnection} to the resource referred to by this URL.
+     * @throws MalformedURLException if the URL protocol is not HTTP or HTTPS.
+     * @throws IllegalArgumentException if the argument proxy is null.
+     * @throws IOException if an error occurs while opening the connection.
+     * @see java.net.URL#openConnection()
+     * @hide
+     */
+    public URLConnection openConnection(URL url, java.net.Proxy proxy) throws IOException {
+        if (proxy == null) throw new IllegalArgumentException("proxy is null");
         maybeInitHttpClient();
         String protocol = url.getProtocol();
         OkUrlFactory okUrlFactory;
         // TODO: HttpHandler creates OkUrlFactory instances that share the default ResponseCache.
         // Could this cause unexpected behavior?
-        // TODO: Should the network's proxy be specified?
         if (protocol.equals("http")) {
-            okUrlFactory = HttpHandler.createHttpOkUrlFactory(null /* proxy */);
+            okUrlFactory = HttpHandler.createHttpOkUrlFactory(proxy);
         } else if (protocol.equals("https")) {
-            okUrlFactory = HttpsHandler.createHttpsOkUrlFactory(null /* proxy */);
+            okUrlFactory = HttpsHandler.createHttpsOkUrlFactory(proxy);
         } else {
             // OkHttp only supports HTTP and HTTPS and returns a null URLStreamHandler if
             // passed another protocol.
@@ -265,18 +298,40 @@ public class Network implements Parcelable {
     }
 
     /**
+     * Binds the specified {@link DatagramSocket} to this {@code Network}. All data traffic on the
+     * socket will be sent on this {@code Network}, irrespective of any process-wide network binding
+     * set by {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be
+     * connected.
+     */
+    public void bindSocket(DatagramSocket socket) throws IOException {
+        // Apparently, the kernel doesn't update a connected UDP socket's routing upon mark changes.
+        if (socket.isConnected()) {
+            throw new SocketException("Socket is connected");
+        }
+        // Query a property of the underlying socket to ensure that the socket's file descriptor
+        // exists, is available to bind to a network and is not closed.
+        socket.getReuseAddress();
+        bindSocketFd(socket.getFileDescriptor$());
+    }
+
+    /**
      * Binds the specified {@link Socket} to this {@code Network}. All data traffic on the socket
      * will be sent on this {@code Network}, irrespective of any process-wide network binding set by
      * {@link ConnectivityManager#setProcessDefaultNetwork}. The socket must not be connected.
      */
     public void bindSocket(Socket socket) throws IOException {
+        // Apparently, the kernel doesn't update a connected TCP socket's routing upon mark changes.
         if (socket.isConnected()) {
             throw new SocketException("Socket is connected");
         }
-        // Query a property of the underlying socket to ensure the underlying
-        // socket exists so a file descriptor is available to bind to a network.
+        // Query a property of the underlying socket to ensure that the socket's file descriptor
+        // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        int err = NetworkUtils.bindSocketToNetwork(socket.getFileDescriptor$().getInt$(), netId);
+        bindSocketFd(socket.getFileDescriptor$());
+    }
+
+    private void bindSocketFd(FileDescriptor fd) throws IOException {
+        int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
         if (err != 0) {
             // bindSocketToNetwork returns negative errno.
             throw new ErrnoException("Binding socket to network " + netId, -err)

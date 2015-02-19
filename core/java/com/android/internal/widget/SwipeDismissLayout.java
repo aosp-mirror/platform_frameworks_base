@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.animation.TimeInterpolator;
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
@@ -75,6 +77,19 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private OnDismissedListener mDismissedListener;
     private OnSwipeProgressChangedListener mProgressListener;
+    private ViewTreeObserver.OnEnterAnimationCompleteListener mOnEnterAnimationCompleteListener =
+            new ViewTreeObserver.OnEnterAnimationCompleteListener() {
+                @Override
+                public void onEnterAnimationComplete() {
+                    // SwipeDismissLayout assumes that the host Activity is translucent
+                    // and temporarily disables translucency when it is fully visible.
+                    // As soon as the user starts swiping, we will re-enable
+                    // translucency.
+                    if (getContext() instanceof Activity) {
+                        ((Activity) getContext()).convertFromTranslucent();
+                    }
+                }
+            };
 
     private float mLastX;
 
@@ -110,6 +125,24 @@ public class SwipeDismissLayout extends FrameLayout {
 
     public void setOnSwipeProgressChangedListener(OnSwipeProgressChangedListener listener) {
         mProgressListener = listener;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (getContext() instanceof Activity) {
+            getViewTreeObserver().addOnEnterAnimationCompleteListener(
+                    mOnEnterAnimationCompleteListener);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (getContext() instanceof Activity) {
+            getViewTreeObserver().removeOnEnterAnimationCompleteListener(
+                    mOnEnterAnimationCompleteListener);
+        }
     }
 
     @Override
@@ -197,6 +230,9 @@ public class SwipeDismissLayout extends FrameLayout {
                 mLastX = ev.getRawX();
                 updateSwiping(ev);
                 if (mSwiping) {
+                    if (getContext() instanceof Activity) {
+                        ((Activity) getContext()).convertToTranslucent(null, null);
+                    }
                     setProgress(ev.getRawX() - mDownX);
                     break;
                 }
@@ -218,6 +254,9 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     protected void cancel() {
+        if (getContext() instanceof Activity) {
+            ((Activity) getContext()).convertFromTranslucent();
+        }
         if (mProgressListener != null) {
             mProgressListener.onSwipeCancelled(this);
         }

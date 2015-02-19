@@ -25,8 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -53,6 +51,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private static final long DOUBLETAP_TIMEOUT_MS = 1200;
     private static final int BACKGROUND_ANIMATION_LENGTH_MS = 220;
     private static final int ACTIVATE_ANIMATION_LENGTH = 220;
+    private static final int DARK_ANIMATION_LENGTH = 170;
 
     /**
      * The amount of width, which is kept in the end when performing a disappear animation (also
@@ -84,6 +83,11 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
      */
     private static final float VERTICAL_ANIMATION_START = 1.0f;
 
+    /**
+     * Scale for the background to animate from when exiting dark mode.
+     */
+    private static final float DARK_EXIT_SCALE_START = 0.93f;
+
     private static final Interpolator ACTIVATE_INVERSE_INTERPOLATOR
             = new PathInterpolator(0.6f, 0, 0.5f, 1);
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
@@ -94,7 +98,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     private boolean mDimmed;
     private boolean mDark;
-    private final Paint mDarkPaint = createDarkPaint();
 
     private int mBgTint = 0;
     private final int mRoundedRectCornerRadius;
@@ -332,40 +335,35 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mDimmed != dimmed) {
             mDimmed = dimmed;
             if (fade) {
-                fadeBackground();
+                fadeDimmedBackground();
             } else {
                 updateBackground();
             }
         }
     }
 
-    public void setDark(boolean dark, boolean fade) {
-        // TODO implement fade
-        if (mDark != dark) {
-            mDark = dark;
-            if (mDark) {
-                setLayerType(View.LAYER_TYPE_HARDWARE, mDarkPaint);
-            } else {
-                setLayerType(View.LAYER_TYPE_NONE, null);
-            }
+    public void setDark(boolean dark, boolean fade, long delay) {
+        super.setDark(dark, fade, delay);
+        if (mDark == dark) {
+            return;
         }
-    }
-
-    private static Paint createDarkPaint() {
-        final Paint p = new Paint();
-        final float[] invert = {
-            -1f,  0f,  0f, 1f, 1f,
-             0f, -1f,  0f, 1f, 1f,
-             0f,  0f, -1f, 1f, 1f,
-             0f,  0f,  0f, 1f, 0f
-        };
-        final ColorMatrix m = new ColorMatrix(invert);
-        final ColorMatrix grayscale = new ColorMatrix();
-        grayscale.setSaturation(0);
-        m.preConcat(grayscale);
-        p.setColorFilter(new ColorMatrixColorFilter(m));
-        return p;
-    }
+        mDark = dark;
+        if (!dark && fade) {
+            if (mActivated) {
+                mBackgroundDimmed.setVisibility(View.VISIBLE);
+                mBackgroundNormal.setVisibility(View.VISIBLE);
+            } else if (mDimmed) {
+                mBackgroundDimmed.setVisibility(View.VISIBLE);
+                mBackgroundNormal.setVisibility(View.INVISIBLE);
+            } else {
+                mBackgroundDimmed.setVisibility(View.INVISIBLE);
+                mBackgroundNormal.setVisibility(View.VISIBLE);
+            }
+            fadeInFromDark(delay);
+        } else {
+            updateBackground();
+        }
+     }
 
     public void setShowingLegacyBackground(boolean showing) {
         mShowingLegacyBackground = showing;
@@ -402,7 +400,40 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mBackgroundNormal.setRippleColor(rippleColor);
     }
 
-    private void fadeBackground() {
+    /**
+     * Fades in the background when exiting dark mode.
+     */
+    private void fadeInFromDark(long delay) {
+        final View background = mDimmed ? mBackgroundDimmed : mBackgroundNormal;
+        background.setAlpha(0f);
+        background.setPivotX(mBackgroundDimmed.getWidth() / 2f);
+        background.setPivotY(getActualHeight() / 2f);
+        background.setScaleX(DARK_EXIT_SCALE_START);
+        background.setScaleY(DARK_EXIT_SCALE_START);
+        background.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(DARK_ANIMATION_LENGTH)
+                .setStartDelay(delay)
+                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationCancel(Animator animation) {
+                        // Jump state if we are cancelled
+                        background.setScaleX(1f);
+                        background.setScaleY(1f);
+                        background.setAlpha(1f);
+                    }
+                })
+                .start();
+    }
+
+    /**
+     * Fades the background when the dimmed state changes.
+     */
+    private void fadeDimmedBackground() {
+        mBackgroundDimmed.animate().cancel();
         mBackgroundNormal.animate().cancel();
         if (mDimmed) {
             mBackgroundDimmed.setVisibility(View.VISIBLE);
@@ -443,11 +474,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void updateBackground() {
-        if (mDimmed) {
+        cancelFadeAnimations();
+        if (mDark) {
+            mBackgroundDimmed.setVisibility(View.INVISIBLE);
+            mBackgroundNormal.setVisibility(View.INVISIBLE);
+        } else if (mDimmed) {
             mBackgroundDimmed.setVisibility(View.VISIBLE);
             mBackgroundNormal.setVisibility(View.INVISIBLE);
         } else {
-            cancelFadeAnimations();
             mBackgroundDimmed.setVisibility(View.INVISIBLE);
             mBackgroundNormal.setVisibility(View.VISIBLE);
             mBackgroundNormal.setAlpha(1f);
@@ -459,6 +493,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mBackgroundAnimator != null) {
             mBackgroundAnimator.cancel();
         }
+        mBackgroundDimmed.animate().cancel();
         mBackgroundNormal.animate().cancel();
     }
 
@@ -508,7 +543,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mAppearAnimator != null) {
             mAppearAnimator.cancel();
         }
-        mAnimationTranslationY = translationDirection * mActualHeight;
+        mAnimationTranslationY = translationDirection * getActualHeight();
         if (mAppearAnimationFraction == -1.0f) {
             // not initialized yet, we start anew
             if (isAppearing) {
@@ -601,14 +636,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
         float top;
         float bottom;
+        final int actualHeight = getActualHeight();
         if (mAnimationTranslationY > 0.0f) {
-            bottom = mActualHeight - heightFraction * mAnimationTranslationY * 0.1f
+            bottom = actualHeight - heightFraction * mAnimationTranslationY * 0.1f
                     - translateYTotalAmount;
             top = bottom * heightFraction;
         } else {
-            top = heightFraction * (mActualHeight + mAnimationTranslationY) * 0.1f -
+            top = heightFraction * (actualHeight + mAnimationTranslationY) * 0.1f -
                     translateYTotalAmount;
-            bottom = mActualHeight * (1 - heightFraction) + top * heightFraction;
+            bottom = actualHeight * (1 - heightFraction) + top * heightFraction;
         }
         mAppearAnimationRect.set(left, top, right, bottom);
         setOutlineRect(left, top + mAppearAnimationTranslation, right,

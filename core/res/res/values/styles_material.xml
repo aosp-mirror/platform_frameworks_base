@@ -88,7 +88,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Preference.Material.DialogPreference.EditTextPreference">
-        <item name="dialogLayout">@layout/preference_dialog_edittext</item>
+        <item name="dialogLayout">@layout/preference_dialog_edittext_material</item>
     </style>
 
     <style name="Preference.Material.RingtonePreference">
@@ -320,49 +320,47 @@ please see styles_device_defaults.xml.
         <item name="textColor">?attr/textColorPrimaryDisableOnly</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.ActionMode"/>
-    <style name="TextAppearance.Material.Widget.ActionMode.Title"
-           parent="TextAppearance.Material.Title">
-        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
-    </style>
-    <style name="TextAppearance.Material.Widget.ActionMode.Title.Inverse"
-           parent="TextAppearance.Material.Title.Inverse">
-        <item name="textSize">@dimen/text_size_title_material_toolbar</item>
-    </style>
-    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle"
-           parent="TextAppearance.Material.Subhead">
-        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
-    </style>
-    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"
-           parent="TextAppearance.Material.Subhead.Inverse">
-        <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
-    </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Title"
            parent="TextAppearance.Material.Title">
         <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+        <item name="textColor">?attr/textColorPrimary</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Title.Inverse"
            parent="TextAppearance.Material.Title.Inverse">
         <item name="textSize">@dimen/text_size_title_material_toolbar</item>
+        <item name="textColor">?attr/textColorPrimaryInverse</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Subtitle"
            parent="TextAppearance.Material.Subhead">
         <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+        <item name="textColor">?attr/textColorSecondary</item>
     </style>
     <style name="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse"
            parent="TextAppearance.Material.Subhead.Inverse">
         <item name="textSize">@dimen/text_size_subtitle_material_toolbar</item>
+        <item name="textColor">?attr/textColorSecondaryInverse</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.ActionBar.Menu" parent="TextAppearance.Material.Menu">
+    <style name="TextAppearance.Material.Widget.ActionBar.Menu"
+           parent="TextAppearance.Material.Menu">
+        <item name="textColor">?attr/actionMenuTextColor</item>
+        <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
+    </style>
+    <style name="TextAppearance.Material.Widget.ActionBar.Menu.Inverse"
+           parent="TextAppearance.Material.Menu.Inverse">
         <item name="textColor">?attr/actionMenuTextColor</item>
         <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
     </style>
 
-    <style name="TextAppearance.Material.Widget.ActionBar.Menu.Inverse" parent="TextAppearance.Material.Menu.Inverse">
-        <item name="textColor">?attr/actionMenuTextColor</item>
-        <item name="textAllCaps">@bool/config_actionMenuItemAllCaps</item>
-    </style>
+    <style name="TextAppearance.Material.Widget.ActionMode"/>
+    <style name="TextAppearance.Material.Widget.ActionMode.Title"
+           parent="TextAppearance.Material.Widget.ActionBar.Title" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Title.Inverse"
+           parent="TextAppearance.Material.Widget.ActionBar.Title.Inverse" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle"
+           parent="TextAppearance.Material.Widget.ActionBar.Subtitle" />
+    <style name="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"
+           parent="TextAppearance.Material.Widget.ActionBar.Subtitle.Inverse" />
 
     <style name="TextAppearance.Material.Widget.Toolbar.Title"
            parent="TextAppearance.Material.Widget.ActionBar.Title" />
@@ -519,10 +517,18 @@ please see styles_device_defaults.xml.
         <item name="submitBackground">@drawable/textfield_search_material</item>
         <item name="closeIcon">@drawable/ic_clear_material</item>
         <item name="searchIcon">@drawable/ic_search_api_material</item>
+        <item name="searchHintIcon">@drawable/ic_search_api_material</item>
         <item name="goIcon">@drawable/ic_go_search_api_material</item>
         <item name="voiceIcon">@drawable/ic_voice_search_api_material</item>
         <item name="commitIcon">@drawable/ic_commit_search_api_material</item>
         <item name="suggestionRowLayout">@layout/search_dropdown_item_icons_2line</item>
+    </style>
+
+    <style name="Widget.Material.SearchView.ActionBar">
+        <item name="queryBackground">@empty</item>
+        <item name="submitBackground">@empty</item>
+        <item name="searchHintIcon">@empty</item>
+        <item name="queryHint">@string/search_hint</item>
     </style>
 
     <style name="Widget.Material.SegmentedButton" parent="SegmentedButton">
@@ -614,6 +620,7 @@ please see styles_device_defaults.xml.
         <item name="weekSeparatorLineColor">#19FFFFFF</item>
         <item name="selectedDateVerticalBar">@drawable/day_picker_week_view_dayline_holo</item>
         <item name="weekDayTextAppearance">@style/TextAppearance.Material.CalendarViewWeekDayView</item>
+        <item name="calendarViewMode">material</item>
     </style>
 
     <style name="Widget.Material.ImageButton" parent="Widget.ImageButton">
@@ -808,6 +815,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
         <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="paddingStart">@dimen/action_bar_navigation_padding_start_material</item>
     </style>
 
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>
@@ -867,8 +875,8 @@ please see styles_device_defaults.xml.
         <item name="contentDescription">@string/action_menu_overflow_description</item>
         <item name="minWidth">@dimen/action_button_min_width_overflow_material</item>
         <item name="minHeight">@dimen/action_button_min_height_material</item>
-        <item name="paddingStart">0dp</item>
-        <item name="paddingEnd">12dp</item>
+        <item name="paddingStart">@dimen/action_bar_overflow_padding_start_material</item>
+        <item name="paddingEnd">@dimen/action_bar_overflow_padding_end_material</item>
     </style>
 
     <style name="Widget.Material.ActionBar.TabView" parent="Widget.ActionBar.TabView">
@@ -903,12 +911,13 @@ please see styles_device_defaults.xml.
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Subtitle</item>
         <item name="progressBarStyle">?attr/progressBarStyleHorizontal</item>
         <item name="indeterminateProgressStyle">?attr/progressBarStyle</item>
-        <item name="progressBarPadding">32dip</item>
-        <item name="itemPadding">8dip</item>
+        <item name="progressBarPadding">32dp</item>
+        <item name="itemPadding">8dp</item>
         <item name="homeLayout">@layout/action_bar_home_material</item>
         <item name="gravity">center_vertical</item>
-        <item name="contentInsetStart">16dp</item>
-        <item name="elevation">8dp</item>
+        <item name="contentInsetStart">@dimen/action_bar_content_inset_material</item>
+        <item name="contentInsetEnd">@dimen/action_bar_content_inset_material</item>
+        <item name="elevation">@dimen/action_bar_elevation_material</item>
         <item name="popupTheme">?attr/actionBarPopupTheme</item>
     </style>
 
@@ -963,6 +972,7 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.ButtonBar" parent="Widget.Material.ButtonBar"/>
     <style name="Widget.Material.Light.ButtonBar.AlertDialog" parent="Widget.Material.ButtonBar.AlertDialog"/>
     <style name="Widget.Material.Light.SearchView" parent="Widget.Material.SearchView"/>
+    <style name="Widget.Material.Light.SearchView.ActionBar" parent="Widget.Material.SearchView.ActionBar"/>
 
     <style name="Widget.Material.Light.SegmentedButton" parent="Widget.Material.SegmentedButton">
         <item name="background">@drawable/btn_group_holo_light</item>
@@ -1001,6 +1011,7 @@ please see styles_device_defaults.xml.
         <item name="weekNumberColor">#7F080021</item>
         <item name="weekSeparatorLineColor">#7F08002A</item>
         <item name="weekDayTextAppearance">@style/TextAppearance.Material.CalendarViewWeekDayView</item>
+        <item name="calendarViewMode">material</item>
     </style>
 
     <style name="Widget.Material.Light.NumberPicker" parent="Widget.Material.NumberPicker"/>
@@ -1093,16 +1104,16 @@ please see styles_device_defaults.xml.
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Material" parent="AlertDialog">
-        <item name="fullDark">@null</item>
-        <item name="topDark">@null</item>
-        <item name="centerDark">@null</item>
-        <item name="bottomDark">@null</item>
-        <item name="fullBright">@null</item>
-        <item name="topBright">@null</item>
-        <item name="centerBright">@null</item>
-        <item name="bottomBright">@null</item>
-        <item name="bottomMedium">@null</item>
-        <item name="centerMedium">@null</item>
+        <item name="fullDark">@empty</item>
+        <item name="topDark">@empty</item>
+        <item name="centerDark">@empty</item>
+        <item name="bottomDark">@empty</item>
+        <item name="fullBright">@empty</item>
+        <item name="topBright">@empty</item>
+        <item name="centerBright">@empty</item>
+        <item name="bottomBright">@empty</item>
+        <item name="bottomMedium">@empty</item>
+        <item name="centerMedium">@empty</item>
         <item name="layout">@layout/alert_dialog_material</item>
         <item name="listLayout">@layout/select_dialog_material</item>
         <item name="progressLayout">@layout/progress_dialog_material</item>
@@ -1129,6 +1140,15 @@ please see styles_device_defaults.xml.
         <item name="ellipsize">end</item>
         <item name="textAlignment">viewStart</item>
     </style>
+
+    <style name="DialogWindowTitleBackground.Material">
+        <item name="background">@null</item>
+        <item name="paddingStart">?attr/dialogPreferredPadding</item>
+        <item name="paddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="paddingTop">@dimen/dialog_padding_top_material</item>
+    </style>
+
+    <style name="DialogWindowTitleBackground.Material.Light" />
 
     <style name="DialogWindowTitle.Material">
         <item name="maxLines">1</item>

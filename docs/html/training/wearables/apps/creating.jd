@@ -1,4 +1,6 @@
 page.title=Creating and Running a Wearable App
+page.tags=wear
+helpoutsWidget=true
 
 @jd:body
 
@@ -6,6 +8,7 @@ page.title=Creating and Running a Wearable App
 <div id="tb">
 <h2>This lesson teaches you to</h2>
 <ol>
+  <li><a href="#UpdateSDK">Update Your SDK</a></li>
   <li><a href="#SetupEmulator">Set Up an Android Wear Emulator</a></li>
   <li><a href="#SetupDevice">Set Up an Android Wear Device</a></li>
   <li><a href="#CreateProject">Create a Project</a></li>
@@ -13,7 +16,7 @@ page.title=Creating and Running a Wearable App
 </ol>
 <h2>Dependencies and Prerequisites</h2>
   <ul>
-    <li>Android Studio 0.8 or later and Gradle 0.12 or later</li>
+    <li>Android Studio 0.8.12 or later and Gradle 0.12 or later</li>
   </ul>
 </div>
 </div>
@@ -34,6 +37,24 @@ sending the results to the wearable.
 both your wearable and handheld apps.
 </p>
 
+<h2 id="UpdateSDK">Update Your SDK</h2>
+
+<p>Before you begin building wearable apps, you must:</p>
+
+<ul>
+  <li><strong>Update your SDK tools to version 23.0.0 or higher</strong>
+    <br>
+    The updated SDK tools enable you to build and test wearable apps.
+  </li>
+  <li><strong>Update your SDK with Android 4.4W.2 (API 20) or higher</strong>
+    <br>
+    The updated platform version provides new APIs for wearable apps.
+  </li>
+</ul>
+
+<p>To update your SDK with these components, see
+<a href="{@docRoot}sdk/installing/adding-packages.html#GetTools"> Get the latest SDK tools</a>.</p>
+
 
 <h2 id="SetupEmulator">Set Up an Android Wear Emulator or Device</h2>
 <p>We recommend that you develop on real hardware so you can better
@@ -45,29 +66,24 @@ types of screen shapes, which is useful for testing.</p>
 <p>To set up an Android Wear virtual device:</p>
 <ol>
   <li>Click <b>Tools > Android > AVD Manager</b>.</li>
-  <li>Click <b>Create...</b>.</li>
-  <li>Fill in the following details for the AVD you want to specify and leave the rest
-  of the fields with their default values:
-    <ul>
-      <li><b>AVD Name</b> - A name for your AVD</li>
-      <li><b>Device</b> - Android Wear Round or Square device types</li>
-      <li><b>Target</b> - Android 4.4W - API Level 20</li>
-      <li><b>CPU/ABI</b> - Android Wear ARM (armeabi-v7a)</li>
-      <li><b>Keyboard</b> - Select <b>Hardware keyboard present</b></li>
-      <li><b>Skin</b> - AndroidWearRound or AndroidWearSquare depending on the selected device type</li>
-      <li><b>Snapshot</b> - Not selected</li>
-      <li><b>Use Host GPU</b> - Selected, to support custom activities for wearable notifications</li>
-    </ul>
-  </li>
-  <li>Click <b>OK</b>.</li>
+  <li>Click <b>Create Virtual Device...</b>.</li>
+  <ol>
+    <li>Click <b>Wear</b> in the Category list:</li>
+    <li>Select Android Wear Square or Android Wear Round.</li>
+    <li>Click <b>Next</b>.</li>
+    <li>Select a release name (for example, KitKat Wear).</li>
+    <li>Click <b>Next</b>.</li>
+    <li>(Optional) Change any preferences for your virtual device.</li>
+    <li>Click <b>Finish</b>.</li>
+  </ol>
 <li>Start the emulator:
 <ol>
   <li>Select the virtual device you just created.</li>
-  <li>Click <b>Start...</b>, then click <b>Launch</b>.</li>
+  <li>Click the <b>Play</b> button.</li>
   <li>Wait until the emulator initializes and shows the Android Wear home screen.</li>
 </ol>
 </li>
-<li>Pair Your handheld with the emulator:
+<li>Pair your handheld with the emulator:
 <ol>
   <li>On your handheld, install the Android Wear app from Google Play.</li>
   <li>Connect the handheld to your machine through USB.</li>
@@ -92,6 +108,11 @@ types of screen shapes, which is useful for testing.</p>
   <li>Leave the Android Wear app open on your phone.</li>
   <li>Connect the wearable to your machine through USB, so you can install apps directly to it
   as you develop. A message appears on both the wearable and the Android Wear app prompting you to allow debugging.</li>
+  <p class="note"><strong>Note:</strong> If you can not connect your wearable to your machine via USB,
+  follow the directions on
+  <a href="{@docRoot}training/wearables/apps/bt-debugging.html">Debugging over
+  Bluetooth</a>.
+  </p>
   <li>On the Android Wear app, check <strong>Always allow from this computer</strong> and tap
   <strong>OK</strong>.</li>
 </ol>

@@ -16,5 +16,11 @@
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
      android:color="#ff9cdfd9">
-    <item android:drawable="@drawable/btn_fab_recents" />
+     <item>
+          <shape android:shape="oval">
+               <solid android:color="#9cc8c4" />
+               <size android:width="@dimen/recents_lock_to_app_size"
+                     android:height="@dimen/recents_lock_to_app_size" />
+          </shape>
+     </item>
 </ripple>

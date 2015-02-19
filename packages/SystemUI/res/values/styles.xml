@@ -167,14 +167,8 @@
         <item name="android:textColor">@color/qs_subhead</item>
     </style>
 
-    <style name="TextAppearance.QS.ZenToast">
-        <item name="android:textSize">14sp</item>
-    </style>
-
     <style name="TextAppearance.QS.SegmentedButton">
         <item name="android:textSize">14sp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="TextAppearance.QS.DataUsage">
@@ -234,6 +228,8 @@
         <item name="android:colorControlActivated">@color/system_accent_color</item>
     </style>
 
+    <style name="Theme.SystemUI.Dialog.Alert" parent="@*android:style/Theme.DeviceDefault.Light.Dialog.Alert" />
+
     <style name="QSBorderlessButton">
         <item name="android:padding">12dp</item>
         <item name="android:background">@drawable/btn_borderless_rect</item>
@@ -267,8 +263,13 @@
         <item name="numColumns">3</item>
     </style>
 
-    <style name="ZenToastAnimations">
-        <item name="android:windowEnterAnimation">@anim/zen_toast_enter</item>
-        <item name="android:windowExitAnimation">@anim/zen_toast_exit</item>
+    <style name="Theme.AlertDialogHost" parent="android:Theme.DeviceDefault">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:alertDialogTheme">@style/Theme.SystemUI.Dialog.Alert</item>
     </style>
 </resources>

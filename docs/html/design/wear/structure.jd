@@ -84,12 +84,18 @@ margin: 0 10px 20px 20px;
 <img src="{@docRoot}design/media/wear/1D_picker.png" alt="" width="499px" />
 <p class="img-caption">This pattern can be used to present a single vertical list, or a “1D Picker”</p>
 
-<img src="{@docRoot}design/media/wear/2D_picker.png" alt="" width:760px" />
+<img src="{@docRoot}design/media/wear/2D_picker.png" alt="" width="760px" />
 <p class="img-caption">It can also be used as a 2D matrix of options, as a way of presenting categorized options.</p>
 
 
 
 <h3>Actions</h3>
+<a class="notice-developers" style="clear:none" href="{@docRoot}training/wearables/ui/2d-picker.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating a 2D Picker</p>
+  </div>
+</a>
 <p>For actions on each card, use the <a href="{@docRoot}design/wear/patterns.html#Actions">Action cards pattern</a>.</p>
 
 <h3>Making it fast</h3>
@@ -155,6 +161,6 @@ href="#2DPicker">2D picker</a> is always available.</p>
 <h3>Manually exiting</h3>
 
 <p>Even with logical exit points like these, some cases may exist where the user may want to immediately exit. This may be common in apps that are used for a longer while. In all cases, you should treat long-press as the user's intent to exit, using
-<a href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>DismissOverlayView</code></a>.</p>
+<a href="{@docRoot}training/wearables/ui/exit.html"><code>DismissOverlayView</code></a>.</p>
 
 

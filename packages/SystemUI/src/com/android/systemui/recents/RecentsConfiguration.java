@@ -38,6 +38,18 @@ public class RecentsConfiguration {
     static RecentsConfiguration sInstance;
     static int sPrevConfigurationHashCode;
 
+    /** Levels of svelte in increasing severity/austerity. */
+    // No svelting.
+    public static final int SVELTE_NONE = 0;
+    // Limit thumbnail cache to number of visible thumbnails when Recents was loaded, disable
+    // caching thumbnails as you scroll.
+    public static final int SVELTE_LIMIT_CACHE = 1;
+    // Disable the thumbnail cache, load thumbnails asynchronously when the activity loads and
+    // evict all thumbnails when hidden.
+    public static final int SVELTE_DISABLE_CACHE = 2;
+    // Disable all thumbnail loading.
+    public static final int SVELTE_DISABLE_LOADING = 3;
+
     /** Animations */
     public float animationPxMovementPerSecond;
 
@@ -74,11 +86,15 @@ public class RecentsConfiguration {
     public float taskStackWidthPaddingPct;
     public float taskStackOverscrollPct;
 
+    /** Transitions */
+    public int transitionEnterFromAppDelay;
+    public int transitionEnterFromHomeDelay;
+
     /** Task view animation and styles */
-    public int taskViewEnterFromHomeDelay;
+    public int taskViewEnterFromAppDuration;
     public int taskViewEnterFromHomeDuration;
     public int taskViewEnterFromHomeStaggerDelay;
-    public int taskViewEnterFromHomeStaggerDuration;
+    public int taskViewExitToAppDuration;
     public int taskViewExitToHomeDuration;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
@@ -98,15 +114,7 @@ public class RecentsConfiguration {
 
     /** Task bar size & animations */
     public int taskBarHeight;
-    public int taskBarEnterAnimDuration;
-    public int taskBarEnterAnimDelay;
-    public int taskBarExitAnimDuration;
     public int taskBarDismissDozeDelaySeconds;
-
-    /** Lock to app */
-    public int taskViewLockToAppButtonHeight;
-    public int taskViewLockToAppShortAnimDuration;
-    public int taskViewLockToAppLongAnimDuration;
 
     /** Nav bar scrim */
     public int navBarScrimEnterDuration;
@@ -115,9 +123,13 @@ public class RecentsConfiguration {
     public boolean launchedWithAltTab;
     public boolean launchedWithNoRecentTasks;
     public boolean launchedFromAppWithThumbnail;
-    public boolean launchedFromAppWithScreenshot;
     public boolean launchedFromHome;
+    public boolean launchedFromSearchHome;
+    public boolean launchedReuseTaskStackViews;
+    public boolean launchedHasConfigurationChanged;
     public int launchedToTaskId;
+    public int launchedNumVisibleTasks;
+    public int launchedNumVisibleThumbnails;
 
     /** Misc **/
     public boolean useHardwareLayers;
@@ -128,6 +140,7 @@ public class RecentsConfiguration {
     public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
     public boolean debugModeEnabled;
+    public int svelteLevel;
 
     /** Private constructor */
     private RecentsConfiguration(Context context) {
@@ -213,15 +226,23 @@ public class RecentsConfiguration {
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
 
+        // Transition
+        transitionEnterFromAppDelay =
+                res.getInteger(R.integer.recents_enter_from_app_transition_duration);
+        transitionEnterFromHomeDelay =
+                res.getInteger(R.integer.recents_enter_from_home_transition_duration);
+
         // Task view animation and styles
-        taskViewEnterFromHomeDelay =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_delay);
+        taskViewEnterFromAppDuration =
+                res.getInteger(R.integer.recents_task_enter_from_app_duration);
         taskViewEnterFromHomeDuration =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
+                res.getInteger(R.integer.recents_task_enter_from_home_duration);
         taskViewEnterFromHomeStaggerDelay =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_stagger_delay);
+                res.getInteger(R.integer.recents_task_enter_from_home_stagger_delay);
+        taskViewExitToAppDuration =
+                res.getInteger(R.integer.recents_task_exit_to_app_duration);
         taskViewExitToHomeDuration =
-                res.getInteger(R.integer.recents_animate_task_exit_to_home_duration);
+                res.getInteger(R.integer.recents_task_exit_to_home_duration);
         taskViewRemoveAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_remove_duration);
         taskViewRemoveAnimTranslationXPx =
@@ -252,22 +273,8 @@ public class RecentsConfiguration {
 
         // Task bar size & animations
         taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-        taskBarEnterAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
-        taskBarEnterAnimDelay =
-                res.getInteger(R.integer.recents_animate_task_bar_enter_delay);
-        taskBarExitAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
         taskBarDismissDozeDelaySeconds =
                 res.getInteger(R.integer.recents_task_bar_dismiss_delay_seconds);
-
-        // Lock to app
-        taskViewLockToAppButtonHeight =
-                res.getDimensionPixelSize(R.dimen.recents_task_view_lock_to_app_button_height);
-        taskViewLockToAppShortAnimDuration =
-                res.getInteger(R.integer.recents_animate_lock_to_app_button_short_duration);
-        taskViewLockToAppLongAnimDuration =
-                res.getInteger(R.integer.recents_animate_lock_to_app_button_long_duration);
 
         // Nav bar scrim
         navBarScrimEnterDuration =
@@ -277,6 +284,7 @@ public class RecentsConfiguration {
         useHardwareLayers = res.getBoolean(R.bool.config_recents_use_hardware_layers);
         altTabKeyDelay = res.getInteger(R.integer.recents_alt_tab_key_delay);
         fakeShadows = res.getBoolean(R.bool.config_recents_fake_shadows);
+        svelteLevel = res.getInteger(R.integer.recents_svelte_level);
     }
 
     /** Updates the system insets */
@@ -304,12 +312,10 @@ public class RecentsConfiguration {
     /** Called when the configuration has changed, and we want to reset any configuration specific
      * members. */
     public void updateOnConfigurationChange() {
-        launchedWithAltTab = false;
-        launchedWithNoRecentTasks = false;
-        launchedFromAppWithThumbnail = false;
-        launchedFromAppWithScreenshot = false;
-        launchedFromHome = false;
-        launchedToTaskId = -1;
+        // Reset this flag on configuration change to ensure that we recreate new task views
+        launchedReuseTaskStackViews = false;
+        // Set this flag to indicate that the configuration has changed since Recents last launched
+        launchedHasConfigurationChanged = true;
     }
 
     /** Returns whether the search bar app widget exists. */

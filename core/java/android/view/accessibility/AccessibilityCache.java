@@ -40,6 +40,9 @@ final class AccessibilityCache {
 
     private final Object mLock = new Object();
 
+    private long mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+    private long mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+
     private final SparseArray<AccessibilityWindowInfo> mWindowCache =
             new SparseArray<>();
 
@@ -73,11 +76,32 @@ final class AccessibilityCache {
         synchronized (mLock) {
             final int eventType = event.getEventType();
             switch (eventType) {
-                case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED:
-                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED:
+                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
+                    if (mAccessibilityFocus != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                    }
+                    mAccessibilityFocus = event.getSourceNodeId();
+                    refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                } break;
+
+                case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED: {
+                    if (mAccessibilityFocus == event.getSourceNodeId()) {
+                        refreshCachedNodeLocked(event.getWindowId(), mAccessibilityFocus);
+                        mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+                    }
+                } break;
+
+                case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
+                    if (mInputFocus != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
+                        refreshCachedNodeLocked(event.getWindowId(), mInputFocus);
+                    }
+                    mInputFocus = event.getSourceNodeId();
+                    refreshCachedNodeLocked(event.getWindowId(), mInputFocus);
+                } break;
+
                 case AccessibilityEvent.TYPE_VIEW_SELECTED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
+                case AccessibilityEvent.TYPE_VIEW_CLICKED:
                 case AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED: {
                     refreshCachedNodeLocked(event.getWindowId(), event.getSourceNodeId());
                 } break;
@@ -267,6 +291,9 @@ final class AccessibilityCache {
                 final int windowId = mNodeCache.keyAt(i);
                 clearNodesForWindowLocked(windowId);
             }
+
+            mAccessibilityFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
+            mInputFocus = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
         }
     }
 

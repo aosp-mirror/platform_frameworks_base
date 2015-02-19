@@ -17,7 +17,7 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:state_selected="true" android:color="@android:color/white"/>
-    <item android:color="@color/segmented_button_text_inactive"/>
+    <item android:state_selected="true" android:color="@color/segmented_button_selected"/>
+    <item android:color="@color/segmented_button_unselected"/>
 
 </selector>

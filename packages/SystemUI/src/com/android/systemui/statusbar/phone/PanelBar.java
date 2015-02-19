@@ -236,4 +236,8 @@ public class PanelBar extends FrameLayout {
     public void onExpandingFinished() {
 
     }
+
+    public void onClosingFinished() {
+
+    }
 }

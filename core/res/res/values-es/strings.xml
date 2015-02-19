@@ -39,6 +39,8 @@
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
+    <string name="ellipsis" msgid="7899829516048813237">"…"</string>
+    <string name="ellipsis_two_dots" msgid="1228078994866030736">"..."</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Sin número de teléfono)"</string>
     <string name="unknownName" msgid="2277556546742746522">"Desconocido"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Buzón de voz"</string>
@@ -68,8 +70,6 @@
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"ID de emisor de llamada entrante"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"ID de emisor de llamada saliente"</string>
-    <string name="ColpMmi" msgid="3065121483740183974">"ID de línea conectada"</string>
-    <string name="ColrMmi" msgid="4996540314421889589">"Restricción de ID de línea conectada"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamada"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Llamada en espera"</string>
     <string name="BaMmi" msgid="455193067926770581">"Bloqueo de llamada"</string>
@@ -298,8 +298,10 @@
     <string name="permdesc_receiveBluetoothMap" msgid="8656755936919466345">"Permite que la aplicación reciba y procese mensajes por Bluetooth (MAP), lo que significa que podría utilizar este permiso para controlar o eliminar mensajes enviados al dispositivo sin mostrárselos al usuario."</string>
     <string name="permlab_getTasks" msgid="6466095396623933906">"recuperar aplicaciones en ejecución"</string>
     <string name="permdesc_getTasks" msgid="7454215995847658102">"Permite que aplicación recupere información sobre tareas que se están ejecutando en ese momento o que se han ejecutado recientemente. La aplicación puede utilizar este permiso para descubrir cuáles son las aplicaciones que se utilizan en el dispositivo."</string>
-    <string name="permlab_startTasksFromRecents" msgid="8990073877885690623">"iniciar una tarea desde recientes"</string>
-    <string name="permdesc_startTasksFromRecents" msgid="7382133554871222235">"Permite que la aplicación utilice un objeto ActivityManager.RecentTaskInfo para iniciar una tarea caducada que se ha devuelto desde ActivityManager.getRecentTaskList()."</string>
+    <!-- no translation found for permlab_startTasksFromRecents (8990073877885690623) -->
+    <skip />
+    <!-- no translation found for permdesc_startTasksFromRecents (7382133554871222235) -->
+    <skip />
     <string name="permlab_interactAcrossUsers" msgid="7114255281944211682">"interactuar con los usuarios"</string>
     <string name="permdesc_interactAcrossUsers" msgid="364670963623385786">"Permite que la aplicación lleve a cabo acciones entre los diferentes usuarios del dispositivo. Las aplicaciones maliciosas pueden utilizar este permiso para infringir la protección entre usuarios."</string>
     <string name="permlab_interactAcrossUsersFull" msgid="2567734285545074105">"licencia completa para interactuar con los usuarios"</string>
@@ -411,12 +413,12 @@
     <string name="permdesc_bindRemoteDisplay" msgid="1261242718727295981">"Permite enlazar con la interfaz de nivel superior de una pantalla remota. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"enlazar con un servicio de widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite enlazar con la interfaz de nivel superior de un servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindRouteProvider" msgid="4869394607915096847">"enlazar con un servicio de proveedor de rutas"</string>
+    <string name="permdesc_bindRouteProvider" msgid="4703804520859960329">"Permite enlazar con proveedores de rutas registrados. No debe ser necesario para las aplicaciones normales."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con el administrador de un dispositivo"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite que se envíen intentos a un administrador de dispositivos. Las aplicaciones normales nunca deberían necesitar este permiso."</string>
     <string name="permlab_bindTvInput" msgid="5601264742478168987">"enlazar a una entrada de TV"</string>
     <string name="permdesc_bindTvInput" msgid="2371008331852001924">"Permite enlazar con la interfaz de nivel superior de una entrada de TV. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_modifyParentalControls" msgid="4611318225997592242">"modificar controles parentales"</string>
-    <string name="permdesc_modifyParentalControls" msgid="7438482894162282039">"Permite modificar los datos de los controles parentales del sistema. Las aplicaciones normales no deberí­an necesitar este permiso."</string>
     <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"añadir o eliminar un administrador de dispositivos"</string>
     <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permite añadir o eliminar administradores de dispositivos activos. No debe ser necesario para aplicaciones normales."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"cambiar orientación de la pantalla"</string>
@@ -609,8 +611,6 @@
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"encender o apagar el teléfono"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite que la aplicación encienda o apague el tablet."</string>
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Permite que la aplicación encienda o apague el teléfono."</string>
-    <string name="permlab_userActivity" msgid="1677844893921729548">"restablecer tiempo de espera de la pantalla"</string>
-    <string name="permdesc_userActivity" msgid="651746160252248024">"Permite que la aplicación restablezca el tiempo de espera de la pantalla."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ejecutar en modo de prueba de fábrica"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Permite la ejecución como prueba de fabricante de nivel inferior, lo que posibilita un acceso completo al hardware del tablet. Solo está disponible cuando un tablet se está ejecutando en modo de prueba."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Ejecutar como prueba de fabricante de nivel inferior, permitiendo un acceso íntegro al hardware del teléfono. Solo está disponible cuando un teléfono se está ejecutando en modo de prueba."</string>
@@ -662,9 +662,6 @@
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Permitir que la aplicación sincronice el Bluetooth"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Permite que la aplicación se sincronice con dispositivos remotos sin la interacción del usuario."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Permite que la aplicación se sincronice con dispositivos remotos sin la interacción del usuario."</string>
-    <string name="permlab_bluetoothMap" msgid="6372198338939197349">"acceder a datos de Bluetooth MAP"</string>
-    <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Permite que la aplicación acceda a los datos de Bluetooth MAP."</string>
-    <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Permite que la aplicación acceda a los datos de Bluetooth MAP."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"conectarse a WiMAX y desconectarse de esta red"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite que la aplicación determine si está habilitada la conexión WiMAX y obtenga información sobre las redes WiMAX que están conectadas."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Cambiar estado de WiMAX"</string>
@@ -710,14 +707,10 @@
     <string name="permdesc_sdcardAccessAll" msgid="3215208357415891320">"Permite que la aplicación acceda al almacenamiento externo de todos los usuarios."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acceder al sistema de archivos almacenado en caché"</string>
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permite que la aplicación lea y escriba el sistema de archivos almacenado en caché."</string>
-    <string name="permlab_use_sip" msgid="2052499390128979920">"hacer/recibir llamadas SIP"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite que la aplicación haga y reciba llamadas SIP."</string>
-    <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interactuar con la pantalla de llamada"</string>
-    <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Permite que la aplicación controle cómo y cuándo aparece la pantalla de llamada."</string>
-    <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interactuar con servicios de telefonía"</string>
-    <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Permite que la aplicación interactúe con servicios de telefonía para hacer y recibir llamadas."</string>
-    <string name="permlab_control_incall_experience" msgid="9061024437607777619">"ofrecer una experiencia de usuario de llamada"</string>
-    <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Permite que la aplicación proporcione una experiencia de usuario de llamada."</string>
+    <string name="permlab_use_sip" msgid="5986952362795870502">"realizar/recibir llamadas por Internet"</string>
+    <string name="permdesc_use_sip" msgid="4717632000062674294">"Permite que la aplicación utilice el servicio SIP para recibir o realizar llamadas VoIP."</string>
+    <string name="permlab_bind_call_service" msgid="6724009726671246551">"interactuar con la pantalla de llamada"</string>
+    <string name="permdesc_bind_call_service" msgid="8732547662442572435">"Permite que la aplicación controle cómo y cuándo aparece la pantalla de llamada."</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"leer uso de red histórico"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Permite que la aplicación consulte el uso de red histórico de redes y de aplicaciones específicas."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"administrar política de red"</string>
@@ -730,6 +723,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite enlazar con la interfaz de nivel superior de un servicio de detector de notificaciones. No debe ser necesario para las aplicaciones normales."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"enlazar con un servicio de proveedor de condiciones"</string>
     <string name="permdesc_bindConditionProviderService" msgid="1680513931165058425">"Permite enlazar con la interfaz de nivel superior de un servicio de proveedor de condiciones. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindMediaRouteService" msgid="6637740382272686835">"enlazar a un servicio de rutas multimedia"</string>
+    <string name="permdesc_bindMediaRouteService" msgid="6436655024972496687">"Permite enlazar con la interfaz de nivel superior de un servicio de rutas multimedia. No debe ser necesario para las aplicaciones normales."</string>
     <string name="permlab_bindDreamService" msgid="4153646965978563462">"enlazar con un servicio de salvapantallas"</string>
     <string name="permdesc_bindDreamService" msgid="7325825272223347863">"Permite enlazar con la interfaz de nivel superior de un servicio de salvapantallas. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"ejecutar la aplicación de configuración proporcionada por el operador"</string>
@@ -742,8 +737,6 @@
     <string name="permdesc_accessDrmCertificates" msgid="8073288354426159089">"Permite que una aplicación proporcione y utilice certificados DRM. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_handoverStatus" msgid="1159132046126626731">"Recibir estado de transferencias de Android Beam"</string>
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Permite que esta aplicación reciba información sobre las transferencias actuales de Android Beam"</string>
-    <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"eliminar certificados DRM"</string>
-    <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Permite a una aplicación eliminar los certificados DRM. Las aplicaciones normales no deberí­an necesitar este permiso."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas de bloqueo de pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control de intentos de bloqueo de pantalla"</string>
@@ -760,8 +753,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el primer administrador de dispositivos define el servidor proxy global efectivo."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Definir caducidad bloqueo pantalla"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"Controlar la frecuencia con la que se debe cambiar el bloqueo de la pantalla"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Cifrado del almacenamiento"</string>
-    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se cifren los datos de la aplicación almacenados."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptación de almacenamiento"</string>
+    <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se encripten los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Inhabilitar funciones en bloqueo"</string>
@@ -912,13 +905,11 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Falta la tarjeta SIM o no se puede leer. Introduce una tarjeta SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Tarjeta SIM inutilizable"</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Tu tarjeta SIM se ha inhabilitado permanentemente.\n Para obtener otra tarjeta SIM, ponte en contacto con tu proveedor de servicios de telefonía."</string>
-    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Canción anterior"</string>
-    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Siguiente canción"</string>
-    <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Pausar"</string>
-    <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Reproducir"</string>
-    <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Detener"</string>
-    <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Rebobinar"</string>
-    <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Avance rápido"</string>
+    <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Botón de canción anterior"</string>
+    <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Botón de siguiente canción"</string>
+    <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Botón de pausa"</string>
+    <string name="lockscreen_transport_play_description" msgid="5888422938351019426">"Botón de reproducción"</string>
+    <string name="lockscreen_transport_stop_description" msgid="4562318378766987601">"Botón para detener la reproducción"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Solo llamadas de emergencia"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Bloqueada para la red"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La tarjeta SIM está bloqueada con el código PUK."</string>
@@ -1117,7 +1108,6 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Acciones de texto"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Es posible que algunas funciones del sistema no funcionen."</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hay espacio suficiente para el sistema. Comprueba que haya 250 MB libres y reinicia el dispositivo."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"Toca para obtener más información o para detener la aplicación."</string>
     <string name="ok" msgid="5970060430562524910">"Aceptar"</string>
@@ -1136,10 +1126,8 @@
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Editar con %1$s"</string>
     <string name="whichSendApplication" msgid="6902512414057341668">"Compartir con"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Compartir con %1$s"</string>
-    <string name="whichHomeApplication" msgid="4307587691506919691">"Selecciona una aplicación de inicio"</string>
-    <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Usar %1$s como aplicación de inicio"</string>
+    <string name="whichHomeApplication" msgid="4616420172727326782">"Seleccionar una aplicación en la pantalla de inicio"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Usar siempre para esta acción"</string>
-    <string name="use_a_different_app" msgid="8134926230585710243">"Uitliza otra aplicación"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Para borrar los valores predeterminados, accede a Ajustes del sistema &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acción"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Seleccionar una aplicación para el dispositivo USB"</string>
@@ -1191,7 +1179,7 @@
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Volumen de llamada"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Volumen multimedia"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volumen de notificaciones"</string>
-    <string name="ringtone_default" msgid="3789758980357696936">"Tono por defecto"</string>
+    <string name="ringtone_default" msgid="3789758980357696936">"Tono predeterminado"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Ninguno"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Tonos"</string>
@@ -1231,8 +1219,8 @@
     <string name="sms_control_yes" msgid="3663725993855816807">"Permitir"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Denegar"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; quiere enviar un mensaje a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="5873295990846059400"><b>"Es posible que se apliquen cargos"</b>" en tu cuenta móvil."</string>
-    <string name="sms_premium_short_code_details" msgid="7869234868023975"><b>"Se aplicarán cargos en tu cuenta móvil."</b></string>
+    <string name="sms_short_code_details" msgid="3492025719868078457"><font fgcolor="#ffffb060">"Es posible que se apliquen cargos"</font>" en tu cuenta móvil."</string>
+    <string name="sms_premium_short_code_details" msgid="5523826349105123687"><font fgcolor="#ffffb060">"Se aplicarán cargos en tu cuenta móvil."</font></string>
     <string name="sms_short_code_confirm_allow" msgid="4458878637111023413">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="2927389840209170706">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="5289538592272218136">"Recordar opción seleccionada"</string>
@@ -1285,9 +1273,9 @@
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formato"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuración USB habilitada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toca para inhabilitar la depuración USB"</string>
-    <string name="select_input_method" msgid="8547250819326693584">"Cambiar teclado"</string>
-    <string name="configure_input_methods" msgid="4769971288371946846">"Elegir teclados"</string>
-    <string name="show_ime" msgid="9157568568695230830">"Mostrar método de entrada"</string>
+    <string name="select_input_method" msgid="4653387336791222978">"Selecciona un método de entrada"</string>
+    <string name="configure_input_methods" msgid="9091652157722495116">"Configurar métodos de entrada"</string>
+    <string name="use_physical_keyboard" msgid="6203112478095117625">"Teclado físico"</string>
     <string name="hardware" msgid="7517821086888990278">"Hardware"</string>
     <string name="select_keyboard_layout_notification_title" msgid="1407367017263030773">"Selecciona un diseño de teclado"</string>
     <string name="select_keyboard_layout_notification_message" msgid="4465907700449257063">"Toca para seleccionar un diseño de teclado."</string>
@@ -1338,10 +1326,8 @@
     <string name="permdesc_bind_trust_agent_service" msgid="7041930026024507515">"Permite a una aplicación enlazar con un servicio de agente de confianza."</string>
     <string name="permlab_recovery" msgid="3157024487744125846">"Interactuar con el sistema de recuperación y las actualizaciones"</string>
     <string name="permdesc_recovery" msgid="8511774533266359571">"Permite que una aplicación interactúe con el sistema de recuperación y las actualizaciones del sistema."</string>
-    <string name="permlab_manageMediaProjection" msgid="1120495449419929218">"Administrar sesiones de proyección de contenido multimedia"</string>
-    <string name="permdesc_manageMediaProjection" msgid="8053759147529492856">"Permite que una aplicación administre sesiones de proyección de contenido multimedia. Estas sesiones pueden ofrecer a las aplicaciones la posibilidad de capturar contenido de audio e imágenes. Este permiso no debe ser necesario para aplicaciones normales."</string>
-    <string name="permlab_readInstallSessions" msgid="6165432407628065939">"Consultar sesiones de instalación"</string>
-    <string name="permdesc_readInstallSessions" msgid="2049771699626019849">"Permite que una aplicación consulte sesiones de instalación para ver detalles sobre instalaciones de paquetes activos."</string>
+    <string name="permlab_createMediaProjection" msgid="4941338725487978112">"Crear sesiones de proyección de contenido multimedia"</string>
+    <string name="permdesc_createMediaProjection" msgid="1284530992706219702">"Permite que una aplicación cree sesiones de proyección de contenido multimedia. Estas sesiones pueden ofrecer a las aplicaciones la posibilidad de capturar contenido de audio e imágenes. Este permiso no debe ser necesario para aplicaciones normales."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="4070433208160063538">"Toca dos veces para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Ir"</string>
@@ -1360,8 +1346,6 @@
     <string name="deny" msgid="2081879885755434506">"Denegar"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permiso solicitado"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permiso solicitado\npara la cuenta <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
-    <string name="forward_intent_to_owner" msgid="1207197447013960896">"Estás usando esta aplicación fuera del perfil de trabajo"</string>
-    <string name="forward_intent_to_work" msgid="621480743856004612">"Estás usando esta aplicación en tu perfil de trabajo"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Método de introducción de texto"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronización"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesibilidad"</string>
@@ -1468,11 +1452,11 @@
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editar"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertencia de uso de datos"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Toca para ver el uso y ajustes."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Límite de datos 2G-3G alcanzado"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Límite de datos 4G alcanzado"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Límite datos móviles alcanzado"</string>
-    <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Límite de datos Wi-Fi alcanzado"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Datos pausados resto del ciclo"</string>
+    <string name="data_usage_3g_limit_title" msgid="4462365924791862301">"Datos 2G-3G desactivados"</string>
+    <string name="data_usage_4g_limit_title" msgid="7476424187522765328">"Datos 4G desactivados"</string>
+    <string name="data_usage_mobile_limit_title" msgid="3393439305227911006">"Datos móviles desactivados"</string>
+    <string name="data_usage_wifi_limit_title" msgid="3461968509557554571">"Datos Wi-Fi desactivados"</string>
+    <string name="data_usage_limit_body" msgid="6131350187562939365">"Límite alcanzado"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Límite de datos 2G-3G superado"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Límite de datos 4G superado"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Límite de datos móviles superado"</string>
@@ -1503,7 +1487,6 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"¿Aceptar la llamada?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"Siempre"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Solo una vez"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s no admite perfiles de trabajo"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Teléfono"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Auriculares"</string>
@@ -1512,7 +1495,8 @@
     <string name="default_audio_route_category_name" msgid="3722811174003886946">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="8575624030406771015">"Audio Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="9070346425023979651">"Pantalla inalámbrica"</string>
-    <string name="media_route_button_content_description" msgid="591703006349356016">"Enviar contenido"</string>
+    <!-- no translation found for media_route_button_content_description (591703006349356016) -->
+    <skip />
     <string name="media_route_chooser_title" msgid="1751618554539087622">"Conectar a dispositivo"</string>
     <string name="media_route_chooser_title_for_remote_display" msgid="3395541745872017583">"Enviar pantalla a dispositivo"</string>
     <string name="media_route_chooser_searching" msgid="4776236202610828706">"Buscando dispositivos…"</string>
@@ -1528,6 +1512,11 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposición #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", seguro"</string>
+    <string name="wifi_display_notification_connecting_title" msgid="2838646471050359706">"Enviando pantalla"</string>
+    <string name="wifi_display_notification_connecting_message" msgid="5837350993752841389">"Conectando a <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_connected_title" msgid="8567308065912676285">"Enviando pantalla"</string>
+    <string name="wifi_display_notification_connected_message" msgid="2587209325701109715">"Conectado a <xliff:g id="NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconectar"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Llamada de emergencia"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"¿Has olvidado el patrón?"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"El patrón es incorrecto"</string>
@@ -1566,15 +1555,14 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminar"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar tus oídos."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"¿Quieres subir el volumen por encima del nivel recomendado?\nEscuchar sonidos a alto volumen durante largos períodos de tiempo puede dañar los oídos."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantén la pantalla pulsada con dos dedos para habilitar las funciones de accesibilidad."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Accesibilidad habilitada"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilidad cancelada"</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuario actual: <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"Cambiando a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propietario"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Error"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"El administrador no permite este cambio"</string>
+    <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Esta aplicación no admite cuentas de perfiles restringidos"</string>
     <string name="app_not_found" msgid="3429141853498927379">"No se ha encontrado ninguna aplicación que pueda realizar esta acción."</string>
     <string name="revoke" msgid="5404479185228271586">"Revocar"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1693,28 +1681,16 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> seleccionado"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminado"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"Para desactivar esta pantalla, mantén pulsados los botones de retroceso y Visión general al mismo tiempo."</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Para desactivar esta pantalla, mantén pulsado Visión general."</string>
-    <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Se ha activado la pantalla. Tu organización no puede desactivarla."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"¿Quieres fijar esta pantalla?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Si activas la pantalla, esta se bloqueará en una vista única.\n\nPara desactivarla, mantén pulsados los botones de retroceso y Visión general al mismo tiempo."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Si activas la pantalla, esta se bloqueará en una vista única.\n\nPara desactivarla, mantén pulsado el botón Visión general."</string>
+    <string name="lock_to_app_toast" msgid="2126866321272822564">"Estás en el modo de bloqueo de aplicación. Para salir, mantén pulsado el botón de aplicaciones recientes"</string>
+    <string name="lock_to_app_toast_locked" msgid="4229650395479263497">"Estás en el modo Bloqueo de aplicación."</string>
+    <string name="lock_to_app_title" msgid="5895142291937470019">"¿Usar Bloqueo de aplicación?"</string>
+    <string name="lock_to_app_description" msgid="2800403592608529611">"El bloqueo de aplicación bloquea la pantalla en una sola aplicación.\n\nPara salir, mantén pulsado el botón de aplicaciones recientes."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRACIAS"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"INICIAR"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fijada"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"La pantalla ya no está fija"</string>
-    <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para desactivar"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para desactivar"</string>
-    <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para desactivar"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Para ayudar a mejorar la duración de la batería, la función de ahorro de energía reduce el rendimiento del dispositivo y limita la vibración y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo y mensajes, no se actualicen a menos que las abras.\n\nLa función de ahorro de energía se desactiva automáticamente cuando el dispositivo se carga."</string>
-    <string name="downtime_condition_summary" msgid="8761776337475705749">"Hasta que el tiempo de inactividad finalice el <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-  <plurals name="zen_mode_duration_minutes">
-    <item quantity="one" msgid="9040808414992812341">"Durante un minuto"</item>
-    <item quantity="other" msgid="6924190729213550991">"Durante %d minutos"</item>
-  </plurals>
-  <plurals name="zen_mode_duration_hours">
-    <item quantity="one" msgid="3480040795582254384">"Durante 1 hora"</item>
-    <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
-  </plurals>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
+    <string name="lock_to_app_start" msgid="3074665051586318340">"Bloqueado en la aplicación"</string>
+    <string name="lock_to_app_exit" msgid="8967089657201849300">"Ya no utilizas el bloqueo de aplicación"</string>
+    <string name="lock_to_app_use_screen_lock" msgid="1434584309048590886">"Solicitar %1$s antes de salir"</string>
+    <string name="lock_to_app_unlock_pin" msgid="7908385370846820001">"PIN"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="7763071104790758405">"patrón de desbloqueo"</string>
+    <string name="lock_to_app_unlock_password" msgid="795224196583495868">"contraseña"</string>
 </resources>

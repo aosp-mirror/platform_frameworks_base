@@ -1,0 +1,278 @@
+page.title=Google Play 徽章生成器
+page.image=/images/gp-badges-set.png
+page.metaDescription=点击几下就可以为你的应用程序构建徽章，或者下载为各种语言本地化的高分辨率徽章资产。
+
+@jd:body
+
+  <p itemprop="description">借助 Google Play 徽章，你可以在在线广告、宣传材料或任何提供应用链接的地方使用 Google 的官方品牌标识，向大众推广你的应用。</p>
+
+  <p>请在下面的表单中输入你应用的应用包名称或发布者名称，选择徽章样式，点击“制作我的徽章”，然后将 HTML 代码粘贴至你的网页内容中。<em></em></p>
+
+  <p>如果你要为应用创建宣传网页，则还应使用 <a href="{@docRoot}distribute/tools/promote/device-art.html">Device Art Generator</a>，以方便快捷地将应用截图嵌入到设备效果图中。</p>
+
+  <p>有关 Google Play 徽章及其他品牌资源的使用指南，请参阅<a href="{@docRoot}distribute/tools/promote/brand.html#brand-google_play">品牌指南</a>。</p>
+
+  <style type="text/css">form.button-form {
+  margin-top: 2em;
+}
+/* the label and input elements are blocks that float left in order to   keep the left edgets of the input aligned, and IE 6/7 do not fully support     22inline-block    22 */
+label.block {
+  display: block;
+  float: left;
+  width: 100px;
+  padding-right: 10px;
+}
+input.text {
+  display: block;
+  float: left;
+  width: 250px;
+}
+div.button-row {
+  white-space: nowrap;
+  min-height: 80px;
+}
+div.button-row input {
+  vertical-align: middle;
+  margin: 0 5px 0 0;
+}
+#jd-content div.button-row img {
+  margin: 0;
+  vertical-align: middle;
+}
+</style>
+
+  <script type="text/javascript">
+
+  // locales for which we have the 'app' badge
+  var APP_LANGS = ['it','pt-br','pt-pt','nl','ko','ja','fr','es','es-419','en','de'];
+
+  // variables for creating 'try it out' demo button
+  var imagePath = "/images/brand/"
+  var linkStart = "<a href=\"https://play.google.com/store/";
+  var imageStart = "\">\n"
+          + "  <img alt=\"";
+    // leaves opening for the alt text value
+  var imageSrc = "\"\n       src=\"" + imagePath;
+    // leaves opening for the image file name
+  var imageEnd = ".png\" />\n</a>";
+
+  // variables for creating code snippet
+  var linkStartCode = "&lt;a href=\"https://play.google.com/store/";
+  var imageStartCode = "\"&gt;\n"
+          + "  &lt;img alt=\"";
+    // leaves opening for the alt text value
+  var imageSrcCode = "\"\n       src=\"" + imagePath;
+    // leaves opening for the image file name
+  var imageEndCode = ".png\" />\n&lt;/a>";
+
+  /** Generate the HTML snippet and demo based on form values */
+  function buildButton(form) {
+    var lang = $('#locale option:selected').val();
+    var selectedValue = lang + $('form input[type=radio]:checked').val();
+    var altText = selectedValue.indexOf("generic") != -1 ? "Get it on Google Play" : "Android app on Google Play";
+
+    if (form["package"].value != "com.example.android") {
+      $("#preview").show();
+      var packageName = escapeHTML(form["package"].value);
+      $("#snippet").show().html(linkStartCode + "apps/details?id=" + packageName
+              + imageStartCode + altText + imageSrcCode
+              + selectedValue + imageEndCode);
+      $("#button-preview").html(linkStart + "apps/details?id=" + packageName
+              + imageStart + altText + imageSrc
+              + selectedValue + imageEnd);
+
+      // Send the event to Analytics
+      ga('send', 'event', 'Distribute', 'Create Google Play Badge', 'Package ' + selectedValue);
+    } else if (form["publisher"].value != "Example, Inc.") {
+      $("#preview").show();
+      var publisherName = escapeHTML(form["publisher"].value);
+      $("#snippet").show().html(linkStartCode + "search?q=pub:" + publisherName
+              + imageStartCode + altText + imageSrcCode
+              + selectedValue + imageEndCode);
+      $("#button-preview").html(linkStart + "search?q=pub:" + publisherName
+              + imageStart + altText + imageSrc
+              + selectedValue + imageEnd);
+
+      // Send the event to Analytics
+      ga('send', 'event', 'Distribute', 'Create Google Play Badge', 'Publisher ' + selectedValue);
+    } else {
+      alert("Please enter your package name or publisher name");
+    }
+    return false;
+  }
+
+  /** Listen for Enter key */
+  function onTextEntered(event, form, me) {
+    // 13 = enter
+    if (event.keyCode == 13) {
+      buildButton(form);
+    }
+  }
+
+  /** When input is focused, remove example text and disable other input */
+  function onInputFocus(object, example) {
+    if (object.value == example) {
+      $(object).val('').css({'color' : '#000'});
+    }
+    $('input[type="text"]:not(input[name='+object.name+'])',
+            object.parentNode).attr('disabled','true');
+    $('#'+object.name+'-clear').show();
+  }
+
+  /** When input is blured, restore example text if appropriate and enable other input */
+  function onInputBlur(object, example) {
+    if (object.value.length < 1) {
+      $(object).attr('value',example).css({'color':'#ccc'});
+      $('input[type="text"]', object.parentNode).removeAttr('disabled');
+      $('#'+object.name+'-clear').hide();
+    }
+  }
+
+  /** Clear the form to start over */
+  function clearLabel(id, example) {
+    $("#preview").hide();
+    $('#'+id+'').html('').attr('value',example).css({'color':'#ccc'});
+    $('input[type="text"]', $('#'+id+'').parent()).removeAttr('disabled');
+    $('#'+id+'-clear').hide();
+    return false;
+  }
+
+  /** Switch the badge urls for selected language */
+  function changeBadgeLang() {
+    var lang = $('#locale option:selected').val();
+
+    // check if we have the 'app' badge for this lang and show notice if not
+    $("div.button-row.error").remove();  // remove any existing instance of error message
+    if ($.inArray(lang,APP_LANGS) == -1) {
+      $("div.button-row.app").hide();
+      $("div.button-row.app").after('<div class="button-row error"><p class="note" style="margin:1em 0 -1em">'
+          + 'Sorry, we currently don\'t have the '
+          + '<em>Android app on Google Play</em> badge translated for '
+          + $("select#locale option[value="+lang+"]").attr("title")
+          + '.<br>Please check back later or instead use the <em>Get it on Google Play</em> badge below.'
+          + '</p></div>');
+    } else {
+      $("div.button-row.app").show(); // show the 'app' badge row
+    }
+
+    $('.button-row img').each(function() {
+      var id = $(this).parent().attr('for');
+      var imgName = lang + $('input#'+id).attr('value') + '.png';
+      var lastSlash = $(this).attr('src').lastIndexOf('/');
+      var imgPath = $(this).attr('src').substring(0, lastSlash+1);
+      $(this).attr('src', imgPath + imgName);
+    });
+  }
+
+  /** When the doc is ready, find the inputs and color the input grey if the value is the example
+      text. This is necessary to handle back-navigation, which can auto-fill the form with previous
+      values (and text should not be grey) */
+  $(document).ready(function() {
+    $(".button-form input.text").each(function(index) {
+      if ($(this).val() == $(this).attr("default")) {
+        $(this).css("color","#ccc");
+      } else {
+        /* This is necessary to handle back-navigation to the page after form was filled */
+        $('input[type="text"]:not(input[name='+this.name+'])',
+                this.parentNode).attr('disabled','true');
+        $('#'+this.name+'-clear').show();
+      }
+    });
+  });
+
+  </script>
+
+  <form class="button-form">
+    <label class="block" for="locale">语言：</label>
+    <select id="locale" style="display:block;float:left;margin:0" onchange="changeBadgeLang()">
+      <option title="南非荷兰语" value="af">Afrikaans</option>
+      <option title="阿拉伯语" value="ar">العربية</option>
+      <option title="白俄罗斯语" value="be">Беларуская</option>
+      <option title="保加利亚语" value="bg">Български</option>
+      <option title="加泰罗尼亚语" value="ca">Català</option>
+      <option title="中文（中国）" value="zh-cn">中文（中国）</option>
+      <option title="中文（香港）" value="zh-hk">中文（香港）</option>
+      <option title="中文（台湾）" value="zh-tw">中文（台灣）</option>
+      <option title="克罗地亚语" value="hr">Hrvatski</option>
+      <option title="捷克语" value="cs">Česky</option>
+      <option title="丹麦语" value="da">Dansk</option>
+      <option title="荷兰语" value="nl">Nederlands</option>
+      <option title="爱沙尼亚语" value="et">Eesti</option>
+      <option title="波斯语" value="fa">فارسی</option>
+      <option title="菲律宾语" value="fil">Tagalog</option>
+      <option title="芬兰语" value="fi">Suomi</option>
+      <option title="法语" value="fr">Français</option>
+      <option title="德语" value="de">Deutsch</option>
+      <option title="希腊语" value="el">Ελληνικά</option>
+      <option title="英语" value="en" selected="">English</option>
+  <!--
+      <option title="希伯来语" value="iw-he">עברית</option>
+  -->
+      <option title="匈牙利语" value="hu">Magyar</option>
+      <option title="印度尼西亚语" value="id-in">Bahasa Indonesia</option>
+      <option title="意大利语" value="it">Italiano</option>
+      <option title="日语" value="ja">日本語</option>
+      <option title="韩语" value="ko">한국어</option>
+      <option title="拉脱维亚语" value="lv">Latviešu</option>
+      <option title="立陶宛语" value="lt">Lietuviškai</option>
+      <option title="马来语" value="ms">Bahasa Melayu</option>
+      <option title="挪威语" value="no">Norsk (bokmål)‎</option>
+      <option title="波兰语" value="pl">Polski</option>
+      <option title="葡萄牙语（巴西）" value="pt-br">Português (Brasil)</option>
+      <option title="葡萄牙语（葡萄牙）" value="pt-pt">Português (Portugal)</option>
+      <option title="罗马尼亚语" value="ro">Română</option>
+      <option title="俄语" value="ru">Русский</option>
+      <option title="塞尔维亚语" value="sr">Српски / srpski</option>
+      <option title="斯洛伐克语" value="sk">Slovenčina</option>
+      <option title="斯洛文尼亚语" value="sl">Slovenščina</option>
+      <option title="西班牙语（西班牙）" value="es">Español (España)</option>
+      <option title="西班牙语（拉丁美洲）" value="es-419">Español (Latinoamérica)</option>
+      <option title="瑞典语" value="sv">Svenska</option>
+      <option title="斯瓦希里语" value="sw">Kiswahili</option>
+      <option title="泰语" value="th">ไทย</option>
+      <option title="土耳其语" value="tr">Türkçe</option>
+      <option title="乌克兰语" value="uk">Українська</option>
+      <option title="越南语" value="vi">Tiếng Việt</option>
+      <option title="祖鲁语" value="zu">isiZulu</option>
+    </select>
+    <p style="clear:both;margin:0"> </p>
+    <label class="block" for="package" style="clear:left">  应用包名称：
+</label>
+    <input class="text" type="text" id="package" name="package" value="com.example.android" default="com.example.android" onfocus="onInputFocus(this, &#39;com.example.android&#39;)" onblur="onInputBlur(this, &#39;com.example.android&#39;)" onkeyup="return onTextEntered(event, this.parentNode, this)" /> 
+           <a id="package-clear" href="#" onclick="return clearLabel(&#39;package&#39;,&#39;com.example.android&#39;);">清除</a>
+    <p style="clear:both;margin:0"> <em>或</em></p>
+    <label class="block" style="margin-top:5px" for="publisher">  发布者名称：
+</label>
+    <input class="text" type="text" id="publisher" name="publisher" value="Example, Inc." default="Example, Inc." onfocus="onInputFocus(this, &#39;Example, Inc.&#39;)" onblur="onInputBlur(this, &#39;Example, Inc.&#39;)" onkeyup="return onTextEntered(event, this.parentNode, this)" /> 
+           <a id="publisher-clear" href="#" onclick="return clearLabel(&#39;publisher&#39;,&#39;Example, Inc.&#39;);">清除</a>
+           <br /><br />
+
+
+  <div class="button-row app">
+    <input type="radio" name="buttonStyle" value="_app_rgb_wo_45" id="ws" />
+      <label for="ws"><img src="{@docRoot}images/brand/en_app_rgb_wo_45.png" alt="即刻获取 Android 应用 Google Play（小图标）" /></label>
+          
+    <input type="radio" name="buttonStyle" value="_app_rgb_wo_60" id="wm" />
+      <label for="wm"><img src="{@docRoot}images/brand/en_app_rgb_wo_60.png" alt="即刻获取 Android 应用 Google Play（大图标）" /></label>
+  </div>
+
+  <div class="button-row">
+    <input type="radio" name="buttonStyle" value="_generic_rgb_wo_45" id="ns" checked="" />
+      <label for="ns"><img src="{@docRoot}images/brand/en_generic_rgb_wo_45.png" alt="即刻获取 Google Play（小图标）" /></label>
+          
+    <input type="radio" name="buttonStyle" value="_generic_rgb_wo_60" id="nm" />
+      <label for="nm"><img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png" alt="即刻获取 Google Play（大图标）" /></label>
+  </div>
+
+    <input class="button" type="button" value="制作我的徽章" style="padding:10px" onclick="return buildButton(this.parentNode);" />
+    <br />
+  </form>
+
+  <div id="preview">
+    <p>请复制以下 HTML 代码并将其粘贴到你的网站上：</p>
+    <textarea id="snippet" cols="100" rows="5" style="font-family:monospace;background-color:#efefef;padding:5px;margin-bottom:1em" onclick="this.select()"></textarea>
+
+  <p>试试以下内容：</p>
+  <div id="button-preview" style="margin-top:1em"></div>
+  </div>
+

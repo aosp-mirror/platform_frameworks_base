@@ -33,7 +33,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  *
  */
 @HasNativeInterpolator
-public class CycleInterpolator implements Interpolator, NativeInterpolatorFactory {
+public class CycleInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
     public CycleInterpolator(float cycles) {
         mCycles = cycles;
     }
@@ -52,7 +52,7 @@ public class CycleInterpolator implements Interpolator, NativeInterpolatorFactor
         }
 
         mCycles = a.getFloat(R.styleable.CycleInterpolator_cycles, 1.0f);
-
+        setChangingConfiguration(a.getChangingConfigurations());
         a.recycle();
     }
 

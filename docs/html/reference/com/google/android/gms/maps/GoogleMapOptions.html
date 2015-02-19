@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GoogleMapOptions</li>
       </ul>
     </div>
@@ -725,13 +794,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -793,10 +855,13 @@ Summary:
   
       implements 
       
-        SafeParcelable
+        Parcelable 
       
   
   
+
+
+    
 
 
 </div><!-- end header -->
@@ -911,48 +976,27 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
 </table>
   </div>
 </div>
@@ -987,7 +1031,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#GoogleMapOptions()">GoogleMapOptions</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Creates a new GoogleMapOptions object.</div>
+        <div class="jd-descrdiv">
+          Creates a new GoogleMapOptions object.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1018,7 +1067,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#camera(com.google.android.gms.maps.model.CameraPosition)">camera</a></span>(<a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a> camera)</nobr>
         
-        <div class="jd-descrdiv">Specifies a the initial camera position for the map.</div>
+        <div class="jd-descrdiv">
+          Specifies a the initial camera position for the map.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1036,7 +1090,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#compassEnabled(boolean)">compassEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Specifies whether the compass should be enabled.</div>
+        <div class="jd-descrdiv">
+          Specifies whether the compass should be enabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1054,30 +1113,19 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#createFromAttributes(android.content.Context, android.util.AttributeSet)">createFromAttributes</a></span>(Context context, AttributeSet attrs)</nobr>
         
-        <div class="jd-descrdiv">Creates a GoogleMapsOptions from the attribute set
-</div>
+        <div class="jd-descrdiv">
+          Creates a GoogleMapsOptions from the attribute set
+
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#describeContents()">describeContents</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1093,7 +1141,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1109,7 +1157,39 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#getLiteMode()">getLiteMode</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#getMapToolbarEnabled()">getMapToolbarEnabled</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1125,7 +1205,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1141,7 +1221,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1157,7 +1237,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1173,7 +1253,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1189,7 +1269,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1205,7 +1285,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1221,7 +1301,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1237,7 +1317,53 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#liteMode(boolean)">liteMode</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies whether the map should be created in lite mode.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#mapToolbarEnabled(boolean)">mapToolbarEnabled</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies whether the mapToolbar should be enabled.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1249,13 +1375,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#mapType(int)">mapType</a></span>(int mapType)</nobr>
         
-        <div class="jd-descrdiv">Specifies a change to the initial map type.</div>
+        <div class="jd-descrdiv">
+          Specifies a change to the initial map type.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1267,13 +1398,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#rotateGesturesEnabled(boolean)">rotateGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Specifies whether rotate gestures should be enabled.</div>
+        <div class="jd-descrdiv">
+          Specifies whether rotate gestures should be enabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1285,25 +1421,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#scrollGesturesEnabled(boolean)">scrollGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Specifies whether scroll gestures should be enabled.</div>
-  
-  </td></tr>
+        <div class="jd-descrdiv">
+          Specifies whether scroll gestures should be enabled.
+          
+    
 
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#tiltGesturesEnabled(boolean)">tiltGesturesEnabled</a></span>(boolean enabled)</nobr>
-        
-        <div class="jd-descrdiv">Specifies whether tilt gestures should be enabled.</div>
+        </div>
   
   </td></tr>
 
@@ -1319,16 +1442,44 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#useViewLifecycleInFragment(boolean)">useViewLifecycleInFragment</a></span>(boolean useViewLifecycleInFragment)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#tiltGesturesEnabled(boolean)">tiltGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">When using a <code><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></code>, this flag specifies whether the lifecycle of the map
- should be tied to the fragment's view or the fragment itself.</div>
+        <div class="jd-descrdiv">
+          Specifies whether tilt gestures should be enabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#useViewLifecycleInFragment(boolean)">useViewLifecycleInFragment</a></span>(boolean useViewLifecycleInFragment)</nobr>
+        
+        <div class="jd-descrdiv">
+          When using a <code><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></code>, this flag specifies whether the lifecycle of the map
+ should be tied to the fragment's view or the fragment itself.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1344,7 +1495,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1356,7 +1507,35 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#zOrderOnTop(boolean)">zOrderOnTop</a></span>(boolean zOrderOnTop)</nobr>
         
-        <div class="jd-descrdiv">Control whether the map view's surface is placed on top of its window.</div>
+        <div class="jd-descrdiv">
+          Control whether the map view's surface is placed on top of its window.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#zoomControlsEnabled(boolean)">zoomControlsEnabled</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies whether the zoom controls should be enabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1372,27 +1551,14 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#zoomControlsEnabled(boolean)">zoomControlsEnabled</a></span>(boolean enabled)</nobr>
-        
-        <div class="jd-descrdiv">Specifies whether the zoom controls should be enabled.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html#zoomGesturesEnabled(boolean)">zoomGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Specifies whether zoom gestures should be enabled.</div>
+        <div class="jd-descrdiv">
+          Specifies whether zoom gestures should be enabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1671,8 +1837,6 @@ From interface
 </td></tr>
 
 
-
-
 </table>
 
 
@@ -1730,6 +1894,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new GoogleMapOptions object.
 </p></div>
 
@@ -1775,6 +1942,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies a the initial camera position for the map.
 </p></div>
 
@@ -1804,6 +1974,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies whether the compass should be enabled. See
  <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setCompassEnabled(boolean)">setCompassEnabled(boolean)</a></code> for more details. The default value is
@@ -1837,37 +2010,11 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a GoogleMapsOptions from the attribute set
 </p></div>
-
-    </div>
-</div>
-
-
-<A NAME="describeContents()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">describeContents</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1895,6 +2042,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
@@ -1929,10 +2079,85 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>the compassEnabled option, or null if unspecified. </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getLiteMode()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        Boolean
+      </span>
+      <span class="sympad">getLiteMode</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the liteMode option, or null if unspecified. </li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getMapToolbarEnabled()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        Boolean
+      </span>
+      <span class="sympad">getMapToolbarEnabled</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the mapToolbarEnabled option, or null if unspecified. </li></ul>
   </div>
 
     </div>
@@ -1961,6 +2186,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
@@ -1995,6 +2223,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2027,6 +2258,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
@@ -2061,6 +2295,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2093,6 +2330,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
@@ -2127,6 +2367,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2159,6 +2402,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
@@ -2193,11 +2439,86 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>the zoomGesturesEnabled option, or null if unspecified. </li></ul>
   </div>
+
+    </div>
+</div>
+
+
+<A NAME="liteMode(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a>
+      </span>
+      <span class="sympad">liteMode</span>
+      <span class="normal">(boolean enabled)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specifies whether the map should be created in lite mode. The default value is
+ <code>false</code>. If lite mode is enabled, maps will load as static images. This improves
+ performance in the case where a lot of maps need to be displayed at the same time, for
+ example in a scrolling list, however lite-mode maps cannot be panned or zoomed by the user,
+ or tilted or rotated at all.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="mapToolbarEnabled(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/maps/GoogleMapOptions.html">GoogleMapOptions</a>
+      </span>
+      <span class="sympad">mapToolbarEnabled</span>
+      <span class="normal">(boolean enabled)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specifies whether the mapToolbar should be enabled. See
+ <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setMapToolbarEnabled(boolean)">setMapToolbarEnabled(boolean)</a></code> for more details. The default value
+ is <code>true</code>.
+</p></div>
 
     </div>
 </div>
@@ -2225,6 +2546,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies a change to the initial map type.
 </p></div>
@@ -2255,6 +2579,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies whether rotate gestures should be enabled. See
  <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setRotateGesturesEnabled(boolean)">setRotateGesturesEnabled(boolean)</a></code> for more details. The default value
@@ -2288,6 +2615,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies whether scroll gestures should be enabled. See
  <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setScrollGesturesEnabled(boolean)">setScrollGesturesEnabled(boolean)</a></code> for more details. The default value
  is <code>true</code>.
@@ -2320,6 +2650,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies whether tilt gestures should be enabled. See
  <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setTiltGesturesEnabled(boolean)">setTiltGesturesEnabled(boolean)</a></code> for more details. The default value is
  <code>true</code>.
@@ -2351,6 +2684,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>When using a <code><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></code>, this flag specifies whether the lifecycle of the map
  should be tied to the fragment's view or the fragment itself. The default value is
@@ -2394,6 +2730,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2422,6 +2761,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Control whether the map view's surface is placed on top of its window. See
  <code><a href="/reference/android/view/SurfaceView.html#setZOrderOnTop(boolean)">setZOrderOnTop(boolean)</a></code> for more details. Note that this
@@ -2456,6 +2798,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies whether the zoom controls should be enabled. See
  <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setZoomControlsEnabled(boolean)">setZoomControlsEnabled(boolean)</a></code> for more details. The default value is
  <code>true</code>.
@@ -2487,6 +2832,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specifies whether zoom gestures should be enabled. See
  <code><a href="/reference/com/google/android/gms/maps/UiSettings.html#setZoomGesturesEnabled(boolean)">setZoomGesturesEnabled(boolean)</a></code> for more details. The default value is

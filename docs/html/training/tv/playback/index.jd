@@ -1,5 +1,6 @@
 page.title=Building TV Playback Apps
-page.tags="leanback"
+page.tags=tv, leanback
+helpoutsWidget=true
 
 startpage=true
 
@@ -16,8 +17,19 @@ startpage=true
     <li><a href="{@docRoot}design/tv/index.html">
       Design for TV</a></li>
   </ul>
+
 </div>
 </div>
+
+  <!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=72K1VhjoL98">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Android TV &mdash; Using the Leanback library</p>
+</div>
+</a>
+
+
 
 <p>
   Browsing and playing media files is frequently part of the user experience provided by a TV app.
@@ -43,6 +55,9 @@ startpage=true
   <dt><b><a href="browse.html">Creating a Catalog Browser</a></b></dt>
     <dd>Learn how to use the Leanback support library to build a browsing interface for media
       catalogs.</dd>
+
+  <dt><b><a href="details.html">Providing a Card View</a></b></dt>
+    <dd>Learn how to use the Leanback support library to build a card view for content items.</dd>
 
   <dt><b><a href="details.html">Building a Details View</a></b></dt>
     <dd>Learn how to use the Leanback support library to build a details page for media items.</dd>

@@ -3,6 +3,7 @@ package android.nfc;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 
 /**
  * Class to IPC data to be shared over Android Beam.
@@ -14,11 +15,13 @@ import android.os.Parcelable;
 public final class BeamShareData implements Parcelable {
     public final NdefMessage ndefMessage;
     public final Uri[] uris;
+    public final UserHandle userHandle;
     public final int flags;
 
-    public BeamShareData(NdefMessage msg, Uri[] uris, int flags) {
+    public BeamShareData(NdefMessage msg, Uri[] uris, UserHandle userHandle, int flags) {
         this.ndefMessage = msg;
         this.uris = uris;
+        this.userHandle = userHandle;
         this.flags = flags;
     }
 
@@ -35,6 +38,7 @@ public final class BeamShareData implements Parcelable {
         if (urisLength > 0) {
             dest.writeTypedArray(uris, 0);
         }
+        dest.writeParcelable(userHandle, 0);
         dest.writeInt(this.flags);
     }
 
@@ -49,9 +53,10 @@ public final class BeamShareData implements Parcelable {
                 uris = new Uri[numUris];
                 source.readTypedArray(uris, Uri.CREATOR);
             }
+            UserHandle userHandle = source.readParcelable(UserHandle.class.getClassLoader());
             int flags = source.readInt();
 
-            return new BeamShareData(msg, uris, flags);
+            return new BeamShareData(msg, uris, userHandle, flags);
         }
 
         @Override

@@ -19,6 +19,7 @@ package android.net;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -26,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.net.Network;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.IBinder;
@@ -164,6 +166,32 @@ public class VpnService extends Service {
     }
 
     /**
+     * Version of {@link #prepare(Context)} which does not require user consent.
+     *
+     * <p>Requires {@link android.Manifest.permission#CONTROL_VPN} and should generally not be
+     * used. Only acceptable in situations where user consent has been obtained through other means.
+     *
+     * <p>Once this is run, future preparations may be done with the standard prepare method as this
+     * will authorize the package to prepare the VPN without consent in the future.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void prepareAndAuthorize(Context context) {
+        IConnectivityManager cm = getService();
+        String packageName = context.getPackageName();
+        try {
+            // Only prepare if we're not already prepared.
+            if (!cm.prepareVpn(packageName, null)) {
+                cm.prepareVpn(null, packageName);
+            }
+            cm.setVpnPackageAuthorization(true);
+        } catch (RemoteException e) {
+            // ignore
+        }
+    }
+
+    /**
      * Protect a socket from VPN connections. After protecting, data sent
      * through this socket will go directly to the underlying network,
      * so its traffic will not be forwarded through the VPN.
@@ -255,6 +283,46 @@ public class VpnService extends Service {
         check(address, prefixLength);
         try {
             return getService().removeVpnAddress(address.getHostAddress(), prefixLength);
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Sets the underlying networks used by the VPN for its upstream connections.
+     *
+     * <p>Used by the system to know the actual networks that carry traffic for apps affected by
+     * this VPN in order to present this information to the user (e.g., via status bar icons).
+     *
+     * <p>This method only needs to be called if the VPN has explicitly bound its underlying
+     * communications channels &mdash; such as the socket(s) passed to {@link #protect(int)} &mdash;
+     * to a {@code Network} using APIs such as {@link Network#bindSocket(Socket)} or
+     * {@link Network#bindSocket(DatagramSocket)}. The VPN should call this method every time
+     * the set of {@code Network}s it is using changes.
+     *
+     * <p>{@code networks} is one of the following:
+     * <ul>
+     * <li><strong>a non-empty array</strong>: an array of one or more {@link Network}s, in
+     * decreasing preference order. For example, if this VPN uses both wifi and mobile (cellular)
+     * networks to carry app traffic, but prefers or uses wifi more than mobile, wifi should appear
+     * first in the array.</li>
+     * <li><strong>an empty array</strong>: a zero-element array, meaning that the VPN has no
+     * underlying network connection, and thus, app traffic will not be sent or received.</li>
+     * <li><strong>null</strong>: (default) signifies that the VPN uses whatever is the system's
+     * default network. I.e., it doesn't use the {@code bindSocket} or {@code bindDatagramSocket}
+     * APIs mentioned above to send traffic over specific channels.</li>
+     * </ul>
+     *
+     * <p>This call will succeed only if the VPN is currently established. For setting this value
+     * when the VPN has not yet been established, see {@link Builder#setUnderlyingNetworks}.
+     *
+     * @param networks An array of networks the VPN uses to tunnel traffic to/from its servers.
+     *
+     * @return {@code true} on success.
+     */
+    public boolean setUnderlyingNetworks(Network[] networks) {
+        try {
+            return getService().setUnderlyingNetworksForVpn(networks);
         } catch (RemoteException e) {
             throw new IllegalStateException(e);
         }
@@ -433,7 +501,7 @@ public class VpnService extends Service {
                     }
                 }
             }
-            mRoutes.add(new RouteInfo(new LinkAddress(address, prefixLength), null));
+            mRoutes.add(new RouteInfo(new IpPrefix(address, prefixLength), null));
             mConfig.updateAllowedFamilies(address);
             return this;
         }
@@ -632,6 +700,20 @@ public class VpnService extends Service {
          */
         public Builder setBlocking(boolean blocking) {
             mConfig.blocking = blocking;
+            return this;
+        }
+
+        /**
+         * Sets the underlying networks used by the VPN for its upstream connections.
+         *
+         * @see VpnService#setUnderlyingNetworks
+         *
+         * @param networks An array of networks the VPN uses to tunnel traffic to/from its servers.
+         *
+         * @return this {@link Builder} object to facilitate chaining method calls.
+         */
+        public Builder setUnderlyingNetworks(Network[] networks) {
+            mConfig.underlyingNetworks = networks != null ? networks.clone() : null;
             return this;
         }
 

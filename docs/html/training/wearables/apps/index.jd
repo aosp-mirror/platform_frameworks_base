@@ -1,5 +1,7 @@
 page.title=Creating Wearable Apps
-page.image=wear/images/notifications.png
+page.tags=wear
+helpoutsWidget=true
+page.image=wear/images/01_create.png
 
 @jd:body
 
@@ -63,7 +65,7 @@ in ADT. The rest of this training assumes you're using Android Studio.
       <dd>Learn how to create and display custom layouts for notifications and
       activities.</dd>
     <dt><a href="{@docRoot}training/wearables/apps/voice.html">Adding Voice Capabilities</a></dt>
-      <dd>Learn how to launch an activity with a voice actions and how to start the
+      <dd>Learn how to launch an activity with voice actions and how to start the
       system speech recognizer app to obtain free-form voice input.</dd>
     <dt><a href="{@docRoot}training/wearables/apps/packaging.html">Packaging Wearable Apps</a></dt>
       <dd>Learn how to package a wearable app inside a

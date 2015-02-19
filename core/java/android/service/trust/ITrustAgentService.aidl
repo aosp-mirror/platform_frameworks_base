@@ -15,7 +15,7 @@
  */
 package android.service.trust;
 
-import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.service.trust.ITrustAgentServiceCallback;
 
 /**
@@ -25,6 +25,8 @@ import android.service.trust.ITrustAgentServiceCallback;
 interface ITrustAgentService {
     oneway void onUnlockAttempt(boolean successful);
     oneway void onTrustTimeout();
+    oneway void onDeviceLocked();
+    oneway void onDeviceUnlocked();
+    oneway void onConfigure(in List<PersistableBundle> options, IBinder token);
     oneway void setCallback(ITrustAgentServiceCallback callback);
-    oneway void setTrustAgentFeaturesEnabled(in Bundle options, IBinder token);
 }

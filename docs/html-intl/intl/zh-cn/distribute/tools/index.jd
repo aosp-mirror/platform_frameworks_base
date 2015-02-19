@@ -1,0 +1,56 @@
+page.title=工具与参考
+section.landing=true
+nonavpage=true
+
+@jd:body
+
+<p>
+此页面的资源将帮助你发布你的应用和游戏，获取用户，并从中获利。
+</p>
+
+<div class="dynamic-grid">
+
+<h3 style="font-size:18px;font-weight:bold">发布与推出</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/checklists/zhcn"
+    data-cardSizes="9x6"
+    data-maxResults="2">
+  </div>
+
+<h3 style="font-size:18px;font-weight:bold">宣传工具</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/promote/zhcn"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+<h3 style="font-size:18px;font-weight:bold">开发者支持</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/support/zhcn"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+<h3 style="font-size:18px;font-weight:bold">开发者消息</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/news"
+    data-cardSizes="9x6"
+    data-maxResults="2">
+  </div>
+
+<h3 style="font-size:18px;font-weight:bold">更多</h3>
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/tools/more/zhcn"
+    data-cardSizes="6x6"
+    data-maxResults="3">
+  </div>
+
+<!--  <h3>Related Resources</h3>
+  <div class="resource-widget resource-stack-layout col-16"
+    data-query="tag:developersupport"
+    data-sortOrder="-timestamp"
+    data-numStacks="3"
+    data-maxResults="6">
+  </div> -->
+
+</div>

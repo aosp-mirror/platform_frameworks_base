@@ -858,8 +858,8 @@ jstring AndroidRuntime::NewStringLatin1(JNIEnv* env, const char* bytes) {
  */
 void AndroidRuntime::start(const char* className, const Vector<String8>& options)
 {
-    ALOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
-            className != NULL ? className : "(unknown)");
+    ALOGD(">>>>>> START %s uid %d <<<<<<\n",
+            className != NULL ? className : "(unknown)", getuid());
 
     static const String8 startSystemServer("start-system-server");
 

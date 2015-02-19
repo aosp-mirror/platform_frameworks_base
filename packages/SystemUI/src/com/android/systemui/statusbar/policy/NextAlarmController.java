@@ -39,7 +39,7 @@ public class NextAlarmController extends BroadcastReceiver {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-        context.registerReceiver(this, filter);
+        context.registerReceiverAsUser(this, UserHandle.ALL, filter, null, null);
         updateNextAlarm();
     }
 

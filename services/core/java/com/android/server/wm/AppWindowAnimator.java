@@ -58,7 +58,9 @@ public class AppWindowAnimator {
     // the state changes.
     boolean allDrawn;
 
-    // Special surface for thumbnail animation.
+    // Special surface for thumbnail animation.  If deferThumbnailDestruction is enabled, then we
+    // will make sure that the thumbnail is destroyed after the other surface is completed.  This
+    // requires that the duration of the two animations are the same.
     SurfaceControl thumbnail;
     int thumbnailTransactionSeq;
     int thumbnailX;
@@ -68,13 +70,12 @@ public class AppWindowAnimator {
     Animation thumbnailAnimation;
     final Transformation thumbnailTransformation = new Transformation();
     // This flag indicates that the destruction of the thumbnail surface is synchronized with
-    // another animation, so do not pre-emptively destroy the thumbnail surface when the animation
-    // completes
+    // another animation, so defer the destruction of this thumbnail surface for a single frame
+    // after the secondary animation completes.
     boolean deferThumbnailDestruction;
-    // This is the thumbnail surface that has been bestowed upon this animator, and when the
-    // surface for this animator's animation is complete, we will destroy the thumbnail surface
-    // as well.  Do not animate or do anything with this surface.
-    SurfaceControl deferredThumbnail;
+    // This flag is set if the animator has deferThumbnailDestruction set and has reached the final
+    // frame of animation.  It will extend the animation by one frame and then clean up afterwards.
+    boolean deferFinalFrameCleanup;
 
     /** WindowStateAnimator from mAppAnimator.allAppWindows as of last performLayout */
     ArrayList<WindowStateAnimator> mAllAppWinAnimators = new ArrayList<WindowStateAnimator>();
@@ -134,9 +135,7 @@ public class AppWindowAnimator {
             animation = null;
             animating = true;
         }
-        if (!deferThumbnailDestruction) {
-            clearThumbnail();
-        }
+        clearThumbnail();
         if (mAppToken.deferClearAllDrawn) {
             mAppToken.allDrawn = false;
             mAppToken.deferClearAllDrawn = false;
@@ -148,13 +147,7 @@ public class AppWindowAnimator {
             thumbnail.destroy();
             thumbnail = null;
         }
-    }
-
-    public void clearDeferredThumbnail() {
-        if (deferredThumbnail != null) {
-            deferredThumbnail.destroy();
-            deferredThumbnail = null;
-        }
+        deferThumbnailDestruction = false;
     }
 
     void updateLayers() {
@@ -223,19 +216,26 @@ public class AppWindowAnimator {
             return false;
         }
         transformation.clear();
-        final boolean more = animation.getTransformation(currentTime, transformation);
-        if (false && WindowManagerService.DEBUG_ANIM) Slog.v(
-            TAG, "Stepped animation in " + mAppToken + ": more=" + more + ", xform=" + transformation);
-        if (!more) {
-            animation = null;
-            if (!deferThumbnailDestruction) {
+        boolean hasMoreFrames = animation.getTransformation(currentTime, transformation);
+        if (!hasMoreFrames) {
+            if (deferThumbnailDestruction && !deferFinalFrameCleanup) {
+                // We are deferring the thumbnail destruction, so extend the animation for one more
+                // (dummy) frame before we clean up
+                deferFinalFrameCleanup = true;
+                hasMoreFrames = true;
+            } else {
+                if (false && WindowManagerService.DEBUG_ANIM) Slog.v(
+                        TAG, "Stepped animation in " + mAppToken + ": more=" + hasMoreFrames +
+                                ", xform=" + transformation);
+                deferFinalFrameCleanup = false;
+                animation = null;
                 clearThumbnail();
+                if (WindowManagerService.DEBUG_ANIM) Slog.v(
+                        TAG, "Finished animation in " + mAppToken + " @ " + currentTime);
             }
-            if (WindowManagerService.DEBUG_ANIM) Slog.v(
-                TAG, "Finished animation in " + mAppToken + " @ " + currentTime);
         }
-        hasTransformation = more;
-        return more;
+        hasTransformation = hasMoreFrames;
+        return hasMoreFrames;
     }
 
     // This must be called while inside a transaction.
@@ -308,13 +308,9 @@ public class AppWindowAnimator {
 
         transformation.clear();
 
-        final int N = mAllAppWinAnimators.size();
-        for (int i=0; i<N; i++) {
-            final WindowStateAnimator winAnim = mAllAppWinAnimators.get(i);
-            if (mAppToken.mLaunchTaskBehind) {
-                winAnim.mWin.mExiting = true;
-            }
-            winAnim.finishExit();
+        final int numAllAppWinAnimators = mAllAppWinAnimators.size();
+        for (int i = 0; i < numAllAppWinAnimators; i++) {
+            mAllAppWinAnimators.get(i).finishExit();
         }
         if (mAppToken.mLaunchTaskBehind) {
             try {

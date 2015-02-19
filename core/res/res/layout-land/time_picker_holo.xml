@@ -20,11 +20,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
-    android:layout_marginLeft="@dimen/timepicker_minimum_margin_sides"
-    android:layout_marginRight="@dimen/timepicker_minimum_margin_sides"
-    android:layout_marginTop="@dimen/timepicker_minimum_margin_top_bottom"
-    android:layout_marginBottom="@dimen/timepicker_minimum_margin_top_bottom">
+    android:orientation="horizontal">
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"

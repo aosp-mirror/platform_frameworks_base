@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -124,23 +125,36 @@ public class NetworkStatsRecorder {
      * as reference is valid.
      */
     public NetworkStatsCollection getOrLoadCompleteLocked() {
-        NetworkStatsCollection complete = mComplete != null ? mComplete.get() : null;
-        if (complete == null) {
-            if (LOGD) Slog.d(TAG, "getOrLoadCompleteLocked() reading from disk for " + mCookie);
-            try {
-                complete = new NetworkStatsCollection(mBucketDuration);
-                mRotator.readMatching(complete, Long.MIN_VALUE, Long.MAX_VALUE);
-                complete.recordCollection(mPending);
-                mComplete = new WeakReference<NetworkStatsCollection>(complete);
-            } catch (IOException e) {
-                Log.wtf(TAG, "problem completely reading network stats", e);
-                recoverFromWtf();
-            } catch (OutOfMemoryError e) {
-                Log.wtf(TAG, "problem completely reading network stats", e);
-                recoverFromWtf();
-            }
+        NetworkStatsCollection res = mComplete != null ? mComplete.get() : null;
+        if (res == null) {
+            res = loadLocked(Long.MIN_VALUE, Long.MAX_VALUE);
+            mComplete = new WeakReference<NetworkStatsCollection>(res);
         }
-        return complete;
+        return res;
+    }
+
+    public NetworkStatsCollection getOrLoadPartialLocked(long start, long end) {
+        NetworkStatsCollection res = mComplete != null ? mComplete.get() : null;
+        if (res == null) {
+            res = loadLocked(start, end);
+        }
+        return res;
+    }
+
+    private NetworkStatsCollection loadLocked(long start, long end) {
+        if (LOGD) Slog.d(TAG, "loadLocked() reading from disk for " + mCookie);
+        final NetworkStatsCollection res = new NetworkStatsCollection(mBucketDuration);
+        try {
+            mRotator.readMatching(res, start, end);
+            res.recordCollection(mPending);
+        } catch (IOException e) {
+            Log.wtf(TAG, "problem completely reading network stats", e);
+            recoverFromWtf();
+        } catch (OutOfMemoryError e) {
+            Log.wtf(TAG, "problem completely reading network stats", e);
+            recoverFromWtf();
+        }
+        return res;
     }
 
     /**
@@ -382,6 +396,11 @@ public class NetworkStatsRecorder {
             pw.println("History since boot:");
             mSinceBoot.dump(pw);
         }
+    }
+
+    public void dumpCheckin(PrintWriter pw, long start, long end) {
+        // Only load and dump stats from the requested window
+        getOrLoadPartialLocked(start, end).dumpCheckin(pw, start, end);
     }
 
     /**

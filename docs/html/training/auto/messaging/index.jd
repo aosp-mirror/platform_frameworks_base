@@ -1,0 +1,535 @@
+page.title=Providing Messaging for Auto
+page.tags="auto", "car", "automotive", "messaging"
+page.article=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android 5.0 (API level 21) or higher</li>
+  </ul>
+
+    <h2>This class teaches you to:</h2>
+
+    <ul>
+      <li><a href="#overview">Provide Messaging Services</a></li>
+      <li><a href="#manifest">Configure Your Manifest</a></li>
+      <li><a href="#support-lib">Import Support Library for Messaging</a></li>
+      <li><a href="#messaging">Notify Users of Messages</a></li>
+      <li><a href="#handle_actions">Handle User Actions</a></li>
+    </ul>
+
+    <h2>Related Samples</h2>
+
+    <ul>
+      <li><a href="{@docRoot}samples/MessagingService/index.html">
+        MessagingService</a></li>
+    </ul>
+
+    <h2>See Also</h2>
+
+    <ul>
+      <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">
+        User Experience Guidelines: Messaging Apps</a></li>
+      <li><a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">
+        Notifications</a></li>
+    </ul>
+</div>
+</div>
+
+<a class="notice-developers-video wide"
+    href="https://www.youtube.com/watch?v=gSVLuaOTIPk">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Android Auto Messaging</p>
+</div>
+</a>
+
+<p>
+  Staying connected through text messages is important to many drivers. Chat apps can let users
+  know if a child need to be picked up, or if a dinner location has been changed. Apps that provide
+  sports information might tell the user who just won the big game, and let the user ask questions
+  about other games being played. The Android framework enables messaging apps to extend their
+  services into car dashboards using a standard user interface that lets drivers keep their eyes
+  on the road.
+</p>
+
+<p>
+  Apps that support messaging can be extended to pass messaging notifications to Auto
+  dashboard systems, alerting them to new messages and allowing them to respond. You can configure
+  your messaging app to provide these services when an Android mobile device with your app
+  installed is connected to an Auto dashboard. Once connected, your app can provide text
+  information to users and allow them to respond. The Auto dashboard system handles displaying the
+  notification and the interface for replies.
+</p>
+
+<p>
+  This lesson assumes that you have built an app that displays messages to the user and receive the
+  user's replies, such as a chat app. It shows you how to extend your app to hand those messages
+  off to an Auto device for display and replies.
+</p>
+
+
+<h2 id="overview">Provide Messaging Services</h2>
+
+<p>
+  Messaging apps do not run directly on the Android dashboard hardware. They are installed on
+  separate, Android mobile device. When the mobile device is plugged into a dashboard,
+  the installed messaging apps can offer services for viewing and responding to messages
+  through the Auto user interface.
+</p>
+
+<p>To enable your app to provide messaging services for Auto devices:</p>
+
+<ul>
+  <li>Configure your app manifest to indicate that your app provides messaging services which are
+  compatible with Android Auto dashboard devices.
+  </li>
+  <li>Build and send a specific type of <a href=
+  "{@docRoot}guide/topics/ui/notifiers/notifications.html">notification</a> for display on Auto
+  devices.
+  </li>
+  <li>Configure your app to receive {@link android.content.Intent} objects that indicate a user
+    has read or replied to a message.
+</ul>
+
+
+<h2 id="#manifest">Configure Your Manifest</h2>
+
+<p>
+  You configure your app <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest</a>
+  to indicate that it supports messaging services for Auto devices and handle message actions. This
+  section describes what changes to make to your manifest to support messaging for Auto devices.
+</p>
+
+
+<h3 id="manifest-messaging">Declare Auto messaging support</h3>
+
+<p>
+  When a user connects a Android mobile device to a dashboard running Android, the dashboard
+  device looks for apps that declare support for vehicle services, such as messaging. You indicate
+  that your app supports cars capabilities using the following manifest entry:
+</p>
+
+<pre>
+&lt;application&gt;
+    ...
+    &lt;meta-data android:name="com.google.android.gms.car.application"
+        android:resource="@xml/automotive_app_desc" /&gt;
+    ...
+&lt;application&gt;
+</pre>
+
+<p>
+  This manifest entry refers to a secondary xml file, where you declare what Auto capabilities your
+  app supports. For an app that supports messaging for Auto devices, add an xml file to the {@code
+  res/xml/} your app's development project directory as {@code automotive_app_desc.xml}, with the
+  following content:
+</p>
+
+<pre>
+&lt;automotiveApp&gt;
+    &lt;uses name="notification"/&gt;
+&lt;/automotiveApp&gt;
+</pre>
+
+<p>
+  For more information about declaring capabilities for Auto devices, see <a href=
+  "{@docRoot}training/auto/start/index.html#auto-metadata">Getting Started with Auto</a>.
+</p>
+
+
+<h3 id="manifest-intent">Define read and reply intent filters</h3>
+
+<p>
+  Auto devices use {@link android.content.Intent} objects that indicate a user has read or replied
+  to a message provided by your app. Your app defines intent types for reading and replying to
+  messages and adds this information to messaging notifications for Auto devices, so that the
+  dashboard system can notify your app when a user takes one of these actions.
+</p>
+
+<p>
+  You define the read action and reply action intents types for your app and the {@link
+  android.content.BroadcastReceiver} classes that handle them in the manifest. The following code
+  example demonstrates how to declare these intents and their associated receivers.
+</p>
+
+<pre>
+&lt;application&gt;
+    ...
+    &lt;receiver android:name="<em>.MyMessageReadReceiver</em>"&gt;
+        &lt;intent-filter&gt;
+          &lt;action android:name="<em>com.myapp.messagingservice.ACTION_MESSAGE_HEARD</em>"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/receiver&gt;
+
+    &lt;receiver android:name="<em>.MyMessageReplyReceiver</em>"&gt;
+        &lt;intent-filter&gt;
+          &lt;action android:name="<em>com.myapp.messagingservice.ACTION_MESSAGE_REPLY</em>"/&gt;
+        &lt;/intent-filter&gt;
+    &lt;/receiver&gt;
+    ...
+&lt;/application&gt;
+</pre>
+
+<p>
+  The definition of the {@link android.content.BroadcastReceiver} classes shown in this example
+  is discussed in <a href="#handle_actions">Handle User Actions</a>.
+</p>
+
+
+<h2 id="support-lib">Import Support Library for Messaging</h3>
+
+<p>
+  Building notifications for use with Auto devices requires classes from the
+  <a href="{@docRoot}tools/support-library/features.html#v4">v4 support library</a>. Use the
+  <a href="{@docRoot}tools/help/sdk-manager.html">Android SDK Manager</a> to update the
+  <em>Extras > Android Support Repository</em> to version 9 or higher and the
+  <em>Extras > Android Support Library</em> to version 21.0.2 or higher.
+</p>
+
+<p>
+  After you have updated the support libraries, import them into your Android Studio development
+  project by adding this dependency to your
+  <a href="{@docRoot}sdk/installing/studio-build.html#configBuild">build.gradle</a> file:
+</p>
+
+<pre>
+dependencies {
+    ...
+    compile 'com.android.support:support-v4:21.0.+'
+}
+</pre>
+
+<p>
+  For information about importing the support library into development projects for other
+  development environments, see <a href="{@docRoot}tools/support-library/setup.html">Support
+  Library Setup</a>.
+</p>
+
+
+
+<h2 id="messaging">Notify Users of Messages</h2>
+
+<p>
+  A messaging app provides messages to a connected Auto dashboard using the <a href=
+  "{@docRoot}guide/topics/ui/notifiers/notifications.html">notifications</a> framework. When your
+  messaging app has a message for a user, you build a specially configured notification that is
+  received by the dashboard system and presented to the user. The Auto device manages the
+  presentation on the dashboard screen and may play the message via text-to-speech. The dashboard
+  system also handles voice interaction if the user replies to a message using verbal input.
+</p>
+
+<p>
+  The messaging user interface for Auto presents users with two levels of information about
+  messages. The first level of notification tells users what <em>conversations</em> are
+  available, and who they are with, but not the content of the messages. Typically, a
+  conversation is one or more messages from another user to the Auto user.
+</p>
+
+<p>
+  The second level of the notification is the actual content of messages in the conversation. If a
+  user indicates they want to hear the messages in a conversation, the Auto user interface plays
+  the messages using text-to-speech.
+</p>
+
+<p>
+  This section describes how to notify Auto users that conversations are available and
+  provide the content of messages in those conversations.
+</p>
+
+
+<h3 id="build_conversation">Build message conversations</h4>
+
+<p>
+  Messaging notifications for Auto organize messages into conversations using the {@link
+  android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation} class,
+  that represents an unread or new
+  portion of a conversation from a particular sender. It contains a list of messages from the
+  sender.
+</p>
+
+<p>
+  Use the {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation.Builder} class to create an unread conversation object,
+  as shown in the following example code:
+</p>
+
+<pre>
+// Build a RemoteInput for receiving voice input in a Car Notification
+RemoteInput remoteInput = new RemoteInput.Builder(EXTRA_VOICE_REPLY)
+        .setLabel(getApplicationContext().getString(R.string.notification_reply))
+        .build();
+
+// Create an unread conversation object to organize a group of messages
+// from a particular sender.
+UnreadConversation.Builder unreadConvBuilder =
+    new UnreadConversation.Builder(participantName)
+        .setReadPendingIntent(msgHeardPendingIntent)
+        .setReplyAction(replyPendingIntent, remoteInput);
+</pre>
+
+<p>
+  This conversation object includes a {@link android.app.PendingIntent}, which allows the Auto
+  device to signal your app that the conversation has been read by the Auto user. The construction
+  of this intent is discussed in the <a href="#conversation-intents">Creating conversation read and
+  reply intents</a> section.
+</p>
+
+<p>
+  If your app supports replying to a conversation, you must call the {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation.Builder#setReplyAction setReplyAction()}
+  method and provide a pending intent to pass that user action back to your app. The
+  {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation}
+  object you create must also include a {@link
+  android.support.v4.app.RemoteInput} object. When the Auto user
+  receiving this conversation speaks a reply, the remote input objects lets your app get a text
+  version of the voice reply.
+</p>
+
+
+<h4 id="conversation-messages">Associate messages with conversations</h4>
+
+<p>
+  Messages provided for Auto must be associated with a conversation using the
+  {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation}
+  class. The following code example shows how
+  to associate individual messages with a conversation object.
+</p>
+
+<pre>
+// Note: Add messages from oldest to newest to the UnreadConversation.Builder
+for (Iterator&lt;String&gt; messages = conversation.getMessages().iterator();
+     messages.hasNext(); ) {
+    String message = messages.next();
+    unreadConvBuilder.addMessage(message);
+}
+</pre>
+
+<p>
+  When a new message arrives in a particular conversation, your app should check if there is
+  already a conversation object for that particular conversation. If there is, associate the new
+  message with the existing conversation instead of building a new one.
+</p>
+
+
+<h4 id="conversation-intents">Create conversation read and reply intents</h4>
+
+<p>
+  Unread conversation objects contain intents for reading and replying to a conversation. You
+  create a {@link android.app.PendingIntent} object for each of these actions, so the Auto device
+  can notify your app of action taken by the Auto user on a particular conversation.
+</p>
+
+<p>
+  The following example code demonstrates how to define a {@link android.app.PendingIntent} to let
+  your app know if a conversation was listened to by the Auto user:
+</p>
+
+<pre>
+Intent msgHeardIntent = new Intent()
+    .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+    .setAction(<em>com.myapp.messagingservice.ACTION_MESSAGE_HEARD</em>)
+    .putExtra("conversation_id", <em>conversationId</em>);
+
+PendingIntent msgHeardPendingIntent =
+    PendingIntent.getBroadcast(getApplicationContext(),
+        <em>conversationId</em>,
+        msgHeardIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT);
+</pre>
+
+<p>
+  In this example, {@code conversationId} is an integer that identifies the current conversation.
+  The value of {@link android.content.Intent#setAction setAction()} is an intent filter identifier for heard messages which is
+  defined in your app manifest, as shown in <a href="#manifest-intent">Define read and reply intent
+  filters</a>.
+</p>
+
+<p>
+  If your app supports replying to conversations, you also create a {@link
+  android.app.PendingIntent} for each conversation to notify your app that the user has replied.
+  The following code example shows you how to build this intent for use with a particular
+  conversation:
+</p>
+
+<pre>
+Intent msgReplyIntent = new Intent()
+    .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+    .setAction(<em>com.myapp.messagingservice.ACTION_MESSAGE_REPLY</em>)
+    .putExtra("conversation_id", <em>conversationId</em>);
+
+PendingIntent msgReplyPendingIntent = PendingIntent.getBroadcast(
+    getApplicationContext(),
+    <em>conversationId</em>,
+    msgReplyIntent,
+    PendingIntent.FLAG_UPDATE_CURRENT);
+</pre>
+
+<p>
+  Once again, {@code conversationId} is an integer that uniquely identifies this conversation. The
+  value of {@link android.content.Intent#setAction setAction()} is an intent filter identifier for replies which is defined in your
+  app manifest, as shown in <a href="#manifest-intent">Define read and reply intent filters</a>.
+</p>
+
+
+<h3 id="sending_messages">Sending Messages</h4>
+
+<p>
+  When a message arrives for a conversation, you take the following steps to dispatch it as a
+  notification to Auto.
+</p>
+
+<p>First, add the message to the {@link
+android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation.Builder}
+for this conversation, and update its timestamp:</p>
+
+<pre>
+unreadConvBuilder.addMessage(<em>messageString</em>)
+    .setLatestTimestamp(<em>currentTimestamp</em>);
+</pre>
+
+<p>Then create a {@link android.support.v4.app.NotificationCompat.Builder}
+object that you'll use to build the actual notification. You'll need to use the
+pending intents you created in the previous step.</p>
+
+<pre>
+NotificationCompat.Builder notificationBuilder =
+    new NotificationCompat.Builder(getApplicationContext())
+        .setSmallIcon(R.drawable.<em>notification_icon</em>)
+        .setLargeIcon(<em>icon_bitmap</em>)
+        .setContentText(<em>messageString</em>)
+        .setWhen(<em>currentTimestamp</em>)
+        .setContentTitle(<em>participant_name</em>)
+        .setContentIntent(msgHeardPendingIntent);
+
+</pre>
+
+<p>You'll also need to extend the  {@link
+android.support.v4.app.NotificationCompat.Builder} with the {@link
+android.support.v4.app.NotificationCompat.CarExtender}. This is where you
+actually create the {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation} object using the builder you
+just created, and attach it to the {@link
+android.support.v4.app.NotificationCompat.CarExtender}:</p>
+
+<pre>
+notificationBuilder.extend(new CarExtender()
+    .setUnreadConversation(unreadConvBuilder.build());
+</pre>
+
+<p>Once you've done all this, you use your app's {@link
+android.support.v4.app.NotificationManagerCompat} to send the notification:</p>
+
+<pre>
+NotificationManagerCompat msgNotificationManager =
+    NotificationManagerCompat.from(context);
+msgNotificationManager.notify(<em>notificationId</em>, notificationBuilder.build());
+</pre>
+
+<h2 id="handle_actions">Handle User Actions</h2>
+
+<p>
+  When your create and dispatch a notification for messaging, you specify intents to be triggered
+  when the Auto user hears the message and when the user dictates a reply. Your app indicates to
+  the Android framework that it handles these intends by registering them through it's manifest, as
+  discussed in <a href="#manifest-intent">Define read and reply intent filters</a>.
+</p>
+
+<p>
+  In addition to registering these intent filters, your app must provide code to handle these
+  actions. Your app can do this by providing a service or {@link android.content.BroadcastReceiver}
+  objects that handle these intents.</p>
+
+<p>
+  For more information about intents, see <a href=
+  "{@docRoot}guide/components/intents-filters.html">Intents and Intent Filters</a>.
+</p>
+
+
+<h3 id="handling_msg_heard">Handling a message heard action</h3>
+
+<p>
+  When a user listens to a messaging conversation through the Auto user interface, the dashboard
+  device sends a read intent based on how your app defined the messaging notification. Your app
+  catches that intent and invokes the broadcast receiver class associated with it, or the service
+  method set up to handle that action.
+</p>
+
+<p>
+  The following code example shows how to define a {@link android.content.BroadcastReceiver} class
+  to handle a received message heard intent:
+</p>
+
+<pre>
+public class MessageHeardReceiver extends BroadcastReceiver {
+
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+
+        // If you set up the intent as described in
+        // "Create conversation read and reply intents",
+        // you can get the conversation ID by calling:
+        int conversationId = intent.getIntExtra("conversation_id", -1);
+
+        // Remove the notification to indicate it has been read
+        // and update the list of unread conversations in your app.
+    }
+}
+</pre>
+
+<p>
+  Once a notification is read, your app can remove it by calling
+  {@link android.support.v4.app.NotificationManagerCompat#cancel} with the notification ID.
+  Within your app, you should mark the messages provided in the notification as read.
+</p>
+
+
+<p class="note">
+  <strong>Note:</strong> An alternative to this implementation is to use a service in a
+  {@link android.app.PendingIntent}.
+</p>
+
+
+<h3 id="handling_reply">Handling a reply action</h3>
+
+<p>
+  When a user replies to a messaging conversation through the Auto user interface, the dashboard
+  system sends a reply intent based on how your app defined the messaging notification. Your app
+  catches that intent and invokes the broadcast receiver class associated with it, or the service
+  method set up to handle that action.
+</p>
+
+<p>
+  The following code example shows how to define a {@link android.content.BroadcastReceiver} class
+  to handle a received message reply intent:
+</p>
+
+<pre>
+  public class MessageReplyReceiver extends BroadcastReceiver {
+
+
+    &#64;Override
+    public void onReceive(Context context, Intent intent) {
+        // If you set up the intent as described in
+        // "Create conversation read and reply intents",
+        // you can get the conversation ID by calling:
+        int conversationId = intent.getIntExtra("conversation_id", -1).
+
+    }
+
+    /**
+     * Get the message text from the intent.
+     * Note that you should call
+     * RemoteInput.getResultsFromIntent() to process
+     * the RemoteInput.
+     */
+    private CharSequence getMessageText(Intent intent) {
+        Bundle remoteInput =
+            RemoteInput.getResultsFromIntent(intent);
+        if (remoteInput != null) {
+            return remoteInput.getCharSequence("extra_voice_reply");
+        }
+        return null;
+    }
+
+}</pre>

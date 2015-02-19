@@ -273,18 +273,23 @@ public class AudioRecord
             mInitializationLooper = Looper.getMainLooper();
         }
 
-        mAudioAttributes = attributes;
-
         // is this AudioRecord using REMOTE_SUBMIX at full volume?
-        if (mAudioAttributes.getCapturePreset() == MediaRecorder.AudioSource.REMOTE_SUBMIX) {
-            final Iterator<String> tagsIter = mAudioAttributes.getTags().iterator();
+        if (attributes.getCapturePreset() == MediaRecorder.AudioSource.REMOTE_SUBMIX) {
+            final AudioAttributes.Builder filteredAttr = new AudioAttributes.Builder();
+            final Iterator<String> tagsIter = attributes.getTags().iterator();
             while (tagsIter.hasNext()) {
-                if (tagsIter.next().equalsIgnoreCase(SUBMIX_FIXED_VOLUME)) {
+                final String tag = tagsIter.next();
+                if (tag.equalsIgnoreCase(SUBMIX_FIXED_VOLUME)) {
                     mIsSubmixFullVolume = true;
                     Log.v(TAG, "Will record from REMOTE_SUBMIX at full fixed volume");
-                    break;
+                } else { // SUBMIX_FIXED_VOLUME: is not to be propagated to the native layers
+                    filteredAttr.addTag(tag);
                 }
             }
+            filteredAttr.setInternalCapturePreset(attributes.getCapturePreset());
+            mAudioAttributes = filteredAttr.build();
+        } else {
+            mAudioAttributes = attributes;
         }
 
         int rate = 0;
@@ -371,6 +376,7 @@ public class AudioRecord
         // audio source
         if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
              ((audioSource > MediaRecorder.getAudioSourceMax()) &&
+              (audioSource != MediaRecorder.AudioSource.FM_TUNER) &&
               (audioSource != MediaRecorder.AudioSource.HOTWORD)) )  {
             throw new IllegalArgumentException("Invalid audio source.");
         }

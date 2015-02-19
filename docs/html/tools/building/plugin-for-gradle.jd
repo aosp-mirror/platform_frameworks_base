@@ -1,0 +1,451 @@
+page.title=Android Plug-in for Gradle
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+<h2>In this document</h2>
+<ol>
+  <li><a href="#workBuildVariants">Work with build variants</a></li>
+</ol>
+
+
+<h2>See also</h2>
+<ul>
+<li><a href="{@docRoot}sdk/installing/studio-build.html">
+Build System Overview</a></li>
+<li><a href="{@docRoot}tools/building/index.html">
+Buidling and Running</a></li>
+<li><a href="{@docRoot}tools/building/building-studio.html">
+Building and Running from Android Studio</a></li>
+</ul>
+
+<h2>Download</h2>
+<div class="download-box">
+  <a href="{@docRoot}shareables/sdk-tools/android-gradle-plugin-dsl.zip"
+    class="button">Plugin Language Reference</a>
+  <p class="filename">android-gradle-plugin-dsl.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>The Android build system consists of an Android plugin for <em>Gradle</em>.
+<a href="http://www.gradle.org/">Gradle</a> is an advanced build toolkit that manages
+dependencies and allows you to define custom build logic. Android Studio uses a Gradle wrapper
+to fully integrate the Android plugin for Gradle. The Android plugin for Gradle also runs
+independent of Android Studio. This means that you can build your Android apps from which Android
+Studio and from the command line on your machine or on machines where Android Studio is not installed
+(such as continuous integration servers).</p>
+
+<p>The output of the build is the same whether you are building a project from the command line,
+on a remote machine, or using Android Studio.</p>
+
+<h2 id="buildConf">Build configuration</h2>
+
+<p>The build configuration for your project is defined inside <code>build.gradle</code> files,
+which are plain text files that use the syntax and options from Gradle and the Android plugin
+to configure the following aspects of your build:</p>
+
+<ul>
+    <li><em>Build variants</em>. The build system can generate multiple APKs with different
+        product and build configurations for the same module. This is useful when you want to
+        build different versions of your application without having to create a separate projects
+        or modules for each version.</li>
+    <li><em>Dependencies</em>. The build system manages project dependencies and supports
+        dependencies from your local filesystem and from remote repositories. This prevents you
+        from having to search, download, and copy binary packages for your dependencies into your
+        project directory.</li>
+    <li><em>Manifest entries</em>. The build system enables you to specify values for some
+        elements of the manifest file in the build variant configuration. These build values
+        override the existing values in the manifest file. This is useful if you want to generate
+        multiple APKs for your modules where each of the <code>apk</code> files has a different
+        application name, minimum SDK version, or target SDK version. When multiple manifests are
+        present, manifest settings are merged in priority of buildType and productFlavor,
+        <code>/main</code> manifest, and the library manifests.</li>
+    <li><em>Signing</em>. The build system enables you to specify signing settings in the build
+        configuration, and it can sign your APKs during the build process.</li>
+    <li><em>ProGuard</em>. The build system enables you to specify a different
+        <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> rules
+        file for each build variant. The build system can run ProGuard to obfuscate your classes
+        during the build process.</li>
+    <li><em>Testing</em>. For most templates, the build system creates a test directory,
+        <em>androidTest</em> and generates a test APK from the test sources in your project, so
+        you do not have to create a separate test project. The build system can also run your tests
+        during the build process.</li>
+</ul>
+
+<p>Gradle build files use Domain Specific Language (DSL) to describe and manipulate the build logic
+through <em>Groovy</em> syntax. <a href="http://groovy.codehaus.org/">Groovy</a> is a dynamic
+language that you can use to define custom build logic and to interact with the Android-specific
+elements provided by the Android plugin for Gradle.</p>
+
+<h2 id="buildConv">Build by convention</h2>
+
+<p>The Android Studio build system assumes <em>sensible defaults</em> for the project structure
+and other build options. If your project adheres to these conventions, your Gradle build files are
+very simple. When some of these conventions do not apply to your project, the flexibility of the
+build system allows you to configure almost every aspect of the build process. For example, if
+you need to replace the default source folders in your module directories, you can configure a new
+directory structure in the module's build file. </p>
+
+<h2 id="projectModules">Projects and modules build settings</h2>
+
+<p>A <em>project</em> in Android Studio represents the top-level Android development structure.
+Android Studio projects contain project files and one or more application modules. A
+<em>module</em> is a component of your app that you can build, test, or debug independently.
+Modules contain the source code and resources for your apps. Android Studio projects can contain
+several kinds of modules:</p>
+
+<ul>
+    <li><em>Android application modules</em> contain application (mobile, TV, Wear, Glass) code and
+         may depend on library modules, although many Android apps consists of only one application
+         module. The build system generates APK packages for application modules. </li>
+    <li><em>Android library modules</em> contain reusable Android-specific code and resources.
+        The build system generates an AAR (Android ARchive) package for library modules.</li>
+    <li><em>App Engine modules</em> contain code and resources for App Engine integration.</li>
+    <li><em>Java library modules</em> contain reusable code. The build system generates a
+        JAR package for Java library modules.</li>
+</ul>
+
+<p>Android Studio projects contain a top-level project Gradle build file that allows you to add the
+configuration options common to all application modules in the project. Each application module
+also has its own build.gradle file for build settings specific to that module.</p>
+
+<h3>Project Build File</h3>
+<p>By default, the project-level Gradle file uses <em>buildscript</em> to define the Gradle
+<em>repositories</em> and <em>dependencies</em>. This allows different projects to use different
+Gradle versions. Supported repositories include JCenter, Maven Central, or Ivy. This example
+declares that the build script uses the JCenter repository and a classpath dependency artifact
+that contains the Android plugin for Gradle version 1.0.1.
+</p>
+<p>
+<pre>
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.0.1'
+
+        // NOTE: Do not place your application dependencies here: they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+   repositories {
+       jcenter()
+   }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> The SDK location for the Android Studio project is defined in
+the <em>local.properties</em> file in the <code>sdk.dir<sdk location></code> setting or through an
+<code>ANDROID_HOME</code> environment variable.</p>
+
+<h3>Module Build File</h3>
+<p>The application module Gradle build file allows you to configure module build settings,
+including overriding the <code>src/main</code> manifest settings and setting custom packaging
+options. </p>
+
+<ul>
+   <li>android settings </li>
+       <ul>
+          <li>compileSdkVersion</li>
+          <li>buildToolsVersion</li>
+       </ul>
+
+   <li>defaultConfig and productFlavors </li>
+       <ul>
+          <li>manifest properties such as applicationId, minSdkVersion, targetSdkVersion, and test
+              information</li>
+       </ul>
+
+   <li>buildTypes</li>
+       <ul>
+          <li>build properties such as debuggable, ProGuard enabling, debug signing, version name
+              suffix and testinformation</li>
+       </ul>
+
+   <li>dependencies</li>
+</ul>
+
+<p>This example applies the Android plugin, uses the default configuration to override several
+manifest properties, creates two build types: release and debug, and declares several dependencies.
+</p>
+
+<pre>
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.mycompany.myapplication"
+        minSdkVersion 13
+        targetSdkVersion 20
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+         debug {
+            debuggable true
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:20.0.0'
+    compile project(path: ':app2, configuration: 'android-endpoints')
+}
+</pre>
+
+
+<p class="note"><strong>Note:</strong> You can inject custom build logic for property values defined
+by a function that gets called by the property, for example:
+<pre>
+def computeVersionName() {
+  ...
+}
+
+android {
+    defaultConfig {
+        versionName computeVersionName()
+        ...
+    }
+}
+</pre>
+</p>
+
+
+
+<h2 id="dependencies">Dependencies</h2>
+
+<p>The Android Studio build system manages project dependencies and supports module dependencies,
+local binary dependencies, and remote binary dependencies.</p>
+
+<dl>
+    <dt><em>Module Dependencies</em></dt>
+    <dd><p>An application module can include in its build file a list of other modules it depends on.
+        When you build this module, the build system assembles and includes the required
+        modules.</p></dd>
+    <dt><em>Local Dependencies</em></dt>
+    <dd><p>If you have binary archives in your local filesystem that a module depends on, such as
+        JAR files, you can declare these dependencies in the build file for that module.</p></dd>
+    <dt><em>Remote Dependencies</em></dt>
+    <dd><p>When some of your dependencies are available in a remote repository, you do not have
+        to download them and copy them into your project. The Android Studio build system supports
+        remote dependencies from repositories, such as <a href="http://maven.apache.org/">Maven</a>,
+        and dependency managers, such as <a href="http://ant.apache.org/ivy/">Ivy</a>. </p>
+        <p>Many popular software libraries and tools are available in public Maven repositories.
+        For these dependencies you only have to specify their Maven coordinates, which uniquely
+        identify each element in a remote repository. The format for Maven coordinates used in the
+        build system is <code>group:name:version</code>. For example, the Maven coordinates for
+        version 16.0.1 of the Google Guava libraries are
+        <code>com.google.guava:guava:16.0.1</code>.</p>
+        <p>The <a href="http://search.maven.org">Maven Central Repository</a> is widely used to
+        distribute many libraries and tools.</p>
+    </dd>
+</dl>
+
+<h2 id="buildTasks">Build tasks</h2>
+
+<p>The Android Studio build system defines a hierarchical set of build tasks: the top-level or
+anchor tasks invoke dependent tasks to produce their collective build outcomes. The top-level build
+tasks are:</p>
+
+<dl>
+   <dt>assemble </dt>
+   <dd><p>Builds the project output. </p></dd>
+   <dt>check </dt>
+   <dd><p>Runs checks and tests.</p></dd>
+   <dt>build </dt>
+   <dd><p>Runs both assemble and check. </p></dd>
+   <dt>clean </dt>
+   <dd><p>Performs the clean.</p></dd>
+</dl>
+
+<p>The Android plugin provides additional tasks for <em>connectedCheck</em> and <em>deviceCheck</em>
+for checks run on connected, emulated, and remote devices. Gradle tasks can be viewed by clicking
+the Gradle tab</a> in the right margin.
+<img src="{@docRoot}images/tools/studio-gradle-tab.png"></p>
+<p class="img-caption"><strong>Figure 1:</strong> Gradle tab</p>
+
+<p>Running a top-level task, runs all the dependent tasks. For example, the <em>assemble</em> task
+has dependent tasks for <em>assembleDebug</em> and <em>assembleRelease</em> to make the debug and
+release APKs. The <em>assemble</em> task depends on these tasks so calling it builds both APKs.
+These tasks can also be called independently to build the debug or release APK separately. </p>
+
+<p>You can view the list of available tasks and invoke any task from Android Studio and from
+the command line, as described in
+<a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android Studio</a>
+and <a href="{@docRoot}tools/building/building-cmdline.html">Build the project from
+the command line</a>.</p>
+
+<h2 id="gradleWrapper">The Gradle wrapper</h2>
+
+<p>Android Studio projects contain the <em>Gradle wrapper</em>, which consists of:</p>
+
+<ul>
+    <li>A JAR file</li>
+    <li>A properties file</li>
+    <li>A shell script for Windows platforms</li>
+    <li>A shell script for Mac and Linux platforms</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> You should submit all of these files to your source
+control system.</p>
+
+<p>Using the Gradle wrapper (instead of the local Gradle installation) ensures that
+you always run the version of Gradle defined in the <em>local.properties</em> file. To configure your
+project to use a newer version of Gradle, edit the properties file and specify the new version there.
+</p>
+
+<p>Android Studio reads the properties file from the Gradle wrapper directory inside your project
+and runs the wrapper from this directory, so you can seamlessly work with multiple projects
+that require different versions of Gradle.</p>
+
+<p class="note"><strong>Note:</strong> Android Studio does not use the shell scripts, so any
+changes you make to them won't work when building from the IDE. You should define your custom
+logic inside Gradle build files instead.</p>
+
+<p>You can run the shell scripts to build your project from the command line on your development
+machine and on other machines where Android Studio is not installed.</p>
+
+<p class="caution"><strong>Caution:</strong> When you create a project, only use the Gradle wrapper
+scripts and JAR from a trusted source, such as those generated by Android Studio. </p>
+
+
+<h2 id="buildVariants"> Build variants</h2>
+
+<p>Each version of your app is represented in the build system by a <em>build variant</em>.
+Build variants are combinations of product flavors and build types. Product flavors represent
+product build versions of an app, such as free and paid. Build types represent the build
+packaging versions generated for each app package, such as debug and release. The build system
+generates APKs for each combination of product flavor and build type.</p>
+
+<p>By default, Android Studio defines default configuration settings, <code>defaultConfig</code> in
+the build.gradle file, and two build types (<em>debug</em> and <em>release</em>). This creates two
+build variants, debug and release, and the build system generates an
+APK for each variant. </p>
+
+<p>Adding two product flavors, <em>demo</em> and <em>full</em> along
+with the default build types <em>debug</em> and <em>release</em> generates four build variants,
+each with its own customized configuration:</p>
+
+<ul>
+    <li>demoDebug</li>
+    <li>demoRelease</li>
+    <li>fullDebug</li>
+    <li>fullRelease</li>
+</ul>
+
+Resources are merged across the multiple Android application sources:
+<ul>
+    <li>Build variants based on the buildType, and productFlavor build settings</li>
+    <li>The main sourceSet, generally located in src/main/res</li>
+    <li>Library Project dependencies, which contribute resources through the res entry in their aar
+    bundle.</li>
+</ul>
+
+<p>The priority of the merge order from lowest to highest is libraries/dependencies -> main src ->
+productFlavor -> buildType.</p>
+
+
+<p>Some projects have complex combinations of features along more than one dimension, but they
+still represent the same app. For example, in addition to having a demo and a full version of the
+app, some games may contain binaries specific to a particular CPU/ABI. The flexibility of
+the build system makes it possible to generate the following build variants for such a project:</p>
+
+<ul>
+    <li>x86-demoDebug</li>
+    <li>x86-demoRelease</li>
+    <li>x86-fullDebug</li>
+    <li>x86-fullRelease</li>
+    <li>arm-demoDebug</li>
+    <li>arm-demoRelease</li>
+    <li>arm-fullDebug</li>
+    <li>arm-fullRelease</li>
+    <li>mips-demoDebug</li>
+    <li>mips-demoRelease</li>
+    <li>mips-fullDebug</li>
+    <li>mips-fullRelease</li>
+</ul>
+
+<p>This project would consist of two build types (<em>debug</em> and <em>release</em>)
+and two <em>dimensions</em> of product flavors, one for app type (demo or full) and one for
+CPU/ABI (x86, ARM, or MIPS). </p>
+
+
+<h3>Source directories</h3>
+
+<p>To build each version of your app, the build system combines source code and
+resources from:</p>
+
+<ul>
+    <li><code>src/main/</code> - the main source directory (the default configuration common to all
+    variants)</li>
+    <li><code>src/&lt;buildType>/</code> - the <buildType> source directory</li>
+    <li><code>src/&lt;productFlavor>/</code> - the <productFlavor> source directory</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> The build type and product flavor source directories are optional,
+as Android Studio does not create these directories for you. You should create these directories
+as you add build types and product flavors to the build configuration files. The build system does not
+use these directories if they are not present.</p>
+
+<p>For projects that do not define any flavors, the build system uses the <em>defaultConfig</em>
+settings, the main app directory and the default build type directories. For example, to generate
+the default <em>debug</em> and <em>release</em> build variants in projects with no product flavors,
+the build system uses:</p>
+<ul>
+  <li><code>src/main/</code> (default configuration)</li>
+  <li><code>src/release/</code> (build type)</li>
+  <li><code>src/debug/</code> (build type)</li>
+</ul>
+
+<p>For projects that define a set of product flavors, the build system merges the build type, product
+flavor and main source directories. For example, to generate the <em>full-debug</em> build variant,
+the build system merges the build type, product flavor and main directories:</p>
+<ul>
+   <li><code>src/main/</code> (default configuration)</li>
+   <li><code>src/debug/</code> (build type)</li>
+   <li><code>src/full/</code> (flavor)</li>
+</ul>
+
+<p>For projects that use flavor dimensions, the build system merges one flavor source directory per
+dimension. For example, to generate the <em>arm-demo-release</em> build variant, the build system
+merges:</p>
+<ul>
+  <li><code>src/main/</code> (default configuration)</li>
+  <li><code>src/release/</code> (build type)</li>
+  <li><code>src/demo/</code> (flavor - app type dimension)</li>
+  <li><code>src/arm/</code> (flavor - ABI dimension)</li>
+</ul>
+
+
+<p>The source code from these directories is used together to generate the output for a build
+variant. You can have classes with the same name in different directories as long as those
+directories are not used together in the same variant. </p>
+
+<p>The build system also merges all the manifests into a single manifest, so each build variant
+can define different components or permissions in the final manifest. The manifest merge priority
+from lowest to highest is libraries/dependencies -> main src -> productFlavor -> buildType. </p>
+
+<p>The build system merges all the resources from the all the source directories. If different
+folders contain resources with the same name for a build variant, the priority order is the
+following: build type resources override those from the product flavor, which override the
+resources in the main source directory, which override those in any libraries.</p>
+
+<p class="note"><strong>Note:</strong> Build variants enable you to reuse common activities,
+application logic, and resources across different versions of your app.</p>
+
+

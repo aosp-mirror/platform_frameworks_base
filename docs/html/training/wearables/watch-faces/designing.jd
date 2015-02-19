@@ -1,0 +1,116 @@
+page.title=Designing Watch Faces
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#DesignGuidelines">Conform to the Design Guidelines</a></li>
+  <li><a href="#ImplementationStrategy">Create an Implementation Strategy</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<!-- design guide box -->
+<a class="notice-designers wide" href="{@docRoot}design/wear/watchfaces.html">
+  <div>
+    <h3>Design Guide</h3>
+    <p>Watch Faces</p>
+  </div>
+</a>
+
+<p>Similar to the process of designing a traditional watch face, creating one for
+Android Wear is an exercise in visualizing time clearly. Android Wear devices
+provide advanced capabilities for watch faces that you can leverage in your designs, such as
+vibrant colors, dynamic backgrounds, animations, and data integration. However, there are
+also many design considerations that you must take into account.</p>
+
+<p>This lesson provides a summary of the design considerations for watch faces and general
+guidelines to get started implementing a design. For more information, read the <a
+href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a> design guide.</p>
+
+
+
+<h2 id="DesignGuidelines">Conform to the Design Guidelines</h2>
+
+<p>As you plan the look of your watch face and what kind of information it should present
+to users, consider these design guidelines:</p>
+
+<div style="float:right;margin-top:-5px;margin-left:20px">
+  <img src="{@docRoot}training/wearables/watch-faces/images/Render_Next.png"
+       width="200" height="195" alt="" style="margin-right:5px"/><br>
+  <img src="{@docRoot}training/wearables/watch-faces/images/Render_Interactive.png"
+       width="200" height="195" alt="" style="margin-right:5px"/>
+  <p class="img-caption" style="margin-top:0px;margin-left:10px">
+  <strong>Figure 1.</strong> Example watch faces.</p>
+</div>
+
+<dl>
+<dt><em>Plan for square and round devices</em></dt>
+<dd>Your design should work for both square and round Android Wear devices, including devices with
+<a href="{@docRoot}training/wearables/ui/layouts.html#same-layout">insets on the bottom of the
+screen</a>.</dd>
+
+<dt><em>Support all display modes</em></dt>
+<dd>Your watch face should support ambient mode with limited color and interactive mode with
+full color and animations.</dd>
+
+<dt><em>Optimize for special screen technologies</em></dt>
+<dd>In ambient mode, your watch face should keep most pixels black. Depending on the screen
+technology, you may need to avoid large blocks of white pixels, use only black and white, and
+disable anti-aliasing.</dd>
+
+<dt><em>Accomodate system UI elements</em></dt>
+<dd>Your design should ensure that system indicators remain visible and that users can still
+read the time when notification cards appear on the screen.</dd>
+
+<dt><em>Integrate data</em></dt>
+<dd>Your watch face can leverage sensors and cellular connectivity on the companion mobile
+device to show user data relevant to the context, such as the weather for the day or their next
+calendar event.</dd>
+
+<dt><em>Provide configuration options</em></dt>
+<dd>You can let users configure some aspects of your design (like colors and sizes) on the
+wearable or on the Android Wear companion app.</dd>
+</dl>
+
+<p>For more information about designing watch faces for Android Wear, see the <a
+href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a> design guide.</p>
+
+
+
+<h2 id="ImplementationStrategy">Create an Implementation Strategy</h2>
+
+<p>After you finalize the design for your watch face, you need to determine how to obtain any
+necessary data and draw the watch face on the wearable device. Most implementations
+consist of the following components:</p>
+
+<ul>
+<li>One or more background images</li>
+<li>Application code to retrieve the required data</li>
+<li>Application code to draw text and shapes over the background images</li>
+</ul>
+
+<p>You typically use one background image in interactive mode and a different background image
+in ambient mode. The background in ambient mode is often completely black. Background images for
+Android Wear devices with a screen density of hdpi should be 320 by 320 pixels in size to fit
+both square and round devices. The corners of the background image are not visible on round
+devices. In your code, you can detect the size of the device screen and scale down the background
+image if the device has a lower resolution than your image. To improve performance, you should
+scale the background image only once and store the resulting bitmap.</p>
+
+<p>You should run the application code to retrieve contextual data only as often as required
+and store the results to reuse the data every time you draw the watch face. For example, you
+don't need to fetch weather updates every minute.</p>
+
+<p>To increase battery life, the application code that draws your watch face in ambient mode
+should be relatively simple. You usually draw outlines of shapes using a limited set of colors
+in this mode. In interactive mode, you can use full color, complex shapes, gradients, and
+animations to draw your watch face.</p>
+
+<p>The remaining lessons in this class show you how to implement watch faces in detail.</p>

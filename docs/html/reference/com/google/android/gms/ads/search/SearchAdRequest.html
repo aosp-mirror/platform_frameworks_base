@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">SearchAdRequest</li>
       </ul>
     </div>
@@ -781,6 +850,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -860,7 +932,12 @@ Summary:
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html">SearchAdRequest.Builder</a></td>
-      <td class="jd-descrcol" width="100%">Builds a <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a></code>.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Builds a <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html">SearchAdRequest</a></code>.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -885,78 +962,133 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_DASHED">BORDER_TYPE_DASHED</a></td>
-        <td class="jd-descrcol" width="100%">Dashed border.</td>
+        <td class="jd-descrcol" width="100%">
+          Dashed border.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_DOTTED">BORDER_TYPE_DOTTED</a></td>
-        <td class="jd-descrcol" width="100%">Dotted border.</td>
+        <td class="jd-descrcol" width="100%">
+          Dotted border.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_NONE">BORDER_TYPE_NONE</a></td>
-        <td class="jd-descrcol" width="100%">No border.</td>
+        <td class="jd-descrcol" width="100%">
+          No border.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#BORDER_TYPE_SOLID">BORDER_TYPE_SOLID</a></td>
-        <td class="jd-descrcol" width="100%">Solid border.</td>
+        <td class="jd-descrcol" width="100%">
+          Solid border.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#CALL_BUTTON_COLOR_DARK">CALL_BUTTON_COLOR_DARK</a></td>
-        <td class="jd-descrcol" width="100%">Dark-colored call button.</td>
+        <td class="jd-descrcol" width="100%">
+          Dark-colored call button.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#CALL_BUTTON_COLOR_LIGHT">CALL_BUTTON_COLOR_LIGHT</a></td>
-        <td class="jd-descrcol" width="100%">Light-colored call button.</td>
+        <td class="jd-descrcol" width="100%">
+          Light-colored call button.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#CALL_BUTTON_COLOR_MEDIUM">CALL_BUTTON_COLOR_MEDIUM</a></td>
-        <td class="jd-descrcol" width="100%">Medium-colored call button.</td>
+        <td class="jd-descrcol" width="100%">
+          Medium-colored call button.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#ERROR_CODE_INTERNAL_ERROR">ERROR_CODE_INTERNAL_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Something happened internally; for instance, an invalid response was received from the ad
- server.</td>
+        <td class="jd-descrcol" width="100%">
+          Something happened internally; for instance, an invalid response was received from the ad
+ server.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#ERROR_CODE_INVALID_REQUEST">ERROR_CODE_INVALID_REQUEST</a></td>
-        <td class="jd-descrcol" width="100%">The ad request was invalid; for instance, the ad unit ID was incorrect.</td>
+        <td class="jd-descrcol" width="100%">
+          The ad request was invalid; for instance, the ad unit ID was incorrect.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#ERROR_CODE_NETWORK_ERROR">ERROR_CODE_NETWORK_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">The ad request was unsuccessful due to network connectivity.</td>
+        <td class="jd-descrcol" width="100%">
+          The ad request was unsuccessful due to network connectivity.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#ERROR_CODE_NO_FILL">ERROR_CODE_NO_FILL</a></td>
-        <td class="jd-descrcol" width="100%">The ad request was successful, but no ad was returned due to lack of ad inventory.</td>
+        <td class="jd-descrcol" width="100%">
+          The ad request was successful, but no ad was returned due to lack of ad inventory.
+          
+    
+
+        </td>
     </tr>
     
     
@@ -981,8 +1113,13 @@ Summary:
           final
           String</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#DEVICE_ID_EMULATOR">DEVICE_ID_EMULATOR</a></td>
-          <td class="jd-descrcol" width="100%">The <code>deviceId</code> for emulators to be used with
- <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            The <code>deviceId</code> for emulators to be used with
+ <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.
+            
+    
+
+          </td>
       </tr>
       
     
@@ -1017,7 +1154,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getAnchorTextColor()">getAnchorTextColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the color of the ad URL.</div>
+        <div class="jd-descrdiv">
+          Returns the color of the ad URL.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1035,7 +1177,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getBackgroundColor()">getBackgroundColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the background color of the ad.</div>
+        <div class="jd-descrdiv">
+          Returns the background color of the ad.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1053,7 +1200,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getBackgroundGradientBottom()">getBackgroundGradientBottom</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the color of the background gradient at the bottom of the ad.</div>
+        <div class="jd-descrdiv">
+          Returns the color of the background gradient at the bottom of the ad.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1071,7 +1223,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getBackgroundGradientTop()">getBackgroundGradientTop</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the color of the background gradient at the top of the ad.</div>
+        <div class="jd-descrdiv">
+          Returns the color of the background gradient at the top of the ad.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1089,7 +1246,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getBorderColor()">getBorderColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the border color of the ad container.</div>
+        <div class="jd-descrdiv">
+          Returns the border color of the ad container.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1107,7 +1269,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getBorderThickness()">getBorderThickness</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the thickness of the border in pixels around the ad container.</div>
+        <div class="jd-descrdiv">
+          Returns the thickness of the border in pixels around the ad container.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1125,7 +1292,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getBorderType()">getBorderType</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the type of border around the ad container.</div>
+        <div class="jd-descrdiv">
+          Returns the type of border around the ad container.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1143,7 +1315,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getCallButtonColor()">getCallButtonColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the color of the call button when a call extension is shown.</div>
+        <div class="jd-descrdiv">
+          Returns the color of the call button when a call extension is shown.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1161,7 +1338,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getCustomChannels()">getCustomChannels</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the custom channels for the ad request.</div>
+        <div class="jd-descrdiv">
+          Returns the custom channels for the ad request.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1178,26 +1360,36 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getCustomEventExtrasBundle(java.lang.Class<T>)">getCustomEventExtrasBundle</a></span>(Class&lt;T&gt; adapterClass)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns extra parameters to pass to a specific custom event adapter.
+          
+    
 
-        <div class="jd-descrdiv">Returns extra parameters to pass to a specific custom event adapter.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
+            
+            
+            
+            
             
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getDescriptionTextColor()">getDescriptionTextColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the color of the ad description.</div>
+        <div class="jd-descrdiv">
+          Returns the color of the ad description.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1215,7 +1407,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getFontFace()">getFontFace</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the font used to render the ad.</div>
+        <div class="jd-descrdiv">
+          Returns the font used to render the ad.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1233,7 +1430,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getHeaderTextColor()">getHeaderTextColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the font size of the header text in pixels.</div>
+        <div class="jd-descrdiv">
+          Returns the font size of the header text in pixels.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1251,7 +1453,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getHeaderTextSize()">getHeaderTextSize</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the font size of the header text in pixels.</div>
+        <div class="jd-descrdiv">
+          Returns the font size of the header text in pixels.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1269,7 +1476,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getLocation()">getLocation</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the user's location targeting information.</div>
+        <div class="jd-descrdiv">
+          Returns the user's location targeting information.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1287,7 +1499,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getNetworkExtras(java.lang.Class<T>)">getNetworkExtras</a></span>(Class&lt;T&gt; networkExtrasClass)</nobr>
         
-        <div class="jd-descrdiv">Returns extra parameters to pass to a specific ad network adapter.</div>
+        <div class="jd-descrdiv">
+          Returns extra parameters to pass to a specific ad network adapter.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1304,26 +1521,36 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getNetworkExtrasBundle(java.lang.Class<T>)">getNetworkExtrasBundle</a></span>(Class&lt;T&gt; adapterClass)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns extra parameters to pass to a specific ad network adapter.
+          
+    
 
-        <div class="jd-descrdiv">Returns extra parameters to pass to a specific ad network adapter.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
+            
+            
+            
+            
             
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#getQuery()">getQuery</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the query of the search ad request.</div>
+        <div class="jd-descrdiv">
+          Returns the query of the search ad request.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1341,7 +1568,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.html#isTestDevice(android.content.Context)">isTestDevice</a></span>(Context context)</nobr>
         
-        <div class="jd-descrdiv">Returns <code>true</code> if this device will receive test ads.</div>
+        <div class="jd-descrdiv">
+          Returns <code>true</code> if this device will receive test ads.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1611,6 +1843,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Dashed border. </p></div>
 
     
@@ -1648,6 +1883,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Dotted border. </p></div>
 
@@ -1687,6 +1925,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>No border. </p></div>
 
     
@@ -1724,6 +1965,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Solid border. </p></div>
 
@@ -1763,6 +2007,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Dark-colored call button. </p></div>
 
     
@@ -1800,6 +2047,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Light-colored call button. </p></div>
 
@@ -1839,6 +2089,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Medium-colored call button. </p></div>
 
     
@@ -1876,6 +2129,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Something happened internally; for instance, an invalid response was received from the ad
  server.
@@ -1917,6 +2173,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The ad request was invalid; for instance, the ad unit ID was incorrect.
 </p></div>
 
@@ -1956,6 +2215,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The ad request was unsuccessful due to network connectivity.
 </p></div>
 
@@ -1994,6 +2256,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The ad request was successful, but no ad was returned due to lack of ad inventory.
 </p></div>
@@ -2043,6 +2308,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>The <code>deviceId</code> for emulators to be used with
  <code><a href="/reference/com/google/android/gms/ads/search/SearchAdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.
@@ -2094,6 +2362,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the color of the ad URL.
 </p></div>
 
@@ -2123,6 +2394,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the background color of the ad.
 </p></div>
@@ -2154,6 +2428,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the color of the background gradient at the bottom of the ad.
 </p></div>
 
@@ -2183,6 +2460,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the color of the background gradient at the top of the ad.
 </p></div>
@@ -2214,6 +2494,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the border color of the ad container.
 </p></div>
 
@@ -2243,6 +2526,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the thickness of the border in pixels around the ad container.
 </p></div>
@@ -2274,6 +2560,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the type of border around the ad container.
 </p></div>
 
@@ -2303,6 +2592,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the color of the call button when a call extension is shown.
 </p></div>
@@ -2334,6 +2626,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the custom channels for the ad request. Custom channels allow publishers to track the
  performance of specific groups of ads. These custom channels need to created on the AdSense
  website. Reports can then be created based on the channels.
@@ -2345,14 +2640,14 @@ From class
 
 <A NAME="getCustomEventExtrasBundle(java.lang.Class<T>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Bundle
       </span>
       <span class="sympad">getCustomEventExtrasBundle</span>
@@ -2360,12 +2655,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns extra parameters to pass to a specific custom event adapter. Returns <code>null</code> if
  no custom event extras of the provided type were set.
 </p></div>
@@ -2397,6 +2695,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the color of the ad description.
 </p></div>
 
@@ -2426,6 +2727,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the font used to render the ad. The same font is used in the header, the description
  and the anchor.
@@ -2458,6 +2762,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the font size of the header text in pixels.
 </p></div>
 
@@ -2487,6 +2794,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the font size of the header text in pixels. The font sizes for the description and
  the anchor are determined from the header size.
@@ -2519,6 +2829,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the user's location targeting information. Returns <code>null</code> if the location was
  not set.
 </p></div>
@@ -2550,6 +2863,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns extra parameters to pass to a specific ad network adapter. Ad network adapters
  provide a <code><a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a></code> class. Returns <code>null</code> if no network extras of the
  provided type were set.
@@ -2561,14 +2877,14 @@ From class
 
 <A NAME="getNetworkExtrasBundle(java.lang.Class<T>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Bundle
       </span>
       <span class="sympad">getNetworkExtrasBundle</span>
@@ -2576,12 +2892,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns extra parameters to pass to a specific ad network adapter. Returns <code>null</code> if no
  network extras of the provided type were set.
 </p></div>
@@ -2613,6 +2932,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the query of the search ad request.
 </p></div>
 
@@ -2642,6 +2964,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns <code>true</code> if this device will receive test ads.
 </p></div>

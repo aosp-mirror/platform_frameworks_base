@@ -1,0 +1,254 @@
+page.title=Android Lollipop
+
+@jd:body
+
+
+
+
+
+
+
+
+
+
+  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
+    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
+  </div>
+
+  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
+  <div class="col-4 normal-links highlights" style="font-size:12px;">
+    <h3 id="thisd" >主要開發人員功能</h3>
+    <ul style="list-style-type:none;">
+  <li><a href="#Material">實感設計</a></li>
+  <li><a href="#Perf">聚焦優異效能</a></li>
+  <li><a href="#Notifications">通知</a></li>
+  <li><a href="#TV">您的應用程式躍上大螢幕</a></li>
+  <li><a href="#Documents">文件導向的應用程式</a></li>
+  <li><a href="#Connectivity">進階連線功能</a></li>
+  <li><a href="#Graphics">高效能圖形運算機制</a></li>
+  <li><a href="#Audio">更強大的音訊功能</a></li>
+  <li><a href="#Camera">改良的相機功能和視訊處理能力</a></li>
+  <li><a href="#Work">Android 在工作方面的應用</a></li>
+  <li><a href="#ScreenCapture">螢幕擷取和分享</a></li>
+  <li><a href="#Sensors">全新的感應器類型</a></li>
+  <li><a href="#WebView">Chromium WebView</a></li>
+  <li><a href="#Accessibility">協助工具和輸入功能</a></li>
+  <li><a href="#Battery">用於打造低耗電應用程式的工具</a></li>
+    </ul>
+  </div>
+</div>
+
+
+
+
+
+
+
+<p>歡迎使用 Android 5.0 Lollipop，這是目前為止規模最大、功能最強的 Android 版本！</p>
+
+<p>這個版本不僅為使用者提供了許多新功能，也為開發人員提供了數以千計的全新 API。Android 的應用領域也因此從手機、平板電腦、穿戴式裝置，進一步擴展到電視和汽車。</p>
+
+<p>如要深入瞭解全新的開發人員 API，請參閱 <a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API 總覽</a>。如需適合一般消費者閱讀的 Android 5.0 相關資訊，請前往 <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a>。</p>
+
+<h2 id="Material">實感設計</h2>
+
+<p>Android 5.0 將<a href="http://www.google.com/design/spec">實感設計</a>功能 (Material Design) 導入到 Android 中，並為您提供了更加完善的使用者介面工具套件，讓您輕鬆將全新的設計模式整合到應用程式中。  </p>
+
+
+
+<p>全新 <strong>3D 檢視模式</strong>可讓您設定 z-level，讓元素高過檢視階層並投射<strong>即時陰影</strong>，即使元素移動時也沒問題。</p>
+
+
+<p>透過內建<strong>活動轉換效果</strong>的優美動畫，帶領使用者體驗流暢的狀態切換畫面。實感主題可為您的活動新增轉換效果，包括在各個活動中使用<strong>共用視覺化元素</strong>的功能。</p>
+
+
+
+<div style="width:290px;margin-right:35px;float:left">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="/design/material/videos/ContactsAnim.mp4">
+    <source src="/design/videos/ContactsAnim.webm">
+    <source src="/design/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    如要播放影片，請按一下裝置螢幕<em></em>
+  </div>
+</div>
+
+
+<p>您可以為按鈕、核取方塊和應用程式中的其他觸控控制項套用波紋動畫。 
+
+<p>您也能以 XML 定義向量圖形可繪項目，並透過多種方式套用動畫效果。向量圖形可繪項目縮放時不會失真，因此最適合用於應用程式內的單色圖示。</p>
+
+<p><strong>RenderThread</strong> 是全新的系統管理執行緒，即使主要使用者介面執行緒中發生延遲，仍可確保動畫流暢播放。 </p>
+
+
+<h2 id="Perf">效能導向</h2>
+
+<p>Android 5.0 為您提供更快、更流暢且更強大的運算體驗。</p>
+
+<p>Android 現在只會在全新 <strong>ART Runtime</strong> 上執行。ART 完全從零打造，可混合支援預先 (AOT) 編譯、準時 (JIT) 編譯和直譯程式碼。ART 受到 ARM、x86 和 MIPS 架構支援 ，並且完全與 64 位元相容。</p>
+
+<p>ART 可提升應用程式的效能和回應靈敏度。有效率的垃圾資訊收集作業可減少垃圾收集事件的暫停次數和持續時間。正因為垂直同步時段內的垃圾資訊收集事件，您的應用程式才不會忽略影格。如果需要在前景使用，ART 還會動態移動記憶體將效能最佳化。 </p>
+
+<p>Android 5.0 導入了對 <strong>64 位元架構</strong>的平台支援  (Nexus 9 的 NVIDIA Tegra K1 使用該架構)。針對特定的運算工作負載，最佳化作業可提供更大的位址空間和改進的效能。以 Java 語言編寫的應用程式可自動做為 64 位元應用程式執行，完全不需要任何修改。如果您的應用程式使用原生程式碼，請注意我們已擴展 NDK，現在可支援適用於 ARM v8、x86-64 和 MIPS-64 的全新 ABI。</p>
+
+<p>延續對於流暢效能的重視，Android 5.0 提供了改進的音訊/視訊同步功能。我們已校準音訊和圖形管道，可以提供更準確的時間戳記，讓影片應用程式和遊戲顯示流暢同步的影音內容。</p>
+
+
+<h2 id="Notifications">通知</h2>
+
+<p>在 Android 5.0 中，通知變得更明顯可見、更容易存取，同時也更容易設定。 </p>
+
+<img src="{@docRoot}images/versions/notification-headsup.png" style="float:right; margin:0 0 40px 60px" width="300" height="224" />
+
+<p>對於<strong>鎖定畫面上</strong>所顯示的通知詳細資訊，使用者可以視需要自行調整。使用者可選擇在安全的鎖定畫面上不顯示任何內容、顯示部分內容，或者顯示所有內容。 </p>
+
+<p>重要的通知提醒 (例如來電) 將顯示在<strong>提醒通知</strong>中。提醒通知是一個小型的浮動視窗，使用者不需要離開目前的應用程式即可回應或關閉提醒通知。</p>
+
+<p>您現在可以在通知中新增<strong>全新中繼資料</strong>，以便收集相關聯的聯絡人 (用於排名)、類別和優先級。</p>
+
+<p>此外，我們也提供了全新的媒體通知範本，目的是讓通知的媒體控制項保持一致，最多不超過 6 個操作按鈕 (包括「豎起拇指」之類的自訂控制項)，從此再也不需要 RemoteViews！</p>
+
+
+
+<h2 id="TV">您的應用程式躍上大螢幕</h2>
+
+<p><a href="http://developer.android.com/tv/index.html">Android TV</a> 提供了完整的電視平台，讓您的應用程式輕鬆躍上大螢幕。Android TV 的設計概念就是圍繞著簡化的主螢幕體驗向外延伸，讓使用者透過量身打造的推薦和語音搜尋，輕鬆發掘新奇內容。</p>
+
+<p>透過 Android TV，您現在不但可以為應用程式或遊戲內容<strong>營造寬廣且鮮明的體驗</strong>，還可以支援與遊戲控制器和其他輸入裝置進行互動的功能。為協助您針對電視打造擁有劇院級效果且在 7 公尺外依然清晰可見的使用者介面，Android 在 <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 支援程式庫</a>中提供了一個 <strong>Leanback 使用者介面架構</strong>。</p>
+
+<p><strong>Android TV 輸入架構</strong> (TIF) 允許電視應用程式處理 HDMI 輸入端、電視協調器、IPTV 接收器等來源的影片串流。透過 TV 輸入架構發佈的中繼資料，還可提供直播電視搜尋和推薦功能，並且包括一項 HDMI-CEC 控制服務，可讓使用者透過一個遙控器操控多個裝置。 </p>
+
+<p>TV 輸入架構可存取廣泛的直播電視輸入來源，並將它們彙集在單一使用者介面中，讓使用者瀏覽、查看及觀賞精彩內容。如果希望您的內容更容易在電視裝置上使用，不妨為您的內容建構電視輸入服務。</p>
+
+
+
+<img src="{@docRoot}images/versions/recents_screen_2x.png" srcset="{@docRoot}images/versions/recents_screen.png 1x, {@docRoot}images/versions/recents_screen_2x.png 2x" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
+
+<h2 id="Documents">文件導向的應用程式</h2>
+
+<p>Android 5.0 導入了重新設計的「概覽」空間 (之前稱為「最近使用的項目」)，用途更廣而且非常適合多工作業。</p>
+
+<p>透過全新的 API，您可將應用程式中的活動當做獨立的文件，與其他最近使用項目的螢幕一起顯示。</p>
+
+<p>您可以運用同時顯示多份文件的功能，讓使用者即時存取更多內容或服務。例如，您可以運用同時顯示多份文件的功能，呈現生產力應用程式中的檔案、遊戲中的玩家比賽，或者是即時通訊應用程式中的通訊內容。 </p>
+
+
+
+<h2 id="Connectivity">進階連線功能</h2>
+
+<p>Android 5.0 增加了全新 API，可讓應用程式透過<strong>藍牙低功耗技術</strong> (BLE) 執行並行操作，因此可同時掃描 (中央模式) 和廣告 (週邊模式)。</p>
+
+<p>透過全新的<strong>多網路</strong>功能，應用程式可查詢具備特定功能的可用網路，例如 Wi-Fi 網路、行動數據網路或是按傳輸量計費網路，以及這些網路是否提供了特定的網路功能。之後，應用程式就可以要求連線，並對連線中斷或其他網路變動做出回應。</p>
+
+<p><strong>NFC</strong> API 現在不但可讓應用程式動態註冊 NFC 應用程式 ID (AID)，還可根據目前為有效狀態的服務設定偏好的卡片模擬服務，並且建立包含 UTF-8 文字資料的 NDEF 紀錄。</p>
+
+
+
+<h2 id="Graphics">高效能圖形運算機制</h2>
+
+<p>在受支援的裝置上，<strong><a href="http://www.khronos.org/opengles/3_X/">Khronos OpenGL ES 3.1</a></strong> 現在可為遊戲和其他應用程式提供最高效能的 2D 和 3D 圖形功能。 </p>
+
+<p>OpenGL ES 3.1 新增了運算著色器、型染紋理、加速的視覺效果、高品質 ETC2/EAC 紋理壓縮、進階紋理轉譯、標準化紋理大小和轉譯緩衝區格式等功能。</p>
+
+
+<div class="figure" style="width:350px; margin:0 0 0 60px">
+<img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" height="525" />
+<p class="img-caption">Gameloft 開發的《決鬥騎士》採用 AEP 的 ASTC (自動調整可縮放紋理壓縮) 和 ES 3.1 中的運算著色器，完美呈現了 HDR (高動態範圍) 泛光效果和更多圖形細節。</p>
+</div>
+
+<p>此外，Android 5.0 也導入了 <strong>Android 擴充功能套件</strong> (AEP)。這組 OpenGL ES 擴充功能可讓您存取下列功能：曲面細分著色器、幾何圖形著色器、ASTC 紋理壓縮、取樣差補和著色，以及其他進階轉譯功能。有了 AEP，您的應用程式便能支援多種 GPU，有效提高圖形運算效率。</p>
+
+
+<h2 id="Audio">更強大的音訊功能</h2>
+
+<p>全新的音訊擷取設計提供了<strong>低延遲音訊輸入</strong>功能。這項新設計包括：永遠不會被封鎖的快速擷取執行緒 (讀取期間除外)；採用原生採樣速率、聲道數量和位元深度的快速擷取用戶端；以及可提供重新採樣、上/下聲道混合以及上/下位元深度的一般擷取用戶端。</p>
+
+<p>多聲道<strong>音訊串流混音</strong>可讓專業的音訊應用程式混合多達八個聲道，包括 5.1 和 7.1 聲道在內。</p>
+
+<p>應用程式現在可以公開媒體內容，並可<strong>瀏覽其他應用程式的媒體</strong>，然後請求播放。由於內容是透過具有查詢功能的介面公開，因此不需要存在於裝置上。</p>
+
+<p>透過與特定地區設定、品質和延遲等級相關聯的語音設定檔，應用程式可以精確掌控<strong>文字轉語音合成</strong>功能。新的 API 同時提升了對合成錯誤檢查、網路合成、語言搜尋和網路替代的支援能力。</p>
+
+<p>Android 現在包括對標準 <strong>USB 音訊</strong>週邊裝置的支援，可讓使用者連接 USB 耳機、喇叭、麥克風和其他高效能數位週邊裝置。Android 5.0 還增加了對 <strong>Opus</strong> 音訊轉碼器的支援。</p>
+
+<p>用於控制媒體播放功能的全新 <strong>{@link android.media.session.MediaSession}</strong> API，現在可讓您輕鬆在不同的螢幕和其他控制器之間提供一致的媒體控制項。</p>
+
+
+<h2 id="Camera">改良的相機和影片 &gt;&gt; </h2>
+
+<p>Android 5.0 導入了<strong>全新的相機 API</strong>，可讓您擷取原始格式 (例如 YUV 和 Bayer RAW)，並以影格為單位對參數 (例如曝光時間、ISO 感光度和影格持續時間) 進行控制。透過全新的完全同步相機管道，您可在受支援的裝置上以每秒 30 影格的速率擷取未壓縮的全解析度 YUV 圖片。</p>
+
+<p>除了圖片之外，您還可透過相機擷取雜訊模型和光學資訊等中繼資料。</p>
+
+<p>透過網路傳送影片串流的應用程式現在可以利用 H.265 <strong>高效率影片編碼 (HEVC)</strong>，獲得影片資料的最佳編碼和解碼效能。 </p>
+
+<p>Android 5.0 也新增對<strong>多媒體隧道服務</strong>的支援，以便針對超高解析度 (4K) 內容提供最佳體驗，並能將壓縮的音訊和影片資料一起播放。 </p>
+
+
+
+<div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
+<img style="float:right; margin:0 1em 1em 2em"    src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"    srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"    alt="" width="300"  />
+<p class="img-caption">使用者的個人應用程式和工作應用程式都會顯示在同一個檢視畫面。工作應用程式都附有徽章，方便您輕鬆識別。</p>
+</div>
+
+
+<h2 id="Work">Android 在工作方面的應用</h2>
+
+<p>為了在企業環境中實現「帶自己的行動裝置來上班」運動，我們新增了<a href="{@docRoot}about/versions/android-5.0.html#Enterprise">受管理的設定檔建置程序</a>，可在裝置上建立安全的工作設定檔。在啟動器中，如果應用程式附帶「工作」徽章，表示該應用程式和資料是由 IT 管理員在工作設定檔內管理的。</p>
+
+<p>個人設定檔和工作設定檔的通知都會顯示在同一個檢視畫面。每個設定檔的資料彼此獨立，安全無虞。即使兩個設定檔使用同一個應用程式，也不會造成安全上的顧慮。</p>
+
+<p>對於公司擁有的裝置，IT 管理員可以著手處理新裝置並為其設定<a href="{@docRoot}about/versions/android-5.0.html#DeviceOwner">裝置擁有者</a>。完成後，雇主就可以發放已安裝裝置擁有者應用程式的裝置，而這些裝置都可以設置全域的裝置設定。</p>
+
+
+
+<h2 id="ScreenCapture">螢幕擷取和分享</h2>
+
+<p>Android 5.0 可讓您在應用程式中新增螢幕擷取和分享功能。 </p>
+
+<p>如果具有相關使用者權限，您就可以擷取螢幕上未設定安全防護的影片，並視需要選擇透過網路傳送。</p>
+
+
+<h2 id="Sensors">全新的感應器類型</h2>
+
+<p>在 Android 5.0 中，全新的<strong>傾斜偵測</strong>感應器可有效提升受支援裝置上的活動識別準確度，<strong>心率感應器</strong>則可回報觸摸裝置的使用者目前的心跳速率。 </p>
+
+<p>全新的<strong>互動複合感應器</strong>現在可用來偵測特殊互動，例如「喚醒」<em></em>手勢、<em></em>「拿取」手勢和<em></em>「掃視」手勢。</p>
+
+
+
+<h2 id="WebView">Chromium WebView</h2>
+
+<div style="float:right;margin:1em 2em 1em 2em;">
+  <img src="/images/kk-chromium-icon.png" alt="" height="160" style="margin-bottom:0em;">
+</div>
+
+<p>Android 5.0 最初版本包含以 Chromium M37 版為基礎的 Chromium for {@link android.webkit.WebView}，藉此增加了 <strong>WebRTC</strong>、<strong>WebAudio</strong> 和 <strong>WebGL</strong> 支援功能。 </p>
+
+<p>Chromium M37 也包含對於所有 <strong>Web Components</strong> 規格 (例如 Custom Elements、Shadow DOM、HTML Imports 和 Templates) 的原生支援。這表示您不需要 Polyfill，即可在 WebView 中使用 <a href="http://polymer-project.org/">Polymer</a> 和相關的<a href="https://www.polymer-project.org/docs/elements/material.html">實感設計元素</a>。</p>
+
+<p>雖然自 Android 4.4 以來，WebView 都是以 Chromium 為基礎，但您現在可以從 Google Play 更新 Chromium 層。</p>
+
+<p>Chromium 新版本推出時，使用者便可以透過 Google Play 進行更新，讓 WebView 能夠取得最新的增強功能，並修正相關錯誤。這表示開發人員能夠讓使用 WebView 的應用程式 (Android 5.0 版以上) 取得最新的 Web API，同時修正各項錯誤。</p>
+
+
+
+<h2 id="Accessibility">協助工具和輸入功能</h2>
+
+<p>對於視力正常的使用者在畫面上互動的視窗，現在只要使用全新的協助工具 API，即可擷取這些視窗的屬性詳細資訊。全新的協助工具 API 也可為使用者介面元素定義標準或自訂的輸入操作。</p>
+
+<p>透過全新輸入法編輯器 (IME) API，使用者可以直接從目前的輸入法迅速切換到其他 IME。</p>
+
+
+
+<h2 id="Battery">用於打造低耗電應用程式的工具</h2>
+
+<p>全新的<strong>排定工作</strong> API 可讓您為系統定義延後執行的工作或是在特定條件下 (例如裝置充電或連接到 Wi-Fi 時) 執行的工作，進而將電池電力最佳化。</p>
+
+<p>全新的 <code>dumpsys batterystats</code> 指令會產生<strong>耗電量統計資料</strong>，您可以使用這項統計資料瞭解整個系統的用電情況，並掌握您的應用程式對裝置電池的影響。您可以查看電力事件、每個 UID 和系統元件的大致用電量等紀錄資訊。</p>
+
+<img src="{@docRoot}images/versions/battery_historian.png" srcset="{@docRoot}images/versions/battery_historian@2x.png 2x" alt="" width="760" height="462"  />
+<p class="img-caption">Battery Historian 這項新工具可以將 <code>dumpsys batterystats</code> 的統計資料轉換為圖示，以便進行與電力相關的偵錯作業。您可以在 <a href="https://github.com/google/battery-historian">https://github.com/google/battery-historian</a> 找到這項工具。</p>

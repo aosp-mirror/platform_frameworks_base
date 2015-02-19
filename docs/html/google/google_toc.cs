@@ -99,14 +99,14 @@
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/billing/index.html">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="<?cs var:toroot?>google/play/billing/billing_overview.html">
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="<?cs var:toroot?>google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="<?cs var:toroot?>google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="<?cs var:toroot?>google/play/billing/billing_integrate.html">
@@ -129,13 +129,13 @@
       <li><a href="<?cs var:toroot?>google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="<?cs var:toroot?>google/play/billing/billing_best_practices.html">
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="<?cs var:toroot?>google/play/billing/billing_testing.html">
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html">
+      <li><a href="<?cs var:toroot?>google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="<?cs var:toroot?>google/play/billing/versions.html">
@@ -169,21 +169,14 @@
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="<?cs var:toroot?>google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="<?cs var:toroot?>google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="<?cs var:toroot?>google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="<?cs var:toroot?>google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="<?cs var:toroot ?>reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>

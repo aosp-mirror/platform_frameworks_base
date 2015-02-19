@@ -27,5 +27,5 @@ oneway interface ITrustAgentServiceCallback {
     void grantTrust(CharSequence message, long durationMs, boolean initiatedByUser);
     void revokeTrust();
     void setManagingTrust(boolean managingTrust);
-    void onSetTrustAgentFeaturesEnabledCompleted(boolean result, IBinder token);
+    void onConfigureCompleted(boolean result, IBinder token);
 }

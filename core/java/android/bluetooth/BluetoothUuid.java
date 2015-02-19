@@ -66,6 +66,8 @@ public final class BluetoothUuid {
             ParcelUuid.fromString("00001116-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid BNEP =
             ParcelUuid.fromString("0000000f-0000-1000-8000-00805F9B34FB");
+    public static final ParcelUuid PBAP_PCE =
+            ParcelUuid.fromString("0000112e-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid PBAP_PSE =
             ParcelUuid.fromString("0000112f-0000-1000-8000-00805F9B34FB");
     public static final ParcelUuid MAP =

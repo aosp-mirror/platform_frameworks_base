@@ -206,6 +206,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private ArrayList<GhostViewListeners> mGhostViewListeners =
             new ArrayList<GhostViewListeners>();
     private ArrayMap<View, Float> mOriginalAlphas = new ArrayMap<View, Float>();
+    final private ArrayList<View> mRootSharedElements = new ArrayList<View>();
+    private ArrayList<Matrix> mSharedElementParentMatrices;
 
     public ActivityTransitionCoordinator(Window window,
             ArrayList<String> allSharedElementNames,
@@ -222,8 +224,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (mListener != null) {
             mListener.onMapSharedElements(mAllSharedElementNames, sharedElements);
         }
-        mSharedElementNames.addAll(sharedElements.keySet());
-        mSharedElements.addAll(sharedElements.values());
+        setSharedElements(sharedElements);
         if (getViewsTransition() != null && mTransitioningViews != null) {
             ViewGroup decorView = getDecor();
             if (decorView != null) {
@@ -232,6 +233,58 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
             mTransitioningViews.removeAll(mSharedElements);
         }
         setEpicenter();
+    }
+
+    /**
+     * Iterates over the shared elements and adds them to the members in order.
+     * Shared elements that are nested in other shared elements are placed after the
+     * elements that they are nested in. This means that layout ordering can be done
+     * from first to last.
+     *
+     * @param sharedElements The map of transition names to shared elements to set into
+     *                       the member fields.
+     */
+    private void setSharedElements(ArrayMap<String, View> sharedElements) {
+        boolean isFirstRun = true;
+        while (!sharedElements.isEmpty()) {
+            final int numSharedElements = sharedElements.size();
+            for (int i = numSharedElements - 1; i >= 0; i--) {
+                final View view = sharedElements.valueAt(i);
+                final String name = sharedElements.keyAt(i);
+                if (isFirstRun && (view == null || !view.isAttachedToWindow() || name == null)) {
+                    sharedElements.removeAt(i);
+                } else {
+                    if (!isNested(view, sharedElements)) {
+                        mSharedElementNames.add(name);
+                        mSharedElements.add(view);
+                        sharedElements.removeAt(i);
+                        if (isFirstRun) {
+                            // We need to keep track which shared elements are roots
+                            // and which are nested.
+                            mRootSharedElements.add(view);
+                        }
+                    }
+                }
+            }
+            isFirstRun = false;
+        }
+    }
+
+    /**
+     * Returns true when view is nested in any of the values of sharedElements.
+     */
+    private static boolean isNested(View view, ArrayMap<String, View> sharedElements) {
+        ViewParent parent = view.getParent();
+        boolean isNested = false;
+        while (parent instanceof View) {
+            View parentView = (View) parent;
+            if (sharedElements.containsValue(parentView)) {
+                isNested = true;
+                break;
+            }
+            parent = parentView.getParent();
+        }
+        return isNested;
     }
 
     protected void stripOffscreenViews() {
@@ -449,11 +502,50 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         view.layout(x, y, x + width, y + height);
     }
 
-    protected void getSharedElementParentMatrix(View view, Matrix matrix) {
-        // Find the location in the view's parent
-        ViewGroup parent = (ViewGroup) view.getParent();
-        matrix.reset();
-        parent.transformMatrixToLocal(matrix);
+    private void setSharedElementMatrices() {
+        int numSharedElements = mSharedElements.size();
+        if (numSharedElements > 0) {
+            mSharedElementParentMatrices = new ArrayList<Matrix>(numSharedElements);
+        }
+        for (int i = 0; i < numSharedElements; i++) {
+            View view = mSharedElements.get(i);
+
+            // Find the location in the view's parent
+            ViewGroup parent = (ViewGroup) view.getParent();
+            Matrix matrix = new Matrix();
+            parent.transformMatrixToLocal(matrix);
+
+            mSharedElementParentMatrices.add(matrix);
+        }
+    }
+
+    private void getSharedElementParentMatrix(View view, Matrix matrix) {
+        final boolean isNestedInOtherSharedElement = !mRootSharedElements.contains(view);
+        final boolean useParentMatrix;
+        if (isNestedInOtherSharedElement) {
+            useParentMatrix = true;
+        } else {
+            final int index = mSharedElementParentMatrices == null ? -1
+                    : mSharedElements.indexOf(view);
+            if (index < 0) {
+                useParentMatrix = true;
+            } else {
+                // The indices of mSharedElementParentMatrices matches the
+                // mSharedElement matrices.
+                Matrix parentMatrix = mSharedElementParentMatrices.get(index);
+                matrix.set(parentMatrix);
+                useParentMatrix = false;
+            }
+        }
+        if (useParentMatrix) {
+            matrix.reset();
+            ViewParent viewParent = view.getParent();
+            if (viewParent instanceof ViewGroup) {
+                // Find the location in the view's parent
+                ViewGroup parent = (ViewGroup) viewParent;
+                parent.transformMatrixToLocal(matrix);
+            }
+        }
     }
 
     protected ArrayList<SharedElementOriginalState> setSharedElementState(
@@ -536,29 +628,31 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
 
     protected ArrayList<View> createSnapshots(Bundle state, Collection<String> names) {
         int numSharedElements = names.size();
-        if (numSharedElements == 0) {
-            return null;
-        }
         ArrayList<View> snapshots = new ArrayList<View>(numSharedElements);
+        if (numSharedElements == 0) {
+            return snapshots;
+        }
         Context context = getWindow().getContext();
         int[] decorLoc = new int[2];
         ViewGroup decorView = getDecor();
         if (decorView != null) {
             decorView.getLocationOnScreen(decorLoc);
         }
+        Matrix tempMatrix = new Matrix();
         for (String name: names) {
             Bundle sharedElementBundle = state.getBundle(name);
+            View snapshot = null;
             if (sharedElementBundle != null) {
                 Parcelable parcelable = sharedElementBundle.getParcelable(KEY_SNAPSHOT);
-                View snapshot = null;
                 if (parcelable != null && mListener != null) {
                     snapshot = mListener.onCreateSnapshotView(context, parcelable);
                 }
                 if (snapshot != null) {
-                    setSharedElementState(snapshot, name, state, null, null, decorLoc);
+                    setSharedElementState(snapshot, name, state, tempMatrix, null, decorLoc);
                 }
-                snapshots.add(snapshot);
             }
+            // Even null snapshots are added so they remain in the same order as shared elements.
+            snapshots.add(snapshot);
         }
         return snapshots;
     }
@@ -607,6 +701,8 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mResultReceiver = null;
         mPendingTransition = null;
         mListener = null;
+        mRootSharedElements.clear();
+        mSharedElementParentMatrices = null;
     }
 
     protected long getFadeDuration() {
@@ -703,10 +799,20 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mIsStartingTransition = false;
     }
 
+    /**
+     * Cancels any pending transitions and returns true if there is a transition is in
+     * the middle of starting.
+     */
+    protected boolean cancelPendingTransitions() {
+        mPendingTransition = null;
+        return mIsStartingTransition;
+    }
+
     protected void moveSharedElementsToOverlay() {
-        if (!mWindow.getSharedElementsUseOverlay()) {
+        if (mWindow == null || !mWindow.getSharedElementsUseOverlay()) {
             return;
         }
+        setSharedElementMatrices();
         int numSharedElements = mSharedElements.size();
         ViewGroup decor = getDecor();
         if (decor != null) {

@@ -35,7 +35,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public static final long LIMIT_DISABLED = -1;
     public static final long SNOOZE_NEVER = -1;
 
-    public final NetworkTemplate template;
+    public NetworkTemplate template;
     public int cycleDay;
     public String cycleTimezone;
     public long warningBytes;

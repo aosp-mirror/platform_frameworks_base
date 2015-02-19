@@ -63,6 +63,8 @@
 
     <!-- thickness (height) of the navigation bar on phones that require it -->
     <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_height</dimen>
+    <!-- Minimum swipe distance to catch the swipe gestures to invoke assist or switch tasks. -->
+    <dimen name="navigation_bar_min_swipe_distance">48dp</dimen>
 
     <!-- thickness (height) of the dead zone at the top of the navigation bar,
          reducing false presses on navbar buttons; approx 2mm -->
@@ -103,11 +105,15 @@
     <!-- The padding on the global screenshot background image -->
     <dimen name="global_screenshot_bg_padding">20dp</dimen>
 
-    <!-- The width of the view containing non-menu status bar icons -->
-    <dimen name="navigation_key_width">80dip</dimen>
+    <!-- The width of the view containing navigation buttons -->
+    <dimen name="navigation_key_width">70dp</dimen>
 
     <!-- The width of the view containing the menu/ime navigation bar icons -->
-    <dimen name="navigation_extra_key_width">40dip</dimen>
+    <dimen name="navigation_extra_key_width">36dp</dimen>
+
+    <!-- The padding on the side of the navigation bar. Must be greater than or equal to
+         navigation_extra_key_width -->
+    <dimen name="navigation_side_padding">36dp</dimen>
 
     <!-- Default distance beyond which snaps to the matching target -->
     <dimen name="navbar_search_snap_margin">40dip</dimen>
@@ -185,16 +191,23 @@
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
 
-    <dimen name="segmented_button_spacing">4dp</dimen>
-    <dimen name="segmented_button_radius">2dp</dimen>
+    <dimen name="segmented_button_spacing">8dp</dimen>
+    <dimen name="borderless_button_radius">2dp</dimen>
 
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>
 
+    <!-- Zen mode panel: condition item button padding -->
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
 
-    <!-- Explicit width of the zen toast window -->
-    <dimen name="zen_toast_width">224dp</dimen>
+    <!-- Zen mode panel: spacing between condition items -->
+    <dimen name="zen_mode_condition_detail_item_spacing">12dp</dimen>
+
+    <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
+    <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
+
+    <!-- Zen mode panel: bottom padding, a bit less than qs_panel_padding -->
+    <dimen name="zen_mode_condition_detail_bottom_padding">4dp</dimen>
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
@@ -223,9 +236,6 @@
     <!-- The amount of highlight to make on each task view. -->
     <dimen name="recents_task_view_highlight">1.5dp</dimen>
 
-    <!-- The height of the lock-to-app button. -->
-    <dimen name="recents_task_view_lock_to_app_button_height">48dp</dimen>
-
     <!-- The amount to offset when animating into an affiliate group. -->
     <dimen name="recents_task_view_affiliate_group_enter_offset">64dp</dimen>
 
@@ -239,7 +249,7 @@
     <dimen name="recents_search_bar_space_height">64dp</dimen>
 
     <!-- The side padding for the task stack as a percentage of the width. -->
-    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.04444</item>
+    <item name="recents_stack_width_padding_percentage" format="float" type="dimen">0.03333</item>
 
     <!-- The overscroll percentage allowed on the stack. -->
     <item name="recents_stack_overscroll_percentage" format="float" type="dimen">0.0875</item>
@@ -253,6 +263,12 @@
 
     <!-- The min alpha to apply to a task affiliation group color. -->
     <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
+
+    <!-- The size of the lock-to-app button. -->
+    <dimen name="recents_lock_to_app_size">56dp</dimen>
+
+    <!-- The size of the lock-to-app button icon. -->
+    <dimen name="recents_lock_to_app_icon_size">28dp</dimen>
 
     <!-- Space reserved for the cards behind the top card in the top stack -->
     <dimen name="top_stack_peek_amount">12dp</dimen>
@@ -318,7 +334,7 @@
     <dimen name="heads_up_window_height">250dp</dimen>
 
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
-    <dimen name="keyguard_min_swipe_amount">90dp</dimen>
+    <dimen name="keyguard_min_swipe_amount">110dp</dimen>
 
     <!-- The minimum background radius when swiping to a side for the camera / phone affordances. -->
     <dimen name="keyguard_affordance_min_background_radius">30dp</dimen>
@@ -357,6 +373,9 @@
 
     <!-- radius of the corners of the material rounded rect background -->
     <dimen name="notification_material_rounded_rect_radius">2dp</dimen>
+
+    <!-- radius of the corners of the material rounded rect background but negative-->
+    <dimen name="notification_material_rounded_rect_radius_negative">-2dp</dimen>
 
     <!-- end margin for multi user switch in expanded quick settings -->
     <dimen name="multi_user_switch_expanded_margin">8dp</dimen>
@@ -398,6 +417,9 @@
 
     <!-- The width of user avatar when on Keyguard -->
     <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
+
+    <!-- The width of user avatar when expanded -->
+    <dimen name="multi_user_avatar_expanded_size">24dp</dimen>
 
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
@@ -493,6 +515,9 @@
          type icon is wide. -->
     <dimen name="wide_type_icon_start_padding">2dp</dimen>
 
+    <!-- Extra padding between multiple phone signal icons. -->
+    <dimen name="secondary_telephony_padding">2dp</dimen>
+
     <!-- Extra padding between the mobile data type icon and the strength indicator when the data
          type icon is wide for the tile in quick settings. -->
     <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
@@ -505,4 +530,35 @@
     <dimen name="fake_shadow_inset">1dp</dimen>
 
     <dimen name="fake_shadow_size">8dp</dimen>
+
+    <!-- Padding between signal cluster and battery icon -->
+    <dimen name="signal_cluster_battery_padding">7dp</dimen>
+
+    <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
+    <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
+
+    <!-- Screen pinning request width -->
+    <dimen name="screen_pinning_request_width">@dimen/match_parent</dimen>
+    <!-- Screen pinning request nav button circle heights -->
+    <dimen name="screen_pinning_request_button_height">66dp</dimen>
+    <!-- Screen pinning request nav button circle widths -->
+    <dimen name="screen_pinning_request_button_width">84dp</dimen>
+    <!-- Screen pinning request padding on top of inner circle -->
+    <dimen name="screen_pinning_request_inner_padding">14dp</dimen>
+    <!-- Screen pinning request padding on top of icons -->
+    <dimen name="screen_pinning_request_nav_icon_padding">18dp</dimen>
+    <!-- Screen pinning request padding on side of icons
+         (makes the width match the nav bar)-->
+    <dimen name="screen_pinning_request_nav_side_padding">7dp</dimen>
+    <!-- Screen pinning request side views to match nav bar
+         navigation_side_padding - 3 / 2 * (screen_pinning_request_button_width
+                                                - navigation_key_width) -->
+    <dimen name="screen_pinning_request_side_width">34dp</dimen>
+    <!-- Screen pinning request controls padding on bigger screens -->
+    <dimen name="screen_pinning_request_frame_padding">0dp</dimen>
+    <!-- Screen pinning inner nav bar circle size -->
+    <dimen name="screen_pinning_nav_highlight_size">56dp</dimen>
+    <!-- Screen pinning inner nav bar outer circle size -->
+    <dimen name="screen_pinning_nav_highlight_outer_size">84dp</dimen>
+
 </resources>

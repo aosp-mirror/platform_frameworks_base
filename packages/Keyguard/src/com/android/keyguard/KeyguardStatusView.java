@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -105,6 +106,8 @@ public class KeyguardStatusView extends GridLayout {
         mAlarmStatusView = (TextView) findViewById(R.id.alarm_status);
         mDateView = (TextClock) findViewById(R.id.date_view);
         mClockView = (TextClock) findViewById(R.id.clock_view);
+        mDateView.setShowCurrentUserTime(true);
+        mClockView.setShowCurrentUserTime(true);
         mOwnerInfo = (TextView) findViewById(R.id.owner_info);
         mLockPatternUtils = new LockPatternUtils(getContext());
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
@@ -160,7 +163,9 @@ public class KeyguardStatusView extends GridLayout {
         if (info == null) {
             return "";
         }
-        String skeleton = DateFormat.is24HourFormat(context) ? "EHm" : "Ehma";
+        String skeleton = DateFormat.is24HourFormat(context, ActivityManager.getCurrentUser())
+                ? "EHm"
+                : "Ehma";
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         return DateFormat.format(pattern, info.getTriggerTime()).toString();
     }

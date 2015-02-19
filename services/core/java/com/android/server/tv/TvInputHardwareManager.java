@@ -19,7 +19,10 @@ package com.android.server.tv;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
@@ -74,6 +77,7 @@ import java.util.Map;
 class TvInputHardwareManager implements TvInputHal.Callback {
     private static final String TAG = TvInputHardwareManager.class.getSimpleName();
 
+    private final Context mContext;
     private final Listener mListener;
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<>();
@@ -92,6 +96,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
     private final IHdmiSystemAudioModeChangeListener mHdmiSystemAudioModeChangeListener =
             new HdmiSystemAudioModeChangeListener();
+    private final BroadcastReceiver mVolumeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleVolumeChange(context, intent);
+        }
+    };
+    private int mCurrentIndex = 0;
+    private int mCurrentMaxIndex = 0;
+    private final boolean mUseMasterVolume;
 
     // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
@@ -103,8 +116,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final Object mLock = new Object();
 
     public TvInputHardwareManager(Context context, Listener listener) {
+        mContext = context;
         mListener = listener;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mUseMasterVolume = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
         mHal.init();
     }
 
@@ -122,7 +138,16 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Error registering listeners to HdmiControlService:", e);
                 }
+            } else {
+                Slog.w(TAG, "HdmiControlService is not available");
             }
+            if (!mUseMasterVolume) {
+                final IntentFilter filter = new IntentFilter();
+                filter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
+                filter.addAction(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+                mContext.registerReceiver(mVolumeReceiver, filter);
+            }
+            updateVolume();
         }
     }
 
@@ -186,10 +211,18 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return;
             }
             connection.updateConfigsLocked(configs);
-            try {
-                connection.getCallbackLocked().onStreamConfigChanged(configs);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "error in onStreamConfigurationChanged", e);
+            String inputId = mHardwareInputIdMap.get(deviceId);
+            if (inputId != null) {
+                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                        convertConnectedToState(configs.length > 0), 0, inputId).sendToTarget();
+            }
+            ITvInputHardwareCallback callback = connection.getCallbackLocked();
+            if (callback != null) {
+                try {
+                    callback.onStreamConfigChanged(configs);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onStreamConfigurationChanged", e);
+                }
             }
         }
     }
@@ -255,6 +288,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             mHardwareInputIdMap.put(deviceId, info.getId());
             mInputMap.put(info.getId(), info);
 
+            // Process pending state changes
+
+            // For logical HDMI devices, they have information from HDMI CEC signals.
             for (int i = 0; i < mHdmiStateMap.size(); ++i) {
                 TvInputHardwareInfo hardwareInfo =
                         findHardwareInfoForHdmiPortLocked(mHdmiStateMap.keyAt(i));
@@ -266,7 +302,16 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
                             convertConnectedToState(mHdmiStateMap.valueAt(i)), 0,
                             inputId).sendToTarget();
+                    return;
                 }
+            }
+            // For the rest of the devices, we can tell by the number of available streams.
+            Connection connection = mConnections.get(deviceId);
+            if (connection != null) {
+                mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
+                        convertConnectedToState(connection.getConfigsLocked().length > 0), 0,
+                        info.getId()).sendToTarget();
+                return;
             }
         }
     }
@@ -278,6 +323,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
         return -1;
+    }
+
+    private static boolean intArrayContains(int[] array, int value) {
+        for (int element : array) {
+            if (element == value) return true;
+        }
+        return false;
     }
 
     public void addHdmiTvInput(int id, TvInputInfo info) {
@@ -457,6 +509,47 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    private void updateVolume() {
+        mCurrentMaxIndex = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        mCurrentIndex = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+    }
+
+    private void handleVolumeChange(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (action.equals(AudioManager.VOLUME_CHANGED_ACTION)) {
+            int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            if (streamType != AudioManager.STREAM_MUSIC) {
+                return;
+            }
+            int index = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
+            if (index == mCurrentIndex) {
+                return;
+            }
+            mCurrentIndex = index;
+        } else if (action.equals(AudioManager.STREAM_MUTE_CHANGED_ACTION)) {
+            int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            if (streamType != AudioManager.STREAM_MUSIC) {
+                return;
+            }
+            // volume index will be updated at onMediaStreamVolumeChanged() through updateVolume().
+        } else {
+            Slog.w(TAG, "Unrecognized intent: " + intent);
+            return;
+        }
+        synchronized (mLock) {
+            for (int i = 0; i < mConnections.size(); ++i) {
+                TvInputHardwareImpl hardwareImpl = mConnections.valueAt(i).getHardwareImplLocked();
+                if (hardwareImpl != null) {
+                    hardwareImpl.onMediaStreamVolumeChanged();
+                }
+            }
+        }
+    }
+
+    private float getMediaStreamVolume() {
+        return mUseMasterVolume ? 1.0f : ((float) mCurrentIndex / (float) mCurrentMaxIndex);
+    }
+
     private class Connection implements IBinder.DeathRecipient {
         private final TvInputHardwareInfo mHardwareInfo;
         private TvInputInfo mInfo;
@@ -574,7 +667,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             public void onServiceDied() {
                 synchronized (mImplLock) {
                     mAudioSource = null;
-                    mAudioSink = null;
+                    mAudioSink.clear();
                     mAudioPatch = null;
                 }
             }
@@ -582,10 +675,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private int mOverrideAudioType = AudioManager.DEVICE_NONE;
         private String mOverrideAudioAddress = "";
         private AudioDevicePort mAudioSource;
-        private AudioDevicePort mAudioSink;
+        private List<AudioDevicePort> mAudioSink = new ArrayList<>();
         private AudioPatch mAudioPatch = null;
-        private float mCommittedVolume = 0.0f;
-        private float mVolume = 0.0f;
+        // Set to an invalid value for a volume, so that current volume can be applied at the
+        // first call to updateAudioConfigLocked().
+        private float mCommittedVolume = -1f;
+        private float mSourceVolume = 0.0f;
 
         private TvStreamConfig mActiveConfig = null;
 
@@ -598,22 +693,23 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             mAudioManager.registerAudioPortUpdateListener(mAudioListener);
             if (mInfo.getAudioType() != AudioManager.DEVICE_NONE) {
                 mAudioSource = findAudioDevicePort(mInfo.getAudioType(), mInfo.getAudioAddress());
-                mAudioSink = findAudioSinkFromAudioPolicy();
+                findAudioSinkFromAudioPolicy(mAudioSink);
             }
         }
 
-        private AudioDevicePort findAudioSinkFromAudioPolicy() {
+        private void findAudioSinkFromAudioPolicy(List<AudioDevicePort> sinks) {
+            sinks.clear();
             ArrayList<AudioPort> devicePorts = new ArrayList<AudioPort>();
-            if (mAudioManager.listAudioDevicePorts(devicePorts) == AudioManager.SUCCESS) {
-                int sinkDevice = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
-                for (AudioPort port : devicePorts) {
-                    AudioDevicePort devicePort = (AudioDevicePort) port;
-                    if ((devicePort.type() & sinkDevice) != 0) {
-                        return devicePort;
-                    }
+            if (mAudioManager.listAudioDevicePorts(devicePorts) != AudioManager.SUCCESS) {
+                return;
+            }
+            int sinkDevice = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
+            for (AudioPort port : devicePorts) {
+                AudioDevicePort devicePort = (AudioDevicePort) port;
+                if ((devicePort.type() & sinkDevice) != 0) {
+                    sinks.add(devicePort);
                 }
             }
-            return null;
         }
 
         private AudioDevicePort findAudioDevicePort(int type, String address) {
@@ -654,28 +750,35 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (mReleased) {
                     throw new IllegalStateException("Device already released.");
                 }
-                if (surface != null && config == null) {
-                    return false;
-                }
-                if (surface == null && mActiveConfig == null) {
-                    return false;
-                }
 
-                int result = TvInputHal.ERROR_UNKNOWN;
+                int result = TvInputHal.SUCCESS;
                 if (surface == null) {
-                    result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
-                    mActiveConfig = null;
+                    // The value of config is ignored when surface == null.
+                    if (mActiveConfig != null) {
+                        result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
+                        mActiveConfig = null;
+                    } else {
+                        // We already have no active stream.
+                        return true;
+                    }
                 } else {
-                    if (config != mActiveConfig && mActiveConfig != null) {
+                    // It's impossible to set a non-null surface with a null config.
+                    if (config == null) {
+                        return false;
+                    }
+                    // Remove stream only if we have an existing active configuration.
+                    if (mActiveConfig != null && !config.equals(mActiveConfig)) {
                         result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
                         if (result != TvInputHal.SUCCESS) {
                             mActiveConfig = null;
-                            return false;
                         }
                     }
-                    result = mHal.addStream(mInfo.getDeviceId(), surface, config);
+                    // Proceed only if all previous operations succeeded.
                     if (result == TvInputHal.SUCCESS) {
-                        mActiveConfig = config;
+                        result = mHal.addOrUpdateStream(mInfo.getDeviceId(), surface, config);
+                        if (result == TvInputHal.SUCCESS) {
+                            mActiveConfig = config;
+                        }
                     }
                 }
                 updateAudioConfigLocked();
@@ -692,7 +795,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             // We can't do updated = updateAudioSinkLocked() || updateAudioSourceLocked() here
             // because Java won't evaluate the latter if the former is true.
 
-            if (mAudioSource == null || mAudioSink == null || mActiveConfig == null) {
+            if (mAudioSource == null || mAudioSink.isEmpty() || mActiveConfig == null) {
                 if (mAudioPatch != null) {
                     mAudioManager.releaseAudioPatch(mAudioPatch);
                     mAudioPatch = null;
@@ -700,8 +803,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return;
             }
 
+            updateVolume();
+            float volume = mSourceVolume * getMediaStreamVolume();
             AudioGainConfig sourceGainConfig = null;
-            if (mAudioSource.gains().length > 0 && mVolume != mCommittedVolume) {
+            if (mAudioSource.gains().length > 0 && volume != mCommittedVolume) {
                 AudioGain sourceGain = null;
                 for (AudioGain gain : mAudioSource.gains()) {
                     if ((gain.mode() & AudioGain.MODE_JOINT) != 0) {
@@ -714,17 +819,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     int steps = (sourceGain.maxValue() - sourceGain.minValue())
                             / sourceGain.stepValue();
                     int gainValue = sourceGain.minValue();
-                    if (mVolume < 1.0f) {
-                        gainValue += sourceGain.stepValue() * (int) (mVolume * steps + 0.5);
+                    if (volume < 1.0f) {
+                        gainValue += sourceGain.stepValue() * (int) (volume * steps + 0.5);
                     } else {
                         gainValue = sourceGain.maxValue();
                     }
-                    int numChannels = 0;
-                    for (int mask = sourceGain.channelMask(); mask > 0; mask >>= 1) {
-                        numChannels += (mask & 1);
-                    }
-                    int[] gainValues = new int[numChannels];
-                    Arrays.fill(gainValues, gainValue);
+                    // size of gain values is 1 in MODE_JOINT
+                    int[] gainValues = new int[] { gainValue };
                     sourceGainConfig = sourceGain.buildConfig(AudioGain.MODE_JOINT,
                             sourceGain.channelMask(), gainValues, 0);
                 } else {
@@ -733,32 +834,87 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
 
             AudioPortConfig sourceConfig = mAudioSource.activeConfig();
-            AudioPortConfig sinkConfig = mAudioSink.activeConfig();
+            List<AudioPortConfig> sinkConfigs = new ArrayList<>();
             AudioPatch[] audioPatchArray = new AudioPatch[] { mAudioPatch };
             boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated;
-            if (sinkConfig == null
-                    || (mDesiredSamplingRate != 0
-                            && sinkConfig.samplingRate() != mDesiredSamplingRate)
-                    || (mDesiredChannelMask != AudioFormat.CHANNEL_OUT_DEFAULT
-                            && sinkConfig.channelMask() != mDesiredChannelMask)
-                    || (mDesiredFormat != AudioFormat.ENCODING_DEFAULT
-                            && sinkConfig.format() != mDesiredFormat)) {
-                sinkConfig = mAudioSource.buildConfig(mDesiredSamplingRate, mDesiredChannelMask,
-                        mDesiredFormat, null);
-                shouldRecreateAudioPatch = true;
+
+            for (AudioDevicePort audioSink : mAudioSink) {
+                AudioPortConfig sinkConfig = audioSink.activeConfig();
+                int sinkSamplingRate = mDesiredSamplingRate;
+                int sinkChannelMask = mDesiredChannelMask;
+                int sinkFormat = mDesiredFormat;
+                // If sinkConfig != null and values are set to default,
+                // fill in the sinkConfig values.
+                if (sinkConfig != null) {
+                    if (sinkSamplingRate == 0) {
+                        sinkSamplingRate = sinkConfig.samplingRate();
+                    }
+                    if (sinkChannelMask == AudioFormat.CHANNEL_OUT_DEFAULT) {
+                        sinkChannelMask = sinkConfig.channelMask();
+                    }
+                    if (sinkFormat == AudioFormat.ENCODING_DEFAULT) {
+                        sinkChannelMask = sinkConfig.format();
+                    }
+                }
+
+                if (sinkConfig == null
+                        || sinkConfig.samplingRate() != sinkSamplingRate
+                        || sinkConfig.channelMask() != sinkChannelMask
+                        || sinkConfig.format() != sinkFormat) {
+                    // Check for compatibility and reset to default if necessary.
+                    if (!intArrayContains(audioSink.samplingRates(), sinkSamplingRate)
+                            && audioSink.samplingRates().length > 0) {
+                        sinkSamplingRate = audioSink.samplingRates()[0];
+                    }
+                    if (!intArrayContains(audioSink.channelMasks(), sinkChannelMask)) {
+                        sinkChannelMask = AudioFormat.CHANNEL_OUT_DEFAULT;
+                    }
+                    if (!intArrayContains(audioSink.formats(), sinkFormat)) {
+                        sinkFormat = AudioFormat.ENCODING_DEFAULT;
+                    }
+                    sinkConfig = audioSink.buildConfig(sinkSamplingRate, sinkChannelMask,
+                            sinkFormat, null);
+                    shouldRecreateAudioPatch = true;
+                }
+                sinkConfigs.add(sinkConfig);
             }
+            // sinkConfigs.size() == mAudioSink.size(), and mAudioSink is guaranteed to be
+            // non-empty at the beginning of this method.
+            AudioPortConfig sinkConfig = sinkConfigs.get(0);
             if (sourceConfig == null || sourceGainConfig != null) {
-                sourceConfig = mAudioSource.buildConfig(sinkConfig.samplingRate(),
-                        sinkConfig.channelMask(), sinkConfig.format(), sourceGainConfig);
+                int sourceSamplingRate = 0;
+                if (intArrayContains(mAudioSource.samplingRates(), sinkConfig.samplingRate())) {
+                    sourceSamplingRate = sinkConfig.samplingRate();
+                } else if (mAudioSource.samplingRates().length > 0) {
+                    // Use any sampling rate and hope audio patch can handle resampling...
+                    sourceSamplingRate = mAudioSource.samplingRates()[0];
+                }
+                int sourceChannelMask = AudioFormat.CHANNEL_IN_DEFAULT;
+                for (int inChannelMask : mAudioSource.channelMasks()) {
+                    if (AudioFormat.channelCountFromOutChannelMask(sinkConfig.channelMask())
+                            == AudioFormat.channelCountFromInChannelMask(inChannelMask)) {
+                        sourceChannelMask = inChannelMask;
+                        break;
+                    }
+                }
+                int sourceFormat = AudioFormat.ENCODING_DEFAULT;
+                if (intArrayContains(mAudioSource.formats(), sinkConfig.format())) {
+                    sourceFormat = sinkConfig.format();
+                }
+                sourceConfig = mAudioSource.buildConfig(sourceSamplingRate, sourceChannelMask,
+                        sourceFormat, sourceGainConfig);
                 shouldRecreateAudioPatch = true;
             }
             if (shouldRecreateAudioPatch) {
-                mCommittedVolume = mVolume;
+                mCommittedVolume = volume;
                 mAudioManager.createAudioPatch(
                         audioPatchArray,
                         new AudioPortConfig[] { sourceConfig },
-                        new AudioPortConfig[] { sinkConfig });
+                        sinkConfigs.toArray(new AudioPortConfig[0]));
                 mAudioPatch = audioPatchArray[0];
+                if (sourceGainConfig != null) {
+                    mAudioManager.setAudioPortGain(mAudioSource, sourceGainConfig);
+                }
             }
         }
 
@@ -768,7 +924,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (mReleased) {
                     throw new IllegalStateException("Device already released.");
                 }
-                mVolume = volume;
+                mSourceVolume = volume;
                 updateAudioConfigLocked();
             }
         }
@@ -799,7 +955,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     return false;
                 }
 
-                int result = mHal.addStream(mInfo.getDeviceId(), surface, config);
+                int result = mHal.addOrUpdateStream(mInfo.getDeviceId(), surface, config);
                 return result == TvInputHal.SUCCESS;
             }
         }
@@ -832,17 +988,24 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             if (mInfo.getAudioType() == AudioManager.DEVICE_NONE) {
                 return false;
             }
-            AudioDevicePort previousSink = mAudioSink;
+            List<AudioDevicePort> previousSink = mAudioSink;
+            mAudioSink = new ArrayList<>();
             if (mOverrideAudioType == AudioManager.DEVICE_NONE) {
-                mAudioSink = findAudioSinkFromAudioPolicy();
+                findAudioSinkFromAudioPolicy(mAudioSink);
             } else {
                 AudioDevicePort audioSink =
                         findAudioDevicePort(mOverrideAudioType, mOverrideAudioAddress);
                 if (audioSink != null) {
-                    mAudioSink = audioSink;
+                    mAudioSink.add(audioSink);
                 }
             }
-            return mAudioSink == null ? (previousSink != null) : !mAudioSink.equals(previousSink);
+
+            // Returns true if mAudioSink and previousSink differs.
+            if (mAudioSink.size() != previousSink.size()) {
+                return true;
+            }
+            previousSink.removeAll(mAudioSink);
+            return !previousSink.isEmpty();
         }
 
         private void handleAudioSinkUpdated() {
@@ -862,6 +1025,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 mDesiredChannelMask = channelMask;
                 mDesiredFormat = format;
 
+                updateAudioConfigLocked();
+            }
+        }
+
+        public void onMediaStreamVolumeChanged() {
+            synchronized (mImplLock) {
                 updateAudioConfigLocked();
             }
         }
@@ -914,11 +1083,18 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     break;
                 }
                 case HDMI_DEVICE_UPDATED: {
-                    SomeArgs args = (SomeArgs) msg.obj;
-                    String inputId = (String) args.arg1;
-                    HdmiDeviceInfo info = (HdmiDeviceInfo) args.arg2;
-                    args.recycle();
-                    mListener.onHdmiDeviceUpdated(inputId, info);
+                    HdmiDeviceInfo info = (HdmiDeviceInfo) msg.obj;
+                    String inputId = null;
+                    synchronized (mLock) {
+                        inputId = mHdmiInputIdMap.get(info.getId());
+                    }
+                    if (inputId != null) {
+                        mListener.onHdmiDeviceUpdated(inputId, info);
+                    } else {
+                        Slog.w(TAG, "Could not resolve input ID matching the device info; "
+                                + "ignoring.");
+                    }
+                    break;
                 }
                 default: {
                     Slog.w(TAG, "Unhandled message: " + msg);
@@ -953,6 +1129,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
         @Override
         public void onStatusChanged(HdmiDeviceInfo deviceInfo, int status) {
+            if (!deviceInfo.isSourceType()) return;
             synchronized (mLock) {
                 int messageType = 0;
                 Object obj = null;
@@ -986,11 +1163,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         }
                         mHdmiDeviceList.add(deviceInfo);
                         messageType = ListenerHandler.HDMI_DEVICE_UPDATED;
-                        String inputId = mHdmiInputIdMap.get(deviceInfo.getId());
-                        SomeArgs args = SomeArgs.obtain();
-                        args.arg1 = inputId;
-                        args.arg2 = deviceInfo;
-                        obj = args;
+                        obj = deviceInfo;
                         break;
                     }
                 }

@@ -219,16 +219,21 @@ public class NetworkFactory extends Handler {
     }
 
     private void evalRequest(NetworkRequestInfo n) {
+        if (VDBG) log("evalRequest");
         if (n.requested == false && n.score < mScore &&
                 n.request.networkCapabilities.satisfiedByNetworkCapabilities(
                 mCapabilityFilter) && acceptRequest(n.request, n.score)) {
+            if (VDBG) log("  needNetworkFor");
             needNetworkFor(n.request, n.score);
             n.requested = true;
         } else if (n.requested == true &&
                 (n.score > mScore || n.request.networkCapabilities.satisfiedByNetworkCapabilities(
                 mCapabilityFilter) == false || acceptRequest(n.request, n.score) == false)) {
+            if (VDBG) log("  releaseNetworkFor");
             releaseNetworkFor(n.request);
             n.requested = false;
+        } else {
+            if (VDBG) log("  done");
         }
     }
 
@@ -273,5 +278,13 @@ public class NetworkFactory extends Handler {
 
     protected void log(String s) {
         Log.d(LOG_TAG, s);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{").append(LOG_TAG).append(" - ScoreFilter=").
+                append(mScore).append(", Filter=").append(mCapabilityFilter).append(", requests=").
+                append(mNetworkRequests.size()).append("}");
+        return sb.toString();
     }
 }

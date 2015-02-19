@@ -227,23 +227,8 @@ public class RankingHelper implements RankingConfig {
             notificationList.get(i).setGlobalSortKey(null);
         }
 
-        try {
-            // rank each record individually
-            Collections.sort(notificationList, mPreliminaryComparator);
-        } catch (RuntimeException ex) {
-            // Don't crash the system server if something bad happened.
-            Log.e(TAG, "Extreme badness during notification sort", ex);
-            Log.e(TAG, "Current notification list: ");
-            for (int i = 0; i < N; i++) {
-                NotificationRecord nr = notificationList.get(i);
-                Log.e(TAG, String.format(
-                        "  [%d] %s (group %s, rank %d, sortkey %s)",
-                        i, nr, nr.getGroupKey(), nr.getAuthoritativeRank(),
-                        nr.getNotification().getSortKey()));
-            }
-            // STOPSHIP: remove once b/16626175 is found
-            throw ex;
-        }
+        // rank each record individually
+        Collections.sort(notificationList, mPreliminaryComparator);
 
         synchronized (mProxyByGroupTmp) {
             // record individual ranking result and nominate proxies for each group

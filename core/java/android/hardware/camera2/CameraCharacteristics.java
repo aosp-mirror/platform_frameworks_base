@@ -315,16 +315,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * supported by this camera device.</p>
      * <p>This key lists the valid modes for {@link CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE android.colorCorrection.aberrationMode}.  If no
      * aberration correction modes are available for a device, this list will solely include
-     * OFF mode.</p>
-     * <p>For FULL capability device ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL), OFF is
-     * always included.</p>
+     * OFF mode. All camera devices will support either OFF or FAST mode.</p>
+     * <p>Camera devices that support the MANUAL_POST_PROCESSING capability will always list
+     * OFF mode. This includes all FULL level devices.</p>
      * <p>LEGACY devices will always only support FAST mode.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE android.colorCorrection.aberrationMode}</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
     public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES =
@@ -337,8 +336,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * supported by a given camera device. This field lists the
      * valid anti-banding modes that the application may request
      * for this camera device with the
-     * {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} control. This list
-     * always includes AUTO.</p>
+     * {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} control.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode}</p>
      * <p>This key is available on all devices.</p>
@@ -393,8 +391,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link CaptureRequest#CONTROL_AE_EXPOSURE_COMPENSATION android.control.aeExposureCompensation}, in counts of {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep},
      * that are supported by this camera device.</p>
      * <p><b>Range of valid values:</b><br></p>
+     * <p>Range [0,0] indicates that exposure compensation is not supported.</p>
+     * <p>For LIMITED and FULL devices, range must follow below requirements if exposure
+     * compensation is supported (<code>range != [0, 0]</code>):</p>
      * <p><code>Min.exposure compensation * {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep} &lt;= -2 EV</code></p>
      * <p><code>Max.exposure compensation * {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep} &gt;= 2 EV</code></p>
+     * <p>LEGACY devices may support a smaller range than this.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
@@ -1155,6 +1157,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING MANUAL_POST_PROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS READ_SENSOR_SETTINGS}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1163,6 +1167,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
@@ -2283,12 +2289,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Camera devices will come in three flavors: LEGACY, LIMITED and FULL.</p>
      * <p>A FULL device will support below capabilities:</p>
      * <ul>
-     * <li>30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.</li>
+     * <li>30fps operation at maximum resolution (== sensor resolution) is preferred, more than
+     *   20fps is required, for at least uncompressed YUV
+     *   output. ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains BURST_CAPTURE)</li>
      * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
      * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
-     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_POST_PROCESSING)</li>
+     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     *   MANUAL_POST_PROCESSING)</li>
      * <li>Arbitrary cropping region ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM)</li>
-     * <li>At least 3 processed (but not stalling) format output streams ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
+     * <li>At least 3 processed (but not stalling) format output streams
+     *   ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
      * <li>The required stream configuration defined in android.scaler.availableStreamConfigurations</li>
      * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
      * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>

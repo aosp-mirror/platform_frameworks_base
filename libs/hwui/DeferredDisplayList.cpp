@@ -332,8 +332,8 @@ private:
 
 class RestoreToCountBatch : public Batch {
 public:
-    RestoreToCountBatch(const StateOp* op, const DeferredDisplayState* state, int restoreCount) :
-            mState(state), mRestoreCount(restoreCount) {}
+    RestoreToCountBatch(const StateOp* op, const DeferredDisplayState* state,
+                        int restoreCount) : mState(state), mRestoreCount(restoreCount) {}
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
         DEFER_LOGD("batch %p restoring to count %d", this, mRestoreCount);

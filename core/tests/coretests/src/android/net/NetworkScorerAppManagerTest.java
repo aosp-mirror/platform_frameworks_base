@@ -59,7 +59,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         // Package 1 - Valid scorer.
         Pair<ResolveInfo, ResolveInfo> package1 = buildResolveInfo("package1", true, true, false);
 
-        // Package 2 - Receiver does not have BROADCAST_SCORE_NETWORKS permission.
+        // Package 2 - Receiver does not have BROADCAST_NETWORK_PRIVILEGED permission.
         Pair<ResolveInfo, ResolveInfo> package2 = buildResolveInfo("package2", false, true, false);
 
         // Package 3 - App does not have SCORE_NETWORKS permission.
@@ -134,7 +134,7 @@ public class NetworkScorerAppManagerTest extends InstrumentationTestCase {
         resolveInfo.activityInfo.packageName = packageName;
         resolveInfo.activityInfo.applicationInfo = new ApplicationInfo();
         if (hasReceiverPermission) {
-            resolveInfo.activityInfo.permission = permission.BROADCAST_SCORE_NETWORKS;
+            resolveInfo.activityInfo.permission = permission.BROADCAST_NETWORK_PRIVILEGED;
         }
 
         ResolveInfo configActivityInfo = null;

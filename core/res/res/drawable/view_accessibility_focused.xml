@@ -18,9 +18,7 @@
 
     <stroke
         android:width="4dp"
-        android:color="@color/accessibility_focus_highlight"
-        android:dashWidth="4dp"
-        android:dashGap="2dp" />
+        android:color="@color/accessibility_focus_highlight" />
 
     <corners android:radius="2dp" />
 

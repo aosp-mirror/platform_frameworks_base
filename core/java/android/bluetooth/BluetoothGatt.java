@@ -928,7 +928,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE) == 0) return false;
 
         if (VDBG) Log.d(TAG, "writeCharacteristic() - uuid: " + characteristic.getUuid());
-        if (mService == null || mClientIf == 0) return false;
+        if (mService == null || mClientIf == 0 || characteristic.getValue() == null) return false;
 
         BluetoothGattService service = characteristic.getService();
         if (service == null) return false;
@@ -1015,7 +1015,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      */
     public boolean writeDescriptor(BluetoothGattDescriptor descriptor) {
         if (VDBG) Log.d(TAG, "writeDescriptor() - uuid: " + descriptor.getUuid());
-        if (mService == null || mClientIf == 0) return false;
+        if (mService == null || mClientIf == 0 || descriptor.getValue() == null) return false;
 
         BluetoothGattCharacteristic characteristic = descriptor.getCharacteristic();
         if (characteristic == null) return false;

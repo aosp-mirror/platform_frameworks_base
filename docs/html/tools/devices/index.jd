@@ -67,7 +67,7 @@ options, from the <strong>&lt;sdk>/tools/</strong> directory.</p>
 
   <p>To learn how to manage AVDs using a graphical tool, read <a href=
   "{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a>. To
-learn how to manage AVDs on the command line, read
+  learn how to manage AVDs on the command line, read
   <a href="{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs
   from the Command Line</a>.</p>
 

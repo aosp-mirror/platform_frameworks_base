@@ -18,7 +18,7 @@ parent.link=index.html
     </div>
   </div>
  
-  <p>If you are not using Eclipse to develop, you can still take advantage of all the tools that
+  <p>If you are not using Android Studio to develop, you can still take advantage of all the tools that
   the Android SDK provides for debugging. A basic debugging environment consists of:</p>
 
   <ul>
@@ -36,7 +36,7 @@ parent.link=index.html
   <h2 id="start-debugging">Starting a debugging environment</h2>
   <p>A Java Debugger assists you in finding problems with
   your code by letting you set breakpoints, step through execution of your application, and examine
-  variable values. Since you are not using Eclipse, you have to manually start up the debugging
+  variable values. Since you are not using Android Studio, you have to manually start up the debugging
   environment yourself by running a few tools that are provided in the Android SDK. To begin
   debugging your application, follow these general steps:</p>
 
@@ -46,8 +46,8 @@ parent.link=index.html
     <li>Start DDMS from the sdk <code>/tools</code> directory. This also starts ADB if it is 
     not already started. You should see your device appear in DDMS.</li>
 
-    <li>Install and run your <code>.apk</code> file on the device or emulator. In DDMS, you should see your
-    application running under the device that you installed it to.</li>
+    <li>Install and run your <code>.apk</code> file on the device or emulator. In DDMS, you should
+    see your application running under the device that you installed it to.</li>
 
     <li>Attach your debugger to the debugging port 8700, or to the specific port shown for the
     application in DDMS.</li>
@@ -62,7 +62,7 @@ parent.link=index.html
 
   <p>Your IDE should attach to your application running on the emulator, showing you its threads
   and allowing you to suspend them, inspect their state, and set breakpoints. If you selected "Wait
-  for debugger" in the Development settings panel the application will run when Eclipse connects,
+  for debugger" in the Development settings panel the application will run when Android Studio connects,
   so you will need to set any breakpoints you want before connecting.</p>
 
   <p>Changing either the application being debugged or the "Wait for debugger" option causes the

@@ -224,6 +224,7 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/servic
 $(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/bin/inputflinger $(PRODUCT_OUT)/symbols/system/bin/inputflinger)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/RsFountainFbo_intermediates)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework-base_intermediates/src/telecomm/java/com/android/internal/telecomm)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/com/android/internal/widget/ILockSettingsObserver.java)
 
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER

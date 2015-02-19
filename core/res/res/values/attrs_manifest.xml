@@ -260,9 +260,18 @@
          released, or define it however else you want, as long as each
          successive version has a higher number.  This is not a version
          number generally shown to the user, that is usually supplied 
-         with {@link android.R.attr#versionName}. -->
+         with {@link android.R.attr#versionName}.  When an app is delivered
+         as multiple split APKs, each APK must have the exact same versionCode. -->
     <attr name="versionCode" format="integer" />
-    
+
+    <!-- Internal revision code.  This number is the number used to determine
+         whether one APK is more recent than another: it has no other meaning
+         than that higher numbers are more recent.  This value is only meaningful
+         when the two {@link android.R.attr#versionCode} values are already
+         identical.  When an app is delivered as multiple split APKs, each
+         APK may have a different revisionCode value. -->
+    <attr name="revisionCode" format="integer" />
+
     <!-- The text shown to the user to indicate the version they have.  This
          is used for no other purpose than display to the user; the actual
          significant version number is given by {@link android.R.attr#versionCode}. -->
@@ -1025,6 +1034,7 @@
     <declare-styleable name="AndroidManifest">
         <attr name="versionCode" />
         <attr name="versionName" />
+        <attr name="revisionCode" />
         <attr name="sharedUserId" />
         <attr name="sharedUserLabel" />
         <attr name="installLocation" />

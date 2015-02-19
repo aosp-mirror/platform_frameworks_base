@@ -21,6 +21,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
@@ -38,6 +39,8 @@ import android.widget.TextView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.QSTile.State;
+
+import java.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends ViewGroup {
@@ -60,6 +63,8 @@ public class QSTileView extends ViewGroup {
     private boolean mDual;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
+    private OnLongClickListener mLongClick;
+    private Drawable mTileBackground;
     private RippleDrawable mRipple;
 
     public QSTileView(Context context) {
@@ -72,6 +77,7 @@ public class QSTileView extends ViewGroup {
         mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
         mDualTileVerticalPaddingPx =
                 res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
+        mTileBackground = newTileBackground();
         recreateLabel();
         setClipChildren(false);
 
@@ -132,6 +138,7 @@ public class QSTileView extends ViewGroup {
             mDualLabel = new QSDualTileLabel(mContext);
             mDualLabel.setId(android.R.id.title);
             mDualLabel.setBackgroundResource(R.drawable.btn_borderless_rect);
+            mDualLabel.setFirstLineCaret(res.getDrawable(R.drawable.qs_dual_tile_caret));
             mDualLabel.setTextColor(res.getColor(R.color.qs_tile_text));
             mDualLabel.setPadding(0, mDualTileVerticalPaddingPx, 0, mDualTileVerticalPaddingPx);
             mDualLabel.setTypeface(CONDENSED);
@@ -165,33 +172,34 @@ public class QSTileView extends ViewGroup {
         }
     }
 
-    public void setDual(boolean dual) {
+    public boolean setDual(boolean dual) {
         final boolean changed = dual != mDual;
         mDual = dual;
         if (changed) {
             recreateLabel();
         }
-        Drawable tileBackground = getTileBackground();
-        if (tileBackground instanceof RippleDrawable) {
-            setRipple((RippleDrawable) tileBackground);
+        if (mTileBackground instanceof RippleDrawable) {
+            setRipple((RippleDrawable) mTileBackground);
         }
         if (dual) {
             mTopBackgroundView.setOnClickListener(mClickPrimary);
             setOnClickListener(null);
             setClickable(false);
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            mTopBackgroundView.setBackground(tileBackground);
+            mTopBackgroundView.setBackground(mTileBackground);
         } else {
             mTopBackgroundView.setOnClickListener(null);
             mTopBackgroundView.setClickable(false);
             setOnClickListener(mClickPrimary);
+            setOnLongClickListener(mLongClick);
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-            setBackground(tileBackground);
+            setBackground(mTileBackground);
         }
         mTopBackgroundView.setFocusable(dual);
         setFocusable(!dual);
         mDivider.setVisibility(dual ? VISIBLE : GONE);
         postInvalidate();
+        return changed;
     }
 
     private void setRipple(RippleDrawable tileBackground) {
@@ -201,9 +209,11 @@ public class QSTileView extends ViewGroup {
         }
     }
 
-    public void init(OnClickListener clickPrimary, OnClickListener clickSecondary) {
+    public void init(OnClickListener clickPrimary, OnClickListener clickSecondary,
+            OnLongClickListener longClick) {
         mClickPrimary = clickPrimary;
         mClickSecondary = clickSecondary;
+        mLongClick = longClick;
     }
 
     protected View createIcon() {
@@ -213,7 +223,7 @@ public class QSTileView extends ViewGroup {
         return icon;
     }
 
-    private Drawable getTileBackground() {
+    private Drawable newTileBackground() {
         final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
         final TypedArray ta = mContext.obtainStyledAttributes(attrs);
         final Drawable d = ta.getDrawable(0);
@@ -284,16 +294,7 @@ public class QSTileView extends ViewGroup {
 
     protected void handleStateChanged(QSTile.State state) {
         if (mIcon instanceof ImageView) {
-            ImageView iv = (ImageView) mIcon;
-            if (state.icon != null) {
-                iv.setImageDrawable(state.icon);
-            } else if (state.iconId > 0) {
-                iv.setImageResource(state.iconId);
-            }
-            Drawable drawable = iv.getDrawable();
-            if (state.autoMirrorDrawable && drawable != null) {
-                drawable.setAutoMirrored(true);
-            }
+            setIcon((ImageView) mIcon, state);
         }
         if (mDual) {
             mDualLabel.setText(state.label);
@@ -302,6 +303,22 @@ public class QSTileView extends ViewGroup {
         } else {
             mLabel.setText(state.label);
             setContentDescription(state.contentDescription);
+        }
+    }
+
+    protected void setIcon(ImageView iv, QSTile.State state) {
+        if (!Objects.equals(state.icon, iv.getTag(R.id.qs_icon_tag))) {
+            Drawable d = state.icon != null ? state.icon.getDrawable(mContext) : null;
+            if (d != null && state.autoMirrorDrawable) {
+                d.setAutoMirrored(true);
+            }
+            iv.setImageDrawable(d);
+            iv.setTag(R.id.qs_icon_tag, state.icon);
+            if (d instanceof Animatable) {
+                if (!iv.isShown()) {
+                    ((Animatable) d).stop(); // skip directly to end state
+                }
+            }
         }
     }
 

@@ -23,6 +23,7 @@ page.title=GCM HTTP Connection Server
 <h2>See Also</h2>
 
 <ol class="toc">
+<li><a href="server-ref.html">Server Reference</a></li>
 <li><a href="gs.html">Getting Started</a></li>
 <li><a href="client.html">Implementing GCM Client</a></li>
 <li><a href="ccs.html">Cloud Connection Server</a></li>
@@ -33,32 +34,39 @@ page.title=GCM HTTP Connection Server
 </div>
 </div>
 
-<p>This document describes the GCM HTTP connection server. Connection servers
+<p>This document describes the Google Cloud Messaging (GCM) HTTP
+connection server. Connection servers
 are the Google-provided servers that take messages from the 3rd-party
 application server and sending them to the device.</p>
 
+<p class="note"><strong>Note:</strong> The content in this document
+applies to <a href="http://developer.chrome.com/apps/cloudMessaging">
+GCM with Chrome apps</a> as well as Android.</p>
 
-
-<p class="note"><strong>Note:</strong> See
-<a href="server.html#params">Implementing GCM Server</a> for a list of all the message
+<p>See the
+<a href="server-ref.html">Server Reference</a> for a list of all the message
 parameters and which connection server(s) supports them.</p>
 
 
 <h2 id="auth">Authentication</h2>
 
-<p>To send a  message, the application server issues a POST request to
-<code>https://android.googleapis.com/gcm/send</code>.</p>
+<p>To send a  message, the application server issues a POST request. For example:</p>
+<pre>https://android.googleapis.com/gcm/send</pre>
 <p>A  message request is made of 2 parts: HTTP header and HTTP body.</p>
 
 <p>The HTTP header must contain the following headers:</p>
 <ul>
   <li><code>Authorization</code>: key=YOUR_API_KEY</li>
-  <li><code>Content-Type</code>: <code>application/json</code> for JSON; <code>application/x-www-form-urlencoded;charset=UTF-8</code> for plain text.
+  <li><code>Content-Type</code>: <code>application/json</code> for JSON;
+<code>application/x-www-form-urlencoded;charset=UTF-8</code> for plain text.
+If <code>Content-Type</code> is omitted, the format
+is assumed to be plain text.
   </li>
 </ul>
 
 <p>For example:
 </p>
+
 <pre>Content-Type:application/json
 Authorization:key=AIzaSyB-1uEai2WiUapxCs2Q0GZYzPu7Udno5aA
 
@@ -68,26 +76,30 @@ Authorization:key=AIzaSyB-1uEai2WiUapxCs2Q0GZYzPu7Udno5aA
     ...
   },
 }</pre>
-<p class="note">
-  <p><strong>Note:</strong> If <code>Content-Type</code> is omitted, the format
-is assumed to be plain text.</p>
-</p>
+
 
 <p>The HTTP body content depends on whether you're using JSON or plain text.
 See
-<a href="server.html#params">Implementing GCM Server</a> for a list of all the
+<a href="server-ref.html#params">the Server Reference</a> for a list of all the
 parameters your JSON or plain text message can contain.</p>
 
 
   <h2 id="request">Request Format</h2>
+
+<p>This section shows you how to format a request for both JSON and plain text. See
+the <a href="server-ref.html#table1">Server Reference</a> for a complete
+list of the fields you can include in a request.</p>
+
   <p>Here is the smallest possible request (a message without any parameters and
 just one recipient) using JSON:</p>
+
   <pre class="prettyprint pretty-json">{ &quot;registration_ids&quot;: [ &quot;42&quot; ] }</pre>
 
   <p>And here the same example using plain text:</p>
   <pre class="prettyprint">registration_id=42</pre>
 
   <p> Here is a message with a payload and 6 recipients:</p>
+
   <pre class="prettyprint pretty-HTML">{ "data": {
     "score": "5x1",
     "time": "15:10"
@@ -109,10 +121,25 @@ just one recipient) using JSON:</p>
   <pre class="prettyprint">collapse_key=score_update&amp;time_to_live=108&amp;delay_while_idle=1&amp;data.score=4x8&amp;data.time=15:16.2342&amp;registration_id=42
   </pre>
 
+<p>Here is a message that includes a notification key and payload:</p>
+
+<pre>
+{
+  "data": {
+    "message": "ciao"
+  },
+  "notification_key":"aUniqueKey"
+}
+</pre>
+
+<p>For more information about notifications and how to use them, see
+<a href="{@docRoot}google/gcm/notifications.html">User Notifications</a>.</p>
+
+
 <p class="note"><strong>Note:</strong> If your organization has a firewall
 that restricts the traffic to or
 from the Internet, you need to configure it to allow connectivity with GCM in order for
-your Android devices to receive messages.
+your GCM client apps to receive messages.
 The ports to open are: 5228, 5229, and 5230. GCM typically only uses 5228, but
 it sometimes uses 5229 and 5230. GCM doesn't provide specific IPs, so you should allow
 your firewall to accept outgoing connections to all IP addresses
@@ -124,53 +151,11 @@ contained in the IP blocks listed in Google's ASN of 15169.</p>
 
 <p>There are two possible outcomes when trying to send a message:</p>
 <ul>
-  <li>The message is processed successfully.</li>
-  <li>The GCM server rejects the request.</li>
+  <li>The message is processed successfully. The HTTP response has a 200 status, and
+the body contains more information about the status of the message (including possible errors).</li>
+  <li>The GCM server rejects the request. The HTTP response contains a
+non-200 status code (such as 400, 401 or 5xx).</li>
 </ul>
-
-<p>When the message is processed successfully, the HTTP response has a 200 status
-and the body contains more information about the status of the message
-(including possible errors). When the request is rejected,
-the HTTP response contains a non-200 status code (such as 400, 401, or 503).</p>
-
-<p>The following table summarizes the statuses that the HTTP response header might
-contain. Click the troubleshoot link for advice on how to deal with each type of
-error.</p>
-<table border=1>
-  <tr>
-    <th>Response</th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td>200</td>
-    <td>Message was processed successfully. The response body will contain more
-details about the message status, but its format will depend whether the request
-was JSON or plain text. See <a href="#success">Interpreting a success response</a>
-for more details.</td>
-  </tr>
-  <tr>
-    <td>400</td>
-    <td><span id="internal-source-marker_0.2">Only applies for JSON requests.
-Indicates that the request could not be parsed as JSON, or it contained invalid
-fields (for instance, passing a string where a number was expected). The exact
-failure reason is described in the response and the problem should be addressed
-before the request can be retried.</td>
-  </tr>
-  <tr>
-    <td>401</td>
-    <td>There was an error authenticating the sender account.
-<a href="#auth_error">Troubleshoot</a></td>
-  </tr>
-  <tr>
-    <td>5xx</td>
-    <td>Errors in the 500-599 range (such as 500 or 503) indicate that there wa
-an internal error in the GCM server while trying to process the request, or that
-the server is temporarily unavailable (for example, because of timeouts). Sender
-must retry later, honoring any <code>Retry-After</code> header included in the
-response. Application servers must implement exponential back-off.
-<a href="#internal_error">Troubleshoot</a></td>
-  </tr>
-</table>
 
 <h3 id="success">Interpreting a success response</h3>
 <p>When a JSON request is successful (HTTP status code 200), the response body
@@ -238,8 +223,8 @@ code>registration_ids</code> passed in the request (using the same index).</li>
 request.</li>
       <li>If it is <code>NotRegistered</code>, you should remove the registration
 ID from your server database because the application was uninstalled from the
-device or it does not have a broadcast receiver configured to receive
-<code>com.google.android.c2dm.intent.RECEIVE</code> intents.</li>
+device, or the client app isn't configured to receive
+messages.</li>
       <li>Otherwise, there is something wrong in the registration ID passed in
 the request; it is probably a non-recoverable error that will also require removing
 the registration from the server database. See <a href="#error_codes">Interpreting
@@ -288,8 +273,7 @@ might occur when trying to send a message to a device:</p>
 
 <dt id="invalid_reg"><strong>Invalid Registration ID</strong></dt>
 <dd>Check the formatting of the registration ID that you pass to the server. Make
-sure it matches the registration ID the phone receives in the
-<code>com.google.android.c2dm.intent.REGISTRATION</code> intent and that you're
+sure it matches the registration ID the client app receives and that you're
 not truncating it or adding additional characters.
 <br/>Happens when error code is <code>InvalidRegistration</code>.</dd>
 
@@ -303,17 +287,13 @@ Happens when error code is <code>MismatchSenderId</code>.</dd>
 <dt id="unreg_device"><strong>Unregistered Device</strong></dt>
 <dd>An existing registration ID may cease to be valid in a number of scenarios, including:
 <ul>
-  <li>If the application manually unregisters by issuing a
-<span class="prettyprint pretty-java">
-<code>com.google.android.c2dm.intent.UNREGISTER</code></span><code>
-</code>intent.</li>
+  <li>If the application manually unregisters.</li>
   <li>If the application is automatically unregistered, which can happen
 (but is not guaranteed) if the user uninstalls the application.</li>
   <li>If the registration ID expires. Google might decide to refresh registration
 IDs. </li>
-  <li>If the application is updated but the new version does not have a broadcast
-receiver configured to receive <code>com.google.android.c2dm.intent.RECEIVE</code>
-intents.</li>
+  <li>If the application is updated but the new version is not configured to receive
+messages.</li>
 </ul>
 For all these cases, you should remove this registration ID from the 3rd-party
 server and stop using it to send
@@ -328,8 +308,7 @@ as the values.
 
 <dt id="invalid_datakey"><strong>Invalid Data Key</strong></dt>
 <dd>The payload data contains a key (such as <code>from</code> or any value
-prefixed by <code>google.</code>) that is used internally by GCM in the
-<code>com.google.android.c2dm.intent.RECEIVE</code> Intent and cannot be used.
+prefixed by <code>google.</code>) that is used internally by GCM and therefore cannot be used.
 Note that some words (such as <code>collapse_key</code>) are also used by GCM
 but are allowed in the payload, in which case the payload value will be
 overridden by the GCM value.
@@ -351,9 +330,9 @@ authenticated. Possible causes are: <ul>
 <li>Request originated from a server not whitelisted in the Server Key IPs.</li>
 
 </ul>
-Check that the token you're sending inside the <code>Authorization</code> header
-is the correct API key associated with your project. You can check the validity
-of your API key by running the following command:<br/>
+When there is an Authentication Error, you can check the validity of your API key by running You can check the validity
+of your API key by running the following command (this example shows what you
+would do on Android; see the documentation for your platform):<br/>
 
 <pre># api_key=YOUR_API_KEY
 
@@ -402,8 +381,7 @@ Happens when the HTTP status code is between 501 and 599, or when the
 <dd>
 The server encountered an error while trying to process the request. You
 could retry the same request (obeying the requirements listed in the <a href="#timeout">Timeout</a>
-section), but if the error persists, please report the problem in the
-<a href="https://groups.google.com/forum/?fromgroups#!forum/android-gcm">android-gcm group</a>.
+section), but if the error persists, please report the problem to Google.
 <br />
 Happens when the HTTP status code is 500, or when the <code>error</code> field of a JSON
 object in the results array is <code>InternalServerError</code>.
@@ -416,6 +394,12 @@ A message was addressed to a registration ID whose package name did not match
 the value passed in the request. Happens when error code is
 <code>InvalidPackageName</code>.
 </dd>
+
+<dt id="big_msg"><strong>Device Message Rate Exceeded</strong></dt>
+  <dd>The rate of messages to a particular device is too high. You should reduce the number
+of messages sent to this device and should not retry sending to this device immediately.
+<br/>Happens when error code is <code>DeviceMessageRateExceeded</code>.</dd>
+
 </dl>
 
 <h3 id="example-responses">Example responses</h3>
@@ -479,7 +463,7 @@ registration_id=32
 
 <p>This section gives examples of implementing an app server that works with the
 GCM HTTP connection server. Note that a full GCM implementation requires a
-client-side implementation, in addition to the server.</a>
+client-side implementation, in addition to the server. This example is based on Android.</a>
 
 
 <p>Requirements</p>
@@ -499,7 +483,7 @@ version 1.6 or later.</li>
 </ul>
 <p>For the Android application:</p>
 <ul>
-  <li>Emulator (or device) running Android 2.2 with Google APIs.</li>
+  <li>Emulator (or device) running Android 2.2 (ideally, 2.3 or above) with Google APIs.</li>
   <li>The Google API project number of the account registered to use GCM.</li>
 </ul>
 

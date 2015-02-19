@@ -18,6 +18,10 @@ package com.android.server.hdmi;
 
 import android.view.KeyEvent;
 
+import libcore.util.EmptyArray;
+
+import java.util.Arrays;
+
 /**
  * Helper class to translate android keycode to hdmi cec keycode and vice versa.
  */
@@ -156,46 +160,60 @@ final class HdmiCecKeycode {
 
     /**
      * A mapping between Android and CEC keycode.
+     * <p>
+     * Normal implementation of this looks like
      *
-     * <p>Normal implementation of this looks like
      * <pre>
-     *    new KeycodeEntry(KeyEvent.KEYCODE_DPAD_CENTER, CEC_KEYCODE_SELECT);
+     * new KeycodeEntry(KeyEvent.KEYCODE_DPAD_CENTER, CEC_KEYCODE_SELECT);
      * </pre>
-     * <p>However, some keys in CEC requires additional parameter.
-     * In order to use parameterized cec key, add unique android keycode (existing or custom)
-     * corresponding to a pair of cec keycode and and its param.
+     * <p>
+     * However, some keys in CEC requires additional parameter. In order to use parameterized cec
+     * key, add unique android keycode (existing or custom) corresponding to a pair of cec keycode
+     * and and its param.
+     *
      * <pre>
-     *    new KeycodeEntry(CUSTOME_ANDORID_KEY_1, CEC_KEYCODE_SELECT_BROADCAST_TYPE,
-     *        UI_BROADCAST_TOGGLE_ALL);
-     *    new KeycodeEntry(CUSTOME_ANDORID_KEY_2, CEC_KEYCODE_SELECT_BROADCAST_TYPE,
-     *        UI_BROADCAST_ANALOGUE);
+     * new KeycodeEntry(CUSTOME_ANDORID_KEY_1, CEC_KEYCODE_SELECT_BROADCAST_TYPE,
+     *         UI_BROADCAST_TOGGLE_ALL);
+     * new KeycodeEntry(CUSTOME_ANDORID_KEY_2, CEC_KEYCODE_SELECT_BROADCAST_TYPE,
+     *         UI_BROADCAST_ANALOGUE);
      * </pre>
      */
     private static class KeycodeEntry {
         private final int mAndroidKeycode;
-        private final int mCecKeycode;
         private final boolean mIsRepeatable;
+        private final byte[] mCecKeycodeAndParams;
+
+        private KeycodeEntry(int androidKeycode, int cecKeycode, boolean isRepeatable,
+                byte[] cecParams) {
+            mAndroidKeycode = androidKeycode;
+            mIsRepeatable = isRepeatable;
+            mCecKeycodeAndParams = new byte[cecParams.length + 1];
+            System.arraycopy(cecParams, 0, mCecKeycodeAndParams, 1, cecParams.length);
+            mCecKeycodeAndParams[0] = (byte) (cecKeycode & 0xFF);
+        }
 
         private KeycodeEntry(int androidKeycode, int cecKeycode, boolean isRepeatable) {
-            mAndroidKeycode = androidKeycode;
-            mCecKeycode = cecKeycode;
-            mIsRepeatable = isRepeatable;
+            this(androidKeycode, cecKeycode, isRepeatable, EmptyArray.BYTE);
+        }
+
+        private KeycodeEntry(int androidKeycode, int cecKeycode, byte[] cecParams) {
+            this(androidKeycode, cecKeycode, true, cecParams);
         }
 
         private KeycodeEntry(int androidKeycode, int cecKeycode) {
-            this(androidKeycode, cecKeycode, true);
+            this(androidKeycode, cecKeycode, true, EmptyArray.BYTE);
         }
 
-        private int toCecKeycodeIfMatched(int androidKeycode) {
+        private byte[] toCecKeycodeAndParamIfMatched(int androidKeycode) {
             if (mAndroidKeycode == androidKeycode) {
-                return mCecKeycode;
+                return mCecKeycodeAndParams;
             } else {
-                return UNSUPPORTED_KEYCODE;
+                return null;
             }
         }
 
-        private int toAndroidKeycodeIfMatched(int cecKeycode) {
-            if (cecKeycode == mCecKeycode) {
+        private int toAndroidKeycodeIfMatched(byte[] cecKeycodeAndParams) {
+            if (Arrays.equals(mCecKeycodeAndParams, cecKeycodeAndParams)) {
                 return mAndroidKeycode;
             } else {
                 return UNSUPPORTED_KEYCODE;
@@ -209,6 +227,11 @@ final class HdmiCecKeycode {
                 return null;
             }
         }
+    }
+
+    private static byte[] intToSingleByteArray(int value) {
+        return new byte[] {
+                (byte) (value & 0xFF) };
     }
 
     // Keycode entry container for all mappings.
@@ -227,19 +250,25 @@ final class HdmiCecKeycode {
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_UP),
             // No Android keycode defined for CEC_KEYCODE_LEFT_DOWN
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_LEFT_DOWN),
-            new KeycodeEntry(KeyEvent.KEYCODE_HOME, CEC_KEYCODE_ROOT_MENU, false),
-            new KeycodeEntry(KeyEvent.KEYCODE_SETTINGS, CEC_KEYCODE_SETUP_MENU, false),
-            new KeycodeEntry(KeyEvent.KEYCODE_MENU, CEC_KEYCODE_CONTENTS_MENU, false),
+            new KeycodeEntry(KeyEvent.KEYCODE_HOME, CEC_KEYCODE_ROOT_MENU),
+            new KeycodeEntry(KeyEvent.KEYCODE_SETTINGS, CEC_KEYCODE_SETUP_MENU),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_CONTENTS_MENU, CEC_KEYCODE_CONTENTS_MENU, false),
             // No Android keycode defined for CEC_KEYCODE_FAVORITE_MENU
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_FAVORITE_MENU),
+            // Note that both BACK and ESCAPE are mapped to EXIT of CEC keycode.
+            // This would be problematic when translates CEC keycode to Android keycode.
+            // In current implementation, we pick BACK as mapping of EXIT key.
+            // If you'd like to map CEC EXIT to Android EXIT key, change order of
+            // the following two definition.
             new KeycodeEntry(KeyEvent.KEYCODE_BACK, CEC_KEYCODE_EXIT),
+            new KeycodeEntry(KeyEvent.KEYCODE_ESCAPE, CEC_KEYCODE_EXIT),
             // RESERVED
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_TOP_MENU, CEC_KEYCODE_MEDIA_TOP_MENU),
-            // No Android keycode defined for CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_MEDIA_CONTEXT_MENU,
+                    CEC_KEYCODE_MEDIA_CONTEXT_SENSITIVE_MENU),
             // RESERVED
             // No Android keycode defined for CEC_KEYCODE_NUMBER_ENTRY_MODE
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_NUMBER_ENTRY_MODE),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_NUMBER_ENTRY, CEC_KEYCODE_NUMBER_ENTRY_MODE),
             new KeycodeEntry(KeyEvent.KEYCODE_11, CEC_KEYCODE_NUMBER_11),
             new KeycodeEntry(KeyEvent.KEYCODE_12, CEC_KEYCODE_NUMBER_12),
             new KeycodeEntry(KeyEvent.KEYCODE_0, CEC_KEYCODE_NUMBER_0_OR_NUMBER_10),
@@ -276,7 +305,12 @@ final class HdmiCecKeycode {
             new KeycodeEntry(KeyEvent.KEYCODE_VOLUME_MUTE, CEC_KEYCODE_MUTE, false),
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_PLAY, CEC_KEYCODE_PLAY),
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_STOP, CEC_KEYCODE_STOP),
+            // Note that we map both MEDIA_PAUSE and MEDIA_PLAY_PAUSE to CEC PAUSE key.
+            // When it translates CEC PAUSE key, it picks Android MEDIA_PAUSE key as a mapping of
+            // it. If you'd like to choose MEDIA_PLAY_PAUSE, please change order of the following
+            // two lines.
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_PAUSE, CEC_KEYCODE_PAUSE),
+            new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, CEC_KEYCODE_PAUSE),
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_RECORD, CEC_KEYCODE_RECORD),
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_REWIND, CEC_KEYCODE_REWIND),
             new KeycodeEntry(KeyEvent.KEYCODE_MEDIA_FAST_FORWARD, CEC_KEYCODE_FAST_FORWARD),
@@ -291,48 +325,61 @@ final class HdmiCecKeycode {
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESERVED),
             // No Android keycode defined for CEC_KEYCODE_ANGLE
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_ANGLE),
-            // No Android keycode defined for CEC_KEYCODE_SUB_PICTURE
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SUB_PICTURE),
+            new KeycodeEntry(KeyEvent.KEYCODE_CAPTIONS, CEC_KEYCODE_SUB_PICTURE),
             // No Android keycode defined for CEC_KEYCODE_VIDEO_ON_DEMAND
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_VIDEO_ON_DEMAND),
             new KeycodeEntry(KeyEvent.KEYCODE_GUIDE, CEC_KEYCODE_ELECTRONIC_PROGRAM_GUIDE),
-            // No Android keycode defined for CEC_KEYCODE_TIMER_PROGRAMMING
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TIMER_PROGRAMMING),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_TIMER_PROGRAMMING, CEC_KEYCODE_TIMER_PROGRAMMING),
             // No Android keycode defined for CEC_KEYCODE_INITIAL_CONFIGURATION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_INITIAL_CONFIGURATION),
             // No Android keycode defined for CEC_KEYCODE_SELECT_BROADCAST_TYPE
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_BROADCAST_TYPE),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_TERRESTRIAL_ANALOG,
+                    CEC_KEYCODE_SELECT_BROADCAST_TYPE, true,
+                    intToSingleByteArray(UI_BROADCAST_ANALOGUE)),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_TERRESTRIAL_DIGITAL,
+                    CEC_KEYCODE_SELECT_BROADCAST_TYPE, true,
+                    intToSingleByteArray(UI_BROADCAST_DIGITAL_TERRESTRIAL)),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_SATELLITE_BS,
+                    CEC_KEYCODE_SELECT_BROADCAST_TYPE, true,
+                    intToSingleByteArray(UI_BROADCAST_DIGITAL_SATELLITE)),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_SATELLITE_CS,
+                    CEC_KEYCODE_SELECT_BROADCAST_TYPE, true,
+                    intToSingleByteArray(UI_BROADCAST_DIGITAL_COMMNICATIONS_SATELLITE)),
+            new KeycodeEntry(KeyEvent.KEYCODE_TV_NETWORK,
+                    CEC_KEYCODE_SELECT_BROADCAST_TYPE, true,
+                    intToSingleByteArray(UI_BROADCAST_TOGGLE_ANALOGUE_DIGITAL)),
             // No Android keycode defined for CEC_KEYCODE_SELECT_SOUND_PRESENTATION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_SOUND_PRESENTATION),
             // RESERVED
             // The following deterministic key definitions do not need key mapping
             // since they are supposed to be generated programmatically only.
             // No Android keycode defined for CEC_KEYCODE_PLAY_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PLAY_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PLAY_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_PAUSE_PLAY_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_PLAY_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_PLAY_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_RECORD_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RECORD_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RECORD_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_PAUSE_RECORD_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_PAUSE_RECORD_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_STOP_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_STOP_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_MUTE_FUNCTION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_MUTE_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_RESTORE_VOLUME_FUNCTION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_RESTORE_VOLUME_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_TUNE_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TUNE_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_TUNE_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_SELECT_MEDIA_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_MEDIA_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_MEDIA_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AV_INPUT_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_SELECT_AUDIO_INPUT_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_POWER_TOGGLE_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_TOGGLE_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_TOGGLE_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_POWER_OFF_FUNCTION
-            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_OFF_FUNCTION),
+            new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_OFF_FUNCTION, false),
             // No Android keycode defined for CEC_KEYCODE_POWER_ON_FUNCTION
             new KeycodeEntry(UNSUPPORTED_KEYCODE, CEC_KEYCODE_POWER_ON_FUNCTION, false),
             // RESERVED
@@ -347,31 +394,31 @@ final class HdmiCecKeycode {
     };
 
     /**
-     * Translate Android keycode to Hdmi Cec keycode.
+     * Translate Android keycode to Hdmi Cec keycode and params.
      *
      * @param keycode Android keycode. For details, refer {@link KeyEvent}
-     * @return single byte CEC keycode if matched.
+     * @return byte array of CEC keycode and params if matched. Otherwise, return null.
      */
-    static int androidKeyToCecKey(int keycode) {
+    static byte[] androidKeyToCecKey(int keycode) {
         for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            int cecKeycode = KEYCODE_ENTRIES[i].toCecKeycodeIfMatched(keycode);
-            if (cecKeycode != UNSUPPORTED_KEYCODE) {
-                return cecKeycode;
+            byte[] cecKeycodeAndParams = KEYCODE_ENTRIES[i].toCecKeycodeAndParamIfMatched(keycode);
+            if (cecKeycodeAndParams != null) {
+                return cecKeycodeAndParams;
             }
         }
-        return UNSUPPORTED_KEYCODE;
+        return null;
     }
 
     /**
-     * Translate Hdmi CEC keycode to Android keycode.
+     * Translate Hdmi CEC keycode with params to Android keycode.
      *
-     * @param keycode CEC keycode
-     * @return cec keycode corresponding to the given android keycode.
-     *         If finds no matched keycode, return {@link #UNSUPPORTED_KEYCODE}
+     * @param cecKeycodeAndParams CEC keycode and params
+     * @return cec keycode corresponding to the given android keycode. If finds no matched keycode,
+     *         return {@link #UNSUPPORTED_KEYCODE}
      */
-    static int cecKeyToAndroidKey(int keycode) {
+    static int cecKeycodeAndParamsToAndroidKey(byte[] cecKeycodeAndParams) {
         for (int i = 0; i < KEYCODE_ENTRIES.length; ++i) {
-            int androidKey = KEYCODE_ENTRIES[i].toAndroidKeycodeIfMatched(keycode);
+            int androidKey = KEYCODE_ENTRIES[i].toAndroidKeycodeIfMatched(cecKeycodeAndParams);
             if (androidKey != UNSUPPORTED_KEYCODE) {
                 return androidKey;
             }
@@ -399,7 +446,6 @@ final class HdmiCecKeycode {
      * Returns {@code true} if given Android keycode is supported, otherwise {@code false}.
      */
     static boolean isSupportedKeycode(int androidKeycode) {
-        return HdmiCecKeycode.androidKeyToCecKey(androidKeycode)
-                != HdmiCecKeycode.UNSUPPORTED_KEYCODE;
-  }
+        return HdmiCecKeycode.androidKeyToCecKey(androidKeycode) != null;
+    }
 }

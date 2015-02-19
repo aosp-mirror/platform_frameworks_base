@@ -17,11 +17,18 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Xml;
 import android.widget.TextView;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ScrollView;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 @SuppressWarnings({"UnusedDeclaration"})
@@ -56,7 +63,34 @@ public class VectorDrawablePerformance extends Activity {
             R.drawable.vector_drawable26,
             R.drawable.vector_drawable27,
             R.drawable.vector_drawable28,
+            R.drawable.vector_drawable29,
+            R.drawable.vector_drawable30,
     };
+
+    public static VectorDrawable create(Resources resources, int rid) {
+        try {
+            final XmlPullParser parser = resources.getXml(rid);
+            final AttributeSet attrs = Xml.asAttributeSet(parser);
+            int type;
+            while ((type=parser.next()) != XmlPullParser.START_TAG &&
+                    type != XmlPullParser.END_DOCUMENT) {
+                // Empty loop
+            }
+            if (type != XmlPullParser.START_TAG) {
+                throw new XmlPullParserException("No start tag found");
+            }
+
+            final VectorDrawable drawable = new VectorDrawable();
+            drawable.inflate(resources, parser, attrs);
+
+            return drawable;
+        } catch (XmlPullParserException e) {
+            Log.e(LOGCAT, "parser error", e);
+        } catch (IOException e) {
+            Log.e(LOGCAT, "parser error", e);
+        }
+        return null;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +104,7 @@ public class VectorDrawablePerformance extends Activity {
         VectorDrawable []d = new VectorDrawable[icon.length];
         long time =  android.os.SystemClock.elapsedRealtimeNanos();
         for (int i = 0; i < icon.length; i++) {
-             d[i] = VectorDrawable.create(res,icon[i]);
+             d[i] = create(res,icon[i]);
         }
         time =  android.os.SystemClock.elapsedRealtimeNanos()-time;
         TextView t = new TextView(this);

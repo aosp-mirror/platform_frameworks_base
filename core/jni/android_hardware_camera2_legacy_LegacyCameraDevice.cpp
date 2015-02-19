@@ -49,36 +49,35 @@ using namespace android;
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
 
 /**
- * Convert from RGB 888 to Y'CbCr using the conversion specified in ITU-R BT.601 for
- * digital RGB with K_b = 0.114, and K_r = 0.299.
+ * Convert from RGB 888 to Y'CbCr using the conversion specified in JFIF v1.02
  */
 static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, uint8_t* yPlane,
         uint8_t* uPlane, uint8_t* vPlane, size_t chromaStep, size_t yStride, size_t chromaStride) {
     uint8_t R, G, B;
     size_t index = 0;
-
-    size_t cStrideDiff = chromaStride - width;
-
     for (size_t j = 0; j < height; j++) {
+        uint8_t* u = uPlane;
+        uint8_t* v = vPlane;
+        uint8_t* y = yPlane;
+        bool jEven = (j & 1) == 0;
         for (size_t i = 0; i < width; i++) {
             R = rgbBuf[index++];
             G = rgbBuf[index++];
             B = rgbBuf[index++];
-            *(yPlane + i) = ((66 * R + 129 * G +  25 * B + 128) >> 8) +  16;
-
-            if (j % 2 == 0 && i % 2 == 0){
-                *uPlane = (( -38 * R -  74 * G + 112 * B + 128) >> 8) + 128;
-                *vPlane = (( 112 * R -  94 * G -  18 * B + 128) >> 8) + 128;
-                uPlane += chromaStep;
-                vPlane += chromaStep;
+            *y++ = (77 * R + 150 * G +  29 * B) >> 8;
+            if (jEven && (i & 1) == 0) {
+                *v = (( -43 * R - 85 * G + 128 * B) >> 8) + 128;
+                *u = (( 128 * R - 107 * G - 21 * B) >> 8) + 128;
+                u += chromaStep;
+                v += chromaStep;
             }
             // Skip alpha
             index++;
         }
         yPlane += yStride;
-        if (j % 2 == 0) {
-            uPlane += cStrideDiff;
-            vPlane += cStrideDiff;
+        if (jEven) {
+            uPlane += chromaStride;
+            vPlane += chromaStride;
         }
     }
 }
@@ -87,8 +86,10 @@ static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, android_yc
     size_t cStep = ycbcr->chroma_step;
     size_t cStride = ycbcr->cstride;
     size_t yStride = ycbcr->ystride;
+    ALOGV("%s: yStride is: %zu, cStride is: %zu, cStep is: %zu", __FUNCTION__, yStride, cStride,
+            cStep);
     rgbToYuv420(rgbBuf, width, height, reinterpret_cast<uint8_t*>(ycbcr->y),
-            reinterpret_cast<uint8_t*>(ycbcr->cb), reinterpret_cast<uint8_t*>(ycbcr->cr),
+            reinterpret_cast<uint8_t*>(ycbcr->cr), reinterpret_cast<uint8_t*>(ycbcr->cb),
             cStep, yStride, cStride);
 }
 
@@ -231,6 +232,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
 
     size_t totalSizeBytes = tmpSize;
 
+    ALOGV("%s: Pixel format chosen: %x", __FUNCTION__, pixelFmt);
     switch(pixelFmt) {
         case HAL_PIXEL_FORMAT_YCrCb_420_SP: {
             if (bufferLength < totalSizeBytes) {
@@ -276,6 +278,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
             }
 
             uint32_t stride = buf->getStride();
+            ALOGV("%s: stride is: %" PRIu32, __FUNCTION__, stride);
             LOG_ALWAYS_FATAL_IF(stride % 16, "Stride is not 16 pixel aligned %d", stride);
 
             uint32_t cStride = ALIGN(stride / 2, 16);
@@ -470,6 +473,26 @@ static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject th
     return NO_ERROR;
 }
 
+static jint LegacyCameraDevice_nativeDetectSurfaceUsageFlags(JNIEnv* env, jobject thiz,
+          jobject surface) {
+    ALOGV("nativeDetectSurfaceUsageFlags");
+
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+            "Could not retrieve native window from surface.");
+        return BAD_VALUE;
+    }
+    int32_t usage = 0;
+    status_t err = anw->query(anw.get(), NATIVE_WINDOW_CONSUMER_USAGE_BITS, &usage);
+    if(err != NO_ERROR) {
+        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+            "Error while querying surface usage bits");
+        return err;
+    }
+    return usage;
+}
+
 static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject thiz,
         jobject surfaceTexture, jintArray dimens) {
     ALOGV("nativeDetectTextureDimens");
@@ -575,15 +598,10 @@ static jint LegacyCameraDevice_nativeSetSurfaceDimens(JNIEnv* env, jobject thiz,
         ALOGE("%s: Could not retrieve native window from surface.", __FUNCTION__);
         return BAD_VALUE;
     }
-    status_t err = native_window_set_buffers_dimensions(anw.get(), width, height);
-    if (err != NO_ERROR) {
-        ALOGE("%s: Error while setting surface dimens %s (%d).", __FUNCTION__, strerror(-err), err);
-        return err;
-    }
 
-    // WAR - Set user dimensions also to avoid incorrect scaling after TextureView orientation
-    // change.
-    err = native_window_set_buffers_user_dimensions(anw.get(), width, height);
+    // Set user dimensions only
+    // The producer dimensions are owned by GL
+    status_t err = native_window_set_buffers_user_dimensions(anw.get(), width, height);
     if (err != NO_ERROR) {
         ALOGE("%s: Error while setting surface user dimens %s (%d).", __FUNCTION__, strerror(-err),
                 err);
@@ -713,6 +731,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeGetJpegFooterSize",
     "()I",
     (void *)LegacyCameraDevice_nativeGetJpegFooterSize },
+    { "nativeDetectSurfaceUsageFlags",
+    "(Landroid/view/Surface;)I",
+    (void *)LegacyCameraDevice_nativeDetectSurfaceUsageFlags },
 };
 
 // Get all the required offsets in java class and register native functions
@@ -724,4 +745,3 @@ int register_android_hardware_camera2_legacy_LegacyCameraDevice(JNIEnv* env)
             gCameraDeviceMethods,
             NELEM(gCameraDeviceMethods));
 }
-

@@ -25,6 +25,58 @@ import android.view.Display;
  */
 public abstract class PowerManagerInternal {
     /**
+     * Wakefulness: The device is asleep.  It can only be awoken by a call to wakeUp().
+     * The screen should be off or in the process of being turned off by the display controller.
+     * The device typically passes through the dozing state first.
+     */
+    public static final int WAKEFULNESS_ASLEEP = 0;
+
+    /**
+     * Wakefulness: The device is fully awake.  It can be put to sleep by a call to goToSleep().
+     * When the user activity timeout expires, the device may start dreaming or go to sleep.
+     */
+    public static final int WAKEFULNESS_AWAKE = 1;
+
+    /**
+     * Wakefulness: The device is dreaming.  It can be awoken by a call to wakeUp(),
+     * which ends the dream.  The device goes to sleep when goToSleep() is called, when
+     * the dream ends or when unplugged.
+     * User activity may brighten the screen but does not end the dream.
+     */
+    public static final int WAKEFULNESS_DREAMING = 2;
+
+    /**
+     * Wakefulness: The device is dozing.  It is almost asleep but is allowing a special
+     * low-power "doze" dream to run which keeps the display on but lets the application
+     * processor be suspended.  It can be awoken by a call to wakeUp() which ends the dream.
+     * The device fully goes to sleep if the dream cannot be started or ends on its own.
+     */
+    public static final int WAKEFULNESS_DOZING = 3;
+
+    public static String wakefulnessToString(int wakefulness) {
+        switch (wakefulness) {
+            case WAKEFULNESS_ASLEEP:
+                return "Asleep";
+            case WAKEFULNESS_AWAKE:
+                return "Awake";
+            case WAKEFULNESS_DREAMING:
+                return "Dreaming";
+            case WAKEFULNESS_DOZING:
+                return "Dozing";
+            default:
+                return Integer.toString(wakefulness);
+        }
+    }
+
+    /**
+     * Returns true if the wakefulness state represents an interactive state
+     * as defined by {@link android.os.PowerManager#isInteractive}.
+     */
+    public static boolean isInteractive(int wakefulness) {
+        return wakefulness == WAKEFULNESS_AWAKE || wakefulness == WAKEFULNESS_DREAMING;
+    }
+
+    /**
      * Used by the window manager to override the screen brightness based on the
      * current foreground activity.
      *
@@ -54,6 +106,13 @@ public abstract class PowerManagerInternal {
      * @param timeoutMillis The overridden timeout, or -1 to disable the override.
      */
     public abstract void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
+
+    /**
+     * Used by device administration to set the maximum screen off timeout.
+     *
+     * This method must only be called by the device administration policy manager.
+     */
+    public abstract void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs);
 
     /**
      * Used by the dream manager to override certain properties while dozing.

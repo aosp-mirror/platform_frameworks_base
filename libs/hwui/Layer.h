@@ -52,7 +52,7 @@ struct DeferStateStruct;
 /**
  * A layer has dimensions and is backed by an OpenGL texture or FBO.
  */
-class Layer {
+class Layer : public VirtualLightRefBase {
 public:
     enum Type {
         kType_Texture,
@@ -278,6 +278,18 @@ public:
     void cancelDefer();
     void flush();
     void render(const OpenGLRenderer& rootRenderer);
+
+    /**
+     * Posts a decStrong call to the appropriate thread.
+     * Thread-safe.
+     */
+    void postDecStrong();
+
+    /**
+     * Lost the GL context but the layer is still around, mark it invalid internally
+     * so the dtor knows not to do any GL work
+     */
+    void onGlContextLost();
 
     /**
      * Bounds of the layer.

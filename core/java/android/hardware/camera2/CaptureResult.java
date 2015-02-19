@@ -493,8 +493,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * options for the antibanding mode. The
      * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES android.control.aeAvailableAntibandingModes} key contains
      * the available modes for a given camera device.</p>
-     * <p>The default mode is AUTO, which is supported by all
-     * camera devices.</p>
+     * <p>AUTO mode is the default if it is available on given
+     * camera device. When AUTO mode is not available, the
+     * default will be either 50HZ or 60HZ, and both 50HZ
+     * and 60HZ will be available.</p>
      * <p>If manual exposure control is enabled (by setting
      * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} to OFF),
      * then this setting has no effect, and the application must
@@ -716,9 +718,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * metering sequence when it processes this request.</p>
      * <p>This entry is normally set to IDLE, or is not
      * included at all in the request settings. When included and
-     * set to START, the camera device will trigger the autoexposure
+     * set to START, the camera device will trigger the auto-exposure (AE)
      * precapture metering sequence.</p>
-     * <p>The precapture sequence should triggered before starting a
+     * <p>The precapture sequence should be triggered before starting a
      * high-quality still capture for final metering decisions to
      * be made, and for firing pre-capture flash pulses to estimate
      * scene brightness and required final capture flash power, when
@@ -726,6 +728,14 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Normally, this entry should be set to START for only a
      * single request, and the application should wait until the
      * sequence completes before starting a new one.</p>
+     * <p>When a precapture metering sequence is finished, the camera device
+     * may lock the auto-exposure routine internally to be able to accurately expose the
+     * subsequent still capture image (<code>{@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} == STILL_CAPTURE</code>).
+     * For this case, the AE may not resume normal scan if no subsequent still capture is
+     * submitted. To ensure that the AE routine restarts normal scan, the application should
+     * submit a request with <code>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} == true</code>, followed by a request
+     * with <code>{@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock} == false</code>, if the application decides not to submit a
+     * still capture request after the precapture sequence completes.</p>
      * <p>The exact effect of auto-exposure (AE) precapture trigger
      * depends on the current AE mode and state; see
      * {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} for AE precapture state transition
@@ -744,7 +754,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
+     * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CaptureResult#CONTROL_AE_STATE
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_IDLE
      * @see #CONTROL_AE_PRECAPTURE_TRIGGER_START
@@ -970,7 +982,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Whether auto-focus (AF) is currently enabled, and what
      * mode it is set to.</p>
      * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO and the lens is not fixed focus
-     * (i.e. <code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>).</p>
+     * (i.e. <code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>). Also note that
+     * when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is OFF, the behavior of AF is device
+     * dependent. It is recommended to lock AF by using {@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger} before
+     * setting {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} to OFF, or set AF mode to OFF when AE is OFF.</p>
      * <p>If the lens is controlled by the camera device auto-focus algorithm,
      * the camera device will report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState}
      * in result metadata.</p>
@@ -987,8 +1002,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#CONTROL_AF_AVAILABLE_MODES android.control.afAvailableModes}</p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_MODE
      * @see CameraCharacteristics#CONTROL_AF_AVAILABLE_MODES
      * @see CaptureResult#CONTROL_AF_STATE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      * @see #CONTROL_AF_MODE_OFF
@@ -1519,7 +1536,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>When set to the ON mode, the camera device's auto-white balance
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
-     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. Note that when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}
+     * is OFF, the behavior of AWB is device dependent. It is recommened to
+     * also set AWB mode to OFF or lock AWB by using {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} before
+     * setting AE mode to OFF.</p>
      * <p>When set to the OFF mode, the camera device's auto-white balance
      * routine is disabled. The application manually controls the white
      * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}
@@ -1550,7 +1570,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AE_MODE
      * @see CameraCharacteristics#CONTROL_AWB_AVAILABLE_MODES
+     * @see CaptureRequest#CONTROL_AWB_LOCK
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
@@ -1898,6 +1920,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #CONTROL_SCENE_MODE_CANDLELIGHT CANDLELIGHT}</li>
      *   <li>{@link #CONTROL_SCENE_MODE_BARCODE BARCODE}</li>
      *   <li>{@link #CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO}</li>
+     *   <li>{@link #CONTROL_SCENE_MODE_HDR HDR}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}</p>
@@ -1926,6 +1949,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_SCENE_MODE_CANDLELIGHT
      * @see #CONTROL_SCENE_MODE_BARCODE
      * @see #CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO
+     * @see #CONTROL_SCENE_MODE_HDR
      */
     @PublicKey
     public static final Key<Integer> CONTROL_SCENE_MODE =

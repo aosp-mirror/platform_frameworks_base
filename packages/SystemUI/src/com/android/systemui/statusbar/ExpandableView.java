@@ -36,9 +36,10 @@ public abstract class ExpandableView extends FrameLayout {
     private final int mMaxNotificationHeight;
 
     private OnHeightChangedListener mOnHeightChangedListener;
-    protected int mActualHeight;
+    private int mActualHeight;
     protected int mClipTopAmount;
     private boolean mActualHeightInitialized;
+    private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
 
     public ExpandableView(Context context, AttributeSet attrs) {
@@ -103,6 +104,15 @@ public abstract class ExpandableView extends FrameLayout {
         }
     }
 
+    /**
+     * Resets the height of the view on the next layout pass
+     */
+    protected void resetActualHeight() {
+        mActualHeight = 0;
+        mActualHeightInitialized = false;
+        requestLayout();
+    }
+
     protected int getInitialHeight() {
         return getHeight();
     }
@@ -115,7 +125,7 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
-    private boolean filterMotionEvent(MotionEvent event) {
+    protected boolean filterMotionEvent(MotionEvent event) {
         return event.getActionMasked() != MotionEvent.ACTION_DOWN
                 || event.getY() > mClipTopAmount && event.getY() < mActualHeight;
     }
@@ -176,8 +186,14 @@ public abstract class ExpandableView extends FrameLayout {
      *
      * @param dark Whether the notification should be dark.
      * @param fade Whether an animation should be played to change the state.
+     * @param delay If fading, the delay of the animation.
      */
-    public void setDark(boolean dark, boolean fade) {
+    public void setDark(boolean dark, boolean fade, long delay) {
+        mDark = dark;
+    }
+
+    public boolean isDark() {
+        return mDark;
     }
 
     /**

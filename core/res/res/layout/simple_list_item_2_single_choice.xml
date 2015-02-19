@@ -19,7 +19,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dip"
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
     android:paddingEnd="12dip"
     android:minHeight="?attr/listPreferredItemHeightSmall"
     android:background="@color/transparent">

@@ -347,12 +347,6 @@ const char* gFS_Main_FragColor_HasRoundRectClip =
 
 const char* gFS_Main_DebugHighlight =
         "    gl_FragColor.rgb = vec3(0.0, gl_FragColor.a, 0.0);\n";
-const char* gFS_Main_EmulateStencil =
-        "    gl_FragColor.rgba = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0, 1.0);\n"
-        "    return;\n"
-        "    /*\n";
-const char* gFS_Footer_EmulateStencil =
-        "    */\n";
 const char* gFS_Footer =
         "}\n\n";
 
@@ -617,7 +611,6 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             && !description.hasColors
             && description.colorOp == ProgramDescription::kColorNone
             && !description.hasDebugHighlight
-            && !description.emulateStencil
             && !description.hasRoundRectClip) {
         bool fast = false;
 
@@ -698,9 +691,6 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 
     // Begin the shader
     shader.append(gFS_Main); {
-        if (description.emulateStencil) {
-            shader.append(gFS_Main_EmulateStencil);
-        }
         // Stores the result in fragColor directly
         if (description.hasTexture || description.hasExternalTexture) {
             if (description.hasAlpha8Texture) {
@@ -778,9 +768,6 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         if (description.hasDebugHighlight) {
             shader.append(gFS_Main_DebugHighlight);
         }
-    }
-    if (description.emulateStencil) {
-        shader.append(gFS_Footer_EmulateStencil);
     }
     // End the shader
     shader.append(gFS_Footer);

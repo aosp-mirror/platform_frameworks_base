@@ -30,7 +30,13 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @hide
  */
 @SystemApi
-public abstract class Conference {
+public abstract class Conference implements IConferenceable {
+
+    /**
+     * Used to indicate that the conference connection time is not specified.  If not specified,
+     * Telecom will set the connect time.
+     */
+    public static long CONNECT_TIME_NOT_SPECIFIED = 0;
 
     /** @hide */
     public abstract static class Listener {
@@ -41,7 +47,8 @@ public abstract class Conference {
         public void onConferenceableConnectionsChanged(
                 Conference conference, List<Connection> conferenceableConnections) {}
         public void onDestroyed(Conference conference) {}
-        public void onCapabilitiesChanged(Conference conference, int capabilities) {}
+        public void onConnectionCapabilitiesChanged(
+                Conference conference, int connectionCapabilities) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -52,12 +59,13 @@ public abstract class Conference {
     private final List<Connection> mUnmodifiableConferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
 
-    private PhoneAccountHandle mPhoneAccount;
+    protected PhoneAccountHandle mPhoneAccount;
     private AudioState mAudioState;
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
-    private int mCapabilities;
+    private int mConnectionCapabilities;
     private String mDisconnectMessage;
+    private long mConnectTimeMillis = CONNECT_TIME_NOT_SPECIFIED;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -104,13 +112,62 @@ public abstract class Conference {
         return mState;
     }
 
+    /** @hide */
+    @Deprecated public final int getCapabilities() {
+        return getConnectionCapabilities();
+    }
+
     /**
-     * Returns the capabilities of a conference. See {@link PhoneCapabilities} for valid values.
+     * Returns the capabilities of a conference. See {@code CAPABILITY_*} constants in class
+     * {@link Connection} for valid values.
      *
-     * @return A bitmask of the {@code PhoneCapabilities} of the conference call.
+     * @return A bitmask of the capabilities of the conference call.
      */
-    public final int getCapabilities() {
-        return mCapabilities;
+    public final int getConnectionCapabilities() {
+        return mConnectionCapabilities;
+    }
+
+    /**
+     * Whether the given capabilities support the specified capability.
+     *
+     * @param capabilities A capability bit field.
+     * @param capability The capability to check capabilities for.
+     * @return Whether the specified capability is supported.
+     * @hide
+     */
+    public static boolean can(int capabilities, int capability) {
+        return (capabilities & capability) != 0;
+    }
+
+    /**
+     * Whether the capabilities of this {@code Connection} supports the specified capability.
+     *
+     * @param capability The capability to check capabilities for.
+     * @return Whether the specified capability is supported.
+     * @hide
+     */
+    public boolean can(int capability) {
+        return can(mConnectionCapabilities, capability);
+    }
+
+    /**
+     * Removes the specified capability from the set of capabilities of this {@code Conference}.
+     *
+     * @param capability The capability to remove from the set.
+     * @hide
+     */
+    public void removeCapability(int capability) {
+        mConnectionCapabilities &= ~capability;
+    }
+
+    /**
+     * Adds the specified capability to the set of capabilities of this {@code Conference}.
+     *
+     * @param capability The capability to add to the set.
+     * @hide
+     */
+    public void addCapability(int capability) {
+        mConnectionCapabilities |= capability;
     }
 
     /**
@@ -153,13 +210,13 @@ public abstract class Conference {
 
     /**
      * Invoked when the child calls should be merged. Only invoked if the conference contains the
-     * capability {@link PhoneCapabilities#MERGE_CONFERENCE}.
+     * capability {@link Connection#CAPABILITY_MERGE_CONFERENCE}.
      */
     public void onMerge() {}
 
     /**
      * Invoked when the child calls should be swapped. Only invoked if the conference contains the
-     * capability {@link PhoneCapabilities#SWAP_CONFERENCE}.
+     * capability {@link Connection#CAPABILITY_SWAP_CONFERENCE}.
      */
     public void onSwap() {}
 
@@ -181,6 +238,13 @@ public abstract class Conference {
      * @param state The new call audio state.
      */
     public void onAudioStateChanged(AudioState state) {}
+
+    /**
+     * Notifies this conference that a connection has been added to it.
+     *
+     * @param connection The newly added connection.
+     */
+    public void onConnectionAdded(Connection connection) {}
 
     /**
      * Sets state to be on hold.
@@ -211,16 +275,29 @@ public abstract class Conference {
     }
 
     /**
-     * Sets the capabilities of a conference. See {@link PhoneCapabilities} for valid values.
-     *
-     * @param capabilities A bitmask of the {@code PhoneCapabilities} of the conference call.
+     * @return The {@link DisconnectCause} for this connection.
      */
-    public final void setCapabilities(int capabilities) {
-        if (capabilities != mCapabilities) {
-            mCapabilities = capabilities;
+    public final DisconnectCause getDisconnectCause() {
+        return mDisconnectCause;
+    }
+
+    /** @hide */
+    @Deprecated public final void setCapabilities(int connectionCapabilities) {
+        setConnectionCapabilities(connectionCapabilities);
+    }
+
+    /**
+     * Sets the capabilities of a conference. See {@code CAPABILITY_*} constants of class
+     * {@link Connection} for valid values.
+     *
+     * @param connectionCapabilities A bitmask of the {@code PhoneCapabilities} of the conference call.
+     */
+    public final void setConnectionCapabilities(int connectionCapabilities) {
+        if (connectionCapabilities != mConnectionCapabilities) {
+            mConnectionCapabilities = connectionCapabilities;
 
             for (Listener l : mListeners) {
-                l.onCapabilitiesChanged(this, mCapabilities);
+                l.onConnectionCapabilitiesChanged(this, mConnectionCapabilities);
             }
         }
     }
@@ -235,6 +312,7 @@ public abstract class Conference {
         if (connection != null && !mChildConnections.contains(connection)) {
             if (connection.setConference(this)) {
                 mChildConnections.add(connection);
+                onConnectionAdded(connection);
                 for (Listener l : mListeners) {
                     l.onConnectionAdded(this, connection);
                 }
@@ -335,6 +413,39 @@ public abstract class Conference {
     public final Conference removeListener(Listener listener) {
         mListeners.remove(listener);
         return this;
+    }
+
+    /**
+     * Retrieves the primary connection associated with the conference.  The primary connection is
+     * the connection from which the conference will retrieve its current state.
+     *
+     * @return The primary connection.
+     */
+    public Connection getPrimaryConnection() {
+        if (mUnmodifiableChildConnections == null || mUnmodifiableChildConnections.isEmpty()) {
+            return null;
+        }
+        return mUnmodifiableChildConnections.get(0);
+    }
+
+    /**
+     * Sets the connect time of the {@code Conference}.
+     *
+     * @param connectTimeMillis The connection time, in milliseconds.
+     */
+    public void setConnectTimeMillis(long connectTimeMillis) {
+        mConnectTimeMillis = connectTimeMillis;
+    }
+
+    /**
+     * Retrieves the connect time of the {@code Conference}, if specified.  A value of
+     * {@link #CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the start time
+     * of the conference.
+     *
+     * @return The time the {@code Conference} has been connected.
+     */
+    public long getConnectTimeMillis() {
+        return mConnectTimeMillis;
     }
 
     /**

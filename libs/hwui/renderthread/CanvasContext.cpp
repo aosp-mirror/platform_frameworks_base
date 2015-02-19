@@ -42,7 +42,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         : mRenderThread(thread)
         , mEglManager(thread.eglManager())
         , mEglSurface(EGL_NO_SURFACE)
-        , mDirtyRegionsEnabled(false)
+        , mBufferPreserved(false)
+        , mSwapBehavior(kSwap_default)
         , mOpaque(!translucent)
         , mCanvas(NULL)
         , mHaveNewSurface(false)
@@ -70,6 +71,8 @@ void CanvasContext::destroy() {
 }
 
 void CanvasContext::setSurface(ANativeWindow* window) {
+    ATRACE_CALL();
+
     mNativeWindow = window;
 
     if (mEglSurface != EGL_NO_SURFACE) {
@@ -82,7 +85,8 @@ void CanvasContext::setSurface(ANativeWindow* window) {
     }
 
     if (mEglSurface != EGL_NO_SURFACE) {
-        mDirtyRegionsEnabled = mEglManager.enableDirtyRegions(mEglSurface);
+        const bool preserveBuffer = (mSwapBehavior != kSwap_discardBuffer);
+        mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
         mHaveNewSurface = true;
         makeCurrent();
     } else {
@@ -103,6 +107,10 @@ void CanvasContext::requireSurface() {
     makeCurrent();
 }
 
+void CanvasContext::setSwapBehavior(SwapBehavior swapBehavior) {
+    mSwapBehavior = swapBehavior;
+}
+
 bool CanvasContext::initialize(ANativeWindow* window) {
     setSurface(window);
     if (mCanvas) return false;
@@ -115,13 +123,13 @@ void CanvasContext::updateSurface(ANativeWindow* window) {
     setSurface(window);
 }
 
-void CanvasContext::pauseSurface(ANativeWindow* window) {
-    stopDrawing();
+bool CanvasContext::pauseSurface(ANativeWindow* window) {
+    return mRenderThread.removeFrameCallback(this);
 }
 
 // TODO: don't pass viewport size, it's automatic via EGL
-void CanvasContext::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
-        uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
+void CanvasContext::setup(int width, int height, const Vector3& lightCenter,
+        float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     if (!mCanvas) return;
     mCanvas->initLight(lightCenter, lightRadius, ambientShadowAlpha, spotShadowAlpha);
 }
@@ -158,6 +166,11 @@ void CanvasContext::prepareTree(TreeInfo& info) {
 
     if (info.canvasContext) {
         freePrefetechedLayers();
+    }
+
+    if (CC_UNLIKELY(!mNativeWindow.get())) {
+        info.out.canDrawThisFrame = false;
+        return;
     }
 
     int runningBehind = 0;
@@ -200,7 +213,7 @@ void CanvasContext::draw() {
     if (width != mCanvas->getViewportWidth() || height != mCanvas->getViewportHeight()) {
         mCanvas->setViewport(width, height);
         dirty.setEmpty();
-    } else if (!mDirtyRegionsEnabled || mHaveNewSurface) {
+    } else if (!mBufferPreserved || mHaveNewSurface) {
         dirty.setEmpty();
     } else {
         if (!dirty.isEmpty() && !dirty.intersect(0, 0, width, height)) {
@@ -230,6 +243,8 @@ void CanvasContext::draw() {
 
     if (status & DrawGlInfo::kStatusDrew) {
         swapBuffers();
+    } else {
+        mEglManager.cancelFrame();
     }
 
     profiler().finishFrame();
@@ -330,6 +345,7 @@ void CanvasContext::trimMemory(RenderThread& thread, int level) {
     // No context means nothing to free
     if (!thread.eglManager().hasEglContext()) return;
 
+    ATRACE_CALL();
     thread.eglManager().requireGlContext();
     if (level >= TRIM_MEMORY_COMPLETE) {
         Caches::getInstance().flush(Caches::kFlushMode_Full);

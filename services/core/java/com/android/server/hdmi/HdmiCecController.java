@@ -129,7 +129,7 @@ final class HdmiCecController {
     }
 
     private void init(long nativePtr) {
-        mIoHandler = new Handler(mService.getServiceLooper());
+        mIoHandler = new Handler(mService.getIoLooper());
         mControlHandler = new Handler(mService.getServiceLooper());
         mNativePtr = nativePtr;
     }
@@ -324,18 +324,20 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void setOption(int flag, int value) {
         assertRunOnServiceThread();
+        HdmiLogger.debug("setOption: [flag:%d, value:%d]", flag, value);
         nativeSetOption(mNativePtr, flag, value);
     }
 
     /**
      * Configure ARC circuit in the hardware logic to start or stop the feature.
      *
+     * @param port ID of HDMI port to which AVR is connected
      * @param enabled whether to enable/disable ARC
      */
     @ServiceThreadOnly
-    void setAudioReturnChannel(boolean enabled) {
+    void setAudioReturnChannel(int port, boolean enabled) {
         assertRunOnServiceThread();
-        nativeSetAudioReturnChannel(mNativePtr, enabled);
+        nativeSetAudioReturnChannel(mNativePtr, port, enabled);
     }
 
     /**
@@ -501,6 +503,19 @@ final class HdmiCecController {
         mControlHandler.post(runnable);
     }
 
+    @ServiceThreadOnly
+    void flush(final Runnable runnable) {
+        assertRunOnServiceThread();
+        runOnIoThread(new Runnable() {
+            @Override
+            public void run() {
+                // This ensures the runnable for cleanup is performed after all the pending
+                // commands are processed by IO thread.
+                runOnServiceThread(runnable);
+            }
+        });
+    }
+
     private boolean isAcceptableAddress(int address) {
         // Can access command targeting devices available in local device or broadcast command.
         if (address == Constants.ADDR_BROADCAST) {
@@ -619,6 +634,6 @@ final class HdmiCecController {
     private static native int nativeGetVendorId(long controllerPtr);
     private static native HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
     private static native void nativeSetOption(long controllerPtr, int flag, int value);
-    private static native void nativeSetAudioReturnChannel(long controllerPtr, boolean flag);
+    private static native void nativeSetAudioReturnChannel(long controllerPtr, int port, boolean flag);
     private static native boolean nativeIsConnected(long controllerPtr, int port);
 }

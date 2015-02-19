@@ -1,0 +1,186 @@
+page.title=链接到你的商品
+page.image=/images/gp-linking-ex-crop.png
+page.metaDescription=了解如何构建链接，把用户从浏览或搜索带到你在 Google Play 的应用程序。
+
+@jd:body
+
+	<div class="sidebox-wrapper">
+	<div class="sidebox">
+	<a href="badges.html">
+	  <img alt="即刻获取 Google Play" src="{@docRoot}images/brand/en_app_rgb_wo_45.png" />
+	</a>
+	<p>如需获得内含 Google Play 品牌图标的链接，请访问<a href="badges.html">徽章</a>页面。</p>
+	</div>
+	</div>
+
+	<p>Google Play 提供多种链接格式，可让你按自己需要的方式将用户从 Android 应用、网页、广告、评论、文章、社交媒体帖子等链接到你的商品。</p> 
+
+	<p>这些链接格式可让你：</p>
+	<ul>
+	<li>链接到特定应用的<a href="#OpeningDetails">商品详情页</a></li>
+	<li>链接到<a href="#OpeningPublisher">你所有应用的列表</a>，或</li>
+	<li>链接到你选择的<a href="#PerformingSearch">搜索结果</a></li>
+	<li>链接到 Google Play 上的某个<a href="#OpeningCollection">合集</a></li>
+	</ul>
+
+	<p>如果你从 Android 应用上提供链接，还可以控制此链接是启动 Play 商店应用还是启动浏览器，后者会将用户转至 Google Play 网站。</p>
+
+	<h2 id="OpeningDetails">链接到商品详情页</h2>
+
+	<p>如果提供下面这种格式的深层链接，你可以将用户直接指向特定应用的商品详情页。在商品详情页上，用户可以查看应用的说明、屏幕截图以及评论等，还可以安装该应用。</p>
+
+	<p>要创建此链接，你需要提供完全符合要求的“程序包名称”（可在相应应用的<a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">AndroidManifest.xml</a>中找到）。<em></em>此外，程序包名称还会显示在开发者控制台中。</p>
+
+	<dl>
+	<dt><strong>从网站上：</strong></dt>
+	<dd>
+	<pre>http://play.google.com/store/apps/details?id=&lt;package_name&gt;</pre>
+	</dd>
+	<dt><strong>从 Android 应用上：</strong></dt>
+	<dd>
+	<pre>market://details?id=&lt;package_name&gt;</pre>
+	</dd>
+	</dl>
+
+	<p>示例如下：</p>
+
+	<p style="margin-left:1em"><code><a href="http://play.google.com/store/apps/details?id=com.google.android.apps.maps">http://play.google.com/store/apps/details?id=com.google.android.apps.maps</a></code></p>
+
+	<p>要详细了解如何在 Android 应用中发送链接，请参阅<a href="#android-app">从 Android 应用提供链接</a>。</p>
+
+
+
+	<h2 id="OpeningPublisher">链接到商品列表</h2>
+
+	<p>如果提供下面这种格式的链接，你可以将用户指向你所发布应用的列表。通过商品列表，用户可以查看特定发布者提供的所有应用，以及各个应用的评分、编辑徽章和“安装”按钮。</p>
+
+	<p>要创建此链接，你需要提供“发布者名称”（可在开发者控制台中找到）。<em></em></p>
+
+	<dl>
+	<dt><strong>从网站上：</strong></dt>
+	<dd>
+	<pre>http://play.google.com/store/search?q=pub:&lt;publisher_name&gt;</pre>
+	</dd>
+	<dt><strong>从 Android 应用上：</strong></dt>
+	<dd>
+	<pre>market://search?q=pub:&lt;publisher_name&gt;</pre>
+	</dd>
+	</dl>
+
+	<p>示例如下：</p>
+
+	<p style="margin-left:1em"><code><a href="http://play.google.com/store/search?q=pub:Google Inc.">http://play.google.com/store/search?q=pub:Google Inc.</a></code></p>
+
+	<p>要详细了解如何在 Android 应用中发送链接，请参阅<a href="#android-app">从 Android 应用提供链接</a>。</p>
+
+
+	<h2 id="PerformingSearch">链接到搜索结果</h2>
+
+	<p>如果提供下面这种格式的链接，你可以将用户指向 Google Play 上的搜索查询结果页。搜索结果页会显示与此次查询相匹配的应用的列表（可能还会显示其他内容），以及各个应用的评分、徽章和“安装”按钮。</p>
+
+	<p>要创建此链接，你只需提供一个搜索查询字符串。如果你希望此次查询搜索 Google Play 应用商品详情以外的地方，则可以去掉该链接网址中的 <code>&amp;c=apps</code> 部分。</p>
+
+	<dl>
+	<dt><strong>从网站上：</strong></dt>
+	<dd>
+	<pre>http://play.google.com/store/search?q=&lt;search_query&gt;&amp;c=apps</pre>
+	</dd>
+	<dt><strong>从 Android 应用上：</strong></dt>
+	<dd>
+	<pre>market://search?q=&lt;seach_query&gt;&amp;c=apps</pre>
+	</dd>
+	</dl>
+
+	<p>示例如下：</p>
+
+	<p style="margin-left:1em"><code><a href="http://play.google.com/store/search?q=maps&amp;c=apps">http://play.google.com/store/search?q=maps&amp;c=apps</a></code></p>
+
+	<p>要详细了解如何在 Android 应用中发送链接，请参阅<a href="#android-app">从 Android 应用提供链接</a>。</p>
+
+
+
+	<h2 id="OpeningCollection">链接到某个合集</h2>
+
+	<p>如果你的应用获得推荐或显示在某个 Google Play 排行榜或合集中，你可以提供下面这种格式的链接，将用户直接指向相应合集。该合集会按照一定顺序排列显示其中的应用，并会显示各个应用的评分、简短说明和“安装”按钮。</p>
+
+	<dl>
+	<dt><strong>从网站上：</strong></dt>
+	<dd>
+	<pre>http://play.google.com/store/apps/collection/&lt;collection_name&gt;</pre>
+	</dd>
+	<dt><strong>从 Android 应用上：</strong></dt>
+	<dd>
+	<pre>market://apps/collection/&lt;collection_name&gt;</pre>
+	</dd>
+	</dl>
+
+	<p>示例如下：</p>
+
+	<p style="margin-left:1em"><code><a href="http://play.google.com/store/apps/collection/editors_choice">http://play.google.com/store/apps/collection/editors_choice</a></code></p>
+
+	<p>要详细了解如何在 Android 应用中发送链接，请参阅<a href="#android-app">从 Android 应用提供链接</a>。</p>
+
+	<p class="table-caption"><strong>表 1：</strong> Google Play 上的合集</p>
+
+	<table>
+	<tr>
+	<th>合集</th><th>collection_name</th>
+	</tr>
+	<tr><td>店员推荐（精选）</td><td>featured</td></tr>
+	<tr><td>编辑精选</td><td>editors_choice</td></tr>
+	<tr><td>热门付费</td><td>topselling_paid</td></tr>
+	<tr><td>热门免费</td><td>topselling_free</td></tr>
+	<tr><td>热门免费新品</td><td>topselling_new_free</td></tr>
+	<tr><td>热门付费新品</td><td>topselling_new_paid</td></tr>
+	<tr><td>创收最高</td><td>topgrossing</td></tr>
+	<tr><td>上升最快</td><td>movers_shakers</td></tr>
+	<tr><td>最畅销游戏</td><td>topselling_paid_game</td></tr>
+	</table>
+
+
+	<h2 id="android-app">从 Android 应用提供链接</h2>
+
+	<p>用户在 Android 设备上可以访问两种常规格式的链接。这两种格式在设备上触发的行为略有不同：</p>
+
+	<ul>
+	<li><code>market://</code>    启动 Play 商店应用以加载目标网页。</li>
+	<li><code>http://</code>    让用户选择是启用 Play 商店应用还是浏览器来处理请求。如果选择浏览器处理请求，它会在 Google Play 网站上加载目标网页。</li>
+	</ul>
+
+	<p>一般情况下，你应对网页上的链接使用 <code>http://</code> 格式；对 Android 应用中的链接使用 <code>market://</code>。</p>
+
+	<p>如果你希望用户从 Android 应用链接到你的商品，请创建一个可打开 Google Play 网址的 <code><a href="{@docRoot}reference/android/content/Intent.html">Intent</a></code>，如下例所示。</p>
+
+	<pre>
+	Intent intent = new Intent(Intent.ACTION_VIEW);
+	intent.setData(Uri.parse("market://details?id=com.example.android"));
+	startActivity(intent);
+	</pre>
+
+
+	<h2 id="UriSummary">网址格式总结</h2>
+
+	<p>下表总结了 Google Play 当前支持的 URI（在网页上和在 Android 应用中），如前几部分所述。</p>
+
+	<table>
+	<tr>
+	<th>结果</th>
+	<th>网页链接</th>
+	<th>Android 应用链接</th>
+	</tr>
+	<tr>
+	<td style="width:72px"><span style="white-space:nowrap;">显示特定应用的商品详情页</span></td>
+	<td><code>http://play.google.com/store/apps/details?id=&lt;package_name&gt;</code>
+	<td><code>market://details?id=&lt;package_name&gt;</code></td>
+	</td></tr>
+	<tr>
+	<td>显示特定发布者的应用</td>
+	<td><nobr><code>http://play.google.com/store/search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
+	<td><nobr><code>market://search?q=pub:&lt;publisher_name&gt;</code></nobr></td>
+	</tr>
+	<tr>
+	<td>使用常规字符串查询搜索应用</td>
+	<td><code>http://play.google.com/store/search?q=&lt;query&gt;</code></td>
+	<td><code>market://search?q=&lt;query&gt;</code></td>
+	</tr>
+	</table>

@@ -7,12 +7,14 @@ page.title=&lt;application&gt;
 <dd><pre class="stx">&lt;application android:<a href="#reparent">allowTaskReparenting</a>=["true" | "false"]
              android:<a href="#allowbackup">allowBackup</a>=["true" | "false"]
              android:<a href="#agent">backupAgent</a>="<i>string</i>"
+             android:<a href="#banner">banner</a>="<i>drawable resource</i>"
              android:<a href="#debug">debuggable</a>=["true" | "false"]
              android:<a href="#desc">description</a>="<i>string resource</i>"
              android:<a href="#enabled">enabled</a>=["true" | "false"]
              android:<a href="#code">hasCode</a>=["true" | "false"]
              android:<a href="#hwaccel">hardwareAccelerated</a>=["true" | "false"]
              android:<a href="#icon">icon</a>="<i>drawable resource</i>"
+             android:<a href="#isGame">isGame</a>=["true" | "false"]
              android:<a href="#killrst">killAfterRestore</a>=["true" | "false"]
              android:<a href="#largeHeap">largeHeap</a>=["true" | "false"]
              android:<a href="#label">label</a>="<i>string resource</i>"
@@ -48,13 +50,13 @@ page.title=&lt;application&gt;
 
 <dt>description:</dt>
 <dd itemprop="description">The declaration of the application.  This element contains subelements
-that declare each of the application's components and has attributes 
-that can affect all the components.  Many of these attributes (such as 
-{@code icon}, {@code label}, {@code permission}, {@code process}, 
-{@code taskAffinity}, and {@code allowTaskReparenting}) set default values 
+that declare each of the application's components and has attributes
+that can affect all the components.  Many of these attributes (such as
+{@code icon}, {@code label}, {@code permission}, {@code process},
+{@code taskAffinity}, and {@code allowTaskReparenting}) set default values
 for corresponding attributes of the component elements.  Others (such as
-{@code debuggable}, {@code enabled}, {@code description}, and 
-{@code allowClearUserData})  set values for the application as a whole and 
+{@code debuggable}, {@code enabled}, {@code description}, and
+{@code allowClearUserData})  set values for the application as a whole and
 cannot be overridden by the components.</dd>
 
 
@@ -65,18 +67,18 @@ cannot be overridden by the components.</dd>
 <dd><dl class="attr">
 
 <dt><a name="reparent"></a>{@code android:allowTaskReparenting}</dt>
-<dd>Whether or not activities that the application defines can move from 
-the task that started them to the task they have an affinity for when that task 
-is next brought to the front &mdash; {@code "true"} if they can move, and 
-{@code "false"} if they must remain with the task where they started.  
+<dd>Whether or not activities that the application defines can move from
+the task that started them to the task they have an affinity for when that task
+is next brought to the front &mdash; {@code "true"} if they can move, and
+{@code "false"} if they must remain with the task where they started.
 The default value is {@code "false"}.
 
 <p>
-The 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> 
-element has its own 
+The
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>
+element has its own
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#reparent">allowTaskReparenting</a></code>
-attribute that can override the value set here.  See that attribute for more 
+attribute that can override the value set here.  See that attribute for more
 information.
 </p></dd>
 
@@ -92,46 +94,68 @@ The default value of this attribute is true.</dd>
 <dt><a name="agent"></a>{@code android:backupAgent}</dt>
 <dd>The name of the class that implement's the application's backup agent,
 a subclass of {@link android.app.backup.BackupAgent}.  The attribute value should be
-a fully qualified  class name (such as, {@code "com.example.project.MyBackupAgent"}).  
-However, as a shorthand, if the first character of the name is a period 
-(for example, {@code ".MyBackupAgent"}), it is appended to the 
-package name specified in the 
-<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
+a fully qualified  class name (such as, {@code "com.example.project.MyBackupAgent"}).
+However, as a shorthand, if the first character of the name is a period
+(for example, {@code ".MyBackupAgent"}), it is appended to the
+package name specified in the
+<code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code>
 element.
 
 <p>
 There is no default.  The name must be specified.
 </p></dd>
 
+<dt><a name="banner"></a>{@code android:banner}</dt>
+<dd>A <a href="{@docRoot}guide/topics/resources/drawable-resource.html">drawable resource</a>
+providing an extended graphical banner for its associated item. Use with the
+{@code &lt;application&gt;} tag to supply a default banner for all application activities, or with the
+<a href="{@docRoot}guide/topics/manifest/activity-element.html"><code>&lt;activity&gt;</code></a>
+tag to supply a banner for a specific activity.
+
+<p>The system uses the banner to represent an app in
+the Android TV home screen. Since the banner is displayed only in the home screen, it
+should only be specified by applications with an activity that handles the
+{@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} intent.</p>
+
+<p>This attribute must be set as a reference to a drawable resource containing
+the image (for example {@code "&#64;drawable/banner"}). There is no default banner.
+</p>
+
+<p>
+See <a href="{@docRoot}design/tv/patterns.html#banner">
+Banners</a> in the UI Patterns for TV design guide, and <a href="{@docRoot}training/tv/start/start.html#banner">
+Provide a home screen banner</a> in Get Started with TV Apps for more information.
+</p></dd>
+
 <dt><a name="debug"></a>{@code android:debuggable}</dt>
-<dd>Whether or not the application can be debugged, even when running 
+<dd>Whether or not the application can be debugged, even when running
 on a device in user mode &mdash; {@code "true"} if it can be, and {@code "false"}
-if not.  The default value is {@code "false"}.</dd> 
+if not.  The default value is {@code "false"}.</dd>
 
 <dt><a name="desc"></a>{@code android:description}</dt>
 <dd>User-readable text about the application, longer and more descriptive than the application label.  The value must be set as a reference to a string resource.  Unlike the label, it cannot be a raw string.  There is no default value.</dd>
 
 <dt><a name="enabled"></a>{@code android:enabled}</dt>
-<dd>Whether or not the Android system can instantiate components of 
-the application &mdash; {@code "true"} if it can, and {@code "false"} 
-if not.  If the value is {@code "true"}, each component's 
-{@code enabled} attribute determines whether that component is enabled 
-or not.  If the value is {@code "false"}, it overrides the 
+<dd>Whether or not the Android system can instantiate components of
+the application &mdash; {@code "true"} if it can, and {@code "false"}
+if not.  If the value is {@code "true"}, each component's
+{@code enabled} attribute determines whether that component is enabled
+or not.  If the value is {@code "false"}, it overrides the
 component-specific values; all components are disabled.
 
 <p>
 The default value is {@code "true"}.
-</p></dd>  
+</p></dd>
 
 <dt><a name="code"></a>{@code android:hasCode}</dt>
-<dd>Whether or not the application contains any code &mdash; {@code "true"} 
-if it does, and {@code "false"} if not.  When the value is {@code "false"}, 
-the system does not try to load any application code when launching components.  
+<dd>Whether or not the application contains any code &mdash; {@code "true"}
+if it does, and {@code "false"} if not.  When the value is {@code "false"},
+the system does not try to load any application code when launching components.
 The default value is {@code "true"}.
 
 <p>
 An application would not have any code of its own only if it's using nothing
-but built-in component classes, such as an activity that uses the {@link 
+but built-in component classes, such as an activity that uses the {@link
 android.app.AliasActivity} class, a rare occurrence.</p>
 </dd>
 
@@ -140,7 +164,7 @@ android.app.AliasActivity} class, a rare occurrence.</p>
 activities and views in this application &mdash; {@code "true"} if it
 should be enabled, and {@code "false"} if not. The default value is {@code "true"} if you've set
 either <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>
-or <a 
+or <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>
 to {@code "14"} or higher; otherwise, it's {@code "false"}.
 
@@ -161,19 +185,25 @@ make use of the renderer without errors.</p>
 </dd>
 
 <dt><a name="icon"></a>{@code android:icon}</dt>
-<dd>An icon for the application as whole, and the default icon for 
-each of the application's components.  See the individual 
-{@code icon} attributes for 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
+<dd>An icon for the application as whole, and the default icon for
+each of the application's components.  See the individual
+{@code icon} attributes for
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
 <code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>,
-<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>,
 <code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>, and
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> elements.
 
 <p>
 This attribute must be set as a reference to a drawable resource containing
-the image (for example {@code "@drawable/icon"}). There is no default icon.
+the image (for example {@code "&#64;drawable/icon"}). There is no default icon.
 </p></dd>
+
+<dt><a name="isGame"></a>{@code android:isGame}</dt>
+<dd>Whether or not the application is a game. The system may group together applications classifed
+as games or display them separately from other applications.
+
+<p>The default is {@code false}.</p></dd>
 
 <dt><a name="killrst"></a>{@code android:killAfterRestore}</dt>
 <dd>Whether the application in question should be terminated after its
@@ -202,65 +232,65 @@ because some devices are constrained by their total available memory.</p>
 </dd>
 
 <dt><a name="label"></a>{@code android:label}</dt>
-<dd>A user-readable label for the application as a whole, and a default 
-label for each of the application's components.  See the individual 
-{@code label} attributes for 
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>, 
+<dd>A user-readable label for the application as a whole, and a default
+label for each of the application's components.  See the individual
+{@code label} attributes for
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code>,
 <code><a href="{@docRoot}guide/topics/manifest/activity-alias-element.html">&lt;activity-alias&gt;</a></code>,
-<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>, 
+<code><a href="{@docRoot}guide/topics/manifest/service-element.html">&lt;service&gt;</a></code>,
 <code><a href="{@docRoot}guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></code>, and
 <code><a href="{@docRoot}guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></code> elements.
 
 <p>
 The label should be set as a reference to a string resource, so that
-it can be localized like other strings in the user interface.  
-However, as a convenience while you're developing the application, 
+it can be localized like other strings in the user interface.
+However, as a convenience while you're developing the application,
 it can also be set as a raw string.
 </p></dd>
 
 <dt><a name="logo"></a>{@code android:logo}</dt>
 <dd>A logo for the application as whole, and the default logo for activities.
 <p>This attribute must be set as a reference to a drawable resource containing
-the image (for example {@code "@drawable/logo"}).  There is no default logo.</p></dd>
+the image (for example {@code "&#64;drawable/logo"}).  There is no default logo.</p></dd>
 
 <dt><a name="space"></a>{@code android:manageSpaceActivity}</dt>
-<dd>The fully qualified name of an Activity subclass that the system 
-can launch to let users manage the memory occupied by the application 
-on the device.  The activity should also be declared with an 
+<dd>The fully qualified name of an Activity subclass that the system
+can launch to let users manage the memory occupied by the application
+on the device.  The activity should also be declared with an
 <code><a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a></code> element.
 </dd>
 
 <dt><a name="nm"></a>{@code android:name}</dt>
-<dd>The fully qualified name of an {@link android.app.Application} 
-subclass implemented for the application.  When the application process 
-is started, this class is instantiated before any of the application's 
-components.  
+<dd>The fully qualified name of an {@link android.app.Application}
+subclass implemented for the application.  When the application process
+is started, this class is instantiated before any of the application's
+components.
 
 <p>
 The subclass is optional; most applications won't need one.
-In the absence of a subclass, Android uses an instance of the base 
+In the absence of a subclass, Android uses an instance of the base
 Application class.
 </p></dd>
 
 <dt><a name="prmsn"></a>{@code android:permission}</dt>
-<dd>The name of a permission that clients must have in order to interact 
-with the application.  This attribute is a convenient way to set a 
-permission that applies to all of the application's components.  It can 
-be overwritten by setting the {@code permission} attributes of individual 
+<dd>The name of a permission that clients must have in order to interact
+with the application.  This attribute is a convenient way to set a
+permission that applies to all of the application's components.  It can
+be overwritten by setting the {@code permission} attributes of individual
 components.
 
 <p>
-For more information on permissions, see the 
-<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a> 
-section in the introduction and another document, 
+For more information on permissions, see the
+<a href="{@docRoot}guide/topics/manifest/manifest-intro.html#sectperm">Permissions</a>
+section in the introduction and another document,
 <a href="{@docRoot}guide/topics/security/security.html">Security and
 Permissions</a>.
 </p></dd>
 
 <dt><a name="persistent"></a>{@code android:persistent}</dt>
-<dd>Whether or not the application should remain running at all times &mdash; 
-{@code "true"} if it should, and {@code "false"} if not.  The default value 
-is {@code "false"}.  Applications should not normally set this flag; 
+<dd>Whether or not the application should remain running at all times &mdash;
+{@code "true"} if it should, and {@code "false"} if not.  The default value
+is {@code "false"}.  Applications should not normally set this flag;
 persistence mode is intended only for certain system applications.</dd>
 
 <dt><a name="proc"></a>{@code android:process}</dt>
@@ -282,9 +312,9 @@ user ID and be signed with the same certificate.
 </p>
 
 <p>
-If the name assigned to this attribute begins with a colon (':'), a new 
+If the name assigned to this attribute begins with a colon (':'), a new
 process, private to the application, is created when it's needed.
-If the process name begins with a lowercase character, a global process 
+If the process name begins with a lowercase character, a global process
 of that name is created.  A global process can be shared with other
 applications, reducing resource usage.
 </p></dd>
@@ -307,7 +337,7 @@ incompatible.  <em>Use with caution!</em>
 If your app requires an {@link android.accounts.Account}, the value for this attribute must
 correspond to the account authenticator
 type used by your app (as defined by {@link android.accounts.AuthenticatorDescription}),
-such as "com.google".  
+such as "com.google".
 
 <p>The default value is null and indicates that the application
 can work <em>without</em> any accounts.
@@ -369,13 +399,13 @@ direction associated to the user's Locale choice (your layouts will always be le
 <dt><a name="aff"></a>{@code android:taskAffinity}</dt>
 <dd>An affinity name that applies to all activities within the application,
 except for those that set a different affinity with their own
-<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> 
+<code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code>
 attributes.  See that attribute for more information.
 
 <p>
-By default, all activities within an application share the same 
-affinity.  The name of that affinity is the same as the package name 
-set by the 
+By default, all activities within an application share the same
+affinity.  The name of that affinity is the same as the package name
+set by the
 <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.
 </p></dd>
 
@@ -389,7 +419,7 @@ only through adb.</dd>
 <dt><a name="theme"></a>{@code android:theme}</dt>
 <dd>A reference to a style resource defining a default theme for all
 activities in the application.  Individual activities can override
-the default by setting their own <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#theme">theme</a></code> 
+the default by setting their own <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#theme">theme</a></code>
 attributes. For more information, see the <a
 href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a> developer guide.
 </dd>

@@ -29,6 +29,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.SoundEffectConstants;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -114,15 +115,16 @@ public abstract class CompoundButton extends Button implements Checkable {
 
     @Override
     public boolean performClick() {
-        /*
-         * XXX: These are tiny, need some surrounding 'expanded touch area',
-         * which will need to be implemented in Button if we only override
-         * performClick()
-         */
-
-        /* When clicked, toggle the state */
         toggle();
-        return super.performClick();
+
+        final boolean handled = super.performClick();
+        if (!handled) {
+            // View only makes a sound effect if the onClickListener was
+            // called, so we'll need to make one here instead.
+            playSoundEffect(SoundEffectConstants.CLICK);
+        }
+
+        return handled;
     }
 
     @ViewDebug.ExportedProperty
@@ -312,6 +314,12 @@ public abstract class CompoundButton extends Button implements Checkable {
 
             if (mHasButtonTintMode) {
                 mButtonDrawable.setTintMode(mButtonTintMode);
+            }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mButtonDrawable.isStateful()) {
+                mButtonDrawable.setState(getDrawableState());
             }
         }
     }

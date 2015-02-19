@@ -1,0 +1,52 @@
+page.title=Resources
+page.viewport_width=970
+page.type=guide
+section.landing=true
+header.hide=1
+nonavpage=true
+page.metaDescription=These resources will help you get started with Android and Google Play. 。
+
+@jd:body
+
+    <div class="jd-descr" itemprop="articleBody">
+
+<div class="dynamic-grid">
+
+<h2>Resources</h2>
+<p style="margin-bottom:2em;">These resources will help you get started with Android and Google Play.</p>
+
+<h3 style="font-size:18px;font-weight:bold">Checklists</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/1"
+    data-sortOrder=""
+    data-cardSizes="6x6,6x6,6x2x3"
+    data-maxResults="5"></div>
+
+<h3 style="font-size:18px;font-weight:bold">Google Play In-app Billing</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/2"
+    data-sortOrder=""
+    data-cardSizes="6x6,6x6,6x2x3"
+    data-maxResults="5"></div>
+
+<h3 style="font-size:18px;font-weight:bold">Tools</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/3"
+    data-sortOrder=""
+    data-cardSizes="6x2x3,6x6,6x6"
+    data-maxResults="5"></div>
+
+<h3 style="font-size:18px;font-weight:bold">Training</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/4"
+    data-sortOrder=""
+    data-cardSizes="6x6,12x2x3"
+    data-maxResults="5"></div>
+
+
+</div>
+

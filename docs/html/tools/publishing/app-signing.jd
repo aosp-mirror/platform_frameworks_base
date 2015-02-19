@@ -19,7 +19,7 @@ page.title=Signing Your Applications
   	<li><a href="sign-auto">Automatically Signing Your App</a></li>
   </ol>
 </li>
-<li><a href="#adt">Signing Your App with the ADT plugin for Eclipse</a></li>
+<li><a href="#studio">Signing Your App with Android Studio</a></li>
 <li><a href="#considerations">Signing Considerations</a></li>
 <li><a href="#secure-key">Securing Your Private Key</a></li>
 <li><a href="#expdebug">Expiry of the Debug Certificate</a></li>
@@ -56,12 +56,18 @@ your own certificate.</p>
 This certificate has a private key with a known password, so you can run and debug your app
 without typing the password every time you make a change to your project.</p>
 
-<p>Android Studio and the ADT plugin for Eclipse sign your app in debug mode automatically when
+<p>Android Studio signs your app in debug mode automatically when
 you run or debug your project from the IDE.</p>
 
 <p>You can run and debug an app signed in debug mode on the emulator and on devices connected
 to your development manchine through USB, but you cannot distribute an app signed in debug
 mode.</p>
+
+<p>By default, the <em>debug</em> configuration uses a debug keystore, with a known
+password and a default key with a known password.
+The debug keystore is located in $HOME/.android/debug.keystore, and is created if not present.
+
+The debug build type is set to use this debug <code>SigningConfig</code> automatically. </p>
 
 <p>For more information about how to build and run apps in debug mode, see
 <a href="{@docRoot}tools/building/index.html">Building and Running</a>.</p>
@@ -75,9 +81,55 @@ mode.</p>
 set of private keys. You must keep your keystore in a safe and secure place.</li>
 <li><em>Create a private key.</em> A <strong>private key</strong> represents the entity to
 be identified with the app, such as a person or a company.</li>
-<li><em>Build your project</em>. Generate an unsigned APK for your app.</li>
-<li><em>Sign your app.</em> Use your private key to generate a signed version of your APK.</li>
+<li><p>Add the signing configuration to the build file for the <code>app</code> module:</p>
+        <p><pre>
+...
+android {
+    ...
+    defaultConfig { ... }
+    signingConfigs {
+        release {
+            storeFile file("myreleasekey.keystore")
+            storePassword "password"
+            keyAlias "MyReleaseKey"
+            keyPassword "password"
+        }
+    }
+    buildTypes {
+        release {
+            ...
+            signingConfig signingConfigs.release
+        }
+    }
+}
+...
+</pre></p>
+    </li>
+<li>Invoke the <code>assembleRelease</code> build task from Android Studio.</li>
 </ol>
+
+<p>The package in <code>app/build/apk/app-release.apk</code> is now signed with your release key.</p>
+
+<p class="note"><strong>Note:</strong> Including the passwords for your release key and keystore
+inside the build file is not a good security practice. Alternatively, you can configure the build
+file to obtain these passwords from environment variables or have the build process prompt you
+for these passwords.</p>
+
+<p>To obtain these passwords from environment variables:</p>
+
+<pre>
+storePassword System.getenv("KSTOREPWD")
+keyPassword System.getenv("KEYPWD")
+</pre>
+
+<p>To have the build process prompt you for these passwords if you are invoking the build from
+the command line:</p>
+
+<pre>
+storePassword System.console().readLine("\nKeystore password: ")
+keyPassword System.console().readLine("\nKey password: ")
+</pre>
+
 
 <p>After you complete this process, you can distribute your app and publish it on Google Play.</p>
 
@@ -88,7 +140,7 @@ any updates to your app, since you must always sign all versions of your app wit
 key.</p>
 
 <p>The rest of this document provides detailed instructions about how to generate a private
-key and sign your apps in release mode with Android Studio and with the ADT plugin for Eclipse.</p>
+key and sign your apps in release mode with Android Studio.</p>
 
 <h3 id="wear-apps">Signing Android Wear Apps</h3>
 
@@ -154,41 +206,9 @@ more than one), and enter the required information.</p>
 </ol>
 
 <p>You can also specify your signing settings in Gradle configuration files. For more information,
-see <a href="{@docRoot}sdk/installing/studio-build.html#configureSigning">Signing settings</a>.</p>
+see <a href="{@docRoot}tools/building/configuring-gradle.html#configureSigning">Configuring Gradle
+Builds</a>.</p>
 
-
-<h2 id="adt">Signing Your App with the ADT Plugin for Eclipse</h2>
-
-<p>To sign your app in release mode in ADT, follow these steps:</p>
-
-<ol>
-<li>Select the project in the Package Explorer and select <strong>File</strong> >
-<strong>Export</strong>.</li>
-<li>On the <em>Export</em> window, select <strong>Export Android Application</strong> and click
-<strong>Next</strong>.</li>
-<li>On the <em>Export Android Application</em> window, select the project you want to sign and
-click <strong>Next</strong>.</li>
-<li>
-<p>On the next window, enter the location to create a keystore and a keystore password. If you
-already have a keystore, select <strong>Use existing keystore</strong>, enter your keystore's
-location and password, and go to step 6.</p>
-<img src="{@docRoot}images/tools/signadt3.png" alt=""
-     width="488" height="270" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 6</strong>. Select a keystore in ADT.</p>
-</li>
-<li><p>On the next window, provide the required information as shown in figure 5.<p>
-<p>Your key should be valid for at least 25 years, so you can sign app updates with the same key
-through the lifespan of your app.</p>
-<img src="{@docRoot}images/tools/signadt4.png" alt=""
-     width="488" height="448" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 7</strong>. Create a private key in ADT.</p>
-</li>
-<li><p>On the next window, select the location to export the signed APK.</p>
-<img src="{@docRoot}images/tools/signadt5.png" alt=""
-     width="488" height="217" style="margin-top:15px"/>
-<p class="img-caption"><strong>Figure 8</strong>. Export the signed APK in ADT.</p>
-</li>
-</ol>
 
 
 <h2 id="considerations">Signing Considerations</h2>
@@ -272,7 +292,7 @@ because the build tools generated an expired debug certificate</a>.</p>
 
 <h2 id="signing-manually">Signing Your App Manually</h2>
 
-<p>You do not need Android Studio or the ADT plugin for Eclipse to sign your app. You can sign
+<p>You do not need Android Studio to sign your app. You can sign
 your app from the command line using standard tools from the Android SDK and the JDK. To sign
 an app in release mode from the command line:</p>
 

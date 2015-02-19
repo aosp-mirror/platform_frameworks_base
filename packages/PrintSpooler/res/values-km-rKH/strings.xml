@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"ម៉ាស៊ីន​បោះពុម្ព​ទាំងអស់ ..."</string>
     <string name="print_dialog" msgid="32628687461331979">"ប្រអប់​បោះពុម្ព"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"ទំព័រ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> នៃ <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"សង្ខេប, ច្បាប់​ចម្លង <xliff:g id="COPIES">%1$s</xliff:g>, ទំហំ​ក្រដាស <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"ពង្រីក​​ចំណុច​ទាញ"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"បង្រួម​ចំណុច​ទាញ"</string>
-    <string name="print_button" msgid="645164566271246268">"បោះពុម្ព"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"រក្សាទុក​ជា PDF"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"បាន​ពង្រីក​ជម្រើស​បោះពុម្ព"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"បាន​បង្រួម​ជម្រើស​បោះពុម្ព"</string>
     <string name="search" msgid="5421724265322228497">"ស្វែងរក"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"ម៉ាស៊ីន​បោះពុម្ព​ទាំងអស់"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"បន្ថែម​សេវាកម្ម"</string>
@@ -70,7 +62,7 @@
   </plurals>
     <string name="cancel" msgid="4373674107267141885">"បោះបង់"</string>
     <string name="restart" msgid="2472034227037808749">"ចាប់ផ្ដើម​ឡើងវិញ"</string>
-    <string name="no_connection_to_printer" msgid="2159246915977282728">"គ្មាន​​​ការ​ភ្ជាប់​ទៅ​ម៉ាស៊ីន​បោះពុម្ព​"</string>
+    <string name="no_connection_to_printer" msgid="2159246915977282728">"គ្មាន​​​ការ​ភ្ជាប់​ទៅ​ម៉ាស៊ីន​បោះពុម្ព"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"មិន​ស្គាល់"</string>
     <string name="printer_unavailable" msgid="2434170617003315690">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> – មិន​អាច​ប្រើ​បាន"</string>
   <string-array name="color_mode_labels">

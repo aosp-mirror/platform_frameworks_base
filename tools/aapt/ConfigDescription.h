@@ -28,10 +28,12 @@ struct ConfigDescription : public android::ResTable_config {
         memset(this, 0, sizeof(*this));
         size = sizeof(android::ResTable_config);
     }
+
     ConfigDescription(const android::ResTable_config&o) {
         *static_cast<android::ResTable_config*>(this) = o;
         size = sizeof(android::ResTable_config);
     }
+
     ConfigDescription(const ConfigDescription&o) {
         *static_cast<android::ResTable_config*>(this) = o;
     }
@@ -41,6 +43,7 @@ struct ConfigDescription : public android::ResTable_config {
         size = sizeof(android::ResTable_config);
         return *this;
     }
+
     ConfigDescription& operator=(const ConfigDescription& o) {
         *static_cast<android::ResTable_config*>(this) = o;
         return *this;

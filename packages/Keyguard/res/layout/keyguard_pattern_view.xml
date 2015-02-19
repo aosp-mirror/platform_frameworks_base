@@ -27,6 +27,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width"
     androidprv:layout_maxHeight="@dimen/keyguard_security_height"
     android:gravity="center_horizontal"
@@ -34,13 +36,17 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
         <LinearLayout
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"
-            android:layout_gravity="center_horizontal|bottom">
+            android:layout_gravity="center_horizontal|bottom"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
             <include layout="@layout/keyguard_message_area"
                 android:layout_width="match_parent"
@@ -52,6 +58,8 @@
              android:layout_width="match_parent"
              android:layout_height="0dp"
              android:layout_weight="1"
+             android:clipChildren="false"
+             android:clipToPadding="false"
              >
             <com.android.internal.widget.LockPatternView
                 android:id="@+id/lockPatternView"
@@ -63,7 +71,9 @@
                 android:layout_marginStart="8dip"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
-                android:contentDescription="@string/keyguard_accessibility_pattern_area" />
+                android:contentDescription="@string/keyguard_accessibility_pattern_area"
+                android:clipChildren="false"
+                android:clipToPadding="false" />
           </FrameLayout>
           <include layout="@layout/keyguard_eca"
               android:id="@+id/keyguard_selector_fade_container"

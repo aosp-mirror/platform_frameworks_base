@@ -40,8 +40,12 @@ interface INetworkStatsService {
 
     /** Mark given UID as being in foreground for stats purposes. */
     void setUidForeground(int uid, boolean uidForeground);
+
+    /** Force update of ifaces. */
+    void forceUpdateIfaces();
     /** Force update of statistics. */
     void forceUpdate();
+
     /** Advise persistance threshold; may be overridden internally. */
     void advisePersistThreshold(long thresholdBytes);
 

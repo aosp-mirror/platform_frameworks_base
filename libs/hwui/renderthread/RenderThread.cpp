@@ -38,7 +38,7 @@ namespace renderthread {
 static const size_t EVENT_BUFFER_SIZE = 100;
 
 // Slight delay to give the UI time to push us a new frame before we replay
-static const int DISPATCH_FRAME_CALLBACKS_DELAY = 4;
+static const nsecs_t DISPATCH_FRAME_CALLBACKS_DELAY = milliseconds_to_nanoseconds(4);
 
 TaskQueue::TaskQueue() : mHead(0), mTail(0) {}
 
@@ -166,7 +166,7 @@ void RenderThread::initializeDisplayEventReceiver() {
 void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
-    mRenderState = new RenderState();
+    mRenderState = new RenderState(*this);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
@@ -207,16 +207,16 @@ static nsecs_t latestVsyncEvent(DisplayEventReceiver* receiver) {
     return latest;
 }
 
-void RenderThread::drainDisplayEventQueue(bool skipCallbacks) {
+void RenderThread::drainDisplayEventQueue() {
     ATRACE_CALL();
     nsecs_t vsyncEvent = latestVsyncEvent(mDisplayEventReceiver);
     if (vsyncEvent > 0) {
         mVsyncRequested = false;
-        mTimeLord.vsyncReceived(vsyncEvent);
-        if (!skipCallbacks && !mFrameCallbackTaskPending) {
+        if (mTimeLord.vsyncReceived(vsyncEvent) && !mFrameCallbackTaskPending) {
             ATRACE_NAME("queue mFrameCallbackTask");
             mFrameCallbackTaskPending = true;
-            queueDelayed(mFrameCallbackTask, DISPATCH_FRAME_CALLBACKS_DELAY);
+            nsecs_t runAt = (vsyncEvent + DISPATCH_FRAME_CALLBACKS_DELAY);
+            queueAt(mFrameCallbackTask, runAt);
         }
     }
 }
@@ -228,8 +228,13 @@ void RenderThread::dispatchFrameCallbacks() {
     std::set<IFrameCallback*> callbacks;
     mFrameCallbacks.swap(callbacks);
 
-    for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); it++) {
-        (*it)->doFrame();
+    if (callbacks.size()) {
+        // Assume one of them will probably animate again so preemptively
+        // request the next vsync in case it occurs mid-frame
+        requestVsync();
+        for (std::set<IFrameCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); it++) {
+            (*it)->doFrame();
+        }
     }
 }
 
@@ -269,10 +274,18 @@ bool RenderThread::threadLoop() {
         }
 
         if (mPendingRegistrationFrameCallbacks.size() && !mFrameCallbackTaskPending) {
-            drainDisplayEventQueue(true);
+            drainDisplayEventQueue();
             mFrameCallbacks.insert(
                     mPendingRegistrationFrameCallbacks.begin(), mPendingRegistrationFrameCallbacks.end());
             mPendingRegistrationFrameCallbacks.clear();
+            requestVsync();
+        }
+
+        if (!mFrameCallbackTaskPending && !mVsyncRequested && mFrameCallbacks.size()) {
+            // TODO: Clean this up. This is working around an issue where a combination
+            // of bad timing and slow drawing can result in dropping a stale vsync
+            // on the floor (correct!) but fails to schedule to listen for the
+            // next vsync (oops), so none of the callbacks are run.
             requestVsync();
         }
     }
@@ -295,9 +308,8 @@ void RenderThread::queueAtFront(RenderTask* task) {
     mLooper->wake();
 }
 
-void RenderThread::queueDelayed(RenderTask* task, int delayMs) {
-    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
-    task->mRunAt = now + milliseconds_to_nanoseconds(delayMs);
+void RenderThread::queueAt(RenderTask* task, nsecs_t runAtNs) {
+    task->mRunAt = runAtNs;
     queue(task);
 }
 
@@ -310,9 +322,11 @@ void RenderThread::postFrameCallback(IFrameCallback* callback) {
     mPendingRegistrationFrameCallbacks.insert(callback);
 }
 
-void RenderThread::removeFrameCallback(IFrameCallback* callback) {
-    mFrameCallbacks.erase(callback);
-    mPendingRegistrationFrameCallbacks.erase(callback);
+bool RenderThread::removeFrameCallback(IFrameCallback* callback) {
+    size_t erased;
+    erased = mFrameCallbacks.erase(callback);
+    erased |= mPendingRegistrationFrameCallbacks.erase(callback);
+    return erased;
 }
 
 void RenderThread::pushBackFrameCallback(IFrameCallback* callback) {

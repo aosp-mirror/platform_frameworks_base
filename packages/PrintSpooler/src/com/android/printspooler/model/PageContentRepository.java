@@ -24,6 +24,7 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -77,13 +78,8 @@ public final class PageContentRepository {
         public void onPageContentAvailable(BitmapDrawable content);
     }
 
-    public interface OnMalformedPdfFileListener {
-        public void onMalformedPdfFile();
-    }
-
-    public PageContentRepository(Context context,
-            OnMalformedPdfFileListener malformedPdfFileListener) {
-        mRenderer = new AsyncRenderer(context, malformedPdfFileListener);
+    public PageContentRepository(Context context) {
+        mRenderer = new AsyncRenderer(context);
         mState = STATE_CLOSED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_CLOSED");
@@ -91,7 +87,7 @@ public final class PageContentRepository {
         mCloseGuard.open("destroy");
     }
 
-    public void open(ParcelFileDescriptor source, final Runnable callback) {
+    public void open(ParcelFileDescriptor source, final OpenDocumentCallback callback) {
         throwIfNotClosed();
         mState = STATE_OPENED;
         if (DEBUG) {
@@ -110,13 +106,26 @@ public final class PageContentRepository {
         mRenderer.close(callback);
     }
 
-    public void destroy(Runnable callback) {
-        throwIfNotClosed();
+    public void destroy(final Runnable callback) {
+        if (mState == STATE_OPENED) {
+            close(new Runnable() {
+                @Override
+                public void run() {
+                    destroy(callback);
+                }
+            });
+            return;
+        }
+
         mState = STATE_DESTROYED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
-        doDestroy(callback);
+        mRenderer.destroy();
+
+        if (callback != null) {
+            callback.run();
+        }
     }
 
     public void startPreload(int firstShownPage, int lastShownPage) {
@@ -163,19 +172,11 @@ public final class PageContentRepository {
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                doDestroy(null);
+                destroy(null);
             }
         } finally {
             super.finalize();
         }
-    }
-
-    private void doDestroy(Runnable callback) {
-        mState = STATE_DESTROYED;
-        if (DEBUG) {
-            Log.i(LOG_TAG, "STATE_DESTROYED");
-        }
-        mRenderer.destroy(callback);
     }
 
     private void throwIfNotOpened() {
@@ -420,18 +421,18 @@ public final class PageContentRepository {
 
         private final ArrayMap<Integer, RenderPageTask> mPageToRenderTaskMap = new ArrayMap<>();
 
-        private final OnMalformedPdfFileListener mOnMalformedPdfFileListener;
-
         private int mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
 
         @GuardedBy("mLock")
         private IPdfRenderer mRenderer;
 
-        private boolean mBoundToService;
+        private OpenTask mOpenTask;
 
-        public AsyncRenderer(Context context, OnMalformedPdfFileListener malformedPdfFileListener) {
+        private boolean mBoundToService;
+        private boolean mDestroyed;
+
+        public AsyncRenderer(Context context) {
             mContext = context;
-            mOnMalformedPdfFileListener = malformedPdfFileListener;
 
             ActivityManager activityManager = (ActivityManager)
                     mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -441,7 +442,6 @@ public final class PageContentRepository {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mBoundToService = true;
             synchronized (mLock) {
                 mRenderer = IPdfRenderer.Stub.asInterface(service);
                 mLock.notifyAll();
@@ -455,68 +455,40 @@ public final class PageContentRepository {
             }
         }
 
-        public void open(final ParcelFileDescriptor source, final Runnable callback) {
+        public void open(ParcelFileDescriptor source, OpenDocumentCallback callback) {
             // Opening a new document invalidates the cache as it has pages
             // from the last document. We keep the cache even when the document
             // is closed to show pages while the other side is writing the new
             // document.
             mPageContentCache.invalidate();
 
-            new AsyncTask<Void, Void, Integer>() {
-                @Override
-                protected void onPreExecute() {
-                    Intent intent = new Intent(PdfManipulationService.ACTION_GET_RENDERER);
-                    intent.setClass(mContext, PdfManipulationService.class);
-                    mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
-                }
-
-                @Override
-                protected Integer doInBackground(Void... params) {
-                    synchronized (mLock) {
-                        while (mRenderer == null) {
-                            try {
-                                mLock.wait();
-                            } catch (InterruptedException ie) {
-                                /* ignore */
-                            }
-                        }
-                        try {
-                            return mRenderer.openDocument(source);
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Cannot open PDF document");
-                            return PdfManipulationService.MALFORMED_PDF_FILE_ERROR;
-                        } finally {
-                            // Close the fd as we passed it to another process
-                            // which took ownership.
-                            IoUtils.closeQuietly(source);
-                        }
-                    }
-                }
-
-                @Override
-                public void onPostExecute(Integer pageCount) {
-                    if (pageCount == PdfManipulationService.MALFORMED_PDF_FILE_ERROR) {
-                        mOnMalformedPdfFileListener.onMalformedPdfFile();
-                        mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
-                    } else {
-                        mPageCount = pageCount;
-                    }
-                    if (callback != null) {
-                        callback.run();
-                    }
-                }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            mOpenTask = new OpenTask(source, callback);
+            mOpenTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
         public void close(final Runnable callback) {
             cancelAllRendering();
 
+            if (mOpenTask != null) {
+                mOpenTask.cancel();
+            }
+
             new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected void onPreExecute() {
+                    if (mDestroyed) {
+                        cancel(true);
+                        return;
+                    }
+                }
+
                 @Override
                 protected Void doInBackground(Void... params) {
                     synchronized (mLock) {
                         try {
-                            mRenderer.closeDocument();
+                            if (mRenderer != null) {
+                                mRenderer.closeDocument();
+                            }
                         } catch (RemoteException re) {
                             /* ignore */
                         }
@@ -534,27 +506,15 @@ public final class PageContentRepository {
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
         }
 
-        public void destroy(final Runnable callback) {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... params) {
-                    return null;
-                }
+        public void destroy() {
+            if (mBoundToService) {
+                mBoundToService = false;
+                mContext.unbindService(AsyncRenderer.this);
+            }
 
-                @Override
-                public void onPostExecute(Void result) {
-                    if (mBoundToService) {
-                        mBoundToService = false;
-                        mContext.unbindService(AsyncRenderer.this);
-                    }
-                    mPageContentCache.invalidate();
-                    mPageContentCache.clear();
-                    if (callback != null) {
-                        callback.run();
-                    }
-
-                }
-            }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+            mPageContentCache.invalidate();
+            mPageContentCache.clear();
+            mDestroyed = true;
         }
 
         public void startPreload(int firstShownPage, int lastShownPage, RenderSpec renderSpec) {
@@ -686,6 +646,91 @@ public final class PageContentRepository {
                 RenderPageTask task = mPageToRenderTaskMap.valueAt(i);
                 if (!task.isCancelled()) {
                     task.cancel(true);
+                }
+            }
+        }
+
+        private final class OpenTask extends AsyncTask<Void, Void, Integer> {
+            private final ParcelFileDescriptor mSource;
+            private final OpenDocumentCallback mCallback;
+
+            public OpenTask(ParcelFileDescriptor source, OpenDocumentCallback callback) {
+                mSource = source;
+                mCallback = callback;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                if (mDestroyed) {
+                    cancel(true);
+                    return;
+                }
+                Intent intent = new Intent(PdfManipulationService.ACTION_GET_RENDERER);
+                intent.setClass(mContext, PdfManipulationService.class);
+                intent.setData(Uri.fromParts("fake-scheme", String.valueOf(
+                        AsyncRenderer.this.hashCode()), null));
+                mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
+                mBoundToService = true;
+            }
+
+            @Override
+            protected Integer doInBackground(Void... params) {
+                synchronized (mLock) {
+                    while (mRenderer == null && !isCancelled()) {
+                        try {
+                            mLock.wait();
+                        } catch (InterruptedException ie) {
+                                /* ignore */
+                        }
+                    }
+                    try {
+                        return mRenderer.openDocument(mSource);
+                    } catch (RemoteException re) {
+                        Log.e(LOG_TAG, "Cannot open PDF document");
+                        return PdfManipulationService.ERROR_MALFORMED_PDF_FILE;
+                    } finally {
+                        // Close the fd as we passed it to another process
+                        // which took ownership.
+                        IoUtils.closeQuietly(mSource);
+                    }
+                }
+            }
+
+            @Override
+            public void onPostExecute(Integer pageCount) {
+                switch (pageCount) {
+                    case PdfManipulationService.ERROR_MALFORMED_PDF_FILE: {
+                        mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
+                        if (mCallback != null) {
+                            mCallback.onFailure(OpenDocumentCallback.ERROR_MALFORMED_PDF_FILE);
+                        }
+                    } break;
+                    case PdfManipulationService.ERROR_SECURE_PDF_FILE: {
+                        mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
+                        if (mCallback != null) {
+                            mCallback.onFailure(OpenDocumentCallback.ERROR_SECURE_PDF_FILE);
+                        }
+                    } break;
+                    default: {
+                        mPageCount = pageCount;
+                        if (mCallback != null) {
+                            mCallback.onSuccess();
+                        }
+                    } break;
+                }
+
+                mOpenTask = null;
+            }
+
+            @Override
+            protected void onCancelled(Integer integer) {
+                mOpenTask = null;
+            }
+
+            public void cancel() {
+                cancel(true);
+                synchronized(mLock) {
+                    mLock.notifyAll();
                 }
             }
         }

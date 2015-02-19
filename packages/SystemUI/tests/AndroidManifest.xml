@@ -18,6 +18,7 @@
     package="com.android.systemui.tests">
 
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application>
         <uses-library android:name="android.test.runner" />

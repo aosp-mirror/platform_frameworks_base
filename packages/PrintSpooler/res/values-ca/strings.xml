@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"Totes les impressores…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Diàleg d\'impressió"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"Pàgina <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> de: <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"Resum; còpies: <xliff:g id="COPIES">%1$s</xliff:g>; mida del paper: <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"Desplega l\'ansa"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Replega l\'ansa"</string>
-    <string name="print_button" msgid="645164566271246268">"Imprimeix"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"Desa en PDF"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"S\'han desplegat les opcions d\'impressió."</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"S\'han replegat les opcions d\'impressió."</string>
     <string name="search" msgid="5421724265322228497">"Cerca"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Totes les impressores"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Afegeix un servei"</string>
@@ -52,7 +44,7 @@
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"S\'ha amagat el quadre de cerca"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"Afegeix una impressora"</string>
     <string name="print_select_printer" msgid="7388760939873368698">"Selecciona una impressora"</string>
-    <string name="print_forget_printer" msgid="5035287497291910766">"Esborra la impressora"</string>
+    <string name="print_forget_printer" msgid="5035287497291910766">"Oblida la impressora"</string>
   <plurals name="print_search_result_count_utterance">
     <item quantity="one" msgid="4484953260685964252">"S\'ha trobat <xliff:g id="COUNT">%1$s</xliff:g> impressora"</item>
     <item quantity="other" msgid="6533817036607128241">"S\'han trobat <xliff:g id="COUNT">%1$s</xliff:g> impressores"</item>

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -129,16 +143,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -180,8 +244,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -212,8 +276,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -336,10 +400,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -361,7 +425,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -421,7 +490,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">com.google.android.gms.maps.model</li>
       </ul>
     </div>
@@ -734,15 +803,28 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   
+
+
+  
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></td>
-              <td class="jd-descrcol" width="100%">An interface for a class that provides the tile images for a <code><a href="/reference/com/google/android/gms/maps/model/TileOverlay.html">TileOverlay</a></code>.&nbsp;</td>
-          </tr>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></td>
+        <td class="jd-descrcol" width="100%">
+          An interface for a class that provides the tile images for a <code><a href="/reference/com/google/android/gms/maps/model/TileOverlay.html">TileOverlay</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 
@@ -751,131 +833,344 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></td>
-              <td class="jd-descrcol" width="100%">Defines an image.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html">BitmapDescriptorFactory</a></td>
-              <td class="jd-descrcol" width="100%">Used to create a definition of an image, used for marker icons and ground overlays.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class that aggregates all camera position parameters.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/CameraPosition.Builder.html">CameraPosition.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builds camera position.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Circle.html">Circle</a></td>
-              <td class="jd-descrcol" width="100%">A circle on the earth's surface (spherical cap).&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/CircleOptions.html">CircleOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines options for a <code><a href="/reference/com/google/android/gms/maps/model/Circle.html">Circle</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html">GroundOverlay</a></td>
-              <td class="jd-descrcol" width="100%">A ground overlay is an image that is fixed to a map.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html">GroundOverlayOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines options for a ground overlay.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/IndoorBuilding.html">IndoorBuilding</a></td>
-              <td class="jd-descrcol" width="100%">Represents a building.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/IndoorLevel.html">IndoorLevel</a></td>
-              <td class="jd-descrcol" width="100%">Represents a level in a building.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class representing a pair of latitude and longitude coordinates, stored as degrees.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class representing a latitude/longitude aligned rectangle.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.Builder.html">LatLngBounds.Builder</a></td>
-              <td class="jd-descrcol" width="100%">This is a builder that is able to create a minimum bound based on a set of LatLng points.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Marker.html">Marker</a></td>
-              <td class="jd-descrcol" width="100%">An icon placed at a particular point on the map's surface.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines MarkerOptions for a marker.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Polygon.html">Polygon</a></td>
-              <td class="jd-descrcol" width="100%">A polygon on the earth's surface.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/PolygonOptions.html">PolygonOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines options for a polygon.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Polyline.html">Polyline</a></td>
-              <td class="jd-descrcol" width="100%">A polyline is a list of points, where line segments are drawn between consecutive points.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/PolylineOptions.html">PolylineOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines options for a polyline.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaCamera.html">StreetViewPanoramaCamera</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class that aggregates all camera position parameters.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaCamera.Builder.html">StreetViewPanoramaCamera.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builds panorama cameras.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaLink.html">StreetViewPanoramaLink</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class that represents a link to another Street View panorama.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaLocation.html">StreetViewPanoramaLocation</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class that contains details of the user's current Street View panorama
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines an image.&nbsp;
+          
+    
 
-&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.html">StreetViewPanoramaOrientation</a></td>
-              <td class="jd-descrcol" width="100%">An immutable class that aggregates all user point of view parameters.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.Builder.html">StreetViewPanoramaOrientation.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builds Street View panorama orientations.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Tile.html">Tile</a></td>
-              <td class="jd-descrcol" width="100%">Contains information about a Tile that is returned by a <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/TileOverlay.html">TileOverlay</a></td>
-              <td class="jd-descrcol" width="100%">A Tile Overlay is a set of images which are displayed on top of the base map tiles.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/TileOverlayOptions.html">TileOverlayOptions</a></td>
-              <td class="jd-descrcol" width="100%">Defines options for a TileOverlay.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/UrlTileProvider.html">UrlTileProvider</a></td>
-              <td class="jd-descrcol" width="100%">A partial implementation of <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code> that only requires a URL that points to an image
- to be provided.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/VisibleRegion.html">VisibleRegion</a></td>
-              <td class="jd-descrcol" width="100%">Contains the four points defining the four-sided polygon that is visible in a map's camera.&nbsp;</td>
-          </tr>
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory.html">BitmapDescriptorFactory</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used to create a definition of an image, used for marker icons and ground overlays.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class that aggregates all camera position parameters.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/CameraPosition.Builder.html">CameraPosition.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builds camera position.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Circle.html">Circle</a></td>
+        <td class="jd-descrcol" width="100%">
+          A circle on the earth's surface (spherical cap).&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/CircleOptions.html">CircleOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines options for a <code><a href="/reference/com/google/android/gms/maps/model/Circle.html">Circle</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html">GroundOverlay</a></td>
+        <td class="jd-descrcol" width="100%">
+          A ground overlay is an image that is fixed to a map.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/GroundOverlayOptions.html">GroundOverlayOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines options for a ground overlay.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/IndoorBuilding.html">IndoorBuilding</a></td>
+        <td class="jd-descrcol" width="100%">
+          Represents a building.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/IndoorLevel.html">IndoorLevel</a></td>
+        <td class="jd-descrcol" width="100%">
+          Represents a level in a building.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class representing a pair of latitude and longitude coordinates, stored as degrees.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class representing a latitude/longitude aligned rectangle.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.Builder.html">LatLngBounds.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          This is a builder that is able to create a minimum bound based on a set of LatLng points.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Marker.html">Marker</a></td>
+        <td class="jd-descrcol" width="100%">
+          An icon placed at a particular point on the map's surface.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html">MarkerOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines MarkerOptions for a marker.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Polygon.html">Polygon</a></td>
+        <td class="jd-descrcol" width="100%">
+          A polygon on the earth's surface.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/PolygonOptions.html">PolygonOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines options for a polygon.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Polyline.html">Polyline</a></td>
+        <td class="jd-descrcol" width="100%">
+          A polyline is a list of points, where line segments are drawn between consecutive points.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/PolylineOptions.html">PolylineOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines options for a polyline.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaCamera.html">StreetViewPanoramaCamera</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class that aggregates all camera position parameters.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaCamera.Builder.html">StreetViewPanoramaCamera.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builds panorama cameras.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaLink.html">StreetViewPanoramaLink</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class that represents a link to another Street View panorama.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaLocation.html">StreetViewPanoramaLocation</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class that contains details of the user's current Street View panorama
+
+&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.html">StreetViewPanoramaOrientation</a></td>
+        <td class="jd-descrcol" width="100%">
+          An immutable class that aggregates all user point of view parameters.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/StreetViewPanoramaOrientation.Builder.html">StreetViewPanoramaOrientation.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builds Street View panorama orientations.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/Tile.html">Tile</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains information about a Tile that is returned by a <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code>.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/TileOverlay.html">TileOverlay</a></td>
+        <td class="jd-descrcol" width="100%">
+          A Tile Overlay is a set of images which are displayed on top of the base map tiles.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/TileOverlayOptions.html">TileOverlayOptions</a></td>
+        <td class="jd-descrcol" width="100%">
+          Defines options for a TileOverlay.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/UrlTileProvider.html">UrlTileProvider</a></td>
+        <td class="jd-descrcol" width="100%">
+          A partial implementation of <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code> that only requires a URL that points to an image
+ to be provided.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/VisibleRegion.html">VisibleRegion</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains the four points defining the four-sided polygon that is visible in a map's camera.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 
@@ -887,12 +1182,22 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Exceptions</h2>
     <div class="jd-sumtable">
     
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/RuntimeRemoteException.html">RuntimeRemoteException</a></td>
-              <td class="jd-descrcol" width="100%">A RuntimeException wrapper for RemoteException.&nbsp;</td>
-          </tr>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/RuntimeRemoteException.html">RuntimeRemoteException</a></td>
+        <td class="jd-descrcol" width="100%">
+          A RuntimeException wrapper for RemoteException.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
     </div>
   
 

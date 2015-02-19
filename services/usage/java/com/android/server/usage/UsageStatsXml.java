@@ -24,21 +24,30 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 public class UsageStatsXml {
     private static final String TAG = "UsageStatsXml";
     private static final int CURRENT_VERSION = 1;
     private static final String USAGESTATS_TAG = "usagestats";
     private static final String VERSION_ATTR = "version";
+    static final String CHECKED_IN_SUFFIX = "-c";
 
     public static long parseBeginTime(AtomicFile file) {
-        return Long.parseLong(file.getBaseFile().getName());
+        return parseBeginTime(file.getBaseFile());
+    }
+
+    public static long parseBeginTime(File file) {
+        String name = file.getName();
+
+        // Eat as many occurrences of -c as possible. This is due to a bug where -c
+        // would be appended more than once to a checked-in file, causing a crash
+        // on boot when indexing files since Long.parseLong() will puke on anything but
+        // a number.
+        while (name.endsWith(CHECKED_IN_SUFFIX)) {
+            name = name.substring(0, name.length() - CHECKED_IN_SUFFIX.length());
+        }
+        return Long.parseLong(name);
     }
 
     public static void read(AtomicFile file, IntervalStats statsOut) throws IOException {

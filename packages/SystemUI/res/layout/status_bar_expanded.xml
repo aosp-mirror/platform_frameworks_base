@@ -101,11 +101,9 @@
 
         <ViewStub
             android:id="@+id/keyguard_user_switcher"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_marginTop="@dimen/status_bar_header_height_keyguard"
-            android:layout_gravity="end"
-            android:layout="@layout/keyguard_user_switcher" />
+            android:layout="@layout/keyguard_user_switcher"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" />
 
         <include
             layout="@layout/keyguard_status_bar"

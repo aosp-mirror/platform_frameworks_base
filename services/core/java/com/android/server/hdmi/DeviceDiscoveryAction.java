@@ -38,6 +38,7 @@ import java.util.List;
  *   <li>Gather "OSD (display) name" of all acknowledge devices
  *   <li>Gather "Vendor id" of all acknowledge devices
  * </ol>
+ * We attempt to get OSD name/vendor ID up to 5 times in case the communication fails.
  */
 final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private static final String TAG = "DeviceDiscoveryAction";
@@ -87,6 +88,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private final ArrayList<DeviceInfo> mDevices = new ArrayList<>();
     private final DeviceDiscoveryCallback mCallback;
     private int mProcessedDeviceCount = 0;
+    private int mTimeoutRetry = 0;
 
     /**
      * Constructor.
@@ -309,6 +311,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
 
     private void increaseProcessedDeviceCount() {
         mProcessedDeviceCount++;
+        mTimeoutRetry = 0;
     }
 
     private void removeDevice(int index) {
@@ -326,6 +329,8 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         Slog.v(TAG, "--------------------------------------------");
         mCallback.onDeviceDiscoveryDone(result);
         finish();
+        // Process any commands buffered while device discovery action was in progress.
+        tv().processAllDelayedMessages();
     }
 
     private void checkAndProceedStage() {
@@ -351,19 +356,23 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
                     return;
             }
         } else {
-            int address = mDevices.get(mProcessedDeviceCount).mLogicalAddress;
-            switch (mState) {
-                case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
-                    queryPhysicalAddress(address);
-                    return;
-                case STATE_WAITING_FOR_OSD_NAME:
-                    queryOsdName(address);
-                    return;
-                case STATE_WAITING_FOR_VENDOR_ID:
-                    queryVendorId(address);
-                default:
-                    return;
-            }
+            sendQueryCommand();
+        }
+    }
+
+    private void sendQueryCommand() {
+        int address = mDevices.get(mProcessedDeviceCount).mLogicalAddress;
+        switch (mState) {
+            case STATE_WAITING_FOR_PHYSICAL_ADDRESS:
+                queryPhysicalAddress(address);
+                return;
+            case STATE_WAITING_FOR_OSD_NAME:
+                queryOsdName(address);
+                return;
+            case STATE_WAITING_FOR_VENDOR_ID:
+                queryVendorId(address);
+            default:
+                return;
         }
     }
 
@@ -373,6 +382,11 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
             return;
         }
 
+        if (++mTimeoutRetry < HdmiConfig.TIMEOUT_RETRY) {
+            sendQueryCommand();
+            return;
+        }
+        mTimeoutRetry = 0;
         Slog.v(TAG, "Timeout[State=" + mState + ", Processed=" + mProcessedDeviceCount);
         removeDevice(mProcessedDeviceCount);
         checkAndProceedStage();

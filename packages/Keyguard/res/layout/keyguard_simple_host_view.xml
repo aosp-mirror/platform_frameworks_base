@@ -24,7 +24,11 @@
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_host_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:importantForAccessibility="yes"> <!-- Needed because TYPE_WINDOW_STATE_CHANGED is sent
+                                                  from this view when bouncer is shown -->
 
     <com.android.keyguard.KeyguardSecurityContainer
         android:id="@+id/keyguard_security_container"

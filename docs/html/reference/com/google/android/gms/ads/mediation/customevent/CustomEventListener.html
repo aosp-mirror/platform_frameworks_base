@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">CustomEventListener</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -724,7 +793,7 @@ Summary:
 
 
   <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -732,9 +801,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -744,17 +813,20 @@ Summary:
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     interface
 <h1 itemprop="name">CustomEventListener</h1>
 
 
 
+  
+  
+  
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -766,10 +838,10 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.ads.mediation.customevent.CustomEventListener</td>
     </tr>
-
+    
 
 </table>
 
@@ -788,30 +860,47 @@ Summary:
   <div id="subclasses-indirect">
       <div id="subclasses-indirect-list"
               class="jd-inheritedlinks"
-
+              
               >
-
-
+          
+            
               <a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventBannerListener.html">CustomEventBannerListener</a>,
-
+            
               <a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitialListener.html">CustomEventInterstitialListener</a>
-
-
+            
+          
       </div>
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventBannerListener.html">CustomEventBannerListener</a></td>
-              <td class="jd-descrcol" width="100%">Custom events that implement <code><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventBanner.html">CustomEventBanner</a></code> should use this listener to send callbacks
- to the mediation library to properly manage ad flow.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitialListener.html">CustomEventInterstitialListener</a></td>
-              <td class="jd-descrcol" width="100%">A custom event interstitial listener.&nbsp;</td>
-          </tr>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventBannerListener.html">CustomEventBannerListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Custom events that implement <code><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventBanner.html">CustomEventBanner</a></code> should use this listener to send callbacks
+ to the mediation library to properly manage ad flow.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitialListener.html">CustomEventInterstitialListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          A custom event interstitial listener.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -883,95 +972,120 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventListener.html#onAdClicked()">onAdClicked</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Indicates that the user has clicked on this custom event.
+          
+    
 
-        <div class="jd-descrdiv">Indicates that the user has clicked on this custom event.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventListener.html#onAdClosed()">onAdClosed</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Indicates that the custom event rendered something in full screen and is now transferring
+ control back to the application.
+          
+    
 
-        <div class="jd-descrdiv">Indicates that the custom event rendered something in full screen and is now transferring
- control back to the application.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventListener.html#onAdFailedToLoad(int)">onAdFailedToLoad</a></span>(int errorCode)</nobr>
+        
+        <div class="jd-descrdiv">
+          Indicates that an custom event request has failed along with the underlying cause.
+          
+    
 
-        <div class="jd-descrdiv">Indicates that an custom event request has failed along with the underlying cause.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventListener.html#onAdLeftApplication()">onAdLeftApplication</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Indicates that user interaction with the custom event is causing the device to switch to a
+ different application (such as a web browser).
+          
+    
 
-        <div class="jd-descrdiv">Indicates that user interaction with the custom event is causing the device to switch to a
- different application (such as a web browser).</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventListener.html#onAdOpened()">onAdOpened</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Indicates that the custom event is rendering something that is full screen.
+          
+    
 
-        <div class="jd-descrdiv">Indicates that the custom event is rendering something that is full screen.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1025,14 +1139,14 @@ Summary:
 
 <A NAME="onAdClicked()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">onAdClicked</span>
@@ -1040,12 +1154,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the user has clicked on this custom event. This is used for publisher metrics,
  and must be called in addition to any other events; this event is never inferred by the
  mediation library. For example, <code><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventListener.html#onAdLeftApplication()">onAdLeftApplication()</a></code> would generally mean that the
@@ -1058,14 +1175,14 @@ Summary:
 
 <A NAME="onAdClosed()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">onAdClosed</span>
@@ -1073,12 +1190,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the custom event rendered something in full screen and is now transferring
  control back to the application. This may be the user returning from a different application.</p></div>
   <div class="jd-tagdata">
@@ -1093,14 +1213,14 @@ Summary:
 
 <A NAME="onAdFailedToLoad(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">onAdFailedToLoad</span>
@@ -1108,12 +1228,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that an custom event request has failed along with the underlying cause. A failure
  may be an actual error or just a lack of fill.
  <p> Once an ad is requested, the custom event must report either success or failure. If no
@@ -1140,14 +1263,14 @@ Summary:
 
 <A NAME="onAdLeftApplication()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">onAdLeftApplication</span>
@@ -1155,12 +1278,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that user interaction with the custom event is causing the device to switch to a
  different application (such as a web browser). This must be called before the current
  application is put in the background.
@@ -1172,14 +1298,14 @@ Summary:
 
 <A NAME="onAdOpened()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">onAdOpened</span>
@@ -1187,12 +1313,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that the custom event is rendering something that is full screen. This may be an
  <code><a href="/reference/android/app/Activity.html">Activity</a></code>, or it may be a precursor to switching to a different
  application.
@@ -1214,17 +1343,17 @@ Summary:
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1232,7 +1361,7 @@ Summary:
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1245,7 +1374,7 @@ Summary:
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

@@ -295,6 +295,11 @@ public final class Log {
         return bytes;
     }
 
+    static void wtfQuiet(int logId, String tag, String msg, boolean system) {
+        TerribleFailure what = new TerribleFailure(msg, null);
+        sWtfHandler.onTerribleFailure(tag, what, system);
+    }
+
     /**
      * Sets the terrible failure handler, for testing.
      *

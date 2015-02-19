@@ -83,7 +83,7 @@ message body is JSON.</p>
 <h2 id="gen-server">Generate a Notification Key on the Server</h2>
 
 <p>To generate a notification key on the server, you create a new
-create a new <code>notification_key</code> and map it to a
+<code>notification_key</code> and map it to a
 <code>notification_key_name</code>.</p>
 
 <p>This example shows how to create a new <code>notification_key</code> for a
@@ -268,7 +268,7 @@ notification key operations.</p>
 
 <p>When you make a request to create a {@code notification_key} or to add/remove its
 regIDs, a successful response always returns the <code>notification_key</code>.
-his is the {@code notification_key} you will use for sending messages:</p>
+Use the returned {@code notification_key} for sending messages:</p>
 
 <pre>HTTP status: 200
 { 
@@ -306,9 +306,3 @@ receive the message:</p>
 <p>In the case of failure, the response has HTTP code 503 and no JSON. When a message
 fails to be delivered to one or more of the regIDs associated with a {@code notification_key},
 the 3rd-party server should retry.</p>
-
-
-
-
-
-

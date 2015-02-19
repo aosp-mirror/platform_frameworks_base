@@ -243,7 +243,7 @@ here, as some details of the output differ across platform versions.</p>
    Other mmap    107       0       8       8     324      68
       Unknown   6994(4)    0     252    6992(4)    0       0
         TOTAL  24358(1) 4188    9724   17972(2)16388    4260(2)16968   16595     336
- 
+
  Objects
                Views:    426         ViewRootImpl:        3(8)
          AppContexts:      6(7)        Activities:        2(7)
@@ -251,7 +251,7 @@ here, as some details of the output differ across platform versions.</p>
        Local Binders:     64        Proxy Binders:       34
     Death Recipients:      0
      OpenSSL Sockets:      1
- 
+
  SQL
          MEMORY_USED:   1739
   PAGECACHE_OVERFLOW:   1164          MALLOC_SIZE:       62
@@ -374,7 +374,7 @@ all app processes, they don’t matter very much to your own heap analysis.</p>
 <p>To analyze your heap dump, you can use a standard tool like jhat or the <a href=
 "http://www.eclipse.org/mat/downloads.php">Eclipse Memory Analyzer Tool</a> (MAT). However, first
 you'll need to convert the HPROF file from Android's format to the J2SE HPROF format. You can do
-this using the <code>hprof-conv</code> tool provided in the <code>&lt;sdk&gt;/tools/</code>
+this using the <code>hprof-conv</code> tool provided in the <code>&lt;sdk&gt;/platform-tools/</code>
 directory. Simply run the <code>hprof-conv</code> command with two arguments: the original HPROF
 file and the location to write the converted HPROF file. For example:</p>
 

@@ -101,8 +101,6 @@
     <!-- The color of the circle around the primary user in the user switcher -->
     <color name="current_user_border_color">@color/system_accent_color</color>
 
-    <color name="segmented_button_text_inactive">#99afbdc4</color><!-- 60% -->
-
     <!-- The "inside" of a notification, reached via longpress -->
     <color name="notification_guts_bg_color">@color/system_secondary_color</color>
     <color name="notification_guts_title_color">#FFFFFFFF</color>
@@ -123,4 +121,12 @@
 
     <!-- Shadow color for the furthest pixels around the fake shadow for recents. -->
     <color name="fake_shadow_end_color">#03000000</color>
+
+    <color name="screen_pinning_nav_icon_highlight_outer">#4080cbc4</color><!-- 25% deep teal 200 -->
+    <color name="screen_pinning_request_bg">#ff009688</color><!-- deep teal 500 -->
+    <color name="screen_pinning_request_window_bg">#80000000</color>
+
+    <color name="segmented_button_selected">#FFFFFFFF</color>
+    <color name="segmented_button_unselected">#B3B0BEC5</color><!-- 70% blue grey 200 -->
+    <color name="volume_panel_divider">#1FFFFFFF</color><!-- 12% white -->
 </resources>

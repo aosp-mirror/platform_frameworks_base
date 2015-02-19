@@ -1,0 +1,116 @@
+page.title=Build Better Apps
+page.metaDescription=Get actionable insights to optimize your app and learn what works best for your business.
+page.tags="analytics, user behavior"
+
+@jd:body
+
+<p>
+  While looking at your data in beautiful reports can be fun, the real power of
+  Google Analytics is uncovered when you derive insights from your data. Having
+  Analytics in your app can help you identify where in your app users spend
+  most time; it can also help you see where users are getting stuck. You may
+  find that users who tend to take a specific action are more likely to
+  convert, so see if drawing more users to that action has an impact on your
+  conversion rate.
+</p>
+
+<h2 id="actions">What Actions Get People to Convert?</h2>
+
+<p>
+  Go beyond looking at the sheer number of actions people take in your app.
+  Combine your custom event data with conversion metrics and see what actions
+  tend to have the highest conversion rates. Build custom reports to identify
+  which events or screens have the highest conversion rate or revenue. Once you
+  know what’s successful at getting users to convert, derive a hypothesis as to
+  why an event or screen might have good results. Then, if appropriate, drive
+  more users there to see if it has an impact on conversion metrics.
+</p>
+<p>
+  In the example below, <em>Shopping in Star Shop</em> has a high conversion;
+  this result isn't surprising since users are indicating that they're
+  interested in buying by being in the shop. More interesting is seeing that if
+  someone Lost More than 10 Times, the conversion rate is low and those users
+  didn’t generate much money. It might be worth offering a promotion after 8 or
+  9 losses to keep the user interested. Also notice that users who started a
+  <em>New Game after Gameover</em> generated lots of revenue. You might
+  hypothesize that those users are determined to take another chance, so more
+  inclined to convert. Lastly, the <em>Discovered Secret Stairwell</em> is
+  particularly interesting &mdash; the conversion rate is fairly low, but it
+  generated lots of revenue, indicating that it was potentially difficult to
+  find, but those that discovered it purchased a lot. It may be worth seeing if
+  driving users to find the staircase could increase conversion.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/event-actions.png">
+</div>
+
+<h2 id="flows">Know Your Flows</h2>
+<p>
+  Your home screen is probably the most visited screen in your app. But do you
+  know what happens after that? What percentage of users navigate through which
+  flows, and where do they drop off the most? In a gaming app, it may be useful
+  to investigate which levels have the highest percentage of users leaving your
+  app, in order to see where users find it difficult to proceed. You can then
+  take action by modifying sections of your app that might need improvement.
+</p>
+
+<p>
+  Similarly if you've an e-commerce app, the behavior flow report will show you
+  at which stages of the purchase flow the highest percentage of users abandon
+  their purchase. By taking these data and improving your purchase flows, you
+  may be able to reduce your drop-off rates.
+</p>
+
+<p>
+  In the example below, users tend to click the Level Up action after they
+  consult the Sorcerer. If users tend to get stuck on a level, then you might
+  want to guide them to see the sorcerer before completing a task.
+</p>
+
+<div>
+<img itemprop="image" src="{@docRoot}distribute/analyze/images/flows.png">
+</div>
+
+
+<h2 id="test">Not Sure of the Right Approach? Test it</h2>
+
+<p>
+  Stop guessing when it comes to finding the right features for your audience.
+  Use Content Experiments in your app to run A/B tests &mdash; without needing
+  to update your app. Think a stronger call to action like “Buy Now!” will
+  drive more purchases than the more common phrase “Checkout”? Test it! Content
+  Experiments uses Google Analytics data to optimize towards your objectives
+  and Google Tag Manager to control the test from the server &mdash; so you can
+  test multiple variations of the same app at the same time. And since this is
+  a standard feature of Google Analytics, you don’t have to set up additional
+  tagging for your KPIs; you simply focus on building your variations.
+</p>
+
+<p>
+  Experiment results are displayed in Google Analytics reports that summarize
+  all of the key information about your experiment. Experiments and Variations
+  are also available as user segments, which allow you to superimpose that
+  information over all of your Google Analytics reports to gain even deeper
+  insights. However, don’t worry about keeping an eye on your reports: you can
+  set an experiment to lock-in the winning variation for all of your users
+  automatically.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/a_b_testing.png">
+</div>
+
+
+  <div class="headerLine clearfloat">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/analyzebuild"
+  data-sortorder="-timestamp"
+  data-cardsizes="6x3"
+  data-maxresults="6">
+</div>

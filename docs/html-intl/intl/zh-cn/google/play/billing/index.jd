@@ -1,0 +1,47 @@
+page.title=Google Play 应用内结算
+page.metaDescription=应用内计费可让你以一次性的购买或订阅方式去销售数码内容。
+page.image=/images/play_dev.jpg
+
+@jd:body
+
+      <p>应用内结算是一项 Google Play 服务，可让你在自己的应用内销售数字内容。你可以使用该服务销售很多内容，包括媒体文件或照片等可下载的内容、游戏关卡或药水等虚拟内容、高级服务及功能，等等。你可以使用应用内结算销售下面这两类商品：</p>
+
+  <div class="sidebox-wrapper">
+  <div class="sidebox">
+    <h2><strong>应用内结算的新变化</strong></h2>
+    <ul>
+    <li><strong>IAB 第 2 版关闭</strong> - 应用内结算 API 第 2 版已弃用，将于 2015 年 1 月关闭。如果你的应用仍在使用应用内结算第 2 版，请尽快迁移到 API 第 3 版。</li>
+    <li><strong>季节性订阅</strong> - 你现在可以设置定期的<a href="billing_subscriptions.html#user-billing">季节性订阅</a>，即订阅在每年的同一天开始并在同一天结束（例如，每年 9 月 1 日开始、次年 4 月 10 日结束的体育订阅）。</li>
+    <li><strong>推迟订阅结算</strong> - 你可以将订阅者的下一个结算日<a href="billing_subscriptions.html#deferred-billing">推迟</a>到你选择的日期。用户在推迟期内仍能访问相关内容，但不用缴费。</li>
+    <li><strong>Google Play Developer API</strong> - 利用 <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play Developer API</a>，你可以执行各种发布和应用管理任务。该 API 中包含之前称为“Purchase Status API”的功能。<em></em> </li>
+    <li><strong>撤消订阅/退还订阅费</strong> - 你可以使用 Google Play Developer API <a href="billing_subscriptions.html#refunds">撤消用户的订阅并退还其订阅费</a>。如果你这样做，用户的订阅将立即结束，且系统会退还其最近的订阅付款。</li>
+    <li><strong>应用内结算第 3 版</strong> - <a href="{@docRoot}google/play/billing/api.html">最新版本</a>的应用内结算采用更易实施的同步 API，可让你更有效地管理应用内商品和订阅。</li>
+   </ul>
+  </div>
+  </div>
+
+  <ul>
+  <li>标准应用内商品（一次性结算）；或</li>
+  <li>订阅（定期自动结算）</li>
+  </ul>
+
+  <p>如果你使用应用内结算服务来销售商品，那么无论你销售的是应用内商品还是订阅，Google Play 都会负责处理所有结帐详情，因此你的应用从不需要直接处理任何财务交易。Google Play 使用的结帐后端服务与用于应用购买的服务相同，因此你的用户将获得一致且熟悉的购买流程使用体验。</p>
+
+  <p>你通过 Google Play 发布的所有应用都可以实施应用内结算。只要你有 Google Play 开发者控制台帐户和 Google 电子钱包商家帐户（无需创建任何特殊帐户或进行任何注册），即可实施该服务。</p>
+
+  <p>为了帮你将应用内结算集成到你的应用中，Android SDK 提供了一个示例应用，向你演示如何在应用内销售标准的应用内商品和订阅。</p>
+
+  <p>要开始使用应用内结算，请先阅读下面介绍的文档或参加<a href="{@docRoot}training/in-app-billing/index.html">销售应用内商品</a>培训课程。</p>
+
+  <dl>
+    <dt><strong><a href="{@docRoot}google/play/billing/billing_overview.html">概述</a></strong></dt>
+      <dd>请阅读本文，了解应用内结算的基本概念。</dd>
+    <dt><strong><a href="{@docRoot}google/play/billing/api.html">API 第 3 版</a></strong></dt>
+      <dd>请阅读这部分中的文档，了解应用内结算最新版本概述以及实施详情和 API 参考。</dd>
+    <dt><strong><a href="{@docRoot}google/play/billing/billing_best_practices.html">安全性和设计</a></strong></dt>
+      <dd>请参阅这些最佳做法，以帮助确保你的应用内结算实施安全稳妥、设计合理。</dd>
+    <dt><strong><a href="{@docRoot}google/play/billing/billing_testing.html">测试应用内结算</a></strong></dt>
+      <dd>了解应用内结算测试工具的工作原理，以及如何测试应用内结算实施。</dd>
+    <dt><strong><a href="{@docRoot}google/play/billing/billing_admin.html">管理应用内结算</a></strong></dt>
+      <dd>了解如何设置商品列表、注册测试帐户以及处理退款。</dd>
+  </dl>

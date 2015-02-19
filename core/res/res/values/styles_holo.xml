@@ -358,6 +358,7 @@ please see styles_device_defaults.xml.
         <item name="submitBackground">@drawable/textfield_searchview_right_holo_dark</item>
         <item name="closeIcon">@drawable/ic_clear_holo_dark</item>
         <item name="searchIcon">@drawable/ic_search_api_holo_dark</item>
+        <item name="searchHintIcon">@drawable/ic_search_api_holo_dark</item>
         <item name="goIcon">@drawable/ic_go_search_api_holo_dark</item>
         <item name="voiceIcon">@drawable/ic_voice_search_api_holo_dark</item>
         <item name="commitIcon">@drawable/ic_commit_search_api_holo_dark</item>
@@ -444,6 +445,7 @@ please see styles_device_defaults.xml.
         <item name="weekSeparatorLineColor">#19FFFFFF</item>
         <item name="selectedDateVerticalBar">@drawable/day_picker_week_view_dayline_holo</item>
         <item name="weekDayTextAppearance">@style/TextAppearance.Holo.CalendarViewWeekDayView</item>
+        <item name="calendarViewMode">holo</item>
     </style>
 
     <style name="Widget.Holo.ImageButton" parent="Widget.ImageButton">
@@ -881,6 +883,7 @@ please see styles_device_defaults.xml.
         <item name="weekNumberColor">#7F080021</item>
         <item name="weekSeparatorLineColor">#7F08002A</item>
         <item name="weekDayTextAppearance">@style/TextAppearance.Holo.Light.CalendarViewWeekDayView</item>
+        <item name="calendarViewMode">holo</item>
     </style>
 
     <style name="Widget.Holo.Light.NumberPicker" parent="Widget.Holo.NumberPicker" />

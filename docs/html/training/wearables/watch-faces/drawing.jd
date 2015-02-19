@@ -1,0 +1,506 @@
+page.title=Drawing Watch Faces
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Initialize">Initialize Your Watch Face</a></li>
+  <li><a href="#SystemUI">Configure the System UI</a></li>
+  <li><a href="#Screen">Obtain Information About the Device Screen</a></li>
+  <li><a href="#Modes">Respond to Changes Between Modes</a></li>
+  <li><a href="#Drawing">Draw Your Watch Face</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>After you have configured your project and added a class that implements the watch
+face service, you can start writing code to initialize and draw your custom watch face.</p>
+
+<p>This lesson explains how the system invokes the methods in the
+watch face service using examples from the <em>WatchFace</em> sample
+included in the Android SDK. This sample is located in the
+<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory. Many aspects of the
+service implementations described here (such as initialization and detecting device features)
+apply to any watch face, so you can reuse some of the code in your own watch faces.</p>
+
+
+<img src="{@docRoot}training/wearables/watch-faces/images/preview_analog.png"
+     width="180" height="180" alt="" style="margin-top:12px"/>
+<img src="{@docRoot}training/wearables/watch-faces/images/preview_digital.png"
+     width="180" height="180" alt="" style="margin-left:25px;margin-top:12px"/>
+<p class="img-caption">
+<strong>Figure 1.</strong> The analog and digital watch faces in
+the <em>WatchFace</em> sample.</p>
+
+
+<h2 id="Initialize">Initialize Your Watch Face</h2>
+
+<p>When the system loads your service, you should allocate and initialize most of the resources
+that your watch face needs, including loading bitmap resources, creating timer objects to run
+custom animations, configuring paint styles, and performing other computations. You can usually
+perform these operations only once and reuse their results. This practice improves the performance
+of your watch face and makes it easier to maintain your code.</p>
+
+<p>To initialize your watch face, follow these steps:</p>
+
+<ol>
+<li>Declare variables for a custom timer, graphic objects, and other elements.</li>
+<li>Initialize the watch face elements in the <code>Engine.onCreate()</code> method.</li>
+<li>Initialize the custom timer in the <code>Engine.onVisibilityChanged()</code> method.</li>
+</ol>
+
+<p>The following sections describe these steps in detail.</p>
+
+<h3 id="Variables">Declare variables</h3>
+
+<p>The resources that you intialize when the system loads your service need to be accessible
+at different points throughout your implementation, so you can reuse them. You achieve this
+by declaring member variables for these resources in your <code>WatchFaceService.Engine</code>
+implementation.</p>
+
+<p>Declare variables for the following elements:</p>
+
+<dl>
+<dt><em>Graphic objects</em></dt>
+<dd>Most watch faces contain at least one bitmap image used as the background of the watch face,
+as described in
+<a href="{@docRoot}training/wearables/watch-faces/designing.html#ImplementationStrategy">Create an
+Implementation Strategy</a>. You can use additional bitmap images that represent clock hands or
+other design elements of your watch face.</dd>
+<dt><em>Periodic timer</em></dt>
+<dd>The system notifies the watch face once a minute when the time changes, but some watch faces
+run animations at custom time intervals. In these cases, you need to provide a custom timer that
+ticks with the frequency required to update your watch face.</dd>
+<dt><em>Time zone change receiver</em></dt>
+<dd>Users can adjust their time zone when they travel, and the system broadcasts this event.
+Your service implementation must register a broadcast receiver that is notified when the time
+zone changes and update the time accordingly.</dd>
+</dl>
+
+<p>The <code>AnalogWatchFaceService.Engine</code> class in the <em>WatchFace</em> sample defines
+these variables as shown in the snippet below. The custom timer is implemented as a
+{@link android.os.Handler} instance that sends and processes delayed messages using the thread's
+message queue. For this particular watch face, the custom timer ticks once every second. When the
+timer ticks, the handler calls the <code>invalidate()</code> method and the system then calls
+the <code>onDraw()</code> method to redraw the watch face.</p>
+
+<pre>
+private class Engine extends CanvasWatchFaceService.Engine {
+    static final int MSG_UPDATE_TIME = 0;
+
+    /* a time object */
+    Time mTime;
+
+    /* device features */
+    boolean mLowBitAmbient;
+
+    /* graphic objects */
+    Bitmap mBackgroundBitmap;
+    Bitmap mBackgroundScaledBitmap;
+    Paint mHourPaint;
+    Paint mMinutePaint;
+    ...
+
+    /* handler to update the time once a second in interactive mode */
+    final Handler mUpdateTimeHandler = new Handler() {
+        &#64;Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case MSG_UPDATE_TIME:
+                    invalidate();
+                    if (shouldTimerBeRunning()) {
+                        long timeMs = System.currentTimeMillis();
+                        long delayMs = INTERACTIVE_UPDATE_RATE_MS
+                                - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
+                        mUpdateTimeHandler
+                            .sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+                    }
+                    break;
+            }
+        }
+    };
+
+    /* receiver to update the time zone */
+    final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+        &#64;Override
+        public void onReceive(Context context, Intent intent) {
+            mTime.clear(intent.getStringExtra("time-zone"));
+            mTime.setToNow();
+        }
+    };
+
+    /* service methods (see other sections) */
+    ...
+}
+</pre>
+
+<h3 id="InitializeElements">Initialize watch face elements</h3>
+
+<p>After you have declared member variables for bitmap resources, paint styles, and other
+elements that you reuse every time your redraw your watch face, initialize them when the system
+loads your service. Initializing these elements only once and reusing them improves performance
+and battery life.</p>
+
+<p>In the <code>Engine.onCreate()</code> method, initialize the following elements:</p>
+
+<ul>
+<li>Load the background image.</li>
+<li>Create styles and colors to draw graphic objects.</li>
+<li>Allocate an object to hold the time.</li>
+<li>Configure the system UI.</li>
+</ul>
+
+<p>The <code>Engine.onCreate()</code> method in the <code>AnalogWatchFaceService</code> class
+initializes these elements as follows:</p>
+
+<pre>
+&#64;Override
+public void onCreate(SurfaceHolder holder) {
+    super.onCreate(holder);
+
+    /* configure the system UI (see next section) */
+    ...
+
+    /* load the background image */
+    Resources resources = AnalogWatchFaceService.this.getResources();
+    Drawable backgroundDrawable = resources.getDrawable(R.drawable.bg);
+    mBackgroundBitmap = ((BitmapDrawable) backgroundDrawable).getBitmap();
+
+    /* create graphic styles */
+    mHourPaint = new Paint();
+    mHourPaint.setARGB(255, 200, 200, 200);
+    mHourPaint.setStrokeWidth(5.0f);
+    mHourPaint.setAntiAlias(true);
+    mHourPaint.setStrokeCap(Paint.Cap.ROUND);
+    ...
+
+    /* allocate an object to hold the time */
+    mTime = new Time();
+}
+</pre>
+
+<p>The background bitmap is loaded only once when the system initializes the watch face. The
+graphic styles are instances of the {@link android.graphics.Paint} class. You later use these
+styles to draw the elements of your watch face inside the <code>Engine.onDraw()</code> method,
+as described in <a href="#Drawing">Drawing Your Watch Face</a>.</p>
+
+<h3 id="Timer">Initialize the custom timer</h3>
+
+<p>As a watch face developer, you decide how often you want to update your watch face by
+providing a custom timer that ticks with the required frequency while the device is in
+interactive mode. This enables you to create custom animations and other visual effects.
+</p>
+
+<p class="note"><strong>Note:</strong> In ambient mode, the system does not reliably call the
+custom timer. To update the watch face in ambient mode, see <a href="#TimeTick">Update the watch
+face in ambient mode</a>.</p>
+
+<p>An example timer definition from the <code>AnalogWatchFaceService</code> class that ticks once
+every second is shown in <a href="#Variables">Declare variables</a>. In the
+<code>Engine.onVisibilityChanged()</code> method, start the custom timer if these two
+conditions apply:</p>
+
+<ul>
+<li>The watch face is visible.</li>
+<li>The device is in interactive mode.</li>
+</ul>
+
+<p>The <code>AnalogWatchFaceService</code> class schedules the next timer tick if required as
+follows:</p>
+
+<pre>
+private void updateTimer() {
+    mUpdateTimeHandler.removeMessages(MSG_UPDATE_TIME);
+    if (shouldTimerBeRunning()) {
+        mUpdateTimeHandler.sendEmptyMessage(MSG_UPDATE_TIME);
+    }
+}
+
+private boolean shouldTimerBeRunning() {
+    return isVisible() &amp;&amp; !isInAmbientMode();
+}
+</pre>
+
+<p>This custom timer ticks once every second, as described in <a href="#Variables">Declare
+variables</a>.</p>
+
+<p>In the <code>Engine.onVisibilityChanged()</code> method, start the timer if required and
+and register the receiver for time zone changes as follows:</p>
+
+<pre>
+&#64;Override
+public void onVisibilityChanged(boolean visible) {
+    super.onVisibilityChanged(visible);
+
+    if (visible) {
+        registerReceiver();
+
+        // Update time zone in case it changed while we weren't visible.
+        mTime.clear(TimeZone.getDefault().getID());
+        mTime.setToNow();
+    } else {
+        unregisterReceiver();
+    }
+
+    // Whether the timer should be running depends on whether we're visible and
+    // whether we're in ambient mode), so we may need to start or stop the timer
+    updateTimer();
+}
+</pre>
+
+<p>When the watch face is visible, the <code>onVisibilityChanged()</code> method registers
+the receiver for time zone changes and starts the custom timer if the device is in interactive
+mode. When the watch face is not visible, this method stops the custom timer and unregisters
+the receiver for time zone changes. The <code>registerReceiver()</code> and
+<code>unregisterReceiver()</code> methods are implemented as follows:</p>
+
+<pre>
+private void registerReceiver() {
+    if (mRegisteredTimeZoneReceiver) {
+        return;
+    }
+    mRegisteredTimeZoneReceiver = true;
+    IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+    AnalogWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
+}
+
+private void unregisterReceiver() {
+    if (!mRegisteredTimeZoneReceiver) {
+        return;
+    }
+    mRegisteredTimeZoneReceiver = false;
+    AnalogWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
+}
+</pre>
+
+
+
+<h3 id="TimeTick">Update the watch face in ambient mode</h3>
+
+<p>In ambient mode, the system calls the <code>Engine.onTimeTick()</code> method every minute.
+It is usually sufficient to update your watch face once per minute in this mode. To update your
+watch face while in interactive mode, you must provide a custom timer as described in
+<a href="#Timer">Initialize the custom timer</a>.</p>
+
+<p>In ambient mode, most watch face implementations simply invalidate the canvas to redraw the watch
+face in the <code>Engine.onTimeTick()</code> method:</p>
+
+<pre>
+&#64;Override
+public void onTimeTick() {
+    super.onTimeTick();
+
+    invalidate();
+}
+</pre>
+
+
+
+<h2 id="SystemUI">Configure the System UI</h2>
+
+<p>Watch faces should not interfere with system UI elements, as described in
+<a href="{@docRoot}design/wear/watchfaces.html#SystemUI">Accommodate System UI Elements</a>.
+If your watch face has a light background or shows information near the bottom of the screen,
+you may have to configure the size of notification cards or enable background protection.</p>
+
+<p>Android Wear enables you to configure the following aspects of the system UI when your watch
+face is active:</p>
+
+<ul>
+<li>Specify how far the first notification card peeks into the screen.</li>
+<li>Specify whether the system draws the time over your watch face.</li>
+<li>Show or hide cards when in ambient mode.</li>
+<li>Protect the system indicators with a solid background around them.</li>
+<li>Specify the positioning of the system indicators.</li>
+</ul>
+
+<p>To configure these aspects of the system UI, create a <code>WatchFaceStyle</code> instance
+and pass it to the <code>Engine.setWatchFaceStyle()</code> method.</p>
+
+<p>The <code>AnalogWatchFaceService</code> class configures the system UI as follows:</p>
+
+<pre>
+&#64;Override
+public void onCreate(SurfaceHolder holder) {
+    super.onCreate(holder);
+
+    /* configure the system UI */
+    setWatchFaceStyle(new WatchFaceStyle.Builder(AnalogWatchFaceService.this)
+            .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+            .setBackgroundVisibility(WatchFaceStyle
+                                    .BACKGROUND_VISIBILITY_INTERRUPTIVE)
+            .setShowSystemUiTime(false)
+            .build());
+    ...
+}
+</pre>
+
+<p>The code snippet above configures peeking cards to be a single line tall, the background
+of a peeking card to show only briefly and only for interruptive notifications, and the system
+time not to be shown (since this watch face draws its own time representation).</p>
+
+<p>You can configure the style of the system UI at any point in your watch face implementation.
+For example, if the user selects a white background, you can add background protection for the
+system indicators.</p>
+
+<p>For more details about configuring the system UI, see the
+<a href="{@docRoot}shareables/training/wearable-support-docs.zip">API reference</a> for the
+<code>WatchFaceStyle</code> class.</p>
+
+
+
+<h2 id="Screen">Obtain Information About the Device Screen</h2>
+
+<p>The system calls the <code>Engine.onPropertiesChanged()</code> method when it determines
+the properties of the device screen, such as whether the device uses low-bit ambient mode and
+whether the screen requires burn-in protection.</p>
+
+<p>The following code snippet shows how to obtain these properties:</p>
+
+<pre>
+&#64;Override
+public void onPropertiesChanged(Bundle properties) {
+    super.onPropertiesChanged(properties);
+    mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
+    mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION,
+            false);
+}
+</pre>
+
+<p>You should take these device properties into account when drawing your watch face:</p>
+
+<ul>
+<li>For devices that use low-bit ambient mode, the screen supports fewer bits for each color
+in ambient mode, so you should disable anti-aliasing.</li>
+<li>For devices that require burn-in protection, avoid using large blocks of white pixels in
+ambient mode and do not place content within 10 pixels of the edge of the screen, since the
+system shifts the content periodically to avoid pixel burn-in.</li>
+</ul>
+
+<p>For more information about low-bit ambient mode and burn-in protection, see
+<a href="{@docRoot}design/wear/watchfaces.html#SpecialScreens">Optimize for Special
+Screens</a>.</p>
+
+
+<h2 id="Modes">Respond to Changes Between Modes</h2>
+
+<p>When the device switches between ambient and interactive modes, the system calls the
+<code>Engine.onAmbientModeChanged()</code> method. Your service implementation should make
+any necessary adjustments to switch between modes and then call the <code>invalidate()</code>
+method for the system to redraw the watch face.</p>
+
+<p>The following snippet shows how this method is implemented in the
+<code>AnalogWatchFaceService</code> class inside the <em>WatchFace</em> sample:</p>
+
+<pre>
+&#64;Override
+public void onAmbientModeChanged(boolean inAmbientMode) {
+
+    super.onAmbientModeChanged(inAmbientMode);
+
+    if (mLowBitAmbient) {
+        boolean antiAlias = !inAmbientMode;
+        mHourPaint.setAntiAlias(antiAlias);
+        mMinutePaint.setAntiAlias(antiAlias);
+        mSecondPaint.setAntiAlias(antiAlias);
+        mTickPaint.setAntiAlias(antiAlias);
+    }
+    invalidate();
+    updateTimer();
+}
+</pre>
+
+<p>This example makes adjustments to some graphic styles and invalidates the canvas so the
+system can redraw the watch face.</p>
+
+
+
+<h2 id="Drawing">Draw Your Watch Face</h2>
+
+<p>To draw a custom watch face, the system calls the <code>Engine.onDraw()</code> method with a
+{@link android.graphics.Canvas} instance and the bounds in which you should draw your watch face.
+The bounds account for any inset areas, such as the "chin" on the bottom of some round devices.
+You can use this canvas to draw your watch face directly as follows:</p>
+
+<ol>
+<li>If this is the first invocation of the <code>onDraw()</code> method, scale your background
+to fit.</li>
+<li>Check whether the device is in ambient mode or interactive mode.</li>
+<li>Perform any required graphic computations.</li>
+<li>Draw your background bitmap on the canvas.</li>
+<li>Use the methods in the {@link android.graphics.Canvas} class to draw your watch face.</li>
+</ol>
+
+<p>The <code>AnalogWatchFaceService</code> class in the <em>WatchFace</em> sample follows these
+steps to implement the <code>onDraw()</code> method as follows:</p>
+
+<pre>
+&#64;Override
+public void onDraw(Canvas canvas, Rect bounds) {
+    // Update the time
+    mTime.setToNow();
+
+    int width = bounds.width();
+    int height = bounds.height();
+
+    // Draw the background, scaled to fit.
+    if (mBackgroundScaledBitmap == null
+        || mBackgroundScaledBitmap.getWidth() != width
+        || mBackgroundScaledBitmap.getHeight() != height) {
+        mBackgroundScaledBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap,
+                                         width, height, true /* filter */);
+    }
+    canvas.drawBitmap(mBackgroundScaledBitmap, 0, 0, null);
+
+    // Find the center. Ignore the window insets so that, on round watches
+    // with a "chin", the watch face is centered on the entire screen, not
+    // just the usable portion.
+    float centerX = width / 2f;
+    float centerY = height / 2f;
+
+    // Compute rotations and lengths for the clock hands.
+    float secRot = mTime.second / 30f * (float) Math.PI;
+    int minutes = mTime.minute;
+    float minRot = minutes / 30f * (float) Math.PI;
+    float hrRot = ((mTime.hour + (minutes / 60f)) / 6f ) * (float) Math.PI;
+
+    float secLength = centerX - 20;
+    float minLength = centerX - 40;
+    float hrLength = centerX - 80;
+
+    // Only draw the second hand in interactive mode.
+    if (!isInAmbientMode()) {
+        float secX = (float) Math.sin(secRot) * secLength;
+        float secY = (float) -Math.cos(secRot) * secLength;
+        canvas.drawLine(centerX, centerY, centerX + secX, centerY +
+                        secY, mSecondPaint);
+    }
+
+    // Draw the minute and hour hands.
+    float minX = (float) Math.sin(minRot) * minLength;
+    float minY = (float) -Math.cos(minRot) * minLength;
+    canvas.drawLine(centerX, centerY, centerX + minX, centerY + minY,
+                    mMinutePaint);
+    float hrX = (float) Math.sin(hrRot) * hrLength;
+    float hrY = (float) -Math.cos(hrRot) * hrLength;
+    canvas.drawLine(centerX, centerY, centerX + hrX, centerY + hrY,
+                    mHourPaint);
+}
+</pre>
+
+<p>This method computes the required positions for the clock hands based on the current time
+and draws them on top of the background bitmap using the graphic styles initialized in the
+<code>onCreate()</code> method. The second hand is only drawn in interactive mode, not in
+ambient mode.</p>
+
+<p>For more information about drawing on a Canvas instance, see <a
+href="{@docRoot}guide/topics/graphics/2d-graphics.html">Canvas and Drawables</a>.</p>
+
+<p>The <em>WatchFace</em> sample in the Android SDK includes additional watch faces that you
+can refer to as examples of how to implement the <code>onDraw()</code> method.</p>

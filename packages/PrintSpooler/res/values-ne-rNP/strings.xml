@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"सबै प्रिन्टरहरू..."</string>
     <string name="print_dialog" msgid="32628687461331979">"सम्वाद छाप्नुहोस्"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"<xliff:g id="PAGE_COUNT">%2$d</xliff:g> को <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> पृष्ठ"</string>
-    <string name="summary_template" msgid="8899734908625669193">"सारांश, प्रतिहरू <xliff:g id="COPIES">%1$s</xliff:g> , कागज आकार <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"ह्यान्डल विस्तार गर्नुहोस्"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"ह्यान्डल कोल्याप्स गर्नुहोस्"</string>
-    <string name="print_button" msgid="645164566271246268">"प्रिन्ट गर्नुहोस्"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"PDF सुरक्षित गर्नुहोस्"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"विस्तार गरेका विकल्पहरू प्रिन्ट गर्नुहोस्"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"कोल्याप्स गरेका विकल्पहरू प्रिन्ट गर्नुहोस्"</string>
     <string name="search" msgid="5421724265322228497">"खोज्नुहोस्"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सबै प्रिन्टरहरू"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा थप्नुहोस्"</string>

@@ -353,7 +353,7 @@ public class ColorStateList implements Parcelable {
         for (int i = 0; i < inputStates.length; i++) {
             final int[] inputState = inputStates[i];
             for (int j = 0; j < inputState.length; j++) {
-                if (inputState[i] == state) {
+                if (inputState[j] == state) {
                     return colorStateList;
                 }
             }

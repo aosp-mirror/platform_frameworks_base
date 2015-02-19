@@ -20,7 +20,10 @@ import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.telephony.TelephonyProperties;
+
 import dalvik.system.VMRuntime;
+
+import java.util.Objects;
 
 /**
  * Information about the current build, extracted from system properties.
@@ -589,6 +592,11 @@ public class Build {
          * </ul>
          */
         public static final int LOLLIPOP = 21;
+
+        /**
+         * Lollipop with an extra sugar coating on the outside!
+         */
+        public static final int LOLLIPOP_MR1 = 22;
     }
     
     /** The type of build, like "user" or "eng". */
@@ -634,6 +642,32 @@ public class Build {
                 Slog.e(TAG, "Failed to set fingerprint property", e);
             }
         }
+    }
+
+    /**
+     * Check that device fingerprint is defined and that it matches across
+     * various partitions.
+     *
+     * @hide
+     */
+    public static boolean isFingerprintConsistent() {
+        final String system = SystemProperties.get("ro.build.fingerprint");
+        final String vendor = SystemProperties.get("ro.vendor.build.fingerprint");
+
+        if (TextUtils.isEmpty(system)) {
+            Slog.e(TAG, "Required ro.build.fingerprint is empty!");
+            return false;
+        }
+
+        if (!TextUtils.isEmpty(vendor)) {
+            if (!Objects.equals(system, vendor)) {
+                Slog.e(TAG, "Mismatched fingerprints; system reported " + system
+                        + " but vendor reported " + vendor);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // The following properties only make sense for internal engineering builds.

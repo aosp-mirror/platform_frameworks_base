@@ -16,28 +16,32 @@
 
 package android.graphics.drawable;
 
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-
-import com.android.internal.R;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -56,7 +60,7 @@ import java.util.Arrays;
  * &ltripple android:color="#ffff0000">
  *   &ltitem android:id="@android:id/mask"
  *         android:drawable="@android:color/white" />
- * &ltripple /></code>
+ * &lt/ripple></code>
  * </pre>
  * <p>
  * If a mask layer is set, the ripple effect will be masked against that layer
@@ -65,15 +69,15 @@ import java.util.Arrays;
  * If no mask layer is set, the ripple effect is masked against the composite
  * of the child layers.
  * <pre>
- * <code>&lt!-- A blue ripple drawn atop a black rectangle. --/>
+ * <code>&lt!-- A green ripple drawn atop a black rectangle. --/>
  * &ltripple android:color="#ff00ff00">
  *   &ltitem android:drawable="@android:color/black" />
- * &ltripple />
+ * &lt/ripple>
  *
- * &lt!-- A red ripple drawn atop a drawable resource. --/>
- * &ltripple android:color="#ff00ff00">
+ * &lt!-- A blue ripple drawn atop a drawable resource. --/>
+ * &ltripple android:color="#ff0000ff">
  *   &ltitem android:drawable="@drawable/my_drawable" />
- * &ltripple /></code>
+ * &lt/ripple></code>
  * </pre>
  * <p>
  * If no child layers or mask is specified and the ripple is set as a View
@@ -81,16 +85,17 @@ import java.util.Arrays;
  * background within the View's hierarchy. In this case, the drawing region
  * may extend outside of the Drawable bounds.
  * <pre>
- * <code>&lt!-- An unbounded green ripple. --/>
- * &ltripple android:color="#ff0000ff" /></code>
+ * <code>&lt!-- An unbounded red ripple. --/>
+ * &ltripple android:color="#ffff0000" /></code>
  * </pre>
  *
  * @attr ref android.R.styleable#RippleDrawable_color
  */
 public class RippleDrawable extends LayerDrawable {
-    private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
-    private static final PorterDuffXfermode SRC_ATOP = new PorterDuffXfermode(Mode.SRC_ATOP);
-    private static final PorterDuffXfermode SRC_OVER = new PorterDuffXfermode(Mode.SRC_OVER);
+    private static final int MASK_UNKNOWN = -1;
+    private static final int MASK_NONE = 0;
+    private static final int MASK_CONTENT = 1;
+    private static final int MASK_EXPLICIT = 2;
 
     /**
      * Constant for automatically determining the maximum ripple radius.
@@ -123,6 +128,13 @@ public class RippleDrawable extends LayerDrawable {
     /** The current background. May be actively animating or pending entry. */
     private RippleBackground mBackground;
 
+    private Bitmap mMaskBuffer;
+    private BitmapShader mMaskShader;
+    private Canvas mMaskCanvas;
+    private Matrix mMaskMatrix;
+    private PorterDuffColorFilter mMaskColorFilter;
+    private boolean mHasValidMask;
+
     /** Whether we expect to draw a background when visible. */
     private boolean mBackgroundActive;
 
@@ -147,9 +159,6 @@ public class RippleDrawable extends LayerDrawable {
     /** Paint used to control appearance of ripples. */
     private Paint mRipplePaint;
 
-    /** Paint used to control reveal layer masking. */
-    private Paint mMaskingPaint;
-
     /** Target density of the display into which ripples are drawn. */
     private float mDensity = 1.0f;
 
@@ -157,17 +166,10 @@ public class RippleDrawable extends LayerDrawable {
     private boolean mOverrideBounds;
 
     /**
-     * Whether the next draw MUST draw something to canvas. Used to work around
-     * a bug in hardware invalidation following a render thread-accelerated
-     * animation.
-     */
-    private boolean mNeedsDraw;
-
-    /**
      * Constructor used for drawable inflation.
      */
     RippleDrawable() {
-        this(new RippleState(null, null, null), null, null);
+        this(new RippleState(null, null, null), null);
     }
 
     /**
@@ -180,7 +182,7 @@ public class RippleDrawable extends LayerDrawable {
      */
     public RippleDrawable(@NonNull ColorStateList color, @Nullable Drawable content,
             @Nullable Drawable mask) {
-        this(new RippleState(null, null, null), null, null);
+        this(new RippleState(null, null, null), null);
 
         if (color == null) {
             throw new IllegalArgumentException("RippleDrawable requires a non-null color");
@@ -203,21 +205,15 @@ public class RippleDrawable extends LayerDrawable {
     public void jumpToCurrentState() {
         super.jumpToCurrentState();
 
-        boolean needsDraw = false;
-
         if (mRipple != null) {
-            needsDraw |= mRipple.isHardwareAnimating();
             mRipple.jump();
         }
 
         if (mBackground != null) {
-            needsDraw |= mBackground.isHardwareAnimating();
             mBackground.jump();
         }
 
-        needsDraw |= cancelExitingRipples();
-
-        mNeedsDraw = needsDraw;
+        cancelExitingRipples();
         invalidateSelf();
     }
 
@@ -280,7 +276,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         setRippleActive(enabled && pressed);
-        setBackgroundActive(focused || (enabled && pressed));
+        setBackgroundActive(focused || (enabled && pressed), focused);
 
         return changed;
     }
@@ -296,11 +292,11 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
-    private void setBackgroundActive(boolean active) {
+    private void setBackgroundActive(boolean active, boolean focused) {
         if (mBackgroundActive != active) {
             mBackgroundActive = active;
             if (active) {
-                tryBackgroundEnter();
+                tryBackgroundEnter(focused);
             } else {
                 tryBackgroundExit();
             }
@@ -333,8 +329,11 @@ public class RippleDrawable extends LayerDrawable {
             }
 
             if (mBackgroundActive) {
-                tryBackgroundEnter();
+                tryBackgroundEnter(false);
             }
+
+            // Skip animations, just show the correct final states.
+            jumpToCurrentState();
         }
 
         return changed;
@@ -470,7 +469,7 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mState != null && mState.mTouchThemeAttrs != null;
+        return (mState != null && mState.canApplyTheme()) || super.canApplyTheme();
     }
 
     @Override
@@ -489,14 +488,13 @@ public class RippleDrawable extends LayerDrawable {
     /**
      * Creates an active hotspot at the specified location.
      */
-    private void tryBackgroundEnter() {
+    private void tryBackgroundEnter(boolean focused) {
         if (mBackground == null) {
             mBackground = new RippleBackground(this, mHotspotBounds);
         }
 
-        final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
-        mBackground.setup(mState.mMaxRadius, color, mDensity);
-        mBackground.enter();
+        mBackground.setup(mState.mMaxRadius, mDensity);
+        mBackground.enter(focused);
     }
 
     private void tryBackgroundExit() {
@@ -531,8 +529,7 @@ public class RippleDrawable extends LayerDrawable {
             mRipple = new Ripple(this, mHotspotBounds, x, y);
         }
 
-        final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
-        mRipple.setup(mState.mMaxRadius, color, mDensity);
+        mRipple.setup(mState.mMaxRadius, mDensity);
         mRipple.enter();
     }
 
@@ -556,23 +553,19 @@ public class RippleDrawable extends LayerDrawable {
      * background. Nothing will be drawn after this method is called.
      */
     private void clearHotspots() {
-        boolean needsDraw = false;
-
         if (mRipple != null) {
-            needsDraw |= mRipple.isHardwareAnimating();
             mRipple.cancel();
             mRipple = null;
+            mRippleActive = false;
         }
 
         if (mBackground != null) {
-            needsDraw |= mBackground.isHardwareAnimating();
             mBackground.cancel();
             mBackground = null;
+            mBackgroundActive = false;
         }
 
-        needsDraw |= cancelExitingRipples();
-
-        mNeedsDraw = needsDraw;
+        cancelExitingRipples();
         invalidateSelf();
     }
 
@@ -628,57 +621,121 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
+    /**
+     * Optimized for drawing ripples with a mask layer and optional content.
+     */
     @Override
     public void draw(@NonNull Canvas canvas) {
-        final boolean hasMask = mMask != null;
-        final boolean drawNonMaskContent = mLayerState.mNum > (hasMask ? 1 : 0);
-        final boolean drawMask = hasMask && mMask.getOpacity() != PixelFormat.OPAQUE;
+        // Clip to the dirty bounds, which will be the drawable bounds if we
+        // have a mask or content and the ripple bounds if we're projecting.
         final Rect bounds = getDirtyBounds();
         final int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
         canvas.clipRect(bounds);
 
-        // If we have content, draw it into a layer first.
-        final int contentLayer;
-        if (drawNonMaskContent) {
-            contentLayer = drawContentLayer(canvas, bounds, SRC_OVER);
-        } else {
-            contentLayer = -1;
-        }
-
-        // Next, try to draw the ripples (into a layer if necessary). If we need
-        // to mask against the underlying content, set the xfermode to SRC_ATOP.
-        final PorterDuffXfermode xfermode = (hasMask || !drawNonMaskContent) ? SRC_OVER : SRC_ATOP;
-
-        // If we have a background and a non-opaque mask, draw the masking layer.
-        final int backgroundLayer = drawBackgroundLayer(canvas, bounds, xfermode, drawMask);
-        if (backgroundLayer >= 0) {
-            if (drawMask) {
-                drawMaskingLayer(canvas, bounds, DST_IN);
-            }
-            canvas.restoreToCount(backgroundLayer);
-        }
-
-        // If we have ripples and a non-opaque mask, draw the masking layer.
-        final int rippleLayer = drawRippleLayer(canvas, bounds, xfermode);
-        if (rippleLayer >= 0) {
-            if (drawMask) {
-                drawMaskingLayer(canvas, bounds, DST_IN);
-            }
-            canvas.restoreToCount(rippleLayer);
-        }
-
-        // If we failed to draw anything and we just canceled animations, at
-        // least draw a color so that hardware invalidation works correctly.
-        if (contentLayer < 0 && backgroundLayer < 0 && rippleLayer < 0 && mNeedsDraw) {
-            canvas.drawColor(Color.TRANSPARENT);
-
-            // Request another draw so we can avoid adding a transparent layer
-            // during the next display list refresh.
-            invalidateSelf();
-        }
-        mNeedsDraw = false;
+        drawContent(canvas);
+        drawBackgroundAndRipples(canvas);
 
         canvas.restoreToCount(saveCount);
+    }
+
+    @Override
+    public void invalidateSelf() {
+        super.invalidateSelf();
+
+        // Force the mask to update on the next draw().
+        mHasValidMask = false;
+    }
+
+    /**
+     * @return whether we need to use a mask
+     */
+    private void updateMaskShaderIfNeeded() {
+        if (mHasValidMask) {
+            return;
+        }
+
+        final int maskType = getMaskType();
+        if (maskType == MASK_UNKNOWN) {
+            return;
+        }
+
+        mHasValidMask = true;
+
+        final Rect bounds = getBounds();
+        if (maskType == MASK_NONE || bounds.isEmpty()) {
+            if (mMaskBuffer != null) {
+                mMaskBuffer.recycle();
+                mMaskBuffer = null;
+                mMaskShader = null;
+                mMaskCanvas = null;
+            }
+            mMaskMatrix = null;
+            mMaskColorFilter = null;
+            return;
+        }
+
+        // Ensure we have a correctly-sized buffer.
+        if (mMaskBuffer == null
+                || mMaskBuffer.getWidth() != bounds.width()
+                || mMaskBuffer.getHeight() != bounds.height()) {
+            if (mMaskBuffer != null) {
+                mMaskBuffer.recycle();
+            }
+
+            mMaskBuffer = Bitmap.createBitmap(
+                    bounds.width(), bounds.height(), Bitmap.Config.ALPHA_8);
+            mMaskShader = new BitmapShader(mMaskBuffer,
+                    Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            mMaskCanvas = new Canvas(mMaskBuffer);
+        } else {
+            mMaskBuffer.eraseColor(Color.TRANSPARENT);
+        }
+
+        if (mMaskMatrix == null) {
+            mMaskMatrix = new Matrix();
+        } else {
+            mMaskMatrix.reset();
+        }
+
+        if (mMaskColorFilter == null) {
+            mMaskColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_IN);
+        }
+
+        // Draw the appropriate mask.
+        if (maskType == MASK_EXPLICIT) {
+            drawMask(mMaskCanvas);
+        } else if (maskType == MASK_CONTENT) {
+            drawContent(mMaskCanvas);
+        }
+    }
+
+    private int getMaskType() {
+        if (mRipple == null && mExitingRipplesCount <= 0
+                && (mBackground == null || !mBackground.shouldDraw())) {
+            // We might need a mask later.
+            return MASK_UNKNOWN;
+        }
+
+        if (mMask != null) {
+            if (mMask.getOpacity() == PixelFormat.OPAQUE) {
+                // Clipping handles opaque explicit masks.
+                return MASK_NONE;
+            } else {
+                return MASK_EXPLICIT;
+            }
+        }
+
+        // Check for non-opaque, non-mask content.
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int count = mLayerState.mNum;
+        for (int i = 0; i < count; i++) {
+            if (array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
+                return MASK_CONTENT;
+            }
+        }
+
+        // Clipping handles opaque content.
+        return MASK_NONE;
     }
 
     /**
@@ -711,139 +768,90 @@ public class RippleDrawable extends LayerDrawable {
         return -1;
     }
 
-    private int drawContentLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
+    private void drawContent(Canvas canvas) {
+        // Draw everything except the mask.
         final ChildDrawable[] array = mLayerState.mChildren;
         final int count = mLayerState.mNum;
-
-        // We don't need a layer if we don't expect to draw any ripples, we have
-        // an explicit mask, or if the non-mask content is all opaque.
-        boolean needsLayer = false;
-        if ((mExitingRipplesCount > 0 || mBackground != null) && mMask == null) {
-            for (int i = 0; i < count; i++) {
-                if (array[i].mId != R.id.mask
-                        && array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
-                    needsLayer = true;
-                    break;
-                }
-            }
-        }
-
-        final Paint maskingPaint = getMaskingPaint(mode);
-        final int restoreToCount = needsLayer ? canvas.saveLayer(bounds.left, bounds.top,
-                bounds.right, bounds.bottom, maskingPaint) : -1;
-
-        // Draw everything except the mask.
         for (int i = 0; i < count; i++) {
             if (array[i].mId != R.id.mask) {
                 array[i].mDrawable.draw(canvas);
             }
         }
-
-        return restoreToCount;
     }
 
-    private int drawBackgroundLayer(
-            Canvas canvas, Rect bounds, PorterDuffXfermode mode, boolean drawMask) {
-        int saveCount = -1;
-
-        if (mBackground != null && mBackground.shouldDraw()) {
-            // TODO: We can avoid saveLayer here if we push the xfermode into
-            // the background's render thread animator at exit() time.
-            if (drawMask || mode != SRC_OVER) {
-                saveCount = canvas.saveLayer(bounds.left, bounds.top, bounds.right,
-                        bounds.bottom, getMaskingPaint(mode));
-            }
-
-            final float x = mHotspotBounds.exactCenterX();
-            final float y = mHotspotBounds.exactCenterY();
-            canvas.translate(x, y);
-            mBackground.draw(canvas, getRipplePaint());
-            canvas.translate(-x, -y);
-        }
-
-        return saveCount;
-    }
-
-    private int drawRippleLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
-        boolean drewRipples = false;
-        int restoreToCount = -1;
-        int restoreTranslate = -1;
-
-        // Draw ripples and update the animating ripples array.
+    private void drawBackgroundAndRipples(Canvas canvas) {
+        final Ripple active = mRipple;
+        final RippleBackground background = mBackground;
         final int count = mExitingRipplesCount;
-        final Ripple[] ripples = mExitingRipples;
-        for (int i = 0; i <= count; i++) {
-            final Ripple ripple;
-            if (i < count) {
-                ripple = ripples[i];
-            } else if (mRipple != null) {
-                ripple = mRipple;
-            } else {
-                continue;
+        if (active == null && count <= 0 && (background == null || !background.shouldDraw())) {
+            // Move along, nothing to draw here.
+            return;
+        }
+
+        final float x = mHotspotBounds.exactCenterX();
+        final float y = mHotspotBounds.exactCenterY();
+        canvas.translate(x, y);
+
+        updateMaskShaderIfNeeded();
+
+        // Position the shader to account for canvas translation.
+        if (mMaskShader != null) {
+            mMaskMatrix.setTranslate(-x, -y);
+            mMaskShader.setLocalMatrix(mMaskMatrix);
+        }
+
+        // Grab the color for the current state and cut the alpha channel in
+        // half so that the ripple and background together yield full alpha.
+        final int color = mState.mColor.getColorForState(getState(), Color.BLACK);
+        final int halfAlpha = (Color.alpha(color) / 2) << 24;
+        final Paint p = getRipplePaint();
+
+        if (mMaskColorFilter != null) {
+            // The ripple timing depends on the paint's alpha value, so we need
+            // to push just the alpha channel into the paint and let the filter
+            // handle the full-alpha color.
+            final int fullAlphaColor = color | (0xFF << 24);
+            mMaskColorFilter.setColor(fullAlphaColor);
+
+            p.setColor(halfAlpha);
+            p.setColorFilter(mMaskColorFilter);
+            p.setShader(mMaskShader);
+        } else {
+            final int halfAlphaColor = (color & 0xFFFFFF) | halfAlpha;
+            p.setColor(halfAlphaColor);
+            p.setColorFilter(null);
+            p.setShader(null);
+        }
+
+        if (background != null && background.shouldDraw()) {
+            background.draw(canvas, p);
+        }
+
+        if (count > 0) {
+            final Ripple[] ripples = mExitingRipples;
+            for (int i = 0; i < count; i++) {
+                ripples[i].draw(canvas, p);
             }
-
-            // If we're masking the ripple layer, make sure we have a layer
-            // first. This will merge SRC_OVER (directly) onto the canvas.
-            if (restoreToCount < 0) {
-                final Paint maskingPaint = getMaskingPaint(mode);
-                final int color = mState.mColor.getColorForState(getState(), Color.TRANSPARENT);
-                final int alpha = Color.alpha(color);
-                maskingPaint.setAlpha(alpha / 2);
-
-                // TODO: We can avoid saveLayer here if we're only drawing one
-                // ripple and we don't have content or a translucent mask.
-                restoreToCount = canvas.saveLayer(bounds.left, bounds.top,
-                        bounds.right, bounds.bottom, maskingPaint);
-
-                // Translate the canvas to the current hotspot bounds.
-                restoreTranslate = canvas.save();
-                canvas.translate(mHotspotBounds.exactCenterX(), mHotspotBounds.exactCenterY());
-            }
-
-            drewRipples |= ripple.draw(canvas, getRipplePaint());
         }
 
-        // Always restore the translation.
-        if (restoreTranslate >= 0) {
-            canvas.restoreToCount(restoreTranslate);
+        if (active != null) {
+            active.draw(canvas, p);
         }
 
-        // If we created a layer with no content, merge it immediately.
-        if (restoreToCount >= 0 && !drewRipples) {
-            canvas.restoreToCount(restoreToCount);
-            restoreToCount = -1;
-        }
-
-        return restoreToCount;
+        canvas.translate(-x, -y);
     }
 
-    private int drawMaskingLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
-        final int restoreToCount = canvas.saveLayer(bounds.left, bounds.top,
-                bounds.right, bounds.bottom, getMaskingPaint(mode));
-
-        // Ensure that DST_IN blends using the entire layer.
-        canvas.drawColor(Color.TRANSPARENT);
-
+    private void drawMask(Canvas canvas) {
         mMask.draw(canvas);
-
-        return restoreToCount;
     }
 
     private Paint getRipplePaint() {
         if (mRipplePaint == null) {
             mRipplePaint = new Paint();
             mRipplePaint.setAntiAlias(true);
+            mRipplePaint.setStyle(Paint.Style.FILL);
         }
         return mRipplePaint;
-    }
-
-    private Paint getMaskingPaint(PorterDuffXfermode xfermode) {
-        if (mMaskingPaint == null) {
-            mMaskingPaint = new Paint();
-        }
-        mMaskingPaint.setXfermode(xfermode);
-        mMaskingPaint.setAlpha(0xFF);
-        return mMaskingPaint;
     }
 
     @Override
@@ -893,6 +901,10 @@ public class RippleDrawable extends LayerDrawable {
         // LayerDrawable creates a new state using createConstantState, so
         // this should always be a safe cast.
         mState = (RippleState) mLayerState;
+
+        // The locally cached drawable may have changed.
+        mMask = findDrawableByLayerId(R.id.mask);
+
         return this;
     }
 
@@ -924,17 +936,12 @@ public class RippleDrawable extends LayerDrawable {
 
         @Override
         public Drawable newDrawable() {
-            return new RippleDrawable(this, null, null);
+            return new RippleDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new RippleDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new RippleDrawable(this, res, theme);
+            return new RippleDrawable(this, res);
         }
     }
 
@@ -968,35 +975,16 @@ public class RippleDrawable extends LayerDrawable {
         return mState.mMaxRadius;
     }
 
-    private RippleDrawable(RippleState state, Resources res, Theme theme) {
-        boolean needsTheme = false;
+    private RippleDrawable(RippleState state, Resources res) {
+        mState = new RippleState(state, this, res);
+        mLayerState = mState;
 
-        final RippleState ns;
-        if (theme != null && state != null && state.canApplyTheme()) {
-            ns = new RippleState(state, this, res);
-            needsTheme = true;
-        } else if (state == null) {
-            ns = new RippleState(null, this, res);
-        } else {
-            // We always need a new state since child drawables contain local
-            // state but live within the parent's constant state.
-            // TODO: Move child drawables into local state.
-            ns = new RippleState(state, this, res);
+        if (mState.mNum > 0) {
+            ensurePadding();
         }
 
         if (res != null) {
             mDensity = res.getDisplayMetrics().density;
-        }
-
-        mState = ns;
-        mLayerState = ns;
-
-        if (ns.mNum > 0) {
-            ensurePadding();
-        }
-
-        if (needsTheme) {
-            applyTheme(theme);
         }
 
         initializeFromState();

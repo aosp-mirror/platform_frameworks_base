@@ -130,8 +130,11 @@ public class ViewOverlay {
             super(context);
             mHostView = hostView;
             mAttachInfo = mHostView.mAttachInfo;
+
             mRight = hostView.getWidth();
             mBottom = hostView.getHeight();
+            // pass right+bottom directly to RenderNode, since not going through setters
+            mRenderNode.setLeftTopRightBottom(0, 0, mRight, mBottom);
         }
 
         public void add(Drawable drawable) {

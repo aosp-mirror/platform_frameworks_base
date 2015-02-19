@@ -1,0 +1,275 @@
+page.title=Distributing to Android Wear
+page.image=/design/media/wear/ContextualExample.008_2x.png
+meta.tags="wear", "publish", "quality"
+page.tags="wear", "publish", "googleplay"
+page.metaDescription=Distribute your apps, games, and content to Android Wear.
+
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>How to Participate</h2>
+<ol>
+<li><a href="#understand_guidelines">Understand the guidelines</a></li>
+<li><a href="#develop_app">Develop a great app for Wear</a></li>
+<li><a href="#test_app">Test for Wear App Quality</a></li>
+<li><a href="#opt_in">Opt-in</a></li>
+<li><a href="#track_review">Track your review</a></li>
+</ol>
+
+<h2>You Should Also Read</h2>
+<ol>
+<li><a href="{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a></li>
+<li><a href="{@docRoot}distribute/essentials/quality/core.html">Core App Quality</a></li>
+</ol>
+
+</div></div>
+
+<p>
+  If you've got a great app, Android Wear and Google Play can help you bring it to users. While all
+  apps are able to send basic notifications to Android Wear devices, you can go much further.
+  Extend your apps to support custom Wear interactions and offer a refined, engaging user
+  experience across all Wear devices. If your apps meet core app quality guidelines on handsets and
+  provide a high-quality experience for Android Wear devices, Google Play will showcase your apps
+  for easy discovery.
+</p>
+
+<p>
+  To get started, review the sections in this document to learn how to distribute your Wear apps
+  to users through Google Play. Be sure to read <a
+  href="{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> for information on
+  the usability and quality standards that your apps should meet. When your app is ready, you can
+  opt-in for designation as an Android Wear app from the Developer Console.
+</p>
+
+<h2 id="how_to_participate">
+  How to Participate
+</h2>
+
+<p>
+  Google Play lets you make your Wear apps more discoverable for Wear users. You can develop and
+  publish using your existing Developer Console account and your current distribution and pricing
+  settings. It's easy to participate — the sections below outline the process.
+</p>
+
+<h3 id="understand_guidelines">
+  1. Understand guidelines and requirements
+</h3>
+
+<div style="float:right;margin:1em 0 1.5em 2em;">
+  <img src="{@docRoot}images/gp-wear-process.png">
+</div>
+
+<p>
+  To prepare for a successful launch on Android Wear, start by reviewing the guidelines for
+  creating great app experiences on Wear. See the <a href="{@docRoot}design/wear/index.html">Android
+  Wear design guidelines</a> for ideas on extending your app for Wear and details on design and
+  usability.
+</p>
+
+<p>
+  As you get started designing your Wear experience, make sure to read and understand the quality
+  criteria for Wear apps. Only apps that are usable on Wear will be designated as Wear apps on
+  Google Play — your apps can participate if they meet a set of basic quality criteria. See <a
+  href="{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> for details.
+</p>
+
+<h3 id="develop_app">2. Develop a great app for Wear</h3>
+
+<p>
+Once you have read the guidelines, the next step is to develop your app. The following sections
+describe how to start building a great app experience for Wear.
+</p>
+
+<h4>Design first</h4>
+
+<p>
+  Android Wear aims to provide users with just the right information at just the right time. Great
+  Android Wear experiences are launched automatically, glanceable, and
+  require zero or low user interaction. Although all apps can send basic notifications to Wear
+  devices without any modification, great apps built for Wear are refined to offer a polished and
+  high-quality experience, work on different screen layouts, and deliver a compelling feature set
+  for users.
+</p>
+
+<p>
+  As you consider your Wear app, review the <a href=
+  "{@docRoot}training/building-wearables.html">developer documentation</a> and <a
+  href="{@docRoot}design/wear/index.html">usability guidelines</a> and plan on utilizing them to the
+  greatest extent possible. You can design a great notification experience for users with the APIs
+  provided in the SDK and support library. You may also choose to build an app that runs directly
+  on the wearable.
+</p>
+
+<h4>Package your app</h4>
+
+<p>
+  We recommend that you deliver your Wear experience as part of your existing app for phones,
+  tablets, and other devices, using the same package name and store listing. This lets users
+  upgrade to your Wear experience seamlessly and also lets you take advantage of the reviews and
+  ratings you’ve earned in your app for phones and tablets. For wearable apps that depend on an
+  app for functionality, you should always package it within that app. To learn how, read <a
+  href="{@docRoot}training/wearables/apps/packaging.html">Packaging Wearable Apps</a>.
+</p>
+
+<h4>Test on a variety of devices</h4>
+
+<p>
+  Throughout design and development, it's important to have suitable devices on which to prototype
+  and test your user experience. It's highly recommended that you acquire one or more Android Wear
+  devices or develop with different emulator configurations and set up your testing environment as
+  early as possible. It’s important that you optimize your design on both square and round layouts.
+</p>
+
+<h3 id="test_app">3. Test for Wear App Quality</h3>
+
+<p>
+  Your Wear apps should be designed to perform well and look great on Android Wear, and they should
+  offer the best user experience possible. Google Play will showcase selected high-quality Wear
+  apps for easy discovery. Here’s how you can participate and deliver an Android Wear app that
+  users will enjoy:
+</p>
+
+<ul>
+  <li>Meet Core App Quality guidelines
+    <ul>
+      <li>Follow <a href="{@docRoot}design/index.html">Android Design
+      guidelines</a>. Pay special attention to using <a href=
+      "http://www.google.com/design/spec/material-design/introduction.html">material
+      design</a> in your app.
+      </li>
+
+      <li>Test your apps against the <a href=
+      "{@docRoot}distribute/essentials/quality/core.html">Core App Quality
+      guidelines</a>.
+      </li>
+    </ul>
+  </li>
+  <li>Meet <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear App
+  Quality</a> criteria
+    <ul>
+      <li>Follow our best practices for <a href="{@docRoot}training/building-wearables.html">
+      Wear app development</a></li>
+      <li>Make sure your app meets all of the <a href=
+      "{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> criteria</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="opt_in">4. Opt-in to Android Wear and publish</h3>
+
+<p>
+  When you've built your release-ready APK and tested to ensure that it meets all of the <a
+  href="{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> criteria, upload it
+  to the Developer Console. Update your store listing with Wear screenshots and set distribution
+  options as needed. If you aren't familiar with how to prepare for launch on Google Play, see the
+  <a href="{@docRoot}distribute/googleplay/publish/preparing.html">Launch Checklist.</a>
+</p>
+
+<p>
+  Before you publish to users, you may opt-in to Android Wear from the <strong>Pricing and
+  Distribution</strong> section of the Developer Console. Opt-in means that you want your app to
+  be made more discoverable to Android Wear users through Google Play, and that your app meets <a
+  href="{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> criteria.
+</p>
+
+<p>
+  After you've opted-in and saved changes, you can publish your app as usual. In addition, Google
+  Play submits your app for review against the <a
+  href="{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> criteria and
+  notifies you of the result. See the next section for details on how to track the approval status
+  of your app.
+</p>
+
+<p>
+  If your app meets all <a href="{@docRoot}distribute/essentials/quality/wear.html">Wear App
+  Quality</a> criteria, Google Play makes it more discoverable to Android Wear users. Your app is
+  also eligible for higher-visibility featuring in app collections and promotions.
+</p>
+
+<p>
+  Note that opt-in and review do not affect the availability of your app in the Google Play Store
+  &mdash; your app is available as soon as you publish.
+</p>
+
+<p>
+  Here are the steps to opt-in to Android Wear in the Developer Console:
+</p>
+
+<ol>
+  <li>Make sure your app meets all <a href=
+  "{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> criteria
+  </li>
+
+  <li>Add Wear screenshots to the app’s store listing
+  </li>
+
+  <li>In the <strong>All Applications</strong> page, click the app you want to opt-in.
+  </li>
+
+  <li>Under <strong>Pricing and Distribution</strong>, scroll down to find <em>Android Wear</em>
+  and the opt-in checkbox.
+  </li>
+
+  <li>Click the checkbox next to <em>Distribute your app on Android Wear</em>.
+  </li>
+
+  <li>Click <strong>Save</strong> to save your Pricing and Distribution changes.
+  </li>
+</ol>
+
+<div style="padding-top:1em">
+  <img style="border:2px solid #ddd;" src="{@docRoot}images/gp-wear-opt-in.png">
+  <p class="caption">
+    <strong>Opt-in for Wear:</strong> Include your app in Android Wear by opting-in from the
+    Developer Console.
+  </p>
+</div>
+
+<h3 id="track_review">5. Track your review and approval</h3>
+
+<p>
+  If your app meets the technical and quality criteria for Android Wear, as described above, your
+  app will be made more discoverable for users on Android Wear. If your app doesn’t meet the
+  criteria, you’ll receive a <strong>notification email sent to your developer account
+  address</strong>, with a summary of the areas that you need to address. When you’ve made the
+  necessary adjustments, you can upload a new version of your app to the Developer Console.
+</p>
+
+<p>
+  At any time, you can check the review and approval status of your app in the Developer Console,
+  under <em>Android Wear</em> in the app's <strong>Pricing and Distribution</strong>
+  page.
+</p>
+
+<p>
+  There are three approval states:
+</p>
+
+<ul>
+  <li>
+    <em>Pending</em> — Your app was sent for review and the review is not yet complete.
+  </li>
+
+  <li>
+    <em>Approved</em> — Your app was reviewed and approved. The app will be made more discoverable
+    to Android Wear users.
+  </li>
+
+  <li>
+    <em>Not approved</em> — Your app was reviewed and not approved. Check the notification email
+    for information about why the app was not approved. You can address any issues and opt-in and
+    publish again to initiate another review.
+  </li>
+</ul>
+
+<p>To understand how your apps are evaluated, please see the <a href=
+"{@docRoot}distribute/essentials/quality/wear.html">Wear App Quality</a> document. </p>
+
+
+  <h3>Related resources</h3>
+
+  <div class="resource-widget resource-flow-layout col-13"
+    data-query="collection:wearlanding"
+    data-cardSizes="6x2"
+    data-maxResults="3">
+  </div>

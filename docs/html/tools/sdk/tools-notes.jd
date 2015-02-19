@@ -1,19 +1,15 @@
-page.title=SDK Tools
+page.title=SDK Tools Release Notes
 excludeFromSuggestions=true
 @jd:body
 
 <p>SDK Tools is a downloadable component for the Android SDK. It includes the
-complete set of development and debugging tools for the Android SDK.</p>
-
-<p>If you are new to the Android SDK, the <a
-href="{@docRoot}sdk/index.html">SDK starter package</a> installs the
-latest revision of the SDK Tools in the <code>&lt;sdk&gt;/tools</code> directory.</p>
+complete set of development and debugging tools for the Android SDK. It is included
+with <a href="{@docRoot}tools/studio/index.html">Android Studio</a>.</p>
 
 <p>If you are already using the SDK and you want to update to the latest version
-of the SDK Tools, use the <em>Android SDK Manager</em> to get the
-update, rather than downloading a new SDK starter package. For more information
-about how to update, see <a
-href="{@docRoot}sdk/exploring.html#UpdatingComponents">Exploring the SDK</a>.</p>
+of the SDK Tools, use the <a
+href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a> to get the
+update.</p>
 
 
 <h2 id="notes">Revisions</h2>
@@ -29,6 +25,88 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.0.2</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 19 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue with creating projects and activities from templates using Eclipse ADT.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.0.1</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 19 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed Java detection issue on 32-bit Windows systems.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.0.0</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 19 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Added support for Andriod Studio 1.0 and emulator enhancements.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 23.0.5</a> <em>(October 2014)</em>
   </p>
 
@@ -847,7 +925,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
             <li>Added a flag that sets <em>jumbo mode</em> for DEX files, which allows a larger
               number of strings in the DEX files. Enable this mode by adding the following line to
               the {@code project.properties} file of your project:
-              <pre>set dex.force.jumbo=true</pre></li>
+              <pre>dex.force.jumbo=true</pre></li>
             <li>Improved the build time by pre-dexing libraries (both JAR files and library
               projects).</li>
             <li>Updated the build to generate {@code R} resource classes for library projects

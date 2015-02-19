@@ -6,8 +6,6 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 # getConfig in external/skia/include/core/SkBitmap.h is deprecated.
 # Allow Gnu extension: in-class initializer of static 'const float' member.
 LOCAL_CLANG_CFLAGS += \
-    -Wno-unused-parameter \
-    -Wno-deprecated-declarations \
     -Wno-gnu-static-float-init
 
 # Only build libhwui when USE_OPENGL_RENDERER is

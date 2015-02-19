@@ -13,11 +13,11 @@ header.hide=1
 
   <h1 itemprop="name" style="margin-bottom:0;">Google Cloud Messaging for Android</h1>
   <p itemprop="description">
-  Google Cloud Messaging for Android (GCM) is a service that allows you to send data
+  Google Cloud Messaging (GCM) for Android is a service that allows you to send data
 from your server to your users' Android-powered device, and also to receive messages from
 devices on the same connection. The GCM service handles all aspects of queueing of messages
-and delivery to the target Android application running on the target device. GCM is
-completely free no matter how big your messaging needs are, and there are no quotas.
+and delivery to the target Android application running on the target device, and it is
+completely free.
 </p>
 
 </div>

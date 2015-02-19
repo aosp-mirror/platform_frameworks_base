@@ -51,6 +51,12 @@ public class Ringtone {
 
     private final Context mContext;
     private final AudioManager mAudioManager;
+
+    /**
+     * Flag indicating if we're allowed to fall back to remote playback using
+     * {@link #mRemotePlayer}. Typically this is false when we're the remote
+     * player and there is nobody else to delegate to.
+     */
     private final boolean mAllowRemote;
     private final IRingtonePlayer mRemotePlayer;
     private final Binder mRemoteToken;
@@ -211,12 +217,7 @@ public class Ringtone {
             mLocalPlayer.setAudioAttributes(mAudioAttributes);
             mLocalPlayer.prepare();
 
-        } catch (SecurityException e) {
-            destroyLocalPlayer();
-            if (!mAllowRemote) {
-                Log.w(TAG, "Remote playback not allowed: " + e);
-            }
-        } catch (IOException e) {
+        } catch (SecurityException | IOException e) {
             destroyLocalPlayer();
             if (!mAllowRemote) {
                 Log.w(TAG, "Remote playback not allowed: " + e);

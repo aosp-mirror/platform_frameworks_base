@@ -384,6 +384,12 @@ public class FrameLayout extends ViewGroup {
             if (mHasForegroundTintMode) {
                 mForeground.setTintMode(mForegroundTintMode);
             }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mForeground.isStateful()) {
+                mForeground.setState(getDrawableState());
+            }
         }
     }
 

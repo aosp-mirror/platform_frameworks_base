@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.AttributeSet;
 import android.util.EventLog;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -31,7 +30,7 @@ import com.android.systemui.R;
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = PhoneStatusBar.DEBUG;
-    private static final boolean DEBUG_GESTURES = true;
+    private static final boolean DEBUG_GESTURES = false;
 
     PhoneStatusBar mBar;
 
@@ -149,6 +148,12 @@ public class PhoneStatusBarView extends PanelBar {
         super.onTrackingStarted(panel);
         mBar.onTrackingStarted();
         mScrimController.onTrackingStarted();
+    }
+
+    @Override
+    public void onClosingFinished() {
+        super.onClosingFinished();
+        mBar.onClosingFinished();
     }
 
     @Override

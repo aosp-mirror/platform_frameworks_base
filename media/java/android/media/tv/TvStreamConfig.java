@@ -33,7 +33,6 @@ public class TvStreamConfig implements Parcelable {
 
     private int mStreamId;
     private int mType;
-    // TODO: Revisit if max widht/height really make sense.
     private int mMaxWidth;
     private int mMaxHeight;
     /**
@@ -165,5 +164,18 @@ public class TvStreamConfig implements Parcelable {
             config.mGeneration = mGeneration;
             return config;
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+        if (!(obj instanceof TvStreamConfig)) return false;
+
+        TvStreamConfig config = (TvStreamConfig) obj;
+        return config.mGeneration == mGeneration
+            && config.mStreamId == mStreamId
+            && config.mType == mType
+            && config.mMaxWidth == mMaxWidth
+            && config.mMaxHeight == mMaxHeight;
     }
 }

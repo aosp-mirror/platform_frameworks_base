@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.IpConfiguration;
+import android.net.IEthernetServiceListener;
 
 /**
  * Interface that answers queries about, and allows changing
@@ -27,4 +28,7 @@ interface IEthernetManager
 {
     IpConfiguration getConfiguration();
     void setConfiguration(in IpConfiguration config);
+    boolean isAvailable();
+    void addListener(in IEthernetServiceListener listener);
+    void removeListener(in IEthernetServiceListener listener);
 }

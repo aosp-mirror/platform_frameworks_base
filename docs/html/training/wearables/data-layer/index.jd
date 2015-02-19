@@ -8,7 +8,7 @@ page.title=Sending and Syncing Data
     <h2>Dependencies and prerequisites</h2>
     <ul>
       <li>Android 4.3 (API Level 18) or higher on the handset device</li>
-      <li>The latest version of <a href="{@docRoot}google/play">Google Play services</a></li>
+      <li>The latest version of <a href="{@docRoot}google/play-services/index.html">Google Play services</a></li>
       <li>An Android Wear device or Wear AVD</li>
     </ul>
   </div>
@@ -30,9 +30,12 @@ the data layer:</p>
   <dd>The <a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a> class
   can send messages and is good for remote procedure calls (RPC), such as controlling a handheld's
   media player from the wearable or starting an intent on the wearable from the handheld.
-  The system always delivers the message when the handheld and wearable are connected and delivers
-  an error when the devices are disconnected. Messages are great for one-way requests or for a
-  request/response communication model.</dd>
+  Messages are also great for one-way requests or for a request/response communication model.
+  If the handheld and wearable are connected, the system queues the message for delivery and
+  returns a successful result code. If the devices are not connected, an error is returned. A
+  successful result code does not indicate that the message was delivered successfully as the
+  devices may disconnect after receiving the result code.
+</p></dd>
 
   <dt><b>Asset</b></dt>
   <dd><a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html"><code>Asset</code></a> objects are for
@@ -66,7 +69,7 @@ channel.
 
 <h2>Lessons</h2>
   <dl>
-    <dt><a href="{@docRoot}training/wearables/data-layer/data-items.html">Accessing the Wearable Data Layer</a></dt>
+    <dt><a href="{@docRoot}training/wearables/data-layer/accessing.html">Accessing the Wearable Data Layer</a></dt>
     <dd>This lesson shows you how to create a client to access the Data Layer APIs.</dd>
 
     <dt><a href="{@docRoot}training/wearables/data-layer/data-items.html">Syncing Data Items</a></dt>
@@ -83,5 +86,3 @@ channel.
     <dt><a href="{@docRoot}training/wearables/data-layer/events.html">Handling Data Layer Events</a></dt>
       <dd>Be notified of changes and events to the data layer.</dd>
   </dl>
-
-</div>

@@ -155,6 +155,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // True if auto-brightness should be used.
     private boolean mUseSoftwareAutoBrightnessConfig;
 
+    // True if should use light sensor to automatically determine doze screen brightness.
+    private final boolean mAllowAutoBrightnessWhileDozingConfig;
+
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish color fade animation instead.
     private boolean mColorFadeFadesConfig;
@@ -295,6 +298,19 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_automatic_brightness_available);
+
+        mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
+
+        int lightSensorRate = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessLightSensorRate);
+        long brighteningLightDebounce = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessBrighteningLightDebounce);
+        long darkeningLightDebounce = resources.getInteger(
+                com.android.internal.R.integer.config_autoBrightnessDarkeningLightDebounce);
+        boolean autoBrightnessResetAmbientLuxAfterWarmUp = resources.getBoolean(
+                com.android.internal.R.bool.config_autoBrightnessResetAmbientLuxAfterWarmUp);
+
         if (mUseSoftwareAutoBrightnessConfig) {
             int[] lux = resources.getIntArray(
                     com.android.internal.R.array.config_autoBrightnessLevels);
@@ -302,6 +318,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
             int lightSensorWarmUpTimeConfig = resources.getInteger(
                     com.android.internal.R.integer.config_lightSensorWarmupTime);
+            final float dozeScaleFactor = resources.getFraction(
+                    com.android.internal.R.fraction.config_screenAutoBrightnessDozeScaleFactor,
+                    1, 1);
 
             Spline screenAutoBrightnessSpline = createAutoBrightnessSpline(lux, screenBrightness);
             if (screenAutoBrightnessSpline == null) {
@@ -326,7 +345,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController = new AutomaticBrightnessController(this,
                         handler.getLooper(), sensorManager, screenAutoBrightnessSpline,
                         lightSensorWarmUpTimeConfig, screenBrightnessRangeMinimum,
-                        mScreenBrightnessRangeMaximum);
+                        mScreenBrightnessRangeMaximum, dozeScaleFactor, lightSensorRate,
+                        brighteningLightDebounce, darkeningLightDebounce,
+                        autoBrightnessResetAmbientLuxAfterWarmUp);
             }
         }
 
@@ -523,7 +544,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 } else {
                     state = Display.STATE_DOZE;
                 }
-                brightness = mPowerRequest.dozeScreenBrightness;
+                if (!mAllowAutoBrightnessWhileDozingConfig) {
+                    brightness = mPowerRequest.dozeScreenBrightness;
+                }
                 break;
             case DisplayPowerRequest.POLICY_DIM:
             case DisplayPowerRequest.POLICY_BRIGHT:
@@ -574,19 +597,26 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightness = PowerManager.BRIGHTNESS_OFF;
         }
 
-        // Use default brightness when dozing unless overridden.
-        if (brightness < 0 && (state == Display.STATE_DOZE
-                || state == Display.STATE_DOZE_SUSPEND)) {
-            brightness = mScreenBrightnessDozeConfig;
-        }
-
         // Configure auto-brightness.
         boolean autoBrightnessEnabled = false;
         if (mAutomaticBrightnessController != null) {
+            final boolean autoBrightnessEnabledInDoze = mAllowAutoBrightnessWhileDozingConfig
+                    && (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND);
             autoBrightnessEnabled = mPowerRequest.useAutoBrightness
-                    && state == Display.STATE_ON && brightness < 0;
+                    && (state == Display.STATE_ON || autoBrightnessEnabledInDoze)
+                    && brightness < 0;
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
-                    mPowerRequest.screenAutoBrightnessAdjustment);
+                    mPowerRequest.screenAutoBrightnessAdjustment, state != Display.STATE_ON);
+        }
+
+        // Apply brightness boost.
+        // We do this here after configuring auto-brightness so that we don't
+        // disable the light sensor during this temporary state.  That way when
+        // boost ends we will be able to resume normal auto-brightness behavior
+        // without any delay.
+        if (mPowerRequest.boostScreenBrightness
+                && brightness != PowerManager.BRIGHTNESS_OFF) {
+            brightness = PowerManager.BRIGHTNESS_ON;
         }
 
         // Apply auto-brightness.
@@ -607,6 +637,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
         } else {
             mAppliedAutoBrightness = false;
+        }
+
+        // Use default brightness when dozing unless overridden.
+        if (brightness < 0 && (state == Display.STATE_DOZE
+                || state == Display.STATE_DOZE_SUSPEND)) {
+            brightness = mScreenBrightnessDozeConfig;
         }
 
         // Apply manual brightness.
@@ -644,11 +680,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended.
-        if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
-            animateScreenBrightness(brightness,
-                    slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
-        } else {
-            animateScreenBrightness(brightness, 0);
+        if (!mPendingScreenOff) {
+            if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
+                animateScreenBrightness(brightness,
+                        slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+            } else {
+                animateScreenBrightness(brightness, 0);
+            }
         }
 
         // Determine whether the display is ready for use in the newly requested state.
@@ -1021,6 +1059,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
         pw.println("  mUseSoftwareAutoBrightnessConfig=" + mUseSoftwareAutoBrightnessConfig);
+        pw.println("  mAllowAutoBrightnessWhileDozingConfig=" +
+                mAllowAutoBrightnessWhileDozingConfig);
         pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);
 
         mHandler.runWithScissors(new Runnable() {

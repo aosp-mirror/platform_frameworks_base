@@ -35,6 +35,18 @@ public class TaskStackViewLayoutAlgorithm {
     // These are all going to change
     static final float StackPeekMinScale = 0.8f; // The min scale of the last card in the peek area
 
+    // A report of the visibility state of the stack
+    public class VisibilityReport {
+        public int numVisibleTasks;
+        public int numVisibleThumbnails;
+
+        /** Package level ctor */
+        VisibilityReport(int tasks, int thumbnails) {
+            numVisibleTasks = tasks;
+            numVisibleThumbnails = thumbnails;
+        }
+    }
+
     RecentsConfiguration mConfig;
 
     // The various rects that define the stack view
@@ -117,12 +129,12 @@ public class TaskStackViewLayoutAlgorithm {
         float pTaskHeightOffset = pAtBottomOfStackRect -
                 screenYToCurveProgress(mStackVisibleRect.bottom - taskHeight);
         float pNavBarOffset = pAtBottomOfStackRect -
-                screenYToCurveProgress(mStackVisibleRect.bottom - (mStackVisibleRect.bottom - mStackRect.bottom));
+                screenYToCurveProgress(mStackVisibleRect.bottom - (mStackVisibleRect.bottom -
+                        mStackRect.bottom));
 
         // Update the task offsets
         float pAtBackMostCardTop = 0.5f;
         float pAtFrontMostCardTop = pAtBackMostCardTop;
-        float pAtSecondFrontMostCardTop = pAtBackMostCardTop;
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
@@ -130,42 +142,89 @@ public class TaskStackViewLayoutAlgorithm {
 
             if (i < (taskCount - 1)) {
                 // Increment the peek height
-                float pPeek = task.group.isFrontMostTask(task) ? pBetweenAffiliateOffset :
-                    pWithinAffiliateOffset;
-                pAtSecondFrontMostCardTop = pAtFrontMostCardTop;
+                float pPeek = task.group.isFrontMostTask(task) ?
+                        pBetweenAffiliateOffset : pWithinAffiliateOffset;
                 pAtFrontMostCardTop += pPeek;
             }
         }
 
         mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
         mMinScrollP = tasks.size() == 1 ? Math.max(mMaxScrollP, 0f) : 0f;
-        if (launchedWithAltTab) {
-            if (launchedFromHome) {
-                // Center the top most task, since that will be focused first
-                mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
-            } else {
-                // Center the second top most task, since that will be focused first
-                mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
-            }
+        if (launchedWithAltTab && launchedFromHome) {
+            // Center the top most task, since that will be focused first
+            mInitialScrollP = mMaxScrollP;
         } else {
             mInitialScrollP = pAtFrontMostCardTop - 0.825f;
         }
-        mInitialScrollP = Math.max(0, mInitialScrollP);
+        mInitialScrollP = Math.min(mMaxScrollP, Math.max(0, mInitialScrollP));
+    }
+
+    /**
+     * Computes the maximum number of visible tasks and thumbnails.  Requires that
+     * computeMinMaxScroll() is called first.
+     */
+    public VisibilityReport computeStackVisibilityReport(ArrayList<Task> tasks) {
+        if (tasks.size() <= 1) {
+            return new VisibilityReport(1, 1);
+        }
+
+        // Walk backwards in the task stack and count the number of tasks and visible thumbnails
+        int taskHeight = mTaskRect.height();
+        int numVisibleTasks = 1;
+        int numVisibleThumbnails = 1;
+        float progress = mTaskProgressMap.get(tasks.get(tasks.size() - 1).key) - mInitialScrollP;
+        int prevScreenY = curveProgressToScreenY(progress);
+        for (int i = tasks.size() - 2; i >= 0; i--) {
+            Task task = tasks.get(i);
+            progress = mTaskProgressMap.get(task.key) - mInitialScrollP;
+            if (progress < 0) {
+                break;
+            }
+            boolean isFrontMostTaskInGroup = task.group.isFrontMostTask(task);
+            if (isFrontMostTaskInGroup) {
+                float scaleAtP = curveProgressToScale(progress);
+                int scaleYOffsetAtP = (int) (((1f - scaleAtP) * taskHeight) / 2);
+                int screenY = curveProgressToScreenY(progress) + scaleYOffsetAtP;
+                boolean hasVisibleThumbnail = (prevScreenY - screenY) > mConfig.taskBarHeight;
+                if (hasVisibleThumbnail) {
+                    numVisibleThumbnails++;
+                    numVisibleTasks++;
+                    prevScreenY = screenY;
+                } else {
+                    // Once we hit the next front most task that does not have a visible thumbnail,
+                    // walk through remaining visible set
+                    for (int j = i; j >= 0; j--) {
+                        numVisibleTasks++;
+                        progress = mTaskProgressMap.get(tasks.get(j).key) - mInitialScrollP;
+                        if (progress < 0) {
+                            break;
+                        }
+                    }
+                    break;
+                }
+            } else if (!isFrontMostTaskInGroup) {
+                // Affiliated task, no thumbnail
+                numVisibleTasks++;
+            }
+        }
+        return new VisibilityReport(numVisibleTasks, numVisibleThumbnails);
     }
 
     /** Update/get the transform */
-    public TaskViewTransform getStackTransform(Task task, float stackScroll, TaskViewTransform transformOut,
-            TaskViewTransform prevTransform) {
+    public TaskViewTransform getStackTransform(Task task, float stackScroll,
+            TaskViewTransform transformOut, TaskViewTransform prevTransform) {
         // Return early if we have an invalid index
         if (task == null || !mTaskProgressMap.containsKey(task.key)) {
             transformOut.reset();
             return transformOut;
         }
-        return getStackTransform(mTaskProgressMap.get(task.key), stackScroll, transformOut, prevTransform);
+        return getStackTransform(mTaskProgressMap.get(task.key), stackScroll, transformOut,
+                prevTransform);
     }
 
     /** Update/get the transform */
-    public TaskViewTransform getStackTransform(float taskProgress, float stackScroll, TaskViewTransform transformOut, TaskViewTransform prevTransform) {
+    public TaskViewTransform getStackTransform(float taskProgress, float stackScroll,
+            TaskViewTransform transformOut, TaskViewTransform prevTransform) {
         float pTaskRelative = taskProgress - stackScroll;
         float pBounded = Math.max(0, Math.min(pTaskRelative, 1f));
         // If the task top is outside of the bounds below the screen, then immediately reset it
@@ -199,19 +258,16 @@ public class TaskStackViewLayoutAlgorithm {
         return transformOut;
     }
 
-    /**
-     * Returns the untransformed task view size.
-     */
+    /** Returns the untransformed task view size. */
     public Rect getUntransformedTaskViewSize() {
         Rect tvSize = new Rect(mTaskRect);
         tvSize.offsetTo(0, 0);
         return tvSize;
     }
 
-    /**
-     * Returns the scroll to such task top = 1f;
-     */
+    /** Returns the scroll to such task top = 1f; */
     float getStackScrollForTask(Task t) {
+        if (!mTaskProgressMap.containsKey(t.key)) return 0f;
         return mTaskProgressMap.get(t.key);
     }
 

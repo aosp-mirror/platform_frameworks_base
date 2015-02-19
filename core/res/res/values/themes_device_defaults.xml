@@ -551,6 +551,8 @@ easier.
         <item name="windowDrawsSystemBarBackgrounds">false</item>
         <item name="windowContentOverlay">@null</item>
         <item name="colorControlActivated">?attr/colorControlHighlight</item>
+        <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
     </style>
 
 </resources>

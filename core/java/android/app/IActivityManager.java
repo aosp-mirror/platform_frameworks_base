@@ -140,6 +140,7 @@ public interface IActivityManager extends IInterface {
     public StackInfo getStackInfo(int stackId) throws RemoteException;
     public boolean isInHomeStack(int taskId) throws RemoteException;
     public void setFocusedStack(int stackId) throws RemoteException;
+    public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException;
     public int getTaskForActivity(IBinder token, boolean onlyRoot) throws RemoteException;
     public ContentProviderHolder getContentProvider(IApplicationThread caller,
             String name, int userId, boolean stable) throws RemoteException;
@@ -220,9 +221,11 @@ public interface IActivityManager extends IInterface {
 
     public int checkPermission(String permission, int pid, int uid)
             throws RemoteException;
-
-    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId)
+    public int checkPermissionWithToken(String permission, int pid, int uid, IBinder callerToken)
             throws RemoteException;
+
+    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId,
+            IBinder callerToken) throws RemoteException;
     public void grantUriPermission(IApplicationThread caller, String targetPkg, Uri uri,
             int mode, int userId) throws RemoteException;
     public void revokeUriPermission(IApplicationThread caller, Uri uri, int mode, int userId)
@@ -374,7 +377,7 @@ public interface IActivityManager extends IInterface {
     public boolean isUserRunning(int userid, boolean orStopping) throws RemoteException;
     public int[] getRunningUserIds() throws RemoteException;
 
-    public boolean removeTask(int taskId, int flags) throws RemoteException;
+    public boolean removeTask(int taskId) throws RemoteException;
 
     public void registerProcessObserver(IProcessObserver observer) throws RemoteException;
     public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException;
@@ -457,6 +460,9 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public Bitmap getTaskDescriptionIcon(String filename) throws RemoteException;
 
+    public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts)
+            throws RemoteException;
+
     public boolean requestVisibleBehind(IBinder token, boolean visible) throws RemoteException;
     public boolean isBackgroundVisibleBehind(IBinder token) throws RemoteException;
     public void backgroundResourcesReleased(IBinder token) throws RemoteException;
@@ -464,6 +470,7 @@ public interface IActivityManager extends IInterface {
     public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException;
     public void notifyEnterAnimationComplete(IBinder token) throws RemoteException;
 
+    public void systemBackupRestored() throws RemoteException;
     public void notifyCleartextNetwork(int uid, byte[] firstPacket) throws RemoteException;
 
     /*
@@ -784,6 +791,10 @@ public interface IActivityManager extends IInterface {
     int BOOT_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+237;
     int GET_TASK_DESCRIPTION_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+238;
     int LAUNCH_ASSIST_INTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+239;
+    int START_IN_PLACE_ANIMATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+240;
+    int CHECK_PERMISSION_WITH_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+241;
+    int REGISTER_TASK_STACK_LISTENER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+242;
+    int SYSTEM_BACKUP_RESTORED = IBinder.FIRST_CALL_TRANSACTION+243;
 
     // Start of M transactions
     int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+280;

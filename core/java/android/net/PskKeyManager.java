@@ -81,6 +81,13 @@ import javax.net.ssl.SSLEngine;
  * Subclasses should normally provide their own implementation of {@code getKey} because the default
  * implementation returns no key, which aborts the handshake.
  *
+ * <h3>Known issues</h3>
+ * The implementation of {@code ECDHE_PSK} cipher suites in API Level 21 contains a bug which breaks
+ * compatibility with other implementations. {@code ECDHE_PSK} cipher suites are enabled by default
+ * on platforms with API Level 21 when an {@code SSLContext} is initialized with a
+ * {@code PskKeyManager}. A workaround is to disable {@code ECDHE_PSK} cipher suites on platforms
+ * with API Level 21.
+ *
  * <h3>Example</h3>
  * The following example illustrates how to create an {@code SSLContext} which enables the use of
  * TLS-PSK in {@code SSLSocket}, {@code SSLServerSocket} and {@code SSLEngine} instances obtained

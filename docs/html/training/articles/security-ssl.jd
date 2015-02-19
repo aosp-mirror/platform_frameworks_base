@@ -22,6 +22,7 @@ page.article=true
   <li><a href="#Blacklisting">Blacklisting</a></li>
   <li><a href="#Pinning">Pinning</a></li>
   <li><a href="#ClientCert">Client Certificates</a></li>
+  <li><a href="#nogotofail">Nogotofail: Network Security Testing</a></li>
 </ol>
 
 
@@ -511,8 +512,42 @@ See the discussion about creating a custom {@link javax.net.ssl.KeyManager} in t
 
 
 
+<h2 id="nogotofail">
+  Nogotofail: A Network Traffic Security Testing Tool
+</h2>
 
+<p>
+  Nogotofail is a tool gives you an easy way to confirm that your apps are safe
+  against known TLS/SSL vulnerabilities and misconfigurations. It's an
+  automated, powerful, and scalable tool for testing network security issues on
+  any device whose network traffic could be made to go through it. </p>
 
+  <p>Nogotofail is useful for three main use cases:
+</p>
+
+<ul>
+  <li>Finding bugs and vulnerabilities.
+  </li>
+
+  <li>Verifying fixes and watching for regressions.
+  </li>
+
+  <li>Understanding what applications and devices are generating what traffic.
+  </li>
+</ul>
+
+<p>
+  Nogotofail works for Android, iOS, Linux, Windows, Chrome OS, OSX, in fact
+  any device you use to connect to the Internet. There’s an easy-to-use client
+  to configure the settings and get notifications on Android and Linux, as well
+  as the attack engine itself which can be deployed as a router, VPN server, or
+  proxy.
+</p>
+
+<p>
+  You can access the tool at the <a href=
+  "https://github.com/google/nogotofail">Nogotofail open source project</a>.
+</p>
 
 
 

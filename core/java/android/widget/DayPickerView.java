@@ -16,15 +16,12 @@
 
 package android.widget;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.AttributeSet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
@@ -37,9 +34,7 @@ import java.util.Locale;
 /**
  * This displays a list of months in a calendar format with selectable days.
  */
-class DayPickerView extends ListView implements AbsListView.OnScrollListener,
-        OnDateChangedListener {
-
+class DayPickerView extends ListView implements AbsListView.OnScrollListener {
     private static final String TAG = "DayPickerView";
 
     // How long the GoTo fling animation should last
@@ -48,18 +43,24 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     // How long to wait after receiving an onScrollStateChanged notification before acting on it
     private static final int SCROLL_CHANGE_DELAY = 40;
 
-    private static int LIST_TOP_OFFSET = -1; // so that the top line will be under the separator
+    // so that the top line will be under the separator
+    private static final int LIST_TOP_OFFSET = -1;
+
+    private final SimpleMonthAdapter mAdapter = new SimpleMonthAdapter(getContext());
+
+    private final ScrollStateRunnable mScrollStateChangedRunnable = new ScrollStateRunnable(this);
 
     private SimpleDateFormat mYearFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
 
-    // These affect the scroll speed and feel
-    private float mFriction = 1.0f;
-
     // highlighted time
     private Calendar mSelectedDay = Calendar.getInstance();
-    private SimpleMonthAdapter mAdapter;
-
     private Calendar mTempDay = Calendar.getInstance();
+    private Calendar mMinDate = Calendar.getInstance();
+    private Calendar mMaxDate = Calendar.getInstance();
+
+    private Calendar mTempCalendar;
+
+    private OnDaySelectedListener mOnDaySelectedListener;
 
     // which month should be displayed/highlighted [0-11]
     private int mCurrentMonthDisplayed;
@@ -68,60 +69,91 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     // used for tracking what state listview is in
     private int mCurrentScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
-    private DatePickerController mController;
     private boolean mPerformingScroll;
 
-    private ScrollStateRunnable mScrollStateChangedRunnable = new ScrollStateRunnable(this);
-
-    public DayPickerView(Context context, DatePickerController controller) {
+    public DayPickerView(Context context) {
         super(context);
-        init();
-        setController(controller);
-    }
 
-    public void setController(DatePickerController controller) {
-        if (mController != null) {
-            mController.unregisterOnDateChangedListener(this);
-        }
-        mController = controller;
-        mController.registerOnDateChangedListener(this);
-        setUpAdapter();
         setAdapter(mAdapter);
-        onDateChanged();
-    }
-
-    public void init() {
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         setDrawSelectorOnTop(false);
-
         setUpListView();
-    }
 
-    public void onChange() {
-        setUpAdapter();
-        setAdapter(mAdapter);
+        goTo(mSelectedDay.getTimeInMillis(), false, false, true);
+
+        mAdapter.setOnDaySelectedListener(mProxyOnDaySelectedListener);
     }
 
     /**
-     * Creates a new adapter if necessary and sets up its parameters. Override
-     * this method to provide a custom adapter.
+     * Sets the currently selected date to the specified timestamp. Jumps
+     * immediately to the new date. To animate to the new date, use
+     * {@link #setDate(long, boolean, boolean)}.
+     *
+     * @param timeInMillis
      */
-    protected void setUpAdapter() {
-        if (mAdapter == null) {
-            mAdapter = new SimpleMonthAdapter(getContext(), mController);
-        } else {
-            mAdapter.setSelectedDay(mSelectedDay);
-            mAdapter.notifyDataSetChanged();
-        }
-        // refresh the view with the new parameters
-        mAdapter.notifyDataSetChanged();
+    public void setDate(long timeInMillis) {
+        setDate(timeInMillis, false, true);
+    }
+
+    public void setDate(long timeInMillis, boolean animate, boolean forceScroll) {
+        goTo(timeInMillis, animate, true, forceScroll);
+    }
+
+    public long getDate() {
+        return mSelectedDay.getTimeInMillis();
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        mAdapter.setFirstDayOfWeek(firstDayOfWeek);
+    }
+
+    public int getFirstDayOfWeek() {
+        return mAdapter.getFirstDayOfWeek();
+    }
+
+    public void setMinDate(long timeInMillis) {
+        mMinDate.setTimeInMillis(timeInMillis);
+        onRangeChanged();
+    }
+
+    public long getMinDate() {
+        return mMinDate.getTimeInMillis();
+    }
+
+    public void setMaxDate(long timeInMillis) {
+        mMaxDate.setTimeInMillis(timeInMillis);
+        onRangeChanged();
+    }
+
+    public long getMaxDate() {
+        return mMaxDate.getTimeInMillis();
+    }
+
+    /**
+     * Handles changes to date range.
+     */
+    public void onRangeChanged() {
+        mAdapter.setRange(mMinDate, mMaxDate);
+
+        // Changing the min/max date changes the selection position since we
+        // don't really have stable IDs. Jumps immediately to the new position.
+        goTo(mSelectedDay.getTimeInMillis(), false, false, true);
+    }
+
+    /**
+     * Sets the listener to call when the user selects a day.
+     *
+     * @param listener The listener to call.
+     */
+    public void setOnDaySelectedListener(OnDaySelectedListener listener) {
+        mOnDaySelectedListener = listener;
     }
 
     /*
      * Sets all the required fields for the list view. Override this method to
      * set a different list view behavior.
      */
-    protected void setUpListView() {
+    private void setUpListView() {
         // Transparent background on scroll
         setCacheColorHint(0);
         // No dividers
@@ -134,26 +166,27 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         setOnScrollListener(this);
         setFadingEdgeLength(0);
         // Make the scrolling behavior nicer
-        setFriction(ViewConfiguration.getScrollFriction() * mFriction);
+        setFriction(ViewConfiguration.getScrollFriction());
     }
 
-    private int getDiffMonths(Calendar start, Calendar end){
+    private int getDiffMonths(Calendar start, Calendar end) {
         final int diffYears = end.get(Calendar.YEAR) - start.get(Calendar.YEAR);
         final int diffMonths = end.get(Calendar.MONTH) - start.get(Calendar.MONTH) + 12 * diffYears;
         return diffMonths;
     }
 
-    private int getPositionFromDay(Calendar day) {
-        final int diffMonthMax = getDiffMonths(mController.getMinDate(), mController.getMaxDate());
-        int diffMonth = getDiffMonths(mController.getMinDate(), day);
+    private int getPositionFromDay(long timeInMillis) {
+        final int diffMonthMax = getDiffMonths(mMinDate, mMaxDate);
+        final int diffMonth = getDiffMonths(mMinDate, getTempCalendarForTime(timeInMillis));
+        return MathUtils.constrain(diffMonth, 0, diffMonthMax);
+    }
 
-        if (diffMonth < 0 ) {
-            diffMonth = 0;
-        } else if (diffMonth > diffMonthMax) {
-            diffMonth = diffMonthMax;
+    private Calendar getTempCalendarForTime(long timeInMillis) {
+        if (mTempCalendar == null) {
+            mTempCalendar = Calendar.getInstance();
         }
-
-        return diffMonth;
+        mTempCalendar.setTimeInMillis(timeInMillis);
+        return mTempCalendar;
     }
 
     /**
@@ -171,15 +204,14 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
      *            visible
      * @return Whether or not the view animated to the new location
      */
-    public boolean goTo(Calendar day, boolean animate, boolean setSelected,
-                        boolean forceScroll) {
+    private boolean goTo(long day, boolean animate, boolean setSelected, boolean forceScroll) {
 
         // Set the selected day
         if (setSelected) {
-            mSelectedDay.setTimeInMillis(day.getTimeInMillis());
+            mSelectedDay.setTimeInMillis(day);
         }
 
-        mTempDay.setTimeInMillis(day.getTimeInMillis());
+        mTempDay.setTimeInMillis(day);
         final int position = getPositionFromDay(day);
 
         View child;
@@ -273,6 +305,10 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         mAdapter.setCalendarTextColor(colors);
     }
 
+    void setCalendarTextAppearance(int resId) {
+        mAdapter.setCalendarTextAppearance(resId);
+    }
+
     protected class ScrollStateRunnable implements Runnable {
         private int mNewState;
         private View mParent;
@@ -361,11 +397,6 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         return firstPosition + mostVisibleIndex;
     }
 
-    @Override
-    public void onDateChanged() {
-        goTo(mController.getSelectedDay(), false, true, true);
-    }
-
     /**
      * Attempts to return the date that has accessibility focus.
      *
@@ -435,7 +466,7 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     }
 
     private String getMonthAndYearString(Calendar day) {
-        StringBuffer sbuf = new StringBuffer();
+        final StringBuilder sbuf = new StringBuilder();
         sbuf.append(day.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault()));
         sbuf.append(" ");
         sbuf.append(mYearFormat.format(day.getTime()));
@@ -449,8 +480,8 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-        info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
+        info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
     }
 
     /**
@@ -464,10 +495,10 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         }
 
         // Figure out what month is showing.
-        int firstVisiblePosition = getFirstVisiblePosition();
-        int month = firstVisiblePosition % 12;
-        int year = firstVisiblePosition / 12 + mController.getMinYear();
-        Calendar day = Calendar.getInstance();
+        final int firstVisiblePosition = getFirstVisiblePosition();
+        final int month = firstVisiblePosition % 12;
+        final int year = firstVisiblePosition / 12 + mMinDate.get(Calendar.YEAR);
+        final Calendar day = Calendar.getInstance();
         day.set(year, month, 1);
 
         // Scroll either forward or backward one month.
@@ -494,8 +525,22 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
 
         // Go to that month.
         announceForAccessibility(getMonthAndYearString(day));
-        goTo(day, true, false, true);
+        goTo(day.getTimeInMillis(), true, false, true);
         mPerformingScroll = true;
         return true;
     }
+
+    public interface OnDaySelectedListener {
+        public void onDaySelected(DayPickerView view, Calendar day);
+    }
+
+    private final SimpleMonthAdapter.OnDaySelectedListener
+            mProxyOnDaySelectedListener = new SimpleMonthAdapter.OnDaySelectedListener() {
+        @Override
+        public void onDaySelected(SimpleMonthAdapter adapter, Calendar day) {
+            if (mOnDaySelectedListener != null) {
+                mOnDaySelectedListener.onDaySelected(DayPickerView.this, day);
+            }
+        }
+    };
 }

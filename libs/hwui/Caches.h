@@ -340,7 +340,6 @@ public:
     TessellationCache tessellationCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
-    ResourceCache resourceCache;
 
     GammaFontRenderer* fontRenderer;
 
@@ -348,8 +347,6 @@ public:
 
     Dither dither;
     Stencil stencil;
-
-    AssetAtlas assetAtlas;
 
     bool gpuPixelBuffersEnabled;
 

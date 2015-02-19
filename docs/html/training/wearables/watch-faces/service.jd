@@ -1,0 +1,258 @@
+page.title=Building a Watch Face Service
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#CreateProject">Create and Configure Your Project</a></li>
+  <li><a href="#CallbackMethods">Implement the Service Callback Methods</a></li>
+  <li><a href="#RegisterService">Register the Service Implementation</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>Watch faces in Android Wear are implemented as <a
+href="{@docRoot}guide/components/services.html">services</a> and packaged inside a <a
+href="{@docRoot}training/wearables/apps/index.html">wearable app</a>. When users install a
+handheld app that contains a wearable app with watch faces, these watch faces become available
+in the <a
+href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear companion app</a> on the handheld device and in the watch face picker on the wearable. When
+users select one of the available watch faces, the wearable device shows the watch face and
+invokes its service callback methods as required.</p>
+
+<p>This lesson shows you how to configure an Android project to include watch faces and how
+to implement the watch face service.</p>
+
+
+
+<h2 id="CreateProject">Create and Configure Your Project</h2>
+
+<p>To create an Android project for your watch face in Android Studio:</p>
+
+<ol>
+<li>Start Android Studio.</li>
+<li>Create a new project:
+  <ul>
+  <li>If you don't have a project opened, in the <strong>Welcome</strong> screen, click
+      <strong>New Project</strong>.</li>
+  <li>If you have a project opened, from the <strong>File</strong> menu, select <strong>New
+      Project</strong>.</li>
+  </ul>
+</li>
+<li>Provide an application name and click <strong>Next</strong>.</li>
+<li>Select the <strong>Phone and Tablet</strong> form factor.</li>
+<li>Under <strong>Minimum SDK</strong>, choose API 18.</li>
+<li>Select the <strong>Wear</strong> form factor.</li>
+<li>Under <strong>Minimum SDK</strong>, choose API 21 and click <strong>Next</strong>.</li>
+<li>Select <strong>Add No Activity</strong> and click <strong>Next</strong> in the two following
+    screens.</li>
+<li>Click <strong>Finish</strong>.</li>
+<li>Click <strong>View</strong> > <strong>Tool Windows</strong> > <strong>Project</strong> in the
+    IDE window.</li>
+</ol>
+
+<p>Android Studio creates a project with the <code>wear</code> and <code>mobile</code> modules.
+For more information, see <a href="{@docRoot}sdk/installing/create-project.html">Creating a
+Project</a>.</p>
+
+<h3 id="Dependencies">Dependencies</h3>
+
+<p>The Wearable Support Library provides the necessary classes that you extend to create watch
+face implementations. The Google Play services client libraries (<code>play-services</code> and
+<code>play-services-wearable</code>) are required to sync data items between the companion device
+and the wearable with the <a href="{@docRoot}training/wearables/data-layer/index.html">Wearable
+Data Layer API</a>.</p>
+
+<p>Android Studio automatically adds the required entries in your <code>build.gradle</code>
+files when you create the project in the instructions above.</p>
+
+<h3 id="Reference">Wearable Support Library API Reference</h3>
+
+<p>The reference documentation provides detailed information about the classes you use to
+implement watch faces. Browse the
+<a href="{@docRoot}reference/android/support/wearable/watchface/package-summary.html">API reference
+documentation</a> for the Wearable Support Library.</p>
+
+<h3 id="LibEclipse">Download the Wearable Support Library for Eclipse ADT</h3>
+
+<p>If you are using the ADT plugin for Eclipse, download the
+<a href="{@docRoot}shareables/training/wearable-support-lib.zip">Wearable Support Library</a> and
+include it as a dependency in your project.</p>
+
+<h3 id="Permissions">Declare Permissions</h3>
+
+<p>Watch faces require the <code>PROVIDE_BACKGROUND</code> and <code>WAKE_LOCK</code> permissions.
+Add the following permissions to the manifest files of both the wearable app and the mobile
+app under the <code>manifest</code> element:</p>
+
+<pre>
+&lt;manifest ...>
+    &lt;uses-permission
+        android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
+    &lt;uses-permission
+        android:name="android.permission.WAKE_LOCK" />
+    ...
+&lt;/manifest>
+</pre>
+
+<p class="caution"><strong>Caution:</strong> The handheld app must include all the permissions
+declared in the wearable app.</p>
+
+
+
+<h2 id="CallbackMethods">Implement the Service and Callback Methods</h2>
+
+<p>Watch faces in Android Wear are implemented as
+<a href="{@docRoot}guide/components/services.html">services</a>.
+When a watch face is active, the system invokes the methods in its service when the time changes
+or when an important event occurs (like switching to ambient mode or receiving a new
+notification). The service implementation then draws the watch face on the screen using the
+updated time and any other relevant data.</p>
+
+<p>To implement a watch face, you extend the <code>CanvasWatchFaceService</code>
+and <code>CanvasWatchFaceService.Engine</code> classes, and then you override the callback methods
+in the <code>CanvasWatchFaceService.Engine</code> class. These classes are included in the
+Wearable Support Library.</p>
+
+<p>The following snippet outlines the key methods you need to implement:</p>
+
+<pre>
+public class AnalogWatchFaceService extends CanvasWatchFaceService {
+
+    &#64;Override
+    public Engine onCreateEngine() {
+        /* provide your watch face implementation */
+        return new Engine();
+    }
+
+    /* implement service callback methods */
+    private class Engine extends CanvasWatchFaceService.Engine {
+
+        &#64;Override
+        public void onCreate(SurfaceHolder holder) {
+            super.onCreate(holder);
+            /* initialize your watch face */
+        }
+
+        &#64;Override
+        public void onPropertiesChanged(Bundle properties) {
+            super.onPropertiesChanged(properties);
+            /* get device features (burn-in, low-bit ambient) */
+        }
+
+        &#64;Override
+        public void onTimeTick() {
+            super.onTimeTick();
+            /* the time changed */
+        }
+
+        &#64;Override
+        public void onAmbientModeChanged(boolean inAmbientMode) {
+            super.onAmbientModeChanged(inAmbientMode);
+            /* the wearable switched between modes */
+        }
+
+        &#64;Override
+        public void onDraw(Canvas canvas, Rect bounds) {
+            /* draw your watch face */
+        }
+
+        &#64;Override
+        public void onVisibilityChanged(boolean visible) {
+            super.onVisibilityChanged(visible);
+            /* the watch face became visible or invisible */
+        }
+    }
+}
+</pre>
+
+<p class="note"><strong>Note:</strong> The <em>WatchFace</em> sample in the Android SDK
+demonstrates how to implement analog and digital watch faces extending the
+<code>CanvasWatchFaceService</code> class. This sample is located in the
+<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory.</p>
+
+<p>The <code>CanvasWatchFaceService</code> class provides an invalidate mechanism similar to
+the {@link android.view.View#invalidate View.invalidate()} method. You can call the
+<code>invalidate()</code> method throughout your implementation when you want the system to
+redraw the watch face. You can only use the <code>invalidate()</code> method in the main UI
+thread. To invalidate the canvas from another thread, call the <code>postInvalidate()</code>
+method.</p>
+
+<p>For more information about implementing the methods in the
+<code>CanvasWatchFaceService.Engine</code> class, see <a
+href="{@docRoot}training/wearables/watch-faces/drawing.html">Drawing Watch Faces</a>.</p>
+
+
+
+<h2 id="RegisterService">Register the Watch Face Service</h2>
+
+<p>After you implement the watch face service, you register the implementation in the manifest
+file of the wearable app. When users install this app, the system uses the information about
+the service to make the watch face available in the <a
+href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear companion app</a> and in the watch face picker on the wearable device.</p>
+
+</p>The following snippet shows how to register a watch face implementation
+under the <a href="{@docRoot}guide/topics/manifest/application-element.html">
+<code>application</code></a> element:</p>
+
+<pre>
+&lt;service
+    android:name=".AnalogWatchFaceService"
+    android:label="&#64;string/analog_name"
+    android:allowEmbedded="true"
+    android:taskAffinity=""
+    android:permission="android.permission.BIND_WALLPAPER" >
+    &lt;meta-data
+        android:name="android.service.wallpaper"
+        android:resource="&#64;xml/watch_face" />
+    &lt;meta-data
+        android:name="com.google.android.wearable.watchface.preview"
+        android:resource="&#64;drawable/preview_analog" />
+    &lt;meta-data
+        android:name="com.google.android.wearable.watchface.preview_circular"
+        android:resource="&#64;drawable/preview_analog_circular" />
+    &lt;intent-filter>
+        &lt;action android:name="android.service.wallpaper.WallpaperService" />
+        &lt;category
+            android:name=
+            "com.google.android.wearable.watchface.category.WATCH_FACE" />
+    &lt;/intent-filter>
+&lt;/service>
+</pre>
+
+<p>The <a
+href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear companion app</a> and the watch face picker on the wearable device use the preview image
+defined by the <code>com.google.android.wearable.watchface.preview</code> metadata entry when
+presenting users with all the watch faces installed on the device. To obtain this drawable,
+run the watch face on your Android Wear device or in an emulator instance and <a
+href="{@docRoot}sdk/installing/studio-debug.html#screenCap">take a screenshot</a>. On Android Wear
+devices with hdpi screens, the preview image is typically 320x320 pixels in size.</p>
+
+<p>Watch faces that look substantially different on round devices can provide both round and
+square preview images. To specify a round preview image, use the
+<code>com.google.android.wearable.watchface.preview_circular</code> metadata entry. If a watch
+face includes both preview images, the companion app and the watch face picker on the wearable
+show the appropriate one, depending on the shape of the watch. If a round preview image is not
+included, the square preview image is used for both square and round devices. For round devices,
+a square preview image is cropped using a circular shape.</p>
+
+<p>The <code>android.service.wallpaper</code> metadata entry specifies the
+<code>watch_face.xml</code> resource file, which contains a <code>wallpaper</code>
+element:</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;wallpaper xmlns:android="http://schemas.android.com/apk/res/android" />
+</pre>
+
+<p>Your wearable app can contain more than one watch face. You must add a service entry to the
+manifest file of the wearable app for each of your watch face implementations.</p>

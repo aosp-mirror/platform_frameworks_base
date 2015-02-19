@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="root"
+    android:alpha="1.0"
+    android:height="48dp"
+    android:width="48dp"
+    android:viewportHeight="48"
+    android:viewportWidth="48" >
+    <group
+        android:name="ic_signal_airplane"
+        android:translateX="21.9995"
+        android:translateY="25.73401" >
+        <group
+            android:name="ic_signal_airplane_pivot"
+            android:translateX="-23.21545"
+            android:translateY="-18.86649" >
+            <clip-path
+                android:name="mask"
+                android:pathData="M 37.8337860107,-40.4599914551 c 0.0,0.0 -35.8077850342,31.5523681641 -35.8077850342,31.5523681641 c 0.0,0.0 9.55097961426,9.55285644531 9.55097961426,9.55285644531 c 0.0,0.0 -2.61698913574,2.09387207031 -2.61698913574,2.09387207031 c 0.0,0.0 -9.75096130371,-9.56428527832 -9.75096130371,-9.56428527832 c 0.0,0.0 -34.6200408936,25.4699249268 -34.6200408936,25.4699249268 c 0.0,0.0 55.9664764404,69.742401123 55.9664764404,69.742401123 c 0.0,0.0 73.2448120117,-59.1047973633 73.2448120117,-59.1047973633 c 0.0,0.0 -55.9664916992,-69.7423400879 -55.9664916992,-69.7423400879 Z" />
+            <group
+                android:name="cross" >
+                <path
+                    android:name="cross_1"
+                    android:pathData="M 7.54049682617,3.9430847168 c 0.0,0.0 0.324981689453,0.399978637695 0.324981689453,0.399978637695 "
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="0"
+                    android:strokeWidth="3.5"
+                    android:fillColor="#00000000" />
+            </group>
+            <group
+                android:name="plane"
+                android:translateX="23.481"
+                android:translateY="18.71151" >
+                <path
+                    android:name="plane_1"
+                    android:pathData="M 18.9439849854,7.98849487305 c 0.0,0.0 0.0,-4.0 0.0,-4.0 c 0.0,0.0 -16.0,-10.0 -16.0,-10.0 c 0.0,0.0 0.0,-11.0 0.0,-11.0 c 0.0,-1.70001220703 -1.30000305176,-3.0 -3.0,-3.0 c -1.69999694824,0.0 -3.0,1.29998779297 -3.0,3.0 c 0.0,0.0 0.0,11.0 0.0,11.0 c 0.0,0.0 -16.0,10.0 -16.0,10.0 c 0.0,0.0 0.0,4.0 0.0,4.0 c 0.0,0.0 16.0,-5.0 16.0,-5.0 c 0.0,0.0 0.0,11.0 0.0,11.0 c 0.0,0.0 -4.0,3.0 -4.0,3.0 c 0.0,0.0 0.0,3.0 0.0,3.0 c 0.0,0.0 7.0,-2.0 7.0,-2.0 c 0.0,0.0 7.0,2.0 7.0,2.0 c 0.0,0.0 0.0,-3.0 0.0,-3.0 c 0.0,0.0 -4.0,-3.0 -4.0,-3.0 c 0.0,0.0 0.0,-11.0 0.0,-11.0 c 0.0,0.0 16.0,5.0 16.0,5.0 Z"
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1" />
+            </group>
+        </group>
+    </group>
+</vector>

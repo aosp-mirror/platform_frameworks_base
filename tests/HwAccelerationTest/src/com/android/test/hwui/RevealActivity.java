@@ -17,12 +17,14 @@
 package com.android.test.hwui;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewAnimationUtils;
@@ -36,6 +38,29 @@ public class RevealActivity extends Activity implements OnClickListener {
 
     private boolean mShouldBlock;
     private int mIteration = 0;
+
+    private AnimatorListener mListener = new AnimatorListener() {
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            Log.d("Reveal", "onAnimatorStart " + animation);
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+            Log.d("Reveal", "onAnimationRepeat " + animation);
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            Log.d("Reveal", "onAnimationEnd " + animation);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            Log.d("Reveal", "onAnimationCancel " + animation);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +84,8 @@ public class RevealActivity extends Activity implements OnClickListener {
         Animator animator = ViewAnimationUtils.createCircularReveal(view,
                 view.getWidth() / 2, view.getHeight() / 2,
                 0, Math.max(view.getWidth(), view.getHeight()));
+        Log.d("Reveal", "Calling start...");
+        animator.addListener(mListener);
         if (mIteration < 2) {
             animator.setDuration(DURATION);
             animator.start();
@@ -66,6 +93,7 @@ public class RevealActivity extends Activity implements OnClickListener {
             AnimatorSet set = new AnimatorSet();
             set.playTogether(animator);
             set.setDuration(DURATION);
+            set.addListener(mListener);
             set.start();
         }
 

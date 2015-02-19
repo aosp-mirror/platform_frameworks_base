@@ -132,6 +132,12 @@ bool DrawFrameTask::syncFrameState(TreeInfo& info) {
     mLayers.clear();
     mContext->prepareTree(info);
 
+    // This is after the prepareTree so that any pending operations
+    // (RenderNode tree state, prefetched layers, etc...) will be flushed.
+    if (CC_UNLIKELY(!mContext->hasSurface())) {
+        mSyncResult |= kSync_LostSurfaceRewardIfFound;
+    }
+
     if (info.out.hasAnimations) {
         if (info.out.requiresUiRedraw) {
             mSyncResult |= kSync_UIRedrawRequired;

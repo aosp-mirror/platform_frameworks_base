@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
@@ -103,6 +104,13 @@ public interface WindowManagerPolicy {
      * plugged in to HDMI, false if not.
      */
     public final static String EXTRA_HDMI_PLUGGED_STATE = "state";
+
+    /**
+     * Set to {@code true} when intent was invoked from pressing the home key.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
 
     /**
      * Pass this event to the user / app.  To be returned from
@@ -865,12 +873,15 @@ public interface WindowManagerPolicy {
      * Return the insets for the areas covered by system windows. These values
      * are computed on the most recent layout, so they are not guaranteed to
      * be correct.
-     * 
+     *
      * @param attrs The LayoutParams of the window.
-     * @param contentInset The areas covered by system windows, expressed as positive insets
-     * 
+     * @param outContentInsets The areas covered by system windows, expressed as positive insets.
+     * @param outStableInsets The areas covered by stable system windows irrespective of their
+     *                        current visibility. Expressed as positive insets.
+     *
      */
-    public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset);
+    public void getInsetHintLw(WindowManager.LayoutParams attrs, Rect outContentInsets,
+            Rect outStableInsets);
 
     /**
      * Called when layout of the windows is finished.  After this function has

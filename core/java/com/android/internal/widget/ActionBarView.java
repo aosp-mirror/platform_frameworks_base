@@ -19,8 +19,6 @@ package com.android.internal.widget;
 import android.animation.LayoutTransition;
 import android.app.ActionBar;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -29,9 +27,7 @@ import android.os.Parcelable;
 import android.text.Layout;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.CollapsibleActionView;
-import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -111,10 +107,10 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
     private int mProgressBarPadding;
     private int mItemPadding;
 
-    private int mTitleStyleRes;
-    private int mSubtitleStyleRes;
-    private int mProgressStyle;
-    private int mIndeterminateProgressStyle;
+    private final int mTitleStyleRes;
+    private final int mSubtitleStyleRes;
+    private final int mProgressStyle;
+    private final int mIndeterminateProgressStyle;
 
     private boolean mUserTitle;
     private boolean mIncludeTabs;
@@ -1343,6 +1339,22 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         }
         mDefaultUpDescription = defaultNavigationContentDescription;
         updateHomeAccessibility(mUpGoerFive.isEnabled());
+    }
+
+    @Override
+    public void setMenuCallbacks(MenuPresenter.Callback presenterCallback,
+            MenuBuilder.Callback menuBuilderCallback) {
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.setCallback(presenterCallback);
+        }
+        if (mOptionsMenu != null) {
+            mOptionsMenu.setCallback(menuBuilderCallback);
+        }
+    }
+
+    @Override
+    public Menu getMenu() {
+        return mOptionsMenu;
     }
 
     static class SavedState extends BaseSavedState {

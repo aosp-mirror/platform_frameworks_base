@@ -38,8 +38,4 @@ public class AssetManager_Delegate {
         Resources_Theme_Delegate.getDelegateManager().removeJavaReferenceFor(theme);
     }
 
-    @LayoutlibDelegate
-    /*package*/ static void applyThemeStyle(long theme, int styleRes, boolean force) {
-        Resources_Theme_Delegate.getDelegateManager().getDelegate(theme).force = force;
-    }
 }

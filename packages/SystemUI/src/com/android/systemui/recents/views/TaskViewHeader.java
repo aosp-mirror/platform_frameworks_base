@@ -36,7 +36,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -56,25 +55,28 @@ public class TaskViewHeader extends FrameLayout {
 
     RecentsConfiguration mConfig;
 
+    // Header views
     ImageView mDismissButton;
     ImageView mApplicationIcon;
     TextView mActivityDescription;
 
-    RippleDrawable mBackground;
-    GradientDrawable mBackgroundColorDrawable;
+    // Header drawables
+    boolean mCurrentPrimaryColorIsDark;
+    int mCurrentPrimaryColor;
     int mBackgroundColor;
     Drawable mLightDismissDrawable;
     Drawable mDarkDismissDrawable;
+    RippleDrawable mBackground;
+    GradientDrawable mBackgroundColorDrawable;
     AnimatorSet mFocusAnimator;
-    ValueAnimator backgroundColorAnimator;
-    PorterDuffColorFilter mDimFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
+    String mDismissContentDescription;
 
-    boolean mIsFullscreen;
-    boolean mCurrentPrimaryColorIsDark;
-    int mCurrentPrimaryColor;
-
+    // Static highlight that we draw at the top of each view
     static Paint sHighlightPaint;
-    private Paint mDimPaint = new Paint();
+
+    // Header dim, which is only used when task view hardware layers are not used
+    Paint mDimLayerPaint = new Paint();
+    PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
 
     public TaskViewHeader(Context context) {
         this(context, null);
@@ -104,6 +106,8 @@ public class TaskViewHeader extends FrameLayout {
         Resources res = context.getResources();
         mLightDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_light);
         mDarkDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_dark);
+        mDismissContentDescription =
+                res.getString(R.string.accessibility_recents_item_will_be_dismissed);
 
         // Configure the highlight paint
         if (sHighlightPaint == null) {
@@ -126,14 +130,6 @@ public class TaskViewHeader extends FrameLayout {
 
     @Override
     protected void onFinishInflate() {
-        // Set the outline provider
-        setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-            }
-        });
-
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
@@ -159,26 +155,29 @@ public class TaskViewHeader extends FrameLayout {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (!mIsFullscreen) {
-            // Draw the highlight at the top edge (but put the bottom edge just out of view)
-            float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
-            float radius = mConfig.taskViewRoundedCornerRadiusPx;
-            int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
-            canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-            canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
-                    getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
-            canvas.restoreToCount(count);
-        }
-    }
-
-    /** Sets whether the current task is full screen or not. */
-    void setIsFullscreen(boolean isFullscreen) {
-        mIsFullscreen = isFullscreen;
+        // Draw the highlight at the top edge (but put the bottom edge just out of view)
+        float offset = (float) Math.ceil(mConfig.taskViewHighlightPx / 2f);
+        float radius = mConfig.taskViewRoundedCornerRadiusPx;
+        int count = canvas.save(Canvas.CLIP_SAVE_FLAG);
+        canvas.clipRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
+        canvas.drawRoundRect(-offset, 0f, (float) getMeasuredWidth() + offset,
+                getMeasuredHeight() + radius, radius, radius, sHighlightPaint);
+        canvas.restoreToCount(count);
     }
 
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    /**
+     * Sets the dim alpha, only used when we are not using hardware layers.
+     * (see RecentsConfiguration.useHardwareLayers)
+     */
+    void setDimAlpha(int alpha) {
+        mDimColorFilter.setColor(Color.argb(alpha, 0, 0, 0));
+        mDimLayerPaint.setColorFilter(mDimColorFilter);
+        setLayerType(LAYER_TYPE_HARDWARE, mDimLayerPaint);
     }
 
     /** Returns the secondary color for a primary color. */
@@ -213,9 +212,8 @@ public class TaskViewHeader extends FrameLayout {
                 mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
-        mDismissButton.setContentDescription(
-                getContext().getString(R.string.accessibility_recents_item_will_be_dismissed,
-                        t.activityLabel));
+        mDismissButton.setContentDescription(String.format(mDismissContentDescription,
+                t.activityLabel));
     }
 
     /** Unbinds the bar view from the task */
@@ -231,7 +229,7 @@ public class TaskViewHeader extends FrameLayout {
                     .alpha(0f)
                     .setStartDelay(0)
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setDuration(mConfig.taskViewExitToAppDuration)
                     .withLayer()
                     .start();
         }
@@ -239,15 +237,17 @@ public class TaskViewHeader extends FrameLayout {
 
     /** Animates this task bar if the user does not interact with the stack after a certain time. */
     void startNoUserInteractionAnimation() {
-        mDismissButton.setVisibility(View.VISIBLE);
-        mDismissButton.setAlpha(0f);
-        mDismissButton.animate()
-                .alpha(1f)
-                .setStartDelay(0)
-                .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                .setDuration(mConfig.taskBarEnterAnimDuration)
-                .withLayer()
-                .start();
+        if (mDismissButton.getVisibility() != View.VISIBLE) {
+            mDismissButton.setVisibility(View.VISIBLE);
+            mDismissButton.setAlpha(0f);
+            mDismissButton.animate()
+                    .alpha(1f)
+                    .setStartDelay(0)
+                    .setInterpolator(mConfig.fastOutLinearInInterpolator)
+                    .setDuration(mConfig.taskViewEnterFromAppDuration)
+                    .withLayer()
+                    .start();
+        }
     }
 
     /** Mark this task view that the user does has not interacted with the stack after a certain time. */
@@ -259,6 +259,11 @@ public class TaskViewHeader extends FrameLayout {
         }
     }
 
+    /** Resets the state tracking that the user has not interacted with the stack after a certain time. */
+    void resetNoUserInteractionState() {
+        mDismissButton.setVisibility(View.INVISIBLE);
+    }
+
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
 
@@ -268,13 +273,16 @@ public class TaskViewHeader extends FrameLayout {
     }
 
     /** Notifies the associated TaskView has been focused. */
-    void onTaskViewFocusChanged(boolean focused) {
+    void onTaskViewFocusChanged(boolean focused, boolean animateFocusedState) {
+        // If we are not animating the visible state, just return
+        if (!animateFocusedState) return;
+
         boolean isRunning = false;
         if (mFocusAnimator != null) {
             isRunning = mFocusAnimator.isRunning();
-            mFocusAnimator.removeAllListeners();
-            mFocusAnimator.cancel();
+            Utilities.cancelAnimationWithoutCallbacks(mFocusAnimator);
         }
+
         if (focused) {
             int secondaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             int[][] states = new int[][] {
@@ -295,7 +303,7 @@ public class TaskViewHeader extends FrameLayout {
             int currentColor = mBackgroundColor;
             int lightPrimaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
-                    lightPrimaryColor, currentColor);
+                    currentColor, lightPrimaryColor);
             backgroundColor.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -348,12 +356,5 @@ public class TaskViewHeader extends FrameLayout {
                 setTranslationZ(0f);
             }
         }
-    }
-
-    public void setDimAlpha(int alpha) {
-        int color = Color.argb(alpha, 0, 0, 0);
-        mDimFilter.setColor(color);
-        mDimPaint.setColorFilter(mDimFilter);
-        setLayerType(LAYER_TYPE_HARDWARE, mDimPaint);
     }
 }

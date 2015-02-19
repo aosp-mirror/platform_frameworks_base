@@ -248,7 +248,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         mDaemonHandler = new Handler(FgThread.get().getLooper());
 
-        mPhoneStateListener = new PhoneStateListener(SubscriptionManager.DEFAULT_SUB_ID,
+        mPhoneStateListener = new PhoneStateListener(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
                 mDaemonHandler.getLooper()) {
             @Override
             public void onDataConnectionRealTimeInfoChanged(
@@ -968,6 +968,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
             mConnector.execute("interface", "ipv6", iface, "disable");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void setInterfaceIpv6NdOffload(String iface, boolean enable) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            mConnector.execute(
+                    "interface", "ipv6ndoffload", iface, (enable ? "enable" : "disable"));
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1776,14 +1787,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setDnsServersForNetwork(int netId, String[] servers, String domains) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("resolver", "setnetdns", netId,
-                (domains == null ? "" : domains));
-
-        for (String s : servers) {
-            InetAddress a = NetworkUtils.numericToInetAddress(s);
-            if (a.isAnyLocalAddress() == false) {
-                cmd.appendArg(a.getHostAddress());
+        Command cmd;
+        if (servers.length > 0) {
+            cmd = new Command("resolver", "setnetdns", netId,
+                    (domains == null ? "" : domains));
+            for (String s : servers) {
+                InetAddress a = NetworkUtils.numericToInetAddress(s);
+                if (a.isAnyLocalAddress() == false) {
+                    cmd.appendArg(a.getHostAddress());
+                }
             }
+        } else {
+            cmd = new Command("resolver", "clearnetdns", netId);
         }
 
         try {
@@ -1931,23 +1946,23 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void stopClatd() throws IllegalStateException {
+    public void stopClatd(String interfaceName) throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("clatd", "stop");
+            mConnector.execute("clatd", "stop", interfaceName);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
     }
 
     @Override
-    public boolean isClatdStarted() {
+    public boolean isClatdStarted(String interfaceName) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("clatd", "status");
+            event = mConnector.execute("clatd", "status", interfaceName);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }

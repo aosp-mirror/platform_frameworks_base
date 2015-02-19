@@ -1,0 +1,375 @@
+page.title=﻿Detecting Location on Android Wear
+page.tags="gps"
+
+page.article=true
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>In this document</h2>
+<ol class="nolist">
+  <li><a href="#Connect">Connect to Google Play Services</a></li>
+  <li><a href="#Request">Request Location Updates</a></li>
+  <li><a href="#DetectGPS">Detect On-Board GPS</a></li>
+  <li><a href="#Disconnection">Handle Disconnection Events</a></li>
+  <li><a href="#Notify">Handle Location Not Found</a></li>
+  <li><a href="#Synchronize">Synchronize Data</a></li>
+</ol>
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 4.3 (API Level 18) or higher on the handset device</li>
+  <li><a href="{@docRoot}google/play-services/index.html">Google Play services</a> 6.1 or higher</li>
+  <li>An Android Wear device</li>
+</ul>
+<h2>See also</h2>
+<ul>
+  <li><a href="{@docRoot}training/location/index.html">Making Your App Location-Aware
+  </a></li>
+</ul>
+</div></div>
+
+<p>Location awareness on wearable devices enables you to create apps that give users a better
+understanding of their geographic position, movement and what's around them. With the small form
+factor and glanceable nature of a wearable device, you can build low-friction apps that record and
+respond to location data.</p>
+
+<p>Some wearable devices include a GPS sensor that can retrieve location data without another
+tethered device. However, when you request location data in a wearable app, you don't have to worry
+about where the location data originates; the system retrieves the location updates using the most
+power-efficient method. Your app should be able to handle loss of location data, in case the wear
+device loses connection with its paired device and does not have a built-in GPS sensor.</p>
+
+<p>This document shows you how to check for on-device location sensors, receive location data, and
+monitor tethered data connections.</p>
+
+<p class="note"><b>Note:</b> The article assumes that you know how to use the Google Play services
+API to retrieve location data. For more information, see <a href="{@docRoot}training/
+location/index.html">Making Your App Location-Aware</a>.</p>
+
+<h2 id="Connect">Connect to Google Play Services</h2>
+
+<p>Location data on wearable devices is obtained though the Google Play services location APIs. You
+use the <a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html">
+<code>FusedLocationProviderApi</code></a> and its accompanying classes to obtain this data.
+To access location services, create an instance of
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">
+<code>GoogleApiClient</code></a>, which is
+the main entry point for any of the Google Play services APIs.
+</p>
+
+<p class="caution"><b>Caution:</b> Do not use the existing <a href="{@docRoot}reference/android/location/package-summary.html">Location</a>
+APIs in the Android framework. The best practice for retrieving location updates is through the
+Google Play services API as outlined in this article.</p>
+
+<p>To connect to Google Play services, configure your app to create an instance of
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">
+<code>GoogleApiClient</code></a>:</p>
+
+<ol>
+  <li>Create an activity that specifies an implementation for the interfaces <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html"
+>{@code ConnectionCallbacks}</a>, <a href="{@docRoot}reference/com/google/android/gms/common/api/
+GoogleApiClient.OnConnectionFailedListener.html">{@code OnConnectionFailedListener}</a>, and <a
+href="{@docRoot}reference/com/google/android/gms/location/LocationListener.html">{@code
+LocationListener}</a>.</li>
+  <li>In your activity's {@link android.app.Activity#onCreate onCreate()} method, create an instance
+of <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html"><code>
+GoogleApiClient</code></a> and add the Location service.
+  </li>
+  <li>To gracefully manage the lifecycle of the connection, call  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">
+  {@code connect()}</a> in the {@link android.app.Activity#onResume onResume()} method and
+  <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">
+  {@code disconnect()}</a> in the {@link android.app.Activity#onPause onPause()} method.
+  </li>
+</ol>
+
+<p>The following code example shows an implementation of an activity that implements the
+<a href="{@docRoot}reference/com/google/android/gms/location/LocationListener.html">
+{@code LocationListener}</a> interface:</p>
+
+<pre>
+public class WearableMainActivity extends Activity implements
+    GoogleApiClient.ConnectionCallbacks,
+    GoogleApiClient.OnConnectionFailedListener,
+    LocationListener {
+
+    private GoogleApiClient mGoogleApiClient;
+    ...
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ...
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addApi(Wearable.API)  // used for data layer API
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+    }
+
+    &#64;Override
+    protected void onResume() {
+        super.onResume();
+        mGoogleApiClient.connect();
+        ...
+    }
+
+    &#64;Override
+    protected void onPause() {
+        super.onPause();
+        ...
+        mGoogleApiClient.disconnect();
+    }
+}
+</pre>
+
+<p>For more information on connecting to Google Play services, see <a href="{@docRoot}google/auth
+/api-client.html">Accessing Google APIs</a>.</p>
+
+<h2 id="Request">Request Location Updates</h2>
+
+<p>After your app has connected to the Google Play services API, it is ready to start receiving
+location updates. When the system invokes the
+<a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">
+<code>onConnected()</code></a> callback for your client, you build the location data request as
+follows:</p>
+
+<ol>
+  <li>Create a <a
+href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html"
+>{@code LocationRequest}</a> object and set any options using methods like <a
+href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setPriority(int)"
+>{@code setPriority()}</a>.
+  </li>
+  <li>Request location updates using <a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">
+  <code>requestLocationUpdates()</code></a>.
+  </li>
+  <li>Remove location updates using <a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html#removeLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationListener)">
+  <code>removeLocationUpdates()</code></a> in the {@link android.app.Activity#onPause
+  onPause()} method.
+  </li>
+</ol>
+
+<p>The following example shows how to retrieve and remove location updates:</p>
+
+<pre>
+&#64;Override
+public void onConnected(Bundle bundle) {
+    LocationRequest locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(UPDATE_INTERVAL_MS)
+            .setFastestInterval(FASTEST_INTERVAL_MS);
+
+    LocationServices.FusedLocationApi
+            .requestLocationUpdates(mGoogleApiClient, locationRequest, this)
+            .setResultCallback(new ResultCallback<Status>() {
+
+                &#64;Override
+                public void onResult(Status status) {
+                    if (status.getStatus().isSuccess()) {
+                        if (Log.isLoggable(TAG, Log.DEBUG)) {
+                            Log.d(TAG, "Successfully requested location updates");
+                        }
+                    } else {
+                        Log.e(TAG,
+                                "Failed in requesting location updates, "
+                                        + "status code: "
+                                        + status.getStatusCode()
+                                        + ", message: "
+                                        + status.getStatusMessage());
+                    }
+                }
+            });
+}
+
+&#64;Override
+protected void onPause() {
+    super.onPause();
+    if (mGoogleApiClient.isConnected()) {
+        LocationServices.FusedLocationApi
+             .removeLocationUpdates(mGoogleApiClient, this);
+    }
+    mGoogleApiClient.disconnect();
+}
+
+&#64;Override
+public void onConnectionSuspended(int i) {
+    if (Log.isLoggable(TAG, Log.DEBUG)) {
+        Log.d(TAG, "connection to location client suspended");
+    }
+}
+
+</pre>
+
+<p>Now that you have enabled location updates, the system calls the {@link android.location.LocationListener#onLocationChanged
+onLocationChanged()} method with the updated location at the interval specified in <a
+href="{@docRoot}reference/com/google/android/gms/location/LocationRequest.html#setInterval(long)">
+{@code setInterval()}</a>
+</p>
+
+<h2 id="DetectGPS">Detect On-Board GPS</h2>
+
+<p>Not all wearables have a GPS sensor. If your user goes out for a run and leaves their phone at
+home, your wearable app cannot receive location data through a tethered connection. If the
+wearable device does not have a sensor, you should detect this situation and warn the user that
+location functionality is not available.
+
+<p>To determine whether your Android Wear device has a built-in GPS sensor, use the
+{@link android.content.pm.PackageManager#hasSystemFeature hasSystemFeature()}
+method. The following code detects whether the device has built-in GPS when you start an activity:
+</p>
+
+<pre>
+
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.main_activity);
+    if (!hasGps()) {
+        Log.d(TAG, "This hardware doesn't have GPS.");
+        // Fall back to functionality that does not use location or
+        // warn the user that location function is not available.
+    }
+
+    ...
+}
+
+private boolean hasGps() {
+    return getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
+}
+</pre>
+
+<h2 id="Disconnection">Handle Disconnection Events</h2>
+
+<p>Wearable devices relying on a tethered connection for location data may lose their connections
+abruptly. If your wearable app expects a constant stream of data, you must handle the
+disconnection based upon where that data is interrupted or unavailable. On a wearable device with no
+onboard GPS sensor, loss of location data occurs when the device loses its tethered data connection.
+</p>
+
+<p>In cases where your app depends on a tethered data connection for location data and the wear
+device does not have a GPS sensor, you should detect the loss of that connection, warn the user, and
+gracefully degrade the functionality of your app.</p>
+
+<p>To detect the loss of a tethered data connection:</p>
+
+<ol>
+  <li>Extend a <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html">
+  <code>WearableListenerService</code></a> that lets you listen for important data layer events.
+  </li>
+  <li>Declare an intent filter in your Android manifest to notify the system about your
+  <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html"><code>
+  WearableListenerService</code></a>.
+  This filter allows the system to bind your service as needed.
+<pre>
+&lt;service android:name=".NodeListenerService"&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name="com.google.android.gms.wearable.BIND_LISTENER" /&gt;
+    &lt;/intent-filter&gt;
+&lt;/service>
+</pre>
+  </li>
+  <li>Implement the <a href="{@docRoot}reference/com/google/android/gms/wearable/WearableListenerService.html#onPeerDisconnected(com.google.android.gms.wearable.Node)">
+  <code>onPeerDisconnected()</code></a> method and handle cases of whether or not the device has
+  built-in
+  GPS.
+<pre>
+public class NodeListenerService extends WearableListenerService {
+
+    private static final String TAG = "NodeListenerService";
+
+    &#64;Override
+    public void onPeerDisconnected(Node peer) {
+        Log.d(TAG, "You have been disconnected.");
+        if(!hasGPS()) {
+            // Notify user to bring tethered handset
+            // Fall back to functionality that does not use location
+        }
+    }
+    ...
+}
+</pre>
+  </li>
+</ol>
+
+For more information, read the <a href="{@docRoot}training/wearables/data-layer/events.html#Listen">
+Listen for Data Layer Events</a> guide.
+
+<h2 id="Notify">Handle Location Not Found</h2>
+
+<p>When the GPS signal is lost, you can still retrieve the last known location using
+<a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html#getLastLocation(com.google.android.gms.common.api.GoogleApiClient)">
+<code>getLastLocation()</code></a>. This method can be helpful in situations where you are unable to
+get a GPS fix, or when your wearable doesn't have built-in GPS and loses its connection with the
+phone.</p>
+
+<p>The following code uses <a href="{@docRoot}reference/com/google/android/gms/location/FusedLocationProviderApi.html#getLastLocation(com.google.android.gms.common.api.GoogleApiClient)">
+<code>getLastLocation()</code></a> to retrieve the last known location if available:
+</p>
+
+<pre>
+Location location = LocationServices.FusedLocationApi
+                .getLastLocation(mGoogleApiClient);
+</pre>
+
+<h2 id="Synchronize">Synchronize Data</h2>
+
+<p>If your wearable app records data using the built-in GPS, you may want to synchronize
+the location data with the handset. With the {@link android.location.LocationListener}, you
+implement the {@link android.location.LocationListener#onLocationChanged onLocationChanged()}
+method to detect and record the location as it changes.
+
+<p>The following code for wearable apps detects when the location changes and uses the data layer
+API to store the data for later retrieval by your phone app:</p>
+
+<pre>
+&#64;Override
+public void onLocationChanged(Location location) {
+    ...
+    addLocationEntry(location.getLatitude(), location.getLongitude());
+
+}
+
+private void addLocationEntry(double latitude, double longitude) {
+    if (!mSaveGpsLocation || !mGoogleApiClient.isConnected()) {
+        return;
+    }
+
+    mCalendar.setTimeInMillis(System.currentTimeMillis());
+
+    // Set the path of the data map
+    String path = Constants.PATH + "/" + mCalendar.getTimeInMillis();
+    PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(path);
+
+    // Set the location values in the data map
+    putDataMapRequest.getDataMap()
+            .putDouble(Constants.KEY_LATITUDE, latitude);
+    putDataMapRequest.getDataMap()
+            .putDouble(Constants.KEY_LONGITUDE, longitude);
+    putDataMapRequest.getDataMap()
+            .putLong(Constants.KEY_TIME, mCalendar.getTimeInMillis());
+
+    // Prepare the data map for the request
+    PutDataRequest request = putDataMapRequest.asPutDataRequest();
+
+    // Request the system to create the data item
+    Wearable.DataApi.putDataItem(mGoogleApiClient, request)
+            .setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
+                &#64;Override
+                public void onResult(DataApi.DataItemResult dataItemResult) {
+                    if (!dataItemResult.getStatus().isSuccess()) {
+                        Log.e(TAG, "Failed to set the data, "
+                                + "status: " + dataItemResult.getStatus()
+                                .getStatusCode());
+                    }
+                }
+            });
+}
+</pre>
+
+<p>For more information on how to use the Data Layer API, see the <a href="{@docRoot}training/
+wearables/data-layer/index.html">Sending and Syncing Data</a>
+guide.</p>

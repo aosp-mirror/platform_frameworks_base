@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
@@ -1112,7 +1113,11 @@ public class Notification implements Parcelable
             /** Notification action extra which contains wearable extensions */
             private static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
 
+            // Keys within EXTRA_WEARABLE_EXTENSIONS for wearable options.
             private static final String KEY_FLAGS = "flags";
+            private static final String KEY_IN_PROGRESS_LABEL = "inProgressLabel";
+            private static final String KEY_CONFIRM_LABEL = "confirmLabel";
+            private static final String KEY_CANCEL_LABEL = "cancelLabel";
 
             // Flags bitwise-ored to mFlags
             private static final int FLAG_AVAILABLE_OFFLINE = 0x1;
@@ -1121,6 +1126,10 @@ public class Notification implements Parcelable
             private static final int DEFAULT_FLAGS = FLAG_AVAILABLE_OFFLINE;
 
             private int mFlags = DEFAULT_FLAGS;
+
+            private CharSequence mInProgressLabel;
+            private CharSequence mConfirmLabel;
+            private CharSequence mCancelLabel;
 
             /**
              * Create a {@link android.app.Notification.Action.WearableExtender} with default
@@ -1138,6 +1147,9 @@ public class Notification implements Parcelable
                 Bundle wearableBundle = action.getExtras().getBundle(EXTRA_WEARABLE_EXTENSIONS);
                 if (wearableBundle != null) {
                     mFlags = wearableBundle.getInt(KEY_FLAGS, DEFAULT_FLAGS);
+                    mInProgressLabel = wearableBundle.getCharSequence(KEY_IN_PROGRESS_LABEL);
+                    mConfirmLabel = wearableBundle.getCharSequence(KEY_CONFIRM_LABEL);
+                    mCancelLabel = wearableBundle.getCharSequence(KEY_CANCEL_LABEL);
                 }
             }
 
@@ -1153,6 +1165,15 @@ public class Notification implements Parcelable
                 if (mFlags != DEFAULT_FLAGS) {
                     wearableBundle.putInt(KEY_FLAGS, mFlags);
                 }
+                if (mInProgressLabel != null) {
+                    wearableBundle.putCharSequence(KEY_IN_PROGRESS_LABEL, mInProgressLabel);
+                }
+                if (mConfirmLabel != null) {
+                    wearableBundle.putCharSequence(KEY_CONFIRM_LABEL, mConfirmLabel);
+                }
+                if (mCancelLabel != null) {
+                    wearableBundle.putCharSequence(KEY_CANCEL_LABEL, mCancelLabel);
+                }
 
                 builder.getExtras().putBundle(EXTRA_WEARABLE_EXTENSIONS, wearableBundle);
                 return builder;
@@ -1162,6 +1183,9 @@ public class Notification implements Parcelable
             public WearableExtender clone() {
                 WearableExtender that = new WearableExtender();
                 that.mFlags = this.mFlags;
+                that.mInProgressLabel = this.mInProgressLabel;
+                that.mConfirmLabel = this.mConfirmLabel;
+                that.mCancelLabel = this.mCancelLabel;
                 return that;
             }
 
@@ -1192,6 +1216,72 @@ public class Notification implements Parcelable
                 } else {
                     mFlags &= ~mask;
                 }
+            }
+
+            /**
+             * Set a label to display while the wearable is preparing to automatically execute the
+             * action. This is usually a 'ing' verb ending in ellipsis like "Sending..."
+             *
+             * @param label the label to display while the action is being prepared to execute
+             * @return this object for method chaining
+             */
+            public WearableExtender setInProgressLabel(CharSequence label) {
+                mInProgressLabel = label;
+                return this;
+            }
+
+            /**
+             * Get the label to display while the wearable is preparing to automatically execute
+             * the action. This is usually a 'ing' verb ending in ellipsis like "Sending..."
+             *
+             * @return the label to display while the action is being prepared to execute
+             */
+            public CharSequence getInProgressLabel() {
+                return mInProgressLabel;
+            }
+
+            /**
+             * Set a label to display to confirm that the action should be executed.
+             * This is usually an imperative verb like "Send".
+             *
+             * @param label the label to confirm the action should be executed
+             * @return this object for method chaining
+             */
+            public WearableExtender setConfirmLabel(CharSequence label) {
+                mConfirmLabel = label;
+                return this;
+            }
+
+            /**
+             * Get the label to display to confirm that the action should be executed.
+             * This is usually an imperative verb like "Send".
+             *
+             * @return the label to confirm the action should be executed
+             */
+            public CharSequence getConfirmLabel() {
+                return mConfirmLabel;
+            }
+
+            /**
+             * Set a label to display to cancel the action.
+             * This is usually an imperative verb, like "Cancel".
+             *
+             * @param label the label to display to cancel the action
+             * @return this object for method chaining
+             */
+            public WearableExtender setCancelLabel(CharSequence label) {
+                mCancelLabel = label;
+                return this;
+            }
+
+            /**
+             * Get the label to display to cancel the action.
+             * This is usually an imperative verb like "Cancel".
+             *
+             * @return the label to display to cancel the action
+             */
+            public CharSequence getCancelLabel() {
+                return mCancelLabel;
             }
         }
     }
@@ -2774,6 +2864,14 @@ public class Notification implements Parcelable
                     contentView.setViewVisibility(R.id.progress, View.VISIBLE);
                     contentView.setProgressBar(
                             R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
+                    contentView.setProgressBackgroundTintList(
+                            R.id.progress, ColorStateList.valueOf(mContext.getResources().getColor(
+                                    R.color.notification_progress_background_color)));
+                    if (mColor != COLOR_DEFAULT) {
+                        ColorStateList colorStateList = ColorStateList.valueOf(mColor);
+                        contentView.setProgressTintList(R.id.progress, colorStateList);
+                        contentView.setProgressIndeterminateTintList(R.id.progress, colorStateList);
+                    }
                     showLine2 = true;
                 } else {
                     contentView.setViewVisibility(R.id.progress, View.GONE);
@@ -2958,6 +3056,11 @@ public class Notification implements Parcelable
          * Apply any necessary background to smallIcons being used in the largeIcon spot.
          */
         private void processSmallIconAsLarge(int largeIconId, RemoteViews contentView) {
+            if (!isLegacy()) {
+                contentView.setDrawableParameters(R.id.icon, false, -1,
+                        0xFFFFFFFF,
+                        PorterDuff.Mode.SRC_ATOP, -1);
+            }
             if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, largeIconId)) {
                 applyLargeIconBackground(contentView);
             }
@@ -3005,11 +3108,12 @@ public class Notification implements Parcelable
          */
         private void processSmallRightIcon(int smallIconDrawableId,
                 RemoteViews contentView) {
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
+            if (!isLegacy()) {
                 contentView.setDrawableParameters(R.id.right_icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
-
+            }
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
                 contentView.setInt(R.id.right_icon,
                         "setBackgroundResource",
                         R.drawable.notification_icon_legacy_bg);
@@ -3674,7 +3778,23 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
+
+            // Replace mLargeIcon with mBigLargeIcon if mBigLargeIconSet
+            // This covers the following cases:
+            //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
+            //          mLargeIcon
+            //   2. !mBigLargeIconSet -> mLargeIcon applies
+            Bitmap oldLargeIcon = null;
+            if (mBigLargeIconSet) {
+                oldLargeIcon = mBuilder.mLargeIcon;
+                mBuilder.mLargeIcon = mBigLargeIcon;
+            }
+
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
+
+            if (mBigLargeIconSet) {
+                mBuilder.mLargeIcon = oldLargeIcon;
+            }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
@@ -3706,6 +3826,7 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             if (extras.containsKey(EXTRA_LARGE_ICON_BIG)) {
+                mBigLargeIconSet = true;
                 mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
             }
             mPicture = extras.getParcelable(EXTRA_PICTURE);
@@ -4001,7 +4122,7 @@ public class Notification implements Parcelable
      *
      * Unlike the other styles provided here, MediaStyle can also modify the standard-size
      * {@link Notification#contentView}; by providing action indices to
-     * {@link #setShowActionsInCompactView(int...)} you can promote up to 2 actions to be displayed
+     * {@link #setShowActionsInCompactView(int...)} you can promote up to 3 actions to be displayed
      * in the standard view alongside the usual content.
      *
      * Notifications created with MediaStyle will have their category set to
@@ -4018,9 +4139,9 @@ public class Notification implements Parcelable
      * <pre class="prettyprint">
      * Notification noti = new Notification.Builder()
      *     .setSmallIcon(R.drawable.ic_stat_player)
-     *     .setContentTitle(&quot;Track title&quot;)     // these three lines are optional
-     *     .setContentText(&quot;Artist - Album&quot;)   // if you use
-     *     .setLargeIcon(albumArtBitmap))      // setMediaSession(token)
+     *     .setContentTitle(&quot;Track title&quot;)
+     *     .setContentText(&quot;Artist - Album&quot;)
+     *     .setLargeIcon(albumArtBitmap))
      *     .setStyle(<b>new Notification.MediaStyle()</b>
      *         .setMediaSession(mySession))
      *     .build();
@@ -4332,10 +4453,23 @@ public class Notification implements Parcelable
          */
         public static final int SIZE_FULL_SCREEN = 5;
 
+        /**
+         * Sentinel value for use with {@link #setHintScreenTimeout} to keep the screen on for a
+         * short amount of time when this notification is displayed on the screen. This
+         * is the default value.
+         */
+        public static final int SCREEN_TIMEOUT_SHORT = 0;
+
+        /**
+         * Sentinel value for use with {@link #setHintScreenTimeout} to keep the screen on
+         * for a longer amount of time when this notification is displayed on the screen.
+         */
+        public static final int SCREEN_TIMEOUT_LONG = -1;
+
         /** Notification extra which contains wearable extensions */
         private static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
 
-        // Keys within EXTRA_WEARABLE_OPTIONS for wearable options.
+        // Keys within EXTRA_WEARABLE_EXTENSIONS for wearable options.
         private static final String KEY_ACTIONS = "actions";
         private static final String KEY_FLAGS = "flags";
         private static final String KEY_DISPLAY_INTENT = "displayIntent";
@@ -4347,12 +4481,14 @@ public class Notification implements Parcelable
         private static final String KEY_CUSTOM_SIZE_PRESET = "customSizePreset";
         private static final String KEY_CUSTOM_CONTENT_HEIGHT = "customContentHeight";
         private static final String KEY_GRAVITY = "gravity";
+        private static final String KEY_HINT_SCREEN_TIMEOUT = "hintScreenTimeout";
 
         // Flags bitwise-ored to mFlags
         private static final int FLAG_CONTENT_INTENT_AVAILABLE_OFFLINE = 0x1;
         private static final int FLAG_HINT_HIDE_ICON = 1 << 1;
         private static final int FLAG_HINT_SHOW_BACKGROUND_ONLY = 1 << 2;
         private static final int FLAG_START_SCROLL_BOTTOM = 1 << 3;
+        private static final int FLAG_HINT_AVOID_BACKGROUND_CLIPPING = 1 << 4;
 
         // Default value for flags integer
         private static final int DEFAULT_FLAGS = FLAG_CONTENT_INTENT_AVAILABLE_OFFLINE;
@@ -4371,6 +4507,7 @@ public class Notification implements Parcelable
         private int mCustomSizePreset = SIZE_DEFAULT;
         private int mCustomContentHeight;
         private int mGravity = DEFAULT_GRAVITY;
+        private int mHintScreenTimeout;
 
         /**
          * Create a {@link android.app.Notification.WearableExtender} with default
@@ -4406,6 +4543,7 @@ public class Notification implements Parcelable
                         SIZE_DEFAULT);
                 mCustomContentHeight = wearableBundle.getInt(KEY_CUSTOM_CONTENT_HEIGHT);
                 mGravity = wearableBundle.getInt(KEY_GRAVITY, DEFAULT_GRAVITY);
+                mHintScreenTimeout = wearableBundle.getInt(KEY_HINT_SCREEN_TIMEOUT);
             }
         }
 
@@ -4453,6 +4591,9 @@ public class Notification implements Parcelable
             if (mGravity != DEFAULT_GRAVITY) {
                 wearableBundle.putInt(KEY_GRAVITY, mGravity);
             }
+            if (mHintScreenTimeout != 0) {
+                wearableBundle.putInt(KEY_HINT_SCREEN_TIMEOUT, mHintScreenTimeout);
+            }
 
             builder.getExtras().putBundle(EXTRA_WEARABLE_EXTENSIONS, wearableBundle);
             return builder;
@@ -4472,6 +4613,7 @@ public class Notification implements Parcelable
             that.mCustomSizePreset = this.mCustomSizePreset;
             that.mCustomContentHeight = this.mCustomContentHeight;
             that.mGravity = this.mGravity;
+            that.mHintScreenTimeout = this.mHintScreenTimeout;
             return that;
         }
 
@@ -4865,6 +5007,52 @@ public class Notification implements Parcelable
          */
         public boolean getHintShowBackgroundOnly() {
             return (mFlags & FLAG_HINT_SHOW_BACKGROUND_ONLY) != 0;
+        }
+
+        /**
+         * Set a hint that this notification's background should not be clipped if possible,
+         * and should instead be resized to fully display on the screen, retaining the aspect
+         * ratio of the image. This can be useful for images like barcodes or qr codes.
+         * @param hintAvoidBackgroundClipping {@code true} to avoid clipping if possible.
+         * @return this object for method chaining
+         */
+        public WearableExtender setHintAvoidBackgroundClipping(
+                boolean hintAvoidBackgroundClipping) {
+            setFlag(FLAG_HINT_AVOID_BACKGROUND_CLIPPING, hintAvoidBackgroundClipping);
+            return this;
+        }
+
+        /**
+         * Get a hint that this notification's background should not be clipped if possible,
+         * and should instead be resized to fully display on the screen, retaining the aspect
+         * ratio of the image. This can be useful for images like barcodes or qr codes.
+         * @return {@code true} if it's ok if the background is clipped on the screen, false
+         * otherwise. The default value is {@code false} if this was never set.
+         */
+        public boolean getHintAvoidBackgroundClipping() {
+            return (mFlags & FLAG_HINT_AVOID_BACKGROUND_CLIPPING) != 0;
+        }
+
+        /**
+         * Set a hint that the screen should remain on for at least this duration when
+         * this notification is displayed on the screen.
+         * @param timeout The requested screen timeout in milliseconds. Can also be either
+         *     {@link #SCREEN_TIMEOUT_SHORT} or {@link #SCREEN_TIMEOUT_LONG}.
+         * @return this object for method chaining
+         */
+        public WearableExtender setHintScreenTimeout(int timeout) {
+            mHintScreenTimeout = timeout;
+            return this;
+        }
+
+        /**
+         * Get the duration, in milliseconds, that the screen should remain on for
+         * when this notification is displayed.
+         * @return the duration in milliseconds if > 0, or either one of the sentinel values
+         *     {@link #SCREEN_TIMEOUT_SHORT} or {@link #SCREEN_TIMEOUT_LONG}.
+         */
+        public int getHintScreenTimeout() {
+            return mHintScreenTimeout;
         }
 
         private void setFlag(int mask, boolean value) {

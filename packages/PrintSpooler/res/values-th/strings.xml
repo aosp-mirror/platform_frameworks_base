@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"เครื่องพิมพ์ทั้งหมด…"</string>
     <string name="print_dialog" msgid="32628687461331979">"ช่องโต้ตอบการพิมพ์"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g>/<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"หน้า <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> จาก <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"สรุป สำเนา <xliff:g id="COPIES">%1$s</xliff:g>, ขนาดกระดาษ <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"ปุ่มขยาย"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"ปุ่มยุบ"</string>
-    <string name="print_button" msgid="645164566271246268">"พิมพ์"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"บันทึกไปยัง PDF"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"ขยายตัวเลือกการพิมพ์แล้ว"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"ยุบตัวเลือกการพิมพ์แล้ว"</string>
     <string name="search" msgid="5421724265322228497">"ค้นหา"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"เครื่องพิมพ์ทั้งหมด"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"เพิ่มบริการ"</string>

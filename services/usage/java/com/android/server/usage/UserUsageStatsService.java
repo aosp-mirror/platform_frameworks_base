@@ -23,9 +23,13 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.res.Configuration;
 import android.os.SystemClock;
+import android.content.Context;
+import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.usage.UsageStatsDatabase.StatCombiner;
 
 import java.io.File;
@@ -43,7 +47,13 @@ class UserUsageStatsService {
     private static final String TAG = "UsageStatsService";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
     private static final SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final int sDateFormatFlags =
+            DateUtils.FORMAT_SHOW_DATE
+            | DateUtils.FORMAT_SHOW_TIME
+            | DateUtils.FORMAT_SHOW_YEAR
+            | DateUtils.FORMAT_NUMERIC_DATE;
 
+    private final Context mContext;
     private final UsageStatsDatabase mDatabase;
     private final IntervalStats[] mCurrentStats;
     private boolean mStatsChanged = false;
@@ -55,7 +65,8 @@ class UserUsageStatsService {
         void onStatsUpdated();
     }
 
-    UserUsageStatsService(int userId, File usageStatsDir, StatsUpdatedListener listener) {
+    UserUsageStatsService(Context context, int userId, File usageStatsDir, StatsUpdatedListener listener) {
+        mContext = context;
         mDailyExpiryDate = new UnixCalendar(0);
         mDatabase = new UsageStatsDatabase(usageStatsDir);
         mCurrentStats = new IntervalStats[UsageStatsManager.INTERVAL_COUNT];
@@ -433,6 +444,117 @@ class UserUsageStatsService {
                 tempCal.getTimeInMillis() + ")");
     }
 
+    //
+    // -- DUMP related methods --
+    //
+
+    void checkin(final IndentingPrintWriter pw) {
+        mDatabase.checkinDailyFiles(new UsageStatsDatabase.CheckinAction() {
+            @Override
+            public boolean checkin(IntervalStats stats) {
+                printIntervalStats(pw, stats, false);
+                return true;
+            }
+        });
+    }
+
+    void dump(IndentingPrintWriter pw) {
+        // This is not a check-in, only dump in-memory stats.
+        for (int interval = 0; interval < mCurrentStats.length; interval++) {
+            pw.print("In-memory ");
+            pw.print(intervalToString(interval));
+            pw.println(" stats");
+            printIntervalStats(pw, mCurrentStats[interval], true);
+        }
+    }
+
+    private String formatDateTime(long dateTime, boolean pretty) {
+        if (pretty) {
+            return "\"" + DateUtils.formatDateTime(mContext, dateTime, sDateFormatFlags) + "\"";
+        }
+        return Long.toString(dateTime);
+    }
+
+    private String formatElapsedTime(long elapsedTime, boolean pretty) {
+        if (pretty) {
+            return "\"" + DateUtils.formatElapsedTime(elapsedTime / 1000) + "\"";
+        }
+        return Long.toString(elapsedTime);
+    }
+
+    void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats, boolean prettyDates) {
+        if (prettyDates) {
+            pw.printPair("timeRange", "\"" + DateUtils.formatDateRange(mContext,
+                    stats.beginTime, stats.endTime, sDateFormatFlags) + "\"");
+        } else {
+            pw.printPair("beginTime", stats.beginTime);
+            pw.printPair("endTime", stats.endTime);
+        }
+        pw.println();
+        pw.increaseIndent();
+        pw.println("packages");
+        pw.increaseIndent();
+        final ArrayMap<String, UsageStats> pkgStats = stats.packageStats;
+        final int pkgCount = pkgStats.size();
+        for (int i = 0; i < pkgCount; i++) {
+            final UsageStats usageStats = pkgStats.valueAt(i);
+            pw.printPair("package", usageStats.mPackageName);
+            pw.printPair("totalTime", formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
+            pw.printPair("lastTime", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.println();
+        }
+        pw.decreaseIndent();
+
+        pw.println("configurations");
+        pw.increaseIndent();
+        final ArrayMap<Configuration, ConfigurationStats> configStats =
+                stats.configurations;
+        final int configCount = configStats.size();
+        for (int i = 0; i < configCount; i++) {
+            final ConfigurationStats config = configStats.valueAt(i);
+            pw.printPair("config", Configuration.resourceQualifierString(config.mConfiguration));
+            pw.printPair("totalTime", formatElapsedTime(config.mTotalTimeActive, prettyDates));
+            pw.printPair("lastTime", formatDateTime(config.mLastTimeActive, prettyDates));
+            pw.printPair("count", config.mActivationCount);
+            pw.println();
+        }
+        pw.decreaseIndent();
+
+        pw.println("events");
+        pw.increaseIndent();
+        final TimeSparseArray<UsageEvents.Event> events = stats.events;
+        final int eventCount = events != null ? events.size() : 0;
+        for (int i = 0; i < eventCount; i++) {
+            final UsageEvents.Event event = events.valueAt(i);
+            pw.printPair("time", formatDateTime(event.mTimeStamp, prettyDates));
+            pw.printPair("type", eventToString(event.mEventType));
+            pw.printPair("package", event.mPackage);
+            if (event.mClass != null) {
+                pw.printPair("class", event.mClass);
+            }
+            if (event.mConfiguration != null) {
+                pw.printPair("config", Configuration.resourceQualifierString(event.mConfiguration));
+            }
+            pw.println();
+        }
+        pw.decreaseIndent();
+        pw.decreaseIndent();
+    }
+
+    private static String intervalToString(int interval) {
+        switch (interval) {
+            case UsageStatsManager.INTERVAL_DAILY:
+                return "daily";
+            case UsageStatsManager.INTERVAL_WEEKLY:
+                return "weekly";
+            case UsageStatsManager.INTERVAL_MONTHLY:
+                return "monthly";
+            case UsageStatsManager.INTERVAL_YEARLY:
+                return "yearly";
+            default:
+                return "?";
+        }
+    }
 
     private static String eventToString(int eventType) {
         switch (eventType) {

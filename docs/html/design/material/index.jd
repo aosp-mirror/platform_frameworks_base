@@ -5,6 +5,40 @@ page.image=design/material/images/MaterialLight.png
 
 @jd:body
 
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/material/index.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Apps with Material Design</p>
+  </div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=p4gmvHyuZzw">
+<div>
+    <h3>Video</h3>
+    <p>Introduction to Material Design</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=YaG_ljfzeUw">
+<div>
+    <h3>Video</h3>
+    <p>Paper and Ink: The Materials that Matter</p>
+</div>
+</a>
+
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=XOcCOBe8PTc">
+<div>
+    <h3>Video</h3>
+    <p>Material Design in the Google I/O App</p>
+</div>
+</a>
+
+
+
 <p itemprop="description">Material design is a comprehensive guide for visual, motion, and
 interaction design across platforms and devices. Android now includes support for
 material design apps. To use material design in your Android apps, follow the guidelines defined

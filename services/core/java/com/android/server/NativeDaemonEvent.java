@@ -33,15 +33,20 @@ public class NativeDaemonEvent {
     private final int mCode;
     private final String mMessage;
     private final String mRawEvent;
+    private final String mLogMessage;
     private String[] mParsed;
 
-    private NativeDaemonEvent(int cmdNumber, int code, String message, String rawEvent) {
+    private NativeDaemonEvent(int cmdNumber, int code, String message,
+                              String rawEvent, String logMessage) {
         mCmdNumber = cmdNumber;
         mCode = code;
         mMessage = message;
         mRawEvent = rawEvent;
+        mLogMessage = logMessage;
         mParsed = null;
     }
+
+    static public final String SENSITIVE_MARKER = "{{sensitive}}";
 
     public int getCmdNumber() {
         return mCmdNumber;
@@ -62,7 +67,7 @@ public class NativeDaemonEvent {
 
     @Override
     public String toString() {
-        return mRawEvent;
+        return mLogMessage;
     }
 
     /**
@@ -151,9 +156,15 @@ public class NativeDaemonEvent {
             }
         }
 
+        String logMessage = rawEvent;
+        if (parsed.length > 2 && parsed[2].equals(SENSITIVE_MARKER)) {
+            skiplength += parsed[2].length() + 1;
+            logMessage = parsed[0] + " " + parsed[1] + " {}";
+        }
+
         final String message = rawEvent.substring(skiplength);
 
-        return new NativeDaemonEvent(cmdNumber, code, message, rawEvent);
+        return new NativeDaemonEvent(cmdNumber, code, message, rawEvent, logMessage);
     }
 
     /**

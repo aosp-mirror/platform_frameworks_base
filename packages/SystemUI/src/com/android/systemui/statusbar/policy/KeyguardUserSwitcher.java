@@ -19,15 +19,16 @@ package com.android.systemui.statusbar.policy;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.animation.AnimationUtils;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import com.android.keyguard.AppearAnimationUtils;
 import com.android.systemui.R;
@@ -35,8 +36,6 @@ import com.android.systemui.qs.tiles.UserDetailItemView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.phone.StatusBarHeaderView;
-import com.android.systemui.statusbar.phone.UserAvatarView;
 
 /**
  * Manages the user switcher on the Keyguard.
@@ -46,6 +45,7 @@ public class KeyguardUserSwitcher {
     private static final String TAG = "KeyguardUserSwitcher";
     private static final boolean ALWAYS_ON = false;
 
+    private final Container mUserSwitcherContainer;
     private final ViewGroup mUserSwitcher;
     private final KeyguardStatusBarView mStatusBarView;
     private final Adapter mAdapter;
@@ -53,24 +53,31 @@ public class KeyguardUserSwitcher {
     private final KeyguardUserSwitcherScrim mBackground;
     private ObjectAnimator mBgAnimator;
     private UserSwitcherController mUserSwitcherController;
+    private boolean mAnimating;
 
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
             KeyguardStatusBarView statusBarView, NotificationPanelView panelView,
             UserSwitcherController userSwitcherController) {
-        if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON) {
-            mUserSwitcher = (ViewGroup) userSwitcher.inflate();
+        boolean keyguardUserSwitcherEnabled =
+                context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON;
+        if (userSwitcherController != null && keyguardUserSwitcherEnabled) {
+            mUserSwitcherContainer = (Container) userSwitcher.inflate();
+            mUserSwitcher = (ViewGroup)
+                    mUserSwitcherContainer.findViewById(R.id.keyguard_user_switcher_inner);
             mBackground = new KeyguardUserSwitcherScrim(mUserSwitcher);
             mUserSwitcher.setBackground(mBackground);
             mStatusBarView = statusBarView;
             mStatusBarView.setKeyguardUserSwitcher(this);
             panelView.setKeyguardUserSwitcher(this);
-            mAdapter = new Adapter(context, userSwitcherController);
+            mAdapter = new Adapter(context, userSwitcherController, this);
             mAdapter.registerDataSetObserver(mDataSetObserver);
             mUserSwitcherController = userSwitcherController;
             mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
                     AnimationUtils.loadInterpolator(
                             context, android.R.interpolator.fast_out_slow_in));
+            mUserSwitcherContainer.setKeyguardUserSwitcher(this);
         } else {
+            mUserSwitcherContainer = null;
             mUserSwitcher = null;
             mStatusBarView = null;
             mAdapter = null;
@@ -98,9 +105,10 @@ public class KeyguardUserSwitcher {
     }
 
     public void show(boolean animate) {
-        if (mUserSwitcher != null && mUserSwitcher.getVisibility() != View.VISIBLE) {
+        if (mUserSwitcher != null && mUserSwitcherContainer.getVisibility() != View.VISIBLE) {
             cancelAnimations();
-            mUserSwitcher.setVisibility(View.VISIBLE);
+            mAdapter.refresh();
+            mUserSwitcherContainer.setVisibility(View.VISIBLE);
             mStatusBarView.setKeyguardUserSwitcherShowing(true, animate);
             if (animate) {
                 startAppearAnimation();
@@ -108,13 +116,13 @@ public class KeyguardUserSwitcher {
         }
     }
 
-    public void hide(boolean animate) {
-        if (mUserSwitcher != null && mUserSwitcher.getVisibility() == View.VISIBLE) {
+    private void hide(boolean animate) {
+        if (mUserSwitcher != null && mUserSwitcherContainer.getVisibility() == View.VISIBLE) {
             cancelAnimations();
             if (animate) {
                 startDisappearAnimation();
             } else {
-                mUserSwitcher.setVisibility(View.GONE);
+                mUserSwitcherContainer.setVisibility(View.GONE);
             }
             mStatusBarView.setKeyguardUserSwitcherShowing(false, animate);
         }
@@ -129,6 +137,7 @@ public class KeyguardUserSwitcher {
             mBgAnimator.cancel();
         }
         mUserSwitcher.animate().cancel();
+        mAnimating = false;
     }
 
     private void startAppearAnimation() {
@@ -139,13 +148,14 @@ public class KeyguardUserSwitcher {
         }
         mUserSwitcher.setClipChildren(false);
         mUserSwitcher.setClipToPadding(false);
-        mAppearAnimationUtils.startAppearAnimation(objects, new Runnable() {
+        mAppearAnimationUtils.startAnimation(objects, new Runnable() {
             @Override
             public void run() {
                 mUserSwitcher.setClipChildren(true);
                 mUserSwitcher.setClipToPadding(true);
             }
         });
+        mAnimating = true;
         mBgAnimator = ObjectAnimator.ofInt(mBackground, "alpha", 0, 255);
         mBgAnimator.setDuration(400);
         mBgAnimator.setInterpolator(PhoneStatusBar.ALPHA_IN);
@@ -153,12 +163,14 @@ public class KeyguardUserSwitcher {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mBgAnimator = null;
+                mAnimating = false;
             }
         });
         mBgAnimator.start();
     }
 
     private void startDisappearAnimation() {
+        mAnimating = true;
         mUserSwitcher.animate()
                 .alpha(0f)
                 .setDuration(300)
@@ -166,8 +178,9 @@ public class KeyguardUserSwitcher {
                 .withEndAction(new Runnable() {
                     @Override
                     public void run() {
-                        mUserSwitcher.setVisibility(View.GONE);
+                        mUserSwitcherContainer.setVisibility(View.GONE);
                         mUserSwitcher.setAlpha(1f);
+                        mAnimating = false;
                     }
                 });
     }
@@ -198,6 +211,16 @@ public class KeyguardUserSwitcher {
         }
     }
 
+    public void hideIfNotSimple(boolean animate) {
+        if (mUserSwitcherContainer != null && !mUserSwitcherController.isSimpleUserSwitcher()) {
+            hide(animate);
+        }
+    }
+
+    boolean isAnimating() {
+        return mAnimating;
+    }
+
     public final DataSetObserver mDataSetObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
@@ -209,10 +232,13 @@ public class KeyguardUserSwitcher {
             View.OnClickListener {
 
         private Context mContext;
+        private KeyguardUserSwitcher mKeyguardUserSwitcher;
 
-        public Adapter(Context context, UserSwitcherController controller) {
+        public Adapter(Context context, UserSwitcherController controller,
+                KeyguardUserSwitcher kgu) {
             super(controller);
             mContext = context;
+            mKeyguardUserSwitcher = kgu;
         }
 
         @Override
@@ -240,7 +266,37 @@ public class KeyguardUserSwitcher {
 
         @Override
         public void onClick(View v) {
-            switchTo(((UserSwitcherController.UserRecord)v.getTag()));
+            UserSwitcherController.UserRecord user = (UserSwitcherController.UserRecord) v.getTag();
+            if (user.isCurrent && !user.isGuest) {
+                // Close the switcher if tapping the current user. Guest is excluded because
+                // tapping the guest user while it's current clears the session.
+                mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
+            } else {
+                switchTo(user);
+            }
+        }
+    }
+
+    public static class Container extends FrameLayout {
+
+        private KeyguardUserSwitcher mKeyguardUserSwitcher;
+
+        public Container(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            setClipChildren(false);
+        }
+
+        public void setKeyguardUserSwitcher(KeyguardUserSwitcher keyguardUserSwitcher) {
+            mKeyguardUserSwitcher = keyguardUserSwitcher;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            // Hide switcher if it didn't handle the touch event (and let the event go through).
+            if (mKeyguardUserSwitcher != null && !mKeyguardUserSwitcher.isAnimating()) {
+                mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
+            }
+            return false;
         }
     }
 }

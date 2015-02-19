@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.telephony.SubscriptionManager;
 import android.telephony.CellLocation;
 import android.telephony.CellInfo;
 import android.telephony.VoLteServiceState;
@@ -31,6 +32,7 @@ import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 
 import com.android.internal.telephony.IPhoneStateListener;
+import com.android.internal.telephony.PhoneConstants;
 
 import java.util.List;
 
@@ -225,7 +227,7 @@ public class PhoneStateListener {
      * @hide
      */
     /** @hide */
-    protected long mSubId = 0;
+    protected int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     private final Handler mHandler;
 
@@ -234,7 +236,7 @@ public class PhoneStateListener {
      * This class requires Looper.myLooper() not return null.
      */
     public PhoneStateListener() {
-        this(SubscriptionManager.DEFAULT_SUB_ID, Looper.myLooper());
+        this(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, Looper.myLooper());
     }
 
     /**
@@ -243,16 +245,16 @@ public class PhoneStateListener {
      * @hide
      */
     public PhoneStateListener(Looper looper) {
-        this(SubscriptionManager.DEFAULT_SUB_ID, looper);
+        this(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, looper);
     }
 
     /**
      * Create a PhoneStateListener for the Phone using the specified subscription.
      * This class requires Looper.myLooper() not return null. To supply your
-     * own non-null Looper use PhoneStateListener(long subId, Looper looper) below.
+     * own non-null Looper use PhoneStateListener(int subId, Looper looper) below.
      * @hide
      */
-    public PhoneStateListener(long subId) {
+    public PhoneStateListener(int subId) {
         this(subId, Looper.myLooper());
     }
 
@@ -261,7 +263,7 @@ public class PhoneStateListener {
      * and non-null Looper.
      * @hide
      */
-    public PhoneStateListener(long subId, Looper looper) {
+    public PhoneStateListener(int subId, Looper looper) {
         if (DBG) log("ctor: subId=" + subId + " looper=" + looper);
         mSubId = subId;
         mHandler = new Handler(looper) {

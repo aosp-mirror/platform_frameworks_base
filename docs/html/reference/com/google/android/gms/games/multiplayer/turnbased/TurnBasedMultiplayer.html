@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">TurnBasedMultiplayer</li>
       </ul>
     </div>
@@ -738,6 +807,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -812,7 +884,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.CancelMatchResult.html">TurnBasedMultiplayer.CancelMatchResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when the match has been canceled.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when the match has been canceled.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -824,7 +901,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.InitiateMatchResult.html">TurnBasedMultiplayer.InitiateMatchResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when match has been initiated.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when match has been initiated.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -836,7 +918,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LeaveMatchResult.html">TurnBasedMultiplayer.LeaveMatchResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when the player has left the match.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when the player has left the match.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -848,7 +935,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchResult.html">TurnBasedMultiplayer.LoadMatchResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when a turn-based match has been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when a turn-based match has been loaded.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -860,7 +952,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when matches have been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when matches have been loaded.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -872,7 +969,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.UpdateMatchResult.html">TurnBasedMultiplayer.UpdateMatchResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when match has been updated.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when match has been updated.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -921,7 +1023,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#acceptInvitation(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">acceptInvitation</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String invitationId)</nobr>
         
-        <div class="jd-descrdiv">Accept an invitation for a turn-based match.</div>
+        <div class="jd-descrdiv">
+          Accept an invitation for a turn-based match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -939,7 +1046,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#cancelMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">cancelMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId)</nobr>
         
-        <div class="jd-descrdiv">Cancels a turn-based match.</div>
+        <div class="jd-descrdiv">
+          Cancels a turn-based match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -957,7 +1069,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#createMatch(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatchConfig)">createMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchConfig.html">TurnBasedMatchConfig</a> config)</nobr>
         
-        <div class="jd-descrdiv">Create a new turn-based match for the current game.</div>
+        <div class="jd-descrdiv">
+          Create a new turn-based match for the current game.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -975,7 +1092,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#declineInvitation(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">declineInvitation</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String invitationId)</nobr>
         
-        <div class="jd-descrdiv">Decline an invitation for a turn-based match.</div>
+        <div class="jd-descrdiv">
+          Decline an invitation for a turn-based match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -993,7 +1115,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#dismissInvitation(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">dismissInvitation</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String invitationId)</nobr>
         
-        <div class="jd-descrdiv">Dismiss an invitation to a turn-based match.</div>
+        <div class="jd-descrdiv">
+          Dismiss an invitation to a turn-based match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1011,7 +1138,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#dismissMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">dismissMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId)</nobr>
         
-        <div class="jd-descrdiv">Delete a match from the server and local storage.</div>
+        <div class="jd-descrdiv">
+          Delete a match from the server and local storage.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1029,7 +1161,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#finishMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, byte[], com.google.android.gms.games.multiplayer.ParticipantResult...)">finishMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId, byte[] matchData, <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult...</a> results)</nobr>
         
-        <div class="jd-descrdiv">Mark a match as finished.</div>
+        <div class="jd-descrdiv">
+          Mark a match as finished.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1047,7 +1184,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#finishMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, byte[], java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">finishMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId, byte[] matchData, List&lt;<a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>&gt; results)</nobr>
         
-        <div class="jd-descrdiv">Mark a match as finished.</div>
+        <div class="jd-descrdiv">
+          Mark a match as finished.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1065,7 +1207,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#finishMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">finishMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId)</nobr>
         
-        <div class="jd-descrdiv">Indicate that a participant is finished with a match.</div>
+        <div class="jd-descrdiv">
+          Indicate that a participant is finished with a match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1083,8 +1230,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#getInboxIntent(com.google.android.gms.common.api.GoogleApiClient)">getInboxIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Returns an intent that will let the user see and manage any outstanding invitations and
- matches.</div>
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user see and manage any outstanding invitations and
+ matches.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1102,7 +1254,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#getMaxMatchDataSize(com.google.android.gms.common.api.GoogleApiClient)">getMaxMatchDataSize</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Gets the maximum data size per match in bytes.</div>
+        <div class="jd-descrdiv">
+          Gets the maximum data size per match in bytes.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1120,8 +1277,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int, boolean)">getSelectOpponentsIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int minPlayers, int maxPlayers, boolean allowAutomatch)</nobr>
         
-        <div class="jd-descrdiv">Returns an intent that will let the user select opponents to send an invitation to for a
- turn based multiplayer match.</div>
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user select opponents to send an invitation to for a
+ turn based multiplayer match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1139,8 +1301,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#getSelectOpponentsIntent(com.google.android.gms.common.api.GoogleApiClient, int, int)">getSelectOpponentsIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int minPlayers, int maxPlayers)</nobr>
         
-        <div class="jd-descrdiv">Returns an intent that will let the user select opponents to send an invitation to for a
- turn based multiplayer match.</div>
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user select opponents to send an invitation to for a
+ turn based multiplayer match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1158,7 +1325,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#leaveMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">leaveMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId)</nobr>
         
-        <div class="jd-descrdiv">Leave the specified match when it is not the current player's turn.</div>
+        <div class="jd-descrdiv">
+          Leave the specified match when it is not the current player's turn.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1176,7 +1348,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#leaveMatchDuringTurn(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">leaveMatchDuringTurn</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId, String pendingParticipantId)</nobr>
         
-        <div class="jd-descrdiv">Leave the specified match during the current player's turn.</div>
+        <div class="jd-descrdiv">
+          Leave the specified match during the current player's turn.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1194,7 +1371,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">loadMatch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId)</nobr>
         
-        <div class="jd-descrdiv">Load a specified turn-based match.</div>
+        <div class="jd-descrdiv">
+          Load a specified turn-based match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1212,7 +1394,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int, int[])">loadMatchesByStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int invitationSortOrder, int[] matchTurnStatuses)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously load turn-based matches for the current game.</div>
+        <div class="jd-descrdiv">
+          Asynchronously load turn-based matches for the current game.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1229,26 +1416,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int[])">loadMatchesByStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int[] matchTurnStatuses)</nobr>
+        
+        <div class="jd-descrdiv">
+          Asynchronously load turn-based matches for the current game.
+          
+    
 
-        <div class="jd-descrdiv">Asynchronously load turn-based matches for the current game.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#registerMatchUpdateListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.turnbased.OnTurnBasedMatchUpdateReceivedListener)">registerMatchUpdateListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/OnTurnBasedMatchUpdateReceivedListener.html">OnTurnBasedMatchUpdateReceivedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Register a listener to intercept incoming match updates for the currently signed-in user.</div>
+        <div class="jd-descrdiv">
+          Register a listener to intercept incoming match updates for the currently signed-in user.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1266,7 +1463,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#rematch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">rematch</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId)</nobr>
         
-        <div class="jd-descrdiv">Create a rematch of a previously completed turn-based match.</div>
+        <div class="jd-descrdiv">
+          Create a rematch of a previously completed turn-based match.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1284,7 +1486,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#takeTurn(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, byte[], java.lang.String)">takeTurn</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId, byte[] matchData, String pendingParticipantId)</nobr>
         
-        <div class="jd-descrdiv">Update a match with new turn data.</div>
+        <div class="jd-descrdiv">
+          Update a match with new turn data.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1302,7 +1509,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#takeTurn(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, byte[], java.lang.String, java.util.List<com.google.android.gms.games.multiplayer.ParticipantResult>)">takeTurn</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId, byte[] matchData, String pendingParticipantId, List&lt;<a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a>&gt; results)</nobr>
         
-        <div class="jd-descrdiv">Update a match with new turn data.</div>
+        <div class="jd-descrdiv">
+          Update a match with new turn data.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1320,7 +1532,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#takeTurn(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, byte[], java.lang.String, com.google.android.gms.games.multiplayer.ParticipantResult...)">takeTurn</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String matchId, byte[] matchData, String pendingParticipantId, <a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult...</a> results)</nobr>
         
-        <div class="jd-descrdiv">Update a match with new turn data.</div>
+        <div class="jd-descrdiv">
+          Update a match with new turn data.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1338,7 +1555,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#unregisterMatchUpdateListener(com.google.android.gms.common.api.GoogleApiClient)">unregisterMatchUpdateListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Unregisters this client's match update listener, if any.</div>
+        <div class="jd-descrdiv">
+          Unregisters this client's match update listener, if any.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1414,6 +1636,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Accept an invitation for a turn-based match. This changes the current player's participant
  status to <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></code>.
  <p>
@@ -1468,6 +1693,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Cancels a turn-based match. Once this call succeeds, the match will be removed from local
  storage. Note that this will cancel the match completely, forcing it to end for all players
  involved. See <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.html#leaveMatch(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">leaveMatch(GoogleApiClient, String)</a></code> for a different alternative.
@@ -1519,6 +1747,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Create a new turn-based match for the current game. If the provided
  <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchConfig.html">TurnBasedMatchConfig</a></code> includes automatch parameters, the server will attempt to find
@@ -1576,6 +1807,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Decline an invitation for a turn-based match.
  <p>
  Note that this will cancel the match for the other participants and remove the match from the
@@ -1625,6 +1859,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Dismiss an invitation to a turn-based match. Dismissing an invitation will not change the
  state of the match for the other participants.
  <p>
@@ -1671,6 +1908,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Delete a match from the server and local storage. Dismissing a match will not change the
  state of the match for the other participants, but dismissed matches will never be shown to
@@ -1719,6 +1959,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Mark a match as finished. This should be called when the match is over and all participants
  have results to be reported (if appropriate). Note that the last client to update a match is
@@ -1792,6 +2035,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Mark a match as finished. This should be called when the match is over and all participants
  have results to be reported (if appropriate). Note that the last client to update a match is
  responsible for calling finish on that match.
@@ -1864,6 +2110,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicate that a participant is finished with a match. This will not change the data of the
  match, but it will transition the match into state
  <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_COMPLETE">MATCH_STATUS_COMPLETE</a></code> if the match is not already in that state. This
@@ -1917,6 +2166,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user see and manage any outstanding invitations and
  matches. Note that this must be invoked using
@@ -1973,6 +2225,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum data size per match in bytes. Guaranteed to be at least 128 KB. May increase
  in the future.
  <p>
@@ -2021,6 +2276,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user select opponents to send an invitation to for a
  turn based multiplayer match. Note that this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling package
@@ -2106,6 +2364,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user select opponents to send an invitation to for a
  turn based multiplayer match. Note that this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling package
  can be established.
@@ -2186,6 +2447,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Leave the specified match when it is not the current player's turn. If this takes the match
  to fewer than two participants, the match will be canceled.
  <p>
@@ -2239,6 +2503,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Leave the specified match during the current player's turn. If this takes the match to fewer
  than two participants, the match will be canceled. The provided <code>pendingParticipantId</code>
@@ -2304,6 +2571,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Load a specified turn-based match.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -2333,14 +2603,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="loadMatchesByStatus(com.google.android.gms.common.api.GoogleApiClient, int, int[])"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a>&gt;
       </span>
       <span class="sympad">loadMatchesByStatus</span>
@@ -2348,12 +2618,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load turn-based matches for the current game. Matches with any specified turn
  status codes will be returned.
  <p>
@@ -2419,6 +2692,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load turn-based matches for the current game. Matches with any specified turn
  status codes will be returned.
  <p>
@@ -2478,6 +2754,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Register a listener to intercept incoming match updates for the currently signed-in user. If
  a listener is registered by this method, the incoming match update will not generate a status
  bar notification as long as this client remains connected.
@@ -2530,6 +2809,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Create a rematch of a previously completed turn-based match. The new match will have the same
  participants as the previous match. Note that only one rematch may be created from any single
@@ -2587,6 +2869,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Update a match with new turn data. The participant that is passed in as the pending
  participant will be notified that it is their turn to take action. If no pending participant
@@ -2659,6 +2944,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Update a match with new turn data. The participant that is passed in as the pending
  participant will be notified that it is their turn to take action. If no pending participant
@@ -2746,6 +3034,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Update a match with new turn data. The participant that is passed in as the pending
  participant will be notified that it is their turn to take action. If no pending participant
  is provided and the match has available auto-match slots, the match will wait for additional
@@ -2831,6 +3122,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters this client's match update listener, if any. Any new match updates will generate
  status bar notifications as normal.

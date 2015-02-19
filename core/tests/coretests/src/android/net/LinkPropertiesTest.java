@@ -31,8 +31,10 @@ public class LinkPropertiesTest extends TestCase {
             "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
     private static InetAddress DNS1 = NetworkUtils.numericToInetAddress("75.208.7.1");
     private static InetAddress DNS2 = NetworkUtils.numericToInetAddress("69.78.7.1");
+    private static InetAddress DNS6 = NetworkUtils.numericToInetAddress("2001:4860:4860::8888");
     private static InetAddress GATEWAY1 = NetworkUtils.numericToInetAddress("75.208.8.1");
     private static InetAddress GATEWAY2 = NetworkUtils.numericToInetAddress("69.78.8.1");
+    private static InetAddress GATEWAY6 = NetworkUtils.numericToInetAddress("fe80::6:0000:613");
     private static String NAME = "qmi0";
     private static int MTU = 1500;
 
@@ -338,14 +340,14 @@ public class LinkPropertiesTest extends TestCase {
             assertFalse("newname".equals(link.getInterfaceName()));
         }
 
-        assertTrue(rmnet0.removeStackedLink(clat4));
+        assertTrue(rmnet0.removeStackedLink("clat4"));
         assertEquals(0, rmnet0.getStackedLinks().size());
         assertEquals(1, rmnet0.getAddresses().size());
         assertEquals(1, rmnet0.getLinkAddresses().size());
         assertEquals(1, rmnet0.getAllAddresses().size());
         assertEquals(1, rmnet0.getAllLinkAddresses().size());
 
-        assertFalse(rmnet0.removeStackedLink(clat4));
+        assertFalse(rmnet0.removeStackedLink("clat4"));
     }
 
     private LinkAddress getFirstLinkAddress(LinkProperties lp) {
@@ -370,7 +372,7 @@ public class LinkPropertiesTest extends TestCase {
         assertTrue(stacked.hasGlobalIPv6Address());
         assertFalse(lp.hasIPv4Address());
         assertFalse(lp.hasGlobalIPv6Address());
-        lp.removeStackedLink(stacked);
+        lp.removeStackedLink("stacked");
         assertFalse(lp.hasIPv4Address());
         assertFalse(lp.hasGlobalIPv6Address());
 
@@ -452,5 +454,48 @@ public class LinkPropertiesTest extends TestCase {
 
         lp2.setLinkAddresses(lp.getLinkAddresses());
         assertTrue(lp.equals(lp));
+    }
+
+    @SmallTest
+    public void testIsProvisioned() {
+        LinkProperties lp4 = new LinkProperties();
+        assertFalse("v4only:empty", lp4.isProvisioned());
+        lp4.addLinkAddress(LINKADDRV4);
+        assertFalse("v4only:addr-only", lp4.isProvisioned());
+        lp4.addDnsServer(DNS1);
+        assertFalse("v4only:addr+dns", lp4.isProvisioned());
+        lp4.addRoute(new RouteInfo(GATEWAY1));
+        assertTrue("v4only:addr+dns+route", lp4.isProvisioned());
+
+        LinkProperties lp6 = new LinkProperties();
+        assertFalse("v6only:empty", lp6.isProvisioned());
+        lp6.addLinkAddress(LINKADDRV6LINKLOCAL);
+        assertFalse("v6only:fe80-only", lp6.isProvisioned());
+        lp6.addDnsServer(DNS6);
+        assertFalse("v6only:fe80+dns", lp6.isProvisioned());
+        lp6.addRoute(new RouteInfo(GATEWAY6));
+        assertFalse("v6only:fe80+dns+route", lp6.isProvisioned());
+        lp6.addLinkAddress(LINKADDRV6);
+        assertTrue("v6only:fe80+global+dns+route", lp6.isProvisioned());
+        lp6.removeLinkAddress(LINKADDRV6LINKLOCAL);
+        assertTrue("v6only:global+dns+route", lp6.isProvisioned());
+
+        LinkProperties lp46 = new LinkProperties();
+        lp46.addLinkAddress(LINKADDRV4);
+        lp46.addLinkAddress(LINKADDRV6);
+        lp46.addDnsServer(DNS1);
+        lp46.addDnsServer(DNS6);
+        assertFalse("dualstack:missing-routes", lp46.isProvisioned());
+        lp46.addRoute(new RouteInfo(GATEWAY1));
+        assertTrue("dualstack:v4-provisioned", lp46.isProvisioned());
+        lp6.addRoute(new RouteInfo(GATEWAY6));
+        assertTrue("dualstack:both-provisioned", lp46.isProvisioned());
+
+        // A link with an IPv6 address and default route, but IPv4 DNS server.
+        LinkProperties mixed = new LinkProperties();
+        mixed.addLinkAddress(LINKADDRV6);
+        mixed.addDnsServer(DNS1);
+        mixed.addRoute(new RouteInfo(GATEWAY6));
+        assertFalse("mixed:addr6+route6+dns4", mixed.isProvisioned());
     }
 }

@@ -19,6 +19,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.vpndialogs">
 
+    <uses-permission android:name="android.permission.CONTROL_VPN" />
+
     <application android:label="VpnDialogs"
             android:allowBackup="false" >
         <activity android:name=".ConfirmDialog"

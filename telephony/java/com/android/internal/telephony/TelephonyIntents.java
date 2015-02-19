@@ -274,6 +274,15 @@ public class TelephonyIntents {
     public static final String ACTION_CARRIER_SETUP = "android.intent.action.ACTION_CARRIER_SETUP";
 
     /**
+     * <p>Broadcast Action: Indicates that the action is forbidden by network.
+     * <p class="note">
+     * This is for the OEM applications to understand about possible provisioning issues.
+     * Used in OMA-DM applications.
+     */
+    public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION
+            = "android.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
+
+    /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are
      * of the form {@code *#*#<code>#*#*}. The intent will have the data URI:
      *
@@ -312,27 +321,7 @@ public class TelephonyIntents {
     public static final String EXTRA_SPN        = "spn";
 
     /**
-     * <p>Broadcast Action: It indicates one column of a siminfo record has been changed
-     * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>columnName</em> - The siminfo column that is updated.</li>
-     *   <li><em>stringContent</em> - The string value of the updated column.</li>
-     *   <li><em>intContent</em> - The int value of the updated column.</li>
-     * </ul>
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SIMINFO_CONTENT_CHANGE
-            = "android.intent.action.ACTION_SIMINFO_CONTENT_CHANGE";
-
-    /**
      * <p>Broadcast Action: It indicates one column of a subinfo record has been changed
-     * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>columnName</em> - The siminfo column that is updated.</li>
-     *   <li><em>stringContent</em> - The string value of the updated column.</li>
-     *   <li><em>intContent</em> - The int value of the updated column.</li>
-     * </ul>
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -340,27 +329,13 @@ public class TelephonyIntents {
             = "android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE";
 
     /**
-     * <p>Broadcast Action: It indicates siminfo update is completed when SIM inserted state change
-     * The intent will have the following extra values:</p>
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SIMINFO_UPDATED
-            = "android.intent.action.ACTION_SIMINFO_UPDATED";
-
-    /**
      * <p>Broadcast Action: It indicates subinfo record update is completed
      * when SIM inserted state change
-     * The intent will have the following extra values:</p>
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
     public static final String ACTION_SUBINFO_RECORD_UPDATED
             = "android.intent.action.ACTION_SUBINFO_RECORD_UPDATED";
-
-    public static final String EXTRA_COLUMN_NAME = "columnName";
-    public static final String EXTRA_INT_CONTENT = "intContent";
-    public static final String EXTRA_STRING_CONTENT = "stringContent";
 
     /**
      * Broadcast Action: The default subscription has changed.  This has the following
@@ -401,4 +376,23 @@ public class TelephonyIntents {
      */
     public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED
             = "android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED";
+
+    /*
+     * Broadcast Action: An attempt to set phone radio type and access technology has changed.
+     * This has the following extra values:
+     * <ul>
+     *   <li><em>phones radio access family </em> - A RadioAccessFamily
+     *   array, contain phone ID and new radio access family for each phone.</li>
+     * </ul>
+     */
+    public static final String ACTION_SET_RADIO_CAPABILITY_DONE =
+            "android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE";
+
+    public static final String EXTRA_RADIO_ACCESS_FAMILY = "rafs";
+
+    /*
+     * Broadcast Action: An attempt to set phone radio access family has failed.
+     */
+    public static final String ACTION_SET_RADIO_CAPABILITY_FAILED =
+            "android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED";
 }

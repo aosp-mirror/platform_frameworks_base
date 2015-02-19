@@ -47,7 +47,9 @@ public final class PdfManipulationService extends Service {
     public static final String ACTION_GET_EDITOR =
             "com.android.printspooler.renderer.ACTION_GET_EDITOR";
 
-    public static final int MALFORMED_PDF_FILE_ERROR = -2;
+    public static final int ERROR_MALFORMED_PDF_FILE = -2;
+
+    public static final int ERROR_SECURE_PDF_FILE = -3;
 
     private static final String LOG_TAG = "PdfManipulationService";
     private static final boolean DEBUG = false;
@@ -87,10 +89,14 @@ public final class PdfManipulationService extends Service {
                     }
                     mRenderer = new PdfRenderer(source);
                     return mRenderer.getPageCount();
-                } catch (IOException|IllegalStateException e) {
+                } catch (IOException | IllegalStateException e) {
                     IoUtils.closeQuietly(source);
                     Log.e(LOG_TAG, "Cannot open file", e);
-                    return MALFORMED_PDF_FILE_ERROR;
+                    return ERROR_MALFORMED_PDF_FILE;
+                } catch (SecurityException e) {
+                    IoUtils.closeQuietly(source);
+                    Log.e(LOG_TAG, "Cannot open file", e);
+                    return ERROR_SECURE_PDF_FILE;
                 }
             }
         }
@@ -217,7 +223,7 @@ public final class PdfManipulationService extends Service {
                     }
                     mEditor = new PdfEditor(source);
                     return mEditor.getPageCount();
-                } catch (IOException|IllegalStateException e) {
+                } catch (IOException | IllegalStateException e) {
                     IoUtils.closeQuietly(source);
                     Log.e(LOG_TAG, "Cannot open file", e);
                     throw new RemoteException(e.toString());
@@ -241,6 +247,111 @@ public final class PdfManipulationService extends Service {
                     for (int j = range.getEnd(); j >= range.getStart(); j--) {
                         mEditor.removePage(j);
                     }
+                }
+            }
+        }
+
+        @Override
+        public void applyPrintAttributes(PrintAttributes attributes) {
+            synchronized (mLock) {
+                throwIfNotOpened();
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "applyPrintAttributes()");
+                }
+
+                Rect mediaBox = new Rect();
+                Rect cropBox = new Rect();
+                Matrix transform = new Matrix();
+
+                final boolean contentPortrait = attributes.getMediaSize().isPortrait();
+
+                final boolean layoutDirectionRtl = getResources().getConfiguration()
+                        .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+
+                // We do not want to rotate the media box, so take into account orientation.
+                final int dstWidthPts = contentPortrait
+                        ? pointsFromMils(attributes.getMediaSize().getWidthMils())
+                        : pointsFromMils(attributes.getMediaSize().getHeightMils());
+                final int dstHeightPts = contentPortrait
+                        ? pointsFromMils(attributes.getMediaSize().getHeightMils())
+                        : pointsFromMils(attributes.getMediaSize().getWidthMils());
+
+                final boolean scaleForPrinting = mEditor.shouldScaleForPrinting();
+
+                final int pageCount = mEditor.getPageCount();
+                for (int i = 0; i < pageCount; i++) {
+                    if (!mEditor.getPageMediaBox(i, mediaBox)) {
+                        Log.e(LOG_TAG, "Malformed PDF file");
+                        return;
+                    }
+
+                    final int srcWidthPts = mediaBox.width();
+                    final int srcHeightPts = mediaBox.height();
+
+                    // Update the media box with the desired size.
+                    mediaBox.right = dstWidthPts;
+                    mediaBox.bottom = dstHeightPts;
+                    mEditor.setPageMediaBox(i, mediaBox);
+
+                    // Make sure content is top-left after media box resize.
+                    transform.setTranslate(0, srcHeightPts - dstHeightPts);
+
+                    // Rotate the content if in landscape.
+                    if (!contentPortrait) {
+                        transform.postRotate(270);
+                        transform.postTranslate(0, dstHeightPts);
+                    }
+
+                    // Scale the content if document allows it.
+                    final float scale;
+                    if (scaleForPrinting) {
+                        if (contentPortrait) {
+                            scale = Math.min((float) dstWidthPts / srcWidthPts,
+                                    (float) dstHeightPts / srcHeightPts);
+                            transform.postScale(scale, scale);
+                        } else {
+                            scale = Math.min((float) dstWidthPts / srcHeightPts,
+                                    (float) dstHeightPts / srcWidthPts);
+                            transform.postScale(scale, scale, mediaBox.left, mediaBox.bottom);
+                        }
+                    } else {
+                        scale = 1.0f;
+                    }
+
+                    // Update the crop box relatively to the media box change, if needed.
+                    if (mEditor.getPageCropBox(i, cropBox)) {
+                        cropBox.left = (int) (cropBox.left * scale + 0.5f);
+                        cropBox.top = (int) (cropBox.top * scale + 0.5f);
+                        cropBox.right = (int) (cropBox.right * scale + 0.5f);
+                        cropBox.bottom = (int) (cropBox.bottom * scale + 0.5f);
+                        cropBox.intersect(mediaBox);
+                        mEditor.setPageCropBox(i, cropBox);
+                    }
+
+                    // If in RTL mode put the content in the logical top-right corner.
+                    if (layoutDirectionRtl) {
+                        final float dx = contentPortrait
+                                ? dstWidthPts - (int) (srcWidthPts * scale + 0.5f) : 0;
+                        final float dy = contentPortrait
+                                ? 0 : - (dstHeightPts - (int) (srcWidthPts * scale + 0.5f));
+                        transform.postTranslate(dx, dy);
+                    }
+
+                    // Adjust the physical margins if needed.
+                    Margins minMargins = attributes.getMinMargins();
+                    final int paddingLeftPts = pointsFromMils(minMargins.getLeftMils());
+                    final int paddingTopPts = pointsFromMils(minMargins.getTopMils());
+                    final int paddingRightPts = pointsFromMils(minMargins.getRightMils());
+                    final int paddingBottomPts = pointsFromMils(minMargins.getBottomMils());
+
+                    Rect clip = new Rect(mediaBox);
+                    clip.left += paddingLeftPts;
+                    clip.top += paddingTopPts;
+                    clip.right -= paddingRightPts;
+                    clip.bottom -= paddingBottomPts;
+
+                    // Apply the accumulated transforms.
+                    mEditor.setTransformAndClip(i, transform, clip);
                 }
             }
         }

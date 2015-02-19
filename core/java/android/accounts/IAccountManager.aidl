@@ -37,8 +37,13 @@ interface IAccountManager {
     void hasFeatures(in IAccountManagerResponse response, in Account account, in String[] features);
     void getAccountsByFeatures(in IAccountManagerResponse response, String accountType, in String[] features);
     boolean addAccountExplicitly(in Account account, String password, in Bundle extras);
-    void removeAccount(in IAccountManagerResponse response, in Account account);
-    void removeAccountAsUser(in IAccountManagerResponse response, in Account account, int userId);
+    void removeAccount(in IAccountManagerResponse response, in Account account,
+        boolean expectActivityLaunch);
+    void removeAccountAsUser(in IAccountManagerResponse response, in Account account,
+        boolean expectActivityLaunch, int userId);
+    boolean removeAccountExplicitly(in Account account);
+    void copyAccountToUser(in IAccountManagerResponse response, in Account account,
+        int userFrom, int userTo);
     void invalidateAuthToken(String accountType, String authToken);
     String peekAuthToken(in Account account, String authTokenType);
     void setAuthToken(in Account account, String authTokenType, String authToken);

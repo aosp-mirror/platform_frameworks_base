@@ -570,7 +570,7 @@ public:
     }
 
     bool hasShadow() const {
-        return getZ() >= 0.0f
+        return getZ() > 0.0f
                 && getOutline().getPath() != NULL
                 && getOutline().getAlpha() != 0.0f;
     }

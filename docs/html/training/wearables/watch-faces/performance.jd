@@ -1,0 +1,160 @@
+page.title=Optimizing Performance and Battery Life
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ReduceSize">Reduce the Size of Your Bitmap Assets</a></li>
+  <li><a href="#CombineBitmaps">Combine Bitmap Assets</a></li>
+  <li><a href="#AntiAlias">Disable Anti-Aliasing when Drawing Scaled Bitmaps</a></li>
+  <li><a href="#OutDrawing">Move Expensive Operations Outside the Drawing Method</a></li>
+  <li><a href="#SavePower">Follow Best Practices to Save Power</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>In addition to accommodating notification cards and system indicators, you need to ensure that
+the animations in your watch face run smoothly and that your service does not perform unnecessary
+computations. Watch faces in Android Wear run continuously on the device, so it is critical
+that your watch face uses power efficiently.</p>
+
+<p>This lesson provides some tips to speed up your animations and to measure and conserve
+power on the device.</p>
+
+
+
+<h2 id="ReduceSize">Reduce the Size of Your Bitmap Assets</h2>
+
+<p>Many watch faces consist of a background image and other graphic assets that are transformed
+and overlapped on top of the background image, such as clock hands and other elements of the design
+that move over time. Typically these graphic elements are rotated (and sometimes scaled) inside the
+<code>Engine.onDraw()</code> method every time the system redraws the watch face, as described in
+<a href="{@docRoot}training/wearables/watch-faces/drawing.html#Drawing">Draw Your Watch
+Face</a>.</p>
+
+<p>The larger these graphic assets are, the more computationally expensive it is to transform them.
+Transforming large graphic assets in the <code>Engine.onDraw()</code> method drastically reduces
+the frame rate at which the system can run your animations.</p>
+
+<div id="fig1" style="float:right;width:250px;margin-left:25px">
+<img src="{@docRoot}training/wearables/watch-faces/images/ClockHandFull.png" alt=""
+     width="180" height="180"/>
+<img src="{@docRoot}training/wearables/watch-faces/images/ClockHandCropped.png" alt=""
+     width="15" height="65" style="margin-left:25px"/>
+<p class="img-caption">
+<strong>Figure 1.</strong> Clock hands can be cropped to remove extra pixels.</p>
+</div>
+
+<p>To improve the performance of your watch face:</p>
+
+<ul>
+<li>Do not use graphic elements that are larger than you need.</li>
+<li>Remove extra transparent pixels around the edges.</li>
+</ul>
+
+<p>The example clock hand on the left side of <a href="#fig1">Figure 1</a> can be reduced in size
+by 97&#37;.</p>
+
+<p>Reducing the size of your bitmap assets as described in this section not only improves
+the performance of your animations, but it also saves power.</p>
+
+
+
+<h2 id="CombineBitmaps">Combine Bitmap Assets</h2>
+
+<p>If you have bitmaps that are often drawn together, consider combining them into the same
+graphic asset. You can often combine the background image in interactive mode with the tick
+marks to avoid drawing two full-screen bitmaps every time the system redraws the watch face.</p>
+
+
+
+<h2 id="AntiAlias">Disable Anti-Aliasing when Drawing Scaled Bitmaps</h2>
+
+<p>When you draw a scaled bitmap on the {@link android.graphics.Canvas} object using the {@link
+android.graphics.Canvas#drawBitmap(android.graphics.Bitmap, float, float, android.graphics.Paint)
+Canvas.drawBitmap()} method, you can provide a {@link android.graphics.Paint} instance to configure
+several options. To improve performance, disable anti-aliasing using the {@link
+android.graphics.Paint#setAntiAlias setAntiAlias()} method, since this option does not have any
+effect on bitmaps.</p>
+
+<div id="fig2" style="float:right;width:250px;margin-left:40px;margin-top:12px">
+<img src="{@docRoot}training/wearables/watch-faces/images/BitmapFilterDisabled.png" alt=""
+     width="70" height="70" style="margin-left:20px"/>
+<img src="{@docRoot}training/wearables/watch-faces/images/BitmapFilterEnabled.png" alt=""
+     width="70" height="70" style="margin-left:20px"/>
+<p class="img-caption"><strong>Figure 2.</strong> Example of bitmap filtering disabled (left) and
+enabled (right).</p>
+</div>
+
+<h3 id="BitmapFiltering">Use bitmap filtering</h3>
+
+<p>For bitmap assets that you draw on top of other elements, enable bitmap filtering on the same
+{@link android.graphics.Paint} instance using the {@link android.graphics.Paint#setFilterBitmap
+setFilterBitmap()} method. <a href="#fig2">Figure 2</a> shows a magnified view of a clock hand with
+and without bitmap filtering.</p>
+
+
+
+<h2 id="OutDrawing">Move Expensive Operations Outside the Drawing Method</h2>
+
+<p>The system calls the <code>Engine.onDraw()</code> method every time it redraws your watch
+face, so you should only include operations that are strictly required to update the watch
+face inside this method to improve performance.<p>
+
+<p>When possible, avoid performing these operations inside the <code>onDraw()</code> method:</p>
+
+<ul>
+<li>Loading images and other resources.</li>
+<li>Resizing images.</li>
+<li>Allocating objects.</li>
+<li>Performing computations whose result does not change between frames.</li>
+</ul>
+
+<p>You can usually perform these operations in the <code>Engine.onCreate()</code> method instead.
+You can resize images ahead of time in the {@link
+android.service.wallpaper.WallpaperService.Engine#onSurfaceChanged(android.view.SurfaceHolder, int, int, int)
+Engine.onSurfaceChanged()} method, which provides you with the size of the canvas.</p>
+
+<p>To analyze the performance of your watch face, use the Android Device Monitor. In particular,
+ensure that the execution time for your <code>Engine.onDraw()</code> implementation is short and
+consistent across invocations. For more information, see
+<a href="{@docRoot}tools/debugging/ddms.html">Using DDMS</a>.</p>
+
+
+
+<h2 id="SavePower">Follow Best Practices to Save Power</h2>
+
+<p>In addition to the techniques described in the previous sections, follow the best
+practices in this section to reduce the power consumption of your watch face.</p>
+
+<h3>Reduce the frame rate of animations</h3>
+
+<p>Animations are often computationally expensive and consume a significant amount of power. Most
+animations look fluid at 30 frames per second, so you should avoid running your animations
+at a higher frame rate.</p>
+
+<h3>Let the CPU sleep</h3>
+
+<p>Animations and small changes to the contents of the watch face wake up the CPU. Your watch
+face should let the CPU sleep in between animations. For example, you can use short bursts of
+animation every second in interactive mode and then let the CPU sleep until the next second.
+Letting the CPU sleep often, even briefly, can significantly reduce power consumption.</p>
+
+<p>To maximize battery life, use animations sparingly. Even a blinking colon wakes up the CPU with
+every blink and hurts battery life.</p>
+
+<h3>Monitor power consumption</h3>
+
+<p>The <a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">
+Android Wear companion app</a> lets developers and users see how much battery different processes
+on the wearable device are consuming under <strong>Settings</strong> > <strong>Watch
+battery</strong>.</p>
+
+<p>For more information about new features in Android 5.0 that help you improve battery life,
+see <a href="{@docRoot}about/versions/android-5.0.html#Power">Project Volta</a>.</p>

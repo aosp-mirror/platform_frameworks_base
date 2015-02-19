@@ -90,10 +90,9 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
     }
 
     private void sendSystemAudioModeRequestInternal() {
-        int avrPhysicalAddress = tv().getAvrDeviceInfo().getPhysicalAddress();
         HdmiCecMessage command = HdmiCecMessageBuilder.buildSystemAudioModeRequest(
                 getSourceAddress(),
-                mAvrLogicalAddress, avrPhysicalAddress, mTargetAudioStatus);
+                mAvrLogicalAddress, getSystemAudioModeRequestParam(), mTargetAudioStatus);
         sendCommand(command, new HdmiControlService.SendMessageCallback() {
             @Override
             public void onSendCompleted(int error) {
@@ -106,6 +105,20 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
         });
         mState = STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE;
         addTimer(mState, mTargetAudioStatus ? ON_TIMEOUT_MS : OFF_TIMEOUT_MS);
+    }
+
+    private int getSystemAudioModeRequestParam() {
+        // <System Audio Mode Request> takes the physical address of the source device
+        // as a parameter. Get it from following candidates, in the order listed below:
+        // 1) physical address of the active source
+        // 2) active routing path
+        // 3) physical address of TV
+        if (tv().getActiveSource().isValid()) {
+            return tv().getActiveSource().physicalAddress;
+        }
+        int param = tv().getActivePath();
+        return param != Constants.INVALID_PHYSICAL_ADDRESS
+                ? param : Constants.PATH_INTERNAL;
     }
 
     private void handleSendSystemAudioModeRequestTimeout() {
@@ -125,6 +138,9 @@ abstract class SystemAudioAction extends HdmiCecFeatureAction {
 
     @Override
     final boolean processCommand(HdmiCecMessage cmd) {
+        if (cmd.getSource() != mAvrLogicalAddress) {
+            return false;
+        }
         switch (mState) {
             case STATE_WAIT_FOR_SET_SYSTEM_AUDIO_MODE:
                 if (cmd.getOpcode() == Constants.MESSAGE_FEATURE_ABORT

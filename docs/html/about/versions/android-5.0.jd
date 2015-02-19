@@ -15,16 +15,10 @@ sdk.platform.apiLevel=21
 
 <ol id="toc44" class="hide-nested">
   <li><a href="#ApiLevel">Update your target API level</a></li>
-  <li><a href="#Behaviors">Important Behavior Changes</a>
-    <ol>
-      <li><a href="#ART">If you haven't tested your app against the new Android Runtime (ART)...</a></li>
-      <li><a href="#BehaviorNotifications">If your app implements notifications...</a></li>
-      <li><a href="#BehaviorMediaControl">If your app uses RemoteControlClient...</a></li>
-<li><a href="#BehaviorGetRecentTasks">If your app uses getRecentTasks()...</a></li>
-<li><a href="#64BitSupport">If you are using the Android Native Development Kit (NDK)...</a></li>
-<li><a href="#BindService">If your app binds to a Service...</a></li>
-    </ol>
-  </li>
+
+
+
+
   <li><a href="#UI">User Interface</a>
     <ol>
       <li><a href="#MaterialDesign">Material design support</a></li>
@@ -112,6 +106,13 @@ sdk.platform.apiLevel=21
 <li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
 </ol>
 
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/android-5.0-changes.html">Android 5.0 Behavior Changes</a> </li>
+<li><a href="{@docRoot}about/versions/lollipop.html">Android Lollipop Highlights</a> </li>
+</ol>
+
+
 </div>
 </div>
 
@@ -121,27 +122,24 @@ sdk.platform.apiLevel=21
   offers new features for users and app developers. This document provides an
   introduction to the most notable new APIs.</p>
 
+<p>
+  If you have a published app, make sure to check out the <a href=
+  "{@docRoot}about/versions/android-5.0-changes.html">Android 5.0 Behavior
+  Changes</a> that you should account for in your app. These behavior changes
+  may affect your app on Android 5.0 devices, even if you are not using new APIs
+  or targeting new functionality.
+</p>
+
 <p>For a high-level look at the new platform features, instead
 see the
 <a href="{@docRoot}about/versions/lollipop.html">Android Lollipop
 highlights</a>.</p>
-
 
 <h3 id="Start">Start developing</h3>
 
 <p>To start building apps for Android 5.0, you must first <a href="{@docRoot}sdk/index.html">get
 the Android SDK</a>. Then use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
 to download the Android 5.0 SDK Platform and System Images.</p>
-
-<p style="
-    padding: 10px;
-    background: #eee;
-    width: 445px;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-">To test your apps on a real device, flash a Nexus 5 or Nexus 7 with the <br>
-<a href="/preview/index.html#Start"><b>ANDROID PREVIEW SYSTEM IMAGE</b></a>.</p>
-
 
 
 <h3 id="ApiLevel">Update your target API level</h3>
@@ -165,212 +163,18 @@ Different Platform Versions</a>.</p>
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">What is API
 Level?</a></p>
 
-<h2 id="Behaviors">Important Behavior Changes</h2>
+<h3 id="Behaviors">Important behavior changes</h3>
 
-<p>If you have previously published an app for Android, be aware that your app
-  might be affected by changes in Android 5.0.</p>
+<p>If you have previously published an app for Android, be aware that your app might be affected by changes in Android 5.0.</p>
 
-<h3 id="ART">If you haven't tested your app against the new Android Runtime (ART)...</h3>
+<p>Please see <a href="{@docRoot}about/versions/android-5.0-changes.html">Android 5.0 Changes</a> for complete information.</p>
 
-<p>The 4.4 release introduced a new, experimental Android runtime, ART. Under
-4.4, ART was optional, and the default runtime remained Dalvik. With Android
-5.0, ART is now the default runtime.</p>
-
-<p>For an overview of ART's new features, see
-<a href="https://source.android.com/devices/tech/dalvik/art.html">Introducing
-ART</a>. Some of the major new features are:</p>
-
-<ul>
-  <li>Ahead-of-time (AOT) compilation</li>
-  <li>Improved garbage collection (GC)</li>
-  <li>Improved debugging support</li>
-</ul>
-
-<p>Most Android apps should just work without any changes under ART. However, some
-techniques that work on Dalvik do not work on ART. For information about the
-most important issues, see
-<a href="{@docRoot}guide/practices/verifying-apps-art.html">Verifying App
-Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
-
-<ul>
-  <li>Your app uses Java Native Interface (JNI) to run C/C++ code.</li>
-  <li>You use development tools that generate non-standard code (such as some
-      obfuscators).</li>
-  <li>You use techniques that are incompatible with compacting garbage
-      collection. (ART does not currently implement compacting GC, but
-      compacting GC is under development in the Android Open Source
-      Project.)</li>
-</ul>
-
-<h3 id="BehaviorNotifications">If your app implements notifications...</h3>
-
-<p>Make sure your notifications take these Android 5.0 changes into account.
- To learn more about designing your notifications for Android 5.0 and higher,
- see the <a href="{@docRoot}design/patterns/notifications.html">notifications design guide</a>.
-</p>
-
-<h4 id="NotificationsMaterialDesignStyle">Material design style</h4>
-<p>Notifications are drawn with dark text atop white (or very light) backgrounds
-  to match the new material design widgets. Make sure that all your
-  notifications look right with the new color scheme. If your notifications
-look wrong, fix them:</p>
-
-<ul>
-  <li>Use {@link android.app.Notification.Builder#setColor(int) setColor()}
-    to set an accent color in a circle behind your icon image. </li>
-  <li>Update or remove assets that involve color. The system ignores all
-    non-alpha channels in action icons and in the main notification icon. You
-    should assume that these icons will be alpha-only. The system draws
-    notification icons in white and action icons in dark gray.</li>
-</ul>
-
-<h4 id="NotificationsSoundVibration">Sound and vibration</h4>
-<p>If you are currently adding sounds and vibrations to your notifications by
-using the {@link android.media.Ringtone}, {@link android.media.MediaPlayer},
-or {@link android.os.Vibrator} classes, remove this code so that
-the system can present notifications correctly in
-<em>priority</em> mode. Instead, use
-{@link android.app.Notification.Builder} methods to add sounds and
-vibration.</p>
-
-<p>Setting the device to
-{@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} now
-causes the device to enter the new priority mode. The device leaves priority
-mode if you set it to
-{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} or
-{@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}.</p>
-
-<p>Previously, Android used {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC}
-as the master stream to control volume on tablet devices. In Android 5.0, the
-master volume stream for both phone and tablet devices is now unified, and
-is controlled by {@link android.media.AudioManager#STREAM_RING STREAM_RING} or
-{@link android.media.AudioManager#STREAM_NOTIFICATION STREAM_NOTIFICATION}.</p>
-
-<h4 id="NotificationsLockscreenVisibility">Lock screen visibility</h4>
-<p>By default, notifications now appear on the user's lock screen in Android 5.0.
-Users can choose to protect sensitive information from being exposed, in which
-case the system automatically redacts the text displayed by the notification. To
-customize this redacted notification, use
-{@link android.app.Notification.Builder#setPublicVersion(android.app.Notification)
-  setPublicVersion()}.</p>
-<p>If the notification does not contain personal information, or if you want to
-allow media playback control on the notification, call the
-{@link android.app.Notification.Builder#setVisibility(int) setVisibility()}
-method and set the notification's visibility level to
-{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}.
-</p>
-
-<h4 id="NotificationsMediaPlayback">Media playback</h4>
-<p>If you are implementing notifications that present media playback
-status or transport controls, consider using the new
-{@link android.app.Notification.MediaStyle} template instead of a custom
-{@link android.widget.RemoteViews.RemoteView} object. Whichever approach you
-choose, make sure to set the notification's visibility to
-{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC} so that
-your controls are accessible from the lock screen. Note that beginning in
-Android 5.0, the system no longer shows
-{@link android.media.RemoteControlClient} objects on the lock screen. For more
-information, see
-<a href="#BehaviorMediaControl">If your app uses RemoteControlClient</a>.</p>
-
-<h4 id="NotificationsHeadsup">Heads-up notification</h4>
-<p>Notifications may now appear in a small floating window (also called a
-  heads-up notification) when the device is active (that is, the device is
-  unlocked and its screen is on). These notifications appear similar to the
-  compact form of your notification, except that the heads-up notification also
-  shows action buttons. Users can act on, or dismiss, a heads-up notification
-  without leaving the current app.</p>
-
-<p>Examples of conditions that may trigger heads-up notifications include:</p>
-
-<ul>
-  <li>The user's activity is in fullscreen mode (the app uses
-{@link android.app.Notification#fullScreenIntent})</li>
-  <li>The notification has high priority and uses ringtones or vibrations</li>
-</ul>
-
-<p>If your app implements notifications under any of those scenarios, make sure
-that heads-up notifications are presented correctly.</p>
-
-<h3 id="BehaviorMediaControl">If your app uses RemoteControlClient...</h3>
-<p>The {@link android.media.RemoteControlClient} class is now deprecated. Switch
-  to the new {@link android.media.session.MediaSession} API as
-  soon as possible.</p>
-
-<p>Lock screens in Android 5.0 do not show transport controls for
-your {@link android.media.session.MediaSession} or
-{@link android.media.RemoteControlClient}. Instead, your app can provide
-media playback control from the lock screen through a notification. This
-gives your app more control over the presentation of media buttons, while
-providing a consistent experience for users across locked and
-unlocked devices.</p>
-
-<p>Android 5.0 introduces a new
-{@link android.app.Notification.MediaStyle} template for this purpose.
-{@link android.app.Notification.MediaStyle} converts notification
-actions that you added with
-{@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence,
-  android.app.PendingIntent)
-Notification.Builder.addAction()} into compact buttons embedded in your app's
-media playback notifications. Pass your session token to the
-{@link android.app.Notification.MediaStyle#setMediaSession(android.media.session.MediaSession.Token)
-  setSession()} method to inform the system that this notification controls an
-  ongoing media session.</p>
-
-<p>Make sure to set the notification's visibility to
-  {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}
-  to mark the notification as safe to show on any lock screen (secure or
-  otherwise). For more information, see
-  <a href="#LockscreenNotifications">Lock screen notifications</a>.</p>
-
-<p>To display media playback controls if your app is running on the
-Android <a href="{@docRoot}tv/index.html">TV</a> or
-<a href="{@docRoot}wear/index.html">Wear</a> platform, implement the
-{@link android.media.session.MediaSession} class. You should also implement
-{@link android.media.session.MediaSession} if your app needs to receive media
-button events on Android devices.</p>
-
-<h3 id="BehaviorGetRecentTasks">If your app uses getRecentTasks()...</h3>
-
-<p>With the introduction of the new <em>concurrent documents and activities
-tasks</em> feature in Android 5.0 (see <a href="#Recents">Concurrent
-documents and activities in the recents screen</a> below),
-the {@link android.app.ActivityManager#getRecentTasks
-ActivityManager.getRecentTasks()} method is now deprecated to improve user
-privacy. For backward compatibility, this method still returns a small subset of
-its data, including the calling application’s own tasks and possibly some other
-non-sensitive tasks (such as Home). If your app is using this method to retrieve
-its own tasks, use {@link android.app.ActivityManager#getAppTasks() getAppTasks()}
-instead to retrieve that information.</p>
-
-<h3 id="64BitSupport">If you are using the Android Native Development Kit (NDK)...</h3>
-
-<p>Android 5.0 introduces support for 64-bit systems. The 64-bit enhancement
-  increases address space and improves performance, while still supporting
-  existing 32-bit apps fully. The 64-bit support also improves the performance of
-  OpenSSL for cryptography. In addition, this release introduces new native
-  media NDK APIs, as well as native OpenGL ES (GLES) 3.1 support.</p>
-
-<p>To use the 64-bit support provided in Android 5.0, download and install NDK
-  Revision 10c from the
-<a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK page</a>. Refer to the
-Revision 10c <a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">release notes</a>
-for more information about important changes and bug fixes to the NDK.</p>
-
-<h3 id="BindService">If your app binds to a Service...</h3>
-
-<p>The
-  {@link android.content.Context#bindService(android.content.Intent, android.content.ServiceConnection, int) Context.bindService()}
-  method now requires an explicit {@link android.content.Intent},
-and throws an exception if given an implicit intent.
-To ensure your app is secure, use an explicit intent when starting or binding
-your {@link android.app.Service}, and do not declare intent filters for the service.</p>
 
 <h2 id="UI">User Interface</h2>
 
 <h3 id="MaterialDesign">Material design support</h3>
 
-<p>The upcoming release adds support for Android's new <em>material design</em>
+<p>Android 5.0 adds support for Android's new <em>material design</em>
 style. You can create apps with material design that are visually dynamic and
 have UI element transitions that feel natural to users. This support includes:</p>
 
@@ -470,7 +274,7 @@ request the user’s permission by launching a screen capture dialog using an
 method.</p>
 
 <p>For an example of how to use the new APIs, see the {@code MediaProjectionDemo}
-class in the {@code ApiDemos} sample project.</p>
+class in the sample project.</p>
 
 <h2 id="Notifications">Notifications</h2>
 

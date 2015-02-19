@@ -582,9 +582,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
         pw.println("    [--details] [--full-details] [--current] [--hours N] [--last N]");
-        pw.println("    [--active] [--commit] [--reset] [--clear] [--write] [-h] [<package.name>]");
+        pw.println("    [--max N] --active] [--commit] [--reset] [--clear] [--write] [-h]");
+        pw.println("    [--start-testing] [--stop-testing] [<package.name>]");
         pw.println("  --checkin: perform a checkin: print and delete old committed states.");
-        pw.println("  --c: print only state in checkin format.");
+        pw.println("  -c: print only state in checkin format.");
         pw.println("  --csv: output data suitable for putting in a spreadsheet.");
         pw.println("  --csv-screen: on, off.");
         pw.println("  --csv-mem: norm, mod, low, crit.");
@@ -595,12 +596,15 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  --current: only dump current state.");
         pw.println("  --hours: aggregate over about N last hours.");
         pw.println("  --last: only show the last committed stats at index N (starting at 1).");
+        pw.println("  --max: for -a, max num of historical batches to print.");
         pw.println("  --active: only show currently active processes/services.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
         pw.println("  --reset: reset current stats, without committing.");
         pw.println("  --clear: clear all stats; does both --reset and deletes old stats.");
         pw.println("  --write: write current in-memory stats to disk.");
         pw.println("  --read: replace current stats with last-written stats.");
+        pw.println("  --start-testing: clear all stats and starting high frequency pss sampling.");
+        pw.println("  --stop-testing: stop high frequency pss sampling.");
         pw.println("  -a: print everything.");
         pw.println("  -h: print this help text.");
         pw.println("  <package.name>: optional name of package to filter output by.");
@@ -634,8 +638,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         boolean dumpDetails = false;
         boolean dumpFullDetails = false;
         boolean dumpAll = false;
+        boolean quit = false;
         int aggregateHours = 0;
         int lastIndex = 0;
+        int maxNum = 2;
         boolean activeOnly = false;
         String reqPackage = null;
         boolean csvSepScreenStats = false;
@@ -734,6 +740,20 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         dumpHelp(pw);
                         return;
                     }
+                } else if ("--max".equals(arg)) {
+                    i++;
+                    if (i >= args.length) {
+                        pw.println("Error: argument required for --max");
+                        dumpHelp(pw);
+                        return;
+                    }
+                    try {
+                        maxNum = Integer.parseInt(args[i]);
+                    } catch (NumberFormatException e) {
+                        pw.println("Error: --max argument not an int -- " + args[i]);
+                        dumpHelp(pw);
+                        return;
+                    }
                 } else if ("--active".equals(arg)) {
                     activeOnly = true;
                     currentOnly = true;
@@ -744,14 +764,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                         mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
                         writeStateLocked(true, true);
                         pw.println("Process stats committed.");
+                        quit = true;
                     }
-                    return;
                 } else if ("--reset".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
                         pw.println("Process stats reset.");
+                        quit = true;
                     }
-                    return;
                 } else if ("--clear".equals(arg)) {
                     synchronized (mAm) {
                         mProcessStats.resetSafely();
@@ -762,20 +782,32 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             }
                         }
                         pw.println("All process stats cleared.");
+                        quit = true;
                     }
-                    return;
                 } else if ("--write".equals(arg)) {
                     synchronized (mAm) {
                         writeStateSyncLocked();
                         pw.println("Process stats written.");
+                        quit = true;
                     }
-                    return;
                 } else if ("--read".equals(arg)) {
                     synchronized (mAm) {
                         readLocked(mProcessStats, mFile);
                         pw.println("Process stats read.");
+                        quit = true;
                     }
-                    return;
+                } else if ("--start-testing".equals(arg)) {
+                    synchronized (mAm) {
+                        mAm.setTestPssMode(true);
+                        pw.println("Started high frequency sampling.");
+                        quit = true;
+                    }
+                } else if ("--stop-testing".equals(arg)) {
+                    synchronized (mAm) {
+                        mAm.setTestPssMode(false);
+                        pw.println("Stopped high frequency sampling.");
+                        quit = true;
+                    }
                 } else if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
@@ -796,6 +828,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     dumpDetails = true;
                 }
             }
+        }
+
+        if (quit) {
+            return;
         }
 
         if (isCsv) {
@@ -892,7 +928,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             try {
                 ArrayList<String> files = getCommittedFiles(0, false, !isCheckin);
                 if (files != null) {
-                    for (int i=0; i<files.size(); i++) {
+                    int start = isCheckin ? 0 : (files.size() - maxNum);
+                    if (start < 0) {
+                        start = 0;
+                    }
+                    for (int i=start; i<files.size(); i++) {
                         if (DEBUG) Slog.d(TAG, "Retrieving state: " + files.get(i));
                         try {
                             AtomicFile file = new AtomicFile(new File(files.get(i)));
@@ -947,19 +987,6 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
         }
         if (!isCheckin) {
-            if (!currentOnly) {
-                if (sepNeeded) {
-                    pw.println();
-                }
-                pw.println("AGGREGATED OVER LAST 24 HOURS:");
-                dumpAggregatedStats(pw, 24, now, reqPackage, isCompact,
-                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
-                pw.println();
-                pw.println("AGGREGATED OVER LAST 3 HOURS:");
-                dumpAggregatedStats(pw, 3, now, reqPackage, isCompact,
-                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
-                sepNeeded = true;
-            }
             synchronized (mAm) {
                 if (isCompact) {
                     mProcessStats.dumpCheckinLocked(pw, reqPackage);
@@ -977,7 +1004,20 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                     } else {
                         mProcessStats.dumpSummaryLocked(pw, reqPackage, now, activeOnly);
                     }
+                    sepNeeded = true;
                 }
+            }
+            if (!currentOnly) {
+                if (sepNeeded) {
+                    pw.println();
+                }
+                pw.println("AGGREGATED OVER LAST 24 HOURS:");
+                dumpAggregatedStats(pw, 24, now, reqPackage, isCompact,
+                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
+                pw.println();
+                pw.println("AGGREGATED OVER LAST 3 HOURS:");
+                dumpAggregatedStats(pw, 3, now, reqPackage, isCompact,
+                        dumpDetails, dumpFullDetails, dumpAll, activeOnly);
             }
         }
     }

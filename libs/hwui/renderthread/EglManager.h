@@ -48,8 +48,10 @@ public:
     bool makeCurrent(EGLSurface surface);
     void beginFrame(EGLSurface surface, EGLint* width, EGLint* height);
     bool swapBuffers(EGLSurface surface);
+    void cancelFrame();
 
-    bool enableDirtyRegions(EGLSurface surface);
+    // Returns true iff the surface is now preserving buffers.
+    bool setPreserveBuffer(EGLSurface surface, bool preserve);
 
     void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize);
 
@@ -71,14 +73,20 @@ private:
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
 
-    const bool mRequestDirtyRegions;
-    bool mCanSetDirtyRegions;
+    const bool mAllowPreserveBuffer;
+    bool mCanSetPreserveBuffer;
 
     EGLSurface mCurrentSurface;
 
     sp<GraphicBuffer> mAtlasBuffer;
     int64_t* mAtlasMap;
     size_t mAtlasMapSize;
+
+    // Whether or not we are in the middle of drawing a frame. This is used
+    // to avoid switching surfaces mid-frame if requireGlContext() is called
+    // TODO: Need to be better about surface/context management so that this isn't
+    // necessary
+    bool mInFrame;
 };
 
 } /* namespace renderthread */

@@ -1,48 +1,49 @@
-page.title=Android SDK
-page.tags=download
+page.title=Download Android Studio and SDK Tools
+page.tags=sdk, android studio
 page.template=sdk
 header.hide=1
-page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
+page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-sdk.version=23.0.2
+studio.version=1.0.1
 
-sdk.linux32_bundle_download=adt-bundle-linux-x86-20140702.zip
-sdk.linux32_bundle_bytes=371950735
-sdk.linux32_bundle_checksum=5901c898bae4fe95476463a951b68404
+studio.linux_bundle_download=android-studio-ide-135.1641136-linux.zip
+studio.linux_bundle_bytes=243917559
+studio.linux_bundle_checksum=7c8f2d0cec21b98984cdba45ab5a25f26d67f23a
 
-sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20140702.zip
-sdk.linux64_bundle_bytes=372259418
-sdk.linux64_bundle_checksum=18a7c5778f96c0823349d465f58a0a36
+studio.mac_bundle_download=android-studio-ide-1641136.dmg
+studio.mac_bundle_bytes=245729073
+studio.mac_bundle_checksum=49506ba2cf6b56be4f7d07e6a00c4ec3ba2249d5
 
-sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20140702.zip
-sdk.mac64_bundle_bytes=320593642
-sdk.mac64_bundle_checksum=24c51a1ad96c5f6d43821d978bf9866d
+studio.win_bundle_exe_download=android-studio-bundle-135.1641136.exe
+studio.win_bundle_exe_bytes=868344232
+studio.win_bundle_exe_checksum=9c1c8ea6aa17fb74e0593c62fd48ee62a8950be7
 
-sdk.win32_bundle_download=adt-bundle-windows-x86-20140702.zip
-sdk.win32_bundle_bytes=370612741
-sdk.win32_bundle_checksum=9d2cf3770edbb49461788164af2331f3
+studio.win_notools_exe_download=android-studio-ide-135.1641136.exe
+studio.win_notools_exe_bytes=260272840
+studio.win_notools_exe_checksum=464d1c5497ab3d1bdef441365791ab36c89cd5ae
 
-sdk.win64_bundle_download=adt-bundle-windows-x86_64-20140702.zip
-sdk.win64_bundle_bytes=370763706
-sdk.win64_bundle_checksum=bfc3472a12173422ba044182ac466c13
+studio.win_bundle_download=android-studio-ide-135.1641136-windows.zip
+studio.win_bundle_bytes=246249059
+studio.win_bundle_checksum=6d6856aca83f6ff747ca40b10f70edfbbcccd91c
 
 
 
-sdk.linux_download=android-sdk_r23.0.2-linux.tgz
-sdk.linux_bytes=140827643
-sdk.linux_checksum=94a8c62086a7398cc0e73e1c8e65f71e
+sdk.linux_download=android-sdk_r24.0.2-linux.tgz
+sdk.linux_bytes=140097024
+sdk.linux_checksum=b6fd75e8b06b0028c2427e6da7d8a09d8f956a86
 
-sdk.mac_download=android-sdk_r23.0.2-macosx.zip
-sdk.mac_bytes=90996733
-sdk.mac_checksum=322787b0e6c629d926c28690c79ac0d8
+sdk.mac_download=android-sdk_r24.0.2-macosx.zip
+sdk.mac_bytes=87262823
+sdk.mac_checksum=3ab5e0ab0db5e7c45de9da7ff525dee6cfa97455
 
-sdk.win_download=android-sdk_r23.0.2-windows.zip
-sdk.win_bytes=141435413
-sdk.win_checksum=89f0576abf3f362a700767bdc2735c8a
+sdk.win_download=android-sdk_r24.0.2-windows.zip
+sdk.win_bytes=139473113
+sdk.win_checksum=51269c8336f936fc9b9538f9b9ca236b78fb4e4b
 
-sdk.win_installer=installer_r23.0.2-windows.exe
-sdk.win_installer_bytes=93015376
-sdk.win_installer_checksum=7be4b9c230341e1fb57c0f84a8df3994
+sdk.win_installer=installer_r24.0.2-windows.exe
+sdk.win_installer_bytes=91428280
+sdk.win_installer_checksum=edac14e1541e97d68821fa3a709b4ea8c659e676
+
 
 
 
@@ -52,22 +53,66 @@ sdk.win_installer_checksum=7be4b9c230341e1fb57c0f84a8df3994
 
 <style type="text/css">
   .offline {display:none;}
+  a.download-bundle-button {display:block;}
+  h2.feature {
+    padding-top:30px;
+    margin-top:0;
+    clear:both;
+  }
+  .feature-blurb {
+  margin:0px; font-size:16px; font-weight:300;
+  padding:40px 0 0 0;
+  }
+
+  .landing-button.green {
+    font-size:16px;
+    background-color:#90c653;
+    padding:8px 10px 10px;
+    margin:0;
+    width:206px;
+    text-align:center;
+  }
+
+  .landing-button.green:hover {
+    background-color:#85b84f;
+  }
+
+  .landing-button .small {
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 12px;
+    display: block;
+  }
+
+  h1.studio-logo {
+    width:226px;
+    height:78px;
+    display:block;
+    padding:0;
+    white-space: nowrap;
+    text-indent: -10000px;
+    font-size:0px;
+    background: url(../images/tools/studio-logo.png);
+    background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
+    background-size: 226px 78px;
+  }
+
 </style>
 
 
 
 
-<div style="position:relative;height:660px;">
+
+<div style="position:relative;">
 
 
-<div class="wrap" id="tos" style="position:absolute;display:none;width:inherit;">
+<div class="wrap" id="tos" style="display:none;width:inherit;height:650px">
 <div class="col-13" style="margin:0;">&nbsp;</div><!-- provides top margin for content -->
 
-<h1 id="tos-header" style="margin-top:0">Get the Android SDK</h1>
+<h1 id="tos-header" style="margin-top:0">Download</h1>
 
-
-
-<p class="sdk-terms-intro">Before installing the Android SDK, you must agree to the following terms and conditions.</p>
+<p class="sdk-terms-intro">Before installing Android Studio or the standalone SDK tools,
+you must agree to the following terms and conditions.</p>
 
 <div class="sdk-terms" onfocus="this.blur()">
 <h2 class="norule">Terms and Conditions</h2>
@@ -205,11 +250,11 @@ This is the Android Software Development Kit License Agreement
 
 
 
+
 <div id="next-steps" style="display:none;position:absolute;width:inherit">
   <p>You're just a few steps away from building apps for Android!</p>
-  <p>In a moment, you'll be redirected to <a
-  id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the
-  Android SDK</a>.</p>
+  <p>In a moment, you'll be redirected to
+  <a id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>.</p>
 
 </div><!-- end next-steps -->
 
@@ -220,12 +265,6 @@ This is the Android Software Development Kit License Agreement
 <input id="agree" type="checkbox" name="agree" value="1" onclick="onAgreeChecked()" />
 <label id="agreeLabel" for="agree">I have read and agree with the above terms and conditions</label>
 </p>
-<p id="bitpicker" style="display:none">
-  <input id="32" onclick="onAgreeChecked()" type="radio" name="bit" value="32">
-    <label for="32">32-bit</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <input id="64" onclick="onAgreeChecked()" type="radio" name="bit" value="64">
-    <label for="64">64-bit</label>
-</p>
 <p><a href="" class="button disabled" id="downloadForRealz" onclick="return onDownloadForRealz(this);"></a></p>
 </div>
 
@@ -234,146 +273,228 @@ This is the Android Software Development Kit License Agreement
 
 
 
-<div class="wrap" id="landing">
+
+
+
+<div id="landing">
 
 <div class="col-13">&nbsp;</div><!-- provides top margin for content -->
 
-<div class="col-6" style="margin-left:0">
+<img src="{@docRoot}images/tools/studio-hero.png"
+srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x"
+width="760" height="400" alt="" style="margin-bottom:80px" />
 
-<h1 style="margin-top:0">Get the Android SDK</h1>
+<div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
+<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
 
-<p>The Android SDK provides you the API libraries and developer tools necessary to build, test,
-  and debug apps for Android.</p>
+<p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
+width: 400px;text-align: center;">The official Android IDE</p>
 
-<p>Download the ADT Bundle to quickly start developing apps. It includes the essential Android
-SDK components and a version of the Eclipse IDE with built-in <b>ADT (Android Developer Tools)</b>
-to streamline your Android app development.</p>
-
-
-<!-- this appears when viewing the online docs -->
-<div class="online" style="margin-bottom:85px">
-
-<a class="big button subtitle" id="download-bundle-button"
-href="" style="width:295px;display:block;margin:25px 0" ></a>
-
-<p id="not-supported">Choose the SDK package for your OS from the table below.</p>
-
-
-  <p>With a single download, the Eclipse ADT bundle
-includes everything you need to begin developing apps:</p>
-<ul>
-<li>Eclipse + ADT plugin</li>
-<li>Android SDK Tools</li>
-<li>Android Platform-tools</li>
-<li>A version of the Android platform</li>
-<li>A version of the Android system image for the emulator</li>
+<ul style="font-size:12px">
+<li>Android Studio IDE</li>
+<li>Android SDK tools</li>
+<li>Android 5.0 (Lollipop) Platform</li>
+<li>Android 5.0 emulator system image with Google APIs</li>
 </ul>
 
-</div>
-<!-- end online -->
 
-
+<a class="online landing-button green download-bundle-button" style="margin-top:30px;"
+href="#Other" >Download Android Studio</a>
 
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
-To get the ADT Bundle or stand-alone SDK Tools, please visit the web site at <a
+To get Android Studio or stand-alone SDK tools, visit <a
 href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
 </p>
 
-</div><!-- end col-6 (left column) -->
-
-
-
-<div class="col-7" style="margin-right:0;">
-  <img src="{@docRoot}images/tools-home.png" alt="" height="347" width="400" />
-
-
-</div><!-- end col-7 -->
-
-
-
-
-<div class="col-7" style="background: #ddd;
-    padding: 30px 20px; width:350px; margin:20px 0 0 20px;">
-
-  <h3 style="margin-top:0">
-  <a href="/sdk/installing/studio.html">Get Android Studio Beta</a>
-  </h3>
-
-  <p>
-  Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
-  over ADT. It's currently in beta but will be the official Android IDE once it's ready.</p>
-  <p>
-  If you're a new Android developer, you should consider starting with Android Studio, because the
-  ADT plugin for Eclipse is no longer in active development.</p>
-  <p style="margin: 0;">
-  <a href="/sdk/installing/studio.html" style="position:relative;z-index:99">Learn more about Android Studio</a></p>
-  </div>
-
-
-
-
-<!-- alternative SDK options -->
-<div class="col-13" style="margin:-70px 0 0;">
-
-
-<p style="width:340px">If you prefer to use an existing version of Eclipse or another IDE,
-you can instead download the stand-alone Android SDK Tools:</p>
-
-
-
-
-<h4 id="ExistingIDE"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.myide');hideExpandable('.pax,.reqs');return false;"
-  >GET THE SDK FOR AN EXISTING IDE</a></h4>
-
-<div class="col-13 myide" style="margin:0 0 15px;display:none;">
-
-<p>If you already have an IDE you want to use for Android app development,
-setting up a new SDK requires that you download the SDK Tools, then
-select additional Android SDK packages to install (such as the Android platform
-and system image). If you'll be using an existing version of Eclipse, then you can add
-the ADT plugin to it.</p>
-  <p>
-<a class="button subtitle" id="download-tools-button" href="" style="display:none" ></a>
-  </p>
-
-</div>
-
-
-
-
-<h4 id="Requirements"><a href='' class="expandable"
-  onclick="toggleExpandable(this,'.reqs');hideExpandable('.pax,.myide');return false;"
-  >SYSTEM REQUIREMENTS</a></h4>
-
-<div class="col-6 reqs" style="margin:0 0 15px;display:none;">
-<h5>Operating Systems</h5>
-<ul>
-  <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
-  <li>Mac OS X 10.8.5 or later</li>
-  <li>Linux
-    <ul>
-      <li>64-bit distribution capable of running 32-bit applications</li>
-      <li>GNU C Library (glibc) 2.11 or later is required.</li>
-      <li>Tested on Ubuntu 12.04, Precise Pangolin</li>
-    </ul>
-  </li>
+<ul style="margin-top:50px;color:#444">
+  <li><a href="#Requirements">System Requirements</a></li>
+  <li><a href="#Other">Other Download Options</a></li>
+  <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform"
+target="_blank">Take a Survey</a></li>
 </ul>
+
 </div>
 
 
-<div class="col-7 reqs" style="margin:0 0 80px 20px;display:none;">
 
-<h5>Development tools</h5>
-    <ul>
-      <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK 6</a>
-        (JRE alone is not sufficient)</li>
-      <li><a href="http://ant.apache.org/">Apache Ant</a> 1.8 or later</li>
-      <li><strong>Not</strong> compatible with Gnu Compiler for Java (gcj)</li>
-    </ul>
 
-<p class="note"><strong>Note:</strong> Some Linux distributions may include JDK 1.4 or Gnu Compiler
-for Java, both of which are <em>not</em> supported for Android development. </p>
-</div><!-- end reqs -->
+<h2 class="feature norule" >Intelligent code editor</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-code.png"
+srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>At the core of Android Studio is an intelligent code editor capable of advanced
+  code completion, refactoring, and code analysis.</p>
+  <p>The powerful code editor helps you be a more productive Android app developer.</p>
+</div>
+
+
+
+
+
+<h2 class="feature norule">Code templates and GitHub integration</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-import.png"
+srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>New project wizards make it easier than ever to start a new project.</p>
+
+  <p>Start projects using template code for patterns such as navigation drawer and view pagers,
+  and even import Google code samples from GitHub.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">Multi-screen app development</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-screens.png"
+srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/tools/studio-hero-screens.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Build apps for Android phones, tablets, Android Wear,
+  Android TV, Android Auto and Google Glass.</p>
+  <p>With the new Android Project View and module support in Android Studio, it's easier
+  to manage app projects and resources.
+</div>
+
+
+
+
+<h2 class="feature norule">Virtual devices for all shapes and sizes</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-avds.png"
+srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tools/studio-hero-avds.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Android Studio comes pre-configured with an optimized emulator image.</p>
+  <p>The updated and streamlined Virtual Device Manager provides
+  pre-defined device profiles for common Android devices.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">
+Android builds evolved, with Gradle</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-gradle.png"
+srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>Create multiple APKs for your Android app with different features using the same project.</p>
+  <p>Manage app dependencies with Maven.</p>
+  <p>Build APKs from Android Studio or the command line.</p>
+</div>
+
+
+
+
+<h2 class="feature norule">More about Android Studio</h2>
+<div style="background:#424242;padding:30px; color:#fff;margin:0 0 15px;">
+
+<a class="online landing-button green download-bundle-button"
+style="margin:0 0 40px 60px;float:right"
+href="" >Download Android Studio</a>
+
+  <ul>
+  <li>Built on IntelliJ IDEA Community Edition, the popular Java IDE by JetBrains.</li>
+  <li>Flexible Gradle-based build system.</li>
+  <li>Build variants and multiple APK generation.</li>
+  <li>Expanded template support for Google Services and various device types.</li>
+  <li>Rich layout editor with support for theme editing.</li>
+  <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
+  <li>ProGuard and app-signing capabilities.</li>
+  <li>Built-in support for Google Cloud Platform, making it easy to integrate Google Cloud
+  Messaging and App Engine.</li>
+  </ul>
+
+<p style="margin:0">
+For more details about features available in Android Studio,
+read the guide to <a href="{@docRoot}tools/studio/index.html"
+  >Android Studio Basics</a>.</p>
+</div>
+
+
+<p>If you have been using Eclipse with ADT, be aware that Android Studio is now the official IDE
+for Android, so you should migrate to Android Studio to receive all the
+latest IDE updates. For help moving projects,
+see <a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android
+Studio</a>.</p>
+
+
+
+
+
+
+
+<h2 id="Requirements">System Requirements</h2>
+
+<h3>Windows</h3>
+
+<ul>
+<li>Microsoft&reg;  Windows&reg;  8/7/Vista/2003 (32 or 64-bit)</li>
+<li>2 GB RAM minimum, 4 GB RAM recommended</li>
+<li>400 MB hard disk space</li>
+<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>1280 x 800  minimum screen resolution</li>
+<li>Java Development Kit (JDK) 7 </li>
+<li>Optional for accelerated emulator: Intel® processor with support for Intel® VT-x, Intel® EM64T
+(Intel® 64), and Execute Disable (XD) Bit functionality</li>
+</ul>
+
+
+<h3>Mac OS X</h3>
+
+<ul>
+<li>Mac&reg;  OS X&reg;  10.8.5 or higher, up to 10.9 (Mavericks)</li>
+<li>2 GB RAM minimum, 4 GB RAM recommended</li>
+<li>400 MB hard disk space</li>
+<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>1280 x 800 minimum screen resolution</li>
+<li>Java Runtime Environment (JRE) 6</li>
+<li>Java Development Kit (JDK) 7</li>
+<li>Optional for accelerated emulator: Intel® processor with support for Intel® VT-x, Intel® EM64T
+(Intel® 64), and Execute Disable (XD) Bit functionality</li>
+</ul>
+
+<p>On Mac OS, run Android Studio with Java Runtime Environment (JRE) 6 for optimized font
+rendering. You can then configure your project to use Java Development Kit (JDK) 6 or JDK 7.</p>
+
+
+
+<h3>Linux</h3>
+
+<ul>
+<li>GNOME or KDE desktop</li>
+<li>GNU C Library (glibc) 2.15 or later</li>
+<li>2 GB RAM minimum, 4 GB RAM recommended</li>
+<li>400 MB hard disk space</li>
+<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>1280 x 800 minimum screen resolution</li>
+<li>Oracle&reg;  Java Development Kit (JDK) 7 </li>
+</ul>
+<p>Tested on Ubuntu&reg;  14.04, Trusty Tahr (64-bit distribution capable of running
+32-bit applications).</p>
+
+
+
+
+<h2 id="Other" style="clear:left">Other Download Options</h2>
+
+<!-- alternative SDK options follows -->

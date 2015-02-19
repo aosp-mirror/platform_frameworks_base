@@ -49,5 +49,5 @@ startpage=true
 
     <dt><b><a href="backward-compat.html">Remaining Backward Compatible</a></b></dt>
 
-    <dd>Learn how to keep search features backward compatible with older devices by using.</dd>
+    <dd>Learn how to keep search features backward compatible with older devices.</dd>
   </dl>

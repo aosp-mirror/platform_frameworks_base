@@ -417,38 +417,42 @@ public final class Message implements Parcelable {
     }
 
     /**
-     * Returns true if the message is asynchronous.
-     *
-     * Asynchronous messages represent interrupts or events that do not require global ordering
-     * with represent to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * Returns true if the message is asynchronous, meaning that it is not
+     * subject to {@link Looper} synchronization barriers.
      *
      * @return True if the message is asynchronous.
      *
      * @see #setAsynchronous(boolean)
-     * @see MessageQueue#enqueueSyncBarrier(long)
-     * @see MessageQueue#removeSyncBarrier(int)
-     *
-     * @hide
      */
     public boolean isAsynchronous() {
         return (flags & FLAG_ASYNCHRONOUS) != 0;
     }
 
     /**
-     * Sets whether the message is asynchronous.
-     *
-     * Asynchronous messages represent interrupts or events that do not require global ordering
-     * with represent to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * Sets whether the message is asynchronous, meaning that it is not
+     * subject to {@link Looper} synchronization barriers.
+     * <p>
+     * Certain operations, such as view invalidation, may introduce synchronization
+     * barriers into the {@link Looper}'s message queue to prevent subsequent messages
+     * from being delivered until some condition is met.  In the case of view invalidation,
+     * messages which are posted after a call to {@link android.view.View#invalidate}
+     * are suspended by means of a synchronization barrier until the next frame is
+     * ready to be drawn.  The synchronization barrier ensures that the invalidation
+     * request is completely handled before resuming.
+     * </p><p>
+     * Asynchronous messages are exempt from synchronization barriers.  They typically
+     * represent interrupts, input events, and other signals that must be handled independently
+     * even while other work has been suspended.
+     * </p><p>
+     * Note that asynchronous messages may be delivered out of order with respect to
+     * synchronous messages although they are always delivered in order among themselves.
+     * If the relative order of these messages matters then they probably should not be
+     * asynchronous in the first place.  Use with caution.
+     * </p>
      *
      * @param async True if the message is asynchronous.
      *
      * @see #isAsynchronous()
-     * @see MessageQueue#enqueueSyncBarrier(long)
-     * @see MessageQueue#removeSyncBarrier(int)
-     *
-     * @hide
      */
     public void setAsynchronous(boolean async) {
         if (async) {

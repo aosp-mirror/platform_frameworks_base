@@ -1,0 +1,475 @@
+page.title=Providing Audio Playback for Auto
+page.tags="auto", "car", "automotive", "audio"
+page.article=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android 5.0 (API level 21) or higher</li>
+  </ul>
+
+    <h2>This class teaches you how to</h2>
+
+    <ol>
+      <li><a href="#overview">Provide Audio Services</a></li>
+      <li><a href="#config_manifest">Configure Your Manifest</a></li>
+      <li><a href="#implement_browser">Build a Browser Service</a></li>
+      <li><a href="#implement_callback">Implement Play Controls</a></li>
+    </ol>
+
+    <h2>Related Samples</h2>
+
+    <ul>
+      <li><a href="{@docRoot}samples/MediaBrowserService/index.html">
+        MediaBrowserService</a></li>
+    </ul>
+
+    <h2>See Also</h2>
+
+    <ul>
+      <li>
+        <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
+              User Experience Guidelines: Media Apps</a>
+      </li>
+      <li><a href="{@docRoot}training/managing-audio/index.html">Managing Audio
+        Playback</a></li>
+      <li><a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>
+      </li>
+    </ul>
+
+</div>
+</div>
+
+<a class="notice-developers-video wide"
+href="https://www.youtube.com/watch?v=Q96Sw6v4ULg">
+<div>
+    <h3>Video</h3>
+    <p>Devbytes: Android Auto Audio</p>
+</div>
+</a>
+
+<p>
+  Drivers want to access their music and other audio content on the road. Audio books, podcasts,
+  sports commentary, and recorded talks can make a long trip educational, inspirational, and
+  enjoyable. The Android framework allows you to extend your audio app so users can listen to their
+  favorite tunes and audio content using a simpler, safer user interface.
+</p>
+
+<p>
+  Apps running on mobile devices with Android 5.0 or higher can provide audio services for
+  dashboard systems running Android Auto. By configuring your app with a few settings and
+  implementing a service for accessing music tracks, you can enable Auto devices to discover your
+  app and provide a browse and playback interface for your app's audio content.
+</p>
+
+<p>
+  This class assumes that you have built an app that plays audio through an Android device's
+  integrated speakers or connected headphones. It describes how to extend your app to allow Auto
+  devices to browse your content listings and play it through a car stereo system.
+</p>
+
+
+<h2 id="overview">Provide Audio Services</h2>
+
+<p>
+  Audio apps do not directly control a car dashboard device that runs Android Auto. When the user
+  connects an Android mobile device into a dashboard system, Android Auto discovers your app through
+  manifest entries that indicate what audio services your app can provide. The dashboard system
+  displays a launcher icon for your app as a music provider and the user can choose to use your
+  app's services. If the user launches your app, the Auto device queries your app to see what
+  content is available, displays your content items to the user, and sends requests to your app to
+  control playback with actions such as play, pause, or skip track.
+</p>
+
+<p>To enable your app to provide audio content for Auto devices, you need to:
+</p>
+
+<ul>
+  <li>Configure your app manifest to do the following:</li>
+    <ul>
+      <li>Declare that your app can provide audio content for Auto devices.</li>
+      <li>Define a service that provides a browsable list of your audio tracks.</li>
+    </ul>
+  </li>
+  <li>Build a service that provides audio track listing information extending
+    {@link android.service.media.MediaBrowserService}.</li>
+  <li>Register a {@link android.media.session.MediaSession} object and implement the
+    {@link android.media.session.MediaSession.Callback} object to enable playback controls.</li>
+</ul>
+
+
+<h2 id="config_manifest">Configure Your Manifest</h2>
+
+<p>
+  When a user plugs an Android mobile device into a dashboard device running Auto, the system
+  requests a list of installed apps that include <a href=
+  "{@docRoot}guide/topics/manifest/manifest-intro.html">app manifest</a> entries to indicate they
+  support services for Auto devices and how to access them. This section describes how to configure
+  your app manifest to indicate your app supports audio services for Auto devices, and allow
+  dashboard system to connect with your app.
+</p>
+
+
+<h3 id="manifest-car-app">Declare Auto audio support</h3>
+
+<p>
+  You indicate that your app supports cars capabilities using the following manifest entry:
+</p>
+
+<pre>
+&lt;application&gt;
+    ...
+    &lt;meta-data android:name="com.google.android.gms.car.application"
+        android:resource="&#64;xml/automotive_app_desc"/&gt;
+    ...
+&lt;application&gt;
+</pre>
+
+<p>
+  This manifest entry refers to a secondary XML file, where you declare what Auto capabilities your
+  app supports. For an app that supports audio for cars, add an XML file to the {@code res/xml/}
+  resources directory as {@code automotive_app_desc.xml}, with the following content:
+</p>
+
+<pre>
+&lt;automotiveApp&gt;
+    &lt;uses name="media"/&gt;
+&lt;/automotiveApp&gt;
+</pre>
+
+<p>
+  For more information about declaring capabilities for Auto devices, see <a href=
+  "{@docRoot}training/auto/start/index.html#auto-metadata">Getting Started with Auto</a>.
+</p>
+
+
+<h3 id="manifest-service">Declare your media browser service</h3>
+
+<p>
+  Auto devices expect to connect to a service in order to browse audio track
+  listings. You declare this service in your manifest to allow the dashboard system to discover
+  this service and connect to your app.
+</p>
+
+<p>The following code example shows how to declare this listing browser service in your manifest:</p>
+
+<pre>
+&lt;application&gt;
+    ...
+    &lt;service android:name="<em>.MyMediaBrowserService</em>"
+                android:exported="true"&gt;
+        &lt;intent-filter&gt;
+            <strong>&lt;action android:name=</strong>
+                <strong>"android.media.browse.MediaBrowserService"/&gt;</strong>
+        &lt;/intent-filter&gt;
+    &lt;/service&gt;
+    ...
+&lt;application&gt;
+</pre>
+
+<p>
+  The service your app provides for browsing audio tracks must extend the
+  {@link android.service.media.MediaBrowserService}. The implementation of this service is discussed
+  in the <a href="#implement_browser">Build a Browser Service</a> section.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> Other clients can also contact your app's browser service aside from Auto
+  devices. These media clients might be other apps on a user's mobile device, or they might be other
+  remote clients.
+</p>
+
+<h3 id="manifest-icon">Specify a notification icon</h3>
+
+<p>
+  The Auto user interface shows notifications about your audio app to the user during the course
+  of operation. For example, if the user has a navigation app running, and one song finishes
+  and a new song starts, the Auto device shows the user a notification to indicate the change with
+  an icon from your app. You can specify an icon that is used to represent your app for these
+  notifications using the following manifest declaration:
+</p>
+
+<pre>
+&lt;application&gt;
+    ...
+    &lt;meta-data android:name="com.google.android.gms.car.notification.SmallIcon"
+        android:resource="&#64;drawable/ic_notification" /&gt;
+    ...
+&lt;application&gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> The icon you provide should have transparency enabled, so the
+icon's background gets filled in with the app's primary color.</p>
+
+
+<h2 id="implement_browser">Build a Browser Service</h2>
+
+<p>Auto devices interact with your app by contacting its implementation of a
+  {@link android.service.media.MediaBrowserService}, which
+you declare in your app manifest. This service allows Auto devices to find out what content your app
+provides. Connected Auto devices can also query your app's media browser service to contact the
+{@link android.media.session.MediaSession} provided by your app, which handles content playback
+commands.</p>
+
+<p>You create a media browser service by extending the
+{@link android.service.media.MediaBrowserService} class.
+Connected Auto devices can contact your service to do the following:</p>
+
+<ul>
+  <li>Browse your app's content hierarchy, in order to present a menu to the
+    user</li>
+  <li>Get the token for your app's {@link android.media.session.MediaSession}
+    object, in order to control audio playback</li>
+</ul>
+
+
+<h3 id="browser_workflow">Media browser service workflow</h3>
+
+<ol>
+
+<li>When your app's audio services are requested by a user through a connected Auto device, the
+dashboard system contacts your app's media browser service.
+In your implementation of the {@link android.service.media.MediaBrowserService#onCreate()
+onCreate()} method, you must create and register a {@link
+android.media.session.MediaSession} object and its callback object.</li>
+
+<li>The Auto device calls the browser service's {@link
+android.service.media.MediaBrowserService#onGetRoot onGetRoot()} method to get the top node of
+your content hierarchy. The node retrieved by this call is not used as a menu item, it is only used
+to retrieve its child nodes, which are subsequently displayed as the top menu items.
+</li>
+
+<li>Auto invokes the {@link android.service.media.MediaBrowserService#onLoadChildren
+onLoadChildren()} method to get the children of the root node, and uses this information to
+present a menu to the user.</li>
+
+<li>If the user selects a submenu, Auto invokes
+{@link android.service.media.MediaBrowserService#onLoadChildren
+onLoadChildren()} again to retrieve the child nodes of the selected menu item.</li>
+
+<li>If the user begins playback, Auto invokes the appropriate media session
+callback method to perform that action. For more information, see the section about how to
+<a href="#implement_callback">Implement Playback Controls</a>. </li>
+
+</ol>
+
+
+<h3 id="build_hierarchy">Building your content hierarchy</h3>
+
+<p>Auto devices acting as audio clients call your app's {@link
+android.service.media.MediaBrowserService} to find out what content you have
+available. You need to implement two methods in your browser service to support
+this: {@link android.service.media.MediaBrowserService#onGetRoot
+onGetRoot()} and {@link
+android.service.media.MediaBrowserService#onLoadChildren
+onLoadChildren()}.</p>
+
+<p>Each node in your content hierarchy is represented by a  {@link
+android.media.browse.MediaBrowser.MediaItem} object. Each of these objects is
+identified by a unique ID string. The client treats these ID strings as
+opaque tokens. When a client wants to browse to a submenu, or play a content
+item, it passes the ID token. Your app is responsible for associating the ID
+token with the appropriate menu node or content item.</p>
+
+<p class="note"><strong>Note:</strong> You should consider providing different content
+hierarchies depending on what client is making the query. In particular, Auto
+applications have strict limits on how large a menu they can display. This is
+intended to prevent distracting the driver, and to make it easy for the driver
+to operate the app via voice commands. For more information on the Auto user
+experience restrictions, see the <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">
+Auto Media Apps</a> guidelines.</p>
+
+<p>Your implementation of {@link android.service.media.MediaBrowserService#onGetRoot
+onGetRoot()} returns information about the root node of the menu
+hierarchy. This root node is the parent of the top items your browse hierarchy.
+The method is passed information about the calling client. You can use this
+information to decide if the client should have access to your content at all.
+For example, if you want to limit your app's content to a list of approved
+clients, you can compare the passed {@code clientPackageName} to your whitelist.
+If the caller isn't an approved package, you can return null to deny access to
+your content.</p>
+
+<p>A typical implementation of {@link
+android.service.media.MediaBrowserService#onGetRoot onGetRoot()} might
+look like this:</p>
+
+<pre>
+&#64;Override
+public BrowserRoot onGetRoot(String clientPackageName, int clientUid,
+    Bundle rootHints) {
+
+    // To ensure you are not allowing any arbitrary app to browse your app's
+    // contents, you need to check the origin:
+    if (!PackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
+        // If the request comes from an untrusted package, return null.
+        // No further calls will be made to other media browsing methods.
+        LogHelper.w(TAG, "OnGetRoot: IGNORING request from untrusted package "
+                + clientPackageName);
+        return null;
+    }
+    if (ANDROID_AUTO_PACKAGE_NAME.equals(clientPackageName)) {
+        // Optional: if your app needs to adapt ads, music library or anything
+        // else that needs to run differently when connected to the car, this
+        // is where you should handle it.
+    }
+    return new BrowserRoot(MEDIA_ID_ROOT, null);
+}
+</pre>
+
+<p>
+  The Auto device client builds the top-level menu by calling {@link
+  android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()}
+  with the root node object and getting it's children. The client builds
+  submenus by calling the same method with other child nodes. The following
+  example code shows a simple implementation of {@link
+  android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()} method:
+</p>
+
+<pre>
+&#64;Override
+public void onLoadChildren(final String parentMediaId,
+    final Result&lt;List&lt;MediaItem&gt;&gt; result) {
+
+    // Assume for example that the music catalog is already loaded/cached.
+
+    List&lt;MediaBrowser.MediaItem&gt; mediaItems = new ArrayList&lt;&gt;();
+
+    // Check if this is the root menu:
+    if (MEDIA_BROWSER_ROOT.equals(parentMediaId)) {
+
+        // build the MediaItem objects for the top level,
+        // and put them in the &lt;result&gt; list
+    } else {
+
+        // examine the passed parentMediaId to see which submenu we're at,
+        // and put the children of that menu in the &lt;result&gt; list
+    }
+}
+</pre>
+
+
+<h2 id="implement_callback">Enable Playback Control</h2>
+
+<p>
+  Auto devices use {@link android.media.session.MediaSession} objects to pass playback control
+  commands to an app that is providing audio services. Your audio app must create an instance of
+  this object to pass to the dashboard device and implement callback methods to enable remote
+  control of audio playback.
+</p>
+
+<h3 id="registering_mediasession">Register a media session</h3>
+
+<p>An Auto device using your app as audio service needs to obtain a {@link
+android.media.session.MediaSession} object from your app. The Auto device uses the session object
+to send playback commands requested by the Auto user back to your app.</p>
+
+<p>When you initialize your browser service, you register that session object with your {@link
+android.service.media.MediaBrowserService} by calling the {@link
+android.service.media.MediaBrowserService#setSessionToken setSessionToken()} method. This step
+allows clients such as an Auto device to retrieve that object by calling your browser service's
+{@link android.service.media.MediaBrowserService#getSessionToken getSessionToken()} method.</p>
+
+<p>In your browser service's {@link
+android.service.media.MediaBrowserService#onCreate() onCreate()} method,
+create a {@link android.media.session.MediaSession}. You can then query
+the {@link android.media.session.MediaSession} to get its token, and register
+the token with your browser service:</p>
+
+<pre>
+public void onCreate() {
+        super.onCreate();
+
+    ...
+    // Start a new MediaSession
+    MediaSession mSession = new MediaSession(this, "session tag");
+    setSessionToken(mSession.getSessionToken());
+
+    // Set a callback object to handle play control requests, which
+    // implements MediaSession.Callback
+    mSession.setCallback(new MyMediaSessionCallback());
+
+    ...
+</pre>
+
+<p>
+  When you create the media session object, you set a callback object that is used to handle
+  playback control requests. You create this callback object by providing an implementation of the
+  {@link android.media.session.MediaSession.Callback} class for your app. The next section
+  discusses how to implement this object.
+</p>
+
+
+<h3 id="playback-commands">Implement play commands</h3>
+
+<p>When an Auto device requests playback of an audio track from your app, it uses the
+{@link android.media.session.MediaSession.Callback} class from your app's
+{@link android.media.session.MediaSession} object, which it obtained from your app's
+media browse service. When an Auto user wants to play content or control content playback,
+such as pausing play or skipping to the next track, Auto invokes one
+of the callback object's methods.</p>
+
+<p>To handle content playback, your app must extend the abstract {@link
+android.media.session.MediaSession.Callback} class and implement the methods
+that your app supports. The most important callback methods are as follows:</p>
+
+<dl>
+
+<dt>{@link android.media.session.MediaSession.Callback#onPlay onPlay()}</dt>
+<dd>Invoked if the user chooses play without choosing a specific item. Your
+app should play its default content. If playback was paused with
+{@link android.media.session.MediaSession.Callback#onPause onPause()}, your
+app should resume playback.</dd>
+
+<dt>{@link android.media.session.MediaSession.Callback#onPlayFromMediaId
+onPlayFromMediaId()}</dt>
+<dd>Invoked when the user chooses to play a specific item. The method is passed
+the item's media ID, which you assigned to the item in the content
+hierarchy.</dd>
+
+<dt>{@link android.media.session.MediaSession.Callback#onPlayFromSearch
+onPlayFromSearch()}</dt>
+<dd>Invoked when the user chooses to play from a search query. The app should
+make an appropriate choice based on the passed search string.</dd>
+
+<dt>{@link android.media.session.MediaSession.Callback#onPause onPause()}</dt>
+<dd>Pause playback.</dd>
+
+<dt>{@link android.media.session.MediaSession.Callback#onSkipToNext
+onSkipToNext()}</dt>
+<dd>Skip to the next item.</dd>
+
+<dt>{@link android.media.session.MediaSession.Callback#onSkipToPrevious
+onSkipToPrevious()}</dt>
+<dd>Skip to the previous item.</dd>
+
+<dt>{@link android.media.session.MediaSession.Callback#onStop onStop()}</dt>
+<dd>Stop playback.</dd>
+
+</dl>
+
+<p>Your app should override these methods to provide any desired functionality.
+In some cases you might not implement a method if it is not supported by your app.
+For example, if your app plays a live stream (such as a sports
+broadcast), the skip to next function might not make sense. In that case, you
+could simply use the default implementation of
+{@link android.media.session.MediaSession.Callback#onSkipToNext
+onSkipToNext()}.</p>
+
+<p>When your app receives a request to play content, it should play audio the same way it
+would in a non-Auto situation (as if the user was listening through a device speaker
+or connected headphones). The audio content is automatically sent to the dashboard system
+to be played over the car's speakers.</p>
+
+<p>For more information about playing audio content, see
+<a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a>,
+<a href="{@docRoot}training/managing-audio/index.html">Managing Audio Playback</a>, and
+<a href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>.
+
+
+(for example, by using a {@link
+android.media.MediaPlayer} or <a
+href="{@docRoot}guide/topics/media/exoplayer.html">ExoPlayer</a>). If the phone
+is connected to an Auto device, .</p>

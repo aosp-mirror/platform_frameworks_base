@@ -276,7 +276,7 @@ public final class Parcel {
 
     private static native byte[] nativeMarshall(long nativePtr);
     private static native void nativeUnmarshall(
-            long nativePtr, byte[] data, int offest, int length);
+            long nativePtr, byte[] data, int offset, int length);
     private static native void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int offset, int length);
     private static native boolean nativeHasFileDescriptors(long nativePtr);
@@ -339,6 +339,12 @@ public final class Parcel {
             }
         }
     }
+
+    /** @hide */
+    public static native long getGlobalAllocSize();
+
+    /** @hide */
+    public static native long getGlobalAllocCount();
 
     /**
      * Returns the total amount of data contained in the parcel.
@@ -432,8 +438,8 @@ public final class Parcel {
     /**
      * Set the bytes in data to be the raw bytes of this Parcel.
      */
-    public final void unmarshall(byte[] data, int offest, int length) {
-        nativeUnmarshall(mNativePtr, data, offest, length);
+    public final void unmarshall(byte[] data, int offset, int length) {
+        nativeUnmarshall(mNativePtr, data, offset, length);
     }
 
     public final void appendFrom(Parcel parcel, int offset, int length) {

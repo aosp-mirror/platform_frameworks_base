@@ -16,18 +16,18 @@ page.title=Transferring Assets
 
 <p>
 To send large blobs of binary data over the Bluetooth transport, such as images, attach an
-<a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html">Asset</a> to a
+<a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html"><code>Asset</code></a> to a
 data item and the put the data item into the replicated data store.
 </p>
 
 <p>Assets automatically handle caching of data to prevent retransmission and conserve Bluetooth bandwidth.
 A common pattern is for a handheld app to download an image, shrink it to an appropriate size
-for display on the wearable, and transmit it to the wearable app as an Asset. The following examples
-demonstrates this pattern.
+for display on the wearable, and transmit it to the wearable app as an asset. The following examples
+demonstrate this pattern.
 </p>
 
-<p class="note"><b>Note:</b> Although the size of data items are limited to 100KB,
-assets can be as large as desired. However, transferring large assets affect the
+<p class="note"><b>Note:</b> Although the size of data items is limited to 100KB,
+assets can be as large as desired. However, transferring large assets affects the
 user experience in many cases, so test your apps to ensure that they perform well
 if you're transferring large assets.
 <p>
@@ -49,7 +49,6 @@ private static Asset createAssetFromBitmap(Bitmap bitmap) {
 </pre>
 
 <p>When you have an asset, attach it to a data item with the <code>putAsset()</code> method in
-
 <a href="{@docRoot}reference/com/google/android/gms/wearable/DataMap.html"><code>DataMap</code></a>
 or
 <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html"><code>PutDataRequest</code></a>
@@ -77,12 +76,13 @@ PendingResult&lt;DataApi.DataItemResult&gt; pendingResult = Wearable.DataApi
         .putDataItem(mGoogleApiClient, request);
 </pre>
 
+
 <h2 id="ReceiveAsset">Receive assets</h2>
 
 <p>
 When an asset is created, you probably want to read and extract
 it on other side of the connection. Here's an example of how to implement the
-callback to detect an asset change and extract the Asset:
+callback to detect an asset change and extract the asset:
 </p>
 
 <pre>

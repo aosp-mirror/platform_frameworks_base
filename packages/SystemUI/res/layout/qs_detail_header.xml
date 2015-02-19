@@ -14,7 +14,8 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.keyguard.AlphaOptimizedLinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
@@ -36,4 +37,4 @@
         android:clickable="false"
         android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
 
-</LinearLayout>
+</com.android.keyguard.AlphaOptimizedLinearLayout>

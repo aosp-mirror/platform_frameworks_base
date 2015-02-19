@@ -109,6 +109,8 @@ public class AppTransition implements Dump {
     /** A window in a new task is being opened behind an existing one in another activity's task.
      * The new window will show briefly and then be gone. */
     public static final int TRANSIT_TASK_OPEN_BEHIND = 16;
+    /** A window in a task is being animated in-place. */
+    public static final int TRANSIT_TASK_IN_PLACE = 17;
 
     /** Fraction of animation at which the recents thumbnail stays completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.7f;
@@ -116,7 +118,7 @@ public class AppTransition implements Dump {
     private static final float RECENTS_THUMBNAIL_FADEOUT_FRACTION = 0.3f;
 
     private static final int DEFAULT_APP_TRANSITION_DURATION = 250;
-    private static final int THUMBNAIL_APP_TRANSITION_DURATION = 300;
+    private static final int THUMBNAIL_APP_TRANSITION_DURATION = 325;
     private static final int THUMBNAIL_APP_TRANSITION_ALPHA_DURATION = 325;
 
     private final Context mContext;
@@ -131,6 +133,7 @@ public class AppTransition implements Dump {
     private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN = 4;
     private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP = 5;
     private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN = 6;
+    private static final int NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE = 7;
     private int mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
@@ -146,6 +149,7 @@ public class AppTransition implements Dump {
     private IRemoteCallback mNextAppTransitionCallback;
     private int mNextAppTransitionEnter;
     private int mNextAppTransitionExit;
+    private int mNextAppTransitionInPlace;
     private int mNextAppTransitionStartX;
     private int mNextAppTransitionStartY;
     private int mNextAppTransitionStartWidth;
@@ -691,8 +695,10 @@ public class AppTransition implements Dump {
                 throw new RuntimeException("Invalid thumbnail transition state");
         }
 
-        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
-                THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailFastOutSlowInInterpolator);
+        int duration = Math.max(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION,
+                THUMBNAIL_APP_TRANSITION_DURATION);
+        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, duration,
+                mThumbnailFastOutSlowInInterpolator);
     }
 
     /**
@@ -833,6 +839,12 @@ public class AppTransition implements Dump {
                     + " anim=" + a + " nextAppTransition=ANIM_CUSTOM"
                     + " transit=" + transit + " isEntrance=" + enter
                     + " Callers=" + Debug.getCallers(3));
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE) {
+            a = loadAnimationRes(mNextAppTransitionPackage, mNextAppTransitionInPlace);
+            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
+                    "applyAnimation:"
+                            + " anim=" + a + " nextAppTransition=ANIM_CUSTOM_IN_PLACE"
+                            + " transit=" + transit + " Callers=" + Debug.getCallers(3));
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_SCALE_UP) {
             a = createScaleUpAnimationLocked(transit, enter, appWidth, appHeight);
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG,
@@ -1011,6 +1023,16 @@ public class AppTransition implements Dump {
         }
     }
 
+    void overrideInPlaceAppTransition(String packageName, int anim) {
+        if (isTransitionSet()) {
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE;
+            mNextAppTransitionPackage = packageName;
+            mNextAppTransitionInPlace = anim;
+        } else {
+            postAnimationCallback();
+        }
+    }
+
     @Override
     public String toString() {
         return "mNextAppTransition=0x" + Integer.toHexString(mNextAppTransition);
@@ -1090,6 +1112,8 @@ public class AppTransition implements Dump {
                 return "NEXT_TRANSIT_TYPE_NONE";
             case NEXT_TRANSIT_TYPE_CUSTOM:
                 return "NEXT_TRANSIT_TYPE_CUSTOM";
+            case NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE:
+                return "NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE";
             case NEXT_TRANSIT_TYPE_SCALE_UP:
                 return "NEXT_TRANSIT_TYPE_SCALE_UP";
             case NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_UP:
@@ -1120,6 +1144,12 @@ public class AppTransition implements Dump {
                         pw.print(Integer.toHexString(mNextAppTransitionEnter));
                         pw.print(" mNextAppTransitionExit=0x");
                         pw.println(Integer.toHexString(mNextAppTransitionExit));
+                break;
+            case NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE:
+                pw.print("  mNextAppTransitionPackage=");
+                        pw.println(mNextAppTransitionPackage);
+                pw.print("  mNextAppTransitionInPlace=0x");
+                        pw.print(Integer.toHexString(mNextAppTransitionInPlace));
                 break;
             case NEXT_TRANSIT_TYPE_SCALE_UP:
                 pw.print("  mNextAppTransitionStartX="); pw.print(mNextAppTransitionStartX);

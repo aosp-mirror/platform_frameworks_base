@@ -85,8 +85,7 @@ abstract class HdmiCecFeatureAction {
      * Process the command. Called whenever a new command arrives.
      *
      * @param cmd command to process
-     * @return true if the command was consumed in the process; Otherwise false, which
-     *          indicates that the command shall be handled by other actions.
+     * @return true if the command was consumed in the process; Otherwise false.
      */
     abstract boolean processCommand(HdmiCecMessage cmd);
 

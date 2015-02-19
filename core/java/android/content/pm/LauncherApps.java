@@ -499,20 +499,4 @@ public class LauncherApps {
             obtainMessage(MSG_UNAVAILABLE, info).sendToTarget();
         }
     }
-
-    /**
-     * TODO Remove after 2014-09-22
-     * @hide
-     */
-    public void addCallback(Callback callback) {
-        registerCallback(callback);
-    }
-
-    /**
-     * TODO Remove after 2014-09-22
-     * @hide
-     */
-    public void removeCallback(Callback callback) {
-        unregisterCallback(callback);
-    }
 }

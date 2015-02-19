@@ -34,6 +34,7 @@ import java.util.Date;
 
 public class ZenLog {
     private static final String TAG = "ZenLog";
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     private static final int SIZE = Build.IS_DEBUGGABLE ? 100 : 20;
 
@@ -45,15 +46,15 @@ public class ZenLog {
 
     private static final int TYPE_INTERCEPTED = 1;
     private static final int TYPE_ALLOW_DISABLE = 2;
-    private static final int TYPE_SET_RINGER_MODE = 3;
-    private static final int TYPE_DOWNTIME = 4;
-    private static final int TYPE_SET_ZEN_MODE = 5;
-    private static final int TYPE_UPDATE_ZEN_MODE = 6;
-    private static final int TYPE_EXIT_CONDITION = 7;
-    private static final int TYPE_SUBSCRIBE = 8;
-    private static final int TYPE_UNSUBSCRIBE = 9;
-    private static final int TYPE_CONFIG = 10;
-    private static final int TYPE_FOLLOW_RINGER_MODE = 11;
+    private static final int TYPE_SET_RINGER_MODE_EXTERNAL = 3;
+    private static final int TYPE_SET_RINGER_MODE_INTERNAL = 4;
+    private static final int TYPE_DOWNTIME = 5;
+    private static final int TYPE_SET_ZEN_MODE = 6;
+    private static final int TYPE_UPDATE_ZEN_MODE = 7;
+    private static final int TYPE_EXIT_CONDITION = 8;
+    private static final int TYPE_SUBSCRIBE = 9;
+    private static final int TYPE_UNSUBSCRIBE = 10;
+    private static final int TYPE_CONFIG = 11;
     private static final int TYPE_NOT_INTERCEPTED = 12;
     private static final int TYPE_DISABLE_EFFECTS = 13;
 
@@ -70,16 +71,30 @@ public class ZenLog {
         append(TYPE_NOT_INTERCEPTED, record.getKey() + "," + reason);
     }
 
-    public static void traceSetRingerMode(int ringerMode) {
-        append(TYPE_SET_RINGER_MODE, ringerModeToString(ringerMode));
+    public static void traceSetRingerModeExternal(int ringerModeOld, int ringerModeNew,
+            String caller, int ringerModeInternalIn, int ringerModeInternalOut) {
+        append(TYPE_SET_RINGER_MODE_EXTERNAL, caller + ",e:" +
+                ringerModeToString(ringerModeOld) + "->" +
+                ringerModeToString(ringerModeNew)  + ",i:" +
+                ringerModeToString(ringerModeInternalIn) + "->" +
+                ringerModeToString(ringerModeInternalOut));
     }
 
-    public static void traceDowntime(boolean inDowntime, int day, ArraySet<Integer> days) {
-        append(TYPE_DOWNTIME, inDowntime + ",day=" + day + ",days=" + days);
+    public static void traceSetRingerModeInternal(int ringerModeOld, int ringerModeNew,
+            String caller, int ringerModeExternalIn, int ringerModeExternalOut) {
+        append(TYPE_SET_RINGER_MODE_INTERNAL, caller + ",i:" +
+                ringerModeToString(ringerModeOld) + "->" +
+                ringerModeToString(ringerModeNew)  + ",e:" +
+                ringerModeToString(ringerModeExternalIn) + "->" +
+                ringerModeToString(ringerModeExternalOut));
     }
 
-    public static void traceSetZenMode(int mode, String reason) {
-        append(TYPE_SET_ZEN_MODE, zenModeToString(mode) + "," + reason);
+    public static void traceDowntimeAutotrigger(String result) {
+        append(TYPE_DOWNTIME, result);
+    }
+
+    public static void traceSetZenMode(int zenMode, String reason) {
+        append(TYPE_SET_ZEN_MODE, zenModeToString(zenMode) + "," + reason);
     }
 
     public static void traceUpdateZenMode(int fromMode, int toMode) {
@@ -102,11 +117,6 @@ public class ZenLog {
         append(TYPE_CONFIG, newConfig != null ? newConfig.toString() : null);
     }
 
-    public static void traceFollowRingerMode(int ringerMode, int oldZen, int newZen) {
-        append(TYPE_FOLLOW_RINGER_MODE, ringerModeToString(ringerMode) + ", "
-                + zenModeToString(oldZen) + " -> " + zenModeToString(newZen));
-    }
-
     public static void traceDisableEffects(NotificationRecord record, String reason) {
         append(TYPE_DISABLE_EFFECTS, record.getKey() + "," + reason);
     }
@@ -119,7 +129,8 @@ public class ZenLog {
         switch (type) {
             case TYPE_INTERCEPTED: return "intercepted";
             case TYPE_ALLOW_DISABLE: return "allow_disable";
-            case TYPE_SET_RINGER_MODE: return "set_ringer_mode";
+            case TYPE_SET_RINGER_MODE_EXTERNAL: return "set_ringer_mode_external";
+            case TYPE_SET_RINGER_MODE_INTERNAL: return "set_ringer_mode_internal";
             case TYPE_DOWNTIME: return "downtime";
             case TYPE_SET_ZEN_MODE: return "set_zen_mode";
             case TYPE_UPDATE_ZEN_MODE: return "update_zen_mode";
@@ -127,7 +138,6 @@ public class ZenLog {
             case TYPE_SUBSCRIBE: return "subscribe";
             case TYPE_UNSUBSCRIBE: return "unsubscribe";
             case TYPE_CONFIG: return "config";
-            case TYPE_FOLLOW_RINGER_MODE: return "follow_ringer_mode";
             case TYPE_NOT_INTERCEPTED: return "not_intercepted";
             case TYPE_DISABLE_EFFECTS: return "disable_effects";
             default: return "unknown";
@@ -166,7 +176,7 @@ public class ZenLog {
                 sSize++;
             }
         }
-        Slog.d(TAG, typeToString(type) + ": " + msg);
+        if (DEBUG) Slog.d(TAG, typeToString(type) + ": " + msg);
     }
 
     public static void dump(PrintWriter pw, String prefix) {

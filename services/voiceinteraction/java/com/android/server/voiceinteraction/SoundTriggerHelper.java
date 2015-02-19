@@ -40,7 +40,6 @@ import android.util.Slog;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Helper for {@link SoundTrigger} APIs.
@@ -78,7 +77,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private IRecognitionStatusCallback mActiveListener;
     private int mKeyphraseId = INVALID_VALUE;
     private int mCurrentSoundModelHandle = INVALID_VALUE;
-    private UUID mCurrentSoundModelUuid = null;
+    private KeyphraseSoundModel mCurrentSoundModel = null;
     // FIXME: Ideally this should not be stored if allowMultipleTriggers happens at a lower layer.
     private RecognitionConfig mRecognitionConfig = null;
     private boolean mRequested = false;
@@ -134,7 +133,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                         + (mActiveListener == null ? "null" : mActiveListener.asBinder()));
                 Slog.d(TAG, "current SoundModel handle=" + mCurrentSoundModelHandle);
                 Slog.d(TAG, "current SoundModel UUID="
-                        + (mCurrentSoundModelUuid == null ? null : mCurrentSoundModelUuid));
+                        + (mCurrentSoundModel == null ? null : mCurrentSoundModel.uuid));
             }
 
             if (!mStarted) {
@@ -166,20 +165,16 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             // Unload the previous model if the current one isn't invalid
-            // and, it's not the same as the new one, or we are already started
-            // if we are already started, we can get multiple calls to start
-            // if the underlying sound model changes, in which case we should unload and reload.
-            // The model reuse helps only in cases when we trigger and stop internally
-            // without a start recognition call.
+            // and, it's not the same as the new one.
+            // This helps use cache and reuse the model and just start/stop it when necessary.
             if (mCurrentSoundModelHandle != INVALID_VALUE
-                    && (!soundModel.uuid.equals(mCurrentSoundModelUuid) || mStarted)) {
+                    && !soundModel.equals(mCurrentSoundModel)) {
                 Slog.w(TAG, "Unloading previous sound model");
                 int status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
                 if (status != SoundTrigger.STATUS_OK) {
                     Slog.w(TAG, "unloadSoundModel call failed with " + status);
                 }
-                mCurrentSoundModelHandle = INVALID_VALUE;
-                mCurrentSoundModelUuid = null;
+                internalClearSoundModelLocked();
                 mStarted = false;
             }
 
@@ -198,7 +193,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             // Load the sound model if the current one is null.
             int soundModelHandle = mCurrentSoundModelHandle;
             if (mCurrentSoundModelHandle == INVALID_VALUE
-                    || mCurrentSoundModelUuid == null) {
+                    || mCurrentSoundModel == null) {
                 int[] handle = new int[] { INVALID_VALUE };
                 int status = mModule.loadSoundModel(soundModel, handle);
                 if (status != SoundTrigger.STATUS_OK) {
@@ -218,7 +213,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mRequested = true;
             mKeyphraseId = keyphraseId;
             mCurrentSoundModelHandle = soundModelHandle;
-            mCurrentSoundModelUuid = soundModel.uuid;
+            mCurrentSoundModel = soundModel;
             mRecognitionConfig = recognitionConfig;
             // Register the new listener. This replaces the old one.
             // There can only be a maximum of one active listener at any given time.
@@ -275,14 +270,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 return status;
             }
 
-            status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
-            if (status != SoundTrigger.STATUS_OK) {
-                Slog.w(TAG, "unloadSoundModel call failed with " + status);
-            }
-
-            // Clear the internal state once the recognition has been stopped.
-            // Unload sound model call may fail in scenarios, and we'd still want
-            // to reload the sound model.
+            // We leave the sound model loaded but not started, this helps us when we start
+            // back.
+            // Also clear the internal state once the recognition has been stopped.
             internalClearStateLocked();
             return status;
         }
@@ -303,11 +293,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             mRequested = false;
             int status = updateRecognitionLocked(false /* don't notify for synchronous calls */);
-            status = mModule.unloadSoundModel(mCurrentSoundModelHandle);
-            if (status != SoundTrigger.STATUS_OK) {
-                Slog.w(TAG, "unloadSoundModel call failed with " + status);
-            }
-
             internalClearStateLocked();
         }
     }
@@ -456,6 +441,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in onError", e);
         } finally {
+            internalClearSoundModelLocked();
             internalClearStateLocked();
             if (mModule != null) {
                 mModule.detach();
@@ -535,8 +521,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         mRequested = false;
 
         mKeyphraseId = INVALID_VALUE;
-        mCurrentSoundModelHandle = INVALID_VALUE;
-        mCurrentSoundModelUuid = null;
         mRecognitionConfig = null;
         mActiveListener = null;
 
@@ -548,6 +532,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mContext.unregisterReceiver(mPowerSaveModeListener);
             mPowerSaveModeListener = null;
         }
+    }
+
+    private void internalClearSoundModelLocked() {
+        mCurrentSoundModelHandle = INVALID_VALUE;
+        mCurrentSoundModel = null;
     }
 
     class MyCallStateListener extends PhoneStateListener {
@@ -581,7 +570,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             pw.print("  keyphrase ID="); pw.println(mKeyphraseId);
             pw.print("  sound model handle="); pw.println(mCurrentSoundModelHandle);
             pw.print("  sound model UUID=");
-            pw.println(mCurrentSoundModelUuid == null ? "null" : mCurrentSoundModelUuid);
+            pw.println(mCurrentSoundModel == null ? "null" : mCurrentSoundModel.uuid);
             pw.print("  current listener=");
             pw.println(mActiveListener == null ? "null" : mActiveListener.asBinder());
 

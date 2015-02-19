@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">WalletFragmentStyle</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -708,28 +777,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+  
+   
+  
+  
+  
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+   
+  
+  
+   
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -742,21 +804,21 @@ Summary:
 
 
   <a href="#inhconstants">Inherited Constants</a>
-
+  
 
 
   &#124; <a href="#lfields">Fields</a>
-
+  
 
 
 
   &#124; <a href="#pubctors">Ctors</a>
-
+  
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -766,9 +828,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -778,28 +840,31 @@ Summary:
 
 <div id="jd-header">
     public
-
-    final
-
+     
+    final 
+    
     class
 <h1 itemprop="name">WalletFragmentStyle</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+      implements 
+      
+        Parcelable 
+      
+  
+  
 
 
-
-
-
-
-      implements
-
-        SafeParcelable
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -811,18 +876,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.wallet.fragment.WalletFragmentStyle</td>
     </tr>
-
+    
 
 </table>
 
@@ -910,54 +975,33 @@ android.os.Parcelable
   </div>
   <div id="inherited-constants-android.os.Parcelable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
-
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
+    
+    
 </table>
   </div>
 </div>
@@ -973,7 +1017,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 <table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
 
 
-
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -981,10 +1025,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           Creator&lt;<a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
 
 </table>
 
@@ -999,19 +1048,19 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#WalletFragmentStyle()">WalletFragmentStyle</a></span>()</nobr>
-
+        
   </td></tr>
 
 
@@ -1028,323 +1077,403 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#describeContents()">describeContents</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setBuyButtonAppearance(int)">setBuyButtonAppearance</a></span>(int buyButtonAppearance)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the appearance of the buy button.
+          
+    
 
-        <div class="jd-descrdiv">Sets the appearance of the buy button.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setBuyButtonHeight(int)">setBuyButtonHeight</a></span>(int height)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies a height for the buy button.
+          
+    
 
-        <div class="jd-descrdiv">Specifies a height for the buy button.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setBuyButtonHeight(int, float)">setBuyButtonHeight</a></span>(int unit, float height)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies a height for the buy button.
+          
+    
 
-        <div class="jd-descrdiv">Specifies a height for the buy button.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setBuyButtonText(int)">setBuyButtonText</a></span>(int buyButtonText)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets text for the buy button.
+          
+    
 
-        <div class="jd-descrdiv">Sets text for the buy button.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setBuyButtonWidth(int)">setBuyButtonWidth</a></span>(int width)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies a width for the buy button.
+          
+    
 
-        <div class="jd-descrdiv">Specifies a width for the buy button.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setBuyButtonWidth(int, float)">setBuyButtonWidth</a></span>(int unit, float width)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specifies a width for the buy button.
+          
+    
 
-        <div class="jd-descrdiv">Specifies a width for the buy button.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsBackgroundColor(int)">setMaskedWalletDetailsBackgroundColor</a></span>(int color)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the color for the masked wallet details view background.
+          
+    
 
-        <div class="jd-descrdiv">Sets the color for the masked wallet details view background.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsBackgroundResource(int)">setMaskedWalletDetailsBackgroundResource</a></span>(int resourceId)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the drawable resource id for the masked wallet details view background.
+          
+    
 
-        <div class="jd-descrdiv">Sets the drawable resource id for the masked wallet details view background.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsButtonBackgroundColor(int)">setMaskedWalletDetailsButtonBackgroundColor</a></span>(int color)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the color for the masked wallet details "Change" button background.
+          
+    
 
-        <div class="jd-descrdiv">Sets the color for the masked wallet details "Change" button background.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsButtonBackgroundResource(int)">setMaskedWalletDetailsButtonBackgroundResource</a></span>(int resourceId)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the drawable resource id for the masked wallet details "Change" button background.
+          
+    
 
-        <div class="jd-descrdiv">Sets the drawable resource id for the masked wallet details "Change" button background.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsButtonTextAppearance(int)">setMaskedWalletDetailsButtonTextAppearance</a></span>(int resourceId)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the text appearance for the masked wallet details "Change" button text.
+          
+    
 
-        <div class="jd-descrdiv">Sets the text appearance for the masked wallet details "Change" button text.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsHeaderTextAppearance(int)">setMaskedWalletDetailsHeaderTextAppearance</a></span>(int resourceId)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets text appearance for the headers describing masked wallet details.
+          
+    
 
-        <div class="jd-descrdiv">Sets text appearance for the headers describing masked wallet details.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsLogoImageType(int)">setMaskedWalletDetailsLogoImageType</a></span>(int imageType)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the type of the wallet image logo in masked wallet details view.
+          
+    
 
-        <div class="jd-descrdiv">Sets the type of the wallet image logo in masked wallet details view.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsLogoTextColor(int)">setMaskedWalletDetailsLogoTextColor</a></span>(int color)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the color for the masked wallet details logo text.
+          
+    
 
-        <div class="jd-descrdiv">Sets the color for the masked wallet details logo text.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setMaskedWalletDetailsTextAppearance(int)">setMaskedWalletDetailsTextAppearance</a></span>(int resourceId)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets text appearance for the masked wallet details.
+          
+    
 
-        <div class="jd-descrdiv">Sets text appearance for the masked wallet details.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId</a></span>(int id)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets resource id of the style which will be used to customize wallet fragment UI.
+          
+    
 
-        <div class="jd-descrdiv">Sets resource id of the style which will be used to customize wallet fragment UI.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)</nobr>
-
+        
   </td></tr>
 
 
@@ -1379,182 +1508,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1581,38 +1710,38 @@ From interface
   </div>
   <div id="inherited-methods-android.os.Parcelable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">describeContents</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
@@ -1620,8 +1749,6 @@ From interface
   </div>
 </div>
 </td></tr>
-
-
 
 
 </table>
@@ -1658,27 +1785,30 @@ From interface
 
 <A NAME="CREATOR"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         Creator&lt;<a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>&gt;
       </span>
         CREATOR
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -1695,27 +1825,30 @@ From interface
 
 <A NAME="WalletFragmentStyle()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">WalletFragmentStyle</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1739,14 +1872,14 @@ From interface
 
 <A NAME="describeContents()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">describeContents</span>
@@ -1754,12 +1887,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1768,14 +1904,14 @@ From interface
 
 <A NAME="setBuyButtonAppearance(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setBuyButtonAppearance</span>
@@ -1783,12 +1919,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the appearance of the buy button.
  See <code><a href="/reference/com/google/android/gms/wallet/fragment/BuyButtonAppearance.html">BuyButtonAppearance</a></code> for the list of possible values.
  Defaults to <code><a href="/reference/com/google/android/gms/wallet/fragment/BuyButtonAppearance.html#CLASSIC">CLASSIC</a></code>.
@@ -1815,14 +1954,14 @@ From interface
 
 <A NAME="setBuyButtonHeight(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setBuyButtonHeight</span>
@@ -1830,12 +1969,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies a height for the buy button. The height includes a padding of 8dp (4dp on each
  side). The padding is used for a border around the button in pressed and focused states.
  The range of height supported is 40dp~72dp.
@@ -1859,14 +2001,14 @@ From interface
 
 <A NAME="setBuyButtonHeight(int, float)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setBuyButtonHeight</span>
@@ -1874,12 +2016,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies a height for the buy button. The height includes a padding of 8dp (4dp on each
  side). The padding is used for a border around the button in pressed and focused states.
  The range of height supported is 40dp~72dp.
@@ -1907,14 +2052,14 @@ From interface
 
 <A NAME="setBuyButtonText(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setBuyButtonText</span>
@@ -1922,12 +2067,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets text for the buy button.
  This will override the buy button text defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code>.
@@ -1954,14 +2102,14 @@ From interface
 
 <A NAME="setBuyButtonWidth(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setBuyButtonWidth</span>
@@ -1969,12 +2117,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies a width for the buy button. The width includes a padding of 8dp (4dp on each
  side). The padding is used for a border around the button in pressed and focused states.
  A minimum width is enforced, and is computed from the height of the button and the width
@@ -1999,14 +2150,14 @@ From interface
 
 <A NAME="setBuyButtonWidth(int, float)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setBuyButtonWidth</span>
@@ -2014,12 +2165,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies a width for the buy button. The width includes a padding of 8dp (4dp on each
  side). The padding is used for a border around the button in pressed and focused states.
  A minimum width is enforced, and is computed from the height of the button and the width
@@ -2048,14 +2202,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsBackgroundColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsBackgroundColor</span>
@@ -2063,12 +2217,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color for the masked wallet details view background.
  This will override the color defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code> and background drawable which was previously set.</p></div>
@@ -2089,14 +2246,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsBackgroundResource(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsBackgroundResource</span>
@@ -2104,12 +2261,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the drawable resource id for the masked wallet details view background.
  This will override the drawable defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code> and background color which was previously set.</p></div>
@@ -2130,14 +2290,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsButtonBackgroundColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsButtonBackgroundColor</span>
@@ -2145,12 +2305,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color for the masked wallet details "Change" button background.
  This will override the background defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code> and drawable resource id which was previously set for
@@ -2172,14 +2335,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsButtonBackgroundResource(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsButtonBackgroundResource</span>
@@ -2187,12 +2350,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the drawable resource id for the masked wallet details "Change" button background.
  This will override the background defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code> and color previously set for the button background.</p></div>
@@ -2213,14 +2379,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsButtonTextAppearance(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsButtonTextAppearance</span>
@@ -2228,12 +2394,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text appearance for the masked wallet details "Change" button text.
  This will override the text appearance defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code>.</p></div>
@@ -2254,14 +2423,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsHeaderTextAppearance(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsHeaderTextAppearance</span>
@@ -2269,12 +2438,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets text appearance for the headers describing masked wallet details.
  This will override the text appearance defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code>.</p></div>
@@ -2295,14 +2467,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsLogoImageType(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsLogoImageType</span>
@@ -2310,12 +2482,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the type of the wallet image logo in masked wallet details view.
  See <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletLogoImageType.html">WalletLogoImageType</a></code> for the list of possible values.
  Defaults to <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletLogoImageType.html#CLASSIC">CLASSIC</a></code>.
@@ -2342,14 +2517,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsLogoTextColor(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsLogoTextColor</span>
@@ -2357,12 +2532,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color for the masked wallet details logo text.
  This will override the text color defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code>.</p></div>
@@ -2383,14 +2561,14 @@ From interface
 
 <A NAME="setMaskedWalletDetailsTextAppearance(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setMaskedWalletDetailsTextAppearance</span>
@@ -2398,12 +2576,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets text appearance for the masked wallet details.
  This will override the text appearance defined in any style passed in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html#setStyleResourceId(int)">setStyleResourceId(int)</a></code>.</p></div>
@@ -2424,14 +2605,14 @@ From interface
 
 <A NAME="setStyleResourceId(int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a>
       </span>
       <span class="sympad">setStyleResourceId</span>
@@ -2439,12 +2620,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets resource id of the style which will be used to customize wallet fragment UI.
  If not set explicitly the default style
  <code><a href="/reference/com/google/android/gms/R.style.html#WalletFragmentDefaultStyle">WalletFragmentDefaultStyle</a></code> will be used.
@@ -2467,14 +2651,14 @@ From interface
 
 <A NAME="writeToParcel(android.os.Parcel, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">writeToParcel</span>
@@ -2482,12 +2666,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2505,17 +2692,17 @@ From interface
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -2523,7 +2710,7 @@ From interface
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -2536,7 +2723,7 @@ From interface
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

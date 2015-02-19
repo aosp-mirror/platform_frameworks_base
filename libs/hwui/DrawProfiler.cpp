@@ -22,7 +22,8 @@
 
 #define DEFAULT_MAX_FRAMES 128
 
-#define RETURN_IF_DISABLED() if (CC_LIKELY(mType == kNone)) return
+#define RETURN_IF_PROFILING_DISABLED() if (CC_LIKELY(mType == kNone)) return
+#define RETURN_IF_DISABLED() if (CC_LIKELY(mType == kNone && !mShowDirtyRegions)) return
 
 #define NANOS_TO_MILLIS_FLOAT(nanos) ((nanos) * 0.000001f)
 
@@ -64,7 +65,9 @@ DrawProfiler::DrawProfiler()
         , mPreviousTime(0)
         , mVerticalUnit(0)
         , mHorizontalUnit(0)
-        , mThresholdStroke(0) {
+        , mThresholdStroke(0)
+        , mShowDirtyRegions(false)
+        , mFlashToggle(false) {
     setDensity(1);
 }
 
@@ -82,27 +85,27 @@ void DrawProfiler::setDensity(float density) {
 }
 
 void DrawProfiler::startFrame(nsecs_t recordDurationNanos) {
-    RETURN_IF_DISABLED();
+    RETURN_IF_PROFILING_DISABLED();
     mData[mCurrentFrame].record = NANOS_TO_MILLIS_FLOAT(recordDurationNanos);
     mPreviousTime = systemTime(CLOCK_MONOTONIC);
 }
 
 void DrawProfiler::markPlaybackStart() {
-    RETURN_IF_DISABLED();
+    RETURN_IF_PROFILING_DISABLED();
     nsecs_t now = systemTime(CLOCK_MONOTONIC);
     mData[mCurrentFrame].prepare = NANOS_TO_MILLIS_FLOAT(now - mPreviousTime);
     mPreviousTime = now;
 }
 
 void DrawProfiler::markPlaybackEnd() {
-    RETURN_IF_DISABLED();
+    RETURN_IF_PROFILING_DISABLED();
     nsecs_t now = systemTime(CLOCK_MONOTONIC);
     mData[mCurrentFrame].playback = NANOS_TO_MILLIS_FLOAT(now - mPreviousTime);
     mPreviousTime = now;
 }
 
 void DrawProfiler::finishFrame() {
-    RETURN_IF_DISABLED();
+    RETURN_IF_PROFILING_DISABLED();
     nsecs_t now = systemTime(CLOCK_MONOTONIC);
     mData[mCurrentFrame].swapBuffers = NANOS_TO_MILLIS_FLOAT(now - mPreviousTime);
     mPreviousTime = now;
@@ -114,19 +117,30 @@ void DrawProfiler::unionDirty(SkRect* dirty) {
     // Not worth worrying about minimizing the dirty region for debugging, so just
     // dirty the entire viewport.
     if (dirty) {
+        mDirtyRegion = *dirty;
         dirty->setEmpty();
     }
 }
 
 void DrawProfiler::draw(OpenGLRenderer* canvas) {
-    if (CC_LIKELY(mType != kBars)) {
-        return;
+    RETURN_IF_DISABLED();
+
+    if (mShowDirtyRegions) {
+        mFlashToggle = !mFlashToggle;
+        if (mFlashToggle) {
+            SkPaint paint;
+            paint.setColor(0x7fff0000);
+            canvas->drawRect(mDirtyRegion.fLeft, mDirtyRegion.fTop,
+                    mDirtyRegion.fRight, mDirtyRegion.fBottom, &paint);
+        }
     }
 
-    prepareShapes(canvas->getViewportHeight());
-    drawGraph(canvas);
-    drawCurrentFrame(canvas);
-    drawThreshold(canvas);
+    if (mType == kBars) {
+        prepareShapes(canvas->getViewportHeight());
+        drawGraph(canvas);
+        drawCurrentFrame(canvas);
+        drawThreshold(canvas);
+    }
 }
 
 void DrawProfiler::createData() {
@@ -217,6 +231,7 @@ DrawProfiler::ProfileType DrawProfiler::loadRequestedProfileType() {
 }
 
 bool DrawProfiler::loadSystemProperties() {
+    bool changed = false;
     ProfileType newType = loadRequestedProfileType();
     if (newType != mType) {
         mType = newType;
@@ -225,13 +240,18 @@ bool DrawProfiler::loadSystemProperties() {
         } else {
             createData();
         }
-        return true;
+        changed = true;
     }
-    return false;
+    bool showDirty = property_get_bool(PROPERTY_DEBUG_SHOW_DIRTY_REGIONS, false);
+    if (showDirty != mShowDirtyRegions) {
+        mShowDirtyRegions = showDirty;
+        changed = true;
+    }
+    return changed;
 }
 
 void DrawProfiler::dumpData(int fd) {
-    RETURN_IF_DISABLED();
+    RETURN_IF_PROFILING_DISABLED();
 
     // This method logs the last N frames (where N is <= mDataSize) since the
     // last call to dumpData(). In other words if there's a dumpData(), draw frame,

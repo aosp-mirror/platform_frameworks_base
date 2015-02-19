@@ -1,6 +1,7 @@
 page.title=Creating an Android Project
-parent.title=Building Your First App
-parent.link=index.html
+
+page.tags=project setup
+helpoutsWidget=true
 
 trainingnavtop=true
 next.title=Running Your App
@@ -16,15 +17,13 @@ next.link=running-app.html
 <h2>This lesson teaches you to</h2>
 
 <ol>
-  <li><a href="#Eclipse">Create a Project with Eclipse</a></li>
+  <li><a href="#Studio">Create a Project with Android Studio</a></li>
   <li><a href="#CommandLine">Create a Project with Command Line Tools</a></li>
 </ol>
 
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
-SDK</a></li>
   <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
 
@@ -33,101 +32,148 @@ SDK</a></li>
 </div>
 
 <p>An Android project contains all the files that comprise the source code for your Android
-app. The Android SDK tools make it easy to start a new Android project with a set of
-default project directories and files.</p>
+app.</p>
 
 <p>This lesson
-shows how to create a new project either using Eclipse (with the ADT plugin) or using the
+shows how to create a new project either using Android Studio or using the
 SDK tools from a command line.</p>
 
 <p class="note"><strong>Note:</strong> You should already have the Android SDK installed, and if
-you're using Eclipse, you should also have the <a href="{@docRoot}tools/sdk/eclipse-adt.html">ADT
-plugin</a> installed (version 22.6.2 or higher). If you don't have these, follow the guide to <a
+you're using Android Studio, you should also have <a href="{@docRoot}sdk/installing/studio.html">
+Android Studio</a> installed. If you don't have these, follow the guide to <a
 href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a> before you start this
 lesson.</p>
 
 
-<h2 id="Eclipse">Create a Project with Eclipse</h2>
+<h2 id="Studio">Create a Project with Android Studio</h2>
 
 <ol>
-  <li>Click <strong>New</strong> <img src="{@docRoot}images/tools/eclipse-new.png"
-  style="vertical-align:baseline;margin:0" /> in the toolbar.</li>
-  <li>In the window that appears, open the <strong>Android</strong> folder,
-  select <strong>Android Application Project</strong>, and click <strong>Next</strong>.</li>
-
-<div class="figure" style="width:420px">
-<img src="{@docRoot}images/training/firstapp/adt-firstapp-setup.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> The New Android App Project wizard in Eclipse.</p>
-</div>
-
-  <li>Fill in the form that appears:
+  <li>In Android Studio, create a new project:
+    <ul>
+      <li>If you don't have a project opened, in the <strong>Welcome</strong> screen, click <strong>
+        New Project</strong>.</li>
+      <li>If you have a project opened, from the <strong>File</strong> menu, select <strong>New
+        Project</strong>.</li>
+    </ul>
+  </li>
+  <div class="figure" style="width:420px">
+    <img src="{@docRoot}images/training/firstapp/studio-setup-1.png" alt="" />
+    <p class="img-caption"><strong>Figure 1.</strong> Configuring a new project in Android Studio.</p>
+  </div>
+  <li>Under <strong>Configure your new project</strong>, fill in the fields as shown in figure 1
+    and click <strong>Next</strong>.
+    <p>It will probably be easier to follow these lessons if you use the same values as shown.</p>
     <ul>
       <li><strong>Application Name</strong> is the app name that appears to users.
-          For this project, use "My First App."</p></li>
-      <li><strong>Project Name</strong> is the name of your project directory and the name visible in Eclipse.</li>
-      <li><strong>Package Name</strong> is the package namespace for your app (following the same
-rules as packages in the Java programming language). Your package name
-must be unique across all packages installed on the Android system. For this reason, it's generally
-best if you use a name that begins with the reverse domain name of your organization or
-publisher entity. For this project, you can use something like "com.example.myfirstapp."
-However, you cannot publish your app on Google Play using the "com.example" namespace.</li>
-      <li><strong>Minimum Required SDK</strong> is the lowest version of Android that your app supports,
-      indicated using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels"
-      >API level</a>.
-        To support as many devices as possible, you should set this to the lowest version available
-        that allows your app to provide its core feature set. If any feature of your app is possible
-        only on newer versions of Android and it's not critical to the app's core feature set, you
-        can enable the feature only when running on the versions that support it (as
-        discussed in <a href="{@docRoot}training/basics/supporting-devices/platforms.html"
-        >Supporting Different Platform Versions</a>).
-        Leave this set to the default value for this project.
-      </li>
-      <li><strong>Target SDK</strong> indicates the highest version of Android (also using the
-      <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels"
-      >API level</a>) with which you
-      have tested with your application.
-        <p>As new versions of Android become available, you should
-      test your app on the new version and update this value to match the latest API level
-      in order to take advantage of new platform features.</p>
-      </li>
-      <li><strong>Compile With</strong> is the platform version against which you will compile your app.
-        By default, this is set to the latest version of Android available in your SDK. (It should
-        be Android 4.1 or greater; if you don't have such a version available, you must install one
-        using the <a href="{@docRoot}sdk/installing/adding-packages.html">SDK Manager</a>).
-        You can still build your app to
-support older versions, but setting the build target to the latest version allows you to
-enable new features and optimize your app for a great user experience on the latest
-devices.</li>
-       <li><strong>Theme</strong> specifies the Android UI style to apply for your app. You can leave
-       this alone.</li>
+          For this project, use "My First App."</li>
+      <li><strong>Company domain</strong> provides a qualifier that will be appended to the package
+        name; Android Studio will remember this qualifier for each new project you create.</li>
+      <li><strong>Package name</strong> is the fully qualified name for the project (following the
+        same rules as those for naming packages in the Java programming language). Your package name
+        must be unique across all packages installed on the Android system. You can <strong>
+        Edit</strong> this value independently from the application name or the company
+        domain.</li>
+      <li><strong>Project location</strong> is the directory on your system that holds the project
+        files.</li>
     </ul>
-    <p>Click <strong>Next</strong>.</p>
   </li>
-  <li>On the next screen to configure the project, leave the default selections and click
-  <strong>Next</strong>.</li>
-  <li>The next screen can help you create a launcher icon for your app.
-    <p>You can customize an icon in several ways and the tool generates an icon for all
-    screen densities. Before you publish your app, you should be sure your icon meets
-    the specifications defined in the <a
-    href="{@docRoot}design/style/iconography.html">Iconography</a>
-    design guide.</p>
-    <p>Click <strong>Next</strong>.</p>
-  </li>
-  <li>Now you can select an activity template from which to begin building your app.
-    <p>For this project, select <strong>BlankActivity</strong> and click <strong>Next</strong>.</p>
-  </li>
-  <li>Leave all the details for the activity in their default state and click
-    <strong>Finish</strong>.</li>
+  <li>Under <strong>Select the form factors your app will run on</strong>, check the box for <strong>
+    Phone and Tablet</strong>.</li>
+  <li>For <strong>Minimum SDK</strong>, select <strong>API 8: Android 2.2 (Froyo)</strong>.
+    <p>The Minimum Required SDK is the earliest version of Android that your app supports,
+      indicated using the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">
+      API level</a>. To support as many devices as possible, you should set this to the lowest
+      version available that allows your app to provide its core feature set. If any feature of your
+      app is possible only on newer versions of Android and it's not critical to the app's core
+      feature set, you can enable the feature only when running on the versions that support it (as
+      discussed in <a href="{@docRoot}training/basics/supporting-devices/platforms.html">
+      Supporting Different Platform Versions</a>).</p></li>
+  <li>Leave all of the other options (TV, Wear, and Glass) unchecked and click <strong>Next.</strong></li>
+  <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h3>Activities</h3>
+      <p>An activity is one of the distinguishing features of the Android framework. Activities
+        provide the user with access to your app, and there may be many activities. An application
+        will usually have a main activity for when the user launches the application, another
+        activity for when she selects some content to view, for example, and other activities for
+        when she performs other tasks within the app. See <a href="{@docRoot}guide/components/activities.html">
+        Activities</a> for more information.</p>
+    </div>
+  </div>
+  <li>Under <strong>Add an activity to your project</strong>, select <strong>Blank Activity</strong>
+    and click <strong>Next</strong>.</li>
+  <li>Under <strong>Describe the new activity for your project</strong>, leave the fields as they
+    are and click <strong>Finish</strong>.</li>
 </ol>
 
-<p>Your Android project is now a basic "Hello World" app that contains some default files.
-To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
+<p>Your Android project is now a basic "Hello World" app that contains some default files. Take a
+moment to review the most important of these:</p>
 
+<dl>
+  <dt><code>app/src/main/res/layout/activity_my.xml</code></dt>
+  <dd>This is the XML layout file for the activity you added when you created the project with Android
+    Studio. Following the New Project workflow, Android Studio presents this file with both a text
+    view and a preview of the screen UI. The file includes some default settings and a <code>TextView</code>
+    element that displays the message, "Hello world!"</dd>
+  <dt><code>app/src/main/java/com.mycompany.myfirstapp/MyActivity.java</code></dt>
+  <dd>A tab for this file appears in Android Studio when the New Project workflow finishes. When you
+    select the file you see the class definition for the activity you created. When you build and
+    run the app, the {@link android.app.Activity} class starts the activity and loads the layout file
+    that says "Hello World!"</dd>
+  <dt><code>app/src/res/AndroidManifest.xml</code></dt>
+  <dd>The <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a> describes
+    the fundamental characteristics of the app and defines each of its components. You'll revisit
+    this file as you follow these lessons and add more components to your app.</dd>
+  <dt><code>app/build.gradle</code></dt>
+  <dd>Android Studio uses Gradle to compile and build your app. There is a <code>build.gradle</code>
+    file for each module of your project, as well as a <code>build.gradle</code> file for the entire
+    project. Usually, you're only interested in the <code>build.gradle</code> file for the module,
+    in this case the <code>app</code> or application module. This is where your app's build dependencies
+    are set, including the <code>defaultConfig</code> settings:
+    <ul>
+      <li><code>compiledSdkVersion</code> is the platform version against which you will compile
+        your app. By default, this is set to the latest version of Android available in your SDK.
+        (It should be Android 4.1 or greater; if you don't have such a version available, you must
+        install one using the <a href="{@docRoot}sdk/installing/adding-packages.html">SDK Manager</a>.)
+        You can still build your app to support older versions, but setting this to the latest
+        version allows you to enable new features and optimize your app for a great user experience
+        on the latest devices.</li>
+      <li><code>applicationId</code> is the fully qualified package name for your application that
+        you specified during the New Project workflow.</li>
+      <li><code>minSdkVersion</code> is the Minimum SDK version you specified during the New Project
+        workflow. This is the earliest version of the Android SDK that your app supports.</li>
+      <li><code>targetSdkVersion</code> indicates the highest version of Android with which you have
+        tested your application. As new versions of Android become available, you should
+        test your app on the new version and update this value to match the latest API level and
+        thereby take advantage of new platform features. For more information, read
+        <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
+          Platform Versions</a>.</li>
+    </ul>
+    <p>See <a href="{@docRoot}sdk/installing/studio-build.html">Building Your Project with Gradle</a>
+    for more information about Gradle.</p></dd>
+</dl>
 
+<p>Note also the <code>/res</code> subdirectories that contain the
+<a href="{@docRoot}guide/topics/resources/overview.html">resources</a> for your application:</p>
+<dl>
+  <dt><code>drawable-hdpi/</code></dt>
+    <dd>Directory for drawable objects (such as bitmaps) that are designed for high-density
+    (hdpi) screens. Other drawable directories contain assets designed for other screen densities.
+    Here you'll find the ic_launcher.png that appears when you run the default app.</dd>
+  <dt><code>layout/</code></dt>
+    <dd>Directory for files that define your app's user interface like activity_my.xml,
+      discussed above, which describes a basic layout for the MyActivity class.</dd>
+  <dt><code>values/</code></dt>
+    <dd>Directory for other XML files that contain a collection of resources, such as
+      string and color definitions. The strings.xml file defines the "Hello world!" string that
+      displays when you run the default app.</dd>
+</dl>
+
+<p>To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
 
 <h2 id="CommandLine">Create a Project with Command Line Tools</h2>
 
-<p>If you're not using the Eclipse IDE with the ADT plugin, you can instead create your project
+<p>If you're not using the Android Studio IDE, you can instead create your project
 using the SDK tools from a command line:</p>
 
 <ol>
@@ -135,31 +181,31 @@ using the SDK tools from a command line:</p>
   <li>Execute:
 <pre class="no-pretty-print">android list targets</pre>
 <p>This prints a list of the available Android platforms that you’ve downloaded for your SDK. Find
-the platform against which you want to compile your app. Make a note of the target id. We
+the platform against which you want to compile your app. Make a note of the target ID. We
 recommend that you select the highest version possible. You can still build your app to
 support older versions, but setting the build target to the latest version allows you to optimize
 your app for the latest devices.</p>
 <p>If you don't see any targets listed, you need to
 install some using the Android SDK
-Manager tool. See <a href="{@docRoot}sdk/installing/adding-packages.html">Adding Platforms
-  and Packages</a>.</p></li>
+Manager tool. See <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK
+  Packages</a>.</p></li>
   <li>Execute:
 <pre class="no-pretty-print">
 android create project --target &lt;target-id> --name MyFirstApp \
---path &lt;path-to-workspace>/MyFirstApp --activity MainActivity \
+--path &lt;path-to-workspace>/MyFirstApp --activity MyActivity \
 --package com.example.myfirstapp
 </pre>
-<p>Replace <code>&lt;target-id></code> with an id from the list of targets (from the previous step)
+<p>Replace <code>&lt;target-id></code> with an ID from the list of targets (from the previous step)
 and replace
 <code>&lt;path-to-workspace></code> with the location in which you want to save your Android
 projects.</p></li>
 </ol>
 
-<p>Your Android project is now a basic "Hello World" app that contains some default files.
-To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
-
 <p class="note"><strong>Tip:</strong> Add the <code>platform-tools/</code> as well as the
 <code>tools/</code> directory to your <code>PATH</code> environment variable.</p>
+
+<p>Your Android project is now a basic "Hello World" app that contains some default files.
+To run the app, continue to the <a href="running-app.html">next lesson</a>.</p>
 
 
 

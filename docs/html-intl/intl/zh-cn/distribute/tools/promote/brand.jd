@@ -1,0 +1,148 @@
+page.title=品牌指南
+page.image=/assets/images/resource-card-default-android.jpg
+page.metaDescription=关于Android 和 Goolge Play 品牌的指南和下载。
+
+@jd:body
+
+      <p>我们建议你在 Android 应用的宣传资料中使用 Android 和 Google Play 品牌。只要你遵循相关指南，就可以使用本页中的图标和其他资源。</p>
+
+  <p>对 Android 或 Google Play 品牌的使用必须经过 Android 合作伙伴营销小组的审核。请使用 <a href="https://docs.google.com/forms/d/1YE5gZpAAcFKjYcUddCsK1Bv9a9Y-luaLVnkazVlaJ2w/viewform">Android 和 Google Play 品牌权限咨询表单</a>提交你的营销资料以供审核。</p>
+
+  <h2 id="brand-android">Android</h2>
+
+   <p>以下是关于 Android 品牌和相关资源的指南。</p>
+
+
+    <h4 style="clear:right">在文本中使用 Android</h4>
+
+    <div style="float:right;clear:right;width:200px;margin:0 0 20px 30px">
+      <img alt="" src="{@docRoot}images/brand/mediaplayer.png" />
+    </div>
+      <ul>
+      <li>Android™ 首次出现在广告素材中时应标注商标符号。</li>
+      <li>Android 应始终采用大写形式，且一律不得使用复数或所有格形式。</li>
+      <li>“Android”不能在应用或配套产品（包括手机、平板电脑、电视、扬声器、耳机、手表及其他设备）的名称中使用。不过，你可以使用“for Android”。
+        <ul>
+          <li><span style="color:red">不正确</span>：“Android MediaPlayer”</li>
+          <li><span style="color:green">正确</span>：“MediaPlayer for Android”</li>
+        </ul>
+        <p>如果与你的徽标一起使用，则“for Android”不应超过徽标大小的 90%。这种用法第一次出现时，后面应标注 TM 符号，即“for Android™”。</p>
+      </li>
+      <li>如果后跟一个合适的通称，Android 可以用作描述词（即用“Android”表达“Android 平台”的意思）。
+        <ul>
+          <li><span style="color:red">不正确</span>：“Android MediaPlayer”或“Android XYZ 应用”</li>
+          <li><span style="color:green">正确</span>：“Android 功能”或“Android 应用”</li>
+        </ul>
+      </li>
+      </ul>
+
+      <p>每次使用 Android 名称时，你的资料中都应注明以下归属信息：</p>
+      <blockquote><em>Android 是 Google Inc. 的商标。</em></blockquote>
+
+
+   <h4>Android 机器人</h4>
+
+    <div style="float:right;width:200px;margin-left:30px">
+      <img alt="" src="{@docRoot}images/brand/Android_Robot_100.png" style="margin-left:50px" />
+      <p style="text-align:center">
+         <a href="{@docRoot}images/brand/Android_Robot_100.png">100x118</a> |
+         <a href="{@docRoot}images/brand/Android_Robot_200.png">200x237</a><br />
+         <a href="{@docRoot}downloads/brand/Android_Robot_outlined.ai">Illustrator 文件 (.ai)</a></p>
+    </div>
+
+      <p>你可以在营销资料中随意使用、复制和修改 Android 机器人。对于印刷版本，Android 机器人的颜色值为 PMS 376C；对于在线版本，请使用十六进制颜色 <span style="color:#a4c639">#A4C639</span>。</p>
+
+      <p>在使用 Android 机器人或其变体形式时，请遵循<a href="http://creativecommons.org/licenses/by/3.0/">知识共享署名 3.0 </a>许可的条款使用正确的归属信息：</p>
+
+      <blockquote><em>Android 机器人是在 Google 原创及共享成果的基础上再创作或修改而成，须遵照知识共享署名 3.0 许可所述条款付诸应用。</em></blockquote>
+
+      <p>你不得通过将 Android 机器人徽标或其变体形式加入自己的公司徽标或商家名称，来提出商标申请。我们希望确保 Android 机器人可供所有人使用。</p>
+
+
+  <h4 style="clear:right">Android 徽标</h4>
+
+  <div style="float:right;width:210px;margin-left:30px">
+    <img alt="" src="{@docRoot}images/brand/android_logo_no.png" />
+  </div>
+
+  <p>不得使用 Android 徽标。</p>
+
+  <p>不得使用 Android 徽标专用的字体。</p>
+
+  <h2 id="brand-google_play">Google Play</h2>
+
+
+   <p>以下是关于 Google Play 品牌和相关资源的指南。</p>
+
+  <h4>在文本中使用 Google Play</h4>
+
+  <p>在文本中，请务必为首次出现或位于显著位置的 Google Play™ 加上 TM 符号。</p>
+
+  <p>在提及移动设备体验时，除非相应文本中是很明显的说明性内容，否则请使用“Google Play”。例如，营销资料的标题可以是“从 Google Play™ 下载我们的游戏”，但是说明性内容可以是“使用 Google Play™ 商店应用下载我们的游戏”。
+
+   <p>每次使用 Google Play 名称或图标时，你的资料中都应注明以下归属信息：</p>
+
+  <blockquote><em>Google Play 是 Google Inc. 的商标。</em></blockquote>
+
+
+    <div style="float:right;width:96px;margin-left:30px">
+       <img src="{@docRoot}images/brand/Google_Play_Store_96.png" alt="" />
+      <p style="text-align:center">
+         <a href="{@docRoot}images/brand/Google_Play_Store_48.png">48x48</a> |
+         <a href="{@docRoot}images/brand/Google_Play_Store_96.png">96x96</a><br />
+         <a href="{@docRoot}images/brand/Google_Play_Store_600.png">600x576</a>
+         </p>
+    </div>
+
+  <h4>Google Play 商店图标</h4>
+
+  <p>你可以使用 Google Play 商店图标，但不得修改它。</p>
+
+  <p>如上文所述，在文案中提及 Google Play 商店应用时，请使用全称：“Google Play 商店”。但直接标注 Google Play 商店图标时，可以只使用“Play 商店”，以便与设备上显示的图标标签一致。</p>
+
+
+  <h4>Google Play 徽章</h4>
+
+    <div style="float:right;clear:right;width:172px;margin-left:30px">
+      <img src="{@docRoot}images/brand/en_app_rgb_wo_60.png" alt="" />
+      <p style="text-align:center">
+         <a href="{@docRoot}images/brand/en_app_rgb_wo_45.png">129x45</a> |
+         <a href="{@docRoot}images/brand/en_app_rgb_wo_60.png">172x60</a></p>
+    </div>
+
+    <div style="float:right;clear:right;width:172px;margin-left:30px">
+      <img src="{@docRoot}images/brand/en_generic_rgb_wo_60.png" alt="" />
+      <p style="text-align:center">
+         <a href="{@docRoot}images/brand/en_generic_rgb_wo_45.png">129x45</a> |
+         <a href="{@docRoot}images/brand/en_generic_rgb_wo_60.png">172x60</a></p>
+    </div>
+
+    <p>你可以在网站和宣传资料中使用“即刻获取 Google Play”和“即刻获取 Android 应用 Google Play”徽标作为徽章，以指向你在 Google Play 上的商品。你也可以使用其他 Google Play 徽章格式，以及用于音乐、图书、杂志、电影和电视节目的徽章。要申请这些徽章，请使用 <a href="https://docs.google.com/forms/d/1YE5gZpAAcFKjYcUddCsK1Bv9a9Y-luaLVnkazVlaJ2w/viewform">Android 和 Google Play 品牌权限咨询表单</a>。</p>
+
+    <ul>
+      <li>请不要修改徽章图片的颜色、比例、间距或其他任何方面。
+      </li>
+      <li>当与其他应用市场的徽标一起使用时，Google Play 徽标尺寸不应小于这些徽标的尺寸。</li>
+      <li>在线使用时，徽章应链接至以下内容之一：
+        <ul>
+          <li>由你发布的商品的列表，例如：<br />
+          <span style="margin-left:1em">http://play.google.com/store/search?q=publisherName<em></em></span>
+          </li>
+          <li>Google Play 中相应应用的商品详情页，例如：<br />
+          <span style="margin-left:1em">http://play.google.com/store/apps/details?id=packageName<em></em></span>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <p>要快速创建链接至你在 Google Play 上的应用的徽章，请使用 <a href="{@docRoot}distribute/tools/promote/badges.html">Google Play 徽章生成器</a>（支持 40 多种语言）。</p>
+
+    <p>要创建自定义尺寸的徽章，请下载<a href="{@docRoot}distribute/tools/promote/badge-files.html">支持 40 多种语言的 Google Play 徽章</a>的 Adobe® Illustrator® (.ai) 文件。</p>
+
+    <p>要详细了解如何链接至 Google Play 中的商品详情页，请参阅<a href="{@docRoot}distribute/tools/promote/linking.html">链接至你的商品</a>。</p>
+
+  <h2 id="Marketing_Review">营销审核和品牌咨询</h2>
+
+  <p>请使用 <a href="https://docs.google.com/forms/d/1YE5gZpAAcFKjYcUddCsK1Bv9a9Y-luaLVnkazVlaJ2w/viewform">Android 和 Google Play 品牌权限咨询表单</a>提交相关的营销审核或品牌咨询。一般情况下，我们至少需要一周时间才能做出回复。</p>
+
+      </p>

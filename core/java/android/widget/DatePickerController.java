@@ -27,31 +27,9 @@ interface DatePickerController {
 
     void onYearSelected(int year);
 
-    void onDayOfMonthSelected(int year, int month, int day);
-
     void registerOnDateChangedListener(OnDateChangedListener listener);
 
-    void unregisterOnDateChangedListener(OnDateChangedListener listener);
-
     Calendar getSelectedDay();
-
-    void setFirstDayOfWeek(int firstDayOfWeek);
-    int getFirstDayOfWeek();
-
-    int getMinYear();
-    int getMaxYear();
-
-    int getMinMonth();
-    int getMaxMonth();
-
-    int getMinDay();
-    int getMaxDay();
-
-    void setMinDate(long minDate);
-    Calendar getMinDate();
-
-    void setMaxDate(long maxDate);
-    Calendar getMaxDate();
 
     void tryVibrate();
 }

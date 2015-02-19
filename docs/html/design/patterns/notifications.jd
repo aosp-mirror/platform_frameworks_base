@@ -15,6 +15,14 @@ page.tags="notifications","design","L"
   </div>
 </a>
 
+<!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Notifications in the Android L Developer Preview</p>
+</div>
+</a>
+
 <style>
   .col-5, .col-6, .col-7 {
     margin-left:0px;
@@ -787,8 +795,8 @@ to anyone who picks up the device and turns on the display.</p>
 
 <h3>User control over information displayed on the secure lock screen</h3>
 <div class="figure" style="width:311px">
-  <img src="{@docRoot}images/android-5.0/notifications/LockScreen.png"
-    alt="" width="311px" />
+  <img src="{@docRoot}images/android-5.0/notifications/LockScreen@2x.png"
+  srcset="{@docRoot}images/android-5.0/notifications/LockScreen.png 1x" alt="" width="311px"/>
       <p class="img-caption">
     Notifications on the lock screen, with contents revealed after the user unlocks the device.
   </p>

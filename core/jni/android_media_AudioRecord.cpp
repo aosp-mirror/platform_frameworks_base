@@ -239,7 +239,8 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         true,          // threadCanCallJava
         sessionId,
         AudioRecord::TRANSFER_DEFAULT,
-        flags);
+        flags,
+        paa);
 
     if (status != NO_ERROR) {
         ALOGE("Error creating AudioRecord instance: initialization check failed with status %d.",
@@ -431,7 +432,7 @@ static jint android_media_AudioRecord_readInShortArray(JNIEnv *env,  jobject thi
     // read the new audio data from the native AudioRecord object
     const size_t recorderBuffSize = lpRecorder->frameCount()*lpRecorder->frameSize();
     const size_t sizeInBytes = sizeInShorts * sizeof(short);
-    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts * sizeof(short),
+    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts,
                                         sizeInBytes > recorderBuffSize ?
                                             recorderBuffSize : sizeInBytes);
 

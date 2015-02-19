@@ -136,6 +136,8 @@
     <color name="notification_media_primary_color">@color/primary_text_material_dark</color>
     <color name="notification_media_secondary_color">@color/secondary_text_material_dark</color>
 
+    <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
+
     <!-- Keyguard colors -->
     <color name="keyguard_avatar_frame_color">#ffffffff</color>
     <color name="keyguard_avatar_frame_shadow_color">#80000000</color>
@@ -158,5 +160,18 @@
     <color name="user_icon_8">#ffff5722</color><!-- deep orange 500 -->
     <color name="user_icon_default_gray">#ff9e9e9e</color><!-- gray 500 -->
     <color name="user_icon_default_white">#ffffffff</color><!-- white -->
-</resources>
 
+    <!-- Multi-sim sim colors -->
+    <color name="Teal_700">#ff00796b</color>
+    <color name="Teal_800">#ff00695c</color>
+    <color name="Blue_700">#ff3367d6</color>
+    <color name="Blue_800">#ff2a56c6</color>
+    <color name="Indigo_700">#ff303f9f</color>
+    <color name="Indigo_800">#ff283593</color>
+    <color name="Purple_700">#ff7b1fa2</color>
+    <color name="Purple_800">#ff6a1b9a</color>
+    <color name="Pink_700">#ffc2185b</color>
+    <color name="Pink_800">#ffad1457</color>
+    <color name="Red_700">#ffc53929</color>
+    <color name="Red_800">#ffb93221</color>
+</resources>

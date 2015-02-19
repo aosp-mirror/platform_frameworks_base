@@ -23,9 +23,9 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
+import android.util.ArraySet;
 import android.util.Log;
 
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -38,6 +38,11 @@ public class BackgroundDexOptService extends JobService {
     private static ComponentName sDexoptServiceName = new ComponentName(
             "android",
             BackgroundDexOptService.class.getName());
+
+    /**
+     * Set of failed packages remembered across job runs.
+     */
+    static final ArraySet<String> sFailedPackageNames = new ArraySet<String>();
 
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
 
@@ -59,7 +64,7 @@ public class BackgroundDexOptService extends JobService {
         if (pm.isStorageLow()) {
             return false;
         }
-        final HashSet<String> pkgs = pm.getPackagesThatNeedDexOpt();
+        final ArraySet<String> pkgs = pm.getPackagesThatNeedDexOpt();
         if (pkgs == null) {
             return false;
         }
@@ -75,7 +80,15 @@ public class BackgroundDexOptService extends JobService {
                         schedule(BackgroundDexOptService.this);
                         return;
                     }
-                    pm.performDexOpt(pkg, null /* instruction set */, true);
+                    if (sFailedPackageNames.contains(pkg)) {
+                        // skip previously failing package
+                        continue;
+                    }
+                    if (!pm.performDexOpt(pkg, null /* instruction set */, true)) {
+                        // there was a problem running dexopt,
+                        // remember this so we do not keep retrying.
+                        sFailedPackageNames.add(pkg);
+                    }
                 }
                 // ran to completion, so we abandon our timeslice and do not reschedule
                 jobFinished(jobParams, false);

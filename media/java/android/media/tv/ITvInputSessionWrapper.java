@@ -42,6 +42,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final String TAG = "TvInputSessionWrapper";
 
     private static final int MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS = 50;
+    private static final int MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS = 2000;
 
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_MAIN = 2;
@@ -161,11 +162,17 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
         if (duration > MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS) {
             Log.w(TAG, "Handling message (" + msg.what + ") took too long time (duration="
                     + duration + "ms)");
+            if (msg.what == DO_TUNE && duration > MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS) {
+                throw new RuntimeException("Too much time to handle tune request. (" + duration
+                        + "ms > " + MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS + "ms) "
+                        + "Consider handling the tune request in a separate thread.");
+            }
         }
     }
 
     @Override
     public void release() {
+        mTvInputSessionImpl.scheduleOverlayViewCleanup();
         mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_RELEASE));
     }
 
@@ -192,6 +199,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void tune(Uri channelUri, Bundle params) {
+        // Clear the pending tune requests.
+        mCaller.removeMessages(DO_TUNE);
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_TUNE, channelUri, params));
     }
 

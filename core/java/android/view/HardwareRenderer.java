@@ -235,7 +235,7 @@ public abstract class HardwareRenderer {
      * or not the surface used by the HardwareRenderer will be changing. It
      * Suspends any rendering into the surface, but will not do any destruction
      */
-    abstract void pauseSurface(Surface surface);
+    abstract boolean pauseSurface(Surface surface);
 
     /**
      * Destroys all hardware rendering resources associated with the specified

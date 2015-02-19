@@ -728,7 +728,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         final ActivityManager am = (ActivityManager)
                 getContext().getSystemService(Context.ACTIVITY_SERVICE);
         if (am != null) {
-            am.removeTask(ad.persistentTaskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+            am.removeTask(ad.persistentTaskId);
 
             // Accessibility feedback
             setContentDescription(

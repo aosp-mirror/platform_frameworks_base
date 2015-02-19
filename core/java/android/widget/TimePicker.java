@@ -86,12 +86,12 @@ public class TimePicker extends FrameLayout {
 
         switch (mode) {
             case MODE_CLOCK:
-                mDelegate = new TimePickerSpinnerDelegate(
+                mDelegate = new TimePickerClockDelegate(
                         this, context, attrs, defStyleAttr, defStyleRes);
                 break;
             case MODE_SPINNER:
             default:
-                mDelegate = new TimePickerClockDelegate(
+                mDelegate = new TimePickerSpinnerDelegate(
                         this, context, attrs, defStyleAttr, defStyleRes);
                 break;
         }

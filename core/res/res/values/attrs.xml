@@ -908,12 +908,14 @@
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
-        <!-- Window decor layout to use in dialog mode with icons -->
+        <!-- Window decor layout to use in dialog mode with icons. -->
         <attr name="dialogTitleIconsDecorLayout" format="reference" />
-        <!-- Window decor layout to use in dialog mode with custom titles -->
+        <!-- Window decor layout to use in dialog mode with custom titles. -->
         <attr name="dialogCustomTitleDecorLayout" format="reference" />
-        <!-- Window decor layout to use in dialog mode with title only -->
+        <!-- Window decor layout to use in dialog mode with title only. -->
         <attr name="dialogTitleDecorLayout" format="reference" />
+        <!-- Preferred padding for dialog content. -->
+        <attr name="dialogPreferredPadding" format="dimension" />
 
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />
@@ -2363,6 +2365,18 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
+        <!-- Sets the id of a view before which this one is visited in accessibility traversal.
+             A screen-reader must visit the content of this view before the content of the one
+             it precedes.
+             @see android.view.View#setAccessibilityTraversalBefore(int)} -->
+        <attr name="accessibilityTraversalBefore" format="integer" />
+
+        <!-- Sets the id of a view after which this one is visited in accessibility traversal.
+             A screen-reader must visit the content of the other view before the content of
+             this one.
+             @see android.view.View#setAccessibilityTraversalAfter(int)} -->
+        <attr name="accessibilityTraversalAfter" format="integer" />
+
         <!-- Name of the method in this View's context to invoke when the view is
              clicked. This name must correspond to a public method that takes
              exactly one parameter of type View. For instance, if you specify
@@ -2625,8 +2639,8 @@
              to allow the children to draw outside of their bounds. The default value of
              this property is true. -->
         <attr name="clipChildren" format="boolean" />
-        <!-- Defines whether the ViewGroup will clip its drawing surface so as to exclude
-             the padding area. This property is set to true by default. -->
+        <!-- Defines whether the ViewGroup will clip its children to its padding, if
+             padding is not zero. This property is set to true by default. -->
         <attr name="clipToPadding" format="boolean" />
         <!-- Defines the layout animation to use the first time the ViewGroup is laid out.
              Layout animations can also be started manually after the first layout. -->
@@ -2772,25 +2786,32 @@
         <attr name="layout_width" />
         <attr name="layout_height" />
         <!--  Specifies extra space on the left, top, right and bottom
-              sides of this view. This space is outside this view's bounds. -->
+              sides of this view. This space is outside this view's bounds.
+              Margin values should be positive. -->
         <attr name="layout_margin" format="dimension"  />
         <!--  Specifies extra space on the left side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive. -->
         <attr name="layout_marginLeft" format="dimension"  />
         <!--  Specifies extra space on the top side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginTop" format="dimension" />
         <!--  Specifies extra space on the right side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginRight" format="dimension"  />
         <!--  Specifies extra space on the bottom side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginBottom" format="dimension"  />
         <!--  Specifies extra space on the start side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginStart" format="dimension"  />
         <!--  Specifies extra space on the end side of this view.
-              This space is outside this view's bounds. -->
+              This space is outside this view's bounds.
+              Margin values should be positive.-->
         <attr name="layout_marginEnd" format="dimension"  />
     </declare-styleable>
 
@@ -4641,6 +4662,11 @@
         <attr name="weekDayTextAppearance" format="reference" />
         <!-- The text appearance for the calendar dates. -->
         <attr name="dateTextAppearance" format="reference" />
+        <!-- The number of weeks to be shown. -->
+        <attr name="calendarViewMode">
+            <enum name="holo" value="0" />
+            <enum name="material" value="1" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="NumberPicker">
@@ -4785,6 +4811,13 @@
         <attr name="autoMirrored"/>
     </declare-styleable>
 
+    <!-- Represents a single state inside a StateListDrawable. -->
+    <declare-styleable name="StateListDrawableItem">
+        <!-- Reference to a drawable resource to use for the state. If not
+             given, the drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
     <!-- Transition used to animate between states with keyframe IDs. -->
     <declare-styleable name="AnimatedStateListDrawableItem">
         <!-- Reference to a drawable resource to use for the frame.  If not
@@ -4862,6 +4895,12 @@
         <attr name="thickness" format="dimension" />
         <!-- Indicates whether the drawable's level affects the way the gradient is drawn. -->
         <attr name="useLevel" />
+        <!-- If set, specifies the color to apply to the drawable as a tint. By default,
+             no tint is applied. May be a color state list. -->
+        <attr name="tint" />
+        <!-- When a tint color is set, specifies its Porter-Duff blending mode. The
+             default value is src_in, which treats the drawable as an alpha mask. -->
+        <attr name="tintMode" />
     </declare-styleable>
 
     <!-- Used to specify the size of the shape for GradientDrawable. -->
@@ -4898,7 +4937,7 @@
         <!-- Y coordinate of the origin of the gradient within the shape. -->
         <attr name="centerY" format="float|fraction" />
         <!-- Radius of the gradient, used only with radial gradient. -->
-        <attr name="gradientRadius" format="float|fraction" />
+        <attr name="gradientRadius" format="float|fraction|dimension" />
     </declare-styleable>
 
     <!-- Used to fill the shape of GradientDrawable with a solid color. -->
@@ -5626,6 +5665,10 @@
             <enum name="right" value="0x05" />
             <!-- Slide to and from the bottom edge of the Scene. -->
             <enum name="bottom" value="0x50" />
+            <!-- Slide to and from the x-axis position at the start of the Scene root. -->
+            <enum name="start" value="0x00800003"/>
+            <!-- Slide to and from the x-axis position at the end of the Scene root. -->
+            <enum name="end" value="0x00800005"/>
         </attr>
     </declare-styleable>
 
@@ -5687,6 +5730,17 @@
         <!-- Tells ChangeTransform to track parent changes. Default is true. Corresponds to
              {@link android.transition.ChangeTransform#setReparent(boolean)}. -->
         <attr name="reparent" format="boolean"/>
+    </declare-styleable>
+
+    <!-- Use <code>changeBounds</code>as the root tag of the XML resource that
+         describes a {@link android.transition.ChangeBounds} transition.
+         The attributes of the {@link android.R.styleable#Transition Transition}
+         resource are available in addition to the specific attributes of ChangeBounds
+         described here. -->
+    <declare-styleable name="ChangeBounds">
+        <!-- Resize the view by adjusting the clipBounds rather than changing the
+             dimensions of the view itself. The default value is false. -->
+        <attr name="resizeClip" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>transitionManager</code> as the root tag of the XML resource that
@@ -6352,7 +6406,7 @@
         <!-- The summary for the Preference in a PreferenceActivity screen. -->
         <attr name="summary" />
         <!-- The order for the Preference (lower values are to be ordered first). If this is not
-             specified, the default orderin will be alphabetic. -->
+             specified, the default ordering will be alphabetic. -->
         <attr name="order" format="integer" />
         <!-- When used inside of a modern PreferenceActivity, this declares
              a new PreferenceFragment to be shown when the user selects this item. -->
@@ -7170,6 +7224,8 @@
         <attr name="goIcon" format="reference" />
         <!-- Search icon -->
         <attr name="searchIcon" format="reference" />
+        <!-- Search icon displayed as a text field hint -->
+        <attr name="searchHintIcon" format="reference" />
         <!-- Voice button icon -->
         <attr name="voiceIcon" format="reference" />
         <!-- Commit icon shown in the query suggestion row -->
@@ -7436,7 +7492,10 @@
             <!-- Push object to the bottom of its container, not changing its size. -->
             <flag name="bottom" value="0x50" />
         </attr>
+        <!-- Icon drawable to use for the collapse button. -->
         <attr name="collapseIcon" format="reference" />
+        <!-- Text to set as the content description for the collapse button. -->
+        <attr name="collapseContentDescription" format="string" />
         <!-- Reference to a theme that should be used to inflate popups
              shown by widgets in the toolbar. -->
         <attr name="popupTheme" format="reference" />

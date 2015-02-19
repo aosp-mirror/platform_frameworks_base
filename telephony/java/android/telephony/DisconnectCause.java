@@ -160,11 +160,43 @@ public class DisconnectCause {
      */
     public static final int OUTGOING_CANCELED = 44;
 
+    /**
+     * The call, which was an IMS call, disconnected because it merged with another call.
+     */
+    public static final int IMS_MERGED_SUCCESSFULLY = 45;
+
+    /**
+     * Stk Call Control modified DIAL request to USSD request.
+     * {@hide}
+     */
+    public static final int DIAL_MODIFIED_TO_USSD          = 46;
+    /**
+     * Stk Call Control modified DIAL request to SS request.
+     * {@hide}
+     */
+    public static final int DIAL_MODIFIED_TO_SS            = 47;
+    /**
+     * Stk Call Control modified DIAL request to DIAL with modified data.
+     * {@hide}
+     */
+    public static final int DIAL_MODIFIED_TO_DIAL          = 48;
+
+    //*********************************************************************************************
+    // When adding a disconnect type:
+    // 1) Please assign the new type the next id value below.
+    // 2) Increment the next id value below to a new value.
+    // 3) Update MAXIMUM_VALID_VALUE to the new disconnect type.
+    // 4) Update toString() with the newly added disconnect type.
+    // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
+    //
+    // NextId: 49
+    //*********************************************************************************************
+
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = OUTGOING_CANCELED;
+    public static final int MAXIMUM_VALID_VALUE = DIAL_MODIFIED_TO_DIAL;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -256,12 +288,20 @@ public class DisconnectCause {
             return "CDMA_CALL_LOST";
         case EXITED_ECM:
             return "EXITED_ECM";
+        case DIAL_MODIFIED_TO_USSD:
+            return "DIAL_MODIFIED_TO_USSD";
+        case DIAL_MODIFIED_TO_SS:
+            return "DIAL_MODIFIED_TO_SS";
+        case DIAL_MODIFIED_TO_DIAL:
+            return "DIAL_MODIFIED_TO_DIAL";
         case ERROR_UNSPECIFIED:
             return "ERROR_UNSPECIFIED";
         case OUTGOING_FAILURE:
             return "OUTGOING_FAILURE";
         case OUTGOING_CANCELED:
             return "OUTGOING_CANCELED";
+        case IMS_MERGED_SUCCESSFULLY:
+            return "IMS_MERGED_SUCCESSFULLY";
         default:
             return "INVALID: " + cause;
         }

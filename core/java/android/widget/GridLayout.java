@@ -1613,7 +1613,11 @@ public class GridLayout extends ViewGroup {
         equivalent to the single-source shortest paths problem on a digraph, for
         which the O(n^2) Bellman-Ford algorithm the most commonly used general solution.
         */
-        private void solve(Arc[] arcs, int[] locations) {
+        private boolean solve(Arc[] arcs, int[] locations) {
+            return solve(arcs, locations, true);
+        }
+
+        private boolean solve(Arc[] arcs, int[] locations, boolean modifyOnError) {
             String axisName = horizontal ? "horizontal" : "vertical";
             int N = getCount() + 1; // The number of vertices is the number of columns/rows + 1.
             boolean[] originalCulprits = null;
@@ -1631,8 +1635,12 @@ public class GridLayout extends ViewGroup {
                         if (originalCulprits != null) {
                             logError(axisName, arcs, originalCulprits);
                         }
-                        return;
+                        return true;
                     }
+                }
+
+                if (!modifyOnError) {
+                    return false; // cannot solve with these constraints
                 }
 
                 boolean[] culprits = new boolean[arcs.length];
@@ -1658,6 +1666,7 @@ public class GridLayout extends ViewGroup {
                     }
                 }
             }
+            return true;
         }
 
         private void computeMargins(boolean leading) {
@@ -1697,8 +1706,8 @@ public class GridLayout extends ViewGroup {
             return trailingMargins;
         }
 
-        private void solve(int[] a) {
-            solve(getArcs(), a);
+        private boolean solve(int[] a) {
+            return solve(getArcs(), a);
         }
 
         private boolean computeHasWeights() {
@@ -1740,28 +1749,18 @@ public class GridLayout extends ViewGroup {
             return deltas;
         }
 
-        private void shareOutDelta() {
-            int totalDelta = 0;
-            float totalWeight = 0;
+        private void shareOutDelta(int totalDelta, float totalWeight) {
+            Arrays.fill(deltas, 0);
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 float weight = spec.weight;
                 if (weight != 0) {
-                    int delta = getMeasurement(c, horizontal) - getOriginalMeasurements()[i];
-                    totalDelta += delta;
-                    totalWeight += weight;
-                }
-            }
-            for (int i = 0, N = getChildCount(); i < N; i++) {
-                LayoutParams lp = getLayoutParams(getChildAt(i));
-                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                float weight = spec.weight;
-                if (weight != 0) {
                     int delta = Math.round((weight * totalDelta / totalWeight));
                     deltas[i] = delta;
-                    // the two adjustments below are to counter the above rounding and avoid off-by-ones at the end
+                    // the two adjustments below are to counter the above rounding and avoid
+                    // off-by-ones at the end
                     totalDelta -= delta;
                     totalWeight -= weight;
                 }
@@ -1771,12 +1770,46 @@ public class GridLayout extends ViewGroup {
         private void solveAndDistributeSpace(int[] a) {
             Arrays.fill(getDeltas(), 0);
             solve(a);
-            shareOutDelta();
-            arcsValid = false;
-            forwardLinksValid = false;
-            backwardLinksValid = false;
-            groupBoundsValid = false;
-            solve(a);
+            int deltaMax = parentMin.value * getChildCount() + 1; //exclusive
+            if (deltaMax < 2) {
+                return; //don't have any delta to distribute
+            }
+            int deltaMin = 0; //inclusive
+
+            float totalWeight = calculateTotalWeight();
+
+            int validDelta = -1; //delta for which a solution exists
+            boolean validSolution = true;
+            // do a binary search to find the max delta that won't conflict with constraints
+            while(deltaMin < deltaMax) {
+                final int delta = (deltaMin + deltaMax) / 2;
+                invalidateValues();
+                shareOutDelta(delta, totalWeight);
+                validSolution = solve(getArcs(), a, false);
+                if (validSolution) {
+                    validDelta = delta;
+                    deltaMin = delta + 1;
+                } else {
+                    deltaMax = delta;
+                }
+            }
+            if (validDelta > 0 && !validSolution) {
+                // last solution was not successful but we have a successful one. Use it.
+                invalidateValues();
+                shareOutDelta(validDelta, totalWeight);
+                solve(a);
+            }
+        }
+
+        private float calculateTotalWeight() {
+            float totalWeight = 0f;
+            for (int i = 0, N = getChildCount(); i < N; i++) {
+                View c = getChildAt(i);
+                LayoutParams lp = getLayoutParams(c);
+                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+                totalWeight += spec.weight;
+            }
+            return totalWeight;
         }
 
         private void computeLocations(int[] a) {

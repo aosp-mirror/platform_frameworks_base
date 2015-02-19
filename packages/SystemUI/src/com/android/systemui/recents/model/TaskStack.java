@@ -61,6 +61,14 @@ class FilteredTaskList {
         }
     }
 
+    /** Resets this FilteredTaskList. */
+    void reset() {
+        mTasks.clear();
+        mFilteredTasks.clear();
+        mTaskIndices.clear();
+        mFilter = null;
+    }
+
     /** Removes the task filter and returns the previous touch state */
     void removeFilter() {
         mFilter = null;
@@ -190,6 +198,14 @@ public class TaskStack {
         mCb = cb;
     }
 
+    /** Resets this TaskStack. */
+    public void reset() {
+        mCb = null;
+        mTaskList.reset();
+        mGroups.clear();
+        mAffinitiesGroups.clear();
+    }
+
     /** Adds a new task */
     public void addTask(Task t) {
         mTaskList.add(t);
@@ -253,6 +269,17 @@ public class TaskStack {
     public Task getFrontMostTask() {
         if (mTaskList.size() == 0) return null;
         return mTaskList.getTasks().get(mTaskList.size() - 1);
+    }
+
+    /** Gets the task keys */
+    public ArrayList<Task.TaskKey> getTaskKeys() {
+        ArrayList<Task.TaskKey> taskKeys = new ArrayList<Task.TaskKey>();
+        ArrayList<Task> tasks = mTaskList.getTasks();
+        int taskCount = tasks.size();
+        for (int i = 0; i < taskCount; i++) {
+            taskKeys.add(tasks.get(i).key);
+        }
+        return taskKeys;
     }
 
     /** Gets the tasks */

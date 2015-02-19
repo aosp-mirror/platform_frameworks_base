@@ -16,6 +16,9 @@
 
 package android.content.res;
 
+import android.animation.Animator;
+import android.animation.StateListAnimator;
+import android.annotation.NonNull;
 import android.util.Pools.SynchronizedPool;
 import android.view.ViewDebug;
 import com.android.internal.util.XmlUtils;
@@ -115,6 +118,10 @@ public class Resources {
             new ArrayMap<String, LongSparseArray<WeakReference<ConstantState>>>();
     private final LongSparseArray<WeakReference<ColorStateList>> mColorStateListCache =
             new LongSparseArray<WeakReference<ColorStateList>>();
+    private final ConfigurationBoundResourceCache<Animator> mAnimatorCache =
+            new ConfigurationBoundResourceCache<Animator>(this);
+    private final ConfigurationBoundResourceCache<StateListAnimator> mStateListAnimatorCache =
+            new ConfigurationBoundResourceCache<StateListAnimator>(this);
 
     private TypedValue mTmpValue = new TypedValue();
     private boolean mPreloading;
@@ -180,6 +187,24 @@ public class Resources {
             return dark;
         }
         return deviceDefault;
+    }
+
+    /**
+     * Used by AnimatorInflater.
+     *
+     * @hide
+     */
+    public ConfigurationBoundResourceCache<Animator> getAnimatorCache() {
+        return mAnimatorCache;
+    }
+
+    /**
+     * Used by AnimatorInflater.
+     *
+     * @hide
+     */
+    public ConfigurationBoundResourceCache<StateListAnimator> getStateListAnimatorCache() {
+        return mStateListAnimatorCache;
     }
 
     /**
@@ -719,10 +744,13 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist.
      * @see #getDrawable(int, Theme)
+     * @deprecated Use {@link #getDrawable(int, Theme)} instead.
      */
+    @Deprecated
+    @Nullable
     public Drawable getDrawable(int id) throws NotFoundException {
         final Drawable d = getDrawable(id, null);
-        if (d.canApplyTheme()) {
+        if (d != null && d.canApplyTheme()) {
             Log.w(TAG, "Drawable " + getResourceName(id) + " has unresolved theme "
                     + "attributes! Consider using Resources.getDrawable(int, Theme) or "
                     + "Context.getDrawable(int).", new RuntimeException());
@@ -744,6 +772,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist.
      */
+    @Nullable
     public Drawable getDrawable(int id, @Nullable Theme theme) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
@@ -788,7 +817,10 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      * @see #getDrawableForDensity(int, int, Theme)
+     * @deprecated Use {@link #getDrawableForDensity(int, int, Theme)} instead.
      */
+    @Deprecated
+    @Nullable
     public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
         return getDrawableForDensity(id, density, null);
     }
@@ -807,6 +839,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      */
+    @Nullable
     public Drawable getDrawableForDensity(int id, int density, @Nullable Theme theme) {
         TypedValue value;
         synchronized (mAccessLock) {
@@ -1524,20 +1557,21 @@ public class Resources {
          * contents of the typed array are ultimately filled in by
          * {@link Resources#getValue}.
          *
-         * @param values The base set of attribute values, must be equal
-         *               in length to {@code attrs} or {@code null}. All values
-         *               must be of type {@link TypedValue#TYPE_ATTRIBUTE}.
+         * @param values The base set of attribute values, must be equal in
+         *               length to {@code attrs}. All values must be of type
+         *               {@link TypedValue#TYPE_ATTRIBUTE}.
          * @param attrs The desired attributes to be retrieved.
          * @return Returns a TypedArray holding an array of the attribute
          *         values. Be sure to call {@link TypedArray#recycle()}
          *         when done with it.
          * @hide
          */
-        public TypedArray resolveAttributes(int[] values, int[] attrs) {
+        @NonNull
+        public TypedArray resolveAttributes(@NonNull int[] values, @NonNull int[] attrs) {
             final int len = attrs.length;
-            if (values != null && len != values.length) {
+            if (values == null || len != values.length) {
                 throw new IllegalArgumentException(
-                        "Base attribute values must be null or the same length as attrs");
+                        "Base attribute values must the same length as attrs");
             }
 
             final TypedArray array = TypedArray.obtain(Resources.this, len);
@@ -1761,23 +1795,7 @@ public class Resources {
             // the framework.
             mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
 
-            int configChanges = 0xfffffff;
-            if (config != null) {
-                mTmpConfig.setTo(config);
-                int density = config.densityDpi;
-                if (density == Configuration.DENSITY_DPI_UNDEFINED) {
-                    density = mMetrics.noncompatDensityDpi;
-                }
-
-                mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
-
-                if (mTmpConfig.locale == null) {
-                    mTmpConfig.locale = Locale.getDefault();
-                    mTmpConfig.setLayoutDirection(mTmpConfig.locale);
-                }
-                configChanges = mConfiguration.updateFrom(mTmpConfig);
-                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
-            }
+            int configChanges = calcConfigChanges(config);
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
                 mConfiguration.setLayoutDirection(mConfiguration.locale);
@@ -1825,6 +1843,8 @@ public class Resources {
 
             clearDrawableCachesLocked(mDrawableCache, configChanges);
             clearDrawableCachesLocked(mColorDrawableCache, configChanges);
+            mAnimatorCache.onConfigurationChange(configChanges);
+            mStateListAnimatorCache.onConfigurationChange(configChanges);
 
             mColorStateListCache.clear();
 
@@ -1835,6 +1855,30 @@ public class Resources {
                 mPluralRule = NativePluralRules.forLocale(config.locale);
             }
         }
+    }
+
+    /**
+     * Called by ConfigurationBoundResourceCacheTest via reflection.
+     */
+    private int calcConfigChanges(Configuration config) {
+        int configChanges = 0xfffffff;
+        if (config != null) {
+            mTmpConfig.setTo(config);
+            int density = config.densityDpi;
+            if (density == Configuration.DENSITY_DPI_UNDEFINED) {
+                density = mMetrics.noncompatDensityDpi;
+            }
+
+            mCompatibilityInfo.applyToConfiguration(density, mTmpConfig);
+
+            if (mTmpConfig.locale == null) {
+                mTmpConfig.locale = Locale.getDefault();
+                mTmpConfig.setLayoutDirection(mTmpConfig.locale);
+            }
+            configChanges = mConfiguration.updateFrom(mTmpConfig);
+            configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+        }
+        return configChanges;
     }
 
     private void clearDrawableCachesLocked(
@@ -2323,7 +2367,14 @@ public class Resources {
 
         final Drawable dr;
         if (cs != null) {
-            dr = cs.newDrawable(this, theme);
+            final Drawable clonedDr = cs.newDrawable(this);
+            if (theme != null) {
+                dr = clonedDr.mutate();
+                dr.applyTheme(theme);
+                dr.clearMutated();
+            } else {
+                dr = clonedDr;
+            }
         } else if (isColorDrawable) {
             dr = new ColorDrawable(value.data);
         } else {

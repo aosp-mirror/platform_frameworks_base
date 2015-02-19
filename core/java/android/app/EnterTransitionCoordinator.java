@@ -18,7 +18,6 @@ package android.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -57,7 +56,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsViewsTransitionStarted;
     private boolean mIsViewsTransitionComplete;
     private boolean mIsSharedElementTransitionComplete;
-    private ArrayList<Matrix> mSharedElementParentMatrices;
     private Transition mEnterViewsTransition;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
@@ -122,7 +120,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mIsReturning) {
             sendSharedElementDestination();
         } else {
-            setSharedElementMatrices();
             moveSharedElementsToOverlay();
         }
         if (mSharedElementsBundle != null) {
@@ -135,16 +132,17 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             return;
         }
         mAreViewsReady = true;
+        final ViewGroup decor = getDecor();
         // Ensure the views have been laid out before capturing the views -- we need the epicenter.
-        if (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()) {
+        if (decor == null || (decor.isAttachedToWindow() &&
+                (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()))) {
             viewsReady(sharedElements);
         } else {
-            final View sharedElement = sharedElements.valueAt(0);
-            sharedElement.getViewTreeObserver()
+            decor.getViewTreeObserver()
                     .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
-                    sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
+                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
                     viewsReady(sharedElements);
                     return true;
                 }
@@ -194,7 +192,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         if (allReady) {
             Bundle state = captureSharedElementState();
-            setSharedElementMatrices();
             moveSharedElementsToOverlay();
             mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
         } else if (decorView != null) {
@@ -205,7 +202,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                             decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                             if (mResultReceiver != null) {
                                 Bundle state = captureSharedElementState();
-                                setSharedElementMatrices();
                                 moveSharedElementsToOverlay();
                                 mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
                             }
@@ -322,6 +318,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mListener != null) {
             mListener.onRejectSharedElements(rejectedSnapshots);
         }
+        removeNullViews(rejectedSnapshots);
         startRejectedAnimations(rejectedSnapshots);
 
         // Now start shared element transition
@@ -367,6 +364,16 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                     }
                 }
             });
+        }
+    }
+
+    private static void removeNullViews(ArrayList<View> views) {
+        if (views != null) {
+            for (int i = views.size() - 1; i >= 0; i--) {
+                if (views.get(i) == null) {
+                    views.remove(i);
+                }
+            }
         }
     }
 
@@ -557,7 +564,12 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         clearState();
     }
 
-    public void cancelEnter() {
+    /**
+     * Cancels the enter transition.
+     * @return True if the enter transition is still pending capturing the target state. If so,
+     * any transition started on the decor will do nothing.
+     */
+    public boolean cancelEnter() {
         setGhostVisibility(View.INVISIBLE);
         mHasStopped = true;
         mIsCanceled = true;
@@ -568,6 +580,7 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         mActivity = null;
         clearState();
+        return super.cancelPendingTransitions();
     }
 
     private void makeOpaque() {
@@ -634,30 +647,4 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         });
     }
 
-    private void setSharedElementMatrices() {
-        int numSharedElements = mSharedElements.size();
-        if (numSharedElements > 0) {
-            mSharedElementParentMatrices = new ArrayList<Matrix>(numSharedElements);
-        }
-        for (int i = 0; i < numSharedElements; i++) {
-            View view = mSharedElements.get(i);
-
-            // Find the location in the view's parent
-            ViewGroup parent = (ViewGroup) view.getParent();
-            Matrix matrix = new Matrix();
-            parent.transformMatrixToLocal(matrix);
-
-            mSharedElementParentMatrices.add(matrix);
-        }
-    }
-
-    @Override
-    protected void getSharedElementParentMatrix(View view, Matrix matrix) {
-        int index = mSharedElementParentMatrices == null ? -1 : mSharedElements.indexOf(view);
-        if (index < 0) {
-            super.getSharedElementParentMatrix(view, matrix);
-        } else {
-            matrix.set(mSharedElementParentMatrices.get(index));
-        }
-    }
 }

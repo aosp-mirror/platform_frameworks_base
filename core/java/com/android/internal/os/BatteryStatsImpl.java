@@ -94,7 +94,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 114 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 116 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -373,6 +373,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     private int mPhoneServiceState = -1;
     private int mPhoneServiceStateRaw = -1;
     private int mPhoneSimStateRaw = -1;
+
+    private int mNumConnectivityChange;
+    private int mLoadedNumConnectivityChange;
+    private int mUnpluggedNumConnectivityChange;
 
     /*
      * Holds a SamplingTimer associated with each kernel wakelock name being tracked.
@@ -2540,6 +2544,22 @@ public final class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PROC_START, name, uid);
     }
 
+    public void noteProcessCrashLocked(String name, int uid) {
+        uid = mapUid(uid);
+        if (isOnBattery()) {
+            Uid u = getUidStatsLocked(uid);
+            u.getProcessStatsLocked(name).incNumCrashesLocked();
+        }
+    }
+
+    public void noteProcessAnrLocked(String name, int uid) {
+        uid = mapUid(uid);
+        if (isOnBattery()) {
+            Uid u = getUidStatsLocked(uid);
+            u.getProcessStatsLocked(name).incNumAnrsLocked();
+        }
+    }
+
     public void noteProcessStateLocked(String name, int uid, int state) {
         uid = mapUid(uid);
         final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -3107,6 +3127,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mInteractiveTimer.stopRunningLocked(elapsedRealtime);
             }
         }
+    }
+
+    public void noteConnectivityChangedLocked(int type, String extra) {
+        final long elapsedRealtime = SystemClock.elapsedRealtime();
+        final long uptime = SystemClock.uptimeMillis();
+        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_CONNECTIVITY_CHANGED,
+                extra, type);
+        mNumConnectivityChange++;
     }
 
     public void noteMobileRadioPowerState(int powerState, long timestampNs) {
@@ -3963,6 +3991,16 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getLowPowerModeEnabledCount(int which) {
         return mLowPowerModeEnabledTimer.getCountLocked(which);
+    }
+
+    @Override public int getNumConnectivityChange(int which) {
+        int val = mNumConnectivityChange;
+        if (which == STATS_CURRENT) {
+            val -= mLoadedNumConnectivityChange;
+        } else if (which == STATS_SINCE_UNPLUGGED) {
+            val -= mUnpluggedNumConnectivityChange;
+        }
+        return val;
     }
 
     @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {
@@ -5374,6 +5412,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             int mStarts;
 
             /**
+             * Number of times the process has crashed.
+             */
+            int mNumCrashes;
+
+            /**
+             * Number of times the process has had an ANR.
+             */
+            int mNumAnrs;
+
+            /**
              * The amount of user time loaded from a previous save.
              */
             long mLoadedUserTime;
@@ -5394,24 +5442,14 @@ public final class BatteryStatsImpl extends BatteryStats {
             int mLoadedStarts;
 
             /**
-             * The amount of user time loaded from the previous run.
+             * Number of times the process has crashed from a previous save.
              */
-            long mLastUserTime;
+            int mLoadedNumCrashes;
 
             /**
-             * The amount of system time loaded from the previous run.
+             * Number of times the process has had an ANR from a previous save.
              */
-            long mLastSystemTime;
-
-            /**
-             * The amount of foreground time loaded from the previous run
-             */
-            long mLastForegroundTime;
-
-            /**
-             * The number of times the process has started from the previous run.
-             */
-            int mLastStarts;
+            int mLoadedNumAnrs;
 
             /**
              * The amount of user time when last unplugged.
@@ -5434,6 +5472,16 @@ public final class BatteryStatsImpl extends BatteryStats {
             int mUnpluggedStarts;
 
             /**
+             * Number of times the process has crashed before unplugged.
+             */
+            int mUnpluggedNumCrashes;
+
+            /**
+             * Number of times the process has had an ANR before unplugged.
+             */
+            int mUnpluggedNumAnrs;
+
+            /**
              * Current process state.
              */
             int mProcessState = PROCESS_STATE_NONE;
@@ -5453,6 +5501,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mUnpluggedSystemTime = mSystemTime;
                 mUnpluggedForegroundTime = mForegroundTime;
                 mUnpluggedStarts = mStarts;
+                mUnpluggedNumCrashes = mNumCrashes;
+                mUnpluggedNumAnrs = mNumAnrs;
             }
 
             public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
@@ -5460,13 +5510,11 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             void reset() {
                 mUserTime = mSystemTime = mForegroundTime = 0;
-                mStarts = 0;
+                mStarts = mNumCrashes = mNumAnrs = 0;
                 mLoadedUserTime = mLoadedSystemTime = mLoadedForegroundTime = 0;
-                mLoadedStarts = 0;
-                mLastUserTime = mLastSystemTime = mLastForegroundTime = 0;
-                mLastStarts = 0;
+                mLoadedStarts = mLoadedNumCrashes = mLoadedNumAnrs = 0;
                 mUnpluggedUserTime = mUnpluggedSystemTime = mUnpluggedForegroundTime = 0;
-                mUnpluggedStarts = 0;
+                mUnpluggedStarts = mUnpluggedNumCrashes = mUnpluggedNumAnrs = 0;
                 for (int i = 0; i < mSpeedBins.length; i++) {
                     SamplingCounter c = mSpeedBins[i];
                     if (c != null) {
@@ -5565,14 +5613,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeLong(mSystemTime);
                 out.writeLong(mForegroundTime);
                 out.writeInt(mStarts);
+                out.writeInt(mNumCrashes);
+                out.writeInt(mNumAnrs);
                 out.writeLong(mLoadedUserTime);
                 out.writeLong(mLoadedSystemTime);
                 out.writeLong(mLoadedForegroundTime);
                 out.writeInt(mLoadedStarts);
+                out.writeInt(mLoadedNumCrashes);
+                out.writeInt(mLoadedNumAnrs);
                 out.writeLong(mUnpluggedUserTime);
                 out.writeLong(mUnpluggedSystemTime);
                 out.writeLong(mUnpluggedForegroundTime);
                 out.writeInt(mUnpluggedStarts);
+                out.writeInt(mUnpluggedNumCrashes);
+                out.writeInt(mUnpluggedNumAnrs);
 
                 out.writeInt(mSpeedBins.length);
                 for (int i = 0; i < mSpeedBins.length; i++) {
@@ -5593,18 +5647,20 @@ public final class BatteryStatsImpl extends BatteryStats {
                 mSystemTime = in.readLong();
                 mForegroundTime = in.readLong();
                 mStarts = in.readInt();
+                mNumCrashes = in.readInt();
+                mNumAnrs = in.readInt();
                 mLoadedUserTime = in.readLong();
                 mLoadedSystemTime = in.readLong();
                 mLoadedForegroundTime = in.readLong();
                 mLoadedStarts = in.readInt();
-                mLastUserTime = 0;
-                mLastSystemTime = 0;
-                mLastForegroundTime = 0;
-                mLastStarts = 0;
+                mLoadedNumCrashes = in.readInt();
+                mLoadedNumAnrs = in.readInt();
                 mUnpluggedUserTime = in.readLong();
                 mUnpluggedSystemTime = in.readLong();
                 mUnpluggedForegroundTime = in.readLong();
                 mUnpluggedStarts = in.readInt();
+                mUnpluggedNumCrashes = in.readInt();
+                mUnpluggedNumAnrs = in.readInt();
 
                 int bins = in.readInt();
                 int steps = getCpuSpeedSteps();
@@ -5633,6 +5689,14 @@ public final class BatteryStatsImpl extends BatteryStats {
 
             public void incStartsLocked() {
                 mStarts++;
+            }
+
+            public void incNumCrashesLocked() {
+                mNumCrashes++;
+            }
+
+            public void incNumAnrsLocked() {
+                mNumAnrs++;
             }
 
             @Override
@@ -5680,6 +5744,28 @@ public final class BatteryStatsImpl extends BatteryStats {
                     val -= mLoadedStarts;
                 } else if (which == STATS_SINCE_UNPLUGGED) {
                     val -= mUnpluggedStarts;
+                }
+                return val;
+            }
+
+            @Override
+            public int getNumCrashes(int which) {
+                int val = mNumCrashes;
+                if (which == STATS_CURRENT) {
+                    val -= mLoadedNumCrashes;
+                } else if (which == STATS_SINCE_UNPLUGGED) {
+                    val -= mUnpluggedNumCrashes;
+                }
+                return val;
+            }
+
+            @Override
+            public int getNumAnrs(int which) {
+                int val = mNumAnrs;
+                if (which == STATS_CURRENT) {
+                    val -= mLoadedNumAnrs;
+                } else if (which == STATS_SINCE_UNPLUGGED) {
+                    val -= mUnpluggedNumAnrs;
                 }
                 return val;
             }
@@ -6647,6 +6733,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].reset(false);
         }
+        mNumConnectivityChange = mLoadedNumConnectivityChange = mUnpluggedNumConnectivityChange = 0;
 
         for (int i=0; i<mUidStats.size(); i++) {
             if (mUidStats.valueAt(i).reset()) {
@@ -6863,6 +6950,17 @@ public final class BatteryStatsImpl extends BatteryStats {
             mLastRecordedClockTime = currentTime;
             mLastRecordedClockRealtime = elapsedRealtimeMs;
             addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_CURRENT_TIME,
+                    mHistoryCur);
+            mHistoryCur.currentTime = 0;
+        }
+    }
+
+    private void recordShutdownLocked(final long elapsedRealtimeMs, final long uptimeMs) {
+        if (mRecordingHistory) {
+            mHistoryCur.currentTime = System.currentTimeMillis();
+            mLastRecordedClockTime = mHistoryCur.currentTime;
+            mLastRecordedClockRealtime = elapsedRealtimeMs;
+            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_SHUTDOWN,
                     mHistoryCur);
             mHistoryCur.currentTime = 0;
         }
@@ -7540,6 +7638,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void shutdownLocked() {
+        recordShutdownLocked(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         writeSyncLocked();
         mShuttingDown = true;
     }
@@ -7861,6 +7960,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].readSummaryFromParcelLocked(in);
         }
+        mNumConnectivityChange = mLoadedNumConnectivityChange = in.readInt();
         mFlashlightOn = false;
         mFlashlightOnTimer.readSummaryFromParcelLocked(in);
 
@@ -8022,6 +8122,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 p.mSystemTime = p.mLoadedSystemTime = in.readLong();
                 p.mForegroundTime = p.mLoadedForegroundTime = in.readLong();
                 p.mStarts = p.mLoadedStarts = in.readInt();
+                p.mNumCrashes = p.mLoadedNumCrashes = in.readInt();
+                p.mNumAnrs = p.mLoadedNumAnrs = in.readInt();
                 int NSB = in.readInt();
                 if (NSB > 100) {
                     Slog.w(TAG, "File corrupt: too many speed bins " + NSB);
@@ -8143,6 +8245,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
+        out.writeInt(mNumConnectivityChange);
         mFlashlightOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
 
         out.writeInt(mKernelWakelockStats.size());
@@ -8326,6 +8429,8 @@ public final class BatteryStatsImpl extends BatteryStats {
                 out.writeLong(ps.mSystemTime);
                 out.writeLong(ps.mForegroundTime);
                 out.writeInt(ps.mStarts);
+                out.writeInt(ps.mNumCrashes);
+                out.writeInt(ps.mNumAnrs);
                 final int N = ps.mSpeedBins.length;
                 out.writeInt(N);
                 for (int i=0; i<N; i++) {
@@ -8444,6 +8549,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             mBluetoothStateTimer[i] = new StopwatchTimer(null, -500-i,
                     null, mOnBatteryTimeBase, in);
         }
+        mNumConnectivityChange = in.readInt();
+        mLoadedNumConnectivityChange = in.readInt();
+        mUnpluggedNumConnectivityChange = in.readInt();
         mAudioOnNesting = 0;
         mAudioOnTimer = new StopwatchTimer(null, -7, null, mOnBatteryTimeBase);
         mVideoOnNesting = 0;
@@ -8588,6 +8696,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i< NUM_BLUETOOTH_STATES; i++) {
             mBluetoothStateTimer[i].writeToParcel(out, uSecRealtime);
         }
+        out.writeInt(mNumConnectivityChange);
+        out.writeInt(mLoadedNumConnectivityChange);
+        out.writeInt(mUnpluggedNumConnectivityChange);
         mFlashlightOnTimer.writeToParcel(out, uSecRealtime);
         out.writeInt(mDischargeUnplugLevel);
         out.writeInt(mDischargePlugLevel);

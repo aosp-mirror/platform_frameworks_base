@@ -54,6 +54,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_SET_POST_DIAL_WAIT = 4;
     private static final int MSG_ON_AUDIO_STATE_CHANGED = 5;
     private static final int MSG_BRING_TO_FOREGROUND = 6;
+    private static final int MSG_ON_CAN_ADD_CALL_CHANGED = 7;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -90,6 +91,9 @@ public abstract class InCallService extends Service {
                     break;
                 case MSG_BRING_TO_FOREGROUND:
                     mPhone.internalBringToForeground(msg.arg1 == 1);
+                    break;
+                case MSG_ON_CAN_ADD_CALL_CHANGED:
+                    mPhone.internalSetCanAddCall(msg.arg1 == 1);
                     break;
                 default:
                     break;
@@ -135,6 +139,12 @@ public abstract class InCallService extends Service {
         @Override
         public void bringToForeground(boolean showDialpad) {
             mHandler.obtainMessage(MSG_BRING_TO_FOREGROUND, showDialpad ? 1 : 0, 0).sendToTarget();
+        }
+
+        @Override
+        public void onCanAddCallChanged(boolean canAddCall) {
+            mHandler.obtainMessage(MSG_ON_CAN_ADD_CALL_CHANGED, canAddCall ? 1 : 0, 0)
+                    .sendToTarget();
         }
     }
 

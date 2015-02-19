@@ -17,13 +17,11 @@
 package android.location;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * A class implementing a container for data associated with a navigation message event.
@@ -31,7 +29,26 @@ import java.util.Collections;
  *
  * @hide
  */
+@SystemApi
 public class GpsNavigationMessageEvent implements Parcelable {
+
+    /**
+     * The system does not support tracking of GPS Navigation Messages. This status will not change
+     * in the future.
+     */
+    public static int STATUS_NOT_SUPPORTED = 0;
+
+    /**
+     * GPS Navigation Messages are successfully being tracked, it will receive updates once they are
+     * available.
+     */
+    public static int STATUS_READY = 1;
+
+    /**
+     * GPS provider or Location is disabled, updated will not be received until they are enabled.
+     */
+    public static int STATUS_GPS_LOCATION_DISABLED = 2;
+
     private final GpsNavigationMessage mNavigationMessage;
 
     /**
@@ -41,8 +58,18 @@ public class GpsNavigationMessageEvent implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public interface Listener {
+
+        /**
+         * Returns the latest collected GPS Navigation Message.
+         */
         void onGpsNavigationMessageReceived(GpsNavigationMessageEvent event);
+
+        /**
+         * Returns the latest status of the GPS Navigation Messages sub-system.
+         */
+        void onStatusChanged(int status);
     }
 
     public GpsNavigationMessageEvent(GpsNavigationMessage message) {

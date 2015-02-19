@@ -265,14 +265,9 @@ public class PacManager {
         }
         Intent intent = new Intent();
         intent.setClassName(PAC_PACKAGE, PAC_SERVICE);
-        // Already bound no need to bind again.
         if ((mProxyConnection != null) && (mConnection != null)) {
-            if (mLastPort != -1) {
-                sendPacBroadcast(new ProxyInfo(mPacUrl, mLastPort));
-            } else {
-                Log.e(TAG, "Received invalid port from Local Proxy,"
-                        + " PAC will not be operational");
-            }
+            // Already bound no need to bind again, just download the new file.
+            IoThread.getHandler().post(mPacDownloader);
             return;
         }
         mConnection = new ServiceConnection() {

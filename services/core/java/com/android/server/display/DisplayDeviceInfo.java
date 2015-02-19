@@ -104,10 +104,15 @@ final class DisplayDeviceInfo {
     public static final int TOUCH_EXTERNAL = 2;
 
     /**
-     * Gets the name of the display device, which may be derived from
-     * EDID or other sources.  The name may be displayed to the user.
+     * Gets the name of the display device, which may be derived from EDID or
+     * other sources. The name may be localized and displayed to the user.
      */
     public String name;
+
+    /**
+     * Unique Id of display device.
+     */
+    public String uniqueId;
 
     /**
      * The width of the display in its natural orientation, in pixels.
@@ -235,6 +240,7 @@ final class DisplayDeviceInfo {
     public boolean equals(DisplayDeviceInfo other) {
         return other != null
                 && Objects.equal(name, other.name)
+                && Objects.equal(uniqueId, other.uniqueId)
                 && width == other.width
                 && height == other.height
                 && refreshRate == other.refreshRate
@@ -261,6 +267,7 @@ final class DisplayDeviceInfo {
 
     public void copyFrom(DisplayDeviceInfo other) {
         name = other.name;
+        uniqueId = other.uniqueId;
         width = other.width;
         height = other.height;
         refreshRate = other.refreshRate;
@@ -285,7 +292,8 @@ final class DisplayDeviceInfo {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("DisplayDeviceInfo{\"");
-        sb.append(name).append("\": ").append(width).append(" x ").append(height);
+        sb.append(name).append("\": uniqueId=\"").append(uniqueId).append("\", ");
+        sb.append(width).append(" x ").append(height);
         sb.append(", ").append(refreshRate).append(" fps");
         sb.append(", supportedRefreshRates ").append(Arrays.toString(supportedRefreshRates));
         sb.append(", density ").append(densityDpi);

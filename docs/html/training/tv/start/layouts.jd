@@ -1,4 +1,7 @@
 page.title=Building Layouts for TV
+page.tags=tv
+helpoutsWidget=true
+
 trainingnavtop=true
 
 @jd:body
@@ -13,6 +16,7 @@ trainingnavtop=true
     <li><a href="#density-resources">Manage Layout Resources for TV</a></li>
     <li><a href="#anti-patterns">Avoid Layout Anti-Patterns</a></li>
     <li><a href="#large-bitmaps">Handle Large Bitmaps</a></li>
+    <li><a href="#advertising">Provide Effective Advertising</a></li>
   </ol>
   <h2>You should also read</h2>
   <ol>
@@ -115,8 +119,8 @@ trainingnavtop=true
 
 <p>
   Avoid screen elements being clipped due to overscan and by incorporating a 10% margin
-  on all sides of your layout. This translates into a 27dp margin on the left and right edges and
-  a 48dp margin on the top and bottom of your base layouts for activities. The following
+  on all sides of your layout. This translates into a 48dp margin on the left and right edges and
+  a 27dp margin on the top and bottom of your base layouts for activities. The following
   example layout demonstrates how to set these margins in the root layout for a TV app:
 </p>
 
@@ -254,4 +258,18 @@ trainingnavtop=true
 <p>
   For more information on getting the best performance when working with images, see
   <a href="{@docRoot}training/displaying-bitmaps/index.html">Displaying Bitmaps Efficiently</a>.
+</p>
+
+<h2 id="advertising">Provide Effective Advertising</h2>
+
+<p>Advertising on Android TV must always be full-screen. Ads must not appear alongside or over
+content. The user must be able to dismiss an advertisement with the D-pad controller. Video ads must
+be dismissible within 30 seconds of their start time.</p>
+
+<p>Android TV does not provide a web browser. Your ads must not attempt to launch a web browser or
+redirect to the Google Play Store.</p>
+
+<p class="note">
+  <strong>Note:</strong> You can use the {@link android.webkit.WebView} class for logins to
+  services like Google+ and Facebook.
 </p>

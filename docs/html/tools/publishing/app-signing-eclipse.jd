@@ -1,0 +1,64 @@
+page.title=Signing Your Applications from Eclipse with ADT
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+
+<ol>
+<li><a href="#signing">Signing Your App for Release</a></li>
+</ol>
+
+<h2>See also</h2>
+
+<ol>
+<li><a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p>Android requires that all apps be digitally signed with a certificate before they can be
+installed. Android uses this certificate to identify the author of an app, and the certificate
+does not need to be signed by a certificate authority.</p>
+
+<p>This document provides detailed instructions about how to sign your apps in release mode with the
+ADT plugin for Eclipse. For information about how to obtain a certificate for signing your app, see
+<a href="{@docRoot}tools/publishing/app-signing.html">Signing Your Applications</a>.
+</p>
+
+
+<h2 id="signing">Signing Your App for Release</h2>
+
+<p>To sign your app for release with ADT, follow these steps:</p>
+
+<ol>
+<li>Select the project in the Package Explorer and select <strong>File</strong> >
+<strong>Export</strong>.</li>
+<li>On the <em>Export</em> window, select <strong>Export Android Application</strong> and click
+<strong>Next</strong>.</li>
+<li>On the <em>Export Android Application</em> window, select the project you want to sign and
+click <strong>Next</strong>.</li>
+<li>
+<p>On the next window, enter the location to create a keystore and a keystore password. If you
+already have a keystore, select <strong>Use existing keystore</strong>, enter your keystore's
+location and password, and go to step 6.</p>
+<img src="{@docRoot}images/tools/signadt3.png" alt=""
+     width="488" height="270" style="margin-top:15px"/>
+<p class="img-caption"><strong>Figure 6</strong>. Select a keystore in ADT.</p>
+</li>
+<li><p>On the next window, provide the required information as shown in figure 5.<p>
+<p>Your key should be valid for at least 25 years, so you can sign app updates with the same key
+through the lifespan of your app.</p>
+<img src="{@docRoot}images/tools/signadt4.png" alt=""
+     width="488" height="448" style="margin-top:15px"/>
+<p class="img-caption"><strong>Figure 7</strong>. Create a private key in ADT.</p>
+</li>
+<li><p>On the next window, select the location to export the signed APK.</p>
+<img src="{@docRoot}images/tools/signadt5.png" alt=""
+     width="488" height="217" style="margin-top:15px"/>
+<p class="img-caption"><strong>Figure 8</strong>. Export the signed APK in ADT.</p>
+</li>
+</ol>

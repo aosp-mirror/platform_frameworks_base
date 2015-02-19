@@ -43,21 +43,21 @@ public class RecentsAppWidgetHost extends AppWidgetHost {
 
     public void startListening(RecentsAppWidgetHostCallbacks cb) {
         mCb = cb;
-        mIsListening = true;
-        super.startListening();
+        if (!mIsListening) {
+            mIsListening = true;
+            super.startListening();
+        }
     }
 
     @Override
     public void stopListening() {
-        super.stopListening();
+        if (mIsListening) {
+            super.stopListening();
+        }
         // Ensure that we release any references to the callbacks
         mCb = null;
         mContext = null;
         mIsListening = false;
-    }
-
-    public boolean isListening() {
-        return mIsListening;
     }
 
     @Override

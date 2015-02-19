@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
@@ -56,8 +57,7 @@ public class LockTaskNotify {
         if (mLastToast != null) {
             mLastToast.cancel();
         }
-        mLastToast = Toast.makeText(mContext, text, Toast.LENGTH_LONG);
-        mLastToast.show();
+        mLastToast = makeAllUserToastAndShow(text);
     }
 
     public void show(boolean starting) {
@@ -65,7 +65,15 @@ public class LockTaskNotify {
         if (starting) {
             showString = R.string.lock_to_app_start;
         }
-        Toast.makeText(mContext, mContext.getString(showString), Toast.LENGTH_LONG).show();
+        makeAllUserToastAndShow(mContext.getString(showString));
+    }
+
+    private Toast makeAllUserToastAndShow(String text) {
+        Toast toast = Toast.makeText(mContext, text, Toast.LENGTH_LONG);
+        toast.getWindowParams().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        toast.show();
+        return toast;
     }
 
     private final class H extends Handler {

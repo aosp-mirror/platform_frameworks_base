@@ -19,6 +19,7 @@ package android.bluetooth;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothGatt;
 import android.bluetooth.IBluetoothManagerCallback;
+import android.bluetooth.IBluetoothProfileServiceConnection;
 import android.bluetooth.IBluetoothStateChangeCallback;
 
 /**
@@ -37,6 +38,9 @@ interface IBluetoothManager
     boolean enableNoAutoConnect();
     boolean disable(boolean persist);
     IBluetoothGatt getBluetoothGatt();
+
+    boolean bindBluetoothProfileService(int profile, IBluetoothProfileServiceConnection proxy);
+    void unbindBluetoothProfileService(int profile, IBluetoothProfileServiceConnection proxy);
 
     String getAddress();
     String getName();

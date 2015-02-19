@@ -27,7 +27,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  * An interpolator where the change bounces at the end.
  */
 @HasNativeInterpolator
-public class BounceInterpolator implements Interpolator, NativeInterpolatorFactory {
+public class BounceInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
     public BounceInterpolator() {
     }
 

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,13 @@ public class HotspotControllerImpl implements HotspotController {
 
     private static final String TAG = "HotspotController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    // Keep these in sync with Settings TetherService.java
+    public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
+    public static final String EXTRA_SET_ALARM = "extraSetAlarm";
+    public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
+    public static final String EXTRA_ENABLE_WIFI_TETHER = "extraEnableWifiTether";
+    // Keep this in sync with Settings TetherSettings.java
+    public static final int WIFI_TETHERING = 0;
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Receiver mReceiver = new Receiver();
@@ -91,20 +99,29 @@ public class HotspotControllerImpl implements HotspotController {
     @Override
     public void setHotspotEnabled(boolean enabled) {
         final ContentResolver cr = mContext.getContentResolver();
-        // This needs to be kept up to date with Settings (WifiApEnabler.setSoftapEnabled)
-        // in case it is turned on in settings and off in qs (or vice versa).
-        // Disable Wifi if enabling tethering.
-        int wifiState = mWifiManager.getWifiState();
-        if (enabled && ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
-                    (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
-            mWifiManager.setWifiEnabled(false);
-            Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
-        }
-
-        mWifiManager.setWifiApEnabled(null, enabled);
-
-        // If needed, restore Wifi on tether disable.
-        if (!enabled) {
+        // Call provisioning app which is called when enabling Tethering from Settings
+        if (enabled) {
+            if (isProvisioningNeeded()) {
+                String tetherEnable = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wifi_tether_enable);
+                Intent intent = new Intent();
+                intent.putExtra(EXTRA_ADD_TETHER_TYPE, WIFI_TETHERING);
+                intent.putExtra(EXTRA_SET_ALARM, true);
+                intent.putExtra(EXTRA_RUN_PROVISION, true);
+                intent.putExtra(EXTRA_ENABLE_WIFI_TETHER, true);
+                intent.setComponent(ComponentName.unflattenFromString(tetherEnable));
+                mContext.startServiceAsUser(intent, UserHandle.CURRENT);
+            } else {
+                int wifiState = mWifiManager.getWifiState();
+                if ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
+                        (wifiState == WifiManager.WIFI_STATE_ENABLED)) {
+                    mWifiManager.setWifiEnabled(false);
+                    Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
+                }
+                mWifiManager.setWifiApEnabled(null, true);
+            }
+        } else {
+            mWifiManager.setWifiApEnabled(null, false);
             if (Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE, 0) == 1) {
                 mWifiManager.setWifiEnabled(true);
                 Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);

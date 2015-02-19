@@ -16,6 +16,8 @@
 package android.animation;
 
 import android.content.Context;
+import android.content.res.ConfigurationBoundResourceCache;
+import android.content.res.ConstantState;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
@@ -30,6 +32,8 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.InflateException;
 import android.view.animation.AnimationUtils;
+import android.view.animation.BaseInterpolator;
+import android.view.animation.Interpolator;
 
 import com.android.internal.R;
 
@@ -67,6 +71,9 @@ public class AnimatorInflater {
 
     private static final boolean DBG_ANIMATOR_INFLATER = false;
 
+    // used to calculate changing configs for resource references
+    private static final TypedValue sTmpTypedValue = new TypedValue();
+
     /**
      * Loads an {@link Animator} object from a resource
      *
@@ -98,11 +105,34 @@ public class AnimatorInflater {
     /** @hide */
     public static Animator loadAnimator(Resources resources, Theme theme, int id,
             float pathErrorScale) throws NotFoundException {
-
+        final ConfigurationBoundResourceCache<Animator> animatorCache = resources
+                .getAnimatorCache();
+        Animator animator = animatorCache.get(id, theme);
+        if (animator != null) {
+            if (DBG_ANIMATOR_INFLATER) {
+                Log.d(TAG, "loaded animator from cache, " + resources.getResourceName(id));
+            }
+            return animator;
+        } else if (DBG_ANIMATOR_INFLATER) {
+            Log.d(TAG, "cache miss for animator " + resources.getResourceName(id));
+        }
         XmlResourceParser parser = null;
         try {
             parser = resources.getAnimation(id);
-            return createAnimatorFromXml(resources, theme, parser, pathErrorScale);
+            animator = createAnimatorFromXml(resources, theme, parser, pathErrorScale);
+            if (animator != null) {
+                animator.appendChangingConfigurations(getChangingConfigs(resources, id));
+                final ConstantState<Animator> constantState = animator.createConstantState();
+                if (constantState != null) {
+                    if (DBG_ANIMATOR_INFLATER) {
+                        Log.d(TAG, "caching animator for res " + resources.getResourceName(id));
+                    }
+                    animatorCache.put(id, theme, constantState);
+                    // create a new animator so that cached version is never used by the user
+                    animator = constantState.newInstance(resources, theme);
+                }
+            }
+            return animator;
         } catch (XmlPullParserException ex) {
             Resources.NotFoundException rnf =
                     new Resources.NotFoundException("Can't load animation resource ID #0x" +
@@ -122,10 +152,29 @@ public class AnimatorInflater {
 
     public static StateListAnimator loadStateListAnimator(Context context, int id)
             throws NotFoundException {
+        final Resources resources = context.getResources();
+        final ConfigurationBoundResourceCache<StateListAnimator> cache = resources
+                .getStateListAnimatorCache();
+        final Theme theme = context.getTheme();
+        StateListAnimator animator = cache.get(id, theme);
+        if (animator != null) {
+            return animator;
+        }
         XmlResourceParser parser = null;
         try {
-            parser = context.getResources().getAnimation(id);
-            return createStateListAnimatorFromXml(context, parser, Xml.asAttributeSet(parser));
+            parser = resources.getAnimation(id);
+            animator = createStateListAnimatorFromXml(context, parser, Xml.asAttributeSet(parser));
+            if (animator != null) {
+                animator.appendChangingConfigurations(getChangingConfigs(resources, id));
+                final ConstantState<StateListAnimator> constantState = animator
+                        .createConstantState();
+                if (constantState != null) {
+                    cache.put(id, theme, constantState);
+                    // return a clone so that the animator in constant state is never used.
+                    animator = constantState.newInstance(resources, theme);
+                }
+            }
+            return animator;
         } catch (XmlPullParserException ex) {
             Resources.NotFoundException rnf =
                     new Resources.NotFoundException(
@@ -172,14 +221,13 @@ public class AnimatorInflater {
                         for (int i = 0; i < attributeCount; i++) {
                             int attrName = attributeSet.getAttributeNameResource(i);
                             if (attrName == R.attr.animation) {
-                                animator = loadAnimator(context,
-                                        attributeSet.getAttributeResourceValue(i, 0));
+                                final int animId = attributeSet.getAttributeResourceValue(i, 0);
+                                animator = loadAnimator(context, animId);
                             } else {
                                 states[stateIndex++] =
                                         attributeSet.getAttributeBooleanValue(i, false) ?
                                                 attrName : -attrName;
                             }
-
                         }
                         if (animator == null) {
                             animator = createAnimatorFromXml(context.getResources(),
@@ -192,7 +240,6 @@ public class AnimatorInflater {
                         }
                         stateListAnimator
                                 .addState(StateSet.trimStateSet(states, stateIndex), animator);
-
                     }
                     break;
             }
@@ -508,7 +555,6 @@ public class AnimatorInflater {
     private static Animator createAnimatorFromXml(Resources res, Theme theme, XmlPullParser parser,
             AttributeSet attrs, AnimatorSet parent, int sequenceOrdering, float pixelSize)
             throws XmlPullParserException, IOException {
-
         Animator anim = null;
         ArrayList<Animator> childAnims = null;
 
@@ -537,8 +583,8 @@ public class AnimatorInflater {
                 } else {
                     a = res.obtainAttributes(attrs, R.styleable.AnimatorSet);
                 }
-                int ordering = a.getInt(R.styleable.AnimatorSet_ordering,
-                        TOGETHER);
+                anim.appendChangingConfigurations(a.getChangingConfigurations());
+                int ordering = a.getInt(R.styleable.AnimatorSet_ordering, TOGETHER);
                 createAnimatorFromXml(res, theme, parser, attrs, (AnimatorSet) anim, ordering,
                         pixelSize);
                 a.recycle();
@@ -565,7 +611,6 @@ public class AnimatorInflater {
                 parent.playSequentially(animsArray);
             }
         }
-
         return anim;
 
     }
@@ -591,7 +636,6 @@ public class AnimatorInflater {
     private static ValueAnimator loadAnimator(Resources res, Theme theme,
             AttributeSet attrs, ValueAnimator anim, float pathErrorScale)
             throws NotFoundException {
-
         TypedArray arrayAnimator = null;
         TypedArray arrayObjectAnimator = null;
 
@@ -609,25 +653,37 @@ public class AnimatorInflater {
             } else {
                 arrayObjectAnimator = res.obtainAttributes(attrs, R.styleable.PropertyAnimator);
             }
+            anim.appendChangingConfigurations(arrayObjectAnimator.getChangingConfigurations());
         }
 
         if (anim == null) {
             anim = new ValueAnimator();
         }
+        anim.appendChangingConfigurations(arrayAnimator.getChangingConfigurations());
 
         parseAnimatorFromTypeArray(anim, arrayAnimator, arrayObjectAnimator, pathErrorScale);
 
-        final int resID =
-                arrayAnimator.getResourceId(R.styleable.Animator_interpolator, 0);
+        final int resID = arrayAnimator.getResourceId(R.styleable.Animator_interpolator, 0);
         if (resID > 0) {
-            anim.setInterpolator(AnimationUtils.loadInterpolator(res, theme, resID));
+            final Interpolator interpolator = AnimationUtils.loadInterpolator(res, theme, resID);
+            if (interpolator instanceof BaseInterpolator) {
+                anim.appendChangingConfigurations(
+                        ((BaseInterpolator) interpolator).getChangingConfiguration());
+            }
+            anim.setInterpolator(interpolator);
         }
 
         arrayAnimator.recycle();
         if (arrayObjectAnimator != null) {
             arrayObjectAnimator.recycle();
         }
-
         return anim;
+    }
+
+    private static int getChangingConfigs(Resources resources, int id) {
+        synchronized (sTmpTypedValue) {
+            resources.getValue(id, sTmpTypedValue, true);
+            return sTmpTypedValue.changingConfigurations;
+        }
     }
 }

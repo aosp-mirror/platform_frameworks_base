@@ -28,6 +28,7 @@ import android.view.animation.AnimationUtils;
 public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     private final AppearAnimationUtils mAppearAnimationUtils;
+    private final DisappearAnimationUtils mDisappearAnimationUtils;
     private ViewGroup mKeyguardBouncerFrame;
     private ViewGroup mRow0;
     private ViewGroup mRow1;
@@ -35,6 +36,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     private ViewGroup mRow3;
     private View mDivider;
     private int mDisappearYTranslation;
+    private View[][] mViews;
 
     public KeyguardPINView(Context context) {
         this(context, null);
@@ -43,6 +45,10 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     public KeyguardPINView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAppearAnimationUtils = new AppearAnimationUtils(context);
+        mDisappearAnimationUtils = new DisappearAnimationUtils(context,
+                125, 0.6f /* translationScale */,
+                0.6f /* delayScale */, AnimationUtils.loadInterpolator(
+                        mContext, android.R.interpolator.fast_out_linear_in));
         mDisappearYTranslation = getResources().getDimensionPixelSize(
                 R.dimen.disappear_y_translation);
     }
@@ -71,6 +77,28 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         mRow2 = (ViewGroup) findViewById(R.id.row2);
         mRow3 = (ViewGroup) findViewById(R.id.row3);
         mDivider = findViewById(R.id.divider);
+        mViews = new View[][]{
+                new View[]{
+                        mRow0, null, null
+                },
+                new View[]{
+                        findViewById(R.id.key1), findViewById(R.id.key2),
+                        findViewById(R.id.key3)
+                },
+                new View[]{
+                        findViewById(R.id.key4), findViewById(R.id.key5),
+                        findViewById(R.id.key6)
+                },
+                new View[]{
+                        findViewById(R.id.key7), findViewById(R.id.key8),
+                        findViewById(R.id.key9)
+                },
+                new View[]{
+                        null, findViewById(R.id.key0), findViewById(R.id.key_enter)
+                },
+                new View[]{
+                        null, mEcaView, null
+                }};
     }
 
     @Override
@@ -91,25 +119,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                 .setDuration(500)
                 .setInterpolator(mAppearAnimationUtils.getInterpolator())
                 .translationY(0);
-        mAppearAnimationUtils.startAppearAnimation(new View[][] {
-                new View[] {
-                        mRow0, null, null
-                },
-                new View[] {
-                        findViewById(R.id.key1), findViewById(R.id.key2), findViewById(R.id.key3)
-                },
-                new View[] {
-                        findViewById(R.id.key4), findViewById(R.id.key5), findViewById(R.id.key6)
-                },
-                new View[] {
-                        findViewById(R.id.key7), findViewById(R.id.key8), findViewById(R.id.key9)
-                },
-                new View[] {
-                        null, findViewById(R.id.key0), findViewById(R.id.key_enter)
-                },
-                new View[] {
-                        null, mEcaView, null
-                }},
+        mAppearAnimationUtils.startAnimation(mViews,
                 new Runnable() {
                     @Override
                     public void run() {
@@ -119,14 +129,23 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     @Override
-    public boolean startDisappearAnimation(Runnable finishRunnable) {
+    public boolean startDisappearAnimation(final Runnable finishRunnable) {
+        enableClipping(false);
+        setTranslationY(0);
         animate()
-                .alpha(0f)
-                .translationY(mDisappearYTranslation)
-                .setInterpolator(AnimationUtils
-                        .loadInterpolator(mContext, android.R.interpolator.fast_out_linear_in))
-                .setDuration(100)
-                .withEndAction(finishRunnable);
+                .setDuration(280)
+                .setInterpolator(mDisappearAnimationUtils.getInterpolator())
+                .translationY(mDisappearYTranslation);
+        mDisappearAnimationUtils.startAnimation(mViews,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        enableClipping(true);
+                        if (finishRunnable != null) {
+                            finishRunnable.run();
+                        }
+                    }
+                });
         return true;
     }
 

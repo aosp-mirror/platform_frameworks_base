@@ -377,18 +377,21 @@ class DisplayContent {
             stack.dump(prefix + "  ", pw);
         }
         pw.println();
-        pw.println("  Application tokens in bottom up Z order:");
+        pw.println("  Application tokens in top down Z order:");
         int ndx = 0;
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
-            ArrayList<Task> tasks = mStacks.get(stackNdx).getTasks();
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final TaskStack stack = mStacks.get(stackNdx);
+            pw.print("  mStackId="); pw.println(stack.mStackId);
+            ArrayList<Task> tasks = stack.getTasks();
             for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
+                final Task task = tasks.get(taskNdx);
+                pw.print("    mTaskId="); pw.println(task.taskId);
+                AppTokenList tokens = task.mAppTokens;
+                for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx, ++ndx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    pw.print("  App #"); pw.print(ndx++);
+                    pw.print("    Activity #"); pw.print(tokenNdx);
                             pw.print(' '); pw.print(wtoken); pw.println(":");
-                    wtoken.dump(pw, "    ");
+                    wtoken.dump(pw, "      ");
                 }
             }
         }

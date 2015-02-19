@@ -22,11 +22,14 @@
 -->
 <view class="com.android.internal.app.AlertController$RecycleListView"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+android:id/select_dialog_listview"
+    android:id="@id/select_dialog_listview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:cacheColorHint="@null"
-    android:divider="?android:attr/listDividerAlertDialog"
+    android:divider="?attr/listDividerAlertDialog"
     android:scrollbars="vertical"
     android:overScrollMode="ifContentScrolls"
-    android:textAlignment="viewStart" />
+    android:textAlignment="viewStart"
+    android:paddingTop="@dimen/dialog_list_padding_vertical_material"
+    android:paddingBottom="@dimen/dialog_list_padding_vertical_material"
+    android:clipToPadding="false" />

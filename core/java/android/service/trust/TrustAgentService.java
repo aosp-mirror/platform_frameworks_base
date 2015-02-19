@@ -29,10 +29,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
+
+import java.util.List;
 
 /**
  * A service that notifies the system about whether it believes the environment of the device
@@ -86,16 +89,23 @@ public class TrustAgentService extends Service {
      */
     public static final String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
 
-    /**
-     * A white list of features that the given trust agent should support when otherwise disabled
-     * by device policy.
-     * @hide
-     */
-    public static final String KEY_FEATURES = "trust_agent_features";
-
     private static final int MSG_UNLOCK_ATTEMPT = 1;
-    private static final int MSG_SET_TRUST_AGENT_FEATURES_ENABLED = 2;
+    private static final int MSG_CONFIGURE = 2;
     private static final int MSG_TRUST_TIMEOUT = 3;
+    private static final int MSG_DEVICE_LOCKED = 4;
+    private static final int MSG_DEVICE_UNLOCKED = 5;
+
+    /**
+     * Class containing raw data for a given configuration request.
+     */
+    private static final class ConfigurationData {
+        final IBinder token;
+        final List<PersistableBundle> options;
+        ConfigurationData(List<PersistableBundle> opts, IBinder t) {
+            options = opts;
+            token = t;
+        }
+    }
 
     private ITrustAgentServiceCallback mCallback;
 
@@ -112,13 +122,12 @@ public class TrustAgentService extends Service {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
                     break;
-                case MSG_SET_TRUST_AGENT_FEATURES_ENABLED:
-                    Bundle features = msg.peekData();
-                    IBinder token = (IBinder) msg.obj;
-                    boolean result = onSetTrustAgentFeaturesEnabled(features);
+                case MSG_CONFIGURE:
+                    ConfigurationData data = (ConfigurationData) msg.obj;
+                    boolean result = onConfigure(data.options);
                     try {
                         synchronized (mLock) {
-                            mCallback.onSetTrustAgentFeaturesEnabledCompleted(result, token);
+                            mCallback.onConfigureCompleted(result, data.token);
                         }
                     } catch (RemoteException e) {
                         onError("calling onSetTrustAgentFeaturesEnabledCompleted()");
@@ -126,6 +135,12 @@ public class TrustAgentService extends Service {
                     break;
                 case MSG_TRUST_TIMEOUT:
                     onTrustTimeout();
+                    break;
+                case MSG_DEVICE_LOCKED:
+                    onDeviceLocked();
+                    break;
+                case MSG_DEVICE_UNLOCKED:
+                    onDeviceUnlocked();
                     break;
             }
         }
@@ -166,28 +181,35 @@ public class TrustAgentService extends Service {
     public void onTrustTimeout() {
     }
 
+    /**
+     * Called when the device enters a state where a PIN, pattern or
+     * password must be entered to unlock it.
+     */
+    public void onDeviceLocked() {
+    }
+
+    /**
+     * Called when the device leaves a state where a PIN, pattern or
+     * password must be entered to unlock it.
+     */
+    public void onDeviceUnlocked() {
+    }
+
     private void onError(String msg) {
         Slog.v(TAG, "Remote exception while " + msg);
     }
 
     /**
-     * Called when device policy wants to restrict features in the agent in response to
-     * {@link DevicePolicyManager#setTrustAgentFeaturesEnabled(ComponentName, ComponentName, java.util.List) }.
-     * Agents that support this feature should overload this method and return 'true'.
+     * Called when device policy admin wants to enable specific options for agent in response to
+     * {@link DevicePolicyManager#setKeyguardDisabledFeatures(ComponentName, int)} and
+     * {@link DevicePolicyManager#setTrustAgentConfiguration(ComponentName, ComponentName,
+     * PersistableBundle)}.
+     * <p>Agents that support configuration options should overload this method and return 'true'.
      *
-     * The list of options can be obtained by calling
-     * options.getStringArrayList({@link #KEY_FEATURES}). Presence of a feature string in the list
-     * means it should be enabled ("white-listed"). Absence of the feature means it should be
-     * disabled. An empty list means all features should be disabled.
-     *
-     * This function is only called if {@link DevicePolicyManager#KEYGUARD_DISABLE_TRUST_AGENTS} is
-     * set.
-     *
-     * @param options Option feature bundle.
-     * @return true if the {@link TrustAgentService} supports this feature.
-     * @hide
+     * @param options bundle containing all options or null if none.
+     * @return true if the {@link TrustAgentService} supports configuration options.
      */
-    public boolean onSetTrustAgentFeaturesEnabled(Bundle options) {
+    public boolean onConfigure(List<PersistableBundle> options) {
         return false;
     }
 
@@ -295,6 +317,22 @@ public class TrustAgentService extends Service {
         }
 
         @Override /* Binder API */
+        public void onConfigure(List<PersistableBundle> args, IBinder token) {
+            mHandler.obtainMessage(MSG_CONFIGURE, new ConfigurationData(args, token))
+                    .sendToTarget();
+        }
+
+        @Override
+        public void onDeviceLocked() throws RemoteException {
+            mHandler.obtainMessage(MSG_DEVICE_LOCKED).sendToTarget();
+        }
+
+        @Override
+        public void onDeviceUnlocked() throws RemoteException {
+            mHandler.obtainMessage(MSG_DEVICE_UNLOCKED).sendToTarget();
+        }
+
+        @Override /* Binder API */
         public void setCallback(ITrustAgentServiceCallback callback) {
             synchronized (mLock) {
                 mCallback = callback;
@@ -312,13 +350,6 @@ public class TrustAgentService extends Service {
                     mPendingGrantTrustTask = null;
                 }
             }
-        }
-
-        @Override /* Binder API */
-        public void setTrustAgentFeaturesEnabled(Bundle features, IBinder token) {
-            Message msg = mHandler.obtainMessage(MSG_SET_TRUST_AGENT_FEATURES_ENABLED, token);
-            msg.setData(features);
-            msg.sendToTarget();
         }
     }
 

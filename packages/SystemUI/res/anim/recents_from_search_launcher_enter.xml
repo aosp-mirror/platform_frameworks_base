@@ -16,13 +16,13 @@
 ** limitations under the License.
 */
 -->
-
+<!-- Recents Activity -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
      android:shareInterpolator="false"
      android:zAdjustment="normal">
-  <alpha android:fromAlpha="0.0" android:toAlpha="1.0"
+  <alpha android:fromAlpha="1.0" android:toAlpha="1.0"
          android:fillEnabled="true"
          android:fillBefore="true" android:fillAfter="true"
          android:interpolator="@android:interpolator/linear"
-         android:duration="50"/>
+         android:duration="1"/>
 </set>

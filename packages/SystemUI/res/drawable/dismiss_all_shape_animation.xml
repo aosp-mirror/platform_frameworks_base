@@ -1,0 +1,21 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/dismiss_all_shape" >
+    <target
+        android:name="3"
+        android:animation="@anim/dismiss_all_shape_animation_3" />
+    <target
+        android:name="rectangle_path_1_2"
+        android:animation="@anim/dismiss_all_shape_animation_rectangle_path_1_2" />
+    <target
+        android:name="2"
+        android:animation="@anim/dismiss_all_shape_animation_2" />
+    <target
+        android:name="rectangle_path_1_1"
+        android:animation="@anim/dismiss_all_shape_animation_rectangle_path_1_1" />
+    <target
+        android:name="1"
+        android:animation="@anim/dismiss_all_shape_animation_1" />
+    <target
+        android:name="rectangle_path_1"
+        android:animation="@anim/dismiss_all_shape_animation_rectangle_path_1" />
+</animated-vector>

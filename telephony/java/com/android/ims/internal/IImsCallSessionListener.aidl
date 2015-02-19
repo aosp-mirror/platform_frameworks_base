@@ -48,10 +48,11 @@ interface IImsCallSessionListener {
     void callSessionResumeReceived(in IImsCallSession session, in ImsCallProfile profile);
 
     /**
-     * Notifiies the result of call merge operation.
+     * Notifies the result of call merge operation.
      */
-    void callSessionMerged(in IImsCallSession session,
+    void callSessionMergeStarted(in IImsCallSession session,
             in IImsCallSession newSession, in ImsCallProfile profile);
+    void callSessionMergeComplete(in IImsCallSession session);
     void callSessionMergeFailed(in IImsCallSession session,
             in ImsReasonInfo reasonInfo);
 
@@ -104,4 +105,14 @@ interface IImsCallSessionListener {
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
     void callSessionHandoverFailed(in IImsCallSession session,
             in int srcAccessTech, in int targetAccessTech, in ImsReasonInfo reasonInfo);
+
+    /**
+     * Notifies the TTY mode change by remote party.
+     * @param mode one of the following:
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_OFF}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_FULL}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_HCO}
+     * - {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
+     */
+    void callSessionTtyModeReceived(in IImsCallSession session, in int mode);
 }

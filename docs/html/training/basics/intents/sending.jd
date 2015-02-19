@@ -1,10 +1,8 @@
 page.title=Sending the User to Another App
-parent.title=Interacting with Other Apps
-parent.link=index.html
+page.tags=intents
+helpoutsWidget=true
 
 trainingnavtop=true
-next.title=Getting a Result from an Activity
-next.link=result.html
 
 @jd:body
 
@@ -155,7 +153,8 @@ java.util.List} is not empty, you can safely use the intent. For example:</p>
 
 <pre>
 PackageManager packageManager = {@link android.content.Context#getPackageManager()};
-List&lt;ResolveInfo> activities = packageManager.queryIntentActivities(intent, 0);
+List<ResolveInfo> activities = packageManager.queryIntentActivities(intent,
+        PackageManager.MATCH_DEFAULT_ONLY);
 boolean isIntentSafe = activities.size() > 0;
 </pre>
 

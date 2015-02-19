@@ -57,16 +57,6 @@ about Android 5.0 for consumers at
 
 
 
-<p style="
-    padding: 10px;
-    background: #eee;
-    width: 250px;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-">To test your apps on a real device, flash a Nexus 5 or Nexus 7 with the <br>
-<a href="/preview/index.html#Start"><b>ANDROID PREVIEW SYSTEM IMAGE</b></a>.</p>
-
-
 <h2 id="Material">Material design</h2>
 
 <p>Android 5.0 brings <a href="http://www.google.com/design/spec">Material design</a> to Android and gives you an expanded UI toolkit for integrating the new design patterns easily in your apps.  </p>
@@ -94,7 +84,7 @@ about Android 5.0 for consumers at
 </div>
 
 
-<p>Ripple animations are available for buttons, checkboxes, and other touch controls in your app. 
+<p>Ripple animations are available for buttons, checkboxes, and other touch controls in your app.
 
 <p>You can also define vector drawables in XML and animate them in a variety of ways. Vector drawables scale without losing definition, so they are perfect for single-color in-app icons.</p>
 
@@ -199,22 +189,25 @@ video apps and games to display smooth synchronized content.</p>
 
 <p>Android 5.0 introduces <strong>all new camera APIs</strong> that let you capture raw formats such as YUV and Bayer RAW, and control parameters such as exposure time, ISO sensitivity, and frame duration on a per-frame basis. The new fully-synchronized camera pipeline allows you to capture uncompressed full-resolution YUV images at 30 FPS on supported devices.</p>
 
-<p>Along with images, you can also capture metadata like noise models and optical information from the camera.</p>
+<p>In addition to giving greater control over image capture, the new APIs also
+expose detailed information about the camera's properties and capabilities and
+provide metadata that describes the capture settings of each frame.</p>
 
 <p>Apps sending video streams over the network can now take advantage of H.265 <strong>High Efficiency Video Coding (HEVC)</strong> for optimized encoding and decoding of video data. </p>
 
 <p>Android 5.0 also adds support for <strong>multimedia tunneling</strong> to provide the best experience for ultra-high definition (4K) content and the ability to play compressed audio and video data together. </p>
 
 
-<!--
+
 <div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
 <img style="float:right; margin:0 1em 1em 2em"
     src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"
     srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"
     alt="" width="300" />
-<p class="img-caption">Android Work users have a unified view of their personal and work apps, which are badged for easy identification.</p>
+<p class="img-caption">Users have a unified view of their personal and work apps, which are
+badged for easy identification.</p>
 </div>
--->
+
 
 <h2 id="Work">Android in the workplace</h2>
 

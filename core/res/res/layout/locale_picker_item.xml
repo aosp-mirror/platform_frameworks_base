@@ -19,15 +19,14 @@
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
     android:gravity="center_vertical"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:paddingStart="16dp"
+    android:minHeight="?attr/listPreferredItemHeight"
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
     android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:paddingEnd="16dp">
+    android:paddingBottom="8dp">
 
     <TextView android:id="@+id/locale"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-    />
-</LinearLayout >
+        android:textAppearance="?android:attr/textAppearanceListItem" />
+</LinearLayout>

@@ -1,8 +1,8 @@
 page.title=Saving Data in SQL Databases
+page.tags=data storage
+helpoutsWidget=true
 
 trainingnavtop=true
-previous.title=Saving Data in Files
-previous.link=files.html
 
 @jd:body
 

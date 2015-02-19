@@ -402,6 +402,23 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_TAINTED = 0x80000000;
 
     /**
+     * Private flag indicating that this event was synthesized by the system and
+     * should be delivered to the accessibility focused view first. When being
+     * dispatched such an event is not handled by predecessors of the accessibility
+     * focused view and after the event reaches that view the flag is cleared and
+     * normal event dispatch is performed. This ensures that the platform can click
+     * on any view that has accessibility focus which is semantically equivalent to
+     * asking the view to perform a click accessibility action but more generic as
+     * views not implementing click action correctly can still be activated.
+     *
+     * @hide
+     * @see #isTargetAccessibilityFocus()
+     * @see #setTargetAccessibilityFocus(boolean)
+     */
+    public static final int FLAG_TARGET_ACCESSIBILITY_FOCUS = 0x40000000;
+
+
+    /**
      * Flag indicating the motion event intersected the top edge of the screen.
      */
     public static final int EDGE_TOP = 0x00000001;
@@ -1764,6 +1781,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public final void setTainted(boolean tainted) {
         final int flags = getFlags();
         nativeSetFlags(mNativePtr, tainted ? flags | FLAG_TAINTED : flags & ~FLAG_TAINTED);
+    }
+
+    /** @hide */
+    public final boolean isTargetAccessibilityFocus() {
+        final int flags = getFlags();
+        return (flags & FLAG_TARGET_ACCESSIBILITY_FOCUS) != 0;
+    }
+
+    /** @hide */
+    public final void setTargetAccessibilityFocus(boolean targetsFocus) {
+        final int flags = getFlags();
+        nativeSetFlags(mNativePtr, targetsFocus
+                ? flags | FLAG_TARGET_ACCESSIBILITY_FOCUS
+                : flags & ~FLAG_TARGET_ACCESSIBILITY_FOCUS);
     }
 
     /**
@@ -3166,6 +3197,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         MotionEvent ev = obtain();
         ev.mNativePtr = nativeReadFromParcel(ev.mNativePtr, in);
         return ev;
+    }
+
+    /** @hide */
+    @Override
+    public final void cancel() {
+        setAction(ACTION_CANCEL);
     }
 
     public void writeToParcel(Parcel out, int flags) {

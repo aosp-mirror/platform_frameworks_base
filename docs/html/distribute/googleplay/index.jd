@@ -21,7 +21,7 @@ nonavpage=true
     data-maxResults="3">
   </div>
 
-  <h3>Google Play for Education</h3>
+  <h3>Distribute Your Apps</h3>
 
   <div class="resource-widget resource-flow-layout landing col-16"
     data-query="collection:distribute/gp/gpfelanding"

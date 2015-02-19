@@ -91,11 +91,6 @@ public abstract class BatteryStats implements Parcelable {
      public static final int WIFI_MULTICAST_ENABLED = 7;
 
     /**
-     * A constant indicating an audio turn on timer
-     */
-    public static final int AUDIO_TURNED_ON = 7;
-
-    /**
      * A constant indicating a video turn on timer
      */
     public static final int VIDEO_TURNED_ON = 8;
@@ -129,6 +124,11 @@ public abstract class BatteryStats implements Parcelable {
      * A constant indicating a job timer
      */
     public static final int JOB = 14;
+
+    /**
+     * A constant indicating an audio turn on timer
+     */
+    public static final int AUDIO_TURNED_ON = 15;
 
     /**
      * Include all of the data in the stats, including previously saved data.
@@ -459,6 +459,20 @@ public abstract class BatteryStats implements Parcelable {
             public abstract int getStarts(int which);
 
             /**
+             * Returns the number of times the process has crashed.
+             *
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+             */
+            public abstract int getNumCrashes(int which);
+
+            /**
+             * Returns the number of times the process has ANRed.
+             *
+             * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
+             */
+            public abstract int getNumAnrs(int which);
+
+            /**
              * Returns the cpu time spent in microseconds while the process was in the foreground.
              * @param which one of STATS_SINCE_CHARGED, STATS_SINCE_UNPLUGGED, or STATS_CURRENT.
              * @return foreground cpu time in microseconds
@@ -590,6 +604,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final byte CMD_CURRENT_TIME = 5;
         public static final byte CMD_OVERFLOW = 6;
         public static final byte CMD_RESET = 7;
+        public static final byte CMD_SHUTDOWN = 8;
 
         public byte cmd = CMD_NULL;
         
@@ -694,8 +709,10 @@ public abstract class BatteryStats implements Parcelable {
         public static final int EVENT_USER_RUNNING = 0x0007;
         // Events for foreground user.
         public static final int EVENT_USER_FOREGROUND = 0x0008;
+        // Events for connectivity changed.
+        public static final int EVENT_CONNECTIVITY_CHANGED = 0x0009;
         // Number of event types.
-        public static final int EVENT_COUNT = 0x0009;
+        public static final int EVENT_COUNT = 0x000a;
         // Mask to extract out only the type part of the event.
         public static final int EVENT_TYPE_MASK = ~(EVENT_FLAG_START|EVENT_FLAG_FINISH);
 
@@ -1107,6 +1124,13 @@ public abstract class BatteryStats implements Parcelable {
     public abstract int getLowPowerModeEnabledCount(int which);
 
     /**
+     * Returns the number of times that connectivity state changed.
+     *
+     * {@hide}
+     */
+    public abstract int getNumConnectivityChange(int which);
+
+    /**
      * Returns the time in microseconds that the phone has been on while the device was
      * running on battery.
      * 
@@ -1306,11 +1330,11 @@ public abstract class BatteryStats implements Parcelable {
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
-            "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg"
+            "null", "proc", "fg", "top", "sync", "wake_lock_in", "job", "user", "userfg", "conn"
     };
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
-            "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf"
+            "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn"
     };
 
     /**
@@ -1871,6 +1895,7 @@ public abstract class BatteryStats implements Parcelable {
         final long screenOnTime = getScreenOnTime(rawRealtime, which);
         final long interactiveTime = getInteractiveTime(rawRealtime, which);
         final long lowPowerModeEnabledTime = getLowPowerModeEnabledTime(rawRealtime, which);
+        final int connChanges = getNumConnectivityChange(which);
         final long phoneOnTime = getPhoneOnTime(rawRealtime, which);
         final long wifiOnTime = getWifiOnTime(rawRealtime, which);
         final long wifiRunningTime = getGlobalWifiRunningTime(rawRealtime, which);
@@ -1941,7 +1966,7 @@ public abstract class BatteryStats implements Parcelable {
                 fullWakeLockTimeTotal / 1000, partialWakeLockTimeTotal / 1000,
                 0 /*legacy input event count*/, getMobileRadioActiveTime(rawRealtime, which) / 1000,
                 getMobileRadioActiveAdjustedTime(which) / 1000, interactiveTime / 1000,
-                lowPowerModeEnabledTime / 1000);
+                lowPowerModeEnabledTime / 1000, connChanges);
         
         // Dump screen brightness stats
         Object[] args = new Object[NUM_SCREEN_BRIGHTNESS_BINS];
@@ -2271,12 +2296,14 @@ public abstract class BatteryStats implements Parcelable {
                     final long userMillis = ps.getUserTime(which) * 10;
                     final long systemMillis = ps.getSystemTime(which) * 10;
                     final long foregroundMillis = ps.getForegroundTime(which) * 10;
-                    final long starts = ps.getStarts(which);
+                    final int starts = ps.getStarts(which);
+                    final int numCrashes = ps.getNumCrashes(which);
+                    final int numAnrs = ps.getNumAnrs(which);
 
                     if (userMillis != 0 || systemMillis != 0 || foregroundMillis != 0
-                            || starts != 0) {
+                            || starts != 0 || numAnrs != 0 || numCrashes != 0) {
                         dumpLine(pw, uid, category, PROCESS_DATA, ent.getKey(), userMillis,
-                                systemMillis, foregroundMillis, starts);
+                                systemMillis, foregroundMillis, starts, numAnrs, numCrashes);
                     }
                 }
             }
@@ -2456,6 +2483,11 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append("  Active phone call: "); formatTimeMs(sb, phoneOnTime / 1000);
                     sb.append("("); sb.append(formatRatioLocked(phoneOnTime, whichBatteryRealtime));
                     sb.append(") "); sb.append(getPhoneOnCount(which));
+        }
+        int connChanges = getNumConnectivityChange(which);
+        if (connChanges != 0) {
+            pw.print(prefix);
+            pw.print("  Connectivity changes: "); pw.println(connChanges);
         }
 
         // Calculate wakelock times across all uids.
@@ -3273,11 +3305,13 @@ public abstract class BatteryStats implements Parcelable {
                     systemTime = ps.getSystemTime(which);
                     foregroundTime = ps.getForegroundTime(which);
                     starts = ps.getStarts(which);
+                    final int numCrashes = ps.getNumCrashes(which);
+                    final int numAnrs = ps.getNumAnrs(which);
                     numExcessive = which == STATS_SINCE_CHARGED
                             ? ps.countExcessivePowers() : 0;
 
                     if (userTime != 0 || systemTime != 0 || foregroundTime != 0 || starts != 0
-                            || numExcessive != 0) {
+                            || numExcessive != 0 || numCrashes != 0 || numAnrs != 0) {
                         sb.setLength(0);
                         sb.append(prefix); sb.append("    Proc ");
                                 sb.append(ent.getKey()); sb.append(":\n");
@@ -3285,9 +3319,26 @@ public abstract class BatteryStats implements Parcelable {
                                 formatTime(sb, userTime); sb.append("usr + ");
                                 formatTime(sb, systemTime); sb.append("krn ; ");
                                 formatTime(sb, foregroundTime); sb.append("fg");
-                        if (starts != 0) {
+                        if (starts != 0 || numCrashes != 0 || numAnrs != 0) {
                             sb.append("\n"); sb.append(prefix); sb.append("      ");
-                                    sb.append(starts); sb.append(" proc starts");
+                            boolean hasOne = false;
+                            if (starts != 0) {
+                                hasOne = true;
+                                sb.append(starts); sb.append(" starts");
+                            }
+                            if (numCrashes != 0) {
+                                if (hasOne) {
+                                    sb.append(", ");
+                                }
+                                hasOne = true;
+                                sb.append(numCrashes); sb.append(" crashes");
+                            }
+                            if (numAnrs != 0) {
+                                if (hasOne) {
+                                    sb.append(", ");
+                                }
+                                sb.append(numAnrs); sb.append(" anrs");
+                            }
                         }
                         pw.println(sb.toString());
                         for (int e=0; e<numExcessive; e++) {
@@ -3479,6 +3530,11 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
                             rec.currentTime).toString());
                 }
+            } else if (rec.cmd == HistoryItem.CMD_SHUTDOWN) {
+                if (checkin) {
+                    pw.print(":");
+                }
+                pw.println("SHUTDOWN");
             } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
                 if (checkin) {
                     pw.print(":");
@@ -3669,6 +3725,45 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(suffix);
     }
 
+    private static boolean dumpTimeEstimate(PrintWriter pw, String label, long[] steps,
+            int count, long modesOfInterest, long modeValues) {
+        if (count <= 0) {
+            return false;
+        }
+        long total = 0;
+        int numOfInterest = 0;
+        for (int i=0; i<count; i++) {
+            long initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
+                    >> STEP_LEVEL_INITIAL_MODE_SHIFT;
+            long modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
+                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
+            // If the modes of interest didn't change during this step period...
+            if ((modMode&modesOfInterest) == 0) {
+                // And the mode values during this period match those we are measuring...
+                if ((initMode&modesOfInterest) == modeValues) {
+                    // Then this can be used to estimate the total time!
+                    numOfInterest++;
+                    total += steps[i] & STEP_LEVEL_TIME_MASK;
+                }
+            }
+        }
+        if (numOfInterest <= 0) {
+            return false;
+        }
+
+        // The estimated time is the average time we spend in each level, multipled
+        // by 100 -- the total number of battery levels
+        long estimatedTime = (total / numOfInterest) * 100;
+
+        pw.print(label);
+        StringBuilder sb = new StringBuilder(64);
+        formatTimeMs(sb, estimatedTime);
+        pw.print(sb);
+        pw.println();
+
+        return true;
+    }
+
     private static boolean dumpDurationSteps(PrintWriter pw, String header, long[] steps,
             int count, boolean checkin) {
         if (count <= 0) {
@@ -3760,7 +3855,8 @@ public abstract class BatteryStats implements Parcelable {
                 if (histStart >= 0 && !printed) {
                     if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
                             || rec.cmd == HistoryItem.CMD_RESET
-                            || rec.cmd == HistoryItem.CMD_START) {
+                            || rec.cmd == HistoryItem.CMD_START
+                            || rec.cmd == HistoryItem.CMD_SHUTDOWN) {
                         printed = true;
                         hprinter.printNextItem(pw, rec, baseTime, checkin,
                                 (flags&DUMP_VERBOSE) != 0);
@@ -3923,6 +4019,38 @@ public abstract class BatteryStats implements Parcelable {
                     TimeUtils.formatDuration(timeRemaining / 1000, pw);
                     pw.println();
                 }
+                dumpTimeEstimate(pw, "  Estimated screen off time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_OFF-1));
+                dumpTimeEstimate(pw, "  Estimated screen off power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_OFF-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                dumpTimeEstimate(pw, "  Estimated screen on time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_ON-1));
+                dumpTimeEstimate(pw, "  Estimated screen on power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_ON-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                dumpTimeEstimate(pw, "  Estimated screen doze time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE-1));
+                dumpTimeEstimate(pw, "  Estimated screen doze power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                dumpTimeEstimate(pw, "  Estimated screen doze suspend time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE_SUSPEND-1));
+                dumpTimeEstimate(pw, "  Estimated screen doze suspend power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE_SUSPEND-1)|STEP_LEVEL_MODE_POWER_SAVE);
                 pw.println();
             }
             if (dumpDurationSteps(pw, "Charge step durations:", getChargeStepDurationsArray(),
@@ -3955,7 +4083,7 @@ public abstract class BatteryStats implements Parcelable {
         prepareForDumpLocked();
 
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                "11", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
+                "12", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 

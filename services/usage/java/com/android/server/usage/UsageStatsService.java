@@ -33,11 +33,11 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -47,9 +47,12 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -176,7 +179,7 @@ public class UsageStatsService extends SystemService implements
             long currentTimeMillis) {
         UserUsageStatsService service = mUserState.get(userId);
         if (service == null) {
-            service = new UserUsageStatsService(userId,
+            service = new UserUsageStatsService(getContext(), userId,
                     new File(mUsageStatsDir, Integer.toString(userId)), this);
             service.init(currentTimeMillis);
             mUserState.put(userId, service);
@@ -319,6 +322,30 @@ public class UsageStatsService extends SystemService implements
         mHandler.removeMessages(MSG_FLUSH_TO_DISK);
     }
 
+    /**
+     * Called by the Binder stub.
+     */
+    void dump(String[] args, PrintWriter pw) {
+        synchronized (mLock) {
+            IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
+            ArraySet<String> argSet = new ArraySet<>();
+            argSet.addAll(Arrays.asList(args));
+
+            final int userCount = mUserState.size();
+            for (int i = 0; i < userCount; i++) {
+                idpw.printPair("user", mUserState.keyAt(i));
+                idpw.println();
+                idpw.increaseIndent();
+                if (argSet.contains("--checkin")) {
+                    mUserState.valueAt(i).checkin(idpw);
+                } else {
+                    mUserState.valueAt(i).dump(idpw);
+                }
+                idpw.decreaseIndent();
+            }
+        }
+    }
+
     class H extends Handler {
         public H(Looper looper) {
             super(looper);
@@ -349,8 +376,12 @@ public class UsageStatsService extends SystemService implements
     private class BinderService extends IUsageStatsManager.Stub {
 
         private boolean hasPermission(String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid == Process.SYSTEM_UID) {
+                return true;
+            }
             final int mode = mAppOps.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
-                    Binder.getCallingUid(), callingPackage);
+                    callingUid, callingPackage);
             if (mode == AppOpsManager.MODE_DEFAULT) {
                 // The default behavior here is to check if PackageManager has given the app
                 // permission.
@@ -416,6 +447,18 @@ public class UsageStatsService extends SystemService implements
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                    != PackageManager.PERMISSION_GRANTED) {
+                pw.println("Permission Denial: can't dump UsageStats from pid="
+                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                        + " without permission " + android.Manifest.permission.DUMP);
+                return;
+            }
+            UsageStatsService.this.dump(args, pw);
         }
     }
 

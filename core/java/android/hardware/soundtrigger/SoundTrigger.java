@@ -211,6 +211,43 @@ public class SoundTrigger {
             this.type = type;
             this.data = data;
         }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + Arrays.hashCode(data);
+            result = prime * result + type;
+            result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+            result = prime * result + ((vendorUuid == null) ? 0 : vendorUuid.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (!(obj instanceof SoundModel))
+                return false;
+            SoundModel other = (SoundModel) obj;
+            if (!Arrays.equals(data, other.data))
+                return false;
+            if (type != other.type)
+                return false;
+            if (uuid == null) {
+                if (other.uuid != null)
+                    return false;
+            } else if (!uuid.equals(other.uuid))
+                return false;
+            if (vendorUuid == null) {
+                if (other.vendorUuid != null)
+                    return false;
+            } else if (!vendorUuid.equals(other.vendorUuid))
+                return false;
+            return true;
+        }
     }
 
     /*****************************************************************************
@@ -394,6 +431,28 @@ public class SoundTrigger {
             return "KeyphraseSoundModel [keyphrases=" + Arrays.toString(keyphrases)
                     + ", uuid=" + uuid + ", vendorUuid=" + vendorUuid
                     + ", type=" + type + ", data=" + (data == null ? 0 : data.length) + "]";
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + Arrays.hashCode(keyphrases);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (!super.equals(obj))
+                return false;
+            if (!(obj instanceof KeyphraseSoundModel))
+                return false;
+            KeyphraseSoundModel other = (KeyphraseSoundModel) obj;
+            if (!Arrays.equals(keyphrases, other.keyphrases))
+                return false;
+            return true;
         }
     }
 

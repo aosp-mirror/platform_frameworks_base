@@ -1,0 +1,190 @@
+page.title=测试应用内结算
+parent.title=In-app Billing
+parent.link=index.html
+@jd:body
+
+      <div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文内容</h2>
+    <ol>
+      <li><a href="#testing-purchases">测试应用内购买</a></li>
+      <li><a href="#billing-testing-static">使用静态回复进行测试</a></li>
+      <li><a href="#billing-testing-real">设置测试购买</a></li>
+      <li><a href="#draft_apps">草稿应用不再受支持</a></li>
+    </ol>
+    <h2>另请参见</h2>
+    <ol>
+      <li><a href="{@docRoot}google/play/billing/billing_overview.html">应用内结算概述</a></li>
+    <ol>
+  </ol></ol></div>
+  </div>
+
+  <p>Google Play 开发者控制台提供了一些帮助你测试应用内结算实施情况的工具：</p>
+
+  <ul>
+  <li>测试购买，让拥有测试帐户的用户真正购买你发布的应用内商品，但不向这些用户帐户实际收取费用。</li>
+  <li>来自 Google Play 的静态结算回复，用于在开发初期进行测试
+  </li></ul>
+
+  <p>要测试应用的应用内结算，必须将该应用安装在 Android 设备上。你不能使用 Android 模拟器测试应用内结算。用于测试的设备必须运行标准的 Android 1.6 或更高版本的平台（API 级别 4 或更高级别），并且要安装最新版本的 Google Play 应用。如果设备运行的不是最新的 Google Play 应用，你的应用将不能向 Google Play 发送应用内结算请求。有关如何设置设备以便用于开发 Android 应用的一般信息，请参阅<a href="{@docRoot}tools/device.html">使用硬件设备</a>。</p>
+
+  <h2 id="testing-purchases">测试应用内购买</h2>
+
+  <p>应用内结算实施就绪后，你可以通过两种方法测试应用内 SKU 的购买：</p>
+
+  <ul>
+  <li><strong>测试购买</strong>：让你选择的许可测试用户在应用发布之前购买应用内商品，但不向这些用户收取费用；</li>
+  <li><strong>真正购买</strong>：让普通用户真正购买你的应用内商品，并根据用户的付款方式实际收取费用。在这种情况下，你可以利用 Google Play 的 Alpha 和 Beta 测试用户小组管理哪些用户可以使用你的实施进行真正的购买。</li>
+  </ul>
+
+  <p>下面的各个部分介绍了有关如何使用这些方法进行测试和验证的详情。</p>
+
+  <h3 id="test-purchases">测试购买（应用内结算沙盒）</h3>
+
+  <p>测试购买提供了一种安全、方便的方法，让你在开发过程中或准备发布期间，对你的应用内结算实施情况进行大规模的测试。测试期间，经过授权的用户帐户可在你的应用尚未发布时通过 Google Play 购买应用内商品，不过这些用户帐户不用实际支付费用。</p>
+
+  <p>获得测试访问权限之后，这些用户可以侧载你的应用，并测试商品的完整销售、购买和订单完成流程。测试购买会产生真实的订单，Google Play 会采用与处理其他订单相同的方式对其进行处理。购买完成后，Google Play 不会让这些订单进入财务流程，从而确保不会向用户帐户实际收取费用，并在 14 天后自动取消已完成的订单。</p>
+
+  <h4 id="setup">设置测试购买</h4>
+
+  <p>设置测试购买很简单，你可以选择任何用户帐户作为测试帐户，而测试帐户中的任何用户都可以通过可用的付款方式进行测试购买（当然用户不需要通过付款方式支付任何费用）。</p>
+
+  <p>首先，上传并发布你希望测试者能够购买的应用内商品。你可以在开发者控制台中上传和发布应用内商品。请注意，你可以在发布 APK 之前上传并发布应用内商品。</p>
+
+  <p>然后，为获得授权的用户创建许可测试帐户。在开发者控制台中，转到<strong>设置</strong> &gt; <strong>帐户详情</strong>，然后在“许可测试”部分将相应地址添加到<strong>可用于测试的 Gmail 帐户</strong>字段。有关详情，请参阅<a href="#billing-testing-test">设置测试购买</a>。</p>
+
+  <p>在你将用户添加为许可测试帐户并保存更改之后，这些用户在 15 分钟内即可开始购买你的应用内商品。随后你可以向测试者发布你的应用并提供收集反馈的方法。</p>
+
+  <p class="note"><strong>注意</strong>：要进行测试购买，许可测试帐户必须设置在用户的 Android 设备上。如果设备上有多个帐户，则必须使用下载应用时所用的帐户进行购买。如果没有帐户下载过应用，则使用第一个帐户进行购买。用户可以通过展开购买对话框来确认执行购买的帐户。</p>
+
+  <h4 id="tp-account">测试购买和开发者帐户</h4>
+  <p>经过授权的许可测试帐户在 Google Play 中与你的开发者帐户相关联，而不是与特定 APK 或程序包名称相关联。被标识为测试帐户的帐户可以购买你帐户的任何应用内商品而不用支付费用。</p>
+
+  <h4 id="purchase-flow">购买流程的详情</h4>
+  <p>在测试购买期间，用户可以测试应用中实际的销售、购买和订单完成流程。购买时，应用内商品与普通商品一样显示，并包含实际价格。不过，Google Play 会在购买对话框中心处显示通知，说明这是测试购买，以便辨识。
+  </p>
+
+  <h4 id="cancelling">取消已完成的测试购买</h4>
+  <p>Google Play 会累积每个用户已完成的测试购买，但不会将相关信息传递到财务流程。经过一段时间后，Google Play 会自动取消这些购买以进行清理。</p>
+
+  <p>在某些情况下，你可能希望手动取消测试购买以便继续进行测试。要取消购买，你可以：</p>
+
+  <ul>
+  <li>等待交易到期：Google Play 会在购买日期的 14 天后清除已完成的测试购买。</li>
+  <li>手动取消购买：你可以转到 Google 电子钱包 Merchant Center，找到相应交易，将其取消。通过查找订单编号即可找到交易。</li>
+  </ul>
+
+  <h4 id="requirements">使用测试购买的要求</h4>
+  <p>如果你打算使用测试购买，请注意以下要求和限制：</p>
+  <ul>
+  <li>只有许可测试帐户可以进行测试购买，而且应用要使用应用内结算 API 第 3 版。</li>
+  <li>只有应用内商品可以进行测试购买，应用内订阅则不可以。</li>
+  </ul>
+
+  <h3 id="transations">使用真实交易进行测试</h3>
+  <p>在准备发布使用应用内结算的应用时，你可以先利用 Google Play Alpha/Beta 发布选项进行来验证和负荷测试你的应用内结算实施情况，然后再向所有用户发布应用。</p>
+
+  <p>Alpha/Beta 测试小组内的真实用户（由你选择）可以通过 Google Play 安装你的应用并测试应用内商品。他们可以通过其在 Google Play 中的常规付款方式进行真正的购买，而他们的帐户中会产生实际费用。请注意，如果你的 Alpha 和 Beta 发布小组中包括测试许可帐户，这些用户将只能进行测试购买。</p>
+
+
+  <h2 id="billing-testing-static">使用静态回复进行测试</h2>
+
+  <p>我们建议你先使用来自 Google Play 的静态回复测试应用内结算的实施情况。这样一来，你可以确认应用能否正确处理主要 Google Play 回复，以及你的应用能否正确验证签名。即使应用尚未发布，你也可以执行此测试。</p>
+
+  <p>要使用静态回复测试你的实施，请使用具有预留的商品 ID 的特定商品发送应用内结算请求。每个预留的商品 ID 均会从 Google Play 返回特定的静态回复。当你使用预留的商品 ID 发送应用内结算请求时不会发生资金转移。此外，当你使用预留的商品 ID 发送结算请求时不能指定付款方式。图 1 显示了商品 ID 为“android.test.purchased”的预留商品的结帐流程。</p>
+
+  <img src="{@docRoot}images/billing_test_flow.png" height="381" id="figure1" />
+  <p class="img-caption">
+    <strong>图 1. </strong>特定的预留商品“android.test.purchased”的电子钱包流程
+  </p>
+
+  <p>你不需要在应用的商品列表中列出预留的商品。Google Play 已经知道预留的商品 ID。此外，你不需要将应用上传到开发者控制台，就可以使用预留的商品 ID 执行静态回复测试。你只需在设备上安装你的应用，登录到设备，然后使用预留的商品 ID 发送结算请求。</p>
+
+  <p class="note"><strong>注意</strong>：过去，你可以通过上传未发布的“草稿”版本来测试应用，但现在系统已不再支持此功能。不过，现在你可以在将应用上传到 Google Play 商店之前就使用静态回复测试应用。有关详情，请参阅<a href="#draft_apps">草稿应用不再受支持</a>。
+
+  <p>用于测试静态应用内结算回复的预留商品 ID 有四种：</p>
+
+  <ul>
+    <li><strong>android.test.purchased</strong>
+      <p>当你使用此商品 ID 发送应用内结算请求时，Google Play 会假定你成功购买了商品而做出回复。回复内容包括一个 JSON 字符串，其中包含虚拟的购买信息（例如虚拟的订单 ID）。在某些情况下，JSON 字符串是经过签名的，并且回复中也包括签名，因此你可以利用这些回复测试你的签名验证实施情况。</p>
+    </li>
+    <li><strong>android.test.canceled</strong>
+      <p>当你使用此商品 ID 发送应用内结算请求时，Google Play 会假定购买已被取消而做出回复。如果订购流程出现问题（例如信用卡无效，或你在用户付款之前取消了订单），就会发生这种情况。</p>
+    </li>
+    <li><strong>android.test.refunded</strong>
+      <p>当你使用此商品 ID 发送应用内结算请求时，Google Play 会假定购买已退款而做出回复。退款不能通过 Google Play 的应用内结算服务发起，而是必须由你（商家）发起。在你通过 Google 电子钱包商家帐户处理退款请求之后，Google Play 会向你的应用发送一条退款信息。只有当 Google Play 收到来自 Google 电子钱包的退款已执行的通知时，Google Play 才会发送此消息。有关退款的更多详情，请参阅<a href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">处理 IN_APP_NOTIFY 信息</a>和<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=zh-CN&amp;answer=1153485">应用内结算定价</a>。</p>
+    </li>
+    <li><strong>android.test.item_unavailable</strong>
+      <p>当你使用此商品 ID 发送应用内结算请求时，Google Play 会假定所购商品在你应用的商品列表中不存在而做出回复。</p>
+    </li>
+  </ul>
+
+  <p>在某些情况下，预留的商品可能会返回经过签名的静态回复，这样你可以测试应用中的签名验证。只有当运行应用的用户拥有<a href="{@docRoot}distribute/googleplay/start.html">开发者帐户</a>或<a href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">测试帐户</a>时，预留的商品才返回经过签名的回复。
+
+  <p>要使用预留的商品 ID 发送应用内结算请求，你只需构建一个常规的 <code>REQUEST_PURCHASE</code> 请求即可，不过请使用上文介绍的一个预留商品 ID，而不要使用你的应用商品列表中的真实商品 ID。</p>
+
+  <p>要使用预留的商品 ID 测试应用，请按以下步骤操作：</p>
+
+  <ol>
+    <li><strong>在 Android 设备上安装你的应用。</strong>
+      <p>你不能使用模拟器测试应用内结算，而是必须在设备上安装应用才能测试应用内结算。</p>
+      <p>要了解如何在设备上安装应用，请参阅<a href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">在设备上运行</a>。</p>
+    </li>
+    <li><strong>使用你的开发者帐户登录到设备。</strong>
+      <p>如果你只是使用预留的商品 ID 进行测试，则不需要使用测试帐户。</p>
+    </li>
+    <li><strong>确保你的设备运行的是受支持的 Google Play 应用版本或 MyApps 应用版本。</strong>
+      <p>如果你的设备运行的是 Android 3.0，则应用内结算要求使用版本为 5.0.12（或更高版本）的 MyApps 应用。如果你的设备运行的是其他版本的 Android，则应用内结算要求使用版本为 2.3.4（或更高版本）的 Google Play 应用。要了解如何查看 Google Play 应用的版本，请参阅<a href="http://market.android.com/support/bin/answer.py?answer=190860">更新 Google Play</a>。</p>
+    </li>
+    <li><strong>运行应用并购买预留的商品 ID。</strong></li>
+  </ol>
+
+  <p class="note"><strong>注意</strong>：使用预留的商品 ID 发送应用内结算请求会覆盖常用的 Google Play 生产系统。当你针对某个预留的商品 ID 发送应用内结算请求时，服务的质量会比不上生产环境。</p>
+
+  <h2 id="billing-testing-test">设置测试真实购买</h2>
+
+  <p>完成静态回复测试，并确认应用中的签名验证正常工作之后，你就可以通过执行实际的应用内购买，来测试应用内结算的实施情况。测试真实的应用内购买能让你测试端到端的应用内结算体验，包括从 Google Play 进行实际购买，以及用户在你的应用中体验的实际结帐流程。</p>
+
+  <p class="note"><strong>注意</strong>：你可以将应用发布到 <a href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">Alpha 发布渠道</a>来进行端到端的测试。也就是说，这样做你可以将应用发布到 Google Play 商店，但限制为仅向你指定的测试者提供该应用。</p>
+
+  <p>要通过实际的应用内购买测试你的应用内结算实施情况，请在 Google Play 开发者控制台注册至少一个测试帐户。你不能使用自己的开发者帐户测试完整的应用内购买流程，因为 Google 电子钱包不允许你购买自己的商品。如果你之前没有设置过测试帐户，请参阅<a href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">设置测试帐户</a>。</p>
+
+  <p>此外，测试帐户只能购买你的商品列表中已经发布的商品。虽然你可以不发布应用，但必须发布商品。</p>
+
+  <p>要通过实际购买测试你的应用内结算实施情况，请按以下步骤操作：</p>
+
+  <ol>
+    <li><strong>通过开发者控制台将你的应用上传到 <a href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">Alpha 发布渠道</a>。</strong>
+
+     <p class="note"><strong>注意</strong>：过去，你可以通过上传未发布的“草稿”版本来测试应用，但现在系统已不再支持此功能。现在你必须将应用发布到 Alpha 或 Beta 发布渠道，才能进行测试。有关详情，请参阅<a href="#draft_apps">草稿应用不再受支持</a>。
+
+    </p></li>
+    <li><strong>将商品添加到应用的商品列表。</strong>
+      <p>请务必发布商品（应用可以保持未发布状态）。要了解如何操作，请参阅<a href="{@docRoot}google/play/billing/billing_admin.html#billing-catalog">创建商品列表</a>。</p>
+    </li>
+    <li><strong>在 Android 设备上安装你的应用。</strong>
+      <p>你不能使用模拟器测试应用内结算，而是必须在设备上安装应用才能测试应用内结算。</p>
+      <p>要了解如何在设备上安装应用，请参阅<a href="{@docRoot}tools/building/building-cmdline.html#RunningOnDevice">在设备上运行</a>。</p>
+    </li>
+    <li><strong>确保你的设备运行的是受支持的 Google Play 应用版本或 MyApps 应用版本。</strong>
+      <p>如果你的设备运行的是 Android 3.0，则应用内结算要求使用版本为 5.0.12（或更高版本）的 MyApps 应用。如果你的设备运行的是其他版本的 Android，则应用内结算要求使用版本为 2.3.4（或更高版本）的 Google Play 应用。要了解如何查看 Google Play 应用的版本，请参阅<a href="http://market.android.com/support/bin/answer.py?answer=190860">更新 Google Play</a>。</p>
+    </li>
+    <li><strong>在应用中进行应用内购买。</strong></li>
+  </ol>
+
+  <p class="note"><strong>注意</strong>：在设备上更改主要帐户的唯一方法是恢复出厂设置，请确保先使用你的主要帐户在设备上登录。</p>
+
+  <p>完成对应用内结算实施情况的测试之后，你就可以在 Google Play 上发布应用了。你可以按照常规步骤<a href="{@docRoot}tools/publishing/preparing.html">准备</a>、<a href="{@docRoot}tools/publishing/app-signing.html">登录</a>以及<a href="{@docRoot}distribute/tools/launch-checklist.html">在 Google Play 上发布</a>。
+  </p>
+
+  <h2 id="draft_apps">草稿应用不再受支持</h2>
+
+  <p>过去，你可以发布应用的“草稿”版本进行测试，但现在系统已不再支持此功能。现在你可以通过两种方法在 Google Play 商店中测试预览版应用的功能运行情况：</p>
+
+  <ul>
+
+    <li>你可以将应用发布到 <a href="{@docRoot}distribute/googleplay/developer-console.html#alpha-beta">Alpha 或 Beta 发布渠道</a>。这样，应用将进入 Google Play 商店，但只提供给你添加到“白名单”中的测试者。</li>
+
+    <li>在少数情况下，你可以使用未发布的应用测试 Google Play 的功能。例如，你可以使用<a href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-static">静态回复</a>和特殊的预留商品 ID（始终返回特定结果，例如“已购买”或“已退款”）来测试未发布应用的应用内结算支持。</li>
+
+  </ul>

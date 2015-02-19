@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -126,6 +128,8 @@ public class TextClock extends TextView {
 
     private Calendar mTime;
     private String mTimeZone;
+
+    private boolean mShowCurrentUserTime;
 
     private final ContentObserver mFormatChangeObserver = new ContentObserver(new Handler()) {
         @Override
@@ -342,6 +346,22 @@ public class TextClock extends TextView {
     }
 
     /**
+     * Sets whether this clock should always track the current user and not the user of the
+     * current process. This is used for single instance processes like the systemUI who need
+     * to display time for different users.
+     *
+     * @hide
+     */
+    public void setShowCurrentUserTime(boolean showCurrentUserTime) {
+        mShowCurrentUserTime = showCurrentUserTime;
+
+        chooseFormat();
+        onTimeChanged();
+        unregisterObserver();
+        registerObserver();
+    }
+
+    /**
      * Indicates whether the system is currently using the 24-hour mode.
      *
      * When the system is in 24-hour mode, this view will use the pattern
@@ -360,7 +380,11 @@ public class TextClock extends TextView {
      * @see #getFormat24Hour()
      */
     public boolean is24HourModeEnabled() {
-        return DateFormat.is24HourFormat(getContext());
+        if (mShowCurrentUserTime) {
+            return DateFormat.is24HourFormat(getContext(), ActivityManager.getCurrentUser());
+        } else {
+            return DateFormat.is24HourFormat(getContext());
+        }
     }
 
     /**
@@ -500,7 +524,13 @@ public class TextClock extends TextView {
 
     private void registerObserver() {
         final ContentResolver resolver = getContext().getContentResolver();
-        resolver.registerContentObserver(Settings.System.CONTENT_URI, true, mFormatChangeObserver);
+        if (mShowCurrentUserTime) {
+            resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
+                    mFormatChangeObserver, UserHandle.USER_ALL);
+        } else {
+            resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
+                    mFormatChangeObserver);
+        }
     }
 
     private void unregisterReceiver() {

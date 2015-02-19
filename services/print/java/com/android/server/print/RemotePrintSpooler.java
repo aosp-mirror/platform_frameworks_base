@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -55,7 +56,8 @@ final class RemotePrintSpooler {
 
     private static final boolean DEBUG = false;
 
-    private static final long BIND_SPOOLER_SERVICE_TIMEOUT = 10000;
+    private static final long BIND_SPOOLER_SERVICE_TIMEOUT =
+            ("eng".equals(Build.TYPE)) ? 120000 : 10000;
 
     private final Object mLock = new Object();
 

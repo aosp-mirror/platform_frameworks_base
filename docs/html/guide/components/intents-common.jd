@@ -80,6 +80,13 @@ page.tags="IntentFilter"
       <li><a href="#DialPhone">Initiate a phone call</a></li>
     </ol>
   </li>
+  </li>
+  <li><a href="#Search">Search</a>
+    <ol>
+      <li><a href="#SearchOnApp">Search in a specific app</a></li>
+      <li><a href="#SearchWeb">Perform a web search</a></li>
+    </ol>
+  </li>
   <li><a href="#Settings">Settings</a>
     <ol>
       <li><a href="#OpenSettings">Open a specific section of Settings</a></li>
@@ -93,7 +100,6 @@ page.tags="IntentFilter"
   <li><a href="#Browser">Web Browser</a>
     <ol>
       <li><a href="#ViewUrl">Load a web URL</a></li>
-      <li><a href="#SearchWeb">Perform a web search</a></li>
     </ol>
   </li>
   <li><a href="#AdbIntents">Verify Intents with the Android Debug Bridge</a></li>
@@ -205,7 +211,8 @@ on this page in response to voice commands. For more information, see
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30"
+           height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -302,7 +309,8 @@ android.provider.AlarmClock#ACTION_SET_ALARM} intent, your app must have the
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -605,7 +613,8 @@ in an extra named <code>"data"</code>.</p>
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -660,7 +669,8 @@ public void capturePhoto() {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1351,7 +1361,8 @@ Framework</a> guide.</p>
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1362,14 +1373,21 @@ Framework</a> guide.</p>
   </ul>
 </div>
 
-<p>To track a bike ride, use the <code>"vnd.google.fitness.TRACK"</code> action with the
-<code>"vnd.google.fitness.activity/biking"</code> MIME type and set the <code>"actionStatus"</code>
-extra to <code>"ActiveActionStatus"</code> when starting and to <code>"CompletedActionStatus"</code>
-when stopping.</p>
+<p>To track a bike ride, use the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+<code>ACTION_TRACK</code></a> action with the <code>"vnd.google.fitness.activity/biking"</code>
+MIME type and set the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_STATUS">
+<code>EXTRA_STATUS</code></a> extra to
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_ACTIVE">
+<code>STATUS_ACTIVE</code></a> when starting and to
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_COMPLETED">
+<code>STATUS_COMPLETED</code></a> when stopping.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><code>"vnd.google.fitness.TRACK"</code><dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+      <code>ACTION_TRACK</code></a><dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
@@ -1380,9 +1398,12 @@ when stopping.</p>
   <dt><b>Extras</b></dt>
   <dd>
     <dl>
-      <dt><code>"actionStatus"</code></dt>
-      <dd>A string with the value <code>"ActiveActionStatus"</code> when starting and
-      <code>"CompletedActionStatus"</code> when stopping.</dd>
+      <dt><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_STATUS">
+          <code>EXTRA_STATUS</code></a></dt>
+      <dd>A string with the value <a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_ACTIVE">
+          <code>STATUS_ACTIVE</code></a> when starting and
+      <a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_COMPLETED">
+          <code>STATUS_COMPLETED</code></a> when stopping.</dd>
     </dl>
   </dd>
 </dl>
@@ -1391,9 +1412,9 @@ when stopping.</p>
 <p><b>Example intent:</b></p>
 <pre>
 public void startBikeRide() {
-    Intent intent = new Intent("vnd.google.fitness.TRACK")
+    Intent intent = new Intent(FitnessIntents.ACTION_TRACK)
             .setType("vnd.google.fitness.activity/biking")
-            .putExtra("actionStatus", "ActiveActionStatus");
+            .putExtra(FitnessIntents.EXTRA_STATUS, FitnessIntents.STATUS_ACTIVE);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
     }
@@ -1422,7 +1443,8 @@ public void startBikeRide() {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1433,14 +1455,21 @@ public void startBikeRide() {
   </ul>
 </div>
 
-<p>To track a run, use the <code>"vnd.google.fitness.TRACK"</code> action with the
-<code>"vnd.google.fitness.activity/running"</code> MIME type and set the <code>"actionStatus"</code>
-extra to <code>"ActiveActionStatus"</code> when starting and to <code>"CompletedActionStatus"</code>
-when stopping.</p>
+<p>To track a run, use the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+<code>ACTION_TRACK</code></a> action with the <code>"vnd.google.fitness.activity/running"</code>
+MIME type and set the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_STATUS">
+<code>EXTRA_STATUS</code></a> extra to
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_ACTIVE">
+<code>STATUS_ACTIVE</code></a> when starting and to
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_COMPLETED">
+<code>STATUS_COMPLETED</code></a> when stopping.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><code>"vnd.google.fitness.TRACK"</code><dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+      <code>ACTION_TRACK</code></a><dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
@@ -1451,9 +1480,12 @@ when stopping.</p>
   <dt><b>Extras</b></dt>
   <dd>
     <dl>
-      <dt><code>"actionStatus"</code></dt>
-      <dd>A string with the value <code>"ActiveActionStatus"</code> when starting and
-      <code>"CompletedActionStatus"</code> when stopping.</dd>
+      <dt><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_STATUS">
+          <code>EXTRA_STATUS</code></a></dt>
+      <dd>A string with the value <a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_ACTIVE">
+          <code>STATUS_ACTIVE</code></a> when starting and
+      <a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_COMPLETED">
+          <code>STATUS_COMPLETED</code></a> when stopping.</dd>
     </dl>
   </dd>
 </dl>
@@ -1462,9 +1494,9 @@ when stopping.</p>
 <p><b>Example intent:</b></p>
 <pre>
 public void startRun() {
-    Intent intent = new Intent("vnd.google.fitness.TRACK")
+    Intent intent = new Intent(FitnessIntents.ACTION_TRACK)
             .setType("vnd.google.fitness.activity/running")
-            .putExtra("actionStatus", "ActiveActionStatus");
+            .putExtra(FitnessIntents.EXTRA_STATUS, FitnessIntents.STATUS_ACTIVE);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
     }
@@ -1492,7 +1524,8 @@ public void startRun() {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1503,14 +1536,21 @@ public void startRun() {
   </ul>
 </div>
 
-<p>To track a workout, use the <code>"vnd.google.fitness.TRACK"</code> action with the
-<code>"vnd.google.fitness.activity/other"</code> MIME type and set the <code>"actionStatus"</code>
-extra to <code>"ActiveActionStatus"</code> when starting and to <code>"CompletedActionStatus"</code>
-when stopping.</p>
+<p>To track a workout, use the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+<code>ACTION_TRACK</code></a> action with the <code>"vnd.google.fitness.activity/other"</code>
+MIME type and set the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_STATUS">
+<code>EXTRA_STATUS</code></a> extra to
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_ACTIVE">
+<code>STATUS_ACTIVE</code></a> when starting and to
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_COMPLETED">
+<code>STATUS_COMPLETED</code></a> when stopping.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><code>"vnd.google.fitness.TRACK"</code><dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+      <code>ACTION_TRACK</code></a><dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
@@ -1521,9 +1561,12 @@ when stopping.</p>
   <dt><b>Extras</b></dt>
   <dd>
     <dl>
-      <dt><code>"actionStatus"</code></dt>
-      <dd>A string with the value <code>"ActiveActionStatus"</code> when starting and
-      <code>"CompletedActionStatus"</code> when stopping.</dd>
+      <dt><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_STATUS">
+          <code>EXTRA_STATUS</code></a></dt>
+      <dd>A string with the value <a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_ACTIVE">
+          <code>STATUS_ACTIVE</code></a> when starting and
+      <a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#STATUS_COMPLETED">
+          <code>STATUS_COMPLETED</code></a> when stopping.</dd>
     </dl>
   </dd>
 </dl>
@@ -1532,9 +1575,9 @@ when stopping.</p>
 <p><b>Example intent:</b></p>
 <pre>
 public void startWorkout() {
-    Intent intent = new Intent("vnd.google.fitness.TRACK")
+    Intent intent = new Intent(FitnessIntents.ACTION_TRACK)
             .setType("vnd.google.fitness.activity/other")
-            .putExtra("actionStatus", "ActiveActionStatus");
+            .putExtra(FitnessIntents.EXTRA_STATUS, FitnessIntents.STATUS_ACTIVE);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
     }
@@ -1562,7 +1605,8 @@ public void startWorkout() {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1572,12 +1616,15 @@ public void startWorkout() {
   </ul>
 </div>
 
-<p>To show the user's heart rate, use the <code>"vnd.google.fitness.VIEW"</code> action with the
-<code>"vnd.google.fitness.data_type<br/>/com.google.heart_rate.bpm"</code> MIME type.</p>
+<p>To show the user's heart rate, use the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_VIEW">
+<code>ACTION_VIEW</code></a> action with the
+<code>"vnd.google.fitness.data_type/com.google.heart_rate.bpm"</code> MIME type.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><code>"vnd.google.fitness.VIEW"</code><dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_VIEW">
+      <code>ACTION_VIEW</code></a><dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
@@ -1592,8 +1639,8 @@ public void startWorkout() {
 
 <p><b>Example intent:</b></p>
 <pre>
-public void showHR() {
-    Intent intent = new Intent("vnd.google.fitness.VIEW")
+public void showHeartRate() {
+    Intent intent = new Intent(FitnessIntents.ACTION_VIEW)
             .setType("vnd.google.fitness.data_type/com.google.heart_rate.bpm");
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
@@ -1623,7 +1670,8 @@ public void showHR() {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1633,12 +1681,16 @@ public void showHR() {
   </ul>
 </div>
 
-<p>To show the user's step count, use the <code>"vnd.google.fitness.VIEW"</code> action with the
-<code>"vnd.google.fitness.data_type<br/>/com.google.step_count.cumulative"</code> MIME type.</p>
+<p>To show the user's step count, use the
+<a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_VIEW">
+<code>ACTION_VIEW</code></a> action with the
+<code>"vnd.google.fitness.data_type<br/>/com.google.step_count<br/>.cumulative"</code> MIME
+type.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><code>"vnd.google.fitness.VIEW"</code><dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_VIEW">
+      <code>ACTION_VIEW</code></a><dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
@@ -1654,7 +1706,7 @@ public void showHR() {
 <p><b>Example intent:</b></p>
 <pre>
 public void showStepCount() {
-    Intent intent = new Intent("vnd.google.fitness.VIEW")
+    Intent intent = new Intent(FitnessIntents.ACTION_VIEW)
             .setType("vnd.google.fitness.data_type/com.google.step_count.cumulative");
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
@@ -1689,7 +1741,8 @@ public void showStepCount() {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -1701,7 +1754,7 @@ public void showStepCount() {
 </div>
 
 <p>To call a taxi, use the
-<a href="{@docRoot}com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a>
+<a href="{@docRoot}reference/com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a>
 action.</p>
 
 <p class="note"><strong>Note:</strong> Apps must ask for confirmation from the user
@@ -1709,7 +1762,7 @@ before completing the action.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><a href="{@docRoot}com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a></dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a></dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
@@ -1888,7 +1941,8 @@ public void playMedia(Uri file) {
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -2134,7 +2188,8 @@ but the user must press the <em>Call</em> button to begin the phone call.</p>
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -2200,6 +2255,106 @@ method instead.</p>
 public void dialPhoneNumber(String phoneNumber) {
     Intent intent = new Intent(Intent.ACTION_DIAL);
     intent.setData(Uri.parse("tel:" + phoneNumber));
+    if (intent.resolveActivity(getPackageManager()) != null) {
+        startActivity(intent);
+    }
+}
+</pre>
+
+
+
+
+
+
+<h2 id="Search">Search</h2>
+
+<h3 id="SearchOnApp">Search using a specific app</h3>
+
+<!-- Google Now box -->
+<div class="now-box">
+  <div class="now-img-cont">
+    <a href="#Now">
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30"/></a>
+  </div>
+  <p class="now-title">Google Now</p>
+  <ul>
+    <li>"search for cat videos on myvideoapp"</li>
+  </ul>
+</div>
+<!-- Video box -->
+<a class="notice-developers-video"
+   href="https://www.youtube.com/watch?v=PS1FbB5qWEI">
+<div>
+    <h3>Video</h3>
+    <p>Voice search in your app</p>
+</div>
+</a>
+
+<p>To support search within the context of your app, declare an intent filter in your app with
+the <code>SEARCH_ACTION</code> action, as shown in the example intent filter below.</p>
+
+<dl>
+<dt><b>Action</b></dt>
+<dd>
+  <dl>
+    <dt><code>"com.google.android.gms.actions.SEARCH_ACTION"</code></dt>
+    <dd>Support search queries from Google Now.</dd>
+  </dl>
+</dd>
+
+<dt><b>Extras</b></dt>
+<dd>
+  <dl>
+    <dt><code>{@link android.app.SearchManager#QUERY}</code></dt>
+    <dd>A string that contains the search query.</dd>
+  <dl>
+</dd>
+</dl>
+
+<p><b>Example intent filter:</b></p>
+<pre>
+&lt;activity android:name=".SearchActivity">
+    &lt;intent-filter>
+        &lt;action android:name="com.google.android.gms.actions.SEARCH_ACTION"/>
+        &lt;category android:name="android.intent.category.DEFAULT"/>
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+
+
+<h3 id="SearchWeb">Perform a web search</h3>
+
+<p>To initiate a web search, use the {@link android.content.Intent#ACTION_WEB_SEARCH} action
+and specify the search string in the
+{@link android.app.SearchManager#QUERY SearchManager.QUERY} extra.</p>
+
+
+<dl>
+  <dt><b>Action</b></dt>
+  <dd>{@link android.content.Intent#ACTION_WEB_SEARCH}</dd>
+
+  <dt><b>Data URI Scheme</b></dt>
+  <dd>None</dd>
+
+  <dt><b>MIME Type</b></dt>
+  <dd>None</dd>
+
+  <dt><b>Extras</b></dt>
+  <dd>
+    <dl>
+      <dt>{@link android.app.SearchManager#QUERY SearchManager.QUERY}</dt>
+      <dd>The search string.</dd>
+    </dl>
+  </dd>
+</dl>
+
+<p><b>Example intent:</b></p>
+<pre>
+public void searchWeb(String query) {
+    Intent intent = new Intent(Intent.ACTION_SEARCH);
+    intent.putExtra(SearchManager.QUERY, query);
     if (intent.resolveActivity(getPackageManager()) != null) {
         startActivity(intent);
     }
@@ -2379,7 +2534,8 @@ at {@link android.provider.Telephony}.</p>
 <div class="now-box">
   <div class="now-img-cont">
     <a href="#Now">
-      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img" width="30" height="30" alt=""/>
+      <img src="{@docRoot}guide/components/images/voice-icon.png" class="now-img"
+           width="30" height="30" alt=""/>
     </a>
   </div>
   <p class="now-title">Google Now</p>
@@ -2443,46 +2599,6 @@ public void openWebPage(String url) {
 your web site, include an intent filter for URLs that point to your web site. Then,
 if users have your app installed, links from emails or other web pages pointing to your web site
 open your Android app instead of your web page.</p>
-
-
-
-
-<h3 id="SearchWeb">Perform a web search</h3>
-
-<p>To initiate a web search, use the {@link android.content.Intent#ACTION_WEB_SEARCH} action
-and specify the search string in the
-{@link android.app.SearchManager#QUERY SearchManager.QUERY} extra.</p>
-
-
-<dl>
-  <dt><b>Action</b></dt>
-  <dd>{@link android.content.Intent#ACTION_WEB_SEARCH}</dd>
-
-  <dt><b>Data URI Scheme</b></dt>
-  <dd>None</dd>
-
-  <dt><b>MIME Type</b></dt>
-  <dd>None</dd>
-
-  <dt><b>Extras</b></dt>
-  <dd>
-    <dl>
-      <dt>{@link android.app.SearchManager#QUERY SearchManager.QUERY}</dt>
-      <dd>The search string.</dd>
-    </dl>
-  </dd>
-</dl>
-
-<p><b>Example intent:</b></p>
-<pre>
-public void searchWeb(String query) {
-    Intent intent = new Intent(Intent.ACTION_SEARCH);
-    intent.putExtra(SearchManager.QUERY, query);
-    if (intent.resolveActivity(getPackageManager()) != null) {
-        startActivity(intent);
-    }
-}
-</pre>
 
 
 
@@ -2588,7 +2704,8 @@ about declaring each intent filter, click on the action description.</p>
       <li>"stop cycling"</li>
     </ul>
   </td>
-  <td><code>"vnd.google.fitness.TRACK"</code></td>
+  <td><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+      <code>FitnessIntents.ACTION_TRACK</code></a></td>
 </tr>
 <tr>
   <td>
@@ -2599,7 +2716,8 @@ about declaring each intent filter, click on the action description.</p>
       <li>"stop running"</li>
     </ul>
   </td>
-  <td><code>"vnd.google.fitness.TRACK"</code></td>
+  <td><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+      <code>FitnessIntents.ACTION_TRACK</code></a></td>
 </tr>
 <tr>
   <td>
@@ -2610,7 +2728,8 @@ about declaring each intent filter, click on the action description.</p>
       <li>"stop workout"</li>
     </ul>
   </td>
-  <td><code>"vnd.google.fitness.TRACK"</code></td>
+  <td><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_TRACK">
+      <code>FitnessIntents.ACTION_TRACK</code></a></code></td>
 </tr>
 <tr>
   <td>
@@ -2620,7 +2739,8 @@ about declaring each intent filter, click on the action description.</p>
       <li>"what's my bpm"</li>
     </ul>
   </td>
-  <td><code>"vnd.google.fitness.VIEW"</code></td>
+  <td><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_VIEW">
+      <code>FitnessIntents.ACTION_VIEW</code></a></code></td>
 </tr>
 <tr>
   <td>
@@ -2630,7 +2750,8 @@ about declaring each intent filter, click on the action description.</p>
       <li>"what's my step count"</li>
     </ul>
   </td>
-  <td><code>"vnd.google.fitness.VIEW"</code></td>
+  <td><a href="{@docRoot}reference/com/google/android/gms/fitness/FitnessIntents.html#ACTION_VIEW">
+      <code>FitnessIntents.ACTION_VIEW</code></a></td>
 </tr>
 <tr>
   <td style="vertical-align:middle">Local</td>
@@ -2671,6 +2792,16 @@ about declaring each intent filter, click on the action description.</p>
     </ul>
   </td>
   <td>{@link android.provider.MediaStore#INTENT_ACTION_VIDEO_CAMERA MediaStore<br/>.INTENT_ACTION_VIDEO_CAMERA}</td>
+</tr>
+<tr>
+  <td style="vertical-align:middle">Search</td>
+  <td>
+    <p><a href="#SearchOnApp">Search using a specific app</a></p>
+    <ul class="now-list">
+      <li>"search for cat videos <br/>on myvideoapp"</li>
+    </ul>
+  </td>
+  <td><code>"com.google.android.gms.actions<br/>.SEARCH_ACTION"</code></td>
 </tr>
 <tr>
   <td style="vertical-align:middle">Web browser</td>

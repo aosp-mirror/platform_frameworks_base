@@ -16,7 +16,6 @@
 
 package android.widget;
 
-import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -65,9 +64,6 @@ public abstract class AbsSeekBar extends ProgressBar {
      * progress.
      */
     private int mKeyProgressIncrement = 1;
-    private ObjectAnimator mPositionAnimator;
-    private static final int PROGRESS_ANIMATION_DURATION = 250;
-
 
     private static final int NO_ALPHA = 0xFF;
     private float mDisabledAlpha;
@@ -267,6 +263,12 @@ public abstract class AbsSeekBar extends ProgressBar {
             if (mHasThumbTintMode) {
                 mThumb.setTintMode(mThumbTintMode);
             }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mThumb.isStateful()) {
+                mThumb.setState(getDrawableState());
+            }
         }
     }
 
@@ -382,14 +384,15 @@ public abstract class AbsSeekBar extends ProgressBar {
     void onProgressRefresh(float scale, boolean fromUser) {
         super.onProgressRefresh(scale, fromUser);
 
-        if (!isAnimationRunning()) {
-            setThumbPos(scale);
-        }
-    }
+        final Drawable thumb = mThumb;
+        if (thumb != null) {
+            setThumbPos(getWidth(), thumb, scale, Integer.MIN_VALUE);
 
-    @Override
-    void onAnimatePosition(float scale, boolean fromUser) {
-        setThumbPos(scale);
+            // Since we draw translated, the drawable's bounds that it signals
+            // for invalidation won't be the actual bounds we want invalidated,
+            // so just invalidate this whole view.
+            invalidate();
+        }
     }
 
     @Override
@@ -432,18 +435,6 @@ public abstract class AbsSeekBar extends ProgressBar {
     private float getScale() {
         final int max = getMax();
         return max > 0 ? getProgress() / (float) max : 0;
-    }
-
-    private void setThumbPos(float scale) {
-        final Drawable thumb = mThumb;
-        if (thumb != null) {
-            setThumbPos(getWidth(), thumb, scale, Integer.MIN_VALUE);
-            // Since we draw translated, the drawable's bounds that it signals
-            // for invalidation won't be the actual bounds we want invalidated,
-            // so just invalidate this whole view.
-            invalidate();
-
-        }
     }
 
     /**
@@ -712,48 +703,16 @@ public abstract class AbsSeekBar extends ProgressBar {
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
                     increment = isLayoutRtl() ? -increment : increment;
                     int progress = getProgress() + increment;
-                    if (progress > -mKeyProgressIncrement &&
-                        progress < getMax() + mKeyProgressIncrement) {
-                        animateSetProgress(progress);
+                    if (progress > 0 && progress < getMax()) {
+                        setProgress(progress, true);
                         onKeyChange();
                         return true;
                     }
+                    break;
             }
         }
 
         return super.onKeyDown(keyCode, event);
-    }
-
-    boolean isAnimationRunning() {
-        return mPositionAnimator != null && mPositionAnimator.isRunning();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
-    public void setProgress(int progress, boolean fromUser) {
-        if (isAnimationRunning()) {
-            mPositionAnimator.cancel();
-        }
-        super.setProgress(progress, fromUser);
-    }
-
-    void animateSetProgress(int progress) {
-        float curProgress = isAnimationRunning() ? getAnimationPosition() : getProgress();
-
-        if (progress < 0) {
-            progress = 0;
-        } else if (progress > getMax()) {
-            progress = getMax();
-        }
-        setProgressValueOnly(progress);
-
-        mPositionAnimator = ObjectAnimator.ofFloat(this, "animationPosition", curProgress,
-                progress);
-        mPositionAnimator.setDuration(PROGRESS_ANIMATION_DURATION);
-        mPositionAnimator.setAutoCancel(true);
-        mPositionAnimator.start();
     }
 
     @Override

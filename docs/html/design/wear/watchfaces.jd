@@ -1,0 +1,345 @@
+page.title=Watch Faces for Android Wear
+@jd:body
+
+
+<!-- developer docs box -->
+<a class="notice-developers right" href="{@docRoot}training/wearables/watch-faces/index.html"
+   style="clear:left;margin-bottom:90px">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Watch Faces</p>
+  </div>
+</a>
+
+<p>Android Wear supports custom watch faces with designs that can show contextually relevant
+information to users. Designing a watch face requires a careful blending of data and visual
+elements that informs users without requiring close attention. Simple, attractive layouts that
+can adjust to different screen shapes and sizes, provide options for color and presentation, let
+users create a deeply personalized experience with the Wear device that fits them best. Watch
+faces exist as part of the Wear user interface, so it is important to provide interactive and
+ambient modes, and consider how system user interface elements will interact with your design.</p>
+
+<p>Follow the guidelines in this page to design your custom watch faces.</p>
+
+<!-- H2 creative vision -->
+<div style="float:right;margin-top:-100px;margin-bottom:20px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Render_Next.png"
+       width="200" height="195" alt="" style="margin-right:5px"/><br/>
+  <img src="{@docRoot}design/media/wear/Render_Interactive.png"
+       width="200" height="195" alt="" style="margin-right:5px"/>
+</div>
+<h2 id="CreativeVision">Creative Vision</h2>
+
+<p>Creating a watch face for Android Wear is an exercise centered around visualizing time clearly.
+Android Wear devices provide a unique digital canvas to reimagine the ways in which we tell time.
+Android Wear also lets you integrate data on watch faces for a higher level of personalization and
+contextual relevance.</p>
+
+<p>These powerful new tools to create watch faces run the risk of overcomplicating a design. The
+most successful watch face designs leverage these advanced capabilities while delivering a
+singular, elegant expression of information.</p>
+
+<p>Glanceability is the single most important principle to consider when creating a watch face
+design. Your watch face designs should deliver a singular expression of time and related data.
+Experiment with bold, minimal, and expressive design directions that are highly readable at a
+distance.</p>
+
+
+
+<h2 id="SquareRound">Plan for Square and Round Devices</h2>
+
+<p>Android Wear devices come in different shapes and sizes. You will need to consider both
+square and round faces as well as different resolutions. Some concepts work better in a certain
+format, but a little planning will allow users to enjoy your watch face regardless of screen
+format.</p>
+
+<p>These guidelines help your concepts align across devices:</p>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-6">
+  <h3>Create flexible concepts</h3>
+  <p>Ideally, the visual functionality of the watch face works for both round and square
+  formats. In this example, the visual functionality of the watch face is flexible enough
+  to work well in either format without any adjustment. However, other design concepts require
+  different executions for square and round screens.</p>
+</div>
+<div class="layout-content-col span-7">
+  <img src="{@docRoot}design/media/wear/ScreenShapes_Invert.png" width="400"
+       height="221" alt="" style="margin-top:-30px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-6">
+  <h3>Use a common design language</h3>
+  <p>Try using a common set of colors, line weights, shading, and other design elements
+  to draw a visual connection between your square and round versions. By using similar color
+  palettes and a few consistent visual elements, the overall appearance of square and round
+  can be appropriately customized while still feeling like part of the same visual system.</p>
+</div>
+<div class="layout-content-col span-7">
+  <img src="{@docRoot}design/media/wear/ScreenShapes_Pyramids.png" width="400"
+       height="221" alt="" style="margin-top:-30px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-6">
+  <h3>Adjust for analog concepts</h3>
+  <p>Some of your concepts will naturally take the shape of an analog clock, like a center
+  dial with hour and minute hands. In this case, consider the corner areas that are exposed
+  when translating to a square format. Try extending and exploring this extra space.</p>
+</div>
+<div class="layout-content-col span-7">
+  <img src="{@docRoot}design/media/wear/ScreenShapes_Rift.png" width="400"
+       height="221" alt="" style="margin-top:-30px">
+</div>
+</div>
+
+
+
+<!-- H2: plan for all display modes -->
+<div style="float:right;margin-top:35px;margin-left:20px">
+  <img src="{@docRoot}design/media/wear/Render_Interactive.png"
+       width="200" height="195" alt="" style="margin-right:5px;margin-top:20px"/><br/>
+  <img src="{@docRoot}design/media/wear/Render_Ambient.png"
+     width="200" height="195" alt="" style="margin-right:5px"/>
+</div>
+<h2 id="DisplayModes">Plan for All Display Modes</h2>
+
+<p>Android Wear devices operate in two main modes: ambient and interactive. Your watch face
+designs should take these modes into account. Generally, if your watch face design looks great
+in ambient mode, it will look even better in interactive mode. The opposite is not always
+true.</p>
+
+<h3>Interactive mode</h3>
+<p>When the user moves their wrist to glance at their watch, the screen goes into interactive
+mode. Your design can use full color with fluid animation in this mode.</p>
+
+<h3>Ambient mode</h3>
+<p>Ambient mode helps the device conserve power. Your design should make clear to the user that
+the screen is in ambient mode. The background color scheme is <em>strictly limited</em> to black,
+white, and grays. Your watch face may use some color elements on screens that support it
+provided it is unambiguous that the device is in ambient mode. You can use color elements for up
+to 5 percent of total pixels. In this mode, the screen is only updated once every minute. Only
+show hours and minutes in ambient mode; do not show seconds. Your watch face is notified when
+the device switches to ambient mode, and you should thoughtfully design for it.</p>
+
+
+
+
+<h2 id="SpecialScreens">Optimize for Special Screens</h2>
+
+<p>Android Wear devices feature a variety of screen technologies, each with their own advantages
+and considerations. One important consideration when designing the ambient mode display for your
+watch face is how it affects battery life and screen burn-in on some screens.
+You can configure your watch face to display different ambient designs depending on the kind
+of screen available on the device. Consider the best design for your watch faces on all
+screens.</p>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>Reduced color space</h3>
+  <p>Some displays use a reduced color space in ambient mode to save power.</p>
+  <p>One reduced color space power saving method is to use a "low-bit" mode. In low-bit mode,
+  the available colors are limited to black, white, blue, red, magenta, green, cyan, and yellow.
+  When designing for low-bit ambient mode, use a black or a white background. For OLED screens,
+  you must use a black background. Non-background pixels must be less than 10 percent of total
+  pixels. You can use low-bit color for up to 5 percent of pixels on screens that support it.
+  You should also disable antialiasing in your paint styles for this mode. Make sure to test
+  your design on devices with low-bit ambient mode.</p>
+  <p>Other displays save power in ambient mode by not producing any color. When designing for
+  displays which do not use color in ambient mode, the background may be either black or
+  white.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Render_LowBit.png" width="200"
+       height="" alt="" style="margin-top:45px;margin-left:13px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>Burn protection techniques</h3>
+  <p>When designing for OLED screens, you should consider power efficiency and the screen
+  burn-in effect. When these screens are in ambient mode, the system shifts the contents of
+  the screen periodically by a few pixels to avoid pixel burn-in. Do not use large blocks of
+  pixels in your ambient mode designs and keep 95% of the pixels black. Replace solid shapes in
+  your regular ambient mode designs with outlined shapes in burn-protected ambient mode. Also
+  replace filled images with pixel patterns. For analog watch face designs, hollow out the center
+  where the hands meet to avoid pixel burn-in in this mode.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Render_1Bit.png" width="200"
+       height="" alt="" style="margin-top:-10px;margin-left:13px">
+</div>
+</div>
+
+
+
+<h2 id="SystemUI">Accomodate System UI Elements</h2>
+
+<p>Your watch face designs should accommodate Android Wear UI elements. These elements give the
+user the status of the wearable and show notifications from services on the user's phone. Try
+to keep critical elements in your watch face designs from being obscured by the UI elements.</p>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>Cards</h3>
+<p>Cards are the notification system that bridges information between the wearable and a
+mobile device. Cards are also how most applications communicate with users. The user will be
+notified on the wearable about items such as emails and messages. As a watch face developer,
+you need to accommodate both large and small cards in your design. Your watch face can specify a
+preference for the card size, but users may override this setting. Users can also temporarily
+hide cards by swiping down on them.</p>
+<p>The peek card is the top card in the stream that is partially visible at the bottom of the
+screen. A variable peek card has a height that is determined by the amount of text within a given
+notification. A small peek card leaves more room for your design. Round faces with analog hands
+should have a small peek card. If the time signature is clearly visible above the maximum height
+of the variable peek card, you may choose to include the variable peek card. The benefit of a
+variable peek card is that it displays more notification information. Faces with information on
+the bottom half of the face should leverage the small peek card instead.</p>
+<p>The system notifies your watch face when the bounds of a peek card change, so you can
+rearrange the elements in your design if necessary.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/CardsRender_Build.png" width="200"
+       height="" alt="" style="margin-top:20px;margin-left:13px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>Indicators</h3>
+<p>Indicators tell the user the status of the wearable, such as charging and airplane mode.
+When designing a watch face, consider how the indicator will fall over the watch face.</p>
+<p>The indicators can be placed in several fixed locations on the wearable. If you have a
+large peek card, the indicators should go on the top or on the center of the screen. When you
+position the status icons or the hotword on the bottom of the screen, the system forces small
+peek cards. If the edge of the watch face contains strong visual elements, such as
+ticks or numbers, place the indicators on the center of the screen.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Indicators_Cropped.png" width="200"
+       height="" alt="" style="margin-top:0px;margin-left:13px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>The hotword</h3>
+<p>The hotword is the phrase "OK Google", which tells the user that they can interact with
+the watch using voice commands. When a user turns on the wearable, the hotword appears on
+the screen for a few seconds.</p>
+<p>The hotword no longer appears after the user says "OK Google" five times, so the placement of
+this element is not as critical. You should still avoid covering up elements of your
+watch face. Finally, background protection for the hotword and the indicators should be
+turned on unless your design is tailored to have these elements appear on top of them, for example
+using dark solid colors with no patterns.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Hotword_Cropped.png" width="200"
+       height="" alt="" style="margin-top:0px;margin-left:13px">
+</div>
+</div>
+
+<p>For more information about measurements and positioning of system UI elements, see
+<a href="#SpecsAssets">Specifications and Assets</a>.</p>
+
+
+
+<h2 id="DataIntegration">Design Data-Integrated Watch Faces</h2>
+
+<p>Your watch face can show users contextually relevant data and react to it by changing styles
+and colors in your design.</p>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>What do you want your user to know?</h3>
+<p>The first step in designing a data-integrated watch face is to define a conceptual user
+outcome based on available data. First, generate a strong concept or outcome you believe is
+supported by real user needs. What do you want your users to know after they have glanced
+at your design? Once you have identified your outcome, you need to determine how to obtain
+the required data.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Render_Saturn.png" width="200"
+       height="" alt="" style="margin-top:-10px;margin-left:13px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>A watch dial is a timeline; add data to it</h3>
+<p>Your watch face concept may include use of data beyond time, such as weather, calendar
+and fitness data. Consider the inclusion of data integration creatively. Avoid simply
+overlaying a time-based watch face with extra data. Rather, think about how the data can
+be expressed through the lens of time. For example, instead of designing a weather-related
+watch face as a clock with an indication of the current temperature in degrees overlayed,
+you might design a watch face that describes how the temperature will change over the
+course of the day.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Render_Episode.png" width="200"
+       height="" alt="" style="margin-top:-10px;margin-left:13px">
+</div>
+</div>
+
+<div class="layout-content-row" style="margin-top:20px">
+<div class="layout-content-col span-9">
+  <h3>Stick to one message</h3>
+<p>Once you have solidified your conceptual direction or desired outcome, you will need to
+begin visualizing your watch face. The strongest watch face designs are highly glanceable
+and deliver a singular expression of data. In order to identify your singular message, you
+must identify the most important supporting data point. For instance, instead of displaying
+an entire month of calendar events,  you might decide to display only the next
+upcoming event. By a process of reduction, you should arrive at a powerful singular
+expression of data to include in your design.</p>
+</div>
+<div class="layout-content-col span-4">
+  <img src="{@docRoot}design/media/wear/Render_Albumem.png" width="200"
+       height="" alt="" style="margin-top:-10px;margin-left:13px">
+</div>
+</div>
+
+<h3>Begin with some insight and test as you go</h3>
+<p>Make sure your approach begins with insight into the needs and expectations of your users.
+Test your designs with users to check any assumptions you might have made about your design along
+the way. Try making a rough sketch on paper and asking a friend to tell you what it means.
+Try your concept out with lots of different types of data and scenarios. Test your designs
+with an actual watch screen before you start coding.</p>
+
+
+
+<h2 id="CompanionApp">Support the Android Wear Companion App</h2>
+
+<p>The Android Wear companion app gives the user access to all installed watch faces and their
+settings.</p>
+
+<div style="margin:0 auto;width:600px">
+<img src="{@docRoot}design/media/wear/CompanionApp_Build.png" width="350"
+       height="" alt="" style="">
+<img src="{@docRoot}design/media/wear/DeviceSettings_Build.png" width="200"
+       height="" alt="" style="">
+</div>
+
+<h3>Don't use a launcher icon</h3>
+<p>All available watch faces are accessible from the Android Wear companion app or from your
+bundled third party app. There is no need for a stand-alone launcher icon for Android Wear
+watch faces.</p>
+
+<h3>Settings</h3>
+<p>Each watch face that has useful settings can have a Settings panel, accessible from the
+watch itself and from the companion app on the phone. Standard UI components work in most cases,
+but you can explore other creative executions once you have built a foundation designing watch
+faces.</p>
+<p>Settings on the watch should be limited to binary selections or scrollable lists. Settings
+on the phone may include any complex configuration items in addition to the settings
+available on the watch.</p>
+
+
+
+<h2 id="SpecsAssets">Specifications and Assets</h2>
+
+<p>To obtain watch face design examples and detailed measurements for the system UI elements, see
+the <a href="{@docRoot}design/downloads/index.html#Wear">Design Downloads for Android Wear</a>.</p>

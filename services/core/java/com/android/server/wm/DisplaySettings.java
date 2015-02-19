@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.util.AtomicFile;
@@ -41,7 +40,6 @@ import java.util.HashMap;
 public class DisplaySettings {
     private static final String TAG = WindowManagerService.TAG;
 
-    private final Context mContext;
     private final AtomicFile mFile;
     private final HashMap<String, Entry> mEntries = new HashMap<String, Entry>();
 
@@ -57,15 +55,19 @@ public class DisplaySettings {
         }
     }
 
-    public DisplaySettings(Context context) {
-        mContext = context;
+    public DisplaySettings() {
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
         mFile = new AtomicFile(new File(systemDir, "display_settings.xml"));
     }
 
-    public void getOverscanLocked(String name, Rect outRect) {
-        Entry entry = mEntries.get(name);
+    public void getOverscanLocked(String name, String uniqueId, Rect outRect) {
+        // Try to get the entry with the unique if possible.
+        // Else, fall back on the display name.
+        Entry entry;
+        if (uniqueId == null || (entry = mEntries.get(uniqueId)) == null) {
+            entry = mEntries.get(name);
+        }
         if (entry != null) {
             outRect.left = entry.overscanLeft;
             outRect.top = entry.overscanTop;
@@ -110,7 +112,7 @@ public class DisplaySettings {
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG
                     && type != XmlPullParser.END_DOCUMENT) {
-                ;
+                // Do nothing.
             }
 
             if (type != XmlPullParser.START_TAG) {

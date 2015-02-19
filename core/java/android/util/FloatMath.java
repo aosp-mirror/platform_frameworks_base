@@ -24,7 +24,10 @@ package android.util;
  * became slower and have since been re-implemented to wrap calls to
  * {@link java.lang.Math}. {@link java.lang.Math} should be used in
  * preference.
+ *
+ * @deprecated Use {@link java.lang.Math} instead.
  */
+@Deprecated
 public class FloatMath {
 
     /** Prevents instantiation. */

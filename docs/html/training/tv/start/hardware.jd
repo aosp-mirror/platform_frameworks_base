@@ -85,29 +85,52 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
   </tr>
   <tr>
     <td>Touchscreen</td>
-    <td>android.hardware.touchscreen</td>
+    <td>{@code android.hardware.touchscreen}</td>
+  </tr>
+  <tr>
+    <td>Touchscreen emulator</td>
+    <td>{@code android.hardware.faketouch}</td>
   </tr>
   <tr>
     <td>Telephony</td>
-    <td>android.hardware.telephony</td>
+    <td>{@code android.hardware.telephony}</td>
   </tr>
   <tr>
     <td>Camera</td>
-    <td>android.hardware.camera</td>
+    <td>{@code android.hardware.camera}</td>
+  </tr>
+  <tr>
+    <td>Bluetooth</td>
+    <td>{@code android.hardware.bluetooth}</td>
   </tr>
   <tr>
     <td>Near Field Communications (NFC)</td>
-    <td>android.hardware.nfc</td>
+    <td>{@code android.hardware.nfc}</td>
   </tr>
   <tr>
     <td>GPS</td>
-    <td>android.hardware.location.gps</td>
+    <td>{@code android.hardware.location.gps}</td>
   </tr>
   <tr>
-    <td>Microphone</td>
-    <td>android.hardware.microphone</td>
+    <td>Microphone <sup><a href="#cont-mic">[1]</a></sup></td>
+    <td>{@code android.hardware.microphone}</td>
+  </tr>
+  <tr>
+    <td>Sensors</td>
+    <td>{@code android.hardware.sensor}</td>
   </tr>
 </table>
+
+<p id="cont-mic" class="note">
+  <strong>[1]</strong> Some TV controllers have a microphone, which is
+  not the same as the microphone hardware feature described here. The controller microphone is fully
+  supported.
+</p>
+
+<p>
+  See the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#features-reference">
+  Features Reference</a> for a complete list of features, subfeatures, and their descriptors.
+</p>
 
 
 <h3 id="declare-hardware-requirements">Declaring hardware requirements for TV</h3>
@@ -130,9 +153,13 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
 <pre>
 &lt;uses-feature android:name="android.hardware.touchscreen"
         android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.faketouch"
+        android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.telephony"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.camera"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.bluetooth"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.nfc"
         android:required="false"/&gt;
@@ -140,22 +167,26 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.microphone"
         android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.sensor"
+        android:required="false"/&gt;
 </pre>
 
-<p class="caution">
-  <strong>Caution:</strong> Declaring an unavailable hardware feature as required by setting its
-  value to {@code true} in your app manifest prevents your app from being installed on TV
-  devices or appearing in the Android TV home screen launcher.
+<p class="note"><strong>Note:</strong> Some features have subfeatures like {@code android.hardware.camera.front},
+  as described in the <a href="guide/topics/manifest/uses-feature-element.html#features-reference">
+  Feature Reference</a>. Be sure to mark as {@code required="false"} any subfeatures also used in
+  your app.</p>
+
+<p>
+  All apps intended for use on TV devices must declare that the touch screen feature is not required
+  as described in <a href="{@docRoot}training/tv/start/start.html#no-touchscreen">Get Started with
+  TV Apps</a>. If your app normally uses one or more of the features listed above, change the
+  {@code android:required} attribute setting to {@code false} for those features in your manifest.
 </p>
 
 <p class="caution">
-  <strong>Caution:</strong> Some <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code uses-permission}</a> manifest declarations <em>imply hardware use</em>, which can also
-  prevent your app from being installed and used on TV devices. For example, requesting the
-  {@link android.Manifest.permission#RECORD_AUDIO} permission in your app implies the
-  {@code android.hardware.microphone} hardware feature requirement. In which case, you must declare
-  the microphone feature as not required ({@code android:required="false"}) in your app manifest.
-  For a list of permission requests that imply a hardware feature requirement, see <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features">
-  {@code uses-feature}</a> guide.
+  <strong>Caution:</strong> Declaring a hardware feature as required by setting its
+  value to {@code true}  prevents your app from being installed on TV
+  devices or appearing in the Android TV home screen launcher.
 </p>
 
 <p>
@@ -169,6 +200,52 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
   For more information on filtering and declaring features in the manifest, see the
   <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code uses-feature}</a>
   guide.
+</p>
+
+
+<h3 id="hardware-permissions">Declaring permissions that imply hardware features</h3>
+
+<p>
+  Some <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code uses-permission}</a>
+  manifest declarations <em>imply hardware features</em>. This behavior means that requesting some
+  permissions in your app manifest can exclude your app from from being installed and used on TV
+  devices. The following commonly requested permissions create an implicit hardware feature
+  requirement:
+</p>
+
+<table>
+  <tr>
+    <th>Permission</th>
+    <th>Implied hardware feature</th>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#RECORD_AUDIO}</td>
+    <td>{@code android.hardware.microphone}</td>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#CAMERA}</td>
+    <td>{@code android.hardware.camera} <em>and</em> <br>
+      {@code android.hardware.camera.autofocus}</td>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#ACCESS_COARSE_LOCATION}</td>
+    <td>{@code android.hardware.location} <em>and</em> <br>
+      {@code android.hardware.location.network}</td>
+  </tr>
+  <tr>
+    <td>{@link android.Manifest.permission#ACCESS_FINE_LOCATION}</td>
+    <td>{@code android.hardware.location} <em>and</em> <br>
+      {@code android.hardware.location.gps}</td>
+  </tr>
+</table>
+
+<p>
+  For a complete list of permission requests that imply a hardware feature requirement, see the
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features">{@code
+  uses-feature}</a> guide. If your app requests one of the features listed above, include a
+  <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code uses-feature}</a>
+  declaration in your manifest for the implied hardware feature that indicates it is not
+  required ({@code android:required="false"}).
 </p>
 
 
@@ -202,7 +279,8 @@ if (getPackageManager().hasSystemFeature("android.hardware.touchscreen")) {
 <p>
   Since most TVs do not have touch screens, Android does not support touch screen interaction for
   TV devices. Furthermore, using a touch screen is not consistent with a viewing environment where
-  the user is seated 10 feet away from the display.
+  the user is seated 10 feet away from the display. Make sure that your UI elements and text do not
+  require or imply the use of a touchscreen.
 </p>
 
 <p>

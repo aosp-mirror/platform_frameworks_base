@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Multiplayer</li>
       </ul>
     </div>
@@ -738,6 +807,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -813,76 +885,126 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_EXCLUSIVE_BIT_MASK">EXTRA_EXCLUSIVE_BIT_MASK</a></td>
-        <td class="jd-descrcol" width="100%">Used to bundle the exclusive bit mask of the player for auto-match criteria.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to bundle the exclusive bit mask of the player for auto-match criteria.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_INVITATION">EXTRA_INVITATION</a></td>
-        <td class="jd-descrcol" width="100%">Used to return an <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to return an <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MAX_AUTOMATCH_PLAYERS">EXTRA_MAX_AUTOMATCH_PLAYERS</a></td>
-        <td class="jd-descrcol" width="100%">Used to return the maximum number of players that should be added to a room by auto-matching.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to return the maximum number of players that should be added to a room by auto-matching.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_MIN_AUTOMATCH_PLAYERS">EXTRA_MIN_AUTOMATCH_PLAYERS</a></td>
-        <td class="jd-descrcol" width="100%">Used to return the minimum number of players that should be added to a room by auto-matching.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to return the minimum number of players that should be added to a room by auto-matching.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_ROOM">EXTRA_ROOM</a></td>
-        <td class="jd-descrcol" width="100%">Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></code>.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#EXTRA_TURN_BASED_MATCH">EXTRA_TURN_BASED_MATCH</a></td>
-        <td class="jd-descrcol" width="100%">Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></code>.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#MAX_RELIABLE_MESSAGE_LEN">MAX_RELIABLE_MESSAGE_LEN</a></td>
-        <td class="jd-descrcol" width="100%">This gives the maximum message size supported via the
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendReliableMessage(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer.ReliableMessageSentCallback, byte[], java.lang.String, java.lang.String)">sendReliableMessage(GoogleApiClient, RealTimeMultiplayer.ReliableMessageSentCallback, byte[], String, String)</a></code> methods (excluding protocol headers).</td>
+        <td class="jd-descrcol" width="100%">
+          This gives the maximum message size supported via the
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendReliableMessage(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer.ReliableMessageSentCallback, byte[], java.lang.String, java.lang.String)">sendReliableMessage(GoogleApiClient, RealTimeMultiplayer.ReliableMessageSentCallback, byte[], String, String)</a></code> methods (excluding protocol headers).
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></td>
-        <td class="jd-descrcol" width="100%">This gives the maximum (unfragmented) message size supported via the
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendUnreliableMessage(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String, java.lang.String)">sendUnreliableMessage(GoogleApiClient, byte[], String, String)</a></code> methods (excluding protocol headers).</td>
+        <td class="jd-descrcol" width="100%">
+          This gives the maximum (unfragmented) message size supported via the
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendUnreliableMessage(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String, java.lang.String)">sendUnreliableMessage(GoogleApiClient, byte[], String, String)</a></code> methods (excluding protocol headers).
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#SORT_ORDER_MOST_RECENT_FIRST">SORT_ORDER_MOST_RECENT_FIRST</a></td>
-        <td class="jd-descrcol" width="100%">Sort multiplayer activities by their last-modified timestamp with most recent first.</td>
+        <td class="jd-descrcol" width="100%">
+          Sort multiplayer activities by their last-modified timestamp with most recent first.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Multiplayer.html#SORT_ORDER_SOCIAL_AGGREGATION">SORT_ORDER_SOCIAL_AGGREGATION</a></td>
-        <td class="jd-descrcol" width="100%">Sort multiplayer activities such that activities from players in the user's circles are
- returned first.</td>
+        <td class="jd-descrcol" width="100%">
+          Sort multiplayer activities such that activities from players in the user's circles are
+ returned first.
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -952,6 +1074,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Used to bundle the exclusive bit mask of the player for auto-match criteria.
 </p></div>
 
@@ -989,6 +1114,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Used to return an <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>. Retrieve with <code><a href="/reference/android/content/Intent.html#getParcelableExtra(java.lang.String)">getParcelableExtra(String)</a></code>
  or <code><a href="/reference/android/os/Bundle.html#getParcelable(java.lang.String)">getParcelable(String)</a></code>.
@@ -1028,6 +1156,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Used to return the maximum number of players that should be added to a room by auto-matching.
  Retrieve with <code><a href="/reference/android/content/Intent.html#getIntExtra(java.lang.String, int)">getIntExtra(String, int)</a></code>.</p></div>
@@ -1072,6 +1203,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Used to return the minimum number of players that should be added to a room by auto-matching.
  Retrieve with <code><a href="/reference/android/content/Intent.html#getIntExtra(java.lang.String, int)">getIntExtra(String, int)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1115,6 +1249,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html">Room</a></code>. Retrieve with <code><a href="/reference/android/content/Intent.html#getParcelableExtra(java.lang.String)">getParcelableExtra(String)</a></code>.
 </p></div>
 
@@ -1152,6 +1289,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Used to return a <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a></code>. Retrieve with
  <code><a href="/reference/android/content/Intent.html#getParcelableExtra(java.lang.String)">getParcelableExtra(String)</a></code> or <code><a href="/reference/android/os/Bundle.html#getParcelable(java.lang.String)">getParcelable(String)</a></code>.
@@ -1191,6 +1331,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>This gives the maximum message size supported via the
  <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendReliableMessage(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.realtime.RealTimeMultiplayer.ReliableMessageSentCallback, byte[], java.lang.String, java.lang.String)">sendReliableMessage(GoogleApiClient, RealTimeMultiplayer.ReliableMessageSentCallback, byte[], String, String)</a></code> methods (excluding protocol headers).
@@ -1232,6 +1375,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>This gives the maximum (unfragmented) message size supported via the
  <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RealTimeMultiplayer.html#sendUnreliableMessage(com.google.android.gms.common.api.GoogleApiClient, byte[], java.lang.String, java.lang.String)">sendUnreliableMessage(GoogleApiClient, byte[], String, String)</a></code> methods (excluding protocol headers).
 </p></div>
@@ -1272,6 +1418,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sort multiplayer activities by their last-modified timestamp with most recent first.
 </p></div>
 
@@ -1282,10 +1431,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
                 0
                 (0x00000000)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1293,33 +1442,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="SORT_ORDER_SOCIAL_AGGREGATION"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         SORT_ORDER_SOCIAL_AGGREGATION
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sort multiplayer activities such that activities from players in the user's circles are
  returned first.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1
                 (0x00000001)
             

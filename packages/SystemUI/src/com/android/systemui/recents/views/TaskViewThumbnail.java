@@ -33,36 +33,47 @@ import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 import com.android.systemui.recents.RecentsConfiguration;
+import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
 
 
-/** The task thumbnail view */
+/**
+ * The task thumbnail view.  It implements an image view that allows for animating the dim and
+ * alpha of the thumbnail image.
+ */
 public class TaskViewThumbnail extends View {
 
-    private final int mCornerRadius;
-    private final Matrix mScaleMatrix = new Matrix();
     RecentsConfiguration mConfig;
 
-    // Task bar clipping
-    Rect mClipRect = new Rect();
+    // Drawing
+    float mDimAlpha;
+    Matrix mScaleMatrix = new Matrix();
     Paint mDrawPaint = new Paint();
+    RectF mBitmapRect = new RectF();
+    RectF mLayoutRect = new RectF();
+    BitmapShader mBitmapShader;
     LightingColorFilter mLightingColorFilter = new LightingColorFilter(0xffffffff, 0);
-    private final RectF mBitmapRect = new RectF();
-    private final RectF mLayoutRect = new RectF();
-    private BitmapShader mBitmapShader;
-    private float mBitmapAlpha;
-    private float mDimAlpha;
-    private View mTaskBar;
-    private boolean mInvisible;
-    private ValueAnimator mAlphaAnimator;
-    private ValueAnimator.AnimatorUpdateListener mAlphaUpdateListener
+
+    // Thumbnail alpha
+    float mThumbnailAlpha;
+    ValueAnimator mThumbnailAlphaAnimator;
+    ValueAnimator.AnimatorUpdateListener mThumbnailAlphaUpdateListener
             = new ValueAnimator.AnimatorUpdateListener() {
         @Override
         public void onAnimationUpdate(ValueAnimator animation) {
-            mBitmapAlpha = (float) animation.getAnimatedValue();
-            updateFilter();
+            mThumbnailAlpha = (float) animation.getAnimatedValue();
+            updateThumbnailPaintFilter();
         }
     };
+
+    // Task bar clipping, the top of this thumbnail can be clipped against the opaque header
+    // bar that overlaps this thumbnail
+    View mTaskBar;
+    Rect mClipRect = new Rect();
+
+    // Visibility optimization, if the thumbnail height is less than the height of the header
+    // bar for the task view, then just mark this thumbnail view as invisible
+    boolean mInvisible;
 
     public TaskViewThumbnail(Context context) {
         this(context, null);
@@ -79,103 +90,15 @@ public class TaskViewThumbnail extends View {
     public TaskViewThumbnail(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mConfig = RecentsConfiguration.getInstance();
-        mCornerRadius = mConfig.taskViewRoundedCornerRadiusPx;
         mDrawPaint.setColorFilter(mLightingColorFilter);
         mDrawPaint.setFilterBitmap(true);
         mDrawPaint.setAntiAlias(true);
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        if (mInvisible) {
-            return;
-        }
-        canvas.drawRoundRect(0,
-                0,
-                getWidth(),
-                getHeight(),
-                mCornerRadius,
-                mCornerRadius,
-                mDrawPaint);
-    }
-
-    @Override
     protected void onFinishInflate() {
-        mBitmapAlpha = 0.9f;
-        updateFilter();
-    }
-
-    private void updateFilter() {
-        if (mInvisible) {
-            return;
-        }
-        int mul = (int) ((1.0f - mDimAlpha) * mBitmapAlpha * 255);
-        int add = (int) ((1.0f - mDimAlpha) * (1 - mBitmapAlpha) * 255);
-        if (mBitmapShader != null) {
-            mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
-            mLightingColorFilter.setColorAdd(Color.argb(0, add, add, add));
-            mDrawPaint.setColorFilter(mLightingColorFilter);
-            mDrawPaint.setColor(0xffffffff);
-        } else {
-            mDrawPaint.setColorFilter(null);
-            int grey = mul + add;
-            mDrawPaint.setColor(Color.argb(255, grey, grey, grey));
-        }
-        invalidate();
-    }
-
-    /** Updates the clip rect based on the given task bar. */
-    void enableTaskBarClip(View taskBar) {
-        mTaskBar = taskBar;
-        int top = (int) Math.max(0, taskBar.getTranslationY() +
-                taskBar.getMeasuredHeight() - 1);
-        mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
-        setClipBounds(mClipRect);
-    }
-
-    void updateVisibility(int clipBottom) {
-        boolean invisible = mTaskBar != null && getHeight() - clipBottom < mTaskBar.getHeight();
-        if (invisible != mInvisible) {
-            mInvisible = invisible;
-            if (!mInvisible) {
-                updateFilter();
-            }
-            invalidate();
-        }
-    }
-
-    /** Binds the thumbnail view to the screenshot. */
-    boolean bindToScreenshot(Bitmap ss) {
-        setImageBitmap(ss);
-        return ss != null;
-    }
-
-    /** Unbinds the thumbnail view from the screenshot. */
-    void unbindFromScreenshot() {
-        setImageBitmap(null);
-    }
-
-    /** Binds the thumbnail view to the task */
-    void rebindToTask(Task t) {
-        if (t.thumbnail != null) {
-            setImageBitmap(t.thumbnail);
-        } else {
-            setImageBitmap(null);
-        }
-    }
-
-    public void setImageBitmap(Bitmap bm) {
-        if (bm != null) {
-            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP,
-                    Shader.TileMode.CLAMP);
-            mDrawPaint.setShader(mBitmapShader);
-            mBitmapRect.set(0, 0, bm.getWidth(), bm.getHeight());
-            updateBitmapScale();
-        } else {
-            mBitmapShader = null;
-            mDrawPaint.setShader(null);
-        }
-        updateFilter();
+        mThumbnailAlpha = mConfig.taskViewThumbnailAlpha;
+        updateThumbnailPaintFilter();
     }
 
     @Override
@@ -183,25 +106,106 @@ public class TaskViewThumbnail extends View {
         super.onLayout(changed, left, top, right, bottom);
         if (changed) {
             mLayoutRect.set(0, 0, getWidth(), getHeight());
-            updateBitmapScale();
+            updateThumbnailScale();
         }
     }
 
-    private void updateBitmapScale() {
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (mInvisible) {
+            return;
+        }
+        // Draw the thumbnail with the rounded corners
+        canvas.drawRoundRect(0, 0, getWidth(), getHeight(),
+                mConfig.taskViewRoundedCornerRadiusPx,
+                mConfig.taskViewRoundedCornerRadiusPx, mDrawPaint);
+    }
+
+    /** Sets the thumbnail to a given bitmap. */
+    void setThumbnail(Bitmap bm) {
+        if (bm != null) {
+            mBitmapShader = new BitmapShader(bm, Shader.TileMode.CLAMP,
+                    Shader.TileMode.CLAMP);
+            mDrawPaint.setShader(mBitmapShader);
+            mBitmapRect.set(0, 0, bm.getWidth(), bm.getHeight());
+            updateThumbnailScale();
+        } else {
+            mBitmapShader = null;
+            mDrawPaint.setShader(null);
+        }
+        updateThumbnailPaintFilter();
+    }
+
+    /** Updates the paint to draw the thumbnail. */
+    void updateThumbnailPaintFilter() {
+        if (mInvisible) {
+            return;
+        }
+        int mul = (int) ((1.0f - mDimAlpha) * mThumbnailAlpha * 255);
+        int add = (int) ((1.0f - mDimAlpha) * (1 - mThumbnailAlpha) * 255);
+        if (mBitmapShader != null) {
+            mLightingColorFilter.setColorMultiply(Color.argb(255, mul, mul, mul));
+            mLightingColorFilter.setColorAdd(Color.argb(0, add, add, add));
+            mDrawPaint.setColorFilter(mLightingColorFilter);
+            mDrawPaint.setColor(0xffffffff);
+        } else {
+            int grey = mul + add;
+            mDrawPaint.setColorFilter(null);
+            mDrawPaint.setColor(Color.argb(255, grey, grey, grey));
+        }
+        invalidate();
+    }
+
+    /** Updates the thumbnail shader's scale transform. */
+    void updateThumbnailScale() {
         if (mBitmapShader != null) {
             mScaleMatrix.setRectToRect(mBitmapRect, mLayoutRect, Matrix.ScaleToFit.FILL);
             mBitmapShader.setLocalMatrix(mScaleMatrix);
         }
     }
 
+    /** Updates the clip rect based on the given task bar. */
+    void updateClipToTaskBar(View taskBar) {
+        mTaskBar = taskBar;
+        int top = (int) Math.max(0, taskBar.getTranslationY() +
+                taskBar.getMeasuredHeight() - 1);
+        mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
+        setClipBounds(mClipRect);
+    }
+
+    /** Updates the visibility of the the thumbnail. */
+    void updateThumbnailVisibility(int clipBottom) {
+        boolean invisible = mTaskBar != null && (getHeight() - clipBottom) <= mTaskBar.getHeight();
+        if (invisible != mInvisible) {
+            mInvisible = invisible;
+            if (!mInvisible) {
+                updateThumbnailPaintFilter();
+            }
+            invalidate();
+        }
+    }
+
+    /**
+     * Sets the dim alpha, only used when we are not using hardware layers.
+     * (see RecentsConfiguration.useHardwareLayers)
+     */
     public void setDimAlpha(float dimAlpha) {
         mDimAlpha = dimAlpha;
-        updateFilter();
+        updateThumbnailPaintFilter();
+    }
+
+    /** Binds the thumbnail view to the task */
+    void rebindToTask(Task t) {
+        if (t.thumbnail != null) {
+            setThumbnail(t.thumbnail);
+        } else {
+            setThumbnail(null);
+        }
     }
 
     /** Unbinds the thumbnail view from the task */
     void unbindFromTask() {
-        setImageBitmap(null);
+        setThumbnail(null);
     }
 
     /** Handles focus changes. */
@@ -217,54 +221,46 @@ public class TaskViewThumbnail extends View {
         }
     }
 
-    /** Prepares for the enter recents animation. */
+    /**
+     * Prepares for the enter recents animation, this gets called before the the view
+     * is first visible and will be followed by a startEnterRecentsAnimation() call.
+     */
     void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask) {
         if (isTaskViewLaunchTargetTask) {
-            mBitmapAlpha = 1f;
+            mThumbnailAlpha = 1f;
         } else {
-            mBitmapAlpha = mConfig.taskViewThumbnailAlpha;
+            mThumbnailAlpha = mConfig.taskViewThumbnailAlpha;
         }
-        updateFilter();
+        updateThumbnailPaintFilter();
     }
 
-    /** Animates this task thumbnail as it enters recents */
+    /** Animates this task thumbnail as it enters Recents. */
     void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
         startFadeAnimation(mConfig.taskViewThumbnailAlpha, delay,
-                mConfig.taskBarEnterAnimDuration, postAnimRunnable);
+                mConfig.taskViewEnterFromAppDuration, postAnimRunnable);
     }
 
-    /** Animates this task thumbnail as it exits recents */
+    /** Animates this task thumbnail as it exits Recents. */
     void startLaunchTaskAnimation(Runnable postAnimRunnable) {
-        startFadeAnimation(1f, 0, mConfig.taskBarExitAnimDuration, postAnimRunnable);
+        startFadeAnimation(1f, 0, mConfig.taskViewExitToAppDuration, postAnimRunnable);
     }
 
-    /** Animates the thumbnail alpha. */
+    /** Starts a new thumbnail alpha animation. */
     void startFadeAnimation(float finalAlpha, int delay, int duration, final Runnable postAnimRunnable) {
-        if (mAlphaAnimator != null) {
-            mAlphaAnimator.cancel();
-        }
-        mAlphaAnimator = ValueAnimator.ofFloat(mBitmapAlpha, finalAlpha);
-        mAlphaAnimator.addUpdateListener(mAlphaUpdateListener);
-        mAlphaAnimator.setStartDelay(delay);
-        mAlphaAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
-        mAlphaAnimator.setDuration(duration);
-        mAlphaAnimator.start();
+        Utilities.cancelAnimationWithoutCallbacks(mThumbnailAlphaAnimator);
+        mThumbnailAlphaAnimator = ValueAnimator.ofFloat(mThumbnailAlpha, finalAlpha);
+        mThumbnailAlphaAnimator.setStartDelay(delay);
+        mThumbnailAlphaAnimator.setDuration(duration);
+        mThumbnailAlphaAnimator.setInterpolator(mConfig.fastOutSlowInInterpolator);
+        mThumbnailAlphaAnimator.addUpdateListener(mThumbnailAlphaUpdateListener);
         if (postAnimRunnable != null) {
-            mAlphaAnimator.addListener(new AnimatorListenerAdapter() {
-                public boolean mCancelled;
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    mCancelled = true;
-                }
-
+            mThumbnailAlphaAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    if (!mCancelled) {
-                        postAnimRunnable.run();
-                    }
+                    postAnimRunnable.run();
                 }
             });
         }
+        mThumbnailAlphaAnimator.start();
     }
 }

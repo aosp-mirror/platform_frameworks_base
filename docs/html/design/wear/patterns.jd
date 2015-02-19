@@ -76,6 +76,13 @@ page.title=UI Patterns for Android Wear
 <li>The cue card can be invoked to continue specifying the action. For example in a messaging application, tapping a “Reply” action button invokes the Cue Card and prompts for voice input. In this case the prompt label (such as “Speak your message…”) and a set of sample voice suggestions can be specified by developers.</li>
 </ol>
 
+<a class="notice-developers left" href="{@docRoot}training/wearables/ui/confirm.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Showing Confirmations</p>
+  </div>
+</a>
+
 
 <h2 id="Continuing" style="clear:both">Continuing activities on phone</h2>
 
@@ -99,6 +106,13 @@ page.title=UI Patterns for Android Wear
 </ul>
 
 <p>Good examples of using an action on card include: play and pause music, toggle light switch on and off, navigate to an address, and call a phone number.</p>
+
+<a class="notice-developers left" href="{@docRoot}training/wearables/ui/cards.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Cards</p>
+  </div>
+</a>
 
 
 <h2 id="Stacks" style="clear:both">Card stacks</h2>
@@ -124,6 +138,13 @@ to check-in to.</p>
 
 <p>More information about how to use the 2D Picker pattern is provided in the <a href="{@docRoot}design/wear/structure.html#2DPicker">App Structure</a> guide.</p>
 
+<a class="notice-developers left" href="{@docRoot}training/wearables/ui/2d-picker.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating a 2D Picker</p>
+  </div>
+</a>
+
 
 <h2 id="Voice" style="clear:both">Voice commands</h2>
 
@@ -148,3 +169,10 @@ href="{@docRoot}training/wearables/apps/layouts.html#UiLibrary"><code>WearableLi
 
 
 <p>Of course, it is possible for Android Wear apps to extend themselves beyond the familiarities of these patterns. For a deeper look at the options available, see the <a href="{@docRoot}design/wear/structure.html">App Structure</a> guide.</p>
+
+<a class="notice-developers left" href="{@docRoot}training/wearables/ui/lists.html">
+  <div>
+    <h3>Developer Docs</h3>
+    <p>Creating Lists</p>
+  </div>
+</a>

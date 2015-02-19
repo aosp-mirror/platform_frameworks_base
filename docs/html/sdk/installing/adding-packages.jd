@@ -1,5 +1,8 @@
 page.title=Adding SDK Packages
 
+page.tags=sdk manager
+helpoutsWidget=true
+
 @jd:body
 
 <style>
@@ -61,10 +64,10 @@ So before you can start, there are a few packages you should add to your Android
 
 <p>To start adding packages, launch the Android SDK Manager in one of the following ways:</p>
 <ul>
-  <li>In Eclipse or Android Studio, click <strong>SDK Manager</strong>
+  <li>In Android Studio, click <strong>SDK Manager</strong>
 <img src="{@docRoot}images/tools/sdk-manager-studio.png"
 style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
-  <li>If you're not using Eclipse or Android Studio:
+  <li>If you're not using Android Studio:
     <ul>
       <li>Windows: Double-click the <code>SDK Manager.exe</code> file at the root of the Android
   SDK directory.</li>
@@ -74,7 +77,7 @@ style="vertical-align:bottom;margin:0;height:17px" /> in the toolbar.</li>
   </li>
 </ul>
 
-<p>When you open the SDK Manager for the first time, several packages will be selected by
+<p>When you open the SDK Manager for the first time, several packages are selected by
 default. Leave these selected, but be sure you have everything you need
 to get started by following these steps:</p>
 

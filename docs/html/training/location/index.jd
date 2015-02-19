@@ -21,7 +21,8 @@ startpage=true
 <h2>You should also read</h2>
 <ul>
     <li>
-        <a href="{@docRoot}google/play-services/setup.html">Setup Google Play Services SDK</a>
+        <a href="{@docRoot}google/play-services/setup.html">Set Up Google Play
+        Services SDK</a>
     </li>
 </ul>
 
@@ -29,68 +30,55 @@ startpage=true
 </div>
 
 <p>
-    One of the unique features of mobile applications is location awareness. Mobile users bring
-    their devices with them everywhere, and adding location awareness to your app offers users a
-    more contextual experience. The new Location Services API available in Google Play services
-    facilitates adding location awareness to your app with automated location tracking,
-    geofencing, and activity recognition. This API adds significant advantages over the plaform's
-    location API.
+  One of the unique features of mobile applications is location awareness.
+  Mobile users take their devices with them everywhere, and adding location
+  awareness to your app offers users a more contextual experience. The location
+  APIs available in Google Play services facilitate adding location awareness to
+  your app with automated location tracking, geofencing, and activity
+  recognition.
 </p>
+
+<p>The
+  <a href="{@docRoot}reference/com/google/android/gms/location/package-summary.html">Google
+  Play services location APIs</a> are preferred over the Android framework
+  location APIs
+  (<a href="{@docRoot}reference/android/location/package-summary.html">android.location</a>)
+  as a way of adding location awareness to your app. If you are currently using
+  the Android framework location APIs, you are strongly encouraged to switch to
+  the Google Play services location APIs as soon as possible.
+</p>
+
 <p>
-    This class shows you how to use Location Services in your app to get the current location,
-    get periodic location updates, look up addresses, create and monitor geofences, and
-    detect user activities. The class includes sample apps and code snippets that you can use as a
-    starting point for adding location awareness to your own app.
+  This class shows you how to use the Google Play services location APIs in your
+  app to get the current location, get periodic location updates, and look up
+  addresses. The class includes sample apps and code snippets that you can use as a starting point
+  for adding location awareness to your app.
 </p>
+
 <p class="note">
-    <strong>Note:</strong> Since this class is based on the Google Play services client library,
-    make sure you install the latest version before using the sample apps or code snippets. To learn
-    how to set up the client library with the latest version, see
-    <a href="{@docRoot}google/play-services/setup.html">Setup</a> in the Google Play services guide.
+  <strong>Note:</strong> Since this class is based on the Google Play services
+  client library, make sure you install the latest version before using the
+  sample apps or code snippets. To learn how to set up the client library with
+  the latest version, see
+  <a href="{@docRoot}google/play-services/setup.html">Setup</a> in the Google
+  Play services guide.
 </p>
 <h2>Lessons</h2>
 <dl>
-    <dt>
-        <b><a href="retrieve-current.html">Retrieving the Current Location</a></b>
-    </dt>
-    <dd>
-        Learn how to retrieve the user's current location.
-    </dd>
-    <dt>
-        <b><a href="receive-location-updates.html">Receiving Location Updates</a></b>
-    </dt>
-    <dd>
-        Learn how to request and receive periodic location updates.
-    </dd>
-    <dt>
-        <b><a href="display-address.html">Displaying a Location Address</a></b>
-    </dt>
-    <dd>
-        Learn how to convert a location's latitude and longitude into an address (reverse
-        geocoding).
-    </dd>
-    <dt>
-        <b>
-            <a href="geofencing.html">Creating and Monitoring Geofences</a>
-        </b>
-    </dt>
-    <dd>
-        Learn how to define one or more geographic areas as locations of interest, called geofences,
-        and detect when the user is close to or inside a geofence.
-    </dd>
-    <dt>
-        <b><a href="activity-recognition.html">Recognizing the User's Current Activity</a></b>
-    </dt>
-    <dd>
-        Learn how to recognize the user's current activity, such as walking, bicycling,
-        or driving a car, and how to use this information to modify your app's location strategy.
-    </dd>
-    <dt>
-        <b><a href="location-testing.html">Testing Using Mock Locations</a></b>
-    </dt>
-    <dd>
-        Learn how to test a location-aware app by injecting mock locations into Location
-        Services. In mock mode, Location Services sends out mock locations that you inject instead
-        of sensor-based locations.
-    </dd>
+  <dt>
+    <b><a href="retrieve-current.html">Getting the Last Known Location</a></b>
+  </dt> <dd>
+     Learn how to retrieve the last known location of an Android device, which
+     is usually equivalent to the user's current location.
+  </dd> <dt>
+    <b><a href="receive-location-updates.html">Receiving Location
+    Updates</a></b>
+  </dt> <dd>
+     Learn how to request and receive periodic location updates.
+  </dd> <dt>
+    <b><a href="display-address.html">Displaying a Location Address</a></b>
+  </dt> <dd>
+    Learn how to convert a location's latitude and longitude into an address
+    (reverse geocoding).
+  </dd>
 </dl>

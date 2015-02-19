@@ -1011,6 +1011,22 @@ public class WifiManager {
     }
 
     /**
+     * startLocationRestrictedScan()
+     * Trigger a scan which will not make use of DFS channels and is thus not suitable for
+     * establishing wifi connection.
+     * @hide
+     */
+    @SystemApi
+    public boolean startLocationRestrictedScan(WorkSource workSource) {
+        try {
+            mService.startLocationRestrictedScan(workSource);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Request a scan for access points in specified channel list. Each channel is specified by its
      * frequency in MHz, e.g. "5500" (do NOT include "DFS" even though it is). The availability of
      * the results is made known later in the same way as {@link #startScan}.
@@ -1616,7 +1632,6 @@ public class WifiManager {
     /** @hide */
     public static final int RSSI_PKTCNT_FETCH_FAILED        = BASE + 22;
 
-
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation failed due to an internal error.
@@ -1966,9 +1981,23 @@ public class WifiManager {
     }
 
     /**
+     * Disable ephemeral Network
+     *
+     * @param SSID, in the format of WifiConfiguration's SSID.
+     * @hide
+     */
+    public void disableEphemeralNetwork(String SSID) {
+        if (SSID == null) throw new IllegalArgumentException("SSID cannot be null");
+        try {
+            mService.disableEphemeralNetwork(SSID);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Start Wi-fi Protected Setup
      *
-     * @param config WPS configuration
+     * @param config WPS configuration (does not support {@link WpsInfo#LABEL})
      * @param listener for callbacks on success or failure. Can be null.
      * @throws IllegalStateException if the WifiManager instance needs to be
      * initialized again

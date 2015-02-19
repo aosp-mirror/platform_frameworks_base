@@ -1,10 +1,8 @@
 page.title=Updating Notifications
-parent.title=Notifying the User
-parent.link=index.html
+page.tags=notifications
+helpoutsWidget=true
 
 trainingnavtop=true
-next.title=Creating Expanded Notifications
-next.link=expanded.html
 
 @jd:body
 

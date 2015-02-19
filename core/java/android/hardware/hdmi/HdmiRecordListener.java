@@ -25,7 +25,7 @@ import android.hardware.hdmi.HdmiRecordSources.RecordSource;
  */
 @SystemApi
 public abstract class HdmiRecordListener {
-    protected HdmiRecordListener() {}
+    public HdmiRecordListener() {}
 
     /**
      * Called when TV received one touch record request from record device. The client of this
@@ -34,11 +34,13 @@ public abstract class HdmiRecordListener {
      * @param recorderAddress
      * @return record source to be used for recording. Null if no device is available.
      */
-    public abstract RecordSource getOneTouchRecordSource(int recorderAddress);
+    public abstract RecordSource onOneTouchRecordSourceRequested(int recorderAddress);
 
     /**
      * Called when one touch record is started or failed during initialization.
      *
+     * @param recorderAddress An address of recorder that reports result of one touch record
+     *            request
      * @param result result code. For more details, please look at all constants starting with
      *            "ONE_TOUCH_RECORD_". Only
      *            {@link HdmiControlManager#ONE_TOUCH_RECORD_RECORDING_CURRENTLY_SELECTED_SOURCE},
@@ -47,15 +49,17 @@ public abstract class HdmiRecordListener {
      *            {@link HdmiControlManager#ONE_TOUCH_RECORD_RECORDING_EXTERNAL_INPUT} mean normal
      *            start of recording; otherwise, describes failure.
      */
-    public void onOneTouchRecordResult(int result) {
+    public void onOneTouchRecordResult(int recorderAddress, int result) {
     }
 
     /**
      * Called when timer recording is started or failed during initialization.
      *
+     * @param recorderAddress An address of recorder that reports result of timer recording
+     *            request
      * @param data timer status data. For more details, look at {@link TimerStatusData}.
      */
-    public void onTimerRecordingResult(TimerStatusData data) {
+    public void onTimerRecordingResult(int recorderAddress, TimerStatusData data) {
     }
 
     /**
@@ -230,6 +234,8 @@ public abstract class HdmiRecordListener {
     /**
      * Called when receiving result for clear timer recording request.
      *
+     * @param recorderAddress An address of recorder that reports result of clear timer recording
+     *            request
      * @param result result of clear timer. It should be one of
      *            {@link HdmiControlManager#CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_RECORDING}
      *            {@link HdmiControlManager#CLEAR_TIMER_STATUS_TIMER_NOT_CLEARED_NO_MATCHING},
@@ -239,6 +245,6 @@ public abstract class HdmiRecordListener {
      *            {@link HdmiControlManager#CLEAR_TIMER_STATUS_FAIL_TO_CLEAR_SELECTED_SOURCE},
      *            {@link HdmiControlManager#CLEAR_TIMER_STATUS_CEC_DISABLE}.
      */
-    public void onClearTimerRecordingResult(int result) {
+    public void onClearTimerRecordingResult(int recorderAddress, int result) {
     }
 }

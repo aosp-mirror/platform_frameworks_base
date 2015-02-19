@@ -139,6 +139,17 @@ public class TypedValue {
     /* ------------------------------------------------------------ */
 
     /**
+     * {@link #TYPE_NULL} data indicating the value was not specified.
+     */
+    public static final int DATA_NULL_UNDEFINED = 0;
+    /**
+     * {@link #TYPE_NULL} data indicating the value was explicitly set to null.
+     */
+    public static final int DATA_NULL_EMPTY = 1;
+
+    /* ------------------------------------------------------------ */
+
+    /**
      * If {@link #density} is equal to this value, then the density should be
      * treated as the system's default density value: {@link DisplayMetrics#DENSITY_DEFAULT}.
      */
@@ -299,6 +310,18 @@ public class TypedValue {
     {
         return complexToDimension(data, metrics);
     }
+
+    /**
+     * Return the complex unit type for this value. For example, a dimen type
+     * with value 12sp will return {@link #COMPLEX_UNIT_SP}. Only use for values
+     * whose type is {@link #TYPE_DIMENSION}.
+     *
+     * @return The complex unit type.
+     */
+     public int getComplexUnit()
+     {
+         return COMPLEX_UNIT_MASK & (data>>TypedValue.COMPLEX_UNIT_SHIFT);
+     }
 
     /**
      * Converts an unpacked complex data value holding a dimension to its final floating 

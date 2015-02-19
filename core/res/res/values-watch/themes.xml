@@ -18,4 +18,6 @@
     <style name="Theme.Dialog.AppError" parent="Theme.Micro.Dialog.AppError" />
     <style name="Theme.Holo.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
     <style name="Theme.Holo.Light.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
+    <style name="Theme.Material.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
+    <style name="Theme.Material.Light.Dialog.Alert" parent="Theme.Micro.Dialog.Alert" />
 </resources>

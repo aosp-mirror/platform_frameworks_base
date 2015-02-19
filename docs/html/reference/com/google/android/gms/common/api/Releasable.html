@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Releasable</li>
       </ul>
     </div>
@@ -757,6 +826,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -793,234 +865,528 @@ Summary:
           
             
             
-
+              
                 <a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a>,
-
-
+              
+              
             
-
+              
                 <a href="/reference/com/google/android/gms/games/achievement/Achievements.LoadAchievementsResult.html">Achievements.LoadAchievementsResult</a>,
-
-
+              
+              
             
-
-
+              
+              
             
-
-
+              
+              
             
-
-
+              
+              
             
-
+              
+              
+            
+              
+              
+            
+              
                 <a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a>,
-
-
+              
+              
             
-
+              
                 <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a>,
-
-
+              
+              
             
-
+              
                 <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a>,
-
-
+              
+              
             
-
+              
                 <a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a>,
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+              
+              
+            
+              
+              
+            
+              
+              
+            
+              
+              
+            
+              
               and
-                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">25 others.</a>
-
+                <a href="#" onclick="return toggleInherited(document.getElementById('subclasses-indirect', null))">26 others.</a>
+              
             
           
       </div>
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of achievements.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievements.LoadAchievementsResult.html">Achievements.LoadAchievementsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when achievement data has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of app states.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a></td>
-              <td class="jd-descrcol" width="100%">Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when a conflict is detected while loading app
- state.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></td>
-              <td class="jd-descrcol" width="100%">Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when app state data has been loaded successfully.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></td>
-              <td class="jd-descrcol" width="100%">Result of an operation that could potentially generate a state conflict.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></td>
-              <td class="jd-descrcol" width="100%">Holder for an active container.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a></td>
-              <td class="jd-descrcol" width="100%">Contains a file descriptor for the requested asset.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a>&lt;T&gt;</td>
-              <td class="jd-descrcol" width="100%">Base class for a buffer of typed data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure holding references to a set of events.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/EventBuffer.html">EventBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of events.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/Events.LoadEventsResult.html">Events.LoadEventsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when event data has been loaded.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of games.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/GameRequestBuffer.html">GameRequestBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Request details.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesMetadata.LoadGamesResult.html">GamesMetadata.LoadGamesResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when game metadata has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when invitations have been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LeaderboardMetadataResult.html">Leaderboards.LeaderboardMetadataResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when leaderboard metadata has been loaded.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadScoresResult.html">Leaderboards.LoadScoresResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when leaderboard scores have been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when a leaderboard score has been submitted.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
-              <td class="jd-descrcol" width="100%">A data buffer that points to Metadata entries.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneBuffer.html">MilestoneBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing quest
- milestone data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a></code> objects.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></td>
-              <td class="jd-descrcol" width="100%">Information about the set of moments that was loaded.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing match participant data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></td>
-              <td class="jd-descrcol" width="100%">Information about the set of people that was loaded.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> objects.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of players.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when player data has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestBuffer.html">QuestBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Quest details.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.LoadQuestsResult.html">Quests.LoadQuestsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when quest data has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.LoadRequestsResult.html">Requests.LoadRequestsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when requests have loaded.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.UpdateRequestsResult.html">Requests.UpdateRequestsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when requests are updated.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of snapshots.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when snapshot data has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing TurnBasedMatch details.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when matches have been loaded.&nbsp;</td>
-          </tr>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of achievements.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievements.LoadAchievementsResult.html">Achievements.LoadAchievementsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when achievement data has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of app states.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when a conflict is detected while loading app
+ state.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when app state data has been loaded successfully.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result of an operation that could potentially generate a state conflict.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Holder for an active container.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Contains a file descriptor for the requested asset.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a>&lt;T&gt;</td>
+        <td class="jd-descrcol" width="100%">
+          Base class for a buffer of typed data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure holding references to a set of events.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/deviceconnection/features/DeviceFeatureBuffer.html">DeviceFeatureBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/deviceconnection/features/DeviceFeature.html">DeviceFeature</a></code> objects.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/EventBuffer.html">EventBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of events.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/Events.LoadEventsResult.html">Events.LoadEventsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when event data has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of games.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/GameRequestBuffer.html">GameRequestBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Request details.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GamesMetadata.LoadGamesResult.html">GamesMetadata.LoadGamesResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when game metadata has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when invitations have been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LeaderboardMetadataResult.html">Leaderboards.LeaderboardMetadataResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when leaderboard metadata has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadScoresResult.html">Leaderboards.LoadScoresResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when leaderboard scores have been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when a leaderboard score has been submitted.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          A data buffer that points to Metadata entries.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneBuffer.html">MilestoneBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing quest
+ milestone data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a></code> objects.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Information about the set of moments that was loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing match participant data.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Information about the set of people that was loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> objects.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of players.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when player data has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestBuffer.html">QuestBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Quest details.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.LoadQuestsResult.html">Quests.LoadQuestsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when quest data has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.LoadRequestsResult.html">Requests.LoadRequestsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when requests have loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/Requests.UpdateRequestsResult.html">Requests.UpdateRequestsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when requests are updated.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of snapshots.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when snapshot data has been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing TurnBasedMatch details.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMultiplayer.LoadMatchesResult.html">TurnBasedMultiplayer.LoadMatchesResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when matches have been loaded.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -1177,6 +1543,9 @@ Summary:
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

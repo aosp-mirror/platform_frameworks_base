@@ -69,6 +69,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IAlarmManager.aidl \
 	core/java/android/app/IAppTask.aidl \
+	core/java/android/app/ITaskStackListener.aidl \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
@@ -99,6 +100,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothA2dpSink.aidl \
 	core/java/android/bluetooth/IBluetoothAvrcpController.aidl \
 	core/java/android/bluetooth/IBluetoothCallback.aidl \
+	core/java/android/bluetooth/IBluetoothProfileServiceConnection.aidl \
 	core/java/android/bluetooth/IBluetoothHeadset.aidl \
 	core/java/android/bluetooth/IBluetoothHeadsetPhone.aidl \
 	core/java/android/bluetooth/IBluetoothHealth.aidl \
@@ -174,6 +176,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/usb/IUsbManager.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/IEthernetManager.aidl \
+	core/java/android/net/IEthernetServiceListener.aidl \
 	core/java/android/net/INetworkManagementEventObserver.aidl \
 	core/java/android/net/INetworkPolicyListener.aidl \
 	core/java/android/net/INetworkPolicyManager.aidl \
@@ -203,6 +206,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/security/IKeystoreService.aidl \
+	core/java/android/service/carrier/ICarrierMessagingCallback.aidl \
+	core/java/android/service/carrier/ICarrierMessagingService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
 	core/java/android/service/notification/IStatusBarNotificationHolder.aidl \
 	core/java/android/service/notification/IConditionListener.aidl \
@@ -271,6 +276,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/policy/IKeyguardShowCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardExitCallback.aidl \
 	core/java/com/android/internal/policy/IKeyguardService.aidl \
+	core/java/com/android/internal/policy/IKeyguardStateCallback.aidl \
 	core/java/com/android/internal/os/IDropBoxManagerService.aidl \
 	core/java/com/android/internal/os/IParcelFileDescriptorFactory.aidl \
 	core/java/com/android/internal/os/IResultReceiver.aidl \
@@ -289,7 +295,6 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	core/java/com/android/internal/view/IInputSessionCallback.aidl \
 	core/java/com/android/internal/widget/ILockSettings.aidl \
-	core/java/com/android/internal/widget/ILockSettingsObserver.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsFactory.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsAdapterConnection.aidl \
 	keystore/java/android/security/IKeyChainAliasCallback.aidl \
@@ -326,6 +331,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
+        media/java/android/media/audiopolicy/IAudioPolicyCallback.aidl \
 	media/java/android/media/projection/IMediaProjection.aidl \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
@@ -372,6 +378,7 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	telephony/java/com/android/internal/telephony/ITelephony.aidl \
 	telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl \
+	telephony/java/com/android/internal/telephony/IOnSubscriptionsChangedListener.aidl \
 	telephony/java/com/android/internal/telephony/ISms.aidl \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	telephony/java/com/android/internal/telephony/ISub.aidl \
@@ -432,6 +439,7 @@ aidl_files := \
 	frameworks/base/media/java/android/media/MediaDescription.aidl \
 	frameworks/base/media/java/android/media/Rating.aidl \
 	frameworks/base/media/java/android/media/AudioAttributes.aidl \
+	frameworks/base/media/java/android/media/AudioFocusInfo.aidl \
 	frameworks/base/media/java/android/media/session/PlaybackState.aidl \
 	frameworks/base/media/java/android/media/session/MediaSession.aidl \
 	frameworks/base/media/java/android/media/tv/TvInputInfo.aidl \
@@ -520,6 +528,7 @@ aidl_files := \
 	frameworks/base/core/java/android/view/textservice/SpellCheckerInfo.aidl \
 	frameworks/base/core/java/android/view/textservice/SentenceSuggestionsInfo.aidl \
 	frameworks/base/core/java/android/view/textservice/SuggestionsInfo.aidl \
+	frameworks/base/core/java/android/service/carrier/MessagePdu.aidl \
 	frameworks/base/core/java/android/service/notification/StatusBarNotification.aidl \
 	frameworks/base/core/java/android/speech/tts/Voice.aidl \
 	frameworks/base/core/java/android/app/usage/UsageEvents.aidl \
@@ -557,6 +566,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/pm/ProviderInfo.aidl \
 	frameworks/base/core/java/android/content/pm/PackageStats.aidl \
 	frameworks/base/core/java/android/content/pm/PermissionGroupInfo.aidl \
+	frameworks/base/core/java/android/content/pm/LabeledIntent.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/ContentValues.aidl \
@@ -725,17 +735,20 @@ samples_dir := development/samples/browseable
 # Whitelist of valid groups, used for default TOC grouping. Each sample must
 # belong to one (and only one) group. Assign samples to groups by setting
 # a sample.group var to one of these groups in the sample's _index.jd.
-sample_groups := -samplegroup Background \
+sample_groups := -samplegroup Admin \
+                 -samplegroup Background \
                  -samplegroup Connectivity \
                  -samplegroup Content \
                  -samplegroup Input \
                  -samplegroup Media \
+                 -samplegroup Notification \
                  -samplegroup RenderScript \
                  -samplegroup Security \
                  -samplegroup Sensors \
                  -samplegroup Testing \
                  -samplegroup UI \
-                 -samplegroup Views
+                 -samplegroup Views \
+                 -samplegroup Wearable
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
@@ -807,6 +820,11 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
+
+# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
+$(full_target): $(framework_built) $(gen)
+$(INTERNAL_PLATFORM_SYSTEM_API_FILE): $(full_target)
+$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 # ====  check javadoc comments but don't generate docs ========
 include $(CLEAR_VARS)

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GeofencingApi</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -713,9 +782,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -725,17 +794,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     interface
 <h1 itemprop="name">GeofencingApi</h1>
 
 
 
+  
+  
+  
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -747,10 +819,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
     <tr>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.location.GeofencingApi</td>
     </tr>
-
+    
 
 </table>
 
@@ -835,58 +907,99 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.GeofencingRequest, android.app.PendingIntent)">addGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a> geofencingRequest, PendingIntent pendingIntent)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets alerts to be notified when the device enters or exits one of the specified geofences.
+          
+    
+
+        </div>
+  
+  </td></tr>
 
 
-
-
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent)">addGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, PendingIntent pendingIntent)</nobr>
+        
+        <div class="jd-descrdiv">
+          <em>
+      This method is deprecated.
+    use <code><a href="/reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.GeofencingRequest, android.app.PendingIntent)">addGeofences(GoogleApiClient, GeofencingRequest, PendingIntent)</a></code>
+             instead.
+</em>
+          
+    
 
-        <div class="jd-descrdiv">Sets alerts to be notified when the device enters or exits one of the
- specified geofences.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
-    <tr class=" api apilevel-" >
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#removeGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<java.lang.String>)">removeGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, List&lt;String&gt; geofenceRequestIds)</nobr>
+        
+        <div class="jd-descrdiv">
+          Removes geofences by their request IDs.
+          
+    
 
-        <div class="jd-descrdiv">Removes geofences by their request IDs.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
-    <tr class="alt-color api apilevel-" >
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#removeGeofences(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">removeGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent pendingIntent)</nobr>
+        
+        <div class="jd-descrdiv">
+          Removes all geofences associated with the given <code>pendingIntent</code>.
+          
+    
 
-        <div class="jd-descrdiv">Removes all geofences associated with the given <code>pendingIntent</code>.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -938,16 +1051,107 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-<A NAME="addGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent)"></A>
+<A NAME="addGeofences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.GeofencingRequest, android.app.PendingIntent)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">addGeofences</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a> geofencingRequest, PendingIntent pendingIntent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets alerts to be notified when the device enters or exits one of the specified geofences. If
+ an existing geofence with the same request ID is already registered, the old geofence is
+ replaced by the new one, and the new <code>PendingIntent</code> is used to generate intents for
+ alerts.
+ <p>
+ <code><a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></code> is returned when geofences are successfully added or failed to be added. Refer
+ to <code><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a></code> for possible errors when adding geofences.
+ <p>
+ When a geofence transition (for example, entering or exiting) matches one of the transition
+ filter (see <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setTransitionTypes(int)">setTransitionTypes(int)</a></code>) in the given geofence list, an
+ intent is generated using the given pending intent. You can call
+ <code><a href="/reference/com/google/android/gms/location/GeofencingEvent.html#fromIntent(android.content.Intent)">fromIntent(Intent)</a></code> to get the transition type, geofences that
+ triggered this intent and the location that triggered the geofence transition.
+ <p>
+ In case network location provider is disabled by the user, the geofence service will stop
+ updating, all registered geofences will be removed and an intent is generated by the provided
+ pending intent. In this case, the <code><a href="/reference/com/google/android/gms/location/GeofencingEvent.html">GeofencingEvent</a></code> created from this intent represents
+ an error event, where <code><a href="/reference/com/google/android/gms/location/GeofencingEvent.html#hasError()">hasError()</a></code> returns <code>true</code> and
+ <code><a href="/reference/com/google/android/gms/location/GeofencingEvent.html#getErrorCode()">getErrorCode()</a></code> returns
+ <code><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html#GEOFENCE_NOT_AVAILABLE">GEOFENCE_NOT_AVAILABLE</a></code>.
+ <p>
+ This method requires <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient. It must be connected at the time of this call,
+            which is normally achieved by calling <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code> and waiting
+            for <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> to be called.</td>
+        </tr>
+        <tr>
+          <th>geofencingRequest</td>
+          <td>geofencing request that include a list of geofences to be added and
+            related triggering behavior. The request must be created using
+            <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a></code>.</td>
+        </tr>
+        <tr>
+          <th>pendingIntent</td>
+          <td>a pending intent that will be used to generate an intent when matched
+            geofence transition is observed</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>SecurityException</td>
+            <td>if the app does not have
+             <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code> permission</td>
+        </tr>  
+        <tr>
+            <th>NullPointerException</td>
+            <td>if <code>geofencingRequest</code> or <code>pendingIntent</code> is
+             <code>null</code>
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
 
 
-        abstract
+<A NAME="addGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent)"></A>
 
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">addGeofences</span>
@@ -955,12 +1159,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    use <code><a href="/reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.GeofencingRequest, android.app.PendingIntent)">addGeofences(GoogleApiClient, GeofencingRequest, PendingIntent)</a></code>
+             instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Sets alerts to be notified when the device enters or exits one of the
  specified geofences. If an existing geofence with the same request ID is
  already registered, the old geofence is replaced by the new one, and the
@@ -1012,23 +1225,22 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>SecurityException</td>
             <td>if the app does not have
              <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>
              permission</td>
-        </tr>
+        </tr>  
         <tr>
             <th>IllegalArgumentException</td>
             <td>if <code>geofences</code> is <code>null</code> or
              empty</td>
-        </tr>
+        </tr>  
         <tr>
             <th>NullPointerException</td>
             <td>if <code>intent</code> or <code>listener</code> is
-             <code>null</code>
-</td>
+             <code>null</code></td>
         </tr>
       </table>
   </div>
@@ -1039,14 +1251,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="removeGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<java.lang.String>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">removeGeofences</span>
@@ -1054,12 +1266,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Removes geofences by their request IDs. Request ID is specified when you
  create a <code><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></code> by calling
  <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setRequestId(java.lang.String)">setRequestId(String)</a></code>.
@@ -1089,18 +1304,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>IllegalArgumentException</td>
             <td>if <code>geofenceRequestIds</code> is
              <code>null</code> or empty</td>
-        </tr>
+        </tr>  
         <tr>
             <th>SecurityException</td>
             <td>if the app does not have
              <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>
              permission</td>
-        </tr>
+        </tr>  
         <tr>
             <th>NullPointerException</td>
             <td>if <code>listener</code> is <code>null</code>
@@ -1115,14 +1330,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="removeGeofences(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">removeGeofences</span>
@@ -1130,12 +1345,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Removes all geofences associated with the given <code>pendingIntent</code>.
  <p>
  Warning: please use <code><a href="/reference/android/app/PendingIntent.html#FLAG_UPDATE_CURRENT">FLAG_UPDATE_CURRENT</a></code>
@@ -1170,13 +1388,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>SecurityException</td>
             <td>if the app does not have
              <code><a href="/reference/android/Manifest.permission.html#ACCESS_FINE_LOCATION">ACCESS_FINE_LOCATION</a></code>
              permission</td>
-        </tr>
+        </tr>  
         <tr>
             <th>NullPointerException</td>
             <td>if <code>intent</code> or <code>listener</code> is
@@ -1201,17 +1419,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1219,7 +1437,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1232,7 +1450,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

@@ -19,7 +19,6 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
-import android.net.ProxyInfo;
 import android.text.TextUtils;
 import android.util.Log;
 

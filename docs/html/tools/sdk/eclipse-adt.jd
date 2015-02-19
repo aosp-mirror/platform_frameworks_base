@@ -1,4 +1,4 @@
-page.title=ADT Plugin
+page.title=ADT Plugin Release Notes
 
 @jd:body
 
@@ -15,29 +15,25 @@ Plugin</a></li>
 </div>
 
 <p>Android Development Tools (ADT) is a plugin for the Eclipse IDE
-that is designed to give you a powerful, integrated environment in which
-to build Android applications.</p>
-
-<p>ADT extends the capabilities of Eclipse to let you quickly set up new Android
+that extends the capabilities of Eclipse to let you quickly set up new Android
 projects, create an application UI, add packages based on the Android
 Framework API, debug your applications using the Android SDK tools, and even
 export signed (or unsigned) {@code .apk} files in order to distribute your application.</p>
 
-<p>Developing in Eclipse with ADT is highly recommended and is the fastest way
-to get started. With the guided project setup it provides, as well as tools
-integration, custom XML editors, and debug output pane, ADT gives you an
-incredible boost in developing Android applications. </p>
+<p class="note"><strong>Note:</strong>
+If you have been using Eclipse with ADT, be aware that <a
+href="{@docRoot}tools/studio/index.html">Android Studio</a> is now the official IDE
+for Android, so you should migrate to Android Studio to receive all the
+latest IDE updates. For help moving projects,
+see <a href="/sdk/installing/migrate.html">Migrating to Android
+Studio</a>.</p>
 
-<p>This document provides step-by-step instructions on how to download the ADT
-plugin and install it into your Eclipse development environment. Note that
+<p>Note that
 before you can install or use ADT, you must have compatible versions of both the
 Eclipse IDE and the Android SDK installed. For details, make sure to read <a
 href="{@docRoot}sdk/installing/installing-adt.html">Installing the Eclipse
 Plugin</a>. </p>
 
-<p>If you are already using ADT, this document also provides instructions on
-how to update ADT to the latest version or how to uninstall it, if necessary.
-</p>
 
 <p>For information about the features provided by the ADT plugin, such as code
 editor features, SDK tool integration, and the graphical layout editor (for drag-and-drop layout

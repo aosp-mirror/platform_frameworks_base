@@ -102,4 +102,8 @@ public class BaseIWindow extends IWindow.Stub {
     @Override
     public void doneAnimating() {
     }
+
+    @Override
+    public void dispatchWindowShown() {
+    }
 }

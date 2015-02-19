@@ -38,10 +38,13 @@
         be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue() -->
     <bool name="imsServiceAllowTurnOff">false</bool>
 
-    <!-- Flag specifying whether VoLTE & VT should be available for carrier: independent of
+    <!-- Flag specifying whether VoLTE should be available for carrier: independent of
          carrier provisioning. If false: hard disabled. If true: then depends on carrier
          provisioning, availability etc -->
-    <bool name="config_carrier_volte_vt_available">false</bool>
+    <bool name="config_carrier_volte_available">true</bool>
+
+    <!-- Flag specifying whether VoLTE availability is based on provisioning -->
+    <bool name="config_carrier_volte_provisioned">true</bool>
 
     <bool name="config_auto_attach_data_on_creation">false</bool>
     <!-- service number convert map in roaming network. -->
@@ -49,4 +52,16 @@
         <item>"*611:+19085594899,"</item>
         <item>"*86:+1MDN,"</item>
     </string-array>
+
+    <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
+          when evaluating RSRP for LTE antenna bar display
+           0. Strict threshold
+           1. Lenient threshold
+    -->
+    <integer name="config_LTE_RSRP_threshold_type">0</integer>
+
+    <string-array translatable="false" name="config_sms_convert_destination_number_support">
+        <item>true</item>
+    </string-array>
+    <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">true</string>
 </resources>

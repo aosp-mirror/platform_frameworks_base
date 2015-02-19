@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"Lahat ng printer…"</string>
     <string name="print_dialog" msgid="32628687461331979">"Dialog ng pag-print"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"Page <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> ng <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"Buod, mga kopya <xliff:g id="COPIES">%1$s</xliff:g>, laki ng papel <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"Palakihin ang handle"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Paliitin ang handle"</string>
-    <string name="print_button" msgid="645164566271246268">"I-print"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"I-save sa PDF"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"Pinalaki ang mga opsyon sa pag-print"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"Pinaliit ang mga opsyon sa pag-print"</string>
     <string name="search" msgid="5421724265322228497">"Hanapin"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Lahat ng printer"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Magdagdag ng serbisyo"</string>

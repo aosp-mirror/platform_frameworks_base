@@ -18,7 +18,9 @@ package com.android.server.location;
 
 import android.location.GpsMeasurementsEvent;
 import android.location.IGpsMeasurementsListener;
+import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * An base implementation for GPS measurements provider.
@@ -29,8 +31,10 @@ import android.os.RemoteException;
  */
 public abstract class GpsMeasurementsProvider
         extends RemoteListenerHelper<IGpsMeasurementsListener> {
-    public GpsMeasurementsProvider() {
-        super("GpsMeasurementsProvider");
+    private static final String TAG = "GpsMeasurementsProvider";
+
+    public GpsMeasurementsProvider(Handler handler) {
+        super(handler, TAG);
     }
 
     public void onMeasurementsAvailable(final GpsMeasurementsEvent event) {
@@ -41,7 +45,56 @@ public abstract class GpsMeasurementsProvider
                 listener.onGpsMeasurementsReceived(event);
             }
         };
-
         foreach(operation);
+    }
+
+    public void onCapabilitiesUpdated(boolean isGpsMeasurementsSupported) {
+        int status = isGpsMeasurementsSupported ?
+                GpsMeasurementsEvent.STATUS_READY :
+                GpsMeasurementsEvent.STATUS_NOT_SUPPORTED;
+        setSupported(isGpsMeasurementsSupported, new StatusChangedOperation(status));
+    }
+
+    @Override
+    protected ListenerOperation<IGpsMeasurementsListener> getHandlerOperation(int result) {
+        final int status;
+        switch (result) {
+            case RESULT_SUCCESS:
+                status = GpsMeasurementsEvent.STATUS_READY;
+                break;
+            case RESULT_NOT_AVAILABLE:
+            case RESULT_NOT_SUPPORTED:
+            case RESULT_INTERNAL_ERROR:
+                status = GpsMeasurementsEvent.STATUS_NOT_SUPPORTED;
+                break;
+            case RESULT_GPS_LOCATION_DISABLED:
+                status = GpsMeasurementsEvent.STATUS_GPS_LOCATION_DISABLED;
+                break;
+            default:
+                Log.v(TAG, "Unhandled addListener result: " + result);
+                return null;
+        }
+        return new StatusChangedOperation(status);
+    }
+
+    @Override
+    protected void handleGpsEnabledChanged(boolean enabled) {
+        int status = enabled ?
+                GpsMeasurementsEvent.STATUS_READY :
+                GpsMeasurementsEvent.STATUS_GPS_LOCATION_DISABLED;
+        foreach(new StatusChangedOperation(status));
+    }
+
+    private class StatusChangedOperation implements ListenerOperation<IGpsMeasurementsListener> {
+        private final int mStatus;
+
+        public StatusChangedOperation(int status) {
+            mStatus = status;
+        }
+
+        @Override
+        public void execute(IGpsMeasurementsListener listener) throws RemoteException {
+            listener.onStatusChanged(mStatus);
+        }
     }
 }

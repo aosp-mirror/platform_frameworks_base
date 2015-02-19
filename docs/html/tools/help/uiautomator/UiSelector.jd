@@ -1915,7 +1915,7 @@ From class
     <div class="jd-details-descr">
 
   <div class="jd-tagdata jd-tagdescr"><p>Set the search criteria to match the resource ID
- of the widget, using a regular expression.http://blog.bettersoftwaretesting.com/</p></div>
+ of the widget, using a regular expression.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

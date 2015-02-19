@@ -154,10 +154,11 @@ public class UserSwitcherController {
                         Bitmap picture = bitmaps.get(info.id);
                         if (picture == null) {
                             picture = mUserManager.getUserIcon(info.id);
-                        }
-                        if (picture != null) {
-                            picture = BitmapHelper.createCircularClip(
-                                    picture, avatarSize, avatarSize);
+
+                            if (picture != null) {
+                                picture = BitmapHelper.createCircularClip(
+                                        picture, avatarSize, avatarSize);
+                            }
                         }
                         int index = isCurrent ? 0 : records.size();
                         records.add(index, new UserRecord(info, picture, false /* isGuest */,
@@ -416,24 +417,16 @@ public class UserSwitcherController {
             }
         }
 
-        public int getSwitchableUsers() {
-            int result = 0;
-            ArrayList<UserRecord> users = mController.mUsers;
-            int N = users.size();
-            for (int i = 0; i < N; i++) {
-                if (users.get(i).info != null) {
-                    result++;
-                }
-            }
-            return result;
-        }
-
         public Drawable getDrawable(Context context, UserRecord item) {
             if (item.isAddUser) {
                 return context.getDrawable(R.drawable.ic_add_circle_qs);
             }
             return UserIcons.getDefaultUserIcon(item.isGuest ? UserHandle.USER_NULL : item.info.id,
                     /* light= */ true);
+        }
+
+        public void refresh() {
+            mController.refreshUsers(UserHandle.USER_NULL);
         }
     }
 
@@ -499,6 +492,7 @@ public class UserSwitcherController {
             } else {
                 v = (UserDetailView) convertView;
             }
+            v.refreshAdapter();
             return v;
         }
 
@@ -571,6 +565,9 @@ public class UserSwitcherController {
                 cancel();
             } else {
                 dismiss();
+                if (ActivityManager.isUserAMonkey()) {
+                    return;
+                }
                 UserInfo user = mUserManager.createSecondaryUser(
                         mContext.getString(R.string.user_new_user_name), 0 /* flags */);
                 if (user == null) {
@@ -586,4 +583,9 @@ public class UserSwitcherController {
             }
         }
     }
+
+    public static boolean isUserSwitcherAvailable(UserManager um) {
+        return UserManager.supportsMultipleUsers() && um.isUserSwitcherEnabled();
+    }
+
 }

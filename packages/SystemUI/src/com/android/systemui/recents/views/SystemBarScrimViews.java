@@ -64,7 +64,9 @@ public class SystemBarScrimViews {
             mStatusBarScrimView.setTranslationY(-mStatusBarScrimView.getMeasuredHeight());
             mStatusBarScrimView.animate()
                     .translationY(0)
-                    .setStartDelay(mConfig.taskBarEnterAnimDelay)
+                    .setStartDelay(mConfig.launchedFromHome ?
+                            mConfig.transitionEnterFromHomeDelay :
+                            mConfig.transitionEnterFromAppDelay)
                     .setDuration(mConfig.navBarScrimEnterDuration)
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .withStartAction(new Runnable() {
@@ -79,7 +81,9 @@ public class SystemBarScrimViews {
             mNavBarScrimView.setTranslationY(mNavBarScrimView.getMeasuredHeight());
             mNavBarScrimView.animate()
                     .translationY(0)
-                    .setStartDelay(mConfig.taskBarEnterAnimDelay)
+                    .setStartDelay(mConfig.launchedFromHome ?
+                            mConfig.transitionEnterFromHomeDelay :
+                            mConfig.transitionEnterFromAppDelay)
                     .setDuration(mConfig.navBarScrimEnterDuration)
                     .setInterpolator(mConfig.quintOutInterpolator)
                     .withStartAction(new Runnable() {
@@ -101,7 +105,7 @@ public class SystemBarScrimViews {
             mStatusBarScrimView.animate()
                     .translationY(-mStatusBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setDuration(mConfig.taskViewExitToAppDuration)
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
                     .start();
         }
@@ -109,7 +113,7 @@ public class SystemBarScrimViews {
             mNavBarScrimView.animate()
                     .translationY(mNavBarScrimView.getMeasuredHeight())
                     .setStartDelay(0)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setDuration(mConfig.taskViewExitToAppDuration)
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
                     .start();
         }

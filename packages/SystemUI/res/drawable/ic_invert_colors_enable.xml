@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:name="root"
+    android:alpha="0.3"
+    android:height="48dp"
+    android:width="48dp"
+    android:viewportHeight="48"
+    android:viewportWidth="48" >
+    <group
+        android:name="icon"
+        android:translateX="21.9995"
+        android:translateY="25.73401" >
+        <group
+            android:name="icon_pivot"
+            android:translateX="-23.21545"
+            android:translateY="-18.86649" >
+            <clip-path
+                android:name="mask"
+                android:pathData="M 37.8337860107,-40.3974914551 c 0.0,0.0 -35.8077850342,31.5523681641 -35.8077850342,31.5523681641 c 0.0,0.0 40.9884796143,40.9278411865 40.9884796143,40.9278411865 c 0.0,0.0 -2.61700439453,2.0938873291 -2.61700439453,2.0938873291 c 0.0,0.0 -41.1884460449,-40.9392852783 -41.1884460449,-40.9392852783 c 0.0,0.0 -34.6200408936,25.4699249268 -34.6200408936,25.4699249268 c 0.0,0.0 55.9664764404,69.742401123 55.9664764404,69.742401123 c 0.0,0.0 73.2448120117,-59.1047973633 73.2448120117,-59.1047973633 c 0.0,0.0 -55.9664916992,-69.7423400879 -55.9664916992,-69.7423400879 Z" />
+            <group
+                android:name="cross" >
+                <path
+                    android:name="cross_1"
+                    android:pathData="M 7.54049682617,3.9430847168 c 0.0,0.0 31.5749816895,31.4499664307 31.5749816895,31.4499664307 "
+                    android:strokeColor="#FFFFFFFF"
+                    android:strokeAlpha="1"
+                    android:strokeWidth="3.5"
+                    android:fillColor="#00000000" />
+            </group>
+            <group
+                android:name="ink_drop"
+                android:translateY="-6.8" >
+                <path
+                    android:name="outer_drop"
+                    android:pathData="M 35.3000030518,15.8999938965 c 0.0,0.0 -11.3000030518,-11.3999938965 -11.3000030518,-11.3999938965 c 0,0.0 -11.3000030518,11.3999938965 -11.3000030518,11.3999938965 c -6.19999694824,6.20001220703 -6.19999694824,16.4000091553 0.0,22.6000061035 c 3.10000610352,3.10000610352 7.19999694824,4.69999694824 11.3000030518,4.69999694824 c 4.10000610352,0.0 8.19999694824,-1.59999084473 11.3000030518,-4.69999694824 c 6.30000305176,-6.30000305176 6.30000305176,-16.3999938965 0.0,-22.6000061035 Z M 24,39.1999969482 c 0,0.0 0,0.0 0,0.0 c -3.19999694824,0.0 -6.19999694824,-1.19999694824 -8.5,-3.5 c -2.30000305176,-2.29998779297 -3.5,-5.30000305176 -3.5,-8.5 c 0,-3.19999694824 1.19999694824,-6.19999694824 3.5,-8.5 c 0.0,0.0 8.5,-8.5 8.5,-8.5 c 0,0.0 0,29.0 0,29.0 Z"
+                    android:fillColor="#FFFFFFFF"
+                    android:fillAlpha="1" />
+            </group>
+        </group>
+    </group>
+</vector>

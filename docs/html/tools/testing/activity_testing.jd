@@ -242,7 +242,7 @@ parent.link=index.html
     This changes when you run tests against the application. With instrumentation-based classes,
     you can invoke methods against the UI of the application under test. The other test classes
     don't allow this. To run an entire test method on the UI thread, you can annotate the thread
-    with <code>@UIThreadTest</code>. Notice that this will run <em>all</em> of the method statements
+    with <code>@UiThreadTest</code>. Notice that this will run <em>all</em> of the method statements
     on the UI thread.  Methods that do not interact with the UI are not allowed; for example, you
     can't invoke <code>Instrumentation.waitForIdleSync()</code>.
 </p>

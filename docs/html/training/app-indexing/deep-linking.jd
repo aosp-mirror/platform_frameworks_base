@@ -61,13 +61,15 @@ in your manifest for deep linking. The URIs {@code “example://gizmos”} and
         &lt;action android:name="android.intent.action.VIEW" /&gt;
         &lt;category android:name="android.intent.category.DEFAULT" /&gt;
         &lt;category android:name="android.intent.category.BROWSABLE" /&gt;
-        &lt;!-- Accepts URIs that begin with "example://gizmos” --&gt;
-        &lt;data android:scheme="example"
-              android:host="gizmos" /&gt;
         &lt;!-- Accepts URIs that begin with "http://www.example.com/gizmos” --&gt;
         &lt;data android:scheme="http"
               android:host="www.example.com"
-              android:pathPrefix="gizmos" /&gt;
+              android:pathPrefix="/gizmos" /&gt;
+        &lt;!-- note that the leading "/" is required for pathPrefix--&gt;
+        &lt;!-- Accepts URIs that begin with "example://gizmos”
+        &lt;data android:scheme="example"
+              android:host="gizmos" /&gt;
+        --&gt;
     &lt;/intent-filter&gt;
 &lt;/activity&gt;
 </pre>
@@ -75,6 +77,11 @@ in your manifest for deep linking. The URIs {@code “example://gizmos”} and
 <p>Once you've added intent filters with URIs for activity content to your app
 manifest, Android is able to route any {@link android.content.Intent}
 that has matching URIs to your app at runtime.</p>
+
+<p class="note">
+  <strong>Note:</strong> Intent filters may only contain a single {@code data} element
+  for a URI pattern. Create separate intent filters to capture additional URI patterns.
+</p>
 
 <p>To learn more about defining intent filters, see <a href="{@docRoot}training/basics/intents/filters.html">Allow Other Apps to Start Your Activity</a>.</p>
 

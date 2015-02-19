@@ -63,6 +63,7 @@ public abstract class Visibility extends Transition {
 
     private static final String[] sTransitionProperties = {
             PROPNAME_VISIBILITY,
+            PROPNAME_PARENT,
     };
 
     private static class VisibilityInfo {
@@ -484,12 +485,19 @@ public abstract class Visibility extends Transition {
 
     @Override
     boolean areValuesChanged(TransitionValues oldValues, TransitionValues newValues) {
-        VisibilityInfo changeInfo = getVisibilityChangeInfo(oldValues, newValues);
         if (oldValues == null && newValues == null) {
             return false;
         }
+        if (oldValues != null && newValues != null &&
+                newValues.values.containsKey(PROPNAME_VISIBILITY) !=
+                        oldValues.values.containsKey(PROPNAME_VISIBILITY)) {
+            // The transition wasn't targeted in either the start or end, so it couldn't
+            // have changed.
+            return false;
+        }
+        VisibilityInfo changeInfo = getVisibilityChangeInfo(oldValues, newValues);
         return changeInfo.visibilityChange && (changeInfo.startVisibility == View.VISIBLE ||
-            changeInfo.endVisibility == View.VISIBLE);
+                changeInfo.endVisibility == View.VISIBLE);
     }
 
     /**

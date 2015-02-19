@@ -62,7 +62,8 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     public ParcelFileDescriptor openFile(
-            String callingPackage, Uri url, String mode, ICancellationSignal signal) {
+            String callingPackage, Uri url, String mode, ICancellationSignal signal,
+            IBinder callerToken) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

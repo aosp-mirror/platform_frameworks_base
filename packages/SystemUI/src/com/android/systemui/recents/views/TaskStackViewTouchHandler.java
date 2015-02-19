@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.content.Context;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -142,12 +143,14 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 // Initialize the velocity tracker
                 initOrResetVelocityTracker();
                 mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
-                // Check if the scroller is finished yet
-                mIsScrolling = mScroller.isScrolling();
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
                 if (mActivePointerId == INACTIVE_POINTER_ID) break;
+
+                // Initialize the velocity tracker if necessary
+                initVelocityTrackerIfNotExists();
+                mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
 
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int y = (int) ev.getY(activePointerIndex);
@@ -155,9 +158,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 if (Math.abs(y - mInitialMotionY) > mScrollTouchSlop) {
                     // Save the touch move info
                     mIsScrolling = true;
-                    // Initialize the velocity tracker if necessary
-                    initVelocityTrackerIfNotExists();
-                    mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
                     // Disallow parents from intercepting touch events
                     final ViewParent parent = mSv.getParent();
                     if (parent != null) {
@@ -189,7 +189,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
-
         // Short circuit if we have no children
         boolean hasChildren = (mSv.getChildCount() > 0);
         if (!hasChildren) {
@@ -237,6 +236,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
             case MotionEvent.ACTION_MOVE: {
                 if (mActivePointerId == INACTIVE_POINTER_ID) break;
 
+                mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
+
                 int activePointerIndex = ev.findPointerIndex(mActivePointerId);
                 int x = (int) ev.getX(activePointerIndex);
                 int y = (int) ev.getY(activePointerIndex);
@@ -246,9 +247,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 if (!mIsScrolling) {
                     if (yTotal > mScrollTouchSlop) {
                         mIsScrolling = true;
-                        // Initialize the velocity tracker
-                        initOrResetVelocityTracker();
-                        mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
                         // Disallow parents from intercepting touch events
                         final ViewParent parent = mSv.getParent();
                         if (parent != null) {
@@ -267,11 +265,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                                 / maxOverScroll));
                     }
                     mScroller.setStackScroll(curStackScroll + deltaP);
-                    if (mScroller.isScrollOutOfBounds()) {
-                        mVelocityTracker.clear();
-                    } else {
-                        mVelocityTracker.addMovement(createMotionEventForStackScroll(ev));
-                    }
                 }
                 mLastMotionX = x;
                 mLastMotionY = y;
@@ -280,20 +273,21 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                final VelocityTracker velocityTracker = mVelocityTracker;
-                velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                int velocity = (int) velocityTracker.getYVelocity(mActivePointerId);
+                mVelocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                int velocity = (int) mVelocityTracker.getYVelocity(mActivePointerId);
                 if (mIsScrolling && (Math.abs(velocity) > mMinimumVelocity)) {
-                    int overscrollRange = (int) (Math.min(1f,
-                            Math.abs((float) velocity / mMaximumVelocity)) *
-                            Constants.Values.TaskStackView.TaskStackOverscrollRange);
-                    // Fling scroll
-                    mScroller.mScroller.fling(0, mScroller.progressToScrollRange(mScroller.getStackScroll()),
+                    float overscrollRangePct = Math.abs((float) velocity / mMaximumVelocity);
+                    int overscrollRange = (int) (Math.min(1f, overscrollRangePct) *
+                            (Constants.Values.TaskStackView.TaskStackMaxOverscrollRange -
+                            Constants.Values.TaskStackView.TaskStackMinOverscrollRange));
+                    mScroller.mScroller.fling(0,
+                            mScroller.progressToScrollRange(mScroller.getStackScroll()),
                             0, velocity,
                             0, 0,
                             mScroller.progressToScrollRange(mSv.mLayoutAlgorithm.mMinScrollP),
                             mScroller.progressToScrollRange(mSv.mLayoutAlgorithm.mMaxScrollP),
-                            0, overscrollRange);
+                            0, Constants.Values.TaskStackView.TaskStackMinOverscrollRange +
+                                    overscrollRange);
                     // Invalidate to kick off computeScroll
                     mSv.invalidate();
                 } else if (mScroller.isScrollOutOfBounds()) {
@@ -336,6 +330,30 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         return true;
     }
 
+    /** Handles generic motion events */
+    public boolean onGenericMotionEvent(MotionEvent ev) {
+        if ((ev.getSource() & InputDevice.SOURCE_CLASS_POINTER) ==
+                InputDevice.SOURCE_CLASS_POINTER) {
+            int action = ev.getAction();
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_SCROLL:
+                    // Find the front most task and scroll the next task to the front
+                    float vScroll = ev.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                    if (vScroll > 0) {
+                        if (mSv.ensureFocusedTask()) {
+                            mSv.focusNextTask(true, false);
+                        }
+                    } else {
+                        if (mSv.ensureFocusedTask()) {
+                            mSv.focusNextTask(false, false);
+                        }
+                    }
+                    return true;
+            }
+        }
+        return false;
+    }
+
     /**** SwipeHelper Implementation ****/
 
     @Override
@@ -355,8 +373,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(false);
         // Disallow touch events from this task view
         tv.setTouchEnabled(false);
-        // Hide the footer
-        tv.animateFooterVisibility(false, mSv.mConfig.taskViewLockToAppShortAnimDuration);
         // Disallow parents from intercepting touch events
         final ViewParent parent = mSv.getParent();
         if (parent != null) {
@@ -387,8 +403,6 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
-        // Restore the footer
-        tv.animateFooterVisibility(true, mSv.mConfig.taskViewLockToAppShortAnimDuration);
     }
 
     @Override

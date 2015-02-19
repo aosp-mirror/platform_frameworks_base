@@ -29,7 +29,8 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.DataUsageInfo;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataController;
+import com.android.systemui.statusbar.policy.NetworkController.MobileDataController.DataUsageInfo;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
 /** Quick settings tile: Cellular **/
@@ -38,11 +39,13 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             "com.android.settings", "com.android.settings.Settings$DataUsageSummaryActivity"));
 
     private final NetworkController mController;
+    private final MobileDataController mDataController;
     private final CellularDetailAdapter mDetailAdapter;
 
     public CellularTile(Host host) {
         super(host);
         mController = host.getNetworkController();
+        mDataController = mController.getMobileDataController();
         mDetailAdapter = new CellularDetailAdapter();
     }
 
@@ -72,7 +75,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleClick() {
-        if (mController.isMobileDataSupported()) {
+        if (mDataController.isMobileDataSupported()) {
             showDetail(true);
         } else {
             mHost.startSettingsActivity(CELLULAR_SETTINGS);
@@ -87,16 +90,15 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
         if (cb == null) return;
 
         final Resources r = mContext.getResources();
-        state.iconId = cb.noSim ? R.drawable.ic_qs_no_sim
+        final int iconId = cb.noSim ? R.drawable.ic_qs_no_sim
                 : !cb.enabled || cb.airplaneModeEnabled ? R.drawable.ic_qs_signal_disabled
                 : cb.mobileSignalIconId > 0 ? cb.mobileSignalIconId
                 : R.drawable.ic_qs_signal_no_signal;
+        state.icon = ResourceIcon.get(iconId);
         state.isOverlayIconWide = cb.isDataTypeIconWide;
         state.autoMirrorDrawable = !cb.noSim;
-        state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) && !cb.wifiConnected
-                ? cb.dataTypeIconId
-                : 0;
-        state.filter = state.iconId != R.drawable.ic_qs_no_sim;
+        state.overlayIconId = cb.enabled && (cb.dataTypeIconId > 0) ? cb.dataTypeIconId : 0;
+        state.filter = iconId != R.drawable.ic_qs_no_sim;
         state.activityIn = cb.enabled && cb.activityIn;
         state.activityOut = cb.enabled && cb.activityOut;
 
@@ -143,16 +145,15 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
     }
 
     private final NetworkSignalChangedCallback mCallback = new NetworkSignalChangedCallback() {
-        private boolean mWifiEnabled;
-        private boolean mWifiConnected;
-        private boolean mAirplaneModeEnabled;
+        private final CallbackInfo mInfo = new CallbackInfo();
 
         @Override
         public void onWifiSignalChanged(boolean enabled, boolean connected, int wifiSignalIconId,
                 boolean activityIn, boolean activityOut,
                 String wifiSignalContentDescriptionId, String description) {
-            mWifiEnabled = enabled;
-            mWifiConnected = connected;
+            mInfo.wifiEnabled = enabled;
+            mInfo.wifiConnected = connected;
+            refreshState(mInfo);
         }
 
         @Override
@@ -160,28 +161,40 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description, boolean noSim,
+                String dataTypeContentDescriptionId, String description,
                 boolean isDataTypeIconWide) {
-            final CallbackInfo info = new CallbackInfo();  // TODO pool?
-            info.enabled = enabled;
-            info.wifiEnabled = mWifiEnabled;
-            info.wifiConnected = mWifiConnected;
-            info.airplaneModeEnabled = mAirplaneModeEnabled;
-            info.mobileSignalIconId = mobileSignalIconId;
-            info.signalContentDescription = mobileSignalContentDescriptionId;
-            info.dataTypeIconId = dataTypeIconId;
-            info.dataContentDescription = dataTypeContentDescriptionId;
-            info.activityIn = activityIn;
-            info.activityOut = activityOut;
-            info.enabledDesc = description;
-            info.noSim = noSim;
-            info.isDataTypeIconWide = isDataTypeIconWide;
-            refreshState(info);
+            mInfo.enabled = enabled;
+            mInfo.mobileSignalIconId = mobileSignalIconId;
+            mInfo.signalContentDescription = mobileSignalContentDescriptionId;
+            mInfo.dataTypeIconId = dataTypeIconId;
+            mInfo.dataContentDescription = dataTypeContentDescriptionId;
+            mInfo.activityIn = activityIn;
+            mInfo.activityOut = activityOut;
+            mInfo.enabledDesc = description;
+            mInfo.isDataTypeIconWide = isDataTypeIconWide;
+            refreshState(mInfo);
+        }
+
+        @Override
+        public void onNoSimVisibleChanged(boolean visible) {
+            mInfo.noSim = visible;
+            if (mInfo.noSim) {
+                // Make sure signal gets cleared out when no sims.
+                mInfo.mobileSignalIconId = 0;
+                mInfo.dataTypeIconId = 0;
+                // Show a No SIMs description to avoid emergency calls message.
+                mInfo.enabled = true;
+                mInfo.enabledDesc = mContext.getString(
+                        R.string.keyguard_missing_sim_message_short);
+                mInfo.signalContentDescription = mInfo.enabledDesc;
+            }
+            refreshState(mInfo);
         }
 
         @Override
         public void onAirplaneModeChanged(boolean enabled) {
-            mAirplaneModeEnabled = enabled;
+            mInfo.airplaneModeEnabled = enabled;
+            refreshState(mInfo);
         }
 
         public void onMobileDataEnabled(boolean enabled) {
@@ -198,7 +211,9 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public Boolean getToggleState() {
-            return mController.isMobileDataSupported() ? mController.isMobileDataEnabled() : null;
+            return mDataController.isMobileDataSupported()
+                    ? mDataController.isMobileDataEnabled()
+                    : null;
         }
 
         @Override
@@ -208,7 +223,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
 
         @Override
         public void setToggleState(boolean state) {
-            mController.setMobileDataEnabled(state);
+            mDataController.setMobileDataEnabled(state);
         }
 
         @Override
@@ -216,7 +231,7 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
             final DataUsageDetailView v = (DataUsageDetailView) (convertView != null
                     ? convertView
                     : LayoutInflater.from(mContext).inflate(R.layout.data_usage, parent, false));
-            final DataUsageInfo info = mController.getDataUsageInfo();
+            final DataUsageInfo info = mDataController.getDataUsageInfo();
             if (info == null) return v;
             v.bind(info);
             return v;

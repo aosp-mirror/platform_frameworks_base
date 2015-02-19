@@ -51,8 +51,8 @@ option java_package com.android.server
 # ---------------------------
 # NotificationManagerService.java
 # ---------------------------
-# when a NotificationManager.notify is called
-2750 notification_enqueue (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(notification|3)
+# when a NotificationManager.notify is called. status: 0=post, 1=update, 2=ignored
+2750 notification_enqueue (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(notification|3),(status|1)
 # when someone tries to cancel a notification, the notification manager sometimes
 # calls this with flags too
 2751 notification_cancel (uid|1|5),(pid|1|5),(pkg|3),(id|1|5),(tag|3),(userid|1|5),(required_flags|1),(forbidden_flags|1),(reason|1|5),(listener|3)
@@ -69,6 +69,10 @@ option java_package com.android.server
 27511 notification_expansion (key|3),(user_action|1),(expanded|1)
 # when a notification has been clicked
 27520 notification_clicked (key|3)
+# when a notification action button has been clicked
+27521 notification_action_clicked (key|3),(action_index|1)
+# when a notification has been canceled
+27530 notification_canceled (key|3),(reason|1)
 
 # ---------------------------
 # Watchdog.java
@@ -162,6 +166,12 @@ option java_package com.android.server
 # ---------------------------
 # Re-connecting to input method service because we haven't received its interface
 32000 imf_force_reconnect_ime (IME|4),(Time Since Connect|2|3),(Showing|1|1)
+
+
+# ---------------------------
+# WallpaperManagerService.java
+# ---------------------------
+33000 wp_wallpaper_crashed (component|3)
 
 
 # ---------------------------

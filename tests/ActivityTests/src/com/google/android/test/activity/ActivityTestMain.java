@@ -62,6 +62,8 @@ public class ActivityTestMain extends Activity {
 
     ArrayList<ServiceConnection> mConnections = new ArrayList<ServiceConnection>();
 
+    ServiceConnection mIsolatedConnection;
+
     static final int MSG_SPAM = 1;
 
     final Handler mHandler = new Handler() {
@@ -127,7 +129,7 @@ public class ActivityTestMain extends Activity {
             @Override
             public boolean onLongClick(View v) {
                 if (task.id >= 0 && thumbs != null) {
-                    mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                    mAm.removeTask(task.id);
                     buildUi();
                     return true;
                 }
@@ -139,6 +141,8 @@ public class ActivityTestMain extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.i(TAG, "Referrer: " + getReferrer());
 
         mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
         if (savedInstanceState != null) {
@@ -202,6 +206,34 @@ public class ActivityTestMain extends Activity {
             @Override public boolean onMenuItemClick(MenuItem item) {
                 Intent intent = new Intent(ActivityTestMain.this, SingleUserService.class);
                 startService(intent);
+                return true;
+            }
+        });
+        menu.add("Rebind Isolated!").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(ActivityTestMain.this, IsolatedService.class);
+                ServiceConnection conn = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        Log.i(TAG, "Isolated service connected " + name + " " + service);
+                    }
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        Log.i(TAG, "Isolated service disconnected " + name);
+                    }
+                };
+                if (mIsolatedConnection != null) {
+                    Log.i(TAG, "Unbinding existing service: " + mIsolatedConnection);
+                    unbindService(mIsolatedConnection);
+                    mIsolatedConnection = null;
+                }
+                Log.i(TAG, "Binding new service: " + conn);
+                if (bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
+                    mIsolatedConnection = conn;
+                } else {
+                    Toast.makeText(ActivityTestMain.this, "Failed to bind",
+                            Toast.LENGTH_LONG).show();
+                }
                 return true;
             }
         });
@@ -415,6 +447,10 @@ public class ActivityTestMain extends Activity {
             unbindService(conn);
         }
         mConnections.clear();
+        if (mIsolatedConnection != null) {
+            unbindService(mIsolatedConnection);
+            mIsolatedConnection = null;
+        }
     }
 
     @Override

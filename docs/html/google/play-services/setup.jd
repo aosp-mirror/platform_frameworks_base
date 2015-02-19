@@ -43,8 +43,8 @@ to <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</
 
 <p>
 <select class="ide">
-  <option value="eclipse">Using Eclipse with ADT</option>
   <option value="studio">Using Android Studio</option>
+  <option value="eclipse">Using Eclipse with ADT</option>
   <option value="other">Using something else</option>
 </select>
 </p>
@@ -62,15 +62,21 @@ to <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</
   <li>Add a new build rule under <code>dependencies</code> for the latest version of
 <code>play-services</code>. For example:
 <pre class="no-pretty-print">
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 ...
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:20.+'
-    <strong>compile 'com.google.android.gms:play-services:6.1.+'</strong>
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    <strong>compile 'com.google.android.gms:play-services:6.5.87'</strong>
 }
 </pre>
 <p>Be sure you update this version number each time Google Play services is updated.</p>
+<p class="note"><strong>Note:</strong> If the number of method references in your app exceeds the
+<a href="{@docRoot}tools/building/multidex.html">65K limit</a>, your app may fail to compile. You
+may be able to mitigate this problem when compiling your app by specifying only the specific Google
+Play services APIs your app uses, instead of all of them. For information on how to do this,
+see <a href="#split">Selectively compiling APIs into your executable</a>.
+
   </li>
   <li>Save the changes and click <strong>Sync Project with Gradle Files</strong>
 <img src="{@docRoot}images/tools/sync-project.png" style="vertical-align:bottom;margin:0;height:19px" />
@@ -89,13 +95,112 @@ element:
 <p>You can now begin developing features with the
 <a href="{@docRoot}reference/gms-packages.html">Google Play services APIs</a>.</p>
 
+<h3 id="split">Selectively compiling APIs into your executable</h3>
+
+<p>In versions of Google Play services prior to 6.5, you had to compile the entire package of APIs
+into your app. In some cases, doing so made it more difficult to keep the number of methods
+in your app (including framework APIs, library methods, and your own code) under the 65,536 limit.</p>
+
+<p>From version 6.5, you can instead selectively compile Google Play service APIs into your app. For
+example, to include only the Google Fit and Android Wear APIs, replace the following line in your
+<code>build.gradle</code> file:</p>
+
+<pre class="no-pretty-print">
+compile 'com.google.android.gms:play-services:6.5.87'
+</pre>
+
+<p>with these lines:</p>
+
+<pre class="no-pretty-print">
+compile 'com.google.android.gms:play-services-fitness:6.5.87'
+compile 'com.google.android.gms:play-services-wearable:6.5.87'
+</pre>
+
+<p>Table 1 shows a list of the separate APIs that you can include when compiling your app, and
+how to describe them in your <code>build.gradle</code> file. Some APIs do not have a separate
+library; include them by including the base library. (This lib is automatically included when
+you include an API that does have a separate library.)</p>
+
+<p class="table-caption" id="table1">
+<strong>Table 1.</strong> Individual APIs and corresponding <code>build.gradle</code> descriptions.</p>
+
+<table>
+  <tr>
+    <th scope="col">Google Play services API</th>
+    <th scope="col">Description in <code>build.gradle</code></th>
+  </tr>
+    <tr>
+    <td>Google+</td>
+    <td>com.google.android.gms:play-services-plus:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Account Login</td>
+    <td>com.google.android.gms:play-services-identity:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Activity Recognition</td>
+    <td>com.google.android.gms:play-services-location:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google App Indexing</td>
+    <td>com.google.android.gms:play-services-appindexing:6.5.87</td>
+  </tr>
+    <tr>
+    <td>Google Cast</td>
+    <td>com.google.android.gms:play-services-cast:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Drive</td>
+    <td>com.google.android.gms:play-services-drive:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Fit</td>
+    <td>com.google.android.gms:play-services-fitness:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Maps</td>
+    <td>com.google.android.gms:play-services-maps:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Mobile Ads</td>
+    <td>com.google.android.gms:play-services-ads:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Panorama Viewer</td>
+    <td>com.google.android.gms:play-services-panorama:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Play Game services</td>
+    <td>com.google.android.gms:play-services-games:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Google Wallet</td>
+    <td>com.google.android.gms:play-services-wallet:6.5.87</td>
+  </tr>
+  <tr>
+    <td>Android Wear</td>
+    <td>com.google.android.gms:play-services-wearable:6.5.87</td>
+  </tr>
+    <tr>
+    <td>
+    Google Actions<br>
+    Google Analytics<br>
+    Google Cloud Messaging<br>
+    </td>
+    <td>com.google.android.gms:play-services-base:6.5.87</td>
+  </tr>
+
+</table>
+
 </div><!-- end studio -->
 
 <div class="select-ide eclipse">
 
 <p>To make the Google Play services APIs available to your app:</p>
 <ol>
-  <li>Copy the library project at <code>&lt;android-sdk&gt;/extras/google/google_play_services/libproject/google-play-services_lib/</code> to the location where you maintain your Android app projects.</li>
+  <li>Copy the library project at
+  <code>&lt;android-sdk&gt;/extras/google/google_play_services/libproject/google-play-services_lib/</code>
+  to the location where you maintain your Android app projects.</li>
   <li>Import the library project into your Eclipse workspace. Click
     <b>File > Import</b>, select <b>Android > Existing Android Code into
 Workspace</b>, and browse to the copy of the library project to import it.</li>
@@ -179,7 +284,7 @@ required classes, add the following lines in the
 </pre>
 
 <p class="note"><strong>Note:</strong> When using Android Studio, you must add Proguard
-to your <code>gradle.build</code> file's build types. For more information, see the
+to your <code>build.gradle</code> file's build types. For more information, see the
 <a href="http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Running-ProGuard"
 >Gradle Plugin User Guide</a>.
 </ol>

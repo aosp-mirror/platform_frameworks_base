@@ -57,18 +57,14 @@ final class ActiveSourceHandler {
      * Handles the incoming active source command.
      *
      * @param newActive new active source information
+     * @param deviceType device type of the new active source
      */
-    void process(ActiveSource newActive) {
+    void process(ActiveSource newActive, int deviceType) {
         // Seq #17
         HdmiCecLocalDeviceTv tv = mSource;
-        ActiveSource activeSource = tv.getActiveSource();
-        if (activeSource.equals(newActive)) {
-            invokeCallback(HdmiControlManager.RESULT_SUCCESS);
-            return;
-        }
         HdmiDeviceInfo device = mService.getDeviceInfo(newActive.logicalAddress);
         if (device == null) {
-            tv.startNewDeviceAction(newActive);
+            tv.startNewDeviceAction(newActive, deviceType);
         }
 
         if (!tv.isProhibitMode()) {
@@ -88,11 +84,8 @@ final class ActiveSourceHandler {
                 tv.updateActiveSource(current);
                 invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             } else {
-                HdmiCecMessage routingChange = HdmiCecMessageBuilder.buildRoutingChange(
-                        getSourceAddress(), newActive.physicalAddress, current.physicalAddress);
-                mService.sendCecCommand(routingChange);
-                tv.addAndStartAction(
-                        new RoutingControlAction(tv, current.physicalAddress, true, mCallback));
+                tv.startRoutingControl(newActive.physicalAddress, current.physicalAddress, true,
+                        mCallback);
             }
         }
     }

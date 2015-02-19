@@ -67,7 +67,7 @@ public class HdmiTimerRecordSources {
     private HdmiTimerRecordSources() {}
 
     /**
-     * Create {@link TimerRecordSource} for digital source which is used for &lt;Set Digital
+     * Creates {@link TimerRecordSource} for digital source which is used for &lt;Set Digital
      * Timer&gt;.
      *
      * @param timerInfo timer info used for timer recording
@@ -82,7 +82,7 @@ public class HdmiTimerRecordSources {
     }
 
     /**
-     * Create {@link TimerRecordSource} for analogue source which is used for &lt;Set Analogue
+     * Creates {@link TimerRecordSource} for analogue source which is used for &lt;Set Analogue
      * Timer&gt;.
      *
      * @param timerInfo timer info used for timer recording
@@ -97,7 +97,7 @@ public class HdmiTimerRecordSources {
     }
 
     /**
-     * Create {@link TimerRecordSource} for external plug which is used for &lt;Set External
+     * Creates {@link TimerRecordSource} for external plug which is used for &lt;Set External
      * Timer&gt;.
      *
      * @param timerInfo timer info used for timer recording
@@ -112,7 +112,7 @@ public class HdmiTimerRecordSources {
     }
 
     /**
-     * Create {@link TimerRecordSource} for external physical address which is used for &lt;Set
+     * Creates {@link TimerRecordSource} for external physical address which is used for &lt;Set
      * External Timer&gt;.
      *
      * @param timerInfo timer info used for timer recording
@@ -140,7 +140,7 @@ public class HdmiTimerRecordSources {
     }
 
     /**
-     * Create {@link Duration} for time value.
+     * Creates {@link Duration} for time value.
      *
      * @param hour hour in range of [0, 23]
      * @param minute minute in range of [0, 60]
@@ -162,7 +162,7 @@ public class HdmiTimerRecordSources {
     }
 
     /**
-     * Create {@link Duration} for duration value.
+     * Creates {@link Duration} for duration value.
      *
      * @param hour hour in range of [0, 99]
      * @param minute minute in range of [0, 59]
@@ -183,22 +183,27 @@ public class HdmiTimerRecordSources {
         }
     }
 
-    private static class TimeUnit {
-        protected final int mHour;
-        protected final int mMinute;
+    /**
+     * Base class for time-related information.
+     * @hide
+     */
+    @SystemApi
+    /* package */ static class TimeUnit {
+        /* package */ final int mHour;
+        /* package */ final int mMinute;
 
-        protected TimeUnit(int hour, int minute) {
+        /* package */ TimeUnit(int hour, int minute) {
             mHour = hour;
             mMinute = minute;
         }
 
-        protected int toByteArray(byte[] data, int index) {
+        /* package */ int toByteArray(byte[] data, int index) {
             data[index] = toBcdByte(mHour);
             data[index + 1] = toBcdByte(mMinute);
             return 2;
         }
 
-        protected static byte toBcdByte(int value) {
+        /* package */ static byte toBcdByte(int value) {
             int digitOfTen = (value / 10) % 10;
             int digitOfOne = value % 10;
             return (byte) ((digitOfTen << 4) | digitOfOne);
@@ -247,7 +252,7 @@ public class HdmiTimerRecordSources {
             RECORDING_SEQUENCE_REPEAT_SATUREDAY);
 
     /**
-     * Create {@link TimerInfo} with the given information.
+     * Creates {@link TimerInfo} with the given information.
      *
      * @param dayOfMonth day of month
      * @param monthOfYear month of year
@@ -426,7 +431,7 @@ public class HdmiTimerRecordSources {
     }
 
     /**
-     * Check the byte array of timer record source.
+     * Checks the byte array of timer record source.
      * @param sourcetype
      * @param recordSource
      * @hide

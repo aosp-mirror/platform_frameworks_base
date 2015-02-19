@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">MaskedWalletRequest.Builder</li>
       </ul>
     </div>
@@ -772,6 +841,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -879,8 +951,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#addAllowedCountrySpecificationForShipping(com.google.android.gms.identity.intents.model.CountrySpecification)">addAllowedCountrySpecificationForShipping</a></span>(<a href="/reference/com/google/android/gms/identity/intents/model/CountrySpecification.html">CountrySpecification</a> countrySpecification)</nobr>
         
-        <div class="jd-descrdiv">Sets an optional set of country specifications that should be allowed for shipping.</div>
+        <div class="jd-descrdiv">
+          Sets an optional set of country specifications that should be allowed for shipping.
+          
+    
 
+        </div>
+  
   </td></tr>
 
 
@@ -929,7 +1006,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setAllowDebitCard(boolean)">setAllowDebitCard</a></span>(boolean allowDebitCard)</nobr>
         
-        <div class="jd-descrdiv">Indicates whether a debit card may be used for this transaction.</div>
+        <div class="jd-descrdiv">
+          Indicates whether a debit card may be used for this transaction.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -946,26 +1028,36 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setAllowPrepaidCard(boolean)">setAllowPrepaidCard</a></span>(boolean allowPrepaidCard)</nobr>
+        
+        <div class="jd-descrdiv">
+          Indicates whether a prepaid card may be used for this transaction.
+          
+    
 
-        <div class="jd-descrdiv">Indicates whether a prepaid card may be used for this transaction.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html">MaskedWalletRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setCart(com.google.android.gms.wallet.Cart)">setCart</a></span>(<a href="/reference/com/google/android/gms/wallet/Cart.html">Cart</a> cart)</nobr>
         
-        <div class="jd-descrdiv">Sets an optional shopping cart to use for this purchase.</div>
+        <div class="jd-descrdiv">
+          Sets an optional shopping cart to use for this purchase.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -983,7 +1075,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setCurrencyCode(java.lang.String)">setCurrencyCode</a></span>(String currencyCode)</nobr>
         
-        <div class="jd-descrdiv">Required field.</div>
+        <div class="jd-descrdiv">
+          Required field.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1001,7 +1098,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setEstimatedTotalPrice(java.lang.String)">setEstimatedTotalPrice</a></span>(String estimatedTotalPrice)</nobr>
         
-        <div class="jd-descrdiv">Required field.</div>
+        <div class="jd-descrdiv">
+          Required field.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1019,8 +1121,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setIsBillingAgreement(boolean)">setIsBillingAgreement</a></span>(boolean isBillingAgreement)</nobr>
         
-        <div class="jd-descrdiv">Indicates whether this request is for a billing agreement rather than for a one time
- purchase.</div>
+        <div class="jd-descrdiv">
+          Indicates whether this request is for a billing agreement rather than for a one time
+ purchase.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1038,7 +1145,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setMerchantName(java.lang.String)">setMerchantName</a></span>(String merchantName)</nobr>
         
-        <div class="jd-descrdiv">Sets an optional merchant name to be displayed on any UI in the checkout flow.</div>
+        <div class="jd-descrdiv">
+          Sets an optional merchant name to be displayed on any UI in the checkout flow.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1056,7 +1168,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setMerchantTransactionId(java.lang.String)">setMerchantTransactionId</a></span>(String merchantTransactionId)</nobr>
         
-        <div class="jd-descrdiv">Sets an optional merchant identifier for the transaction.</div>
+        <div class="jd-descrdiv">
+          Sets an optional merchant identifier for the transaction.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1074,7 +1191,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setPhoneNumberRequired(boolean)">setPhoneNumberRequired</a></span>(boolean phoneNumberRequired)</nobr>
         
-        <div class="jd-descrdiv">Indicates whether a phone number is required from the user.</div>
+        <div class="jd-descrdiv">
+          Indicates whether a phone number is required from the user.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1092,7 +1214,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setShippingAddressRequired(boolean)">setShippingAddressRequired</a></span>(boolean shippingAddressRequired)</nobr>
         
-        <div class="jd-descrdiv">Indicates whether shipping information is required from the user.</div>
+        <div class="jd-descrdiv">
+          Indicates whether shipping information is required from the user.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1110,8 +1237,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setShouldRetrieveWalletObjects(boolean)">setShouldRetrieveWalletObjects</a></span>(boolean shouldRetrieveWalletObjects)</nobr>
         
-        <div class="jd-descrdiv">Indicates that relevant Wallet Object information should be returned with the
- <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>.</div>
+        <div class="jd-descrdiv">
+          Indicates that relevant Wallet Object information should be returned with the
+ <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1261,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.Builder.html#setUseMinimalBillingAddress(boolean)">setUseMinimalBillingAddress</a></span>(boolean useMinimalBillingAddress)</nobr>
         
-        <div class="jd-descrdiv">Indicates that only minimal billing information (name and zip code) is required.</div>
+        <div class="jd-descrdiv">
+          Indicates that only minimal billing information (name and zip code) is required.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1415,6 +1552,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets an optional set of country specifications that should be allowed for shipping.
  If omitted or a null / empty array is provided the API will default to using a country
  specification that only allows shipping in the US.
@@ -1447,6 +1587,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1455,14 +1598,14 @@ From class
 
 <A NAME="build()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html">MaskedWalletRequest</a>
       </span>
       <span class="sympad">build</span>
@@ -1470,12 +1613,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1504,6 +1650,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether a debit card may be used for this transaction.
  If omitted, defaults to <code>true</code>.
@@ -1536,6 +1685,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether a prepaid card may be used for this transaction.
  If omitted, defaults to <code>true</code>.
 </p></div>
@@ -1566,6 +1718,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets an optional shopping cart to use for this purchase.
 
@@ -1602,6 +1757,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Required field. Sets the ISO 4217 currency code of the transaction.
 </p></div>
 
@@ -1631,6 +1789,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Required field. Sets the total price of the shopping cart. The format of this string
  follows the regex: [0-9]+(\.[0-9][0-9])?. This information will be used by Google risk
@@ -1667,6 +1828,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether this request is for a billing agreement rather than for a one time
  purchase. If <code>true</code>, estimated total price and cart are inapplicable and should not
  be set. If omitted, defaults to <code>false</code>.
@@ -1698,6 +1862,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets an optional merchant name to be displayed on any UI in the checkout flow. If
  omitted, the merchant display name configured in the merchant's account settings will be
@@ -1731,6 +1898,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets an optional merchant identifier for the transaction. The value will be echoed back
  in <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code> and <code><a href="/reference/com/google/android/gms/wallet/FullWallet.html">FullWallet</a></code>, but is not otherwise used by the Wallet
  API.
@@ -1762,6 +1932,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether a phone number is required from the user. Only request the phone number
  when it's required to process the order since it can increase friction during the
@@ -1795,6 +1968,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether shipping information is required from the user. If omitted, defaults to
  false.
 </p></div>
@@ -1825,6 +2001,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that relevant Wallet Object information should be returned with the
  <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>. Only set this to true if you have also integrated with the Google
@@ -1857,6 +2036,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Indicates that only minimal billing information (name and zip code) is required. This
  field is mutually exclusive with shipping address required.  Use only one or the other.

@@ -36,6 +36,5 @@
     <com.android.systemui.BatteryMeterView android:id="@+id/battery"
         android:layout_height="14.5dp"
         android:layout_width="9.5dp"
-        android:layout_marginBottom="@dimen/battery_margin_bottom"
-        android:layout_marginStart="7dp"/>
+        android:layout_marginBottom="@dimen/battery_margin_bottom"/>
 </LinearLayout>

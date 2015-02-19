@@ -267,6 +267,12 @@ public class CheckedTextView extends TextView implements Checkable {
             if (mHasCheckMarkTintMode) {
                 mCheckMarkDrawable.setTintMode(mCheckMarkTintMode);
             }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mCheckMarkDrawable.isStateful()) {
+                mCheckMarkDrawable.setState(getDrawableState());
+            }
         }
     }
 

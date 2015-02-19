@@ -16,7 +16,7 @@
 
 <com.android.internal.view.menu.ListMenuItemView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/dropdownListPreferredItemHeight"
+    android:layout_height="?attr/dropdownListPreferredItemHeight"
     android:minWidth="196dip"
     android:paddingEnd="16dip">
     
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:textAppearance="?android:attr/textAppearanceLargePopupMenu"
+            android:textAppearance="?attr/textAppearanceLargePopupMenu"
             android:singleLine="true"
             android:duplicateParentState="true"
             android:ellipsize="marquee"
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/title"
             android:layout_alignParentStart="true"
-            android:textAppearance="?android:attr/textAppearanceSmallPopupMenu"
+            android:textAppearance="?attr/textAppearanceSmallPopupMenu"
             android:singleLine="true"
             android:duplicateParentState="true"
             android:textAlignment="viewStart" />

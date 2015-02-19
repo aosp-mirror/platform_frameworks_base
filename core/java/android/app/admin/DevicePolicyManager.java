@@ -31,6 +31,7 @@ import android.content.pm.ResolveInfo;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -40,6 +41,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
+import android.service.trust.TrustAgentService;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -60,13 +62,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Public interface for managing policies enforced on a device.  Most clients
- * of this class must have published a {@link DeviceAdminReceiver} that the user
- * has currently enabled.
+ * Public interface for managing policies enforced on a device. Most clients of this class must be
+ * registered with the system as a
+ * <a href={@docRoot}guide/topics/admin/device-admin.html">device administrator</a>. Additionally,
+ * a device administrator may be registered as either a profile or device owner. A given method is
+ * accessible to all device administrators unless the documentation for that method specifies that
+ * it is restricted to either device or profile owners.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
- * <p>For more information about managing policies for device adminstration, read the
+ * <p>For more information about managing policies for device administration, read the
  * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
  * developer guide.</p>
  * </div>
@@ -137,11 +142,22 @@ public class DevicePolicyManager {
      * {@link #ACTION_PROVISION_MANAGED_PROFILE} this package has to match the package name of the
      * application that started provisioning. The package will be set as profile owner in that case.
      *
-     * <p>This package is set as device owner when device owner provisioning is started by an Nfc
-     * message containing an Nfc record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
+     * <p>This package is set as device owner when device owner provisioning is started by an NFC
+     * message containing an NFC record with MIME type {@link #MIME_TYPE_PROVISIONING_NFC}.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
+
+    /**
+     * An {@link android.accounts.Account} extra holding the account to migrate during managed
+     * profile provisioning. If the account supplied is present in the primary user, it will be
+     * copied, along with its credentials to the managed profile and removed from the primary user.
+     *
+     * Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+
+    public static final String EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE
+        = "android.app.extra.PROVISIONING_ACCOUNT_TO_MIGRATE";
 
     /**
      * A String extra that, holds the email address of the account which a managed profile is
@@ -160,11 +176,21 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_EMAIL_ADDRESS";
 
     /**
+     * A Boolean extra that can be used by the mobile device management application to skip the
+     * disabling of system apps during provisioning when set to <code>true</code>.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED =
+            "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
+
+    /**
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
      * will be set to.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_TIME_ZONE
         = "android.app.extra.PROVISIONING_TIME_ZONE";
@@ -173,8 +199,8 @@ public class DevicePolicyManager {
      * A Long extra holding the wall clock time (in milliseconds) to be set on the device's
      * {@link android.app.AlarmManager}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_LOCAL_TIME
         = "android.app.extra.PROVISIONING_LOCAL_TIME";
@@ -183,8 +209,8 @@ public class DevicePolicyManager {
      * A String extra holding the {@link java.util.Locale} that the device will be set to.
      * Format: xx_yy, where xx is the language code, and yy the country code.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_LOCALE
         = "android.app.extra.PROVISIONING_LOCALE";
@@ -193,8 +219,8 @@ public class DevicePolicyManager {
      * A String extra holding the ssid of the wifi network that should be used during nfc device
      * owner provisioning for downloading the mobile device management application.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_SSID
         = "android.app.extra.PROVISIONING_WIFI_SSID";
@@ -203,8 +229,8 @@ public class DevicePolicyManager {
      * A boolean extra indicating whether the wifi network in {@link #EXTRA_PROVISIONING_WIFI_SSID}
      * is hidden or not.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_HIDDEN
         = "android.app.extra.PROVISIONING_WIFI_HIDDEN";
@@ -213,8 +239,8 @@ public class DevicePolicyManager {
      * A String extra indicating the security type of the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_SECURITY_TYPE
         = "android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE";
@@ -223,8 +249,8 @@ public class DevicePolicyManager {
      * A String extra holding the password of the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PASSWORD
         = "android.app.extra.PROVISIONING_WIFI_PASSWORD";
@@ -233,8 +259,8 @@ public class DevicePolicyManager {
      * A String extra holding the proxy host for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_HOST
         = "android.app.extra.PROVISIONING_WIFI_PROXY_HOST";
@@ -243,8 +269,8 @@ public class DevicePolicyManager {
      * An int extra holding the proxy port for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_PORT
         = "android.app.extra.PROVISIONING_WIFI_PROXY_PORT";
@@ -253,8 +279,8 @@ public class DevicePolicyManager {
      * A String extra holding the proxy bypass for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PROXY_BYPASS
         = "android.app.extra.PROVISIONING_WIFI_PROXY_BYPASS";
@@ -263,8 +289,8 @@ public class DevicePolicyManager {
      * A String extra holding the proxy auto-config (PAC) URL for the wifi network in
      * {@link #EXTRA_PROVISIONING_WIFI_SSID}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_WIFI_PAC_URL
         = "android.app.extra.PROVISIONING_WIFI_PAC_URL";
@@ -273,8 +299,8 @@ public class DevicePolicyManager {
      * A String extra holding a url that specifies the download location of the device admin
      * package. When not provided it is assumed that the device admin package is already installed.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION";
@@ -283,8 +309,8 @@ public class DevicePolicyManager {
      * A String extra holding a http cookie header which should be used in the http request to the
      * url specified in {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION}.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_COOKIE_HEADER";
@@ -295,8 +321,8 @@ public class DevicePolicyManager {
      * the file at the download location an error will be shown to the user and the user will be
      * asked to factory reset the device.
      *
-     * <p>Use in an Nfc record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
-     * provisioning via an Nfc bump.
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
@@ -312,9 +338,9 @@ public class DevicePolicyManager {
      * <p> A typical use case would be a device that is owned by a company, but used by either an
      * employee or client.
      *
-     * <p> The Nfc message should be send to an unprovisioned device.
+     * <p> The NFC message should be send to an unprovisioned device.
      *
-     * <p>The Nfc record must contain a serialized {@link java.util.Properties} object which
+     * <p>The NFC record must contain a serialized {@link java.util.Properties} object which
      * contains the following properties:
      * <ul>
      * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}</li>
@@ -439,20 +465,20 @@ public class DevicePolicyManager {
             = "android.app.action.SET_NEW_PASSWORD";
 
     /**
-     * Flag used by {@link #addCrossProfileIntentFilter} to allow access
-     * <em>from</em> a managed profile <em>to</em> its parent. That is, any
-     * matching activities in the parent profile are included in the
-     * disambiguation list shown when an app in the managed profile calls
-     * {@link Activity#startActivity(Intent)}.
+     * Flag used by {@link #addCrossProfileIntentFilter} to allow activities in
+     * the parent profile to access intents sent from the managed profile.
+     * That is, when an app in the managed profile calls
+     * {@link Activity#startActivity(Intent)}, the intent can be resolved by a
+     * matching activity in the parent profile.
      */
     public static final int FLAG_PARENT_CAN_ACCESS_MANAGED = 0x0001;
 
     /**
-     * Flag used by {@link #addCrossProfileIntentFilter} to allow access
-     * <em>from</em> a parent <em>to</em> its managed profile. That is, any
-     * matching activities in the managed profile are included in the
-     * disambiguation list shown when an app in the parent profile calls
-     * {@link Activity#startActivity(Intent)}.
+     * Flag used by {@link #addCrossProfileIntentFilter} to allow activities in
+     * the managed profile to access intents sent from the parent profile.
+     * That is, when an app in the parent profile calls
+     * {@link Activity#startActivity(Intent)}, the intent can be resolved by a
+     * matching activity in the managed profile.
      */
     public static final int FLAG_MANAGED_CAN_ACCESS_PARENT = 0x0002;
 
@@ -478,6 +504,22 @@ public class DevicePolicyManager {
         }
         return false;
     }
+    /**
+     * Return true if the given administrator component is currently being removed
+     * for the user.
+     * @hide
+     */
+    public boolean isRemovingAdmin(ComponentName who, int userId) {
+        if (mService != null) {
+            try {
+                return mService.isRemovingAdmin(who, userId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Return a list of all currently active device administrator's component
@@ -1319,6 +1361,24 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the profile with the smallest maximum failed passwords for wipe,
+     * for the given user. So for primary user, it might return the primary or
+     * a managed profile. For a secondary user, it would be the same as the
+     * user passed in.
+     * @hide Used only by Keyguard
+     */
+    public int getProfileWithMinimumFailedPasswordsForWipe(int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getProfileWithMinimumFailedPasswordsForWipe(userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
+    /**
      * Flag for {@link #resetPassword}: don't allow other admins to change
      * the password again until the user has entered it.
      */
@@ -1337,13 +1397,16 @@ public class DevicePolicyManager {
      * characters when the requested quality is only numeric), in which case
      * the currently active quality will be increased to match.
      *
+     * <p>Calling with a null or empty password will clear any existing PIN,
+     * pattern or password if the current password constraints allow it.
+     *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
      * <p>Calling this from a managed profile will throw a security exception.
      *
-     * @param password The new password for the user.
+     * @param password The new password for the user. Null or empty clears the password.
      * @param flags May be 0 or {@link #RESET_PASSWORD_REQUIRE_ENTRY}.
      * @return Returns true if the password was applied, or false if it is
      * not acceptable for the current constraints.
@@ -1426,22 +1489,30 @@ public class DevicePolicyManager {
 
     /**
      * Flag for {@link #wipeData(int)}: also erase the device's external
-     * storage.
+     * storage (such as SD cards).
      */
     public static final int WIPE_EXTERNAL_STORAGE = 0x0001;
 
     /**
+     * Flag for {@link #wipeData(int)}: also erase the factory reset protection
+     * data.
+     *
+     * <p>This flag may only be set by device owner admins; if it is set by
+     * other admins a {@link SecurityException} will be thrown.
+     */
+    public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
+
+    /**
      * Ask the user data be wiped.  This will cause the device to reboot,
-     * erasing all user data while next booting up.  External storage such
-     * as SD cards will be also erased if the flag {@link #WIPE_EXTERNAL_STORAGE}
-     * is set.
+     * erasing all user data while next booting up.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
-     * @param flags Bit mask of additional options: currently 0 and
-     *              {@link #WIPE_EXTERNAL_STORAGE} are supported.
+     * @param flags Bit mask of additional options: currently supported flags
+     * are {@link #WIPE_EXTERNAL_STORAGE} and
+     * {@link #WIPE_RESET_PROTECTION_DATA}.
      */
     public void wipeData(int flags) {
         if (mService != null) {
@@ -2584,6 +2655,10 @@ public class DevicePolicyManager {
      * <p>The application restrictions are only made visible to the target application and the
      * profile or device owner.
      *
+     * <p>If the restrictions are not available yet, but may be applied in the near future,
+     * the admin can notify the target application of that by adding
+     * {@link UserManager#KEY_RESTRICTIONS_PENDING} to the settings parameter.
+     *
      * <p>The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
      *
@@ -2591,6 +2666,8 @@ public class DevicePolicyManager {
      * @param packageName The name of the package to update restricted settings for.
      * @param settings A {@link Bundle} to be parsed by the receiving application, conveying a new
      * set of active restrictions.
+     *
+     * @see UserManager#KEY_RESTRICTIONS_PENDING
      */
     public void setApplicationRestrictions(ComponentName admin, String packageName,
             Bundle settings) {
@@ -2604,25 +2681,30 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets a list of features to enable for a TrustAgent component. This is meant to be
-     * used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which will disable all
-     * trust agents but those with features enabled by this function call.
+     * Sets a list of configuration features to enable for a TrustAgent component. This is meant
+     * to be used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which disables all
+     * trust agents but those enabled by this function call. If flag
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is not set, then this call has no effect.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * this method; if not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param agent Which component to enable features for.
-     * @param features List of features to enable. Consult specific TrustAgent documentation for
-     * the feature list.
-     * @hide
+     * @param target Component name of the agent to be enabled.
+     * @param configuration TrustAgent-specific feature bundle. If null for any admin, agent
+     * will be strictly disabled according to the state of the
+     *  {@link #KEYGUARD_DISABLE_TRUST_AGENTS} flag.
+     * <p>If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all admins,
+     * then it's up to the TrustAgent itself to aggregate the values from all device admins.
+     * <p>Consult documentation for the specific TrustAgent to determine legal options parameters.
      */
-    public void setTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
-            List<String> features) {
+    public void setTrustAgentConfiguration(ComponentName admin, ComponentName target,
+            PersistableBundle configuration) {
         if (mService != null) {
             try {
-                mService.setTrustAgentFeaturesEnabled(admin, agent, features, UserHandle.myUserId());
+                mService.setTrustAgentConfiguration(admin, target, configuration,
+                        UserHandle.myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2630,24 +2712,35 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets list of enabled features for the given TrustAgent component. If admin is
-     * null, this will return the intersection of all features enabled for the given agent by all
-     * admins.
+     * Gets configuration for the given trust agent based on aggregating all calls to
+     * {@link #setTrustAgentConfiguration(ComponentName, ComponentName, PersistableBundle)} for
+     * all device admins.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. If null,
+     * this function returns a list of configurations for all admins that declare
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS}. If any admin declares
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} but doesn't call
+     * {@link #setTrustAgentConfiguration(ComponentName, ComponentName, PersistableBundle)}
+     * for this {@param agent} or calls it with a null configuration, null is returned.
      * @param agent Which component to get enabled features for.
-     * @return List of enabled features.
-     * @hide
+     * @return configuration for the given trust agent.
      */
-    public List<String> getTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent) {
+    public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
+            ComponentName agent) {
+        return getTrustAgentConfiguration(admin, agent, UserHandle.myUserId());
+    }
+
+    /** @hide per-user version */
+    public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
+            ComponentName agent, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getTrustAgentFeaturesEnabled(admin, agent, UserHandle.myUserId());
+                return mService.getTrustAgentConfiguration(admin, agent, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
-        return new ArrayList<String>(); // empty list
+        return new ArrayList<PersistableBundle>(); // empty list
     }
 
     /**
@@ -2710,6 +2803,8 @@ public class DevicePolicyManager {
     /**
      * Called by the profile owner of a managed profile so that some intents sent in the managed
      * profile can also be resolved in the parent, or vice versa.
+     * Only activity intents are supported.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
      * other profile
@@ -2838,9 +2933,9 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames List of input method package names.
-     * @return true if setting the restriction succeeded. It will fail if there is
-     *     one or more input method enabled, that are not in the list or user if the foreground
-     *     user.
+     * @return true if setting the restriction succeeded. It will fail if there are
+     *     one or more non-system input methods currently enabled that are not in
+     *     the packageNames list.
      */
     public boolean setPermittedInputMethods(ComponentName admin, List<String> packageNames) {
         if (mService != null) {
@@ -3133,9 +3228,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to disable account management for a specific type of account.
+     * Called by a device owner or profile owner to disable account management for a specific type
+     * of account.
      *
-     * <p>The calling device admin must be a profile owner. If it is not, a
+     * <p>The calling device admin must be a device owner or profile owner. If it is not, a
      * security exception will be thrown.
      *
      * <p>When account management is disabled for an account type, adding or removing an account
@@ -3284,6 +3380,7 @@ public class DevicePolicyManager {
      * <p>The settings that can be updated by a profile or device owner with this method are:
      * <ul>
      * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
+     * <li>{@link Settings.Secure#INSTALL_NON_MARKET_APPS}</li>
      * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
      * </ul>
      * <p>A device owner can additionally update the following settings:
@@ -3377,12 +3474,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to check whether a user has been blocked from
-     * uninstalling a package.
+     * Check whether the current user has been blocked by device policy from uninstalling a package.
+     * Requires the caller to be the profile owner if checking a specific admin's policy.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin The name of the admin component whose blocking policy will be checked, or null
+     *        to check if any admin has blocked the uninstallation.
      * @param packageName package to check.
-     * @return true if the user shouldn't be able to uninstall the package.
+     * @return true if uninstallation is blocked.
      */
     public boolean isUninstallBlocked(ComponentName admin, String packageName) {
         if (mService != null) {

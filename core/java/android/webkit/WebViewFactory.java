@@ -18,8 +18,8 @@ package android.webkit;
 
 import android.annotation.SystemApi;
 import android.app.ActivityManagerInternal;
-import android.app.Application;
 import android.app.AppGlobals;
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -34,13 +34,13 @@ import android.os.Trace;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
+
 import com.android.server.LocalServices;
+
 import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.util.Arrays;
-
-import com.android.internal.os.Zygote;
 
 /**
  * Top level factory, used creating all the main WebView implementation classes.
@@ -90,6 +90,12 @@ public final class WebViewFactory {
             // For now the main purpose of this function (and the factory abstraction) is to keep
             // us honest and minimize usage of WebView internals when binding the proxy.
             if (sProviderInstance != null) return sProviderInstance;
+
+            final int uid = android.os.Process.myUid();
+            if (uid == android.os.Process.ROOT_UID || uid == android.os.Process.SYSTEM_UID) {
+                throw new UnsupportedOperationException(
+                        "For security reasons, WebView is not allowed in privileged processes");
+            }
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {

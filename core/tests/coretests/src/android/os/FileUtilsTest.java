@@ -180,6 +180,51 @@ public class FileUtilsTest extends AndroidTestCase {
         assertDirContents("file1", "file2");
     }
 
+    public void testValidExtFilename() throws Exception {
+        assertTrue(FileUtils.isValidExtFilename("a"));
+        assertTrue(FileUtils.isValidExtFilename("foo.bar"));
+        assertTrue(FileUtils.isValidExtFilename("foo bar.baz"));
+        assertTrue(FileUtils.isValidExtFilename("foo.bar.baz"));
+        assertTrue(FileUtils.isValidExtFilename(".bar"));
+        assertTrue(FileUtils.isValidExtFilename("foo~!@#$%^&*()_[]{}+bar"));
+
+        assertFalse(FileUtils.isValidExtFilename(null));
+        assertFalse(FileUtils.isValidExtFilename("."));
+        assertFalse(FileUtils.isValidExtFilename("../foo"));
+        assertFalse(FileUtils.isValidExtFilename("/foo"));
+
+        assertEquals(".._foo", FileUtils.buildValidExtFilename("../foo"));
+        assertEquals("_foo", FileUtils.buildValidExtFilename("/foo"));
+        assertEquals("foo_bar", FileUtils.buildValidExtFilename("foo\0bar"));
+        assertEquals(".foo", FileUtils.buildValidExtFilename(".foo"));
+        assertEquals("foo.bar", FileUtils.buildValidExtFilename("foo.bar"));
+    }
+
+    public void testValidFatFilename() throws Exception {
+        assertTrue(FileUtils.isValidFatFilename("a"));
+        assertTrue(FileUtils.isValidFatFilename("foo bar.baz"));
+        assertTrue(FileUtils.isValidFatFilename("foo.bar.baz"));
+        assertTrue(FileUtils.isValidFatFilename(".bar"));
+        assertTrue(FileUtils.isValidFatFilename("foo.bar"));
+        assertTrue(FileUtils.isValidFatFilename("foo bar"));
+        assertTrue(FileUtils.isValidFatFilename("foo+bar"));
+        assertTrue(FileUtils.isValidFatFilename("foo,bar"));
+
+        assertFalse(FileUtils.isValidFatFilename("foo*bar"));
+        assertFalse(FileUtils.isValidFatFilename("foo?bar"));
+        assertFalse(FileUtils.isValidFatFilename("foo<bar"));
+        assertFalse(FileUtils.isValidFatFilename(null));
+        assertFalse(FileUtils.isValidFatFilename("."));
+        assertFalse(FileUtils.isValidFatFilename("../foo"));
+        assertFalse(FileUtils.isValidFatFilename("/foo"));
+
+        assertEquals(".._foo", FileUtils.buildValidFatFilename("../foo"));
+        assertEquals("_foo", FileUtils.buildValidFatFilename("/foo"));
+        assertEquals(".foo", FileUtils.buildValidFatFilename(".foo"));
+        assertEquals("foo.bar", FileUtils.buildValidFatFilename("foo.bar"));
+        assertEquals("foo_bar__baz", FileUtils.buildValidFatFilename("foo?bar**baz"));
+    }
+
     private void touch(String name, long age) throws Exception {
         final File file = new File(mDir, name);
         file.createNewFile();

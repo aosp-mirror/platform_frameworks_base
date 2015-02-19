@@ -547,6 +547,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     private long mParentNodeId = ROOT_NODE_ID;
     private long mLabelForId = ROOT_NODE_ID;
     private long mLabeledById = ROOT_NODE_ID;
+    private long mTraversalBefore = ROOT_NODE_ID;
+    private long mTraversalAfter = ROOT_NODE_ID;
 
     private int mBooleanProperties;
     private final Rect mBoundsInParent = new Rect();
@@ -1046,6 +1048,126 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets the node before which this one is visited during traversal. A screen-reader
+     * must visit the content of this node before the content of the one it precedes.
+     *
+     * @return The succeeding node if such or <code>null</code>.
+     *
+     * @see #setTraversalBefore(android.view.View)
+     * @see #setTraversalBefore(android.view.View, int)
+     */
+    public AccessibilityNodeInfo getTraversalBefore() {
+        enforceSealed();
+        return getNodeForAccessibilityId(mTraversalBefore);
+    }
+
+    /**
+     * Sets the view before whose node this one should be visited during traversal. A
+     * screen-reader must visit the content of this node before the content of the one
+     * it precedes.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param view The view providing the preceding node.
+     *
+     * @see #getTraversalBefore()
+     */
+    public void setTraversalBefore(View view) {
+        setTraversalBefore(view, UNDEFINED_ITEM_ID);
+    }
+
+    /**
+     * Sets the node before which this one is visited during traversal. A screen-reader
+     * must visit the content of this node before the content of the one it precedes.
+     * The successor is a virtual descendant of the given <code>root</code>. If
+     * <code>virtualDescendantId</code> equals to {@link View#NO_ID} the root is set
+     * as the successor.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report them selves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    public void setTraversalBefore(View root, int virtualDescendantId) {
+        enforceNotSealed();
+        final int rootAccessibilityViewId = (root != null)
+                ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
+        mTraversalBefore = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+    }
+
+    /**
+     * Gets the node after which this one is visited in accessibility traversal.
+     * A screen-reader must visit the content of the other node before the content
+     * of this one.
+     *
+     * @return The succeeding node if such or <code>null</code>.
+     *
+     * @see #setTraversalAfter(android.view.View)
+     * @see #setTraversalAfter(android.view.View, int)
+     */
+    public AccessibilityNodeInfo getTraversalAfter() {
+        enforceSealed();
+        return getNodeForAccessibilityId(mTraversalAfter);
+    }
+
+    /**
+     * Sets the view whose node is visited after this one in accessibility traversal.
+     * A screen-reader must visit the content of the other node before the content
+     * of this one.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param view The previous view.
+     *
+     * @see #getTraversalAfter()
+     */
+    public void setTraversalAfter(View view) {
+        setTraversalAfter(view, UNDEFINED_ITEM_ID);
+    }
+
+    /**
+     * Sets the node after which this one is visited in accessibility traversal.
+     * A screen-reader must visit the content of the other node before the content
+     * of this one. If <code>virtualDescendantId</code> equals to {@link View#NO_ID}
+     * the root is set as the predecessor.
+     * <p>
+     * A virtual descendant is an imaginary View that is reported as a part of the view
+     * hierarchy for accessibility purposes. This enables custom views that draw complex
+     * content to report them selves as a tree of virtual views, thus conveying their
+     * logical structure.
+     * </p>
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param root The root of the virtual subtree.
+     * @param virtualDescendantId The id of the virtual descendant.
+     */
+    public void setTraversalAfter(View root, int virtualDescendantId) {
+        enforceNotSealed();
+        final int rootAccessibilityViewId = (root != null)
+                ? root.getAccessibilityViewId() : UNDEFINED_ITEM_ID;
+        mTraversalAfter = makeNodeId(rootAccessibilityViewId, virtualDescendantId);
+    }
+
+    /**
      * Sets the maximum text length, or -1 for no limit.
      * <p>
      * Typically used to indicate that an editable text field has a limit on
@@ -1229,13 +1351,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mParentNodeId)) {
-            return null;
-        }
-        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mParentNodeId, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+        return getNodeForAccessibilityId(mParentNodeId);
     }
 
     /**
@@ -2055,13 +2171,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getLabelFor() {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mLabelForId)) {
-            return null;
-        }
-        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabelForId, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+        return getNodeForAccessibilityId(mLabelForId);
     }
 
     /**
@@ -2113,13 +2223,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getLabeledBy() {
         enforceSealed();
-        if (!canPerformRequestOverConnection(mLabeledById)) {
-            return null;
-        }
-        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
-        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
-                mWindowId, mLabeledById, false, FLAG_PREFETCH_PREDECESSORS
-                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
+        return getNodeForAccessibilityId(mLabeledById);
     }
 
     /**
@@ -2453,6 +2557,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeLong(mParentNodeId);
         parcel.writeLong(mLabelForId);
         parcel.writeLong(mLabeledById);
+        parcel.writeLong(mTraversalBefore);
+        parcel.writeLong(mTraversalAfter);
+
         parcel.writeInt(mConnectionId);
 
         final LongArray childIds = mChildNodeIds;
@@ -2571,6 +2678,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = other.mParentNodeId;
         mLabelForId = other.mLabelForId;
         mLabeledById = other.mLabeledById;
+        mTraversalBefore = other.mTraversalBefore;
+        mTraversalAfter = other.mTraversalAfter;
         mWindowId = other.mWindowId;
         mConnectionId = other.mConnectionId;
         mBoundsInParent.set(other.mBoundsInParent);
@@ -2633,6 +2742,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = parcel.readLong();
         mLabelForId = parcel.readLong();
         mLabeledById = parcel.readLong();
+        mTraversalBefore = parcel.readLong();
+        mTraversalAfter = parcel.readLong();
+
         mConnectionId = parcel.readInt();
 
         final int childrenSize = parcel.readInt();
@@ -2725,6 +2837,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mParentNodeId = ROOT_NODE_ID;
         mLabelForId = ROOT_NODE_ID;
         mLabeledById = ROOT_NODE_ID;
+        mTraversalBefore = ROOT_NODE_ID;
+        mTraversalAfter = ROOT_NODE_ID;
         mWindowId = UNDEFINED_ITEM_ID;
         mConnectionId = UNDEFINED_CONNECTION_ID;
         mMaxTextLength = -1;
@@ -2911,6 +3025,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("; accessibilityViewId: " + getAccessibilityViewId(mSourceNodeId));
             builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
             builder.append("; mParentNodeId: " + mParentNodeId);
+            builder.append("; traversalBefore: ").append(mTraversalBefore);
+            builder.append("; traversalAfter: ").append(mTraversalAfter);
 
             int granularities = mMovementGranularities;
             builder.append("; MovementGranularities: [");
@@ -2961,6 +3077,16 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; actions: ").append(mActions);
 
         return builder.toString();
+    }
+
+    private AccessibilityNodeInfo getNodeForAccessibilityId(long accessibilityId) {
+        if (!canPerformRequestOverConnection(accessibilityId)) {
+            return null;
+        }
+        AccessibilityInteractionClient client = AccessibilityInteractionClient.getInstance();
+        return client.findAccessibilityNodeInfoByAccessibilityId(mConnectionId,
+                mWindowId, accessibilityId, false, FLAG_PREFETCH_PREDECESSORS
+                        | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS);
     }
 
     /**

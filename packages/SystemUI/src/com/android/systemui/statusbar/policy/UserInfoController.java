@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -131,8 +132,11 @@ public final class UserInfoController {
         final int userId = userInfo.id;
         final boolean isGuest = userInfo.isGuest();
         final String userName = userInfo.name;
-        final int avatarSize
-                = mContext.getResources().getDimensionPixelSize(R.dimen.max_avatar_size);
+
+        final Resources res = mContext.getResources();
+        final int avatarSize = Math.max(
+                res.getDimensionPixelSize(R.dimen.multi_user_avatar_expanded_size),
+                res.getDimensionPixelSize(R.dimen.multi_user_avatar_keyguard_size));
 
         final Context context = currentUserContext;
         mUserInfoTask = new AsyncTask<Void, Void, Pair<String, Drawable>>() {
@@ -160,8 +164,9 @@ public final class UserInfoController {
                     // Try and read the display name from the local profile
                     final Cursor cursor = context.getContentResolver().query(
                             ContactsContract.Profile.CONTENT_URI, new String[] {
-                            ContactsContract.CommonDataKinds.Phone._ID, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME},
-                            null, null, null);
+                                    ContactsContract.CommonDataKinds.Phone._ID,
+                                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                            }, null, null, null);
                     if (cursor != null) {
                         try {
                             if (cursor.moveToFirst()) {

@@ -329,7 +329,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a Boolean, or null
      */
-    void putBoolean(String key, boolean value) {
+    public void putBoolean(String key, boolean value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -497,7 +497,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a boolean array object, or null
      */
-    void putBooleanArray(String key, boolean[] value) {
+    public void putBooleanArray(String key, boolean[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -617,7 +617,7 @@ public class BaseBundle {
      * @param key a String
      * @return a boolean value
      */
-    boolean getBoolean(String key) {
+    public boolean getBoolean(String key) {
         unparcel();
         if (DEBUG) Log.d(TAG, "Getting boolean in "
                 + Integer.toHexString(System.identityHashCode(this)));
@@ -654,7 +654,7 @@ public class BaseBundle {
      * @param defaultValue Value to return if key does not exist
      * @return a boolean value
      */
-    boolean getBoolean(String key, boolean defaultValue) {
+    public boolean getBoolean(String key, boolean defaultValue) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1072,7 +1072,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a boolean[] value, or null
      */
-    boolean[] getBooleanArray(String key) {
+    public boolean[] getBooleanArray(String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {

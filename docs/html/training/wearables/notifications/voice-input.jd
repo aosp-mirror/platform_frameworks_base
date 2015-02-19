@@ -1,4 +1,6 @@
 page.title=Receiving Voice Input in a Notification
+page.tags=notifications
+helpoutsWidget=true
 
 @jd:body
 
@@ -37,7 +39,7 @@ so you can type replies instead.</p>
 
 <h2 id="VoiceInput">Define the Voice Input</h2>
 
-<p>To create an action that supports voice input, create an instance of 
+<p>To create an action that supports voice input, create an instance of
   {@link android.support.v4.app.RemoteInput.Builder} that you can add to your notification action.
   This class's constructor accepts a string that the system uses as
   the key for the voice input, which you'll later use to retrieve the text of the
@@ -86,7 +88,7 @@ style="float:right;margin:0 0 20px 40px" />
  {@link android.support.v4.app.RemoteInput}:</p>
 
 <pre>
-public static final EXTRA_VOICE_REPLY = "extra_voice_reply";
+public static final String EXTRA_VOICE_REPLY = "extra_voice_reply";
 ...
 String replyLabel = getResources().getString(R.string.reply_label);
 String[] replyChoices = getResources().getStringArray(R.array.reply_choices);
@@ -116,7 +118,7 @@ PendingIntent replyPendingIntent =
 // Create the reply action and add the remote input
 NotificationCompat.Action action =
         new NotificationCompat.Action.Builder(R.drawable.ic_reply_icon,
-                getString(R.string.label, replyPendingIntent))
+                getString(R.string.label), replyPendingIntent)
                 .addRemoteInput(remoteInput)
                 .build();
 
@@ -166,9 +168,8 @@ which is referenced by the <code>EXTRA_VOICE_REPLY</code> key that is used in th
 
 private CharSequence getMessageText(Intent intent) {
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-        if (remoteInput != null) {
-            return remoteInput.getCharSequence(EXTRA_VOICE_REPLY);
-        }
+    if (remoteInput != null) {
+        return remoteInput.getCharSequence(EXTRA_VOICE_REPLY);
     }
     return null;
 }

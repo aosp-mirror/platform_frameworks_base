@@ -51,11 +51,24 @@ public final class AccessibilityWindowInfo implements Parcelable {
      */
     public static final int TYPE_SYSTEM = 3;
 
+    /**
+     * Window type: Windows that are overlaid <em>only</em> by an {@link
+     * android.accessibilityservice.AccessibilityService} for interception of
+     * user interactions without changing the windows an accessibility service
+     * can introspect. In particular, an accessibility service can introspect
+     * only windows that a sighted user can interact with which they can touch
+     * these windows or can type into these windows. For example, if there
+     * is a full screen accessibility overlay that is touchable, the windows
+     * below it will be introspectable by an accessibility service regardless
+     * they are covered by a touchable window.
+     */
+    public static final int TYPE_ACCESSIBILITY_OVERLAY = 4;
+
     private static final int UNDEFINED = -1;
 
     private static final int BOOLEAN_PROPERTY_ACTIVE = 1 << 0;
     private static final int BOOLEAN_PROPERTY_FOCUSED = 1 << 1;
-    private static final int BOOLEAN_PROPERTY_ACCESSIBLITY_FOCUSED = 1 << 2;
+    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED = 1 << 2;
 
     // Housekeeping.
     private static final int MAX_POOL_SIZE = 10;
@@ -85,6 +98,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @see #TYPE_APPLICATION
      * @see #TYPE_INPUT_METHOD
      * @see #TYPE_SYSTEM
+     * @see #TYPE_ACCESSIBILITY_OVERLAY
      */
     public int getType() {
         return mType;
@@ -93,7 +107,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     /**
      * Sets the type of the window.
      *
-     * @param The type
+     * @param type The type
      *
      * @hide
      */
@@ -115,7 +129,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * Sets the layer which determines the Z-order of the window. Windows
      * with greater layer appear on top of windows with lesser layer.
      *
-     * @param The window layer.
+     * @param layer The window layer.
      *
      * @hide
      */
@@ -174,7 +188,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     /**
      * Sets the unique window id.
      *
-     * @param windowId The window id.
+     * @param id The window id.
      *
      * @hide
      */
@@ -230,7 +244,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * the user is currently touching or the window has input focus
      * and the user is not touching any window.
      *
-     * @param Whether this is the active window.
+     * @param active Whether this is the active window.
      *
      * @hide
      */
@@ -250,7 +264,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
     /**
      * Sets if this window has input focus.
      *
-     * @param Whether has input focus.
+     * @param focused Whether has input focus.
      *
      * @hide
      */
@@ -264,18 +278,18 @@ public final class AccessibilityWindowInfo implements Parcelable {
      * @return Whether has accessibility focus.
      */
     public boolean isAccessibilityFocused() {
-        return getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBLITY_FOCUSED);
+        return getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED);
     }
 
     /**
      * Sets if this window has accessibility focus.
      *
-     * @param Whether has accessibility focus.
+     * @param focused Whether has accessibility focus.
      *
      * @hide
      */
     public void setAccessibilityFocused(boolean focused) {
-        setBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBLITY_FOCUSED, focused);
+        setBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED, focused);
     }
 
     /**
@@ -533,6 +547,9 @@ public final class AccessibilityWindowInfo implements Parcelable {
             }
             case TYPE_SYSTEM: {
                 return "TYPE_SYSTEM";
+            }
+            case TYPE_ACCESSIBILITY_OVERLAY: {
+                return "TYPE_ACCESSIBILITY_OVERLAY";
             }
             default:
                 return "<UNKNOWN>";

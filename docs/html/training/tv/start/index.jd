@@ -1,4 +1,6 @@
 page.title=Building TV Apps
+page.tags=tv, leanback
+helpoutsWidget=true
 startpage=true
 
 @jd:body

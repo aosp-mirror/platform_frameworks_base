@@ -37,6 +37,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.View.MeasureSpec;
 import android.widget.TextView;
 import com.android.printspooler.R;
+import com.android.printspooler.model.OpenDocumentCallback;
 import com.android.printspooler.model.PageContentRepository;
 import com.android.printspooler.model.PageContentRepository.PageContentProvider;
 import com.android.printspooler.util.PageRangeUtils;
@@ -51,8 +52,7 @@ import java.util.List;
 /**
  * This class represents the adapter for the pages in the print preview list.
  */
-public final class PageAdapter extends Adapter implements
-        PageContentRepository.OnMalformedPdfFileListener {
+public final class PageAdapter extends Adapter {
     private static final String LOG_TAG = "PageAdapter";
 
     private static final int MAX_PREVIEW_PAGES_BATCH = 50;
@@ -113,6 +113,7 @@ public final class PageAdapter extends Adapter implements
     public interface ContentCallbacks {
         public void onRequestContentUpdate();
         public void onMalformedPdfFile();
+        public void onSecurePdfFile();
     }
 
     public interface PreviewArea {
@@ -127,7 +128,7 @@ public final class PageAdapter extends Adapter implements
         mCallbacks = callbacks;
         mLayoutInflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        mPageContentRepository = new PageContentRepository(context, this);
+        mPageContentRepository = new PageContentRepository(context);
 
         mPreviewPageMargin = mContext.getResources().getDimensionPixelSize(
                 R.dimen.preview_page_margin);
@@ -156,11 +157,6 @@ public final class PageAdapter extends Adapter implements
         }
     }
 
-    @Override
-    public void onMalformedPdfFile() {
-        mCallbacks.onMalformedPdfFile();
-    }
-
     public void onOrientationChanged() {
         mColumnCount = mContext.getResources().getInteger(
                 R.integer.preview_page_per_row_count);
@@ -181,11 +177,24 @@ public final class PageAdapter extends Adapter implements
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_OPENED");
         }
-        mPageContentRepository.open(source, new Runnable() {
+        mPageContentRepository.open(source, new OpenDocumentCallback() {
             @Override
-            public void run() {
+            public void onSuccess() {
                 notifyDataSetChanged();
                 callback.run();
+            }
+
+            @Override
+            public void onFailure(int error) {
+                switch (error) {
+                    case OpenDocumentCallback.ERROR_MALFORMED_PDF_FILE: {
+                        mCallbacks.onMalformedPdfFile();
+                    } break;
+
+                    case OpenDocumentCallback.ERROR_SECURE_PDF_FILE: {
+                        mCallbacks.onSecurePdfFile();
+                    } break;
+                }
             }
         });
     }
@@ -485,8 +494,12 @@ public final class PageAdapter extends Adapter implements
     }
 
     public void destroy(Runnable callback) {
-        throwIfNotClosed();
-        doDestroy(callback);
+        mCloseGuard.close();
+        mState = STATE_DESTROYED;
+        if (DEBUG) {
+            Log.i(LOG_TAG, "STATE_DESTROYED");
+        }
+        mPageContentRepository.destroy(callback);
     }
 
     @Override
@@ -494,7 +507,7 @@ public final class PageAdapter extends Adapter implements
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                doDestroy(null);
+                destroy(null);
             }
         } finally {
             super.finalize();
@@ -739,15 +752,6 @@ public final class PageAdapter extends Adapter implements
 
     public void stopPreloadContent() {
         mPageContentRepository.stopPreload();
-    }
-
-    private void doDestroy(Runnable callback) {
-        mPageContentRepository.destroy(callback);
-        mCloseGuard.close();
-        mState = STATE_DESTROYED;
-        if (DEBUG) {
-            Log.i(LOG_TAG, "STATE_DESTROYED");
-        }
     }
 
     private void throwIfNotOpened() {

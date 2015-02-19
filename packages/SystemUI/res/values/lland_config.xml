@@ -26,7 +26,7 @@
     <dimen name="obstacle_width">90dp</dimen>
     <dimen name="obstacle_stem_width">12dp</dimen>
     <dimen name="obstacle_gap">170dp</dimen>
-    <dimen name="obstacle_height_min">40dp</dimen>
+    <dimen name="obstacle_height_min">48dp</dimen>
     <dimen name="building_width_min">20dp</dimen>
     <dimen name="building_width_max">250dp</dimen>
     <dimen name="building_height_min">20dp</dimen>

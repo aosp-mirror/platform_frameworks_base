@@ -37,6 +37,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
 import android.os.UserHandle;
@@ -2141,6 +2142,7 @@ public abstract class Context {
             MEDIA_SESSION_SERVICE,
             BATTERY_SERVICE,
             JOB_SCHEDULER_SERVICE,
+            MEDIA_PROJECTION_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2244,6 +2246,8 @@ public abstract class Context {
      * @see android.media.MediaRouter
      * @see #TELEPHONY_SERVICE
      * @see android.telephony.TelephonyManager
+     * @see #TELEPHONY_SUBSCRIPTION_SERVICE
+     * @see android.telephony.SubscriptionManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -2588,6 +2592,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.telephony.SubscriptionManager} for handling management the
+     * telephony subscriptions of the device.
+     *
+     * @see #getSystemService
+     * @see android.telephony.SubscriptionManager
+     */
+    public static final String TELEPHONY_SUBSCRIPTION_SERVICE = "telephony_subscription_service";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.telecom.TelecomManager} to manage telecom-related features
      * of the device.
      *
@@ -2864,11 +2878,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.app.UsageStatsManager} for interacting with the status bar.
+     * android.app.usage.UsageStatsManager} for querying device usage stats.
      *
      * @see #getSystemService
-     * @see android.app.UsageStatsManager
-     * @hide
+     * @see android.app.usage.UsageStatsManager
      */
     public static final String USAGE_STATS_SERVICE = "usagestats";
 
@@ -2920,6 +2933,11 @@ public abstract class Context {
      */
     @PackageManager.PermissionResult
     public abstract int checkPermission(@NonNull String permission, int pid, int uid);
+
+    /** @hide */
+    @PackageManager.PermissionResult
+    public abstract int checkPermission(@NonNull String permission, int pid, int uid,
+            IBinder callerToken);
 
     /**
      * Determine whether the calling process of an IPC you are handling has been
@@ -3107,6 +3125,10 @@ public abstract class Context {
      */
     public abstract int checkUriPermission(Uri uri, int pid, int uid,
             @Intent.AccessUriMode int modeFlags);
+
+    /** @hide */
+    public abstract int checkUriPermission(Uri uri, int pid, int uid,
+            @Intent.AccessUriMode int modeFlags, IBinder callerToken);
 
     /**
      * Determine whether the calling process and user ID has been

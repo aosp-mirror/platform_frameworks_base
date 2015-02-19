@@ -28,6 +28,8 @@ page.type=about
 
 
 
+
+
 <div class="landing-body-content">
   <div class="landing-hero-container">
     <div class="landing-section wear-hero">
@@ -39,7 +41,7 @@ page.type=about
             <div class="col-10">
               <div class="landing-section-header">
                 <div class="landing-h1 hero">Android Wear</div>
-                <div class="landing-subhead hero">Information that moves with you</div>
+                <div class="landing-subhead hero">Information that moves with you.</div>
               </div>
               <div class="landing-hero-description">
 
@@ -53,6 +55,10 @@ page.type=about
               <div class="landing-body">
                 <a href="{@docRoot}training/building-wearables.html" class="landing-button landing-primary" style="margin-top: 40px;">
                   Get Started
+                </a>
+                <a href="https://www.youtube.com/watch?v=Bl4Qne-RpcM" class="video-shadowbox-button white"
+                    style="margin-left:40px">
+                  Watch the Intro Video
                 </a>
               </div>
             </div>

@@ -2,30 +2,29 @@ ndk=true
 page.template=sdk
 
 
-ndk.mac64_download=android-ndk-r10c-darwin-x86_64.bin
-ndk.mac64_bytes=436952863
-ndk.mac64_checksum=bc04ef44b920cf6cd2157b6f2c3531d6
+ndk.mac64_download=android-ndk-r10d-darwin-x86_64.bin
+ndk.mac64_bytes=442691567
+ndk.mac64_checksum=cb101e1e62d56ea75b215f6bc6c27fae
 
-ndk.mac32_download=android-ndk-r10c-darwin-x86.bin
-ndk.mac32_bytes=435858709
-ndk.mac32_checksum=6b3e143f7e64d5cd337b727513e27913
+ndk.mac32_download=android-ndk-r10d-darwin-x86.bin
+ndk.mac32_bytes=441545213
+ndk.mac32_checksum=0aeb3dc062dc457a4cd01e72eadb2379
 
-ndk.linux64_download=android-ndk-r10c-linux-x86_64.bin
-ndk.linux64_bytes=449013322
-ndk.linux64_checksum=792c61706cd9ec6713fa1b69b2f42996
+ndk.linux64_download=android-ndk-r10d-linux-x86_64.bin
+ndk.linux64_bytes=459151600
+ndk.linux64_checksum=263b83071e6bca15f67898548d8d236e
 
-ndk.linux32_download=android-ndk-r10c-linux-x86.bin
-ndk.linux32_bytes=438555265
-ndk.linux32_checksum=d1595d9ca5e15484e047f1ac326c4ceb
+ndk.linux32_download=android-ndk-r10d-linux-x86.bin
+ndk.linux32_bytes=449997190
+ndk.linux32_checksum=70ed6d8c34e7e620c145b791e8eeef89
 
-ndk.win64_download=android-ndk-r10c-windows-x86_64.exe
-ndk.win64_bytes=458925419
-ndk.win64_checksum=af8edf5d316e1bf1a5a72e04a9faec41
+ndk.win64_download=android-ndk-r10d-windows-x86_64.exe
+ndk.win64_bytes=472613732
+ndk.win64_checksum=9a33f96da58a7e0b70e47d27b4a880b4
 
-ndk.win32_download=android-ndk-r10c-windows-x86.exe
-ndk.win32_bytes=433102815
-ndk.win32_checksum=805a04810719886674d3c7bff5eca53f
-
+ndk.win32_download=android-ndk-r10d-windows-x86.exe
+ndk.win32_bytes=455427281
+ndk.win32_checksum=c0930abfae0c990c4d191cc4ebd46b68
 
 
 
@@ -388,6 +387,133 @@ $('#Downloads').after($('#download-table'));
  <p>
    <a href="#" onclick="return toggleContent(this)"> <img
      src="/assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+   >Android NDK, Revision 10d</a> <em>(December 2014)</em>
+ </p>
+ <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
+      <dd>
+      <ul>
+        <li>Made GCC 4.8 the default for all 32-bit ABIs.  Deprecated GCC 4.6, and
+            will remove it next release. To restore previous behavior, either add
+            <code>NDK_TOOLCHAIN_VERSION=4.6</code> to ndk-build, or
+            add <code>--toolchain=arm-linux-androideabi-4.6</code> when executing
+            <code>make-standalone-toolchain.sh</code> on the command line. GCC 4.9 remains the
+            default for 64-bit ABIs.</li>
+
+         <li>Stopped all x86[_64] toolchains from adding <code>-mstackrealign</code> by default. The
+             NDK toolchain assumes a 16-byte stack alignment. The tools and options used by default
+             enforce this rule. A user writing assembly code must make sure to preserve stack
+             alignment, and ensure that other compilers also comply with this rule.
+             (GCC bug <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=38496">38496</a>)</li>
+
+         <li>Added Address Sanitizer functionality to Clang 3.5 support to the ARM and x86 ABIs.
+             For more information on this change, see the
+             <a href="https://code.google.com/p/address-sanitizer/wiki/Android">Address
+             Sanitizer</a> project.</li>
+
+         <li>Introduced the requirement, starting from API level 21, to use <code>-fPIE -pie
+             </code> when building. In API levels 16 and higher, ndk-build uses <code>PIE</code>
+             when building. This change has a number of implications, which are discussed in
+             <a href="https://code.google.com/p/android-developer-preview/issues/detail?id=888">
+             Developer Preview Issue 888</a>.
+             These implications do not apply to shared libraries.</li>
+      </ul>
+      </dd>
+   <dl>
+
+
+     <dt>Important bug fixes:</dt>
+     <dd>
+     <ul>
+        <li>Made more fixes related to
+            <a href="https://gcc.gnu.org/ml/gcc-patches/2014-10/msg00906.html">
+            A53 Errata #835769</a> in the aarch64-linux-android-4.9 linker. As part of this, GCC
+            passes a new option, <code>--fix-cortex-a53-835769</code>, when
+            <code>-mfix-cortex-a53-835769</code> (enabled by default) is specified.
+            For more information, see this
+            <a href="https://sourceware.org/ml/binutils/2014-10/msg00198.html">binutils message</a>
+            and this
+            <a href="https://sourceware.org/ml/binutils/2014-11/msg00287.html">binutils message</a>.
+            </li>
+
+        <li>Documented a fix to a libc++ <code>sscanf/vsscanf</code> hang that occurred in API level
+            21. The fix itself had been implemented in r10c.
+            (Issue <a href="http://b.android.com/77988">77988</a>)</li>
+
+        <li>Fixed an AutoFDO (<code>-fauto-profile</code>) crash that occurred with GCC 4.9 when
+            <code>-Os</code> was specified. (Issue <a href="http://b.android.com/77571">77571</a>)</li>
+     </ul>
+     </dd>
+
+
+     <dt>Other bug fixes:</dt>
+     <dd>
+     <ul>
+        <li>Made the following header and library fixes:</li>
+           <ul>
+        <li>Added <code>posix_memalign</code> to API level 16. Also, added a prototype in
+            <code>stdlib.h</code> to API levels 16 to 19.
+            (Issue <a href="http://b.android.com/77861">77861</a>)</li>
+        <li>Fixed <code>stdatomic.h</code> so that it includes <code>&lt;atomic&gt;</code> only for
+            C++11.</li>
+        <li>Modified the following headers for standalone use: <code>sys/user.h</code>, and
+            <code>gl2ext.h</code>, <code>dlext.h</code>, <code>fts.h</code>, <code>sgidefs.h</code>
+            for API level 21.</li>
+        <li>Modified <code>sys/user.h</code> to rename <code>mxcsr_mask</code> as <code>mxcr_mask</code>,
+            and to change the data type for <code>u_ar0</code></li> from <code>unsigned long</code>
+            to </code>struct user_regs_struct*</code>.
+        <li>Changed <code>sysconf()</code> return value type from <code>int</code> to
+            <code>long</code>.</li>
+           </ul>
+
+        <li>Fixed ndk-build's handling of <code>thumb</code> for <code>LOCAL_ARM_MODE</code>: In
+            r10d, ndk-build adds <code>LOCAL_LDFLAGS+=-mthumb</code> by default, unless one of the
+            following conditions applies:</li>
+          <ul>
+            <li>You have set <code>LOCAL_ARM_MODE</code> equal to <code>arm</code>.</li>
+            <li>You are doing a debug build (with settings such as <code>APP_OPTIM=debug</code> and
+            <code>AndroidManifest.xml</code> containing <code>android:debuggable="true"</code>),
+            where ARM mode is the default in order to retain compatibility with earlier toolchains.
+            (Issue <a href="http://b.android.com/74040">74040</a>)</li>
+          </ul>
+
+        <li>Fixed <code>LOCAL_SRC_FILES</code> in ndk-build to use Windows absolute paths.
+            (Issue <a href="http://b.android.com/74333">74333</a>)</li>
+
+        <li>Removed bash-specific code from ndk-gdb. (Issue <a href="http://b.android.com/73338">73338</a>)</li>
+
+        <li>Removed bash-specific code from <code>make-standalone-toolchain.sh</code>.
+            (Issue <a href="http://b.android.com/74145">74145)</a></li>
+
+        <li>Revised documentation concerning a fix for <code>System.loadLibrary()</code> transitive
+            dependencies. (Issue <a href="http://b.android.com/41790">41790</a>)</li>
+
+        <li>Fixed a problem that was preventing 64-bit packages from extracting on Ubuntu 14.04 and
+            OS X 10.10 (Yosemite). (Issue <a href="http://b.android.com/78148">78148</a>)</li>
+
+        <li>Fixed an issue with <code>LOCAL_PCH</code> to improve Clang support. (Issue
+            <a href="http://b.android.com/77575">77575</a>)</li>
+
+        <li>Clarified "requires executable stack" warning from ld.gold. (Issue
+            <a href="http://b.android.com/79115">79115</a>)</li>
+     </ul>
+     </dd>
+
+   </dl>
+ </div>
+</div>
+
+
+
+
+
+
+
+<div class="toggle-content closed">
+ <p>
+   <a href="#" onclick="return toggleContent(this)"> <img
+     src="/assets/images/triangle-closed.png" class="toggle-content-img" alt=""
    >Android NDK, Revision 10c</a> <em>(October 2014)</em>
  </p>
  <div class="toggle-content-toggleme">
@@ -569,10 +695,6 @@ Symbol not found: _environ
    </dl>
  </div>
 </div>
-
-
-
-
 
 <div class="toggle-content closed">
  <p>

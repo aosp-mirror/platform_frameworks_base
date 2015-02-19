@@ -1,5 +1,6 @@
 page.title=Creating TV Navigation
-page.tags="focus","selection","d-pad"
+page.tags=tv, d-pad, focus
+helpoutsWidget=true
 trainingnavtop=true
 
 @jd:body

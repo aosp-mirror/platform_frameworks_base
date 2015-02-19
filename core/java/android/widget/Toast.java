@@ -235,6 +235,14 @@ public class Toast {
     public int getYOffset() {
         return mTN.mY;
     }
+
+    /**
+     * Gets the LayoutParams for the Toast window.
+     * @hide
+     */
+    public WindowManager.LayoutParams getWindowParams() {
+        return mTN.mParams;
+    }
     
     /**
      * Make a standard toast that just contains a text view.

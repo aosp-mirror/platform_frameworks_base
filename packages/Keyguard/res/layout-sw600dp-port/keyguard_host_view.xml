@@ -25,13 +25,16 @@
     android:id="@+id/keyguard_host_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
     <com.android.keyguard.MultiPaneChallengeLayout
         android:id="@+id/multi_pane_challenge"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
+        android:clipToPadding="false"
         android:orientation="vertical">
 
         <include layout="@layout/keyguard_widget_remove_drop_target"

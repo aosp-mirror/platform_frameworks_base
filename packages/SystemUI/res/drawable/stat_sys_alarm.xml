@@ -17,7 +17,7 @@
     android:insetLeft="2.5dp"
     android:insetRight="2.5dp">
     <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="22dp"
+        android:width="17dp"
         android:height="17dp"
         android:viewportWidth="24.0"
         android:viewportHeight="24.0">

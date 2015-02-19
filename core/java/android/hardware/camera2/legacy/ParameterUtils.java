@@ -918,7 +918,9 @@ public class ParameterUtils {
                 convertCameraAreaToActiveArrayRectangle(activeArray, zoomData, fakeArea);
 
         Point leftEye = face.leftEye, rightEye = face.rightEye, mouth = face.mouth;
-        if (leftEye != null && rightEye != null && mouth != null) {
+        if (leftEye != null && rightEye != null && mouth != null && leftEye.x != -2000 &&
+                leftEye.y != -2000 && rightEye.x != -2000 && rightEye.y != -2000 &&
+                mouth.x != -2000 && mouth.y != -2000) {
             leftEye = convertCameraPointToActiveArrayPoint(activeArray, zoomData,
                     leftEye, /*usePreviewCrop*/true);
             rightEye = convertCameraPointToActiveArrayPoint(activeArray, zoomData,

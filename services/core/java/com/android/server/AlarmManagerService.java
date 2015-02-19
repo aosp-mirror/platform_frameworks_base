@@ -75,6 +75,12 @@ class AlarmManagerService extends SystemService {
     // warning message.  The time duration is in milliseconds.
     private static final long LATE_ALARM_THRESHOLD = 10 * 1000;
 
+    // Minimum futurity of a new alarm
+    private static final long MIN_FUTURITY = 5 * 1000;  // 5 seconds, in millis
+
+    // Minimum alarm recurrence interval
+    private static final long MIN_INTERVAL = 60 * 1000;  // one minute, in millis
+
     private static final int RTC_WAKEUP_MASK = 1 << RTC_WAKEUP;
     private static final int RTC_MASK = 1 << RTC;
     private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << ELAPSED_REALTIME_WAKEUP;
@@ -696,6 +702,15 @@ class AlarmManagerService extends SystemService {
             windowLength = AlarmManager.INTERVAL_HOUR;
         }
 
+        // Sanity check the recurrence interval.  This will catch people who supply
+        // seconds when the API expects milliseconds.
+        if (interval > 0 && interval < MIN_INTERVAL) {
+            Slog.w(TAG, "Suspiciously short interval " + interval
+                    + " millis; expanding to " + (int)(MIN_INTERVAL/1000)
+                    + " seconds");
+            interval = MIN_INTERVAL;
+        }
+
         if (type < RTC_WAKEUP || type > ELAPSED_REALTIME) {
             throw new IllegalArgumentException("Invalid alarm type " + type);
         }
@@ -709,7 +724,11 @@ class AlarmManagerService extends SystemService {
         }
 
         final long nowElapsed = SystemClock.elapsedRealtime();
-        final long triggerElapsed = convertToElapsed(triggerAtTime, type);
+        final long nominalTrigger = convertToElapsed(triggerAtTime, type);
+        // Try to prevent spamming by making sure we aren't firing alarms in the immediate future
+        final long minTrigger = nowElapsed + MIN_FUTURITY;
+        final long triggerElapsed = (nominalTrigger > minTrigger) ? nominalTrigger : minTrigger;
+
         final long maxElapsed;
         if (windowLength == AlarmManager.WINDOW_EXACT) {
             maxElapsed = triggerElapsed;
@@ -787,7 +806,7 @@ class AlarmManagerService extends SystemService {
             }
 
             setImpl(type, triggerAtTime, windowLength, interval, operation,
-                    false, workSource, alarmClock);
+                    windowLength == AlarmManager.WINDOW_EXACT, workSource, alarmClock);
         }
 
         @Override
@@ -1105,7 +1124,7 @@ class AlarmManagerService extends SystemService {
 
                     if (DEBUG_ALARM_CLOCK) {
                         Log.v(TAG, "Found AlarmClockInfo at " +
-                                formatNextAlarm(getContext(), a.alarmClock) +
+                                formatNextAlarm(getContext(), a.alarmClock, userId) +
                                 " for user " + userId);
                     }
 
@@ -1143,7 +1162,7 @@ class AlarmManagerService extends SystemService {
         if (alarmClock != null) {
             if (DEBUG_ALARM_CLOCK) {
                 Log.v(TAG, "Next AlarmClockInfoForUser(" + userId + "): " +
-                        formatNextAlarm(getContext(), alarmClock));
+                        formatNextAlarm(getContext(), alarmClock, userId));
             }
             mNextAlarmClockForUser.put(userId, alarmClock);
         } else {
@@ -1185,7 +1204,7 @@ class AlarmManagerService extends SystemService {
             AlarmManager.AlarmClockInfo alarmClock = pendingUsers.valueAt(i);
             Settings.System.putStringForUser(getContext().getContentResolver(),
                     Settings.System.NEXT_ALARM_FORMATTED,
-                    formatNextAlarm(getContext(), alarmClock),
+                    formatNextAlarm(getContext(), alarmClock, userId),
                     userId);
 
             getContext().sendBroadcastAsUser(NEXT_ALARM_CLOCK_CHANGED_INTENT,
@@ -1196,8 +1215,9 @@ class AlarmManagerService extends SystemService {
     /**
      * Formats an alarm like platform/packages/apps/DeskClock used to.
      */
-    private static String formatNextAlarm(final Context context, AlarmManager.AlarmClockInfo info) {
-        String skeleton = DateFormat.is24HourFormat(context) ? "EHm" : "Ehma";
+    private static String formatNextAlarm(final Context context, AlarmManager.AlarmClockInfo info,
+            int userId) {
+        String skeleton = DateFormat.is24HourFormat(context, userId) ? "EHm" : "Ehma";
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         return (info == null) ? "" :
                 DateFormat.format(pattern, info.getTriggerTime()).toString();
@@ -1210,7 +1230,8 @@ class AlarmManagerService extends SystemService {
         if (mAlarmBatches.size() > 0) {
             final Batch firstWakeup = findFirstWakeupBatchLocked();
             final Batch firstBatch = mAlarmBatches.get(0);
-            if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
+            // always update the kernel alarms, as a backstop against missed wakeups
+            if (firstWakeup != null) {
                 mNextWakeup = firstWakeup.start;
                 setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
             }
@@ -1223,7 +1244,8 @@ class AlarmManagerService extends SystemService {
                 nextNonWakeup = mNextNonWakeupDeliveryTime;
             }
         }
-        if (nextNonWakeup != 0 && mNextNonWakeup != nextNonWakeup) {
+        // always update the kernel alarm, as a backstop against missed wakeups
+        if (nextNonWakeup != 0) {
             mNextNonWakeup = nextNonWakeup;
             setLocked(ELAPSED_REALTIME, nextNonWakeup);
         }
@@ -1425,12 +1447,9 @@ class AlarmManagerService extends SystemService {
                             maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
                             alarm.repeatInterval, alarm.operation, batch.standalone, true,
                             alarm.workSource, alarm.alarmClock, alarm.userId);
+                }
 
-                    // For now we count this as a wakeup alarm, meaning it needs to be
-                    // delivered immediately.  In the future we should change this, but
-                    // that required delaying when we reschedule the repeat...!
-                    hasWakeup = false;
-                } else if (alarm.wakeup) {
+                if (alarm.wakeup) {
                     hasWakeup = true;
                 }
 

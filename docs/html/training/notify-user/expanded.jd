@@ -1,10 +1,8 @@
 page.title=Using Big View Styles
-Styles parent.title=Notifying the User
-parent.link=index.html
+page.tags=notifications
+helpoutsWidget=true
 
 trainingnavtop=true
-next.title=Displaying Progress in a Notification
-next.link=display-progress.html
 
 @jd:body
 

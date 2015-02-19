@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">UiSettings</li>
       </ul>
     </div>
@@ -772,6 +841,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -880,7 +952,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isCompassEnabled()">isCompassEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether the compass is enabled/disabled.</div>
+        <div class="jd-descrdiv">
+          Gets whether the compass is enabled/disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -897,32 +974,65 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isIndoorLevelPickerEnabled()">isIndoorLevelPickerEnabled</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets whether the indoor level picker is enabled/disabled.
+          
+    
 
-        <div class="jd-descrdiv">Gets whether the indoor level picker is enabled/disabled.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isMyLocationButtonEnabled()">isMyLocationButtonEnabled</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isMapToolbarEnabled()">isMapToolbarEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether the my-location button is enabled/disabled.</div>
+        <div class="jd-descrdiv">
+          Gets whether the Map Toolbar is enabled/disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isMyLocationButtonEnabled()">isMyLocationButtonEnabled</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets whether the my-location button is enabled/disabled.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -934,13 +1044,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isRotateGesturesEnabled()">isRotateGesturesEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether rotate gestures are enabled/disabled.</div>
+        <div class="jd-descrdiv">
+          Gets whether rotate gestures are enabled/disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -952,13 +1067,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isScrollGesturesEnabled()">isScrollGesturesEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether scroll gestures are enabled/disabled.</div>
+        <div class="jd-descrdiv">
+          Gets whether scroll gestures are enabled/disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -970,13 +1090,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isTiltGesturesEnabled()">isTiltGesturesEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether tilt gestures are enabled/disabled.</div>
+        <div class="jd-descrdiv">
+          Gets whether tilt gestures are enabled/disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -988,13 +1113,18 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isZoomControlsEnabled()">isZoomControlsEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether the zoom controls are enabled/disabled.</div>
+        <div class="jd-descrdiv">
+          Gets whether the zoom controls are enabled/disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1006,25 +1136,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#isZoomGesturesEnabled()">isZoomGesturesEnabled</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether zoom gestures are enabled/disabled.</div>
-  
-  </td></tr>
+        <div class="jd-descrdiv">
+          Gets whether zoom gestures are enabled/disabled.
+          
+    
 
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setAllGesturesEnabled(boolean)">setAllGesturesEnabled</a></span>(boolean enabled)</nobr>
-        
-        <div class="jd-descrdiv">Sets the preference for whether all gestures should be enabled or disabled.</div>
+        </div>
   
   </td></tr>
 
@@ -1040,9 +1157,14 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setCompassEnabled(boolean)">setCompassEnabled</a></span>(boolean enabled)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setAllGesturesEnabled(boolean)">setAllGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Enables or disables the compass.</div>
+        <div class="jd-descrdiv">
+          Sets the preference for whether all gestures should be enabled or disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1050,22 +1172,73 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setCompassEnabled(boolean)">setCompassEnabled</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">
+          Enables or disables the compass.
+          
+    
+
+        </div>
+  
+  </td></tr>
 
 
-
-
-
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setIndoorLevelPickerEnabled(boolean)">setIndoorLevelPickerEnabled</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets whether the indoor level picker is enabled when indoor mode is enabled.
+          
+    
 
-        <div class="jd-descrdiv">Sets whether the indoor level picker is enabled when indoor mode is enabled.</div>
-
+        </div>
+  
   </td></tr>
 
 
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setMapToolbarEnabled(boolean)">setMapToolbarEnabled</a></span>(boolean enabled)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the preference for whether the Map Toolbar should be enabled or disabled.
+          
+    
 
+        </div>
+  
+  </td></tr>
+
+
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1078,7 +1251,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setMyLocationButtonEnabled(boolean)">setMyLocationButtonEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Enables or disables the my-location button.</div>
+        <div class="jd-descrdiv">
+          Enables or disables the my-location button.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1096,7 +1274,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setRotateGesturesEnabled(boolean)">setRotateGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Sets the preference for whether rotate gestures should be enabled or disabled.</div>
+        <div class="jd-descrdiv">
+          Sets the preference for whether rotate gestures should be enabled or disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1114,7 +1297,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setScrollGesturesEnabled(boolean)">setScrollGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Sets the preference for whether scroll gestures should be enabled or disabled.</div>
+        <div class="jd-descrdiv">
+          Sets the preference for whether scroll gestures should be enabled or disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1132,7 +1320,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setTiltGesturesEnabled(boolean)">setTiltGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Sets the preference for whether tilt gestures should be enabled or disabled.</div>
+        <div class="jd-descrdiv">
+          Sets the preference for whether tilt gestures should be enabled or disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1150,7 +1343,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setZoomControlsEnabled(boolean)">setZoomControlsEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Enables or disables the zoom controls.</div>
+        <div class="jd-descrdiv">
+          Enables or disables the zoom controls.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1168,7 +1366,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/UiSettings.html#setZoomGesturesEnabled(boolean)">setZoomGesturesEnabled</a></span>(boolean enabled)</nobr>
         
-        <div class="jd-descrdiv">Sets the preference for whether zoom gestures should be enabled or disabled.</div>
+        <div class="jd-descrdiv">
+          Sets the preference for whether zoom gestures should be enabled or disabled.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1454,6 +1657,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether the compass is enabled/disabled.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1467,14 +1673,14 @@ From class
 
 <A NAME="isIndoorLevelPickerEnabled()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">isIndoorLevelPickerEnabled</span>
@@ -1482,18 +1688,58 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether the indoor level picker is enabled/disabled. That is, whether the level picker
  will appear when a building with indoor maps is focused.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li><code>true</code> if the level picker is enabled; <code>false</code> if the level picker
          is disabled.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="isMapToolbarEnabled()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isMapToolbarEnabled</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets whether the Map Toolbar is enabled/disabled.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if the Map Toolbar is enabled; <code>false</code> otherwise.
 </li></ul>
   </div>
 
@@ -1523,6 +1769,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether the my-location button is enabled/disabled.</p></div>
   <div class="jd-tagdata">
@@ -1559,6 +1808,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether rotate gestures are enabled/disabled.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1593,6 +1845,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether scroll gestures are enabled/disabled.</p></div>
   <div class="jd-tagdata">
@@ -1629,6 +1884,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether tilt gestures are enabled/disabled.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1663,6 +1921,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether the zoom controls are enabled/disabled.</p></div>
   <div class="jd-tagdata">
@@ -1699,6 +1960,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether zoom gestures are enabled/disabled.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1733,6 +1997,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the preference for whether all gestures should be enabled or disabled. If enabled, all
  gestures are available; otherwise, all gestures are disabled. This doesn't restrict users
@@ -1776,6 +2043,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Enables or disables the compass. The compass is an icon on the map that indicates the
  direction of north on the map. If enabled, it is only shown when the camera is tilted or
  rotated away from its default orientation (tilt of 0 and a bearing of 0). When a user clicks
@@ -1801,14 +2071,14 @@ From class
 
 <A NAME="setIndoorLevelPickerEnabled(boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">setIndoorLevelPickerEnabled</span>
@@ -1816,12 +2086,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether the indoor level picker is enabled when indoor mode is enabled. If true, the
  level picker will appear when a building with indoor maps is focused. If false, no level
  picker will appear - an application will need to provide its own way of selecting levels.
@@ -1832,6 +2105,52 @@ From class
         <tr>
           <th>enabled</td>
           <td><code>true</code> to show or <code>false</code> to hide the level picker.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setMapToolbarEnabled(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setMapToolbarEnabled</span>
+      <span class="normal">(boolean enabled)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the preference for whether the Map Toolbar should be enabled or disabled. If enabled,
+ users will see a bar with various context-dependent actions, including 'open this map in
+ the Google Maps app' and 'find directions to the highlighted marker in the Google Maps app'.
+ <p> By default, the Map Toolbar is enabled.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>enabled</td>
+          <td><code>true</code> to enable the Map Toolbar; <code>false</code> to disable the Map
+ Toolbar.
 </td>
         </tr>
       </table>
@@ -1863,6 +2182,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Enables or disables the my-location button. The my-location button causes the camera to move
  such that the user's location is in the center of the map. If the button is enabled, it is
@@ -1908,6 +2230,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the preference for whether rotate gestures should be enabled or disabled. If enabled,
  users can use a two-finger rotate gesture to rotate the camera. If disabled, users cannot
@@ -1955,6 +2280,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the preference for whether scroll gestures should be enabled or disabled. If enabled,
  users can swipe to pan the camera. If disabled, swiping has no effect. This setting doesn't
  restrict programmatic movement and animation of the camera.
@@ -1998,6 +2326,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the preference for whether tilt gestures should be enabled or disabled. If enabled,
  users can use a two-finger vertical down swipe to tilt the camera. If disabled, users cannot
@@ -2044,6 +2375,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Enables or disables the zoom controls. If enabled, the zoom controls are a pair of buttons
  (one for zooming in, one for zooming out) that appear on the screen. When pressed, they cause
  the camera to zoom in (or out) by one zoom level. If disabled, the zoom controls are not
@@ -2088,6 +2422,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the preference for whether zoom gestures should be enabled or disabled. If enabled,
  users can either double tap/two-finger tap or pinch to zoom the camera. If disabled, these

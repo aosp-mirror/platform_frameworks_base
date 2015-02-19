@@ -65,6 +65,9 @@ page.type=about
 </style>
 
 
+
+
+
 <div class="landing-body-content">
   <div class="landing-hero-container">
 
@@ -77,17 +80,23 @@ page.type=about
             <div class="col-10">
               <div class="landing-section-header">
                 <div class="landing-h1 hero">Android Auto</div>
-                <div class="landing-subhead hero">Entertainment and services on your dashboard</div>
+                <div class="landing-subhead hero">Audio entertainment and
+                  messaging services in the car.</div>
                 <div class="landing-hero-description">
-                  <p style="width:450px">Display and control your Android app in vehicles.
-                   Integrate your content with easy-to-use APIs and let Android Auto take
-                   care of the rest.</p>
+                  <p style="width:450px">Let drivers listen to and control
+                    content in your music and other audio apps. Allow drivers to
+                    hear and respond to your messaging service via the
+                    car's controls and screen.</p>
                 </div>
 
-              <div class="landing-body">
-                <a href="{@docRoot}auto/overview.html" class="landing-button landing-primary"
-                   style="margin-top:40px;">
-                  Developer Overview
+              <div class="landing-body" style="margin-top:40px;">
+                <a href="{@docRoot}training/auto/index.html"
+                   class="landing-button landing-primary">
+                  Get Started
+                </a>
+                <a href="https://www.youtube.com/watch?v=ctiaVxgclsg" class="video-shadowbox-button white"
+                    style="margin-left:40px">
+                  Watch the Intro Video
                 </a>
               </div>
             </div>
@@ -103,148 +112,109 @@ page.type=about
     </div> <!-- end .landing-section .landing-hero -->
   </div> <!-- end .landing-hero-container -->
 
-    <div class="landing-rest-of-page">
+  <div class="landing-rest-of-page">
 
-      <div class="landing-section landing-gray-background" id="android-in-car">
-        <div class="wrap">
-          <div class="landing-section-h1">
-            <div class="landing-h1">Extending Android to Cars</div>
-          </div>
-          <div class="landing-body">
-            <div class="landing-subhead">Android Auto brings the Android experience to
-            cars with apps like Google Now and Maps.</div>
-            <div class="cols">
-              <div class="col-8">
-                <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/01_b_now.png" />
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/01_a_maps.png" />
-                </div>
+    <div class="landing-section landing-gray-background" id="android-in-car">
+      <div class="wrap">
+        <div class="landing-section-header">
+          <div class="landing-h1">Extending Android to Cars</div>
+          <div class="landing-subhead">Android Auto brings the Android
+              platform into the car with a user interface that's optimized for driving.</div>
+        </div>
+
+        <div class="landing-body">
+          <div class="cols">
+            <div class="col-8">
+              <div class="auto-img-container-cols">
+                <img class="auto-img-frame-cols" src="/auto/images/assets/landing/FrameA.png" />
+                <img class="auto-img-shot-cols" src="/auto/images/assets/landing/01.gif" />
               </div>
             </div>
-
-            <p>When users connect their Android phones to compatible vehicles, Android Auto
-             shows a standard interface that lets them start enabled apps and services.
-             Android Auto locks the handheld device when connected, so drivers
-            interact with Auto by using the vehicle's input controls, touch display, and voice.</p>
-            </p>
+            <div class="col-8">
+              <div class="auto-img-container-cols">
+                <img class="auto-img-frame-cols" src="/auto/images/assets/landing/FrameA.png" />
+                <img class="auto-img-shot-cols" src="/auto/images/assets/landing/02.gif" />
+              </div>
+            </div>
           </div>
-        </div> <!-- end .wrap -->
-      </div> <!-- end .landing-section -->
+        </div>
+      </div> <!-- end .wrap -->
+    </div> <!-- end .landing-section -->
 
-
-      <div class="landing-section">
+    <div class="landing-section">
         <div class="wrap">
           <div class="landing-section-header">
             <div class="landing-h1">Build for One Platform</div>
-            <div class="landing-subhead">Create apps with the Android APIs you're familiar with
-            and extend them to cars with the Auto SDK.
+            <div class="landing-subhead">Create apps with the Android APIs
+              you’re familiar with and extend them to cars.
             </div>
           </div>
 
-          <div class="landing-body">
-
-            <div class="cols">
-              <div class="col-8">
-                <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/02_b_switcher.gif" />
-                </div>
-              </div>
-              <div class="col-8">
-                <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/02_a_notif.gif" />
-                </div>
-              </div>
-            </div>
-            <p>Write your apps without having
-            to worry about vehicle-specific hardware differences like screen resolution, software
-            interfaces, knobs, and touch controls. Your users get the same experience on any compatible
-            vehicle such as a consistent app launcher and system events such as notifications.</p>
-          </div>
-        </div> <!-- end .wrap -->
-      </div> <!-- end .landing-section -->
-
-
-      <div class="landing-section landing-gray-background">
-        <div class="wrap">
-          <div class="landing-section-header">
-            <div class="landing-h1">Minimize Distraction</div>
-            <div class="landing-subhead">
-             Android Auto displays different UIs for several app categories that let users focus on the road.
-            </div>
-          </div>
           <div class="landing-body">
             <div class="cols">
               <div class="col-8">
                 <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/03_b_voice.gif" />
+                  <img class="auto-img-frame-cols" src="/auto/images/assets/landing/FrameA.png" />
+                  <img class="auto-img-shot-cols" src="/auto/images/assets/landing/05.png" />
                 </div>
               </div>
               <div class="col-8">
                 <div class="auto-img-container-cols">
-                  <img class="auto-img-frame-cols" src="{@docRoot}auto/images/assets/00_frame.png" />
-                  <img class="auto-img-shot-cols" src="{@docRoot}auto/images/assets/03_a_musict.png" />
+                  <img class="auto-img-frame-cols" src="/auto/images/assets/landing/FrameA.png" />
+                  <img class="auto-img-shot-cols" src="/auto/images/assets/landing/06.png" />
                 </div>
               </div>
             </div>
-            <p>Android Auto defines the user interaction model for all
-             apps and let you hook into a standard UI with touch and voice controls. The interface
-             is designed to reduce driver distraction while still letting you customize and brand them to properly deliver your content.
-             </p>
+            <p>Write your apps without having to worry about vehicle-specific
+            hardware differences like screen resolution, software interfaces,
+            knobs, and touch controls. Your users get the same experience on any
+            compatible vehicle such as a consistent app launcher and system
+            events such as notifications.</p>
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
 
-      <div class="landing-section" style="background-color:#f5f5f5">
+    <div class="landing-section" style="background-color:#f5f5f5" id="developing-for-auto">
         <div class="wrap">
           <div class="landing-section-header">
-            <div class="landing-pre-h1">Coming soon</div>
-            <div class="landing-h1">Android Auto SDK</div>
+            <div class="landing-pre-h1">Now Available</div>
+            <div class="landing-h1">Developing for Android Auto</div>
+            <div class="landing-subhead">The APIs for building Auto-enabled apps
+              are available now! When connected to compatible vehicles, apps on
+              handheld devices running Android 5.0 or higher can communicate
+              with Android Auto.</div>
           </div>
 
           <div class="landing-body">
-            <p>In the coming months, we’ll be releasing the Android Auto SDK, which includes APIs
-              and tools to make your existing apps compatible with Android Auto. The first version
-              of the SDK will provide APIs for music, podcast, live radio, and audio
-              news apps, as well as limited voice actions.</p>
-
-            <div class="cols" style="margin-top:40px">
-              <div class="col-3-wide">
-                <p class="sdk-link-title">Updates</p>
-                <p class="sdk-link-desc">
-                  Register to receive more information and be notified when the SDK is available.
+            <div class="cols">
+              <div class="col-8">
+                <div class="auto-img-container-cols">
+                  <img class="auto-img-frame-cols" src="/auto/images/assets/landing/FrameA.png" />
+                  <img class="auto-img-shot-cols" src="/auto/images/assets/landing/03.gif" />
+                </div>
+                <div class="landing-h3">Play Music on the Road from Your App</div>
+                <p class="landing-small" style="padding-left:0px; padding-top:15px;">
+                  Extend audio apps such as music, radio, and audiobook players
+                  into the car. Build apps that let users browse and play their
+                  music in the car.<br><a href="{@docRoot}training/auto/audio/index.html">Learn how to build audio apps</a>
                 </p>
-                <a class="sdk-link" href="https://docs.google.com/a/google.com/forms/d/1ANgYOoYLkfyZ2JRPSU34Nep5yNaU-Ha2syXJ9b4xLrA/viewform">Sign up for updates</a>
               </div>
-              <div class="col-3-wide">
-                <p class="sdk-link-title">Google+ Community</p>
-                <p class="sdk-link-desc">
-                  Stay involved, get updates, and exchange experiences with other developers.
+              <div class="col-8">
+                <div class="auto-img-container-cols">
+                  <img class="auto-img-frame-cols" src="/auto/images/assets/landing/FrameA.png" />
+                  <img class="auto-img-shot-cols" src="/auto/images/assets/landing/04.png" />
+                </div>
+                <div class="landing-h3">Keep Users Connected with In-Vehicle Messaging</div>
+                <p class="landing-small" style="padding-left:0px; padding-top:15px;">
+                  Create messaging apps that receive incoming notifications,
+                  read messages via text-to-speech, and let users reply by voice
+                  input in the car.<br><a href="{@docRoot}training/auto/messaging/index.html">Learn how to build messaging apps</a>
                 </p>
-                <a class="sdk-link" href="http://g.co/androidautodev">Discuss on Google+</a>
-              </div>
-              <div class="col-3-wide">
-                <p class="sdk-link-title">Developer Overview</p>
-                <p class="sdk-link-desc">
-                  Learn more about developing apps for Android Auto when the SDK is available.
-                </p>
-                <a class="sdk-link" href="{@docRoot}auto/overview.html">Learn about the platform</a>
               </div>
             </div>
           </div>
-
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
-
-
 
       <div class="landing-section landing-gray-background" >
         <div class="wrap">
@@ -255,15 +225,25 @@ page.type=about
           </div>
           <div class="landing-body">
           <div class="cols">
-
+            <div class="col-4">
+              <img src="{@docRoot}auto/images/logos/apps/iheartradio.png"
+                   width="160" height="160" class="img-logo" />
+            </div>
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/joyride.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
+              <img src="{@docRoot}auto/images/logos/apps/kik.png"
+                   width="120" height="120" class="img-logo" style="margin-top:30px" />
+            </div>
+            <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/mlb.png"
                    width="160" height="160" class="img-logo" />
             </div>
+          </div>
+
+          <div class="cols">
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/pandora.png"
                    width="160" height="160" class="img-logo" />
@@ -272,10 +252,20 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/apps/pocketcasts.png"
                    width="160" height="160" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/songza.png"
+                   width="160" height="160" class="img-logo" />
+            </div>
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/soundcloud.png"
+                   width="100" height="100" class="img-logo"
+                   style="margin-top:30px" />
+            </div>
+          </div>
+
+          <div class="cols">
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/spotify.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
@@ -283,39 +273,59 @@ page.type=about
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
+              <img src="/auto/images/logos/apps/TextMe.png"
+                   width="100" height="100" class="img-logo" style="margin-top:30px" />
+            </div>
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/textplus.png"
+                   width="120" height="24" class="img-logo" style="margin-top:70px" />
+            </div>
+          </div>
+
+          <div class="cols">
+            <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/tunein.png"
-                   width="160" height="160" class="img-logo" />
+                   width="160" height="160" class="img-logo" style="margin-left:160px" />
             </div>
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/umano.png"
-                   width="160" height="160" class="img-logo" />
+                   width="160" height="160" class="img-logo" style="margin-left:370px" />
             </div>
           </div>
+
           <div class="cols" style="margin-top:40px">
               <div class="col-4">
-                <img src="{@docRoot}auto/images/logos/apps/iheartradio.png"
-                     width="160" height="160" class="img-logo" />
+                <img src="/auto/images/logos/apps/whatsapp.png"
+                     width="120" height="120" class="img-logo" />
               </div>
-              <div class="col-12">
+              <div class="col-8">
                 <p><em>
-                "The Android Auto APIs provide an easy way to integrate the most important features and functionality of iHeartRadio’s robust music service into a safety-minded automotive infotainment solution. The process was seamless, utilizing a flexible construct that allowed us to quickly adapt our existing product without losing any of the core experience our listeners know and love."</em></p>
+                "We were able to get messaging functionality for text
+                implemented easily on Android Auto, with minimal development
+                effort. We're excited to participate in Android Auto which
+                provides a notification interface for the car that is both
+                user-friendly and highly safety-minded."</em></p>
               </div>
           </div>
+
           <div class="cols" style="margin-top:60px">
 
               <div class="col-4">
-                <img src="{@docRoot}auto/images/logos/apps/spotify.png"
-                     width="160" height="160" class="img-logo" />
+                <img src="/auto/images/logos/apps/npr.png"
+                     width="100" height="128" class="img-logo" />
               </div>
-              <div class="col-12"><p style="margin-top:20px"><em>
-              "Android Auto offers Spotify the exciting opportunity to easily enable safe access to millions of songs while driving. We were able to quickly develop for the platform using the new Android voice and media API extensions. As a result, Android users will soon be able to continue the Spotify experience in their cars, including being able to play any song, artist, album or playlist by voice.</em></p>
+              <div class="col-8"><p style="margin-top:0px"><em>
+              "Android Auto connects NPR One listeners to a personalized stream
+              of public radio news and stories to catch up on in the car. It's
+              an engaging and driver-safe user experience that was developed
+              using the media APIs provided in Android 5.0. The available
+              development tools made the integration and testing process simple
+              for launching in a short period of time."</em></p>
               </div>
               </div>
           </div>
         </div> <!-- end .wrap -->
       </div> <!-- end .landing-section -->
-
-
 
 
       <div class="landing-section landing-white-background">
@@ -456,24 +466,47 @@ page.type=about
           </div>
         </div>
       </div>
-    </div> <!-- end .landing-rest-of-page -->
-    <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement"
-    style="border-top: none;">
-      <div class="layout-content-col col-16" style="padding-top:4px">
-        <style>#___plusone_0 {float:right !important;}</style>
-        <div class="g-plusone" data-size="medium"></div>
+
+      <div class="landing-section landing-red-background">
+        <div class="wrap">
+          <div class="landing-section-header">
+            <div class="landing-h1 landing-align-left">Get Started with Android Auto</div>
+
+            <div class="landing-subhead landing-subhead-red">
+              <p>
+                Set up your development environment and start working with the APIs.
+                We’re excited about the experiences you'll create and can't
+                wait to see what you do next.</p>
+            </div>
+          </div>
+          <div class="landing-body">
+            <a href="{@docRoot}training/auto/index.html"
+            class="landing-button landing-primary" style="margin-top: 20px;">
+              Get Started
+            </a>
+          </div>
+        </div>
       </div>
+  </div>
+  <div class="content-footer wrap" itemscope="" itemtype="http://schema.org/SiteNavigationElement"
+    style="border-top: none;">
+
+    <div class="layout-content-col col-16" style="padding-top:4px">
+      <style>#___plusone_0 {float:right !important;}</style>
+      <div class="g-plusone" data-size="medium"></div>
     </div>
-    <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
-      <div id="copyright">
+  </div>
+
+  <div id="footer" class="wrap" style="width:940px;position:relative;top:-35px;z-index:-1">
+    <div id="copyright">
         Except as noted, this content is
         licensed under <a href="http://creativecommons.org/licenses/by/2.5/">
         Creative Commons Attribution 2.5</a>. For details and
         restrictions, see the <a href="{@docRoot}license.html">Content
         License</a>.
-      </div>
     </div>
-  </div> <!-- end .landing-hero-container -->
+  </div>
+</div> <!-- end .landing-hero-container -->
 
   <script>
   $("a.landing-down-arrow").on("click", function(e) {

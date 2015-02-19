@@ -55,4 +55,20 @@
             android:paddingTop="0dp" />
 
     </FrameLayout>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="1dp"
+        android:layout_height="32dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@color/volume_panel_divider" />
+
+    <ImageView
+        android:id="@+id/secondary_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="center"
+        android:background="@drawable/btn_borderless_rect"
+        android:contentDescription="@null" />
 </LinearLayout>

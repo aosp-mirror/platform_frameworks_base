@@ -1,4 +1,6 @@
 page.title=Debugging over Bluetooth
+page.tags=wear
+helpoutsWidget=true
 
 @jd:body
 
@@ -19,7 +21,7 @@ page.title=Debugging over Bluetooth
   </div>
 </div>
 
-<p>You can debug your wearable over Bluetooth by routing it's debug output to the
+<p>You can debug your wearable over Bluetooth by routing its debug output to the
 handheld device that's connected to your development machine.</p>
 
 <h2 id="SetupDevices">Setup Devices for Debugging</h2>
@@ -58,7 +60,8 @@ Target: connected
 </li>
 <li>Connect the handheld to your machine over USB and run:
 <pre>
-adb forward tcp:4444 localabstract:/adb-hub; adb connect localhost:4444
+adb forward tcp:4444 localabstract:/adb-hub
+adb connect localhost:4444
 </pre>
 
 <p class="note"><b>Note</b>: You can use any available port that you have access to.</p>

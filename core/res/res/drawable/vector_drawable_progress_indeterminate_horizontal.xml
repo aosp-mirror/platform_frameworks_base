@@ -27,7 +27,7 @@
             android:name="background_track"
             android:pathData="M -180.0,-1.0 l 360.0,0 l 0,2.0 l -360.0,0 Z"
             android:fillColor="?attr/colorControlActivated"
-            android:fillAlpha="0.1"/>
+            android:fillAlpha="?attr/disabledAlpha"/>
         <group
             android:name="rect2_grp"
             android:translateX="-197.60001"

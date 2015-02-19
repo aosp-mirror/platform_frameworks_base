@@ -1,0 +1,157 @@
+page.title=Providing Configuration Activities
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Intent">Specify an Intent for Configuration Activities</a></li>
+  <li><a href="#WearableActivity">Create a Wearable Configuration Activity</a></li>
+  <li><a href="#CompanionActivity">Create a Companion Configuration Activity</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>When users install a handheld app that contains a <a
+href="{@docRoot}training/wearables/apps/index.html">wearable app</a> with watch faces, these
+watch faces become available in the Android Wear companion app on the companion device and in
+the watch face picker on the wearable. Users can choose the active watch face for their wearable
+device by selecting it on the companion app or using the watch face picker on the wearable
+device.</p>
+
+<p>Some watch faces support configuration parameters to let users customize how the watch face
+looks and behaves. For example, some watch faces let users pick a custom background color, and
+watch faces that tell time for two different time zones can let users select which time zones
+they are interested in.</p>
+
+<p>Watch faces that support configuration parameters can let users customize a watch face using
+an activity in the wearable app, an activity on the handheld app, or both. Users can start the
+wearable configuration activity on the wearable device, and they can start the companion
+configuration activity from the Android Wear companion app.</p>
+
+<p>The digital watch face from the <em>WatchFace</em> sample in the Android SDK demonstrates how to
+implement handheld and wearable configuration activities and how to update a watch face in
+response to configuration changes. This sample is located in the
+<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory.</p>
+
+
+
+<h2 id="Intent">Specify an Intent for Configuration Activities</h2>
+
+<p>If your watch face includes configuration activities, add the following metadata entries to
+the service declaration in the manifest file of the wearable app:</p>
+
+<pre>
+&lt;service
+    android:name=".DigitalWatchFaceService" ... />
+    &lt;!-- companion configuration activity -->
+    &lt;meta-data
+        android:name=
+           "com.google.android.wearable.watchface.companionConfigurationAction"
+        android:value=
+           "com.example.android.wearable.watchface.CONFIG_DIGITAL" />
+    &lt;!-- wearable configuration activity -->
+    &lt;meta-data
+        android:name=
+           "com.google.android.wearable.watchface.wearableConfigurationAction"
+        android:value=
+           "com.example.android.wearable.watchface.CONFIG_DIGITAL" />
+    ...
+&lt;/service>
+</pre>
+
+<p>Provide values for these entries that are preceded by the package name of your app.
+Configuration activities register intent filters for this intent, and the system fires this
+intent when users want to configure your watch face.</p>
+
+<p>If your watch face only includes a companion or a wearable configuration activity, you only
+need to include the corresponding metadata entry from the example above.</p>
+
+
+
+<h2 id="WearableActivity">Create a Wearable Configuration Activity</h2>
+
+<p>Wearable configuration activities provide a limited set of customization choices for a
+watch face, because complex menus are hard to navigate on smaller screens. Your wearable
+configuration activity should provide binary choices and just a few selections to customize
+the main aspects of your watch face.</p>
+
+<p>To create a wearable configuration activity, add a new activity to your wearable app module
+and declare the following intent filter in the manifest file of the wearable app:</p>
+
+<pre>
+&lt;activity
+    android:name=".DigitalWatchFaceWearableConfigActivity"
+    android:label="@string/digital_config_name">
+    &lt;intent-filter>
+        &lt;action android:name=
+            "com.example.android.wearable.watchface.CONFIG_DIGITAL" />
+        &lt;category android:name=
+        <strong>"com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION"</strong> />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>The name of the action in this intent filter must match the intent name you defined in
+<a href="#Intent">Specify an Intent for Configuration Activities</a>.</p>
+
+<p>In your configuration activity, build a simple UI that provides selections for users to
+customize your watch face. When users make a selection, use the <a
+href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer API</a> to
+communicate the configuration change to the watch face activity.</p>
+
+<p>For more details, see the <code>DigitalWatchFaceWearableConfigActivity</code> and
+<code>DigitalWatchFaceUtil</code> classes in the <em>WatchFace</em> sample.</p>
+
+
+
+<h2 id="CompanionActivity">Create a Companion Configuration Activity</h2>
+
+<p>Companion configuration activities give users access to the full set of configuration choices
+for a watch face, because it is easier to interact with complex menus on the larger screen of
+a handheld device. For example, a configuration activity on a handheld device enables you to
+present users with elaborate color pickers to select the background color of a watch face.</p>
+
+<p>To create a companion configuration activity, add a new activity to your handheld app module and
+declare the following intent filter in the manifest file of the handheld app:</p>
+
+<pre>
+&lt;activity
+    android:name=".DigitalWatchFaceCompanionConfigActivity"
+    android:label="@string/app_name">
+    &lt;intent-filter>
+        &lt;action android:name=
+            "com.example.android.wearable.watchface.CONFIG_DIGITAL" />
+        &lt;category android:name=
+        <strong>"com.google.android.wearable.watchface.category.COMPANION_CONFIGURATION"</strong> />
+        &lt;category android:name="android.intent.category.DEFAULT" />
+    &lt;/intent-filter>
+&lt;/activity>
+</pre>
+
+<p>In your configuration activity, build a UI that provides options to customize all the
+configurable elements of your watch face. When users make a selection, use the <a
+href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer API</a> to
+communicate the configuration change to the watch face activity.</p>
+
+<p>For more details, see the <code>DigitalWatchFaceCompanionConfigActivity</code> class in the
+<em>WatchFace</em> sample.</p>
+
+
+
+<h2 id="Listener">Create a Listener Service in the Wearable App</h2>
+
+<p>To receive updated configuration parameters from the configuration activities, create a
+service that implements the <code>WearableListenerService</code> interface from the <a
+href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer API</a> in your
+wearable app. Your watch face implementation can redraw the watch face when the configuration
+parameters change.</p>
+
+<p>For more details, see the <code>DigitalWatchFaceConfigListenerService</code> and
+<code>DigitalWatchFaceService</code> classes in the <em>WatchFace</em> sample.</p>

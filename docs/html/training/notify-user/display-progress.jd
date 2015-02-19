@@ -1,10 +1,8 @@
 page.title=Displaying Progress in a Notification
-parent.title=Notifying the User
-parent.link=index.html
+page.tags=notifications
+helpoutsWidget=true
 
 trainingnavtop=true
-previous.title=Using Expanded Notification Styles
-previous.link=expanded.html
 
 @jd:body
 

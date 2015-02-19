@@ -1427,7 +1427,7 @@ href="#ActionView">action views</a>.</dd>
 <p>Here's an example that defines a custom theme for an activity, {@code CustomActivityTheme},
 that includes several styles to customize the action bar.</p>
 
-<p>Notice that there are two version for each action bar style property. The first one
+<p>Notice that there are two versions for each action bar style property. The first one
 includes the {@code android:} prefix on the property name to support API levels 11 and higher
 that include these properties in the framework. The second version does <em>not</em>
 include the {@code android:} prefix and is for older versions of the platform, on which

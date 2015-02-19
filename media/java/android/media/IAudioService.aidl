@@ -19,6 +19,7 @@ package android.media;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
+import android.media.AudioAttributes;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -29,6 +30,7 @@ import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.Rating;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.audiopolicy.IAudioPolicyCallback;
 import android.net.Uri;
 import android.view.KeyEvent;
 
@@ -76,9 +78,15 @@ interface IAudioService {
 
     void setMicrophoneMute(boolean on, String callingPackage);
 
-    void setRingerMode(int ringerMode, boolean checkZen);
+    void setRingerModeExternal(int ringerMode, String caller);
 
-    int getRingerMode();
+    void setRingerModeInternal(int ringerMode, String caller);
+
+    int getRingerModeExternal();
+
+    int getRingerModeInternal();
+
+    boolean isValidRingerMode(int ringerMode);
 
     void setVibrateSetting(int vibrateType, int vibrateSetting);
 
@@ -114,10 +122,11 @@ interface IAudioService {
 
     boolean isBluetoothA2dpOn();
 
-    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName);
+    int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
+            IAudioPolicyCallback pcb);
 
-    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId);
+    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa);
 
     void unregisterAudioFocusClient(String clientId);
 
@@ -205,6 +214,9 @@ interface IAudioService {
 
     boolean isHdmiSystemAudioSupported();
 
-    boolean registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
-    oneway void unregisterAudioPolicyAsync(in IBinder cb);
+           String registerAudioPolicy(in AudioPolicyConfig policyConfig,
+                    in IAudioPolicyCallback pcb, boolean hasFocusListener);
+    oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
+
+           int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 }

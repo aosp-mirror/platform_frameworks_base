@@ -16,8 +16,7 @@
 ** limitations under the License.
 */
 -->
-<set xmlns:android="http://schemas.android.com/apk/res/android"
-	android:zAdjustment="top">
+<set xmlns:android="http://schemas.android.com/apk/res/android">
     <objectAnimator
         android:interpolator="@interpolator/decelerate_cubic"
         android:valueFrom="0"

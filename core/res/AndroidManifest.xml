@@ -271,6 +271,8 @@
 
     <protected-broadcast android:name="android.intent.action.PHONE_STATE" />
 
+    <protected-broadcast android:name="android.intent.action.SUB_DEFAULT_CHANGED" />
+
     <protected-broadcast android:name="android.location.GPS_ENABLED_CHANGE" />
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
     <protected-broadcast android:name="android.location.MODE_CHANGED" />
@@ -291,6 +293,15 @@
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_PROGRESS" />
     <protected-broadcast android:name="android.nfc.handover.intent.action.TRANSFER_DONE" />
 
+    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE" />
+    <protected-broadcast android:name="android.intent.action.ACTION_SUBINFO_RECORD_UPDATED" />
+
+    <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE" />
+    <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
@@ -351,6 +362,12 @@
         android:protectionLevel="dangerous"
         android:label="@string/permlab_receiveMms"
         android:description="@string/permdesc_receiveMms" />
+
+    <!-- Allows an application to filter carrier specific sms.
+         @hide -->
+    <permission android:name="android.permission.CARRIER_FILTER_SMS"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:protectionLevel="signature|system" />
 
     <!-- @SystemApi Allows an application to receive emergency cell broadcast messages,
          to record or display them to the user.
@@ -1080,6 +1097,14 @@
         android:label="@string/permlab_hardware_test"
         android:description="@string/permdesc_hardware_test" />
 
+    <!-- @SystemApi Allows access to FM
+         @hide This is not a third-party API (intended for system apps).-->
+    <permission android:name="android.permission.ACCESS_FM_RADIO"
+        android:permissionGroup="android.permission-group.HARDWARE_CONTROLS"
+        android:protectionLevel="signature|system"
+        android:label="@string/permlab_fm"
+        android:description="@string/permdesc_fm" />
+
     <!-- Allows access to configure network interfaces, configure/use IPSec, etc.
          @hide -->
     <permission android:name="android.permission.NET_ADMIN"
@@ -1108,6 +1133,12 @@
     <!-- @hide Allows enabling/disabling OEM unlock
    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.OEM_UNLOCK_STATE"
+                android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+                android:protectionLevel="signature" />
+
+    <!-- @hide Allows querying state of PersistentDataBlock
+   <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.ACCESS_PDB_STATE"
                 android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
                 android:protectionLevel="signature" />
 
@@ -1249,6 +1280,34 @@
         android:protectionLevel="dangerous"
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip" />
+
+    <!-- @SystemApi Protects the ability to register any PhoneAccount with
+         PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION. This capability indicates that the PhoneAccount
+         corresponds to a device SIM.
+         @hide -->
+    <permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_register_sim_subscription"
+        android:label="@string/permlab_register_sim_subscription" />
+
+    <!-- @SystemApi Protects the ability to register any PhoneAccount with
+         PhoneAccount#CAPABILITY_CALL_PROVIDER.
+         @hide -->
+    <permission android:name="android.permission.REGISTER_CALL_PROVIDER"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_register_call_provider"
+        android:label="@string/permlab_register_call_provider" />
+
+    <!-- @SystemApi Protects the ability to register any PhoneAccount with
+         PhoneAccount#CAPABILITY_CONNECTION_MANAGER
+         @hide -->
+    <permission android:name="android.permission.REGISTER_CONNECTION_MANAGER"
+        android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
+        android:description="@string/permdesc_connection_manager"
+        android:label="@string/permlab_connection_manager" />
 
     <!-- @SystemApi Allows an application to bind to InCallService implementations.
          @hide -->
@@ -2359,6 +2418,15 @@
         android:description="@string/permdesc_controlWifiDisplay"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to control VPN.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.CONTROL_VPN"
+        android:label="@string/permlab_controlVpn"
+        android:description="@string/permdesc_controlVpn"
+        android:protectionLevel="signature|system" />
+    <uses-permission android:name="android.permission.CONTROL_VPN" />
+
     <!-- @SystemApi Allows an application to capture audio output.
          <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
@@ -2469,11 +2537,12 @@
         android:description="@string/permdesc_broadcastWapPush"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to broadcast a SCORE_NETWORKS request.
+    <!-- @SystemApi Allows an application to broadcast privileged networking requests.
          <p>Not for use by third-party applications. @hide -->
-    <permission android:name="android.permission.BROADCAST_SCORE_NETWORKS"
-        android:label="@string/permlab_broadcastScoreNetworks"
-        android:description="@string/permdesc_broadcastScoreNetworks"
+    <permission android:name="android.permission.BROADCAST_NETWORK_PRIVILEGED"
+        android:permissionGroup="android.permission-group.NETWORK"
+        android:label="@string/permlab_broadcastNetworkPrivileged"
+        android:description="@string/permdesc_broadcastNetworkPrivileged"
         android:protectionLevel="signature|system" />
 
     <!-- @SystemApi Not for use by third-party applications. -->
@@ -2847,6 +2916,13 @@
         android:description="@string/permdesc_removeDrmCertificates"
         android:protectionLevel="signature|system" />
 
+    <!-- Must be required by a {@link android.service.carrier.CarrierMessagingService}.
+         Any service that filters for this intent must be a carrier privileged app. -->
+    <permission android:name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"
+        android:label="@string/permlab_bindCarrierMessagingService"
+        android:description="@string/permdesc_bindCarrierMessagingService"
+        android:protectionLevel="signature|system" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>
@@ -2892,7 +2968,7 @@
                 android:label="@string/managed_profile_label">
         </activity-alias>
         <activity android:name="com.android.internal.app.HeavyWeightSwitcherActivity"
-                android:theme="@style/Theme.Material.Dialog"
+                android:theme="@style/Theme.Material.Light.Dialog"
                 android:label="@string/heavy_weight_switcher_title"
                 android:finishOnCloseSystemDialogs="true"
                 android:excludeFromRecents="true"
@@ -2912,7 +2988,7 @@
         <activity android:name="android.accounts.ChooseAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Material.Dialog"
+                android:theme="@style/Theme.Material.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2920,14 +2996,14 @@
         <activity android:name="android.accounts.ChooseTypeAndAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Material.Dialog"
+                android:theme="@style/Theme.Material.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.ChooseAccountTypeActivity"
                 android:excludeFromRecents="true"
-                android:theme="@android:style/Theme.Material.Dialog"
+                android:theme="@style/Theme.Material.Light.Dialog"
                 android:label="@string/choose_account_label"
                 android:process=":ui">
         </activity>
@@ -2935,25 +3011,26 @@
         <activity android:name="android.accounts.CantAddAccountActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Material.Dialog.NoActionBar"
+                android:theme="@style/Theme.Material.Light.Dialog.NoActionBar"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.accounts.GrantCredentialsPermissionActivity"
                 android:excludeFromRecents="true"
                 android:exported="true"
-                android:theme="@android:style/Theme.Material.DialogWhenLarge"
+                android:theme="@style/Theme.Material.Light.DialogWhenLarge"
                 android:process=":ui">
         </activity>
 
         <activity android:name="android.content.SyncActivityTooManyDeletes"
-               android:theme="@android:style/Theme.Holo.Dialog"
+               android:theme="@style/Theme.Material.Light.Dialog"
                android:label="@string/sync_too_many_deletes"
                android:process=":ui">
         </activity>
 
-        <activity android:name="com.android.server.ShutdownActivity"
+        <activity android:name="com.android.internal.app.ShutdownActivity"
             android:permission="android.permission.SHUTDOWN"
+            android:theme="@style/Theme.NoDisplay"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
@@ -2966,7 +3043,7 @@
         </activity>
 
         <activity android:name="com.android.internal.app.NetInitiatedActivity"
-                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:theme="@style/Theme.Material.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
                 android:process=":ui">
         </activity>

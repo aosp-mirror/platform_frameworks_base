@@ -23,6 +23,7 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.os.IBinder.DeathRecipient;
 import android.os.Message;
 import android.os.RemoteException;
@@ -33,6 +34,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 
 /**
  * A display adapter that provides virtual displays on behalf of applications.
@@ -43,6 +45,9 @@ import java.io.PrintWriter;
 final class VirtualDisplayAdapter extends DisplayAdapter {
     static final String TAG = "VirtualDisplayAdapter";
     static final boolean DEBUG = false;
+
+    // Unique id prefix for virtual displays
+    private static final String UNIQUE_ID_PREFIX = "virtual:";
 
     private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
             new ArrayMap<IBinder, VirtualDisplayDevice>();
@@ -61,9 +66,12 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         boolean secure = (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
         IBinder appToken = callback.asBinder();
         IBinder displayToken = SurfaceControl.createDisplay(name, secure);
+        final String baseUniqueId =
+                UNIQUE_ID_PREFIX + ownerPackageName + "," + ownerUid + "," + name + ",";
+        final int uniqueIndex = getNextUniqueIndex(baseUniqueId);
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
                 ownerUid, ownerPackageName, name, width, height, densityDpi, surface, flags,
-                new Callback(callback, mHandler));
+                new Callback(callback, mHandler), baseUniqueId + uniqueIndex, uniqueIndex);
 
         mVirtualDisplayDevices.put(appToken, device);
 
@@ -111,6 +119,29 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         return device;
     }
 
+    /**
+     * Returns the next unique index for the uniqueIdPrefix
+     */
+    private int getNextUniqueIndex(String uniqueIdPrefix) {
+        if (mVirtualDisplayDevices.isEmpty()) {
+            return 0;
+        }
+
+        int nextUniqueIndex = 0;
+        Iterator<VirtualDisplayDevice> it = mVirtualDisplayDevices.values().iterator();
+        while (it.hasNext()) {
+            VirtualDisplayDevice device = it.next();
+            if (device.getUniqueId().startsWith(uniqueIdPrefix)
+                    && device.mUniqueIndex >= nextUniqueIndex) {
+                // Increment the next unique index to be greater than ones we have already ran
+                // across for displays that have the same unique Id prefix.
+                nextUniqueIndex = device.mUniqueIndex + 1;
+            }
+        }
+
+        return nextUniqueIndex;
+    }
+
     private void handleBinderDiedLocked(IBinder appToken) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
         if (device != null) {
@@ -149,12 +180,13 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         private int mDisplayState;
         private boolean mStopped;
         private int mPendingChanges;
+        private int mUniqueIndex;
 
         public VirtualDisplayDevice(IBinder displayToken, IBinder appToken,
                 int ownerUid, String ownerPackageName,
                 String name, int width, int height, int densityDpi, Surface surface, int flags,
-                Callback callback) {
-            super(VirtualDisplayAdapter.this, displayToken);
+                Callback callback, String uniqueId, int uniqueIndex) {
+            super(VirtualDisplayAdapter.this, displayToken, uniqueId);
             mAppToken = appToken;
             mOwnerUid = ownerUid;
             mOwnerPackageName = ownerPackageName;
@@ -167,6 +199,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             mCallback = callback;
             mDisplayState = Display.STATE_UNKNOWN;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
+            mUniqueIndex = uniqueIndex;
         }
 
         @Override
@@ -254,9 +287,11 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             if (mInfo == null) {
                 mInfo = new DisplayDeviceInfo();
                 mInfo.name = mName;
+                mInfo.uniqueId = getUniqueId();
                 mInfo.width = mWidth;
                 mInfo.height = mHeight;
                 mInfo.refreshRate = 60;
+                mInfo.supportedRefreshRates = new float[] { 60.0f };
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
@@ -277,6 +312,15 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 }
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
+
+                    if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+                        // For demonstration purposes, allow rotation of the external display.
+                        // In the future we might allow the user to configure this directly.
+                        if ("portrait".equals(SystemProperties.get(
+                                "persist.demo.remoterotation"))) {
+                            mInfo.rotation = Surface.ROTATION_270;
+                        }
+                    }
                 }
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;

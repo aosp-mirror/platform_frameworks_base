@@ -31,6 +31,10 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
      * still available because it was recently on. */
     private static final long RECENTLY_ON_DURATION_MILLIS = 500;
 
+    private final AnimationIcon mEnable
+            = new AnimationIcon(R.drawable.ic_signal_flashlight_enable_animation);
+    private final AnimationIcon mDisable
+            = new AnimationIcon(R.drawable.ic_signal_flashlight_disable_animation);
     private final FlashlightController mFlashlightController;
     private long mWasLastOn;
 
@@ -66,7 +70,7 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         }
         boolean newState = !mState.value;
         mFlashlightController.setFlashlight(newState);
-        refreshState(newState);
+        refreshState(newState ? UserBoolean.USER_TRUE : UserBoolean.USER_FALSE);
     }
 
     @Override
@@ -75,8 +79,8 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
             mWasLastOn = SystemClock.uptimeMillis();
         }
 
-        if (arg instanceof Boolean) {
-            state.value = (Boolean) arg;
+        if (arg instanceof UserBoolean) {
+            state.value = ((UserBoolean) arg).value;
         }
 
         if (!state.value && mWasLastOn != 0) {
@@ -92,8 +96,9 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
         // the camera is not available while it is being used for the flashlight.
         state.visible = mWasLastOn != 0 || mFlashlightController.isAvailable();
         state.label = mHost.getContext().getString(R.string.quick_settings_flashlight_label);
-        state.iconId = state.value
-                ? R.drawable.ic_qs_flashlight_on : R.drawable.ic_qs_flashlight_off;
+        final AnimationIcon icon = state.value ? mEnable : mDisable;
+        icon.setAllowAnimation(arg instanceof UserBoolean && ((UserBoolean) arg).userInitiated);
+        state.icon = icon;
         int onOrOffId = state.value
                 ? R.string.accessibility_quick_settings_flashlight_on
                 : R.string.accessibility_quick_settings_flashlight_off;
@@ -111,12 +116,12 @@ public class FlashlightTile extends QSTile<QSTile.BooleanState> implements
 
     @Override
     public void onFlashlightOff() {
-        refreshState(false);
+        refreshState(UserBoolean.BACKGROUND_FALSE);
     }
 
     @Override
     public void onFlashlightError() {
-        refreshState(false);
+        refreshState(UserBoolean.BACKGROUND_FALSE);
     }
 
     @Override

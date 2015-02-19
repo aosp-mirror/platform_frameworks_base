@@ -16,11 +16,17 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
-        <bitmap android:src="@drawable/fastscroll_thumb_mtrl_alpha"
-            android:tint="?attr/colorControlActivated" />
+        <shape android:tint="?attr/colorControlActivated"
+               android:shape="rectangle">
+            <solid android:color="@color/white" />
+            <size android:width="8dp" android:height="48dp" />
+        </shape>
     </item>
     <item>
-        <bitmap android:src="@drawable/fastscroll_thumb_mtrl_alpha"
-            android:tint="?attr/colorControlNormal" />
+        <shape android:tint="?attr/colorControlNormal"
+               android:shape="rectangle">
+            <solid android:color="@color/white" />
+            <size android:width="8dp" android:height="48dp" />
+        </shape>
     </item>
 </selector>

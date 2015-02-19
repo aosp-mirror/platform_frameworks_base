@@ -9,58 +9,24 @@ page.title=Overview
 <ol class="toc">
   <li><a href="#key">Key Concepts</a></li>
   <li><a href="#arch">Architectural Overview</a></li>
-  <li><a href="#lifecycle">Lifecycle Flow</a>
-    <ol class="toc">
-      <li><a href="#register">Enable GCM</a></li>
-      <li><a href="#push-process">Send a message</a></li>
-      <li><a href="#receiving">Receive a message</a></li>
-    </ol>
-  </li>
+  <li><a href="#lifecycle">Lifecycle Flow</a></li>
+  <li><a href="#reg">Register to enable GCM</a></li>
 </ol>
 
 </div>
 </div>
 
-<p>Google Cloud Messaging for Android (GCM) is a free service that helps
-developers  send data from servers to their Android applications on  Android
-devices, and upstream messages from the user's device back to the cloud.
-This could be a lightweight message telling the Android application
+<p>Google Cloud Messaging (GCM) is a free service that enables developers
+to send downstream messages (from servers to GCM-enabled client apps), and
+upstream messages (from the GCM-enabled client apps to servers).
+This could be a lightweight message telling the client app
 that there is new data to be fetched from the server (for instance, a "new email"
-notification informing the application that it is out of sync with the back end),
+notification informing the app that it is out of sync with the back end),
 or it could be a message containing up to 4kb of payload
 data (so apps like instant messaging can consume the message directly). The GCM
-service handles all aspects  of queueing of messages and delivery to the target
-Android application running  on the target device.</p>
-  
-<p class="note"> To jump right into using GCM with your Android
-  applications, see <a href="gs.html">Getting Started</a>.</p>
+service handles all aspects of queueing of messages and delivery to and from
+the target client app.</p>
 
-<p>Here are the primary characteristics of Google Cloud 
-Messaging (GCM):</p>
-
-<ul>
-  <li>It allows 3rd-party application servers to send messages to
-their Android applications.</li>
-  <li>Using the <a href="ccs.html">GCM Cloud Connection Server</a>, you can receive
-upstream messages from the user's device.</li>
-  <li>An Android application on an Android device doesn't need to be running to receive
-messages. The system will wake up the Android application via Intent broadcast
-when the  message arrives, as long as the application is set up with the proper
-broadcast receiver and permissions.</li>
-  <li>It does not provide any  built-in user interface or other handling for
-message data. GCM  simply passes raw message data received straight to the
-Android application,  which has full control of how to handle it. For example, the
-application might post a notification, display a custom user interface, or 
-silently sync data.</li>
-  <li>It requires devices running Android 2.2 or higher that also have the
-Google Play Store application installed, or or an emulator running Android 2.2
-with Google APIs. However, you are not limited to deploying your
-Android applications through Google Play Store.</li>
-  <li>It uses an existing connection for Google services. For pre-3.0 devices,
-this requires users to
-set up their Google account on their mobile devices. A Google account is not a
-requirement on devices running Android 4.0.4 or higher.</li>
-</ul>
 
 <h2 id="key">Key Concepts</h2>
 
@@ -70,7 +36,7 @@ divided into these categories:</p>
   <li><strong>Components</strong> &mdash; The entities that play a primary role in
 GCM.</li>
   <li><strong>Credentials</strong> &mdash; The IDs and tokens that are used in
-different stages of GCM to ensure that all parties have been authenticated, and
+GCM to ensure that all parties have been authenticated, and
 that the message is going to the correct place.</li>
 </ul>
 
@@ -81,24 +47,20 @@ that the message is going to the correct place.</li>
   <tr>
     <th colspan="2">Components</th>
   </tr>
-  <tr>
-    <td width="165"><strong>Client App</strong></td>
-    <td width="1176">The GCM-enabled Android application that is running on a
-    device. This must be a 2.2 Android device that has Google Play Store installed, and it must
-have at least one logged in Google account if the device is running a version
-lower than Android 4.0.4. Alternatively, for testing you can use an emulator
-running Android 2.2 with Google APIs.</td>
-  </tr>
-  <tr>
-    <td><strong>3rd-party Application Server</strong></td>
-    <td>An application server that you write as part of implementing
-GCM. The 3rd-party application server sends data to an
-Android application on the device via the GCM connection server.</td>
-  </tr>
-  <tr>
+<tr>
     <td><strong>GCM Connection Servers</strong></td>
-    <td>The Google-provided servers involved in taking messages from the 3rd-party
-application server and sending them to the device. </td>
+    <td>The Google-provided servers involved in sending messages between the
+3rd-party app server and the client app.</td>
+  </tr>
+  <tr>
+    <td><strong>Client App</strong></td>
+    <td>A GCM-enabled client app that communicates with a 3rd-party app server.</td>
+  </tr>
+  <tr>
+    <td><strong>3rd-party App Server</strong></td>
+    <td>An app server that you write as part of implementing
+GCM. The 3rd-party app server sends data to a client app via
+the GCM connection server.</td>
   </tr>
   <tr>
     <th colspan="2">Credentials</th>
@@ -108,42 +70,28 @@ application server and sending them to the device. </td>
     <td>A project number you acquire from the API console, as described in
 <a href="gs.html#create-proj">Getting Started</a>. The sender
 ID is used in the <a href="#register">registration process</a> to identify a
-3rd-party application server that is permitted to send messages to the device.</td>
-  </tr>
-  <tr>
-    <td><strong>Application ID</strong></td>
-    <td>The Android application that is registering to receive messages. The Android application
-is identified by the package name from the <a href="client.html#manifest">manifest</a>.
-This  ensures that the messages are targeted to the correct Android application.</td>
-  </tr>
-  <tr>
-    <td><strong>Registration ID</strong></td>
-    <td>An ID issued by the GCM servers to the Android application that allows
-it to receive messages. Once the Android application has the registration ID, it sends
-it to the 3rd-party application server, which uses it to identify each device 
-that has registered to receive messages for a given Android application. In other words,
-a registration ID is tied to a particular Android application running on a particular
-device. Note that registration IDs must be kept secret.
-<br/>
-<br/>
-<strong>Note:</strong> If you use 
-<a href="https://developer.android.com/google/backup/index.html">backup and restore</a>,
-you should explicitly avoid backing up registration IDs. When you back up
-a device, apps back up shared prefs indiscriminately. If you don't explicitly
-exclude the GCM registration ID, it could get reused on a new device,
-which would cause delivery errors.
-</td>
-  </tr>
-  <tr>
-    <td><strong>Google User Account</strong></td>
-    <td>For GCM to work, the mobile device must include at least one Google
-account if the device is running a version lower than Android 4.0.4.</td>
+3rd-party app server that is permitted to send messages to the client app.</td>
   </tr>
   <tr>
     <td id="apikey"><strong>Sender Auth Token</strong></td>
-    <td>An API key that is saved on the 3rd-party application
-server that gives the application server authorized access to Google services.
-The API key is included in the header of POST requests  that send messages.</td>
+    <td>An API key that is saved on the 3rd-party app
+server that gives the app server authorized access to Google services.
+The API key is included in the header of POST requests.
+</td>
+  </tr>
+  <tr>
+    <td><strong>Application ID</strong></td>
+    <td>The client app that is registering to receive messages. How this is implemented
+is platform-dependent. For example, an Android app
+is identified by the package name from the <a href="client.html#manifest">manifest</a>.
+This  ensures that the messages are targeted to the correct Android app.</td>
+  </tr>
+  <tr>
+    <td><strong>Registration ID</strong></td>
+    <td>An ID issued by the GCM servers to the client app that allows
+it to receive messages. Note that registration IDs must be kept secret.
+
+</td>
   </tr>
 
 </table>
@@ -152,7 +100,8 @@ The API key is included in the header of POST requests  that send messages.</td>
 
 <p>A GCM implementation includes a Google-provided
 connection server, a 3rd-party app server that interacts with the connection
-server, and a GCM-enabled client app running on an Android device:</p>
+server, and a GCM-enabled client app. For example, this diagram shows GCM
+communicating with a client app on an Android device:</p>
 
 <img src="{@docRoot}images/gcm/GCM-arch.png">
 
@@ -163,84 +112,196 @@ server, and a GCM-enabled client app running on an Android device:</p>
 <p>This is how these components interact:</p>
 <ul>
   <li>Google-provided <strong>GCM Connection Servers</strong> take messages from
-a 3rd-party application server and send these messages to a
-GCM-enabled Android application (the &quot;client app&quot;) running on a device.
+a 3rd-party app server and send these messages to a
+GCM-enabled client app (the &quot;client app&quot;).
 Currently Google provides connection servers for <a href="http.html">HTTP</a>
 and <a href="ccs.html">XMPP</a>.</li>
-  <li>The <strong>3rd-Party Application Server</strong> is a component that you
+  <li>The <strong>3rd-Party App Server</strong> is a component that you
 implement to work with your chosen GCM connection server(s). App servers send
 messages to a GCM connection server; the connection server enqueues and stores the
-message, and then sends it to the device when the device is online.
+message, and then sends it to the client app.
 For more information, see <a href="server.html">Implementing GCM Server</a>.</li>
-  <li>The <strong>Client App</strong> is a GCM-enabled Android application running
-on a device. To receive GCM messages, this app must register with GCM and get a
+  <li>The <strong>Client App</strong> is a GCM-enabled client app.
+To receive GCM messages, this app must register with GCM and get a
 registration ID. If you are using the <a href="ccs.html">XMPP</a> (CCS) connection
-server, the client app can send "upstream" messages back to the connection server.
+server, the client app can send "upstream" messages back to the 3rd-party app server.
 For more information on how to implement the client app, see
-<a href="client.html">Implementing GCM Client</a>.</li>
+the documentation for your platform.</li>
 </ul>
 
 <h2 id="lifecycle">Lifecycle Flow</h2>
 
 <ul>
-  <li><a href="#register">Enable GCM</a>. An Android application running on a
-mobile device registers to receive messages.</li>
+  <li><strong>Register to enable GCM</strong>. A client app registers to receive messages.
+For more discussion, see <a href="#register">Register to enable GCM</a>.</li>
+  <li><strong>Send and receive downstream messages</strong>.
+  <ul>
+     <li>Send a message. A 3rd-party app server sends messages to the client app:
+       <ol>
+         <li>The 3rd-party app server <a href="server.html#send-msg">sends a message</a>
+to GCM connection servers.</li>
+         <li>The GCM connection server enqueues and stores the message if the device is offline.</li>
+         <li>When the device is online, the GCM connection server sends the message to the device. </li>
+         <li>On the device, the client app receives the message according to the platform-specific implementation.
+See your platform-specific documentation for details.</li>
+       </ol>
+    </li>
+  <li>Receive a message. A client app
+receives a message from a GCM server. See your platform-specific documentation for details
+on how a client app in that environment processes the messages it receives.</li>
+  </ul>
+</li>
 
-  <li><a href="#push-process">Send a message</a>. A 3rd-party application
-server sends messages to the device.</li>
-  <li><a href="#receiving">Receive a message</a>. An Android application
-receives a message from a GCM server.</li>
+  <li><strong>Send and receive upstream messages</strong>. This feature is only available if
+you're using the <a href="ccs.html">XMPP Cloud Connection Server</a> (CCS).
+<ul>
+     <li>Send a message. A client app sends messages to the 3rd-party app server:
+      <ol>
+        <li>On the device, the client app sends messages to XMPP (CCS).See your platform-specific
+          documentation for details on how a client app can send a message to XMPP (CCS).</li>
+        <li>XMPP (CCS) enqueues and stores the message if the server is disconnected.</li>
+        <li>When the 3rd-party app server is re-connected, XMPP (CCS) sends the message to the 3rd-party app server.</li>
+      </ol>
+    </li>
+  <li>Receive a message. A 3rd-party app server receives a message from XMPP (CCS) and then does the following:
+      <ol>
+        <li>Parses the message header to verify client app sender information.
+        <li>Sends "ack" to GCM XMPP connection server to acknowledge receiving the message.
+        <li>Optionally parses the message payload, as defined by the client app.
+      </ol>
+</li>
 </ul>
 
-<p>These processes are described in more detail below.</p>
+</li>
 
-<h3 id="register">Enable GCM</h3>
 
-<p>The first time the Android application needs to use the messaging service, it
-calls the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
-{@code GoogleCloudMessaging}</a> method {@code register()}, as discussed in
-<a href="client.html">Implementing GCM Client</a>.
-The {@code register()} method returns a registration ID. The Android
-application should store this ID for later use (for instance,
-to check in <code>onCreate()</code> if it is already registered).
+</ul>
+
+<h2 id="reg">Register to enable GCM</h2>
+
+<p>Regardless of the platform you're developing on, the first step
+a client app must do is register with GCM. This section covers some of the general
+best practices for registration and unregistration. See your platform-specific docs for
+details on writing a GCM-enabled client app on that platform.</p>
+
+<h3 id="reg-state">Keeping the Registration State in Sync</h3>
+<p>Whenever the app registers as described in
+<a href="{@docRoot}google/gcm/client.html">Implementing GCM Client</a>,
+it should save the registration ID for future use, pass it to the
+3rd-party server to complete the registration, and keep track of
+whether the server completed the registration. If the server fails
+to complete the registration, the client app should retry passing the
+registration ID to 3rd-party app server to complete the registration.
+If this continues to fail, the client app should unregister from GCM.</p>
+
+<p>There are also two other scenarios that require special care:</p>
+<ul>
+  <li>Client app update</li>
+  <li>Backup and restore
+  </li>
+</ul>
+<p><bold>Client app update:</bold> When a client app is updated, it should invalidate its existing registration
+ID, as it is not guaranteed to work with the new version.  The recommended way to achieve
+this validation is by storing the current app version when a registration
+ID is stored. Then when the app starts, compare the stored value with
+the current app version. If they do not match, invalidate the stored data
+and start the registration process again.</p>
+
+<p><bold>Backup and restore: </bold> You should not save the registration ID when an app is
+backed up. This is because the registration ID could become invalid by the time
+the app is restored, which would put the app in an invalid state
+(that is, the app thinks it is registered, but the server and GCM do not
+store that registration ID anymore&mdash;thus the app will not get more
+messages). The best practice is to initiate the registration process as if the app has been
+installed for the first time.</p>
+
+<h4 id="canonical">Canonical IDs</h4>
+<p>If a bug in the app triggers multiple
+registrations for the same device, it can be hard to reconcile state and you might
+end up with duplicate messages.</p>
+<p>GCM provides a facility called &quot;canonical registration IDs&quot; to easily
+recover from these situations. A canonical registration ID is defined to be the ID
+of the last registration requested by your app. This is the ID that the
+server should use when sending messages to the device.</p>
+<p>If later on you try to send a message using a different registration ID, GCM
+will process the request as usual, but it will include the canonical registration
+ID in the <code>registration_id</code> field of the response. Make sure to replace
+the registration ID stored in your server with this canonical ID, as eventually
+the ID you're using will stop working.</p>
+
+<h3 id="retry">Automatic Retry Using Exponential Back-Off</h3>
+
+<p>When registration or unregistration fails, the app should retry the failed operation.</p>
+<p>In the simplest case, if your app attempts to register and GCM is not a
+fundamental part of the app, the app could simply ignore the error
+and try to register again the next time it starts. Otherwise, it should retry the
+previous operation using exponential back-off. In exponential back-off, each time
+there is a failure, it should wait twice the previous amount of time before trying
+again.
 </p>
 
-<h3 id="push-process">Send a message</h3>
+<h3 id="unreg">Unregistration</h3>
 
-<p>Here is the sequence of events that occurs when the application server sends a 
-message:</p>
+<p>This section explains when you should unregister in GCM and what happens
+when you do.</p>
 
+<h4 id="unreg-why">Why you should rarely unregister</h4>
+
+<p>You should only need to unregister in rare cases, such as
+if you want an app to stop receiving messages, or if you suspect that the registration ID has
+been compromised. In general, once an app has a registration ID, you shouldn't need
+to change it.</p>
+
+<p>In particular, you should never unregister your app as a mechanism for
+logout or for switching between users, for the following reasons:</p>
+
+<ul>
+  <li>A registration ID isn't associated with a particular
+  logged in user. If you unregister and then re-register, GCM may return the same
+  ID or a different ID&mdash;there's no guarantee either way.</li>
+
+  <li>Unregistration may take up to 5 minutes to propagate.</li>
+  <li>After unregistration, re-registration may again take up to 5 minutes to
+propagate. During this time messages may be rejected due to the state of being
+unregistered, and after all this, messages may still go to the wrong user.</li>
+</ul>
+
+
+<p>To make sure that messages go to the intended user:</p>
+
+<ul>
+  <li>Your app server can maintain a mapping between the current user
+and the registration ID.</li>
+  <li>The app can then check to ensure that messages it
+receives match the logged in user.</li>
+</ul>
+
+
+<h4 id="unreg-how">How unregistration works</h4>
+
+<p>An app can be automatically unregistered after it is uninstalled.
+However, this process does not happen right away. What happens in
+this scenario is as follows:</p>
 <ol>
-  <li>The application server sends a  message to  GCM servers.</li>
-  <li>Google enqueues and stores the message in case the device is
-offline.</li>
-  <li>When the device is online, Google sends the message to the device. </li>
-  <li>On the device, the system  broadcasts the  message to the specified
-Android application via Intent broadcast with proper permissions, so that only the
-targeted Android application gets the message. This wakes the Android application up. The
-Android application does not need to be running beforehand to receive the message.</li>
-  <li>The Android application processes the message. If the Android application is doing
-non-trivial processing, you may want to grab a
-{@link android.os.PowerManager.WakeLock} and do any processing in a service.</li>
+  <li>The end user uninstalls the client app.</li>
+  <li>The 3rd-party app server sends a message to GCM server.</li>
+  <li>The GCM server sends the message to the GCM client on the device.</li>
+  <li>The GCM client on the device receives the message and detects that the client app has been
+   uninstalled; the detection details depend on the platform on which the client app is running.
+</li>
+  <li>The GCM client on the device informs the GCM server that the client app was uninstalled.</li>
+  <li>The GCM server marks the registration ID for deletion.</li>
+  <li>The 3rd-party app server sends a message to  GCM.</li>
+  <li>The GCM returns a <code>NotRegistered</code> error message to the 3rd-party app server.</li>
+  <li>The 3rd-party app server deletes the registration ID.
+  </li>
 </ol>
 
-<p> An Android application can  unregister GCM if it no longer wants to receive 
-messages.</p>
-
-<h3 id="receiving">Receive a message</h3>
-
-<p>This is the sequence of events that occurs when an Android application
-installed on a mobile device receives a message:</p>
-
-<ol>
-  <li>The system receives the incoming message and extracts the raw key/value
-pairs from the message payload, if any.</li>
-  <li>The system passes the key/value pairs to the targeted Android application
-in a <code>com.google.android.c2dm.intent.RECEIVE</code> Intent as a set of
-extras.</li>
-  <li>The Android application extracts the raw data
-from the <code>com.google.android.c2dm.intent.RECEIVE</code><code> </code>Intent
-by key and processes the data.</li>
-</ol>
-
+<p>Note that it might take a while for the registration ID be completely removed
+from GCM. Thus it is possible that messages sent during step 7 above gets a valid
+message ID as response, even though the message will not be delivered to the client app.
+Eventually, the registration ID will be removed and the server will get a
+<code>NotRegistered</code> error, without any further action being required from
+the 3rd-party server (this scenario happens frequently while an app is
+being developed and tested).</p>
 

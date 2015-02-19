@@ -23,13 +23,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Proxy;
-import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -39,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -55,20 +55,26 @@ import java.lang.reflect.Method;
 
 public class CaptivePortalLoginActivity extends Activity {
     private static final String TAG = "CaptivePortalLogin";
-    private static final String DEFAULT_SERVER = "clients3.google.com";
+    private static final String DEFAULT_SERVER = "connectivitycheck.android.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
 
     // Keep this in sync with NetworkMonitor.
     // Intent broadcast to ConnectivityService indicating sign-in is complete.
     // Extras:
     //     EXTRA_TEXT       = netId
-    //     LOGGED_IN_RESULT = "1" if we should use network, "0" if not.
+    //     LOGGED_IN_RESULT = one of the CAPTIVE_PORTAL_APP_RETURN_* values below.
+    //     RESPONSE_TOKEN   = data fragment from launching Intent
     private static final String ACTION_CAPTIVE_PORTAL_LOGGED_IN =
             "android.net.netmon.captive_portal_logged_in";
     private static final String LOGGED_IN_RESULT = "result";
+    private static final int CAPTIVE_PORTAL_APP_RETURN_APPEASED = 0;
+    private static final int CAPTIVE_PORTAL_APP_RETURN_UNWANTED = 1;
+    private static final int CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS = 2;
+    private static final String RESPONSE_TOKEN = "response_token";
 
     private URL mURL;
     private int mNetId;
+    private String mResponseToken;
     private NetworkCallback mNetworkCallback;
 
     @Override
@@ -78,32 +84,22 @@ public class CaptivePortalLoginActivity extends Activity {
         String server = Settings.Global.getString(getContentResolver(), "captive_portal_server");
         if (server == null) server = DEFAULT_SERVER;
         try {
-            mURL = new URL("http://" + server + "/generate_204");
-        } catch (MalformedURLException e) {
-            done(true);
-        }
-
-        mNetId = Integer.parseInt(getIntent().getStringExtra(Intent.EXTRA_TEXT));
-        final Network network = new Network(mNetId);
-        ConnectivityManager.setProcessDefaultNetwork(network);
-
-        // Set HTTP proxy system properties to those of the selected Network.
-        final LinkProperties lp = ConnectivityManager.from(this).getLinkProperties(network);
-        if (lp != null) {
-            final ProxyInfo proxyInfo = lp.getHttpProxy();
-            String host = "";
-            String port = "";
-            String exclList = "";
-            Uri pacFileUrl = Uri.EMPTY;
-            if (proxyInfo != null) {
-                host = proxyInfo.getHost();
-                port = Integer.toString(proxyInfo.getPort());
-                exclList = proxyInfo.getExclusionListAsString();
-                pacFileUrl = proxyInfo.getPacFileUrl();
+            mURL = new URL("http", server, "/generate_204");
+            final Uri dataUri = getIntent().getData();
+            if (!dataUri.getScheme().equals("netid")) {
+                throw new MalformedURLException();
             }
-            Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
-            Log.v(TAG, "Set proxy system properties to " + proxyInfo);
+            mNetId = Integer.parseInt(dataUri.getSchemeSpecificPart());
+            mResponseToken = dataUri.getFragment();
+        } catch (MalformedURLException|NumberFormatException e) {
+            // System misconfigured, bail out in a way that at least provides network access.
+            done(CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS);
         }
+
+        final ConnectivityManager cm = ConnectivityManager.from(this);
+        final Network network = new Network(mNetId);
+        // Also initializes proxy system properties.
+        cm.setProcessDefaultNetwork(network);
 
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.
@@ -112,8 +108,7 @@ public class CaptivePortalLoginActivity extends Activity {
         getActionBar().setDisplayShowHomeEnabled(false);
 
         // Exit app if Network disappears.
-        final NetworkCapabilities networkCapabilities =
-                ConnectivityManager.from(this).getNetworkCapabilities(network);
+        final NetworkCapabilities networkCapabilities = cm.getNetworkCapabilities(network);
         if (networkCapabilities == null) {
             finish();
             return;
@@ -121,14 +116,14 @@ public class CaptivePortalLoginActivity extends Activity {
         mNetworkCallback = new NetworkCallback() {
             @Override
             public void onLost(Network lostNetwork) {
-                if (network.equals(lostNetwork)) done(false);
+                if (network.equals(lostNetwork)) done(CAPTIVE_PORTAL_APP_RETURN_UNWANTED);
             }
         };
         final NetworkRequest.Builder builder = new NetworkRequest.Builder();
         for (int transportType : networkCapabilities.getTransportTypes()) {
             builder.addTransportType(transportType);
         }
-        ConnectivityManager.from(this).registerNetworkCallback(builder.build(), mNetworkCallback);
+        cm.registerNetworkCallback(builder.build(), mNetworkCallback);
 
         final WebView myWebView = (WebView) findViewById(R.id.webview);
         myWebView.clearCache(true);
@@ -165,11 +160,14 @@ public class CaptivePortalLoginActivity extends Activity {
         }
     }
 
-    private void done(boolean use_network) {
-        ConnectivityManager.from(this).unregisterNetworkCallback(mNetworkCallback);
+    private void done(int result) {
+        if (mNetworkCallback != null) {
+            ConnectivityManager.from(this).unregisterNetworkCallback(mNetworkCallback);
+        }
         Intent intent = new Intent(ACTION_CAPTIVE_PORTAL_LOGGED_IN);
         intent.putExtra(Intent.EXTRA_TEXT, String.valueOf(mNetId));
-        intent.putExtra(LOGGED_IN_RESULT, use_network ? "1" : "0");
+        intent.putExtra(LOGGED_IN_RESULT, String.valueOf(result));
+        intent.putExtra(RESPONSE_TOKEN, mResponseToken);
         sendBroadcast(intent);
         finish();
     }
@@ -194,11 +192,11 @@ public class CaptivePortalLoginActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_use_network) {
-            done(true);
+            done(CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS);
             return true;
         }
         if (id == R.id.action_do_not_use_network) {
-            done(false);
+            done(CAPTIVE_PORTAL_APP_RETURN_UNWANTED);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -227,7 +225,7 @@ public class CaptivePortalLoginActivity extends Activity {
                     if (urlConnection != null) urlConnection.disconnect();
                 }
                 if (httpResponseCode == 204) {
-                    done(true);
+                    done(CAPTIVE_PORTAL_APP_RETURN_APPEASED);
                 }
             }
         }).start();
@@ -254,6 +252,19 @@ public class CaptivePortalLoginActivity extends Activity {
                 return;
             }
             testForCaptivePortal();
+        }
+
+        // A web page consisting of a large broken lock icon to indicate SSL failure.
+        final static String SSL_ERROR_HTML = "<!DOCTYPE html><html><head><style>" +
+                "html { width:100%; height:100%; " +
+                "       background:url(locked_page.png) center center no-repeat; }" +
+                "</style></head><body></body></html>";
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            Log.w(TAG, "SSL error; displaying broken lock icon.");
+            view.loadDataWithBaseURL("file:///android_asset/", SSL_ERROR_HTML, "text/HTML",
+                    "UTF-8", null);
         }
     }
 

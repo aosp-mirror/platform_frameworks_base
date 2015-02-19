@@ -16,8 +16,6 @@
 
 package com.android.server.usb;
 
-import android.alsa.AlsaCardsParser;
-import android.alsa.AlsaDevicesParser;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbConfiguration;
@@ -25,16 +23,13 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -46,10 +41,11 @@ import java.util.HashMap;
  */
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
-    private static final boolean DEBUG_AUDIO = false;
+    private static final boolean DEBUG = false;
 
     // contains all connected USB devices
     private final HashMap<String, UsbDevice> mDevices = new HashMap<String, UsbDevice>();
+
 
     // USB busses to exclude from USB host support
     private final String[] mHostBlacklist;
@@ -64,14 +60,7 @@ public class UsbHostManager {
     private ArrayList<UsbInterface> mNewInterfaces;
     private ArrayList<UsbEndpoint> mNewEndpoints;
 
-    // Attributes of any connected USB audio device.
-    //TODO(pmclean) When we extend to multiple, USB Audio devices, we will need to get
-    // more clever about this.
-    private int mConnectedUsbCard = -1;
-    private int mConnectedUsbDeviceNum = -1;
-    private boolean mConnectedHasPlayback = false;
-    private boolean mConnectedHasCapture = false;
-    private boolean mConnectedHasMIDI = false;
+    private UsbAudioManager mUsbAudioManager;
 
     @GuardedBy("mLock")
     private UsbSettingsManager mCurrentSettings;
@@ -80,6 +69,7 @@ public class UsbHostManager {
         mContext = context;
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
+        mUsbAudioManager = new UsbAudioManager(context);
     }
 
     public void setCurrentSettings(UsbSettingsManager settings) {
@@ -118,48 +108,6 @@ public class UsbHostManager {
         return false;
     }
 
-    // Broadcasts the arrival/departure of a USB audio interface
-    // card - the ALSA card number of the physical interface
-    // device - the ALSA device number of the physical interface
-    // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void sendDeviceNotification(int card, int device, boolean enabled,
-            boolean hasPlayback, boolean hasCapture, boolean hasMIDI) {
-        // send a sticky broadcast containing current USB state
-        Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        intent.putExtra("state", enabled ? 1 : 0);
-        intent.putExtra("card", card);
-        intent.putExtra("device", device);
-        intent.putExtra("hasPlayback", hasPlayback);
-        intent.putExtra("hasCapture", hasCapture);
-        intent.putExtra("hasMIDI", hasMIDI);
-        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    private boolean waitForAlsaFile(int card, int device, boolean capture) {
-        // These values were empirically determined.
-        final int kNumRetries = 5;
-        final int kSleepTime = 500; // ms
-        String alsaDevPath = "/dev/snd/pcmC" + card + "D" + device + (capture ? "c" : "p");
-        File alsaDevFile = new File(alsaDevPath);
-        boolean exists = false;
-        for (int retry = 0; !exists && retry < kNumRetries; retry++) {
-            exists = alsaDevFile.exists();
-            if (!exists) {
-                try {
-                    Thread.sleep(kSleepTime);
-                } catch (IllegalThreadStateException ex) {
-                    Slog.d(TAG, "usb: IllegalThreadStateException while waiting for ALSA file.");
-                } catch (java.lang.InterruptedException ex) {
-                    Slog.d(TAG, "usb: InterruptedException while waiting for ALSA file.");
-                }
-            }
-        }
-
-        return exists;
-    }
-
     /* Called from JNI in monitorUsbHostBus() to report new USB devices
        Returns true if successful, in which case the JNI code will continue adding configurations,
        interfaces and endpoints, and finally call endUsbDeviceAdded after all descriptors
@@ -169,7 +117,7 @@ public class UsbHostManager {
             int deviceClass, int deviceSubclass, int deviceProtocol,
             String manufacturerName, String productName, String serialNumber) {
 
-        if (DEBUG_AUDIO) {
+        if (DEBUG) {
             Slog.d(TAG, "usb:UsbHostManager.beginUsbDeviceAdded(" + deviceName + ")");
             // Audio Class Codes:
             // Audio: 0x01
@@ -254,7 +202,7 @@ public class UsbHostManager {
 
     /* Called from JNI in monitorUsbHostBus() to finish adding a new device */
     private void endUsbDeviceAdded() {
-        if (DEBUG_AUDIO) {
+        if (DEBUG) {
             Slog.d(TAG, "usb:UsbHostManager.endUsbDeviceAdded()");
         }
         if (mNewInterface != null) {
@@ -266,16 +214,6 @@ public class UsbHostManager {
                     mNewInterfaces.toArray(new UsbInterface[mNewInterfaces.size()]));
         }
 
-        // Is there an audio interface in there?
-        final int kUsbClassId_Audio = 0x01;
-        boolean isAudioDevice = false;
-        for (int ntrfaceIndex = 0; !isAudioDevice && ntrfaceIndex < mNewInterfaces.size();
-                ntrfaceIndex++) {
-            UsbInterface ntrface = mNewInterfaces.get(ntrfaceIndex);
-            if (ntrface.getInterfaceClass() == kUsbClassId_Audio) {
-                isAudioDevice = true;
-            }
-        }
 
         synchronized (mLock) {
             if (mNewDevice != null) {
@@ -284,6 +222,7 @@ public class UsbHostManager {
                 mDevices.put(mNewDevice.getDeviceName(), mNewDevice);
                 Slog.d(TAG, "Added device " + mNewDevice);
                 getCurrentSettings().deviceAttached(mNewDevice);
+                mUsbAudioManager.deviceAdded(mNewDevice);
             } else {
                 Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
             }
@@ -292,81 +231,14 @@ public class UsbHostManager {
             mNewInterfaces = null;
             mNewEndpoints = null;
         }
-
-        if (!isAudioDevice) {
-            return; // bail
-        }
-
-        //TODO(pmclean) The "Parser" objects inspect files in "/proc/asound" which we presume is
-        // present, unlike the waitForAlsaFile() which waits on a file in /dev/snd. It is not
-        // clear why this works, or that it can be relied on going forward.  Needs further
-        // research.
-        AlsaCardsParser cardsParser = new AlsaCardsParser();
-        cardsParser.scan();
-        // cardsParser.Log();
-
-        // But we need to parse the device to determine its capabilities.
-        AlsaDevicesParser devicesParser = new AlsaDevicesParser();
-        devicesParser.scan();
-        // devicesParser.Log();
-
-        // The protocol for now will be to select the last-connected (highest-numbered)
-        // Alsa Card.
-        mConnectedUsbCard = cardsParser.getNumCardRecords() - 1;
-        mConnectedUsbDeviceNum = 0;
-
-        mConnectedHasPlayback = devicesParser.hasPlaybackDevices(mConnectedUsbCard);
-        mConnectedHasCapture = devicesParser.hasCaptureDevices(mConnectedUsbCard);
-        mConnectedHasMIDI = devicesParser.hasMIDIDevices(mConnectedUsbCard);
-
-        // Playback device file needed/present?
-        if (mConnectedHasPlayback &&
-            !waitForAlsaFile(mConnectedUsbCard, mConnectedUsbDeviceNum, false)) {
-            return;
-        }
-
-        // Capture device file needed/present?
-        if (mConnectedHasCapture &&
-            !waitForAlsaFile(mConnectedUsbCard, mConnectedUsbDeviceNum, true)) {
-            return;
-        }
-
-        if (DEBUG_AUDIO) {
-            Slog.d(TAG,
-                    "usb: hasPlayback:" + mConnectedHasPlayback + " hasCapture:" + mConnectedHasCapture);
-        }
-
-        sendDeviceNotification(mConnectedUsbCard,
-                mConnectedUsbDeviceNum,
-                true,
-                mConnectedHasPlayback,
-                mConnectedHasCapture,
-                mConnectedHasMIDI);
     }
 
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     private void usbDeviceRemoved(String deviceName) {
-        if (DEBUG_AUDIO) {
-          Slog.d(TAG, "usb:UsbHostManager.usbDeviceRemoved() nm:" + deviceName);
-        }
-
-        if (mConnectedUsbCard != -1 && mConnectedUsbDeviceNum != -1) {
-            sendDeviceNotification(mConnectedUsbCard,
-                    mConnectedUsbDeviceNum,
-                    false,
-                    mConnectedHasPlayback,
-                    mConnectedHasCapture,
-                    mConnectedHasMIDI);
-            mConnectedUsbCard = -1;
-            mConnectedUsbDeviceNum = -1;
-            mConnectedHasPlayback = false;
-            mConnectedHasCapture = false;
-            mConnectedHasMIDI = false;
-        }
-
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
+                mUsbAudioManager.deviceRemoved(device);
                 getCurrentSettings().deviceDetached(device);
             }
         }
@@ -418,6 +290,7 @@ public class UsbHostManager {
                 pw.println("    " + name + ": " + mDevices.get(name));
             }
         }
+        mUsbAudioManager.dump(fd, pw);
     }
 
     private native void monitorUsbHostBus();

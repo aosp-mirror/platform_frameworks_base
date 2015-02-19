@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GroundOverlay</li>
       </ul>
     </div>
@@ -772,6 +841,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -951,7 +1023,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getBearing()">getBearing</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the bearing of the ground overlay in degrees clockwise from north.</div>
+        <div class="jd-descrdiv">
+          Gets the bearing of the ground overlay in degrees clockwise from north.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -969,7 +1046,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getBounds()">getBounds</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the bounds for the ground overlay.</div>
+        <div class="jd-descrdiv">
+          Gets the bounds for the ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -987,7 +1069,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getHeight()">getHeight</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the height of the ground overlay.</div>
+        <div class="jd-descrdiv">
+          Gets the height of the ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1005,7 +1092,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getId()">getId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets this ground overlay's id.</div>
+        <div class="jd-descrdiv">
+          Gets this ground overlay's id.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1023,7 +1115,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getPosition()">getPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the location of the anchored point.</div>
+        <div class="jd-descrdiv">
+          Gets the location of the anchored point.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1041,7 +1138,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getTransparency()">getTransparency</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the transparency of this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Gets the transparency of this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1059,7 +1161,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getWidth()">getWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the width of the ground overlay.</div>
+        <div class="jd-descrdiv">
+          Gets the width of the ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1077,7 +1184,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#getZIndex()">getZIndex</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the zIndex of this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Gets the zIndex of this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1111,7 +1223,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#isVisible()">isVisible</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the visibility of this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Gets the visibility of this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1246,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#remove()">remove</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Removes this ground overlay from the map.</div>
+        <div class="jd-descrdiv">
+          Removes this ground overlay from the map.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1147,8 +1269,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setBearing(float)">setBearing</a></span>(float bearing)</nobr>
         
-        <div class="jd-descrdiv">Sets the bearing of the ground overlay (the direction that the vertical axis of the ground
- overlay points) in degrees clockwise from north.</div>
+        <div class="jd-descrdiv">
+          Sets the bearing of the ground overlay (the direction that the vertical axis of the ground
+ overlay points) in degrees clockwise from north.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1166,7 +1293,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setDimensions(float)">setDimensions</a></span>(float width)</nobr>
         
-        <div class="jd-descrdiv">Sets the dimensions of the ground overlay.</div>
+        <div class="jd-descrdiv">
+          Sets the dimensions of the ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1184,7 +1316,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setDimensions(float, float)">setDimensions</a></span>(float width, float height)</nobr>
         
-        <div class="jd-descrdiv">Sets the dimensions of the ground overlay.</div>
+        <div class="jd-descrdiv">
+          Sets the dimensions of the ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1202,7 +1339,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setImage(com.google.android.gms.maps.model.BitmapDescriptor)">setImage</a></span>(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> image)</nobr>
         
-        <div class="jd-descrdiv">Sets the image for the Ground Overlay.</div>
+        <div class="jd-descrdiv">
+          Sets the image for the Ground Overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1220,7 +1362,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setPosition(com.google.android.gms.maps.model.LatLng)">setPosition</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> latLng)</nobr>
         
-        <div class="jd-descrdiv">Sets the position of the ground overlay by changing the location of the anchored point.</div>
+        <div class="jd-descrdiv">
+          Sets the position of the ground overlay by changing the location of the anchored point.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1238,7 +1385,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setPositionFromBounds(com.google.android.gms.maps.model.LatLngBounds)">setPositionFromBounds</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a> bounds)</nobr>
         
-        <div class="jd-descrdiv">Sets the position of the ground overlay by fitting it to the given <code><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></code>.</div>
+        <div class="jd-descrdiv">
+          Sets the position of the ground overlay by fitting it to the given <code><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1256,7 +1408,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setTransparency(float)">setTransparency</a></span>(float transparency)</nobr>
         
-        <div class="jd-descrdiv">Sets the transparency of this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Sets the transparency of this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1274,7 +1431,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setVisible(boolean)">setVisible</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">Sets the visibility of this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Sets the visibility of this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1292,7 +1454,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/GroundOverlay.html#setZIndex(float)">setZIndex</a></span>(float zIndex)</nobr>
         
-        <div class="jd-descrdiv">Sets the zIndex of this ground overlay.</div>
+        <div class="jd-descrdiv">
+          Sets the zIndex of this ground overlay.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1578,6 +1745,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1606,6 +1776,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the bearing of the ground overlay in degrees clockwise from north.</p></div>
   <div class="jd-tagdata">
@@ -1641,6 +1814,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the bounds for the ground overlay. This ignores the rotation of the ground overlay.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1674,6 +1850,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the height of the ground overlay.</p></div>
   <div class="jd-tagdata">
@@ -1709,6 +1888,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets this ground overlay's id.  The id will be unique amongst all GroundOverlays on a map.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1742,6 +1924,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the location of the anchored point.</p></div>
   <div class="jd-tagdata">
@@ -1777,6 +1962,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the transparency of this ground overlay.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1810,6 +1998,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the width of the ground overlay.</p></div>
   <div class="jd-tagdata">
@@ -1845,6 +2036,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the zIndex of this ground overlay.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1879,6 +2073,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1907,6 +2104,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the visibility of this ground overlay. Note that this does not return whether the ground
  overlay is actually on screen, but whether it will be drawn if it is contained in the
@@ -1944,6 +2144,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Removes this ground overlay from the map. After a ground overlay has been removed, the
  behavior of all its methods is undefined.
 </p></div>
@@ -1974,6 +2177,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the bearing of the ground overlay (the direction that the vertical axis of the ground
  overlay points) in degrees clockwise from north. The rotation is performed about the anchor
@@ -2016,6 +2222,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the dimensions of the ground overlay. The height of the ground overlay will be
  calculated to preserve the proportions inherited from the bitmap.</p></div>
   <div class="jd-tagdata">
@@ -2055,6 +2264,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the dimensions of the ground overlay. The image will be stretched (and hence may not
  retain its proportions) to fit these dimensions.</p></div>
@@ -2100,6 +2312,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the image for the Ground Overlay. The new image will occupy the same bounds as the
  old image.</p></div>
   <div class="jd-tagdata">
@@ -2140,6 +2355,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the position of the ground overlay by changing the location of the anchored point.
  Preserves all other properties of the image.</p></div>
   <div class="jd-tagdata">
@@ -2179,6 +2397,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the position of the ground overlay by fitting it to the given <code><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></code>. This
  method will ignore the rotation (bearing) of the ground overlay when positioning it, but the
@@ -2221,6 +2442,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the transparency of this ground overlay. See the documentation at the top of this class
  for more information.</p></div>
   <div class="jd-tagdata">
@@ -2262,6 +2486,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility of this ground overlay. When not visible, a ground overlay is not drawn,
  but it keeps all of its other properties.</p></div>
   <div class="jd-tagdata">
@@ -2302,6 +2529,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the zIndex of this ground overlay. See the documentation at the top of this class for
  more information.</p></div>

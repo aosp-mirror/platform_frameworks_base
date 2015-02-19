@@ -19,11 +19,14 @@ import com.android.frameworks.coretests.R;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Button;
 
 public class BasicAnimatorActivity extends Activity {
+    public Button mAnimatingButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.animator_basic);
+        mAnimatingButton = (Button) findViewById(R.id.animatingButton);
     }
 }

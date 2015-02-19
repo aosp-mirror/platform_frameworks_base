@@ -17,9 +17,8 @@
 package android.os;
 
 import android.system.ErrnoException;
-import android.text.TextUtils;
 import android.system.Os;
-import android.system.OsConstants;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -403,20 +402,89 @@ public class FileUtils {
         return success;
     }
 
+    private static boolean isValidExtFilenameChar(char c) {
+        switch (c) {
+            case '\0':
+            case '/':
+                return false;
+            default:
+                return true;
+        }
+    }
+
     /**
-     * Assert that given filename is valid on ext4.
+     * Check if given filename is valid for an ext4 filesystem.
      */
     public static boolean isValidExtFilename(String name) {
+        return (name != null) && name.equals(buildValidExtFilename(name));
+    }
+
+    /**
+     * Mutate the given filename to make it valid for an ext4 filesystem,
+     * replacing any invalid characters with "_".
+     */
+    public static String buildValidExtFilename(String name) {
         if (TextUtils.isEmpty(name) || ".".equals(name) || "..".equals(name)) {
-            return false;
+            return "(invalid)";
         }
+        final StringBuilder res = new StringBuilder(name.length());
         for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
-            if (c == '\0' || c == '/') {
-                return false;
+            if (isValidExtFilenameChar(c)) {
+                res.append(c);
+            } else {
+                res.append('_');
             }
         }
-        return true;
+        return res.toString();
+    }
+
+    private static boolean isValidFatFilenameChar(char c) {
+        if ((0x00 <= c && c <= 0x1f)) {
+            return false;
+        }
+        switch (c) {
+            case '"':
+            case '*':
+            case '/':
+            case ':':
+            case '<':
+            case '>':
+            case '?':
+            case '\\':
+            case '|':
+            case 0x7F:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Check if given filename is valid for a FAT filesystem.
+     */
+    public static boolean isValidFatFilename(String name) {
+        return (name != null) && name.equals(buildValidFatFilename(name));
+    }
+
+    /**
+     * Mutate the given filename to make it valid for a FAT filesystem,
+     * replacing any invalid characters with "_".
+     */
+    public static String buildValidFatFilename(String name) {
+        if (TextUtils.isEmpty(name) || ".".equals(name) || "..".equals(name)) {
+            return "(invalid)";
+        }
+        final StringBuilder res = new StringBuilder(name.length());
+        for (int i = 0; i < name.length(); i++) {
+            final char c = name.charAt(i);
+            if (isValidFatFilenameChar(c)) {
+                res.append(c);
+            } else {
+                res.append('_');
+            }
+        }
+        return res.toString();
     }
 
     public static String rewriteAfterRename(File beforeDir, File afterDir, String path) {

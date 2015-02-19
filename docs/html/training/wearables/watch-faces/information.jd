@@ -1,0 +1,213 @@
+page.title=Showing Information in Watch Faces
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Experience">Create a Compelling Experience</a></li>
+  <li><a href="#AddData">Add Data to Your Watch Face</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>In addition to telling time, Android Wear devices provide users with contextually relevant
+information in the form of cards, notifications, and other wearable apps. Creating a custom
+watch face not only gives you the opportunity to tell time in visually compelling ways, but
+also to show users relevant information whenever they glance at their device.</p>
+
+<p>Like any other wearable app, your watch face can communicate with apps running on the handheld
+device using the <a href="{@docRoot}training/wearables/data-layer/index.html">Wearable Data Layer
+API</a>. In some cases, you need to create an activity in the handheld app module of your project
+that retrieves data from the Internet or from the user's profile and then shares it with your
+watch face.</p>
+
+<img src="{@docRoot}training/wearables/watch-faces/images/Render_Saturn.png"
+     width="200" height="196" alt="" style="margin-top:12px;margin-left:-20px"/>
+<img src="{@docRoot}training/wearables/watch-faces/images/Render_Episode.png"
+     width="200" height="196" alt="" style="margin-top:12px;margin-left:-25px"/>
+<p class="img-caption">
+<strong>Figure 1.</strong> Examples of watch faces with integrated data.</p>
+
+
+<h2 id="Experience">Create a Compelling Experience</h2>
+
+<p>Before you design and implement a contextually-aware watch face, answer the following
+questions:</p>
+
+<ul>
+<li>What kind of data do you want to incorporate?</li>
+<li>Where can you obtain this data?</li>
+<li>How often does the data change significantly?</li>
+<li>How can you present the data such that users understand it at a glance?</li>
+</ul>
+
+<p>Android Wear devices are usually paired with a companion device that has a GPS sensor and
+cellular connectivity, so you have endless possibilities to integrate different kinds of data
+in your watch face, such as location, calendar events, social media trends, picture feeds, stock
+market quotes, news events, sports scores, and so on. However, not all kinds of data are
+appropriate for a watch face, so you should consider what kinds of data are most relevant to
+your users throughout the day. Your watch face should also gracefully handle the case where the
+wearable is not paired with a companion device or when an Internet connection is not available.</p>
+
+<p>The active watch face on an Android Wear device is an app that runs continuously, so you
+must retrieve data in a battery-efficient manner. For example, you can obtain the current
+weather every ten minutes and store the results locally, instead of requesting an update every
+minute. You can also refresh contextual data when the device switches from ambient to interactive
+mode, since the user is more likely to glance at the watch when this transition occurs.</p>
+
+<p>You should summarize contextual information on your watch face, since there is limited
+space available on the screen and users just glance at their watch for a second or two at a
+time. Sometimes the best way to convey contextual information is to react to it using graphics
+and colors. For example, a watch face could change its background image depending on the current
+weather.</p>
+
+
+
+<h2 id="AddData">Add Data to Your Watch Face</h2>
+
+<div style="float:right;margin-left:20px">
+<img src="{@docRoot}training/wearables/watch-faces/images/preview_calendar.png"
+     width="180" height="180" alt="" style="margin-left:10px;margin-top:10px"/>
+<p class="img-caption"><strong>Figure 2.</strong> The calendar watch face.</p>
+</div>
+
+<p>The <em>WatchFace</em> sample in the Android SDK demonstrates how to obtain calendar data
+from the user’s profile in the <code>CalendarWatchFaceService</code> class and shows how many
+meetings there are in the following twenty-four hours. This sample is located in the
+<code>android-sdk/samples/android-21/wearable/WatchFace</code> directory.</p>
+
+<p>To implement a watch face that incorporates contextual data, follow these steps:</p>
+
+<ol>
+<li>Provide a task that retrieves the data.</li>
+<li>Create a custom timer to invoke your task periodically, or notify your watch face service
+    when external data changes.</li>
+<li>Redraw your watch face with the updated data.</li>
+</ol>
+
+<p>The following sections describe these steps in detail.</p>
+
+<h3 id="Task">Provide a task to retrieve data</h3>
+
+<p>Create a class inside your <code>CanvasWatchFaceService.Engine</code> implementation that
+extends {@link android.os.AsyncTask} and add the code to retrieve the data you’re interested
+in.</p>
+
+<p>The <code>CalendarWatchFaceService</code> class obtains the number of meetings in the next
+day as follows:</p>
+
+<pre>
+/* Asynchronous task to load the meetings from the content provider and
+ * report the number of meetings back using onMeetingsLoaded() */
+private class LoadMeetingsTask extends AsyncTask&lt;Void, Void, Integer> {
+    &#64;Override
+    protected Integer doInBackground(Void... voids) {
+        long begin = System.currentTimeMillis();
+        Uri.Builder builder =
+                WearableCalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, begin);
+        ContentUris.appendId(builder, begin + DateUtils.DAY_IN_MILLIS);
+        final Cursor cursor = getContentResolver() .query(builder.build(),
+                null, null, null, null);
+        int numMeetings = cursor.getCount();
+        if (Log.isLoggable(TAG, Log.VERBOSE)) {
+            Log.v(TAG, "Num meetings: " + numMeetings);
+        }
+        return numMeetings;
+    }
+
+    &#64;Override
+    protected void onPostExecute(Integer result) {
+        /* get the number of meetings and set the next timer tick */
+        onMeetingsLoaded(result);
+    }
+}
+</pre>
+
+<p>The <code>WearableCalendarContract</code> class from the Wearable Support Library provides
+direct access to the user's calendar events from the companion device.</p>
+
+<p>When the task finishes retrieving data, your code invokes a callback method. The following
+sections describe how to implement the callback method in detail.</p>
+
+<p>For more information about obtaining data from the calendar, see the <a
+href="{@docRoot}guide/topics/providers/calendar-provider.html">Calendar Provider</a> API
+guide.</p>
+
+<h3 id="Timer">Create a custom timer</h3>
+
+<p>You can implement a custom timer that ticks periodically to update your data.
+The <code>CalendarWatchFaceService</code> class uses a {@link android.os.Handler} instance
+that sends and processes delayed messages using the thread's message queue:</p>
+
+<pre>
+private class Engine extends CanvasWatchFaceService.Engine {
+    ...
+    int mNumMeetings;
+    private AsyncTask&lt;Void, Void, Integer> mLoadMeetingsTask;
+
+    /* Handler to load the meetings once a minute in interactive mode. */
+    final Handler mLoadMeetingsHandler = new Handler() {
+        &#64;Override
+        public void handleMessage(Message message) {
+            switch (message.what) {
+                case MSG_LOAD_MEETINGS:
+                    cancelLoadMeetingTask();
+                    mLoadMeetingsTask = new LoadMeetingsTask();
+                    mLoadMeetingsTask.execute();
+                    break;
+            }
+        }
+    };
+    ...
+}
+</pre>
+
+<p>This method initializes the timer when the watch face becomes visible:</p>
+
+<pre>
+&#64;Override
+public void onVisibilityChanged(boolean visible) {
+    super.onVisibilityChanged(visible);
+    if (visible) {
+        mLoadMeetingsHandler.sendEmptyMessage(MSG_LOAD_MEETINGS);
+    } else {
+        mLoadMeetingsHandler.removeMessages(MSG_LOAD_MEETINGS);
+        cancelLoadMeetingTask();
+    }
+}
+</pre>
+
+<p>The next timer tick is set in the <code>onMeetingsLoaded()</code> method, as shown in the next
+section.</p>
+
+<h3 id="Redraw">Redraw your watch face with the updated data</h3>
+
+<p>When the task that retrieves your data finishes, call the <code>invalidate()</code> method
+so the system redraws your watch face. Store your data inside member variables of the
+<code>Engine</code> class so you can access it inside the <code>onDraw()</code> method.</p>
+
+<p>The <code>CalendarWatchFaceService</code> class provides a callback method for the task to
+invoke when it finishes retrieving calendar data:</p>
+
+<pre>
+private void onMeetingsLoaded(Integer result) {
+    if (result != null) {
+        mNumMeetings = result;
+        invalidate();
+    }
+    if (isVisible()) {
+        mLoadMeetingsHandler.sendEmptyMessageDelayed(
+                MSG_LOAD_MEETINGS, LOAD_MEETINGS_DELAY_MS);
+    }
+}
+</pre>
+
+<p>The callback method stores the result in a member variable, invalidates the view, and
+schedules the next timer tick to run the task again.</p>

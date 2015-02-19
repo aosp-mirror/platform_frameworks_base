@@ -1,10 +1,8 @@
 page.title=Preserving Navigation when Starting an Activity
-parent.title=Notifying the User
-parent.link=index.html
+page.tags=notifications
+helpoutsWidget=true
 
 trainingnavtop=true
-next.title=Updating Notifications
-next.link=managing.html
 
 @jd:body
 

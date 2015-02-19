@@ -2304,6 +2304,16 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Set {@link #FLAG_CANCELED} flag for the key event.
+     *
+     * @hide
+     */
+    @Override
+    public final void cancel() {
+        mFlags |= FLAG_CANCELED;
+    }
+
+    /**
      * Call this during {@link Callback#onKeyDown} to have the system track
      * the key through its final up (possibly including a long press).  Note
      * that only one key can be tracked at a time -- if another key down

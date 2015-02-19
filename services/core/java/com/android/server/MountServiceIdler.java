@@ -18,12 +18,14 @@ package com.android.server;
 
 import java.util.Calendar;
 
+import android.app.ActivityManagerNative;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.RemoteException;
 import android.util.Slog;
 
 public class MountServiceIdler extends JobService {
@@ -53,6 +55,13 @@ public class MountServiceIdler extends JobService {
 
     @Override
     public boolean onStartJob(JobParameters params) {
+        // First have the activity manager do its idle maintenance.  (Yes this job
+        // is really more than just mount, some day it should be renamed to be system
+        // idleer).
+        try {
+            ActivityManagerNative.getDefault().performIdleMaintenance();
+        } catch (RemoteException e) {
+        }
         // The mount service will run an fstrim operation asynchronously
         // on a designated separate thread, so we provide it with a callback
         // that lets us cleanly end our idle timeslice.  It's safe to call
@@ -98,7 +107,7 @@ public class MountServiceIdler extends JobService {
     private static Calendar tomorrowMidnight() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 3);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);

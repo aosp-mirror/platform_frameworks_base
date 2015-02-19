@@ -693,6 +693,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ String mEmbeddedID;
     private Application mApplication;
     /*package*/ Intent mIntent;
+    /*package*/ String mReferrer;
     private ComponentName mComponent;
     /*package*/ ActivityInfo mActivityInfo;
     /*package*/ ActivityThread mMainThread;
@@ -2376,8 +2377,10 @@ public class Activity extends ContextThemeWrapper
         if (mDefaultKeyMode == DEFAULT_KEYS_DISABLE) {
             return false;
         } else if (mDefaultKeyMode == DEFAULT_KEYS_SHORTCUT) {
-            if (getWindow().performPanelShortcut(Window.FEATURE_OPTIONS_PANEL,
-                    keyCode, event, Menu.FLAG_ALWAYS_PERFORM_CLOSE)) {
+            Window w = getWindow();
+            if (w.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                    w.performPanelShortcut(Window.FEATURE_OPTIONS_PANEL, keyCode, event,
+                            Menu.FLAG_ALWAYS_PERFORM_CLOSE)) {
                 return true;
             }
             return false;
@@ -2942,7 +2945,8 @@ public class Activity extends ContextThemeWrapper
      * time it needs to be displayed.
      */
     public void invalidateOptionsMenu() {
-        if (mActionBar == null || !mActionBar.invalidateOptionsMenu()) {
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                (mActionBar == null || !mActionBar.invalidateOptionsMenu())) {
             mWindow.invalidatePanelMenu(Window.FEATURE_OPTIONS_PANEL);
         }
     }
@@ -3154,7 +3158,8 @@ public class Activity extends ContextThemeWrapper
      * open, this method does nothing.
      */
     public void openOptionsMenu() {
-        if (mActionBar == null || !mActionBar.openOptionsMenu()) {
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL) &&
+                (mActionBar == null || !mActionBar.openOptionsMenu())) {
             mWindow.openPanel(Window.FEATURE_OPTIONS_PANEL, null);
         }
     }
@@ -3164,7 +3169,9 @@ public class Activity extends ContextThemeWrapper
      * closed, this method does nothing.
      */
     public void closeOptionsMenu() {
-        mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+        if (mWindow.hasFeature(Window.FEATURE_OPTIONS_PANEL)) {
+            mWindow.closePanel(Window.FEATURE_OPTIONS_PANEL);
+        }
     }
 
     /**
@@ -3223,7 +3230,9 @@ public class Activity extends ContextThemeWrapper
      * Programmatically closes the most recently opened context menu, if showing.
      */
     public void closeContextMenu() {
-        mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
+        if (mWindow.hasFeature(Window.FEATURE_CONTEXT_MENU)) {
+            mWindow.closePanel(Window.FEATURE_CONTEXT_MENU);
+        }
     }
 
     /**
@@ -4448,6 +4457,39 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Return information about who launched this activity.  If the launching Intent
+     * contains an {@link android.content.Intent#EXTRA_REFERRER Intent.EXTRA_REFERRER},
+     * that will be returned as-is; otherwise, if known, an
+     * {@link Intent#URI_ANDROID_APP_SCHEME android-app:} referrer URI containing the
+     * package name that started the Intent will be returned.  This may return null if no
+     * referrer can be identified -- it is neither explicitly specified, nor is it known which
+     * application package was involved.
+     *
+     * <p>If called while inside the handling of {@link #onNewIntent}, this function will
+     * return the referrer that submitted that new intent to the activity.  Otherwise, it
+     * always returns the referrer of the original Intent.</p>
+     *
+     * <p>Note that this is <em>not</em> a security feature -- you can not trust the
+     * referrer information, applications can spoof it.</p>
+     */
+    @Nullable
+    public Uri getReferrer() {
+        Intent intent = getIntent();
+        Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+        if (referrer != null) {
+            return referrer;
+        }
+        String referrerName = intent.getStringExtra(Intent.EXTRA_REFERRER_NAME);
+        if (referrerName != null) {
+            return Uri.parse(referrerName);
+        }
+        if (mReferrer != null) {
+            return new Uri.Builder().scheme("android-app").authority(mReferrer).build();
+        }
+        return null;
+    }
+
+    /**
      * Return the name of the package that invoked this activity.  This is who
      * the data in {@link #setResult setResult()} will be sent to.  You can
      * use this information to validate that the recipient is allowed to
@@ -4750,6 +4792,10 @@ public class Activity extends ContextThemeWrapper
      *
      * <p>You will receive this call immediately before onResume() when your
      * activity is re-starting.
+     *
+     * <p>This method is never invoked if your activity sets
+     * {@link android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
+     * <code>true</code>.
      *
      * @param requestCode The integer request code originally supplied to
      *                    startActivityForResult(), allowing you to identify who this
@@ -5586,6 +5632,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * @hide
+     */
+    public void dispatchEnterAnimationComplete() {
+        onEnterAnimationComplete();
+        if (getWindow() != null && getWindow().getDecorView() != null) {
+            getWindow().getDecorView().getViewTreeObserver().dispatchOnEnterAnimationComplete();
+        }
+    }
+
+    /**
      * Adjust the current immersive mode setting.
      *
      * Note that changing this value will have no effect on the activity's
@@ -5868,7 +5924,7 @@ public class Activity extends ContextThemeWrapper
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config, IVoiceInteractor voiceInteractor) {
+            Configuration config, String referrer, IVoiceInteractor voiceInteractor) {
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
@@ -5891,6 +5947,7 @@ public class Activity extends ContextThemeWrapper
         mIdent = ident;
         mApplication = application;
         mIntent = intent;
+        mReferrer = referrer;
         mComponent = intent.getComponent();
         mActivityInfo = info;
         mTitle = title;

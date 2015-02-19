@@ -97,6 +97,91 @@ public final class Call {
     public static final String AVAILABLE_PHONE_ACCOUNTS = "selectPhoneAccountAccounts";
 
     public static class Details {
+
+        /** Call can currently be put on hold or unheld. */
+        public static final int CAPABILITY_HOLD = 0x00000001;
+
+        /** Call supports the hold feature. */
+        public static final int CAPABILITY_SUPPORT_HOLD = 0x00000002;
+
+        /**
+         * Calls within a conference can be merged. A {@link ConnectionService} has the option to
+         * add a {@link Conference} call before the child {@link Connection}s are merged. This is how
+         * CDMA-based {@link Connection}s are implemented. For these unmerged {@link Conference}s, this
+         * capability allows a merge button to be shown while the conference call is in the foreground
+         * of the in-call UI.
+         * <p>
+         * This is only intended for use by a {@link Conference}.
+         */
+        public static final int CAPABILITY_MERGE_CONFERENCE = 0x00000004;
+
+        /**
+         * Calls within a conference can be swapped between foreground and background.
+         * See {@link #CAPABILITY_MERGE_CONFERENCE} for additional information.
+         * <p>
+         * This is only intended for use by a {@link Conference}.
+         */
+        public static final int CAPABILITY_SWAP_CONFERENCE = 0x00000008;
+
+        /**
+         * @hide
+         */
+        public static final int CAPABILITY_UNUSED = 0x00000010;
+
+        /** Call supports responding via text option. */
+        public static final int CAPABILITY_RESPOND_VIA_TEXT = 0x00000020;
+
+        /** Call can be muted. */
+        public static final int CAPABILITY_MUTE = 0x00000040;
+
+        /**
+         * Call supports conference call management. This capability only applies to {@link Conference}
+         * calls which can have {@link Connection}s as children.
+         */
+        public static final int CAPABILITY_MANAGE_CONFERENCE = 0x00000080;
+
+        /**
+         * Local device supports video telephony.
+         * @hide
+         */
+        public static final int CAPABILITY_SUPPORTS_VT_LOCAL = 0x00000100;
+
+        /**
+         * Remote device supports video telephony.
+         * @hide
+         */
+        public static final int CAPABILITY_SUPPORTS_VT_REMOTE = 0x00000200;
+
+        /**
+         * Call is using high definition audio.
+         * @hide
+         */
+        public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00000400;
+
+        /**
+         * Call is using voice over WIFI.
+         * @hide
+         */
+        public static final int CAPABILITY_VoWIFI = 0x00000800;
+
+        /**
+         * Call is able to be separated from its parent {@code Conference}, if any.
+         */
+        public static final int CAPABILITY_SEPARATE_FROM_CONFERENCE = 0x00001000;
+
+        /**
+         * Call is able to be individually disconnected when in a {@code Conference}.
+         */
+        public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 0x00002000;
+
+        /**
+         * Whether the call is a generic conference, where we do not know the precise state of
+         * participants in the conference (eg. on CDMA).
+         *
+         * @hide
+         */
+        public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
+
         private final Uri mHandle;
         private final int mHandlePresentation;
         private final String mCallerDisplayName;
@@ -110,6 +195,78 @@ public final class Call {
         private final int mVideoState;
         private final StatusHints mStatusHints;
         private final Bundle mExtras;
+
+        /**
+         * Whether the supplied capabilities  supports the specified capability.
+         *
+         * @param capabilities A bit field of capabilities.
+         * @param capability The capability to check capabilities for.
+         * @return Whether the specified capability is supported.
+         * @hide
+         */
+        public static boolean can(int capabilities, int capability) {
+            return (capabilities & capability) != 0;
+        }
+
+        /**
+         * Whether the capabilities of this {@code Details} supports the specified capability.
+         *
+         * @param capability The capability to check capabilities for.
+         * @return Whether the specified capability is supported.
+         * @hide
+         */
+        public boolean can(int capability) {
+            return can(mCallCapabilities, capability);
+        }
+
+        /**
+         * Render a set of capability bits ({@code CAPABILITY_*}) as a human readable string.
+         *
+         * @param capabilities A capability bit field.
+         * @return A human readable string representation.
+         */
+        public static String capabilitiesToString(int capabilities) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("[Capabilities:");
+            if (can(capabilities, CAPABILITY_HOLD)) {
+                builder.append(" CAPABILITY_HOLD");
+            }
+            if (can(capabilities, CAPABILITY_SUPPORT_HOLD)) {
+                builder.append(" CAPABILITY_SUPPORT_HOLD");
+            }
+            if (can(capabilities, CAPABILITY_MERGE_CONFERENCE)) {
+                builder.append(" CAPABILITY_MERGE_CONFERENCE");
+            }
+            if (can(capabilities, CAPABILITY_SWAP_CONFERENCE)) {
+                builder.append(" CAPABILITY_SWAP_CONFERENCE");
+            }
+            if (can(capabilities, CAPABILITY_RESPOND_VIA_TEXT)) {
+                builder.append(" CAPABILITY_RESPOND_VIA_TEXT");
+            }
+            if (can(capabilities, CAPABILITY_MUTE)) {
+                builder.append(" CAPABILITY_MUTE");
+            }
+            if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
+                builder.append(" CAPABILITY_MANAGE_CONFERENCE");
+            }
+            if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL)) {
+                builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL");
+            }
+            if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE)) {
+                builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE");
+            }
+            if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
+                builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
+            }
+            if (can(capabilities, CAPABILITY_VoWIFI)) {
+                builder.append(" CAPABILITY_VoWIFI");
+            }
+            if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
+                builder.append(" CAPABILITY_GENERIC_CONFERENCE");
+            }
+            builder.append("]");
+            return builder.toString();
+        }
 
         /**
          * @return The handle (e.g., phone number) to which the {@code Call} is currently
@@ -151,8 +308,8 @@ public final class Call {
         }
 
         /**
-         * @return A bitmask of the capabilities of the {@code Call}, as defined in
-         *         {@link PhoneCapabilities}.
+         * @return A bitmask of the capabilities of the {@code Call}, as defined by the various
+         *         {@code CAPABILITY_*} constants in this class.
          */
         public int getCallCapabilities() {
             return mCallCapabilities;
@@ -484,10 +641,10 @@ public final class Call {
 
     /**
      * Notifies this {@code Call} that an account has been selected and to proceed with placing
-     * an outgoing call.
+     * an outgoing call. Optionally sets this account as the default account.
      */
-    public void phoneAccountSelected(PhoneAccountHandle accountHandle) {
-        mInCallAdapter.phoneAccountSelected(mTelecomCallId, accountHandle);
+    public void phoneAccountSelected(PhoneAccountHandle accountHandle, boolean setDefault) {
+        mInCallAdapter.phoneAccountSelected(mTelecomCallId, accountHandle, setDefault);
 
     }
 
@@ -511,14 +668,14 @@ public final class Call {
     }
 
     /**
-     * Merges the calls within this conference. See {@link PhoneCapabilities#MERGE_CONFERENCE}.
+     * Merges the calls within this conference. See {@link Details#CAPABILITY_MERGE_CONFERENCE}.
      */
     public void mergeConference() {
         mInCallAdapter.mergeConference(mTelecomCallId);
     }
 
     /**
-     * Swaps the calls within this conference. See {@link PhoneCapabilities#SWAP_CONFERENCE}.
+     * Swaps the calls within this conference. See {@link Details#CAPABILITY_SWAP_CONFERENCE}.
      */
     public void swapConference() {
         mInCallAdapter.swapConference(mTelecomCallId);

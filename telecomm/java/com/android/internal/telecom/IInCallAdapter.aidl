@@ -46,7 +46,8 @@ oneway interface IInCallAdapter {
 
     void postDialContinue(String callId, boolean proceed);
 
-    void phoneAccountSelected(String callId, in PhoneAccountHandle accountHandle);
+    void phoneAccountSelected(String callId, in PhoneAccountHandle accountHandle,
+            boolean setDefault);
 
     void conference(String callId, String otherCallId);
 

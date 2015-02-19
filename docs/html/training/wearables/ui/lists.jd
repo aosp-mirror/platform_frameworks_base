@@ -36,9 +36,9 @@ the <code>android-sdk/samples/android-20/wearable/Notifications</code> directory
 <li>Add a <code>WearableListView</code> element to your activity's layout definition.</li>
 <li>Create a custom layout implementation for your list items.</li>
 <li>Use this implementation to create a layout definition file for your list items.</li>
-<div style="float:right;margin-left:25px;width:215px;margin-top:-20px">
+<div style="float:right;margin-left:25px;width:220px;margin-top:-25px">
 <img src="{@docRoot}wear/images/06_uilib.png" width="200" height="200" alt=""/>
-<p class="img-caption" style="text-align:center"><strong>Figure 3:</strong>
+<p class="img-caption" style="text-align:center;margin-left:-10px"><strong>Figure 3:</strong>
 A list view on Android Wear.</p>
 </div>
 <li>Create an adapter to populate the list.</li>
@@ -82,20 +82,21 @@ the list is displayed properly on both round and square devices:</p>
 <p>In many cases, each list item consists of an icon and a description. The
 <em>Notifications</em> sample from the Android SDK implements a custom layout that extends
 {@link android.widget.LinearLayout} to incorporate these two elements inside each list item.
-This layout also implements the methods in the <code>WearableListView.Item</code> interface
-to animate the item's icon and fade the text in response to events from
+This layout also implements the methods in the
+<code>WearableListView.OnCenterProximityListener</code> interface
+to change the color of the item's icon and fade the text in response to events from
 <code>WearableListView</code> as the user scrolls through the list.</p>
 
 <pre>
 public class WearableListItemLayout extends LinearLayout
-                                    implements WearableListView.Item {
+             implements WearableListView.OnCenterProximityListener {
+
+    private ImageView mCircle;
+    private TextView mName;
 
     private final float mFadedTextAlpha;
     private final int mFadedCircleColor;
     private final int mChosenCircleColor;
-    private ImageView mCircle;
-    private float mScale;
-    private TextView mName;
 
     public WearableListItemLayout(Context context) {
         this(context, null);
@@ -108,6 +109,7 @@ public class WearableListItemLayout extends LinearLayout
     public WearableListItemLayout(Context context, AttributeSet attrs,
                                   int defStyle) {
         super(context, attrs, defStyle);
+
         mFadedTextAlpha = getResources()
                          .getInteger(R.integer.action_text_faded_alpha) / 100f;
         mFadedCircleColor = getResources().getColor(R.color.grey);
@@ -124,45 +126,26 @@ public class WearableListItemLayout extends LinearLayout
         mName = (TextView) findViewById(R.id.name);
     }
 
-    // Provide scaling values for WearableListView animations
     &#64;Override
-    public float getProximityMinValue() {
-        return 1f;
-    }
-
-    &#64;Override
-    public float getProximityMaxValue() {
-        return 1.6f;
-    }
-
-    &#64;Override
-    public float getCurrentProximityValue() {
-        return mScale;
-    }
-
-    // Scale the icon for WearableListView animations
-    &#64;Override
-    public void setScalingAnimatorValue(float scale) {
-        mScale = scale;
-        mCircle.setScaleX(scale);
-        mCircle.setScaleY(scale);
-    }
-
-    // Change color of the icon, remove fading from the text
-    &#64;Override
-    public void onScaleUpStart() {
+    public void onCenterPosition(boolean animate) {
         mName.setAlpha(1f);
         ((GradientDrawable) mCircle.getDrawable()).setColor(mChosenCircleColor);
     }
 
-    // Change the color of the icon, fade the text
     &#64;Override
-    public void onScaleDownStart() {
+    public void onNonCenterPosition(boolean animate) {
         ((GradientDrawable) mCircle.getDrawable()).setColor(mFadedCircleColor);
         mName.setAlpha(mFadedTextAlpha);
     }
 }
 </pre>
+
+<p>You can also create animator objects to enlarge the icon of the center item in the list. You can
+use the <code>onCenterPosition()</code> and <code>onNonCenterPosition()</code> callback methods
+in the <code>WearableListView.OnCenterProximityListener</code> interface to manage your
+animators. For more information about animators, see
+<a href="{@docRoot}guide/topics/graphics/prop-animation.html#object-animator">Animating with
+ObjectAnimator</a>.</p>
 
 
 <h2 id="layout-def">Create a Layout Definition for Items</h2>

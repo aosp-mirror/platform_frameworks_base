@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">DataPoint</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -708,28 +777,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+  
+   
+  
+  
+  
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+   
+  
+  
+   
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -742,18 +804,18 @@ Summary:
 
 
   <a href="#inhconstants">Inherited Constants</a>
-
+  
 
 
   &#124; <a href="#lfields">Fields</a>
-
+  
 
 
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -763,9 +825,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -775,28 +837,31 @@ Summary:
 
 <div id="jd-header">
     public
-
-    final
-
+     
+    final 
+    
     class
 <h1 itemprop="name">DataPoint</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+      implements 
+      
+        Parcelable 
+      
+  
+  
 
 
-
-
-
-
-      implements
-
-        SafeParcelable
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -808,18 +873,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.data.DataPoint</td>
     </tr>
-
+    
 
 </table>
 
@@ -836,13 +901,15 @@ Summary:
 <p itemprop="articleBody">Represents a single data point in a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type's</a></code> stream from a particular
  <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.  A data point holds a value for each field, a timestamp and an
  optional start time.  The exact semantics of each of these attributes is specified in the
- documentation for the particular data type, which can be found in <code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html">DataTypes</a></code>.
+ documentation for the particular data type, which can be found in the appropriate constant in
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>.
  <p>
  A data point can represent an instantaneous measurement, reading or inputted observation, as well
  as averages or aggregates over a time interval.  Check the data type documentation to determine
  which is the case for a particular data type.
  <p>
- DataPoints always contain one value for each the data type <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">field</a></code>.
+ DataPoints always contain one value for each the data type
+ <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">field</a></code>.
  Initially, all of the values are unset.  After creating the data point, the appropriate values
  and timestamps should be set.
 </p>
@@ -910,54 +977,33 @@ android.os.Parcelable
   </div>
   <div id="inherited-constants-android.os.Parcelable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
-
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-
-
+    
+    
 </table>
   </div>
 </div>
@@ -973,7 +1019,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 <table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
 
 
-
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -981,10 +1027,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
 
 </table>
 
@@ -1003,358 +1054,386 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#create(com.google.android.gms.fitness.data.DataSource)">create</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</nobr>
+        
+        <div class="jd-descrdiv">
+          Creates a new data point for the given <code>dataSource</code>.
+          
+    
 
-        <div class="jd-descrdiv">Creates a new data point for the given <code>dataSource</code>.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#describeContents()">describeContents</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#equals(java.lang.Object)">equals</a></span>(Object o)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#extract(android.content.Intent)">extract</a></span>(Intent intent)</nobr>
+        
+        <div class="jd-descrdiv">
+          Extracts a data point from a callback intent received after registering to a data source
+ with a PendingIntent.
+          
+    
 
-        <div class="jd-descrdiv">Extracts a data point from a callback intent received after registering to a data source
- with a PendingIntent.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getDataSource()">getDataSource</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the data source for the data point.
+          
+    
 
-        <div class="jd-descrdiv">Returns the data source for the data point.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getDataType()">getDataType</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the data type defining the format of the values in this data point.
+          
+    
 
-        <div class="jd-descrdiv">Returns the data type defining the format of the values in this data point.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getEndTimeNanos()">getEndTimeNanos</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getEndTime(java.util.concurrent.TimeUnit)">getEndTime</a></span>(TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the end time of the interval represented by this data point, in the given unit since
+ epoch.
+          
+    
 
-        <div class="jd-descrdiv">Returns the end time of the interval represented by this data point, in nanoseconds since
- epoch.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getOriginalDataSource()">getOriginalDataSource</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the original data source for this data point.
+          
+    
 
-        <div class="jd-descrdiv">Returns the original data source for this data point.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getStartTimeNanos()">getStartTimeNanos</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getStartTime(java.util.concurrent.TimeUnit)">getStartTime</a></span>(TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the start time of the interval represented by this data point,
+ in the given unit since epoch.
+          
+    
 
-        <div class="jd-descrdiv">Returns the start time of the interval represented by this data point, in nanoseconds since
- epoch.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getTimestampNanos()">getTimestampNanos</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getTimestamp(java.util.concurrent.TimeUnit)">getTimestamp</a></span>(TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the timestamp of the data point, in the given unit since epoch.
+          
+    
 
-        <div class="jd-descrdiv">Returns the timestamp of the data point, in nanoseconds since epoch.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getValue(com.google.android.gms.fitness.data.Field)">getValue</a></span>(<a href="/reference/com/google/android/gms/fitness/data/Field.html">Field</a> field)</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the value holder for the field with the given name.
+          
+    
 
-        <div class="jd-descrdiv">Returns the value holder for the field with the given name.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#hashCode()">hashCode</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setFloatValues(float...)">setFloatValues</a></span>(float... values)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the values of this data point, where the format for all of its values is float.
+          
+    
 
-        <div class="jd-descrdiv">Sets the values of this data point, where the format for all of its values is float.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setIntValues(int...)">setIntValues</a></span>(int... values)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the values of this data point, where the format for all of its values is int.
+          
+    
 
-        <div class="jd-descrdiv">Sets the values of this data point, where the format for all of its values is int.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimeInterval(long, long, java.util.concurrent.TimeUnit)">setTimeInterval</a></span>(long startTime, long endTime, TimeUnit unit)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimeInterval(long, long, java.util.concurrent.TimeUnit)">setTimeInterval</a></span>(long startTime, long endTime, TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the time interval of a data point that represents an interval of time.
+          
+    
 
-        <div class="jd-descrdiv">Sets the time interval of the data point in a given unit.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimeIntervalNanos(long, long)">setTimeIntervalNanos</a></span>(long startTimeNanos, long endTimeNanos)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimestamp(long, java.util.concurrent.TimeUnit)">setTimestamp</a></span>(long timestamp, TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the timestamp of a data point that represent an instantaneous reading,
+ measurement, or input.
+          
+    
 
-        <div class="jd-descrdiv">Sets the time interval for the data point, in case it represents an aggregation or average
- over a period of time.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimestamp(long, java.util.concurrent.TimeUnit)">setTimestamp</a></span>(long timestamp, TimeUnit unit)</nobr>
-
-        <div class="jd-descrdiv">Sets the timestamp of the data point in a given unit.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimestampNanos(long)">setTimestampNanos</a></span>(long timestampNanos)</nobr>
-
-        <div class="jd-descrdiv">Sets the timestamp of the data point, in case the data point represents an instantaneous
- reading, measurement, or input.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#toString()">toString</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel parcel, int flags)</nobr>
-
+        
   </td></tr>
 
 
@@ -1389,182 +1468,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1591,38 +1670,38 @@ From interface
   </div>
   <div id="inherited-methods-android.os.Parcelable-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">describeContents</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
@@ -1630,8 +1709,6 @@ From interface
   </div>
 </div>
 </td></tr>
-
-
 
 
 </table>
@@ -1668,27 +1745,30 @@ From interface
 
 <A NAME="CREATOR"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>&gt;
       </span>
         CREATOR
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -1713,14 +1793,14 @@ From interface
 
 <A NAME="create(com.google.android.gms.fitness.data.DataSource)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
       </span>
       <span class="sympad">create</span>
@@ -1728,12 +1808,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new data point for the given <code>dataSource</code>.  An unset <code><a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a></code> is
  created for each field of the data source's <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1748,14 +1831,14 @@ From interface
 
 <A NAME="describeContents()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">describeContents</span>
@@ -1763,12 +1846,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1777,14 +1863,14 @@ From interface
 
 <A NAME="equals(java.lang.Object)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">equals</span>
@@ -1792,12 +1878,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1806,14 +1895,14 @@ From interface
 
 <A NAME="extract(android.content.Intent)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
       </span>
       <span class="sympad">extract</span>
@@ -1821,12 +1910,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Extracts a data point from a callback intent received after registering to a data source
  with a PendingIntent.</p></div>
   <div class="jd-tagdata">
@@ -1842,14 +1934,14 @@ From interface
 
 <A NAME="getDataSource()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a>
       </span>
       <span class="sympad">getDataSource</span>
@@ -1857,12 +1949,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the data source for the data point.  If the data point is part of a <code><a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a></code>,
  this will correspond to the data set's data source.
 </p></div>
@@ -1873,14 +1968,14 @@ From interface
 
 <A NAME="getDataType()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
       </span>
       <span class="sympad">getDataType</span>
@@ -1888,12 +1983,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the data type defining the format of the values in this data point.
 </p></div>
 
@@ -1901,31 +1999,34 @@ From interface
 </div>
 
 
-<A NAME="getEndTimeNanos()"></A>
+<A NAME="getEndTime(java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
-      <span class="sympad">getEndTimeNanos</span>
-      <span class="normal">()</span>
+      <span class="sympad">getEndTime</span>
+      <span class="normal">(TimeUnit timeUnit)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the end time of the interval represented by this data point, in nanoseconds since
- epoch.  This method is equivalent to <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getTimestampNanos()">getTimestampNanos()</a></code>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the end time of the interval represented by this data point, in the given unit since
+ epoch.  This method is equivalent to <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#getTimestamp(java.util.concurrent.TimeUnit)">getTimestamp(TimeUnit)</a></code>
 </p></div>
 
     </div>
@@ -1934,14 +2035,14 @@ From interface
 
 <A NAME="getOriginalDataSource()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a>
       </span>
       <span class="sympad">getOriginalDataSource</span>
@@ -1949,12 +2050,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the original data source for this data point.  The original data source helps
  identify the source of the data point as it gets merged and transformed into different
  streams.
@@ -1970,61 +2074,67 @@ From interface
 </div>
 
 
-<A NAME="getStartTimeNanos()"></A>
+<A NAME="getStartTime(java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
-      <span class="sympad">getStartTimeNanos</span>
-      <span class="normal">()</span>
+      <span class="sympad">getStartTime</span>
+      <span class="normal">(TimeUnit timeUnit)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the start time of the interval represented by this data point, in nanoseconds since
- epoch.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the start time of the interval represented by this data point,
+ in the given unit since epoch.
 </p></div>
 
     </div>
 </div>
 
 
-<A NAME="getTimestampNanos()"></A>
+<A NAME="getTimestamp(java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
-      <span class="sympad">getTimestampNanos</span>
-      <span class="normal">()</span>
+      <span class="sympad">getTimestamp</span>
+      <span class="normal">(TimeUnit timeUnit)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the timestamp of the data point, in nanoseconds since epoch.  For data points that
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the timestamp of the data point, in the given unit since epoch.  For data points that
  represent intervals, this method will return the end time.
 </p></div>
 
@@ -2034,14 +2144,14 @@ From interface
 
 <A NAME="getValue(com.google.android.gms.fitness.data.Field)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a>
       </span>
       <span class="sympad">getValue</span>
@@ -2049,12 +2159,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value holder for the field with the given name.  This method can be used
  both to query the value and to set it.</p></div>
   <div class="jd-tagdata">
@@ -2072,7 +2185,7 @@ From interface
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>IllegalArgumentException</td>
             <td>if the given field doesn't match any of the fields
@@ -2088,14 +2201,14 @@ From interface
 
 <A NAME="hashCode()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">hashCode</span>
@@ -2103,12 +2216,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2117,14 +2233,14 @@ From interface
 
 <A NAME="setFloatValues(float...)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
       </span>
       <span class="sympad">setFloatValues</span>
@@ -2132,12 +2248,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the values of this data point, where the format for all of its values is float.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2156,14 +2275,14 @@ From interface
 
 <A NAME="setIntValues(int...)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
       </span>
       <span class="sympad">setIntValues</span>
@@ -2171,12 +2290,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the values of this data point, where the format for all of its values is int.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2195,29 +2317,40 @@ From interface
 
 <A NAME="setTimeInterval(long, long, java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
       </span>
       <span class="sympad">setTimeInterval</span>
-      <span class="normal">(long startTime, long endTime, TimeUnit unit)</span>
+      <span class="normal">(long startTime, long endTime, TimeUnit timeUnit)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the time interval of the data point in a given unit.
- See <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimeIntervalNanos(long, long)">setTimeIntervalNanos(long, long)</a></code> for more details.</p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the time interval of a data point that represents an interval of time.  For data points
+ that represent instantaneous readings, <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimestamp(long, java.util.concurrent.TimeUnit)">setTimestamp(long, TimeUnit)</a></code> should be used.
+ <p>
+ Examples of data types that represent intervals include:
+ <ul>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">TYPE_STEP_COUNT_DELTA</a></code>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">TYPE_ACTIVITY_SEGMENT</a></code>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">TYPE_DISTANCE_DELTA</a></code>
+ </ul>
+ Google Fit accepts timestamps with up to nanosecond granularity.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2230,60 +2363,8 @@ From interface
           <td>the end time in the given unit, representing elapsed time since epoch</td>
         </tr>
         <tr>
-          <th>unit</td>
-          <td>the unit of both start and end timestamps
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="setTimeIntervalNanos(long, long)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
-      </span>
-      <span class="sympad">setTimeIntervalNanos</span>
-      <span class="normal">(long startTimeNanos, long endTimeNanos)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the time interval for the data point, in case it represents an aggregation or average
- over a period of time.  For data points that represent instantaneous samples,
- <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimestampNanos(long)">setTimestampNanos(long)</a></code> should be used.
- <p>
- Examples of data types that represent intervals include:
- <ul>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#STEP_COUNT_DELTA">STEP_COUNT_DELTA</a></code>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#ACTIVITY_SEGMENT">ACTIVITY_SEGMENT</a></code>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#DISTANCE_DELTA">DISTANCE_DELTA</a></code>
- </ul></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>startTimeNanos</td>
-          <td>the start time of the interval, in nanoseconds since epoch</td>
-        </tr>
-        <tr>
-          <th>endTimeNanos</td>
-          <td>the end time of the interval, in nanoseconds since epoch
+          <th>timeUnit</td>
+          <td>the time unit of both start and end timestamps
 </td>
         </tr>
       </table>
@@ -2295,29 +2376,44 @@ From interface
 
 <A NAME="setTimestamp(long, java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
       </span>
       <span class="sympad">setTimestamp</span>
-      <span class="normal">(long timestamp, TimeUnit unit)</span>
+      <span class="normal">(long timestamp, TimeUnit timeUnit)</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the timestamp of the data point in a given unit.
- See <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimestampNanos(long)">(long)</a></code> for more details.</p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the timestamp of a data point that represent an instantaneous reading,
+ measurement, or input.  For data points that represent intervals,
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimeInterval(long, long, java.util.concurrent.TimeUnit)">setTimeInterval(long, long, TimeUnit)</a></code> should be used.
+ <p>
+ Examples of data types with instantaneous timestamp include:
+ <ul>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">TYPE_ACTIVITY_SAMPLE</a></code>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">TYPE_HEART_RATE_BPM</a></code>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">TYPE_LOCATION_SAMPLE</a></code>
+ <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">TYPE_SPEED</a></code>
+ </ul>
+ Google Fit accepts timestamps with up to nanosecond granularity for all
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataTypes</a></code> with the exception of <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location</a></code>, which supports only timestamps with millisecond precision. If the timestamp has
+ more than millisecond granularity for a location, the extra precision will be lost.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -2326,57 +2422,8 @@ From interface
           <td>the timestamp in the given unit, representing elapsed time since epoch</td>
         </tr>
         <tr>
-          <th>unit</td>
+          <th>timeUnit</td>
           <td>the unit of the given timestamp
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="setTimestampNanos(long)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        <a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a>
-      </span>
-      <span class="sympad">setTimestampNanos</span>
-      <span class="normal">(long timestampNanos)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the timestamp of the data point, in case the data point represents an instantaneous
- reading, measurement, or input.  For data points that represent intervals,
- <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html#setTimeIntervalNanos(long, long)">setTimeIntervalNanos(long, long)</a></code> should be used.
- <p>
- Examples of data types with instantaneous timestamp include:
- <ul>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#ACTIVITY_SAMPLE">ACTIVITY_SAMPLE</a></code>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#HEART_RATE_BPM">HEART_RATE_BPM</a></code>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#LOCATION_SAMPLE">LOCATION_SAMPLE</a></code>
- <li><code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html#SPEED">SPEED</a></code>
- </ul></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>timestampNanos</td>
-          <td>the time of the reading, in nanoseconds since epoch.
 </td>
         </tr>
       </table>
@@ -2388,14 +2435,14 @@ From interface
 
 <A NAME="toString()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">toString</span>
@@ -2403,12 +2450,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2417,14 +2467,14 @@ From interface
 
 <A NAME="writeToParcel(android.os.Parcel, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">writeToParcel</span>
@@ -2432,12 +2482,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2455,17 +2508,17 @@ From interface
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -2473,7 +2526,7 @@ From interface
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -2486,7 +2539,7 @@ From interface
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

@@ -116,14 +116,13 @@ mDelayedView.setTotalTimeMs(2000);
 mDelayedView.start();
 </pre>
 
-
-<h2 id="show-confirmation">Show Confirmation Animations</h2>
-
-<div style="float:right;margin-left:25px;width:200px">
+<div style="float:right;margin-left:25px;width:210px;margin-top:15px">
 <img src="{@docRoot}wear/images/08_uilib.png" width="200" height="200" alt=""/>
-<p class="img-caption" style="text-align:center"><strong>Figure 2:</strong>
+<p class="img-caption" style="text-align:center;margin-left:-5px"><strong>Figure 2:</strong>
 A confirmation animation.</p>
 </div>
+
+<h2 id="show-confirmation">Show Confirmation Animations</h2>
 
 <p>To show a confirmation animation when users complete an action in your app, create an intent
 that starts <code>ConfirmationActivity</code> from one of your activities. You can specify

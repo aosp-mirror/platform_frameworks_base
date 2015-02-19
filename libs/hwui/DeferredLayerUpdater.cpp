@@ -24,25 +24,6 @@
 namespace android {
 namespace uirenderer {
 
-class DeleteLayerTask : public renderthread::RenderTask {
-public:
-    DeleteLayerTask(renderthread::EglManager& eglManager, Layer* layer)
-        : mEglManager(eglManager)
-        , mLayer(layer)
-    {}
-
-    virtual void run() {
-        mEglManager.requireGlContext();
-        LayerRenderer::destroyLayer(mLayer);
-        mLayer = 0;
-        delete this;
-    }
-
-private:
-    renderthread::EglManager& mEglManager;
-    Layer* mLayer;
-};
-
 DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer)
         : mSurfaceTexture(0)
         , mTransform(0)
@@ -62,7 +43,7 @@ DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, L
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
     setTransform(0);
-    mRenderThread.queue(new DeleteLayerTask(mRenderThread.eglManager(), mLayer));
+    mLayer->postDecStrong();
     mLayer = 0;
 }
 

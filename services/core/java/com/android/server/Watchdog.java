@@ -415,15 +415,9 @@ public class Watchdog extends Thread {
                 dumpKernelStackTraces();
             }
 
-            // Trigger the kernel to dump all blocked threads to the kernel log
-            try {
-                FileWriter sysrq_trigger = new FileWriter("/proc/sysrq-trigger");
-                sysrq_trigger.write("w");
-                sysrq_trigger.close();
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to write to /proc/sysrq-trigger");
-                Slog.e(TAG, e.getMessage());
-            }
+            // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the kernel log
+            doSysRq('w');
+            doSysRq('l');
 
             // Try to add the error to the dropbox, but assuming that the ActivityManager
             // itself may be deadlocked.  (which has happened, causing this statement to
@@ -485,6 +479,16 @@ public class Watchdog extends Thread {
             }
 
             waitedHalf = false;
+        }
+    }
+
+    private void doSysRq(char c) {
+        try {
+            FileWriter sysrq_trigger = new FileWriter("/proc/sysrq-trigger");
+            sysrq_trigger.write(c);
+            sysrq_trigger.close();
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed to write to /proc/sysrq-trigger", e);
         }
     }
 

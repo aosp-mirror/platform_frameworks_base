@@ -16,11 +16,18 @@
 
 package com.android.keyguard;
 
+import java.util.List;
+import java.util.Locale;
+
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.text.method.SingleLineTransformationMethod;
+import android.net.ConnectivityManager;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
+import android.text.method.SingleLineTransformationMethod;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -28,29 +35,19 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
 
-import java.util.Locale;
-
 public class CarrierText extends TextView {
+    private static final boolean DEBUG = KeyguardConstants.DEBUG;
+    private static final String TAG = "CarrierText";
+
     private static CharSequence mSeparator;
 
     private LockPatternUtils mLockPatternUtils;
+    private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
-        private CharSequence mPlmn;
-        private CharSequence mSpn;
-        private State mSimState;
-
         @Override
-        public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-            mPlmn = plmn;
-            mSpn = spn;
-            updateCarrierText(mSimState, mPlmn, mSpn);
-        }
-
-        @Override
-        public void onSimStateChanged(IccCardConstants.State simState) {
-            mSimState = simState;
-            updateCarrierText(mSimState, mPlmn, mSpn);
+        public void onRefreshCarrierInfo() {
+            updateCarrierText();
         }
 
         public void onScreenTurnedOff(int why) {
@@ -93,14 +90,50 @@ public class CarrierText extends TextView {
         setTransformationMethod(new CarrierTextTransformationMethod(mContext, useAllCaps));
     }
 
-    protected void updateCarrierText(State simState, CharSequence plmn, CharSequence spn) {
-        setText(getCarrierTextForSimState(simState, plmn, spn));
+    protected void updateCarrierText() {
+        boolean allSimsMissing = true;
+        CharSequence displayText = null;
+
+        List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
+        final int N = subs.size();
+        if (DEBUG) Log.d(TAG, "updateCarrierText(): " + N);
+        for (int i = 0; i < N; i++) {
+            State simState = mKeyguardUpdateMonitor.getSimState(subs.get(i).getSubscriptionId());
+            CharSequence carrierName = subs.get(i).getCarrierName();
+            CharSequence carrierTextForSimState = getCarrierTextForSimState(simState, carrierName);
+            if (DEBUG) Log.d(TAG, "Handling " + simState + " " + carrierName);
+            if (carrierTextForSimState != null) {
+                allSimsMissing = false;
+                displayText = concatenate(displayText, carrierTextForSimState);
+            }
+        }
+        if (allSimsMissing) {
+            if (N != 0) {
+                // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
+                // This depends on mPlmn containing the text "Emergency calls only" when the radio
+                // has some connectivity. Otherwise, it should be null or empty and just show
+                // "No SIM card"
+                // Grab the first subscripton, because they all should contain the emergency text,
+                // described above.
+                displayText =  makeCarrierStringOnEmergencyCapable(
+                        getContext().getText(R.string.keyguard_missing_sim_message_short),
+                        subs.get(0).getCarrierName());
+            } else {
+                // We don't have a SubscriptionInfo to get the emergency calls only from.
+                // Lets just make it ourselves.
+                displayText =  makeCarrierStringOnEmergencyCapable(
+                        getContext().getText(R.string.keyguard_missing_sim_message_short),
+                        getContext().getText(com.android.internal.R.string.emergency_calls_only));
+            }
+        }
+        setText(displayText);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mSeparator = getResources().getString(R.string.kg_text_message_separator);
+        mSeparator = getResources().getString(
+                com.android.internal.R.string.kg_text_message_separator);
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setSelected(screenOn); // Allow marquee to work.
     }
@@ -108,13 +141,23 @@ public class CarrierText extends TextView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mCallback);
+        if (ConnectivityManager.from(mContext).isNetworkSupported(
+                ConnectivityManager.TYPE_MOBILE)) {
+            mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            mKeyguardUpdateMonitor.registerCallback(mCallback);
+        } else {
+            // Don't listen and clear out the text when the device isn't a phone.
+            mKeyguardUpdateMonitor = null;
+            setText("");
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mCallback);
+        if (mKeyguardUpdateMonitor != null) {
+            mKeyguardUpdateMonitor.removeCallback(mCallback);
+        }
     }
 
     /**
@@ -122,36 +165,31 @@ public class CarrierText extends TextView {
      * and SPN as well as device capabilities, such as being emergency call capable.
      *
      * @param simState
-     * @param plmn
+     * @param text
      * @param spn
-     * @return
+     * @return Carrier text if not in missing state, null otherwise.
      */
     private CharSequence getCarrierTextForSimState(IccCardConstants.State simState,
-            CharSequence plmn, CharSequence spn) {
+            CharSequence text) {
         CharSequence carrierText = null;
         StatusMode status = getStatusForIccState(simState);
         switch (status) {
             case Normal:
-                carrierText = concatenate(plmn, spn);
+                carrierText = text;
                 break;
 
             case SimNotReady:
-                carrierText = null; // nothing to display yet.
+                // Null is reserved for denoting missing, in this case we have nothing to display.
+                carrierText = ""; // nothing to display yet.
                 break;
 
             case NetworkLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
-                        mContext.getText(R.string.keyguard_network_locked_message), plmn);
+                        mContext.getText(R.string.keyguard_network_locked_message), text);
                 break;
 
             case SimMissing:
-                // Shows "No SIM card | Emergency calls only" on devices that are voice-capable.
-                // This depends on mPlmn containing the text "Emergency calls only" when the radio
-                // has some connectivity. Otherwise, it should be null or empty and just show
-                // "No SIM card"
-                carrierText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_missing_sim_message_short),
-                        plmn);
+                carrierText = null;
                 break;
 
             case SimPermDisabled:
@@ -160,21 +198,19 @@ public class CarrierText extends TextView {
                 break;
 
             case SimMissingLocked:
-                carrierText =  makeCarrierStringOnEmergencyCapable(
-                        getContext().getText(R.string.keyguard_missing_sim_message_short),
-                        plmn);
+                carrierText = null;
                 break;
 
             case SimLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_sim_locked_message),
-                        plmn);
+                        text);
                 break;
 
             case SimPukLocked:
                 carrierText = makeCarrierStringOnEmergencyCapable(
                         getContext().getText(R.string.keyguard_sim_puk_locked_message),
-                        plmn);
+                        text);
                 break;
         }
 

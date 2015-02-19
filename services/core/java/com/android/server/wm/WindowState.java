@@ -29,6 +29,7 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
@@ -227,13 +228,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final Rect mCompatFrame = new Rect();
 
     final Rect mContainingFrame = new Rect();
-    final Rect mDisplayFrame = new Rect();
-    final Rect mOverscanFrame = new Rect();
-    final Rect mContentFrame = new Rect();
+
     final Rect mParentFrame = new Rect();
-    final Rect mVisibleFrame = new Rect();
-    final Rect mDecorFrame = new Rect();
+
+    // The entire screen area of the device.
+    final Rect mDisplayFrame = new Rect();
+
+    // The region of the display frame that the display type supports displaying content on. This
+    // is mostly a special case for TV where some displays don’t have the entire display usable.
+    // {@link WindowManager.LayoutParams#FLAG_LAYOUT_IN_OVERSCAN} flag can be used to allow
+    // window display contents to extend into the overscan region.
+    final Rect mOverscanFrame = new Rect();
+
+    // The display frame minus the stable insets. This value is always constant regardless of if
+    // the status bar or navigation bar is visible.
     final Rect mStableFrame = new Rect();
+
+    // The area not occupied by the status and navigation bars. So, if both status and navigation
+    // bars are visible, the decor frame is equal to the stable frame.
+    final Rect mDecorFrame = new Rect();
+
+    // Equal to the decor frame if the IME (e.g. keyboard) is not present. Equal to the decor frame
+    // minus the area occupied by the IME if the IME is present.
+    final Rect mContentFrame = new Rect();
+
+    // Legacy stuff. Generally equal to the content frame expect when the IME for older apps
+    // displays hint text.
+    final Rect mVisibleFrame = new Rect();
 
     boolean mContentChanged;
 
@@ -702,9 +723,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         WindowState ws = this;
         WindowList windows = getWindowList();
         while (true) {
-            if ((ws.mAttrs.privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY) != 0) {
-                return (ws.mAttrs.flags & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
+            if (ws.mAttrs.needsMenuKey != WindowManager.LayoutParams.NEEDS_MENU_UNSET) {
+                return ws.mAttrs.needsMenuKey == WindowManager.LayoutParams.NEEDS_MENU_SET_TRUE;
             }
             // If we reached the bottom of the range of windows we are considering,
             // assume no menu is needed.
@@ -881,7 +901,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean isVisibleNow() {
         return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && !mRootToken.hidden && !mExiting && !mDestroying;
+                && (!mRootToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
+                && !mExiting && !mDestroying;
     }
 
     /**
@@ -912,7 +933,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * being visible.
      */
     boolean isOnScreen() {
-        if (!mHasSurface || !mPolicyVisibility || mDestroying) {
+        return mPolicyVisibility && isOnScreenIgnoringKeyguard();
+    }
+
+    /**
+     * Like isOnScreen(), but ignores any force hiding of the window due
+     * to the keyguard.
+     */
+    boolean isOnScreenIgnoringKeyguard() {
+        if (!mHasSurface || mDestroying) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;

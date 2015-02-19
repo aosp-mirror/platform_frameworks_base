@@ -21,6 +21,8 @@ import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.RECENTS_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_ADD_REMOVE;
+import static com.android.server.am.TaskPersister.DEBUG_PERSISTER;
+import static com.android.server.am.TaskPersister.DEBUG_RESTORER;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -52,12 +54,12 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 final class TaskRecord {
-    private static final String ATTR_TASKID = "task_id";
+    static final String ATTR_TASKID = "task_id";
     private static final String TAG_INTENT = "intent";
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
-    private static final String ATTR_REALACTIVITY = "real_activity";
+    static final String ATTR_REALACTIVITY = "real_activity";
     private static final String ATTR_ORIGACTIVITY = "orig_activity";
-    private static final String TAG_ACTIVITY = "activity";
+    static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
     private static final String ATTR_ROOT_AFFINITY = "root_affinity";
     private static final String ATTR_ROOTHASRESET = "root_has_reset";
@@ -71,7 +73,7 @@ final class TaskRecord {
     private static final String ATTR_LASTDESCRIPTION = "last_description";
     private static final String ATTR_LASTTIMEMOVED = "last_time_moved";
     private static final String ATTR_NEVERRELINQUISH = "never_relinquish_identity";
-    private static final String ATTR_TASK_AFFILIATION = "task_affiliation";
+    static final String ATTR_TASK_AFFILIATION = "task_affiliation";
     private static final String ATTR_PREV_AFFILIATION = "prev_affiliation";
     private static final String ATTR_NEXT_AFFILIATION = "next_affiliation";
     private static final String ATTR_TASK_AFFILIATION_COLOR = "task_affiliation_color";
@@ -81,6 +83,8 @@ final class TaskRecord {
     private static final String TASK_THUMBNAIL_SUFFIX = "_task_thumbnail";
 
     static final boolean IGNORE_RETURN_TO_RECENTS = true;
+
+    static final int INVALID_TASK_ID = -1;
 
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
@@ -144,16 +148,16 @@ final class TaskRecord {
     boolean mReuseTask = false;
 
     private Bitmap mLastThumbnail; // Last thumbnail captured for this item.
-    private final File mLastThumbnailFile; // File containing last thubmnail.
+    private final File mLastThumbnailFile; // File containing last thumbnail.
     private final String mFilename;
     CharSequence lastDescription; // Last description captured for this item.
 
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
     int mAffiliatedTaskColor; // color of the parent task affiliation.
     TaskRecord mPrevAffiliate; // previous task in affiliated chain.
-    int mPrevAffiliateTaskId = -1; // previous id for persistence.
+    int mPrevAffiliateTaskId = INVALID_TASK_ID; // previous id for persistence.
     TaskRecord mNextAffiliate; // next task in affiliated chain.
-    int mNextAffiliateTaskId = -1; // next id for persistence.
+    int mNextAffiliateTaskId = INVALID_TASK_ID; // next id for persistence.
 
     // For relaunching the task from recents as though it was launched by the original launcher.
     int mCallingUid;
@@ -363,12 +367,12 @@ final class TaskRecord {
 
     void setPrevAffiliate(TaskRecord prevAffiliate) {
         mPrevAffiliate = prevAffiliate;
-        mPrevAffiliateTaskId = prevAffiliate == null ? -1 : prevAffiliate.taskId;
+        mPrevAffiliateTaskId = prevAffiliate == null ? INVALID_TASK_ID : prevAffiliate.taskId;
     }
 
     void setNextAffiliate(TaskRecord nextAffiliate) {
         mNextAffiliate = nextAffiliate;
-        mNextAffiliateTaskId = nextAffiliate == null ? -1 : nextAffiliate.taskId;
+        mNextAffiliateTaskId = nextAffiliate == null ? INVALID_TASK_ID : nextAffiliate.taskId;
     }
 
     // Close up recents linked list.
@@ -383,12 +387,12 @@ final class TaskRecord {
         setNextAffiliate(null);
     }
 
-    void removedFromRecents(TaskPersister persister) {
+    void removedFromRecents() {
         disposeThumbnail();
         closeRecentsChain();
         if (inRecents) {
             inRecents = false;
-            persister.wakeup(this, false);
+            mService.notifyTaskPersisterLocked(this, false);
         }
     }
 
@@ -875,6 +879,10 @@ final class TaskRecord {
 
     static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
             throws IOException, XmlPullParserException {
+        return restoreFromXml(in, stackSupervisor, INVALID_TASK_ID);
+    }
+    static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor,
+            int inTaskId) throws IOException, XmlPullParserException {
         Intent intent = null;
         Intent affinityIntent = null;
         ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
@@ -894,23 +902,23 @@ final class TaskRecord {
         long lastActiveTime = -1;
         long lastTimeOnTop = 0;
         boolean neverRelinquishIdentity = true;
-        int taskId = -1;
+        int taskId = inTaskId;
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
-        int taskAffiliation = -1;
+        int taskAffiliation = INVALID_TASK_ID;
         int taskAffiliationColor = 0;
-        int prevTaskId = -1;
-        int nextTaskId = -1;
+        int prevTaskId = INVALID_TASK_ID;
+        int nextTaskId = INVALID_TASK_ID;
         int callingUid = -1;
         String callingPackage = "";
 
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
             final String attrValue = in.getAttributeValue(attrNdx);
-            if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: attribute name=" +
-                    attrName + " value=" + attrValue);
+            if (DEBUG_PERSISTER || DEBUG_RESTORER) Slog.d(TaskPersister.TAG,
+                        "TaskRecord: attribute name=" + attrName + " value=" + attrValue);
             if (ATTR_TASKID.equals(attrName)) {
-                taskId = Integer.valueOf(attrValue);
+                if (taskId == INVALID_TASK_ID) taskId = Integer.valueOf(attrValue);
             } else if (ATTR_REALACTIVITY.equals(attrName)) {
                 realActivity = ComponentName.unflattenFromString(attrValue);
             } else if (ATTR_ORIGACTIVITY.equals(attrName)) {
@@ -966,17 +974,16 @@ final class TaskRecord {
                 (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
             if (event == XmlPullParser.START_TAG) {
                 final String name = in.getName();
-                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" +
-                        name);
+                if (DEBUG_PERSISTER || DEBUG_RESTORER)
+                        Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" + name);
                 if (TAG_AFFINITYINTENT.equals(name)) {
                     affinityIntent = Intent.restoreFromXml(in);
                 } else if (TAG_INTENT.equals(name)) {
                     intent = Intent.restoreFromXml(in);
                 } else if (TAG_ACTIVITY.equals(name)) {
-                    ActivityRecord activity =
-                            ActivityRecord.restoreFromXml(in, taskId, stackSupervisor);
-                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: activity=" +
-                            activity);
+                    ActivityRecord activity = ActivityRecord.restoreFromXml(in, stackSupervisor);
+                    if (DEBUG_PERSISTER || DEBUG_RESTORER)
+                            Slog.d(TaskPersister.TAG, "TaskRecord: activity=" + activity);
                     if (activity != null) {
                         activities.add(activity);
                     }
@@ -1082,8 +1089,9 @@ final class TaskRecord {
                     pw.print(" mNeverRelinquishIdentity="); pw.print(mNeverRelinquishIdentity);
                     pw.print(" mReuseTask="); pw.println(mReuseTask);
         }
-        if (mAffiliatedTaskId != taskId || mPrevAffiliateTaskId != -1 || mPrevAffiliate != null
-                || mNextAffiliateTaskId != -1 || mNextAffiliate != null) {
+        if (mAffiliatedTaskId != taskId || mPrevAffiliateTaskId != INVALID_TASK_ID
+                || mPrevAffiliate != null || mNextAffiliateTaskId != INVALID_TASK_ID
+                || mNextAffiliate != null) {
             pw.print(prefix); pw.print("affiliation="); pw.print(mAffiliatedTaskId);
                     pw.print(" prevAffiliation="); pw.print(mPrevAffiliateTaskId);
                     pw.print(" (");

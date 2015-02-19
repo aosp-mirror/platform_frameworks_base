@@ -44,7 +44,6 @@ public final class InputWindowHandle {
 
     // Window layout params attributes.  (WindowManager.LayoutParams)
     public int layoutParamsFlags;
-    public int layoutParamsPrivateFlags;
     public int layoutParamsType;
 
     // Dispatching timeout.

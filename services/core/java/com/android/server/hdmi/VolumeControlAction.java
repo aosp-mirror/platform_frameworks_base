@@ -16,10 +16,10 @@
 
 package com.android.server.hdmi;
 
-import static com.android.server.hdmi.Constants.IRT_MS;
 import static com.android.server.hdmi.Constants.MESSAGE_FEATURE_ABORT;
 import static com.android.server.hdmi.Constants.MESSAGE_REPORT_AUDIO_STATUS;
 import static com.android.server.hdmi.Constants.MESSAGE_USER_CONTROL_PRESSED;
+import static com.android.server.hdmi.HdmiConfig.IRT_MS;
 
 import android.media.AudioManager;
 
@@ -45,6 +45,7 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
     private boolean mIsVolumeUp;
     private long mLastKeyUpdateTime;
     private int mLastAvrVolume;
+    private boolean mLastAvrMute;
     private boolean mSentKeyPressed;
 
     /**
@@ -74,6 +75,7 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
         mAvrAddress = avrAddress;
         mIsVolumeUp = isVolumeUp;
         mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+        mLastAvrMute = false;
         mSentKeyPressed = false;
 
         updateLastKeyUpdateTime();
@@ -108,6 +110,8 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
             HdmiLogger.debug("Volume Key Status Changed[old:%b new:%b]", mIsVolumeUp, isVolumeUp);
             sendVolumeKeyReleased();
             mIsVolumeUp = isVolumeUp;
+            sendVolumeKeyPressed();
+            resetTimer();
         }
         updateLastKeyUpdateTime();
     }
@@ -129,9 +133,8 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
                 return handleReportAudioStatus(cmd);
             case MESSAGE_FEATURE_ABORT:
                 return handleFeatureAbort(cmd);
-            default:
-                return false;
         }
+        return false;
     }
 
     private boolean handleReportAudioStatus(HdmiCecMessage cmd) {
@@ -139,9 +142,12 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
         boolean mute = (params[0] & 0x80) == 0x80;
         int volume = params[0] & 0x7F;
         mLastAvrVolume = volume;
+        mLastAvrMute = mute;
         if (shouldUpdateAudioVolume(mute)) {
             HdmiLogger.debug("Force volume change[mute:%b, volume=%d]", mute, volume);
             tv().setAudioStatus(mute, volume);
+            mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+            mLastAvrMute = false;
         }
         return true;
     }
@@ -182,8 +188,9 @@ final class VolumeControlAction extends HdmiCecFeatureAction {
             sendVolumeKeyReleased();
         }
         if (mLastAvrVolume != UNKNOWN_AVR_VOLUME) {
-            tv().setAudioStatus(false, mLastAvrVolume);
+            tv().setAudioStatus(mLastAvrMute, mLastAvrVolume);
             mLastAvrVolume = UNKNOWN_AVR_VOLUME;
+            mLastAvrMute = false;
         }
     }
 

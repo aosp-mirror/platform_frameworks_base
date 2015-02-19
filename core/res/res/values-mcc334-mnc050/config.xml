@@ -33,8 +33,11 @@
 
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
+         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
+         Or string format of ApnSettingV3.
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">Modem,modem.iusacellgsm.mx,,,iusacellgsm,iusacellgsm,,,,,334,050,1,DUN</string>
+    <string-array translatable="false" name="config_tether_apndata">
+      <item>Modem,modem.iusacellgsm.mx,,,iusacellgsm,iusacellgsm,,,,,334,050,1,DUN</item>
+    </string-array>
 
 </resources>

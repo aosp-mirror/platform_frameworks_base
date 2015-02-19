@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -55,11 +56,8 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
 import android.view.IWindowManager;
-import android.view.View;
 
 import com.android.internal.os.BaseCommand;
-
-import dalvik.system.VMRuntime;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -127,6 +125,7 @@ public class Am extends BaseCommand {
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
+                "       am to-app-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
@@ -229,6 +228,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am to-intent-uri: print the given Intent specification as an intent: URI.\n" +
                 "\n" +
+                "am to-app-uri: print the given Intent specification as an android-app: URI.\n" +
+                "\n" +
                 "am switch-user: switch to put USER_ID in the foreground, starting\n" +
                 "  execution of that user if it is currently stopped.\n" +
                 "\n" +
@@ -270,7 +271,7 @@ public class Am extends BaseCommand {
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
                 "        (to embed a comma into a string escape it using \"\\,\")\n" +
-                "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
+                "    [-n <COMPONENT>] [-p <PACKAGE>] [-f <FLAGS>]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
@@ -337,9 +338,11 @@ public class Am extends BaseCommand {
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
         } else if (op.equals("to-uri")) {
-            runToUri(false);
+            runToUri(0);
         } else if (op.equals("to-intent-uri")) {
-            runToUri(true);
+            runToUri(Intent.URI_INTENT_SCHEME);
+        } else if (op.equals("to-app-uri")) {
+            runToUri(Intent.URI_ANDROID_APP_SCHEME);
         } else if (op.equals("switch-user")) {
             runSwitchUser();
         } else if (op.equals("start-user")) {
@@ -417,7 +420,7 @@ public class Am extends BaseCommand {
             } else if (opt.equals("--ei")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
-                intent.putExtra(key, Integer.valueOf(value));
+                intent.putExtra(key, Integer.decode(value));
             } else if (opt.equals("--eu")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -434,7 +437,7 @@ public class Am extends BaseCommand {
                 String[] strings = value.split(",");
                 int[] list = new int[strings.length];
                 for (int i = 0; i < strings.length; i++) {
-                    list[i] = Integer.valueOf(strings[i]);
+                    list[i] = Integer.decode(strings[i]);
                 }
                 intent.putExtra(key, list);
             } else if (opt.equals("--el")) {
@@ -477,13 +480,34 @@ public class Am extends BaseCommand {
                 hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Boolean.valueOf(value));
+                String value = nextArgRequired().toLowerCase();
+                // Boolean.valueOf() results in false for anything that is not "true", which is
+                // error-prone in shell commands
+                boolean arg;
+                if ("true".equals(value) || "t".equals(value)) {
+                    arg = true;
+                } else if ("false".equals(value) || "f".equals(value)) {
+                    arg = false;
+                } else {
+                    try {
+                        arg = Integer.decode(value) != 0;
+                    } catch (NumberFormatException ex) {
+                        throw new IllegalArgumentException("Invalid boolean value: " + value);
+                    }
+                }
+
+                intent.putExtra(key, arg);
             } else if (opt.equals("-n")) {
                 String str = nextArgRequired();
                 ComponentName cn = ComponentName.unflattenFromString(str);
                 if (cn == null) throw new IllegalArgumentException("Bad component name: " + str);
                 intent.setComponent(cn);
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
+            } else if (opt.equals("-p")) {
+                String str = nextArgRequired();
+                intent.setPackage(str);
                 if (intent == baseIntent) {
                     hasIntentInfo = true;
                 }
@@ -592,7 +616,8 @@ public class Am extends BaseCommand {
         } else if (arg.indexOf(':') >= 0) {
             // The argument is a URI.  Fully parse it, and use that result
             // to fill in any data not specified so far.
-            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
+            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME
+                    | Intent.URI_ANDROID_APP_SCHEME | Intent.URI_ALLOW_UNSAFE);
         } else if (arg.indexOf('/') >= 0) {
             // The argument is a component name.  Build an Intent to launch
             // it.
@@ -717,13 +742,14 @@ public class Am extends BaseCommand {
 
             if (mProfileFile != null) {
                 try {
-                    fd = ParcelFileDescriptor.open(
+                    fd = openForSystemServer(
                             new File(mProfileFile),
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE |
                             ParcelFileDescriptor.MODE_READ_WRITE);
                 } catch (FileNotFoundException e) {
                     System.err.println("Error: Unable to open file: " + mProfileFile);
+                    System.err.println("Consider using a file under /data/local/tmp/");
                     return;
                 }
                 profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
@@ -1029,13 +1055,14 @@ public class Am extends BaseCommand {
         if (start) {
             profileFile = nextArgRequired();
             try {
-                fd = ParcelFileDescriptor.open(
+                fd = openForSystemServer(
                         new File(profileFile),
                         ParcelFileDescriptor.MODE_CREATE |
                         ParcelFileDescriptor.MODE_TRUNCATE |
                         ParcelFileDescriptor.MODE_READ_WRITE);
             } catch (FileNotFoundException e) {
                 System.err.println("Error: Unable to open file: " + profileFile);
+                System.err.println("Consider using a file under /data/local/tmp/");
                 return;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, 0, false);
@@ -1089,12 +1116,13 @@ public class Am extends BaseCommand {
         try {
             File file = new File(heapFile);
             file.delete();
-            fd = ParcelFileDescriptor.open(file,
+            fd = openForSystemServer(file,
                     ParcelFileDescriptor.MODE_CREATE |
                     ParcelFileDescriptor.MODE_TRUNCATE |
                     ParcelFileDescriptor.MODE_READ_WRITE);
         } catch (FileNotFoundException e) {
             System.err.println("Error: Unable to open file: " + heapFile);
+            System.err.println("Consider using a file under /data/local/tmp/");
             return;
         }
 
@@ -1534,9 +1562,9 @@ public class Am extends BaseCommand {
         } while (packageName != null);
     }
 
-    private void runToUri(boolean intentScheme) throws Exception {
+    private void runToUri(int flags) throws Exception {
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
-        System.out.println(intent.toUri(intentScheme ? Intent.URI_INTENT_SCHEME : 0));
+        System.out.println(intent.toUri(flags));
     }
 
     private class IntentReceiver extends IIntentReceiver.Stub {
@@ -1830,5 +1858,19 @@ public class Am extends BaseCommand {
 
         } catch (RemoteException e) {
         }
+    }
+
+    /**
+     * Open the given file for sending into the system process. This verifies
+     * with SELinux that the system will have access to the file.
+     */
+    private static ParcelFileDescriptor openForSystemServer(File file, int mode)
+            throws FileNotFoundException {
+        final ParcelFileDescriptor fd = ParcelFileDescriptor.open(file, mode);
+        final String tcon = SELinux.getFileContext(file.getAbsolutePath());
+        if (!SELinux.checkSELinuxAccess("u:r:system_server:s0", tcon, "file", "read")) {
+            throw new FileNotFoundException("System server has no access to file context " + tcon);
+        }
+        return fd;
     }
 }

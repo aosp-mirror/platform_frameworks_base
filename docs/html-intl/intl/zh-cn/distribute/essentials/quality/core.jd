@@ -1,0 +1,998 @@
+page.title=应用的核心质量
+page.image=/distribute/images/core-quality-guidelines.jpg
+page.type="分发"
+page.metaDescription=应用程序质量的好坏将直接影响到你的应用程序的长期成功 － 这包括安装，用户评分和评论，参与和用户保留方面。
+@jd:body
+
+      <div id="qv-wrapper"><div id="qv">
+  <h2>质量标准</h2>
+    <ol>
+      <li><a href="#ux">设计和互动</a></li>
+          <li><a href="#fn">功能</a></li>
+          <li><a href="#ps">性能和稳定性</a></li>
+          <li><a href="#listing">Google Play</a></li>
+
+    </ol>
+
+    <h2>测试</h2>
+    <ol>
+      <li><a href="#test-environment">设置测试环境</a></li>
+          <li><a href="#tests">测试流程</a></li>
+          </ol>
+
+    <h2>你还应阅读以下内容：</h2>
+    <ol>
+      <li><a href="{@docRoot}distribute/essentials/quality/tablets.html">平板电脑应用的质量</a></li>
+          <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">优化你的应用</a></li>
+    </ol>
+
+
+  </div>
+  </div>
+
+  <div class="top-right-float">
+    <img src="{@docRoot}images/gp-core-quality.png" style="margin-left:20px" />
+  </div>
+
+  <p>
+    Android 用户期望获得高品质的应用。你的应用要获得长期成功（体现在安装量、用户评分和评论、参与度和用户留存等方面），应用质量起着直接的作用。
+  </p>
+
+  <p>
+    本文介绍一组简明的核心应用质量标准及相关的测试，旨在帮助你评估应用质量的基本要素。所有 Android 应用均应满足这些标准。
+  </p>
+
+  <p>
+    你在发布应用之前，请根据这些标准对应用进行测试，确保应用能在众多设备上正常运行，满足 Android 的导航和设计标准，并为在 Google Play 商店开展推广做好准备。当然你的测试范围远不止这里所介绍的内容，不过本文的目的是说明所有应用都应具备的基本质量特征，因此你可以在测试计划中纳入这些内容。
+  </p>
+
+  <p>
+    如果你要为平板电脑和/或 Google Play for Education 创建应用，还应考虑<a href="{@docRoot}distribute/essentials/quality/tablets.html">平板电脑应用的质量</a>指南和 <a href="{@docRoot}distribute/essentials/gpfe-guidelines.html">Education 指南</a>中规定的其他质量标准。
+  </p>
+
+  <div class="headerLine">
+    <h2 id="ux">
+    视觉设计和用户互动
+    </h2>
+
+
+  </div>
+
+  <p>
+    遵循这些标准能够确保你的应用具备标准的 Android 视觉设计和互动模式（如果适用），从而提供一致、直观的用户体验。
+  </p>
+
+  <table>
+    <tr>
+      <th style="width:2px">
+        领域
+      </th>
+      <th style="width:54px">
+        ID
+      </th>
+
+
+      <th>
+        说明
+      </th>
+      <th style="width:54px">
+        测试
+      </th>
+    </tr>
+    <tr id="UX-B1">
+    <td>标准设计</td>
+    <td>
+      UX-B1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用遵循 <a href="{@docRoot}design/index.html">Android 设计</a>指南，采用常见的<a href="{@docRoot}design/patterns/index.html">界面模式和图标</a>：
+      </p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>应用不会重新定义系统图标的预期功能（例如“返回”按钮）。
+      </li>
+
+      <li>如果系统图标触发的是标准界面行为，则应用不会使用完全不同的图标替换该系统图标。
+      </li>
+
+      <li>如果应用提供标准系统图标的自定义版本，那么该图标要与系统图标十分相似并能够触发标准系统行为。
+      </li>
+
+      <li>应用不会重新定义或滥用 Android 界面模式，例如有误导性或令用户困惑的图标或行为。
+      </li>
+      </ol>
+    </td>
+    <td>
+      <a href="#core">CR 全部</a>
+    </td>
+    </tr>
+
+    <tr>
+    <td rowspan="3">
+      导航
+    </td>
+    <td id="UX-N1">
+      UX-N1
+    </td>
+    <td>
+      <p>
+      应用支持标准的系统<a href="{@docRoot}design/patterns/navigation.html">“返回”按钮导航</a>，不会在屏幕上使用任何自定义的“返回按钮”提示。
+      </p>
+    </td>
+    <td>
+      <a href="#core">CR-3</a>
+    </td>
+    </tr>
+
+    <tr>
+    <td id="UX-N2">
+      UX-N2
+    </td>
+    <td>
+      <p>
+      所有对话框均可以使用“返回”按钮关闭。
+      </p>
+    </td>
+    <td>
+      <a href="#core">CR-3</a>
+    </td>
+    </tr>
+
+    <tr id="UX-N3">
+    <td>
+      UX-N3
+    </td>
+    <td>
+      在任何位置按下“主屏幕”按钮即可转到设备的主屏幕。
+    </td>
+    <td>
+      <a href="#core">CR-1</a>
+    </td>
+    </tr>
+
+    <tr id="UX-S1">
+    <td rowspan="2">
+      通知
+    </td>
+    <td>
+      UX-S1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      通知遵循 Android 设计<a href="{@docRoot}design/patterns/notifications.html">指南</a>。尤其是：</p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>如果可能，将多个通知放入一个通知对象中。
+      </li>
+
+      <li>只有与进行中的活动（例如音乐播放或通话）相关时，通知才会持续保留。
+      </li>
+
+      <li>通知中不包含广告或与应用核心功能无关的内容，除非用户选择接受这样的通知。
+      </li>
+      </ol>
+    </td>
+    <td>
+      <a href="#core">CR-11</a>
+    </td>
+    </tr>
+
+    <tr id="UX-S2">
+    <td>
+      UX-S2
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用只为实现以下目的才使用通知：
+      </p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>说明与用户个人相关的上下文更改（例如收到消息）</li>
+
+      <li>展示与进行中的活动（例如音乐播放或通话）相关的信息/控件。
+      </li>
+      </ol>
+    </td>
+    <td>
+      <a href="#core">CR-11</a>
+    </td>
+    </tr>
+  </table>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/corequalityguidelines/visualdesign" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,6x3,6x3" data-maxresults="6">
+  </div>
+
+  <div class="headerLine">
+    <h2 id="fn">
+    功能
+    </h2>
+
+
+  </div>
+
+  <p>
+    遵循这些标准能够确保你的应用使用合适的权限级别，提供预期的功能行为。
+  </p>
+
+  <table>
+    <tr>
+    <th style="width:2px">
+      领域
+    </th>
+    <th style="width:54px">
+      ID
+    </th>
+    <th>
+      说明
+    </th>
+    <th style="width:54px">
+      测试
+    </th>
+    </tr>
+
+    <tr id="FN-P1">
+    <td rowspan="2">
+      权限
+    </td>
+    <td>
+      FN-P1
+    </td>
+    <td>
+      应用只请求为支持核心功能而需要的绝对最低级别权限。<em></em>
+    </td>
+    <td rowspan="2">
+      <a href="#core">CR-11</a>
+    </td>
+    </tr>
+
+    <tr id="FN-P2">
+    <td>
+      FN-P2
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      除非与应用的核心功能相关，否则应用不请求访问敏感数据（例如通讯录或系统日志）或访问用户付费服务（例如拨号或短信）的权限。
+      </p>
+    </td>
+    </tr>
+
+    <tr id="FN-L1">
+    <td>
+      安装位置
+    </td>
+    <td>
+      FN-L1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用安装在 SD 卡上（如果应用支持）时可以正常工作。
+      </p>
+
+      <p style="margin-bottom:.25em">
+      建议大多数的大型应用（大于 10MB）支持安装到 SD 卡。请参阅<a href="{@docRoot}guide/topics/data/install-location.html">应用安装位置</a>开发者指南，了解哪些类型的应用应该支持安装到 SD 卡。
+      </p>
+    </td>
+    <td>
+      <a href="#SD-1">SD-1</a>
+    </td>
+    </tr>
+
+    <tr id="FN-A1">
+    <td rowspan="4">
+      音频
+    </td>
+    <td>
+      FN-A1
+    </td>
+    <td>
+      音频不会在屏幕关闭时播放，除非这是应用的核心功能（例如应用是音乐播放器）。
+    </td>
+    <td>
+      <a href="#core">CR-7</a>
+    </td>
+    </tr>
+
+    <tr id="FN-A2">
+    <td>
+      FN-A2
+    </td>
+    <td>
+      音频不会在<a href="http://android-developers.blogspot.com/2011/11/making-android-games-that-play-nice.html">锁定屏幕后播放</a>，除非这是应用的核心功能。
+    </td>
+    <td>
+      <a href="#core">CR-8</a>
+    </td>
+    </tr>
+
+    <tr id="FN-A3">
+    <td>
+      FN-A3
+    </td>
+    <td>
+      音频不会在主屏幕上或其他应用运行时播放，除非这是应用的核心功能。
+    </td>
+    <td>
+      <a href="#core">CR-1,<br />
+      CR-2</a>
+    </td>
+    </tr>
+
+    <tr id="FN-A4">
+    <td>
+      FN-A4
+    </td>
+    <td>
+      音频会在应用返回前台时恢复，或者提示用户播放已处于暂停状态。
+    </td>
+    <td>
+      <a href="#core">CR-1, CR-8</a>
+    </td>
+    </tr>
+
+    <tr id="FN-U1">
+    <td rowspan="3">
+      界面和图形
+    </td>
+    <td>
+      FN-U1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用既支持横向模式也支持纵向模式（如果可能）。
+      </p>
+
+      <p style="margin-bottom:.25em">
+      不同的显示方向下，所展现的功能特性和操作应大致相同。对内容或视图做出细微更改是可接受的。
+      </p>
+    </td>
+    <td>
+      <a href="#core">CR-5</a>
+    </td>
+    </tr>
+
+    <tr id="FN-U2">
+    <td>
+      FN-U2
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      在两种显示方向下，应用都占用整个屏幕，不会因为显示方向更改而出现黑边。
+      </p>
+
+      <p style="margin-bottom:.25em">
+      为补偿屏幕图形的细微差异而使用少许黑边是可接受的。
+      </p>
+    </td>
+    <td>
+      <a href="#core">CR-5</a>
+    </td>
+    </tr>
+
+    <tr id="FN-U3">
+    <td>
+      FN-U3
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用能正确处理显示方向之间的快速转换，而不会出现渲染问题。
+      </p>
+    </td>
+    <td>
+      <a href="#core">CR-5</a>
+    </td>
+    </tr>
+
+    <tr id="FN-S1">
+    <td rowspan="2">
+      用户/应用状态
+    </td>
+    <td>
+      FN-S1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用转入后台时，不应再有任何服务处于运行状态，除非该服务与应用核心功能相关。
+      </p>
+
+      <p style="margin-bottom:.25em">
+      例如，应用不得为了以下目的而让服务保持运行状态：为了接收通知而连接网络、保持蓝牙连接状态或为了让 GPS 保持开启状态。
+      </p>
+    </td>
+    <td>
+      <a href="#core">CR-6</a>
+    </td>
+    </tr>
+
+    <tr id="FN-S2">
+    <td>
+      FN-S2
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用能够正确保留和恢复用户或应用状态。
+      </p>
+
+      <p style="margin-bottom:.25em">
+      应用在离开前台时能够保留用户或应用状态，并防止因返回导航或其他状态更改导致的意外数据丢失。返回前台时，应用必须恢复保留的状态和其他任何重要的待处理事务，例如对可修改字段的更改、游戏进程、菜单、视频以及应用或游戏的其他部分。
+      </p>
+
+      <ol style="margin-bottom:.25em;list-style-type:lower-alpha">
+      <li>当应用从“最近使用的应用”切换器恢复时，它能够让用户返回到上次使用的准确状态。
+      </li>
+
+      <li>当在设备从休眠（锁定）中被唤醒后，应用能够恢复并让用户准确返回到上次使用的状态。
+      </li>
+
+      <li>当应用从主屏幕或“所有应用”重新启动时，应用会尽可能恢复为与之前状态最接近的状态。
+      </li>
+
+      <li>在“返回”按键上，应用允许用户保存会因返回导航而丢失的任何应用或用户状态。
+      </li>
+      </ol>
+    </td>
+    <td>
+      <a href="#core">CR-1, CR-3, CR-5</a>
+    </td>
+    </tr>
+  </table>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/corequalityguidelines/functionality" data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
+  </div>
+
+  <div class="headerLine">
+    <h2 id="ps">
+    性能和稳定性
+    </h2>
+
+
+  </div>
+
+  <p>
+    遵循这些标准能够确保应用提供用户期望的性能、稳定性和响应速度。
+  </p>
+
+  <table>
+    <tr>
+    <th style="width:2px">
+      领域
+    </th>
+    <th style="width:54px">
+      ID
+    </th>
+    <th>
+      说明
+    </th>
+    <th style="width:54px">
+      测试
+    </th>
+    </tr>
+
+    <tr id="PS-S1">
+    <td>
+      稳定性
+    </td>
+    <td>
+      PS-S1
+    </td>
+    <td>
+      应用不会在适配设备上崩溃、强制关闭、冻结或不正常运行。
+    </td>
+    <td>
+      <a href="#core">CR 全部</a>、<a href="#SD-1">SD-1</a>、<a href="#HA-1">HA-1</a>
+    </td>
+    </tr>
+
+    <tr id="PS-P1">
+    <td rowspan="2">
+      性能
+    </td>
+    <td>
+      PS-P1
+    </td>
+    <td>
+      应用加载迅速，如果加载时间超过 2 秒则在屏幕上向用户提供反馈（进度指示器或类似提示）。
+    </td>
+    <td>
+      <a href="#core">CR 全部</a>、<a href="#SD-1">SD-1</a>
+    </td>
+    </tr>
+
+    <tr id="PS-P2">
+    <td>
+      PS-P2
+    </td>
+    <td>
+      启用 StrictMode 之后（请参阅下文的 <a href="#strictmode">StrictMode 测试</a>），在应用运行期间（包括玩游戏、动画和界面转换期间以及应用的其他部分）指示灯不会呈红色闪烁（StrictMode 的性能警告）。
+    </td>
+    <td>
+      <a href="#PM-1">PM-1</a>
+    </td>
+    </tr>
+
+    <tr id="PS-M1">
+    <td>
+      媒体
+    </td>
+    <td>
+      PS-M1
+    </td>
+    <td>
+      音乐和视频播放流畅，应用正常使用和加载期间没有中断、卡壳或其他异常声音。
+    </td>
+    <td>
+      <a href="#core">CR 全部</a>、<a href="#SD-1">SD-1</a>、<a href="#HA-1">HA-1</a>
+    </td>
+    </tr>
+
+    <tr id="PS-V1">
+    <td rowspan="2">
+      视觉质量
+    </td>
+    <td>
+      PS-V1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用显示的图形、文本、图片和其他界面元素没有明显的失真、模糊或像素化。
+      </p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>应用为所有适配的屏幕尺寸和外形规格提供高品质的图形，包括<a href="{@docRoot}distribute/essentials/quality/tablet.html">平板电脑等大屏幕设备</a>。
+      </li>
+
+      <li>菜单边缘、按钮和其他界面元素没有明显的走样。
+      </li>
+      </ol>
+    </td>
+    <td rowspan="2">
+      <a href="#core">CR-all</a>
+    </td>
+    </tr>
+
+    <tr id="PS-V2">
+    <td>
+      PS-V2
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用以可接受的方式显示文本和文本块。
+      </p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>所用构图在所有支持的外形规格上都适用，包括平板电脑等大屏幕设备。
+      </li>
+
+      <li>没有明显的字母或词语丢失。
+      </li>
+
+      <li>按钮或图标中没有明显的不当文本换行。
+      </li>
+
+      <li>文本与周围元素之间有充分的空间。
+      </li>
+      </ol>
+    </td>
+    </tr>
+  </table>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/core/performance" data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
+  </div>
+
+  <div class="headerLine">
+    <h2 id="listing">Google Play</h2>
+
+
+  </div>
+
+  <p>
+    遵循这些标准能够确保你的应用做好在 Google Play 上发布的准备。
+  </p>
+
+  <table>
+    <tr>
+    <th style="width:2px">
+      领域
+    </th>
+    <th style="width:54px">
+      ID
+    </th>
+    <th>
+      说明
+    </th>
+    <th style="width:54px">
+      测试
+    </th>
+    </tr>
+
+    <tr id="GP-P1">
+    <td rowspan="2">
+      政策
+    </td>
+    <td>
+      GP-P1
+    </td>
+    <td>
+      应用严格遵守 <a href="http://play.google.com/about/developer-content-policy.html">Google Play 开发者内容政策</a>的条款，不提供不当内容，不使用其他方的知识产权或品牌等。
+    </td>
+    <td>
+      <a href="#gp">GP 全部</a>
+    </td>
+    </tr>
+
+    <tr id="GP-P2">
+    <td>
+      GP-P2
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      根据<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=zh-CN&amp;answer=188189">内容分级指南</a>合理设置应用的心智成熟度。
+      </p>
+
+      <p style="margin-bottom:.25em">
+      尤其要注意的是，对于需要请求相应权限以使用设备位置的应用，其心智成熟度不能设置为“所有人”。
+      </p>
+    </td>
+    <td>
+      <a href="#gp">GP-1</a>
+    </td>
+    </tr>
+
+    <tr id="GP-D1">
+    <td rowspan="3">
+      应用详细信息页
+    </td>
+    <td>
+      GP-D1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      应用置顶大图遵循此<a href="http://android-developers.blogspot.com/2011/10/android-market-featured-image.html">博文</a>中介绍的指南。请确保：
+      </p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>应用商品详情包括高品质的置顶大图。
+      </li>
+
+      <li>置顶大图不包含设备图片、屏幕截图，也不包含缩小后以及在应用适配的最小尺寸屏幕上显示时难以辨认的小文字。
+      </li>
+
+      <li>置顶大图不能看起来像广告。
+      </li>
+      </ol>
+    </td>
+    <td>
+      <a href="#gp">GP-1、GP-2</a>
+    </td>
+    </tr>
+
+    <tr id="GP-D2">
+    <td>
+      GP-D2
+    </td>
+    <td>
+      应用屏幕截图和视频不显示或引用非 Android 设备。
+    </td>
+    <td rowspan="2">
+      <a href="#gp">GP-1</a>
+    </td>
+    </tr>
+
+    <tr id="GP-D3">
+    <td>
+      GP-D3
+    </td>
+    <td>
+      应用屏幕截图或视频不以误导性方式展示应用的内容和体验。
+    </td>
+    </tr>
+
+    <tr id="GP-X1">
+    <td>
+      用户支持
+    </td>
+    <td>
+      GP-X1
+    </td>
+    <td>
+      对于 Google Play 页面的“评论”标签中常见的用户报告的错误，如果错误可重现而且在多种不同的设备上发生，则应予以解决。
+      如果错误只在少数设备上出现，但是这些设备十分受欢迎或者是新设备，则你仍要予以解决。
+    </td>
+    <td>
+      <a href="#gp">GP-1</a>
+    </td>
+    </tr>
+  </table>
+
+  <h3 class="rel-resources clearfloat">相关资源</h3>
+
+  <div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/essentials/core/play/zhcn" data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,6x3,6x3,6x3" data-maxresults="6">
+  </div>
+
+  <div class="headerLine">
+    <h2 id="test-environment">
+    设置测试环境
+    </h2>
+
+
+  </div>
+
+  <p>
+    要掌控应用的质量，请设置合适的硬件或模拟器环境以进行测试。
+  </p>
+
+  <p>
+    理想的测试环境应包括少量实际硬件设备，并且这些设备能够代表目前消费者可用的主要外形规格和硬件/软件组合。你不需要测试市场上的每种设备，只需关注少量代表性的设备，甚至是仅针对每种外形规格选用一两个设备即可。<em></em>
+  </p>
+
+  <p>
+    如果你不能获得实际硬件设备来进行测试，则应该<a href="{@docRoot}tools/devices/index.html">设置模拟设备 (AVD)</a> 以代表最常见的外形规格和硬件/软件组合。
+  </p>
+
+  <p>
+    如果你不局限于基本测试，则可以向测试环境中添加更多设备、更多外形规格，或新的硬件/软件组合。你也可以增加测试次数、提高复杂性和质量标准。
+  </p>
+
+  <div class="headerLine">
+    <h2 id="tests">
+    测试流程
+    </h2>
+
+
+  </div>
+
+  <p>
+    这里的这些测试流程有助于你发现应用中的各类质量问题。你可以在你的测试计划中组合各项测试或综合运用各组测试。请参阅上文介绍的内容，了解与特定测试相关联的具体标准。
+  </p>
+
+  <table>
+    <tr>
+    <th style="width:2px">
+      类型
+
+
+    </th>
+    <th style="width:54px">
+      测试
+    </th>
+    <th>
+      说明
+    </th>
+    </tr>
+
+    <tr>
+    <td rowspan="12" id="core">
+      核心套件
+    </td>
+    <td>
+      CR-0
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      浏览应用的各个部分：所有屏幕、对话框、设置和所有用户流程。
+      </p>
+
+      <ol style="margin-bottom:.5em;list-style-type:lower-alpha">
+      <li>如果应用运行修改或创建内容、播放游戏或媒体，请务必进入这些流程以创建或修改内容。
+      </li>
+
+      <li>在使用应用期间，让网络连接、电池功能、GPS 或位置可用性以及系统加载等发生短暂变化。
+      </li>
+      </ol>
+    </td>
+    </tr>
+
+    <tr id="tg2">
+    <td id="core2">
+      CR-1
+    </td>
+    <td>
+      在每个应用屏幕上，按下设备的“主屏幕”键，然后从“所有应用”屏幕重新启动应用。
+    </td>
+    </tr>
+
+    <tr id="CR-2">
+    <td>
+      CR-2
+    </td>
+    <td>
+      从每个应用屏幕，使用“最近使用的应用”切换器切换到其他正在运行的应用，然后返回正在测试的应用。
+    </td>
+    </tr>
+
+    <tr id="CR-3">
+    <td>
+      CR-3
+    </td>
+    <td>
+      从每个应用屏幕（和对话框），按下“返回”按钮。
+    </td>
+    </tr>
+
+    <tr id="CR-5">
+    <td>
+      CR-5
+    </td>
+    <td>
+      从每个应用屏幕，旋转设备，在横屏和竖屏之间切换至少三次。
+    </td>
+    </tr>
+
+    <tr id="CR-6">
+    <td>
+      CR-6
+    </td>
+    <td>
+      切换到其他应用，以将测试应用转至后台。转到“设置”，检查测试应用在后台时是否有服务在运行。在 Android 4.0 及更高版本中，转到“应用”屏幕并找到“正在运行”标签中的应用。在早期版本中，使用“管理应用”查看运行中的服务。
+    </td>
+    </tr>
+
+    <tr id="CR-7">
+    <td>
+      CR-7
+    </td>
+    <td>
+      按下电源按钮，让设备进入休眠状态，然后再次按下电源按钮唤醒屏幕。
+    </td>
+    </tr>
+
+    <tr id="CR-8">
+    <td>
+      CR-8
+    </td>
+    <td>
+      将设备设置为按下电源按钮后锁定。按下电源按钮让设备进入休眠状态，然后再次按下电源按钮唤醒屏幕，然后解锁设备。
+    </td>
+    </tr>
+
+    <tr id="CR-9">
+    <td><!-- Hardware features -->
+      CR-9
+    </td>
+    <td>
+      对于带有滑动键盘的设备，将键盘滑进并滑出至少一次。对于带有键盘底座的设备，将设备连接到键盘底座。
+    </td>
+    </td></tr>
+
+    <tr id="CR-10">
+    <td>
+      CR-10
+    </td>
+    <td>
+      对于具有外部显示端口的设备，请插入外部显示器。
+    </td>
+    </tr>
+
+    <tr id="CR-11">
+    <td>
+      CR-11
+    </td>
+    <td>
+      在通知抽屉中触发并查看应用能够显示的所有通知类型。如果适用（Android 4.1 及更高版本）展开通知并触碰提供的所有操作。
+    </td>
+    </tr>
+
+    <tr id="CR-12">
+    <td>
+      CR-12
+    </td>
+    <td>
+      转到“设置”&gt;“应用信息”检查应用请求的权限</td>
+    </tr>
+
+    <tr id="tg3">
+    <td>
+      在 SD 卡上安装
+    </td>
+    <td>
+      SD-1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      对安装到<a href="{@docRoot}guide/topics/data/install-location.html">设备 SD 卡</a>的应用（如果应用支持的话）重复核心套件测试。<em></em>
+      </p>
+
+      <p style="margin-bottom:.25em">
+      要将应用移动到 SD 卡，你可以使用“设置”&gt;“应用信息”&gt;“移动到 SD 卡”。
+      </p>
+    </td>
+    </tr>
+
+    <tr id="tg32">
+    <td>
+      硬件加速
+    </td>
+    <td>
+      HA-1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      启用硬件加速并重复核心套件测试。<em></em>
+      </p>
+
+      <p style="margin-bottom:.25em">
+      要强制启动硬件加速（在设备支持的位置），请将 <code>hardware-accelerated="true"</code> 添加到AndroidManifest.xml中的 <code>&lt;application&gt;</code> 并重新编译。
+      </p>
+    </td>
+    </tr>
+
+    <tr id="tg33">
+    <td>
+      性能监控
+    </td>
+    <td>
+      PM-1
+    </td>
+    <td>
+      <p style="margin-bottom:.5em">
+      在启用 StrictMode 分析（<a href="#strictmode">如下所述</a>）的情况下重复核心套件测试。<em></em>
+      </p>
+
+      <p style="margin-bottom:.25em">
+      密切关注垃圾回收及其对用户体验的影响。
+      </p>
+    </td>
+    </tr>
+
+    <tr id="gp">
+    <td rowspan="3">Google Play</td>
+    <td>
+      GP-1
+    </td>
+    <td>
+      登录到<a href="https://play.google.com/apps/publish/">开发者控制台</a>查看你的开发者个人资料、应用说明、屏幕截图、置顶大图、心智成熟度设置以及用户反馈。
+    </td>
+    </tr>
+
+    <tr id="GP-2">
+    <td>
+      GP-2
+    </td>
+    <td>
+      下载置顶大图和屏幕截图，将其缩小以匹配设备上的显示屏尺寸以及你定位的外形规格。
+    </td>
+    </tr>
+
+    <tr id="GP-3">
+    <td>
+      GP-3
+    </td>
+    <td>
+      查看所有图形资源、媒体、文本、代码库，以及应用内其他打包的内容或下载的扩展文件。
+    </td>
+    </tr>
+
+    <tr id="GP-4">
+    <td>
+      付款
+    </td>
+    <td>
+      GP-4
+    </td>
+    <td>
+      浏览应用的所有屏幕，并进入所有应用内购买流程。
+    </td>
+    </tr>
+  </table>
+
+  <h3 id="strictmode">
+    使用 StrictMode 进行测试
+  </h3>
+
+  <p>
+    对于性能测试，我们建议在应用内启用 <code><a href="{@docRoot}reference/android/os/StrictMode.html">StrictMode</a></code>，通过它捕获主线程上和其他线程上可能影响性能、网络访问、文件读/写等的操作。
+  </p>
+
+  <p>
+    你可以使用 <code><a href="{@docRoot}reference/android/os/StrictMode.ThreadPolicy.Builder.html">StrictMode.ThreadPolicy.Builder</a></code> 设置每个线程的监控政策，并使用 <code><a href="{@docRoot}reference/android/os/StrictMode.ThreadPolicy.Builder.html#detectAll()">detectAll()</a></code> 在 <code>ThreadPolicy</code> 中启用所有受支持的监控。
+  </p>
+
+  <p>
+    请务必使用 <code><a href="{@docRoot}reference/android/os/StrictMode.ThreadPolicy.Builder.html#penaltyFlashScreen()">penaltyFlashScreen()</a></code> 针对 <code>ThreadPolicy</code> 为违反策略的行为启用<strong>可视通知</strong>。
+  </p>

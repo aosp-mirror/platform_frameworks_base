@@ -41,10 +41,10 @@ import android.os.UserHandle;
  * <ul>
  * <li>Declares the {@link android.Manifest.permission#SCORE_NETWORKS} permission.
  * <li>Includes a receiver for {@link #ACTION_SCORE_NETWORKS} guarded by the
- *     {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission which scores networks
- *     and (eventually) calls {@link #updateScores} with the results. If this receiver specifies an
- *     android:label attribute, this label will be used when referring to the application throughout
- *     system settings; otherwise, the application label will be used.
+ *     {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission which scores
+ *     networks and (eventually) calls {@link #updateScores} with the results. If this receiver
+ *     specifies an android:label attribute, this label will be used when referring to the
+ *     application throughout system settings; otherwise, the application label will be used.
  * </ul>
  *
  * <p>The system keeps track of an active scorer application; at any time, only this application
@@ -192,12 +192,15 @@ public class NetworkScoreManager {
     /**
      * Set the active scorer to a new package and clear existing scores.
      *
+     * <p>Should never be called directly without obtaining user consent. This can be done by using
+     * the {@link #ACTION_CHANGE_ACTIVE} broadcast, or using a custom configuration activity.
+     *
      * @return true if the operation succeeded, or false if the new package is not a valid scorer.
      * @throws SecurityException if the caller does not hold the
-     *         {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission indicating
-     *         that it can manage scorer applications.
+     *         {@link android.Manifest.permission#SCORE_NETWORKS} permission.
      * @hide
      */
+    @SystemApi
     public boolean setActiveScorer(String packageName) throws SecurityException {
         try {
             return mService.setActiveScorer(packageName);
@@ -228,7 +231,7 @@ public class NetworkScoreManager {
      *
      * @return true if the broadcast was sent, or false if there is no active scorer.
      * @throws SecurityException if the caller does not hold the
-     *         {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission.
+     *         {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission.
      * @hide
      */
     public boolean requestScores(NetworkKey[] networks) throws SecurityException {
@@ -252,7 +255,7 @@ public class NetworkScoreManager {
      * @param networkType the type of network this cache can handle. See {@link NetworkKey#type}.
      * @param scoreCache implementation of {@link INetworkScoreCache} to store the scores.
      * @throws SecurityException if the caller does not hold the
-     *         {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission.
+     *         {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission.
      * @throws IllegalArgumentException if a score cache is already registered for this type.
      * @hide
      */

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Participant</li>
       </ul>
     </div>
@@ -788,6 +857,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -830,12 +902,22 @@ Summary:
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
+  
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantEntity.html">ParticipantEntity</a></td>
-              <td class="jd-descrcol" width="100%">Data object representing a Participant in a match.&nbsp;</td>
-          </tr>
+    
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantEntity.html">ParticipantEntity</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data object representing a Participant in a match.&nbsp;
+          
+    
+
+        </td>
+      </tr>
+      
+    
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -894,49 +976,84 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_DECLINED">STATUS_DECLINED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant has declined the invitation.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant has declined the invitation.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_FINISHED">STATUS_FINISHED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant is finished with this match.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant is finished with this match.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_INVITED">STATUS_INVITED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant has been sent an invitation.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant has been sent an invitation.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_JOINED">STATUS_JOINED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant has accepted the invitation and is joined.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant has accepted the invitation and is joined.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_LEFT">STATUS_LEFT</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant joined a multiplayer game and subsequently left.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant joined a multiplayer game and subsequently left.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_NOT_INVITED_YET">STATUS_NOT_INVITED_YET</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant has not yet been sent an invitation.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant has not yet been sent an invitation.
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#STATUS_UNRESPONSIVE">STATUS_UNRESPONSIVE</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that this participant did not respond to the match in the alloted time.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that this participant did not respond to the match in the alloted time.
+          
+    
+
+        </td>
     </tr>
     
     
@@ -973,14 +1090,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
@@ -1024,7 +1151,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getDisplayName()">getDisplayName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Return the name to display for this participant.</div>
+        <div class="jd-descrdiv">
+          Return the name to display for this participant.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1042,7 +1174,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getDisplayName(android.database.CharArrayBuffer)">getDisplayName</a></span>(CharArrayBuffer dataOut)</nobr>
         
-        <div class="jd-descrdiv">Loads the display name for this participant into the provided <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+        <div class="jd-descrdiv">
+          Loads the display name for this participant into the provided <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1060,7 +1197,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getHiResImageUri()">getHiResImageUri</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the URI of the hi-res image to display for this participant.</div>
+        <div class="jd-descrdiv">
+          Returns the URI of the hi-res image to display for this participant.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1078,7 +1220,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getIconImageUri()">getIconImageUri</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the URI of the icon-sized image to display for this participant.</div>
+        <div class="jd-descrdiv">
+          Returns the URI of the icon-sized image to display for this participant.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1096,7 +1243,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getParticipantId()">getParticipantId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the ID of this participant.</div>
+        <div class="jd-descrdiv">
+          Returns the ID of this participant.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1114,7 +1266,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getPlayer()">getPlayer</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the <code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> that this participant represents.</div>
+        <div class="jd-descrdiv">
+          Returns the <code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> that this participant represents.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1132,7 +1289,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getResult()">getResult</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any.</div>
+        <div class="jd-descrdiv">
+          Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1150,7 +1312,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#getStatus()">getStatus</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieve the status of this participant.</div>
+        <div class="jd-descrdiv">
+          Retrieve the status of this participant.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1168,7 +1335,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html#isConnectedToRoom()">isConnectedToRoom</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the connected status of the participant.</div>
+        <div class="jd-descrdiv">
+          Retrieves the connected status of the participant.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1278,7 +1450,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1296,7 +1473,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1356,6 +1538,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has declined the invitation.
 </p></div>
 
@@ -1394,6 +1579,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant is finished with this match.
  Only applies to turn-based match participants.
@@ -1435,6 +1623,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has been sent an invitation.
 </p></div>
 
@@ -1473,6 +1664,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has accepted the invitation and is joined.
 </p></div>
@@ -1513,6 +1707,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant joined a multiplayer game and subsequently left.
 </p></div>
 
@@ -1551,6 +1748,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant has not yet been sent an invitation.
  Only applies to turn-based match participants.
@@ -1591,6 +1791,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that this participant did not respond to the match in the alloted time.
  Only applies to turn-based match participants.
@@ -1655,6 +1858,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the name to display for this participant. If the identity of the player is unknown,
  this will be a generic handle to describe the player.</p></div>
   <div class="jd-tagdata">
@@ -1689,6 +1895,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Loads the display name for this participant into the provided <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1729,6 +1938,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the URI of the hi-res image to display for this participant. If the identity of the
  player is unknown, this will be null. It may also be null if the player simply has no image.
  <p>
@@ -1765,6 +1977,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the URI of the icon-sized image to display for this participant. If the identity of
  the player is unknown, this will be the automatch avatar icon image for the player. It may
@@ -1804,6 +2019,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the ID of this participant. Note that this is only valid for use in the current
  multiplayer room or match: a participant will not have the same ID across multiple rooms or
  matches.</p></div>
@@ -1839,6 +2057,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> that this participant represents. Note that this may be null if
  the identity of the player is unknown. This occurs in automatching scenarios where some
@@ -1876,6 +2097,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantResult.html">ParticipantResult</a></code> associated with this participant, if any.
  Only applies to turn-based match participants.</p></div>
   <div class="jd-tagdata">
@@ -1910,6 +2134,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the status of this participant.
  <p>
@@ -1952,6 +2179,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the connected status of the participant. If true indicates that participant is in
  the connected set of the room. Only applies to room participants.</p></div>

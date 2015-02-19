@@ -16,7 +16,7 @@ Copyright (C) 2014 The Android Open Source Project
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
     android:insetLeft="2.5dp"
     android:insetRight="2.5dp">
-    <vector android:width="22dp"
+    <vector android:width="17dp"
             android:height="17dp"
             android:viewportWidth="48.0"
             android:viewportHeight="48.0">

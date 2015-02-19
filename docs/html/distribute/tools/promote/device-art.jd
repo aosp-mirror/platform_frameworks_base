@@ -1,13 +1,13 @@
 page.title=Device Art Generator
 page.image=/images/device-art-ex-crop.jpg
-page.metaDescription=Drag and drop screenshots of your app into real device artwork, for better looking promotional images and improved visual context.
+page.metaDescription=Drag and drop screenshots of your app into device artwork, for better looking promotional images and improved visual context.
 meta.tags="disttools, promoting, deviceart, marketing"
 page.tags="device, deviceart, nexus, assets"
 Xnonavpage=true
 
 @jd:body
 
-<p>The device art generator enables you to quickly wrap app screenshots in real device artwork. This provides better visual context for your app screenshots on your website or in other promotional materials</p>
+<p>The device art generator enables you to quickly wrap app screenshots in device artwork. This provides better visual context for your app screenshots on your website or in other promotional materials</p>
 
 <p class="note"><strong>Note</strong>: Do <em>not</em> use graphics created here in your 1024x500
 feature image or screenshots for your Google Play app listing.</p>
@@ -41,6 +41,12 @@ feature image or screenshots for your Google Play app listing.</p>
       <label for="output-glare">Screen Glare</label><br><br>
       <a class="button" id="rotate-button">Rotate</a>
     </p>
+    <p id="wear-customizations">
+      <input type="radio" id="output-square" name="output-wear" checked="checked" class="form-field-checkbutton">
+      <label for="output-square">Square</label><br>
+      <input type="radio" id="output-round" name="output-wear" class="form-field-checkbutton">
+      <label for="output-round">Round</label><br><br>
+    </p>
   </div>
   <div class="layout-content-col span-10">
     <!-- position:relative fixes an issue where dragging an image out of a inline-block container
@@ -52,7 +58,7 @@ feature image or screenshots for your Google Play app listing.</p>
 </div>
 
 <div class="unsupported-browser" style="display: none">
-  <p class="warning"><strong>Error:</strong> This page requires 
+  <p class="warning"><strong>Error:</strong> This page requires
     <span id="unsupported-browser-reason">certain features</span>, which your web browser
     doesn't support. To continue, navigate to this page on a supported web browser, such as
     <strong>Google Chrome</strong>.</p>
@@ -66,7 +72,7 @@ feature image or screenshots for your Google Play app listing.</p>
   }
 
   .device-list {
-    padding: 0;
+    padding: 1em 0 0 0;
     margin: 0;
   }
 
@@ -165,6 +171,10 @@ feature image or screenshots for your Google Play app listing.</p>
   // Global constants
   var MSG_INVALID_INPUT_IMAGE = 'Invalid screenshot provided. Screenshots must be PNG files '
       + 'matching the target device\'s screen aspect ratio in either portrait or landscape.';
+  var MSG_INVALID_WEAR_IMAGE = 'Invalid screenshot provided. Screenshots must be PNG files '
+      + 'matching the target device\'s screen aspect ratio.'
+      + ' Capture screenshots from a Wear emulator or device with '
+      + '<a href="http://developer.android.com/tools/debugging/debugging-studio.html#screenCap">Android Studio</a>.';
   var MSG_NO_INPUT_IMAGE = 'Drag a screenshot (in PNG format) from your desktop onto a '
       + 'target device above.'
   var MSG_GENERATING_IMAGE = 'Generating device art&hellip;';
@@ -187,6 +197,19 @@ feature image or screenshots for your Google Play app listing.</p>
       portSize: [1080,1920],
     },
     {
+      id: 'nexus_6',
+      title: 'Nexus 6',
+      url: 'http://www.google.com/nexus/6/',
+      physicalSize: 6,
+      physicalHeight: 6.27,
+      density: '560DPI',
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [489,327],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [327,489],
+      portSize: [1440, 2560],
+    },
+    {
       id: 'nexus_7',
       title: 'Nexus 7',
       url: 'http://www.google.com/nexus/7/',
@@ -201,6 +224,20 @@ feature image or screenshots for your Google Play app listing.</p>
       portSize: [800,1280]
     },
     {
+      id: 'nexus_9',
+      title: 'Nexus 9',
+      url: 'http://www.google.com/nexus/9/',
+      physicalSize: 9,
+      physicalHeight: 8.98,
+      actualResolution: [1536,2048],
+      density: 'XHDPI',
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [514,350],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [348,514],
+      portSize: [1536,2048],
+    },
+    {
       id: 'nexus_10',
       title: 'Nexus 10',
       url: 'http://www.google.com/nexus/10/',
@@ -212,19 +249,6 @@ feature image or screenshots for your Google Play app listing.</p>
       landOffset: [227,217],
       portRes: ['shadow', 'back', 'fore'],
       portOffset: [217,223],
-      portSize: [800,1280]
-    },
-    {
-      id: 'xoom',
-      title: 'Motorola XOOM',
-      url: 'http://www.google.com/phone/detail/motorola-xoom',
-      physicalSize: 10,
-      physicalHeight: 6.61,
-      density: 'MDPI',
-      landRes: ['shadow', 'back', 'fore'],
-      landOffset: [218,191],
-      portRes: ['shadow', 'back', 'fore'],
-      portOffset: [199,200],
       portSize: [800,1280],
       archived: true
     },
@@ -257,33 +281,46 @@ feature image or screenshots for your Google Play app listing.</p>
       archived: true
     },
     {
-      id: 'galaxy_nexus',
-      title: 'Galaxy Nexus',
-      url: 'http://www.android.com/devices/detail/galaxy-nexus',
-      physicalSize: 4.65,
-      physicalHeight: 5.33,
-      density: 'XHDPI',
-      landRes: ['shadow', 'back', 'fore'],
-      landOffset: [371,199],
-      portRes: ['shadow', 'back', 'fore'],
-      portOffset: [216,353],
-      portSize: [720,1280],
-      archived: true
+      id: 'wear',
+      title: 'Android Wear',
+      url: 'http://www.android.com/wear/',
+      physicalSize: 1.8,
+      physicalHeight: 1.8,
+      density: 'HDPI',
+      landRes: ['back'],
+      landOffset: [225,206],
+      portRes: ['back'],
+      portOffset: [200,214],
+      portSize: [320,320],
     },
     {
-      id: 'nexus_s',
-      title: 'Nexus S',
-      url: 'http://www.google.com/phone/detail/nexus-s',
-      physicalSize: 4.0,
-      physicalHeight: 4.88,
+      id: 'wear_square',
+      title: 'Android Wear Square',
+      url: 'http://www.android.com/wear/',
+      physicalSize: 1.8,
+      physicalHeight: 1.8,
       density: 'HDPI',
-      landRes: ['shadow', 'back', 'fore'],
-      landOffset: [247,135],
-      portRes: ['shadow', 'back', 'fore'],
-      portOffset: [134,247],
-      portSize: [480,800],
-      archived: true
-    }
+      landRes: ['back'],
+      landOffset: [225,206],
+      portRes: ['back'],
+      portOffset: [200,214],
+      portSize: [320,320],
+      hidden: true
+    },
+    {
+      id: 'wear_round',
+      title: 'Android Wear Round',
+      url: 'http://www.android.com/wear/',
+      physicalSize: 1.8,
+      physicalHeight: 1.8,
+      density: 'HDPI',
+      landRes: ['back'],
+      landOffset: [161,167],
+      portRes: ['back'],
+      portOffset: [128,134],
+      portSize: [320,320],
+      hidden: true
+    },
   ];
 
   DEVICES = DEVICES.sort(function(x, y) { return x.physicalSize - y.physicalSize; });
@@ -357,8 +394,13 @@ feature image or screenshots for your Google Play app listing.</p>
     $('#output').html(MSG_NO_INPUT_IMAGE);
 
     $('#frame-customizations').hide();
+    $('#wear-customizations').hide();
 
     $('#output-shadow, #output-glare').click(function() {
+      createFrame();
+    });
+
+    $('input[name="output-wear"]').change(function() {
       createFrame();
     });
 
@@ -366,11 +408,18 @@ feature image or screenshots for your Google Play app listing.</p>
     $.each(DEVICES, function() {
       var resolution = this.actualResolution || this.portSize;
       var scaleFactorText = '';
+      var deviceList = '.device-list.primary';
       if (resolution[0] != this.portSize[0]) {
         scaleFactorText = '<br>' + (100 * (this.portSize[0] / resolution[0])).toFixed(0) +
             '% size output';
       } else {
         scaleFactorText = '<br>&nbsp;';
+      }
+
+      if (this.archived) {
+        deviceList = '.device-list.archived';
+      } else if (this.hidden) {
+        deviceList = '.device-list.hidden';
       }
 
       $('<li>')
@@ -388,7 +437,7 @@ feature image or screenshots for your Google Play app listing.</p>
                   '<br>' +  this.physicalSize + '" @ ' + this.density +
                   '<br>' + (resolution[0] + 'x' + resolution[1]) + scaleFactorText))
           .data('deviceId', this.id)
-          .appendTo(this.archived ? '.device-list.archive' : '.device-list.primary');
+          .appendTo(deviceList)
     });
 
     // Set up "older devices" expando.
@@ -420,7 +469,11 @@ feature image or screenshots for your Google Play app listing.</p>
           evt.preventDefault();
           loadImageFromFileList(evt.dataTransfer.files, function(data) {
             if (data == null) {
-              $('#output').html(MSG_INVALID_INPUT_IMAGE);
+              if (g_currentDevice.id == 'wear') {
+                $('#output').html(MSG_INVALID_WEAR_IMAGE);
+              }else {
+                $('#output').html(MSG_INVALID_INPUT_IMAGE);
+              }
               return;
             }
             loadImageFromUri(data.uri, function(img) {
@@ -464,6 +517,14 @@ feature image or screenshots for your Google Play app listing.</p>
   function createFrame() {
     var port;
 
+    if (g_currentDevice.id == 'wear' || g_currentDevice.id == 'wear_square' || g_currentDevice.id == 'wear_round') {
+      if ($('#output-square').is(':checked')) {
+        g_currentDevice = getDeviceById('wear_square');
+      } else {
+        g_currentDevice = getDeviceById('wear_round');
+      }
+    }
+
     var aspect1 = g_currentImage.naturalWidth / g_currentImage.naturalHeight;
     var aspect2 = g_currentDevice.portSize[0] / g_currentDevice.portSize[1];
 
@@ -472,11 +533,18 @@ feature image or screenshots for your Google Play app listing.</p>
     } else if (aspect1 == 1 / aspect2) {
       port = false;
     } else {
-      alert('The screenshot must have an aspect ratio of ' +
+      if (g_currentDevice.id == 'wear_square' || g_currentDevice.id == 'wear_round') {
+        alert('The screenshot must have an aspect ratio of ' +
+          aspect2.toFixed(3) +
+          ' (ideally ' + g_currentDevice.portSize[0] + 'x' + g_currentDevice.portSize[1] + ').');
+        $('#output').html(MSG_INVALID_WEAR_IMAGE);
+      }else {
+        alert('The screenshot must have an aspect ratio of ' +
           aspect2.toFixed(3) + ' or ' + (1 / aspect2).toFixed(3) +
           ' (ideally ' + g_currentDevice.portSize[0] + 'x' + g_currentDevice.portSize[1] +
           ' or ' + g_currentDevice.portSize[1] + 'x' + g_currentDevice.portSize[0] + ').');
-      $('#output').html(MSG_INVALID_INPUT_IMAGE);
+        $('#output').html(MSG_INVALID_INPUT_IMAGE);
+      }
       return;
     }
 
@@ -511,9 +579,37 @@ feature image or screenshots for your Google Play app listing.</p>
         ctx.drawImage(resourceImages['shadow'], 0, 0);
       }
       ctx.drawImage(resourceImages['back'], 0, 0);
-      ctx.fillStyle = '#000';
-      ctx.fillRect(offset[0], offset[1], size[0], size[1]);
-      ctx.drawImage(g_currentImage, offset[0], offset[1], size[0], size[1]);
+
+      if (g_currentDevice.id == 'wear_round') {
+        var scratchCanvas = document.createElement('canvas');
+        scratchCanvas.width = width;
+        scratchCanvas.height = height;
+        var scratchCtx = scratchCanvas.getContext('2d');
+
+
+        //drawing code
+        scratchCtx.clearRect(offset[0], offset[1], scratchCanvas.width, scratchCanvas.height);
+
+        scratchCtx.globalCompositeOperation = 'source-over'; //default
+
+        scratchCtx.drawImage(g_currentImage, offset[0], offset[1], size[0], size[1]);
+
+        scratchCtx.fillStyle = '#fff'; //color doesn't matter, but we want full opacity
+        scratchCtx.globalCompositeOperation = 'destination-in';
+        scratchCtx.beginPath();
+        scratchCtx.arc(288, 294, size[0] / 2, 0, 2 * Math.PI, false);
+        scratchCtx.closePath();
+        scratchCtx.fill();
+
+        // After tinkering with the offset, the 1 in the x-position drew the image
+        // perfectly
+        ctx.drawImage(scratchCanvas, 1, 0);
+      } else {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(offset[0], offset[1], size[0], size[1]);
+        ctx.drawImage(g_currentImage, offset[0], offset[1], size[0], size[1]);
+      }
+
       if (resourceImages['fore'] && $('#output-glare').is(':checked')) {
         ctx.drawImage(resourceImages['fore'], 0, 0);
       }
@@ -560,7 +656,13 @@ feature image or screenshots for your Google Play app listing.</p>
               .attr('data-downloadurl', ['image/png', filename, imageUrl].join(':')))
           .appendTo($('#output').empty());
 
-      $('#frame-customizations').show();
+      if (g_currentDevice.id == 'wear' || g_currentDevice.id == 'wear_round' || g_currentDevice.id == 'wear_square') {
+        $('#wear-customizations').show();
+        $('#frame-customizations').hide();
+      } else {
+        $('#frame-customizations').show();
+        $('#wear-customizations').hide();
+      }
     }
   }
 

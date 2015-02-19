@@ -14,6 +14,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -212,15 +213,8 @@ public class VectorDrawable extends Drawable {
         mVectorState = new VectorDrawableState();
     }
 
-    private VectorDrawable(VectorDrawableState state, Resources res, Theme theme) {
-        if (theme != null && state.canApplyTheme()) {
-            // If we need to apply a theme, implicitly mutate.
-            mVectorState = new VectorDrawableState(state);
-            applyTheme(theme);
-        } else {
-            mVectorState = state;
-        }
-
+    private VectorDrawable(@NonNull VectorDrawableState state) {
+        mVectorState = state;
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 
@@ -231,6 +225,14 @@ public class VectorDrawable extends Drawable {
             mMutated = true;
         }
         return this;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
     }
 
     Object getTargetByName(String name) {
@@ -359,7 +361,7 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mVectorState != null && mVectorState.canApplyTheme();
+        return (mVectorState != null && mVectorState.canApplyTheme()) || super.canApplyTheme();
     }
 
     @Override
@@ -748,8 +750,8 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return super.canApplyTheme() || mThemeAttrs != null
-                    || (mVPathRenderer != null && mVPathRenderer.canApplyTheme());
+            return mThemeAttrs != null || (mVPathRenderer != null && mVPathRenderer.canApplyTheme())
+                    || super.canApplyTheme();
         }
 
         public VectorDrawableState() {
@@ -758,17 +760,12 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public Drawable newDrawable() {
-            return new VectorDrawable(this, null, null);
+            return new VectorDrawable(this);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new VectorDrawable(this, res, null);
-        }
-
-        @Override
-        public Drawable newDrawable(Resources res, Theme theme) {
-            return new VectorDrawable(this, res, theme);
+            return new VectorDrawable(this);
         }
 
         @Override

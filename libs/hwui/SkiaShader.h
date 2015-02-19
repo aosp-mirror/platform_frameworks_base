@@ -62,7 +62,8 @@ public:
         // This shader is unsupported. Skip it.
     }
     static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
+            GLuint* textureUnit, const Extensions& extensions,
+            const SkShader& shader) {
         // This shader is unsupported. Skip it.
     }
 

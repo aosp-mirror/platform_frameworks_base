@@ -1,0 +1,125 @@
+page.title=Addressing Common Issues
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ScreenShape">Detect the Shape of the Screen</a></li>
+  <li><a href="#PeekCards">Accomodate Peek Cards</a></li>
+  <li><a href="#RelativeMeasurements">Use Relative Measurements</a></li>
+</ol>
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}design/wear/watchfaces.html">Watch Faces for Android Wear</a></li>
+</ul>
+</div>
+</div>
+
+<p>Creating a custom watch face for Android Wear is substantially different from creating
+notifications and wearable-specific activities. This class shows you how to resolve some
+issues that you may encounter as you implement your first few watch faces.</p>
+
+
+
+<h2 id="ScreenShape">Detect the Shape of the Screen</h2>
+
+<p>Some Android Wear devices have square screens, while others have round screens. Devices with
+round screens can contain an inset (or "chin") at the bottom of the screen. Your watch face
+should adapt to and take advantage of the particular shape of the screen, as described in the
+<a href="{@docRoot}design/wear/watchfaces.html">design guidelines</a>.</p>
+
+<p>Android Wear lets your watch face determine the screen shape at runtime. To detect whether
+the screen is square or round, override the <code>onApplyWindowInsets()</code> method in the
+<code>CanvasWatchFaceService.Engine</code> class as follows:</p>
+
+<pre>
+private class Engine extends CanvasWatchFaceService.Engine {
+    boolean mIsRound;
+    int mChinSize;
+
+    &#64;Override
+    public void onApplyWindowInsets(WindowInsets insets) {
+        super.onApplyWindowInsets(insets);
+        mIsRound = insets.isRound();
+        mChinSize = insets.getSystemWindowInsetBottom();
+    }
+    ...
+}
+</pre>
+
+<p>To adapt your design when you draw your watch face, check the value of the
+<code>mIsRound</code> and <code>mChinSize</code> member variables.</p>
+
+
+
+<h2 id="PeekCards">Accomodate Peek Cards</h2>
+
+<div style="float:right;margin-left:30px;width:340px">
+<img src="{@docRoot}training/wearables/watch-faces/images/AnalogNoCard.png" alt=""
+     width="160" height="145" style="margin-right:7px"/>
+<img src="{@docRoot}training/wearables/watch-faces/images/AnalogWithCard.png" alt=""
+     width="160" height="145"/>
+<p class="img-caption"><strong>Figure 1.</strong> Some analog watch faces require adjustments
+when notification cards appear.</p>
+</div>
+
+<p>When users receive a notification, the notification card may cover a significant portion of the
+screen, depending on the
+<a href="{@docRoot}training/wearables/watch-faces/drawing.html#SystemUI">system UI style</a>. Your
+watch face should adapt to these situations by ensuring that users can still tell the time while
+the notification card is present.</p>
+
+<p>Analog watch faces can make adjustments when a notification card is present, like scaling
+down the watch face to fit inside the portion of the screen not covered by the peek card. Digital
+watch faces that display the time in the area of the screen not covered by peek cards do not
+usually require adjustments. To determine the free space above the peek card so you can adapt
+your watch face, use the <code>WatchFaceService.getPeekCardPosition()</code> method.</p>
+
+<p>In ambient mode, peek cards have a transparent background. If your watch face contains details
+near the card in ambient mode, consider drawing a black rectangle over them to ensure that users
+can read the contents of the card.</p>
+
+
+
+<h2 id="SystemIndicators">Configure the System Indicators</h2>
+
+<div style="width:200px;float:right;margin-left:10px">
+<img src="{@docRoot}training/wearables/watch-faces/images/Indicators_Cropped.png" alt=""
+     width="200" height="195"/>
+<p class="img-caption" style="margin-left:25px;margin-top:-25px">
+<strong>Figure 2.</strong> The status bar.</p>
+</div>
+
+<p>To ensure that the system indicators remain visible, you can configure their position on the
+screen and whether they need background protection when you create a <code>WatchFaceStyle</code>
+instance:</p>
+
+<ul>
+<li>To set the position of the status bar, use the <code>setStatusBarGravity()</code> method.</li>
+<li>To set the position of the hotword, use the <code>setHotwordIndicatorGravity()</code>
+method.</li>
+<li>To protect the status bar and hotword with a semi-transparent gray background, use the
+<code>setViewProtection()</code> method. This is usually necessary if your watch face has a
+light background, since the system indicators are white.</li>
+</ul>
+
+<p>For more information about the system indicators, see <a
+href="{@docRoot}training/wearables/watch-faces/drawing.html#SystemUI">Configure the System UI</a>
+and read the <a href="{@docRoot}design/wear/watchfaces.html">design guidelines</a>.</p>
+
+
+
+<h2 id="RelativeMeasurements">Use Relative Measurements</h2>
+
+<p>Android Wear devices from different manufacturers feature screens with a variety of sizes and
+resolutions. Your watch face should adapt to these variations by using relative measurements
+instead of absolute pixel values.</p>
+
+<p>When you draw your watch face, obtain the size of the canvas with the {@link
+android.graphics.Canvas#getWidth Canvas.getWidth()} and {@link
+android.graphics.Canvas#getHeight Canvas.getHeight()} methods and set the positions of your
+graphic elements using values that are some fraction of the detected screen size. If you resize
+the elements of your watch face in response to a peek card, use values that are some fraction
+of the remaining space above the card to redraw your watch face.</p>

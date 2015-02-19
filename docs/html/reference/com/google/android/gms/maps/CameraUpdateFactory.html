@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">CameraUpdateFactory</li>
       </ul>
     </div>
@@ -772,6 +841,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -904,7 +976,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#newCameraPosition(com.google.android.gms.maps.model.CameraPosition)">newCameraPosition</a></span>(<a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a> cameraPosition)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the camera to a specified <code><a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the camera to a specified <code><a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -922,8 +999,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#newLatLng(com.google.android.gms.maps.model.LatLng)">newLatLng</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> latLng)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the center of the screen to a latitude and
- longitude specified by a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> object.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the center of the screen to a latitude and
+ longitude specified by a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> object.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -941,8 +1023,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#newLatLngBounds(com.google.android.gms.maps.model.LatLngBounds, int)">newLatLngBounds</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a> bounds, int padding)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that transforms the camera such that the specified
- latitude/longitude bounds are centered on screen at the greatest possible zoom level.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that transforms the camera such that the specified
+ latitude/longitude bounds are centered on screen at the greatest possible zoom level.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -960,9 +1047,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#newLatLngBounds(com.google.android.gms.maps.model.LatLngBounds, int, int, int)">newLatLngBounds</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a> bounds, int width, int height, int padding)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that transforms the camera such that the specified
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that transforms the camera such that the specified
  latitude/longitude bounds are centered on screen within a bounding box of specified
- dimensions at the greatest possible zoom level.</div>
+ dimensions at the greatest possible zoom level.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -980,8 +1072,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#newLatLngZoom(com.google.android.gms.maps.model.LatLng, float)">newLatLngZoom</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> latLng, float zoom)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the center of the screen to a latitude and
- longitude specified by a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> object, and moves to the given zoom level.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the center of the screen to a latitude and
+ longitude specified by a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> object, and moves to the given zoom level.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -999,8 +1096,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#scrollBy(float, float)">scrollBy</a></span>(float xPixel, float yPixel)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that scrolls the camera over the map, shifting the center of
- view by the specified number of pixels in the x and y directions.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that scrolls the camera over the map, shifting the center of
+ view by the specified number of pixels in the x and y directions.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1018,7 +1120,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#zoomBy(float, android.graphics.Point)">zoomBy</a></span>(float amount, Point focus)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that shifts the zoom level of the current camera viewpoint.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that shifts the zoom level of the current camera viewpoint.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1036,7 +1143,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#zoomBy(float)">zoomBy</a></span>(float amount)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that shifts the zoom level of the current camera viewpoint.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that shifts the zoom level of the current camera viewpoint.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1054,8 +1166,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#zoomIn()">zoomIn</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that zooms in on the map by moving the viewpoint's height
- closer to the Earth's surface.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that zooms in on the map by moving the viewpoint's height
+ closer to the Earth's surface.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1073,8 +1190,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#zoomOut()">zoomOut</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that zooms out on the map by moving the viewpoint's height
- farther away from the Earth's surface.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that zooms out on the map by moving the viewpoint's height
+ farther away from the Earth's surface.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1092,7 +1214,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#zoomTo(float)">zoomTo</a></span>(float zoom)</nobr>
         
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the camera viewpoint to a particular zoom level.</div>
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the camera viewpoint to a particular zoom level.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1378,6 +1505,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the camera to a specified <code><a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a></code>.
  In effect, this creates a transformation from the <code><a href="/reference/com/google/android/gms/maps/model/CameraPosition.html">CameraPosition</a></code> object's latitude,
  longitude, zoom level, bearing and tilt.</p></div>
@@ -1413,6 +1543,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the center of the screen to a latitude and
  longitude specified by a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> object. This centers the camera on the <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>
@@ -1458,6 +1591,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that transforms the camera such that the specified
  latitude/longitude bounds are centered on screen at the greatest possible zoom level. You can
@@ -1518,6 +1654,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that transforms the camera such that the specified
  latitude/longitude bounds are centered on screen within a bounding box of specified
@@ -1582,6 +1721,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the center of the screen to a latitude and
  longitude specified by a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code> object, and moves to the given zoom level.</p></div>
   <div class="jd-tagdata">
@@ -1631,6 +1773,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that scrolls the camera over the map, shifting the center of
  view by the specified number of pixels in the x and y directions.
@@ -1695,6 +1840,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that shifts the zoom level of the current camera viewpoint.
  <p>
  A point specified by focus will remain fixed (i.e., it corresponds to the same lat/long both
@@ -1756,6 +1904,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that shifts the zoom level of the current camera viewpoint.
  <p>
  This method is different to <code><a href="/reference/com/google/android/gms/maps/CameraUpdateFactory.html#zoomTo(float)">zoomTo(float)</a></code> in that zoom is relative to the current
@@ -1804,6 +1955,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that zooms in on the map by moving the viewpoint's height
  closer to the Earth's surface. The zoom increment is 1.0.</p></div>
   <div class="jd-tagdata">
@@ -1839,6 +1993,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that zooms out on the map by moving the viewpoint's height
  farther away from the Earth's surface. The zoom increment is -1.0.</p></div>
   <div class="jd-tagdata">
@@ -1873,6 +2030,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/com/google/android/gms/maps/CameraUpdate.html">CameraUpdate</a></code> that moves the camera viewpoint to a particular zoom level.</p></div>
   <div class="jd-tagdata">

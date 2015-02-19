@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"سبھی پرنٹرز…"</string>
     <string name="print_dialog" msgid="32628687461331979">"پرنٹ ڈائلاگ"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"صفحہ <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> از <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"خلاصہ، کاپیاں <xliff:g id="COPIES">%1$s</xliff:g>، کاغذ کا سائز <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"پھیلانے والا ہینڈل"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"سکیڑنے والا ہینڈل"</string>
-    <string name="print_button" msgid="645164566271246268">"پرنٹ کریں"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"‏PDF میں محفوظ کریں"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"پرنٹ کے اختیارات پھیلا دیے گئے"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"پرنٹ کے اختیارات سکیڑ دیے گئے"</string>
     <string name="search" msgid="5421724265322228497">"تلاش کریں"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"سبھی پرنٹرز"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"سروس شامل کریں"</string>

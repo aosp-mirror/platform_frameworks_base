@@ -47,7 +47,7 @@ interface ISms {
      * @param subId the subId id.
      * @return list of SmsRawData of all sms on ICC
      */
-    List<SmsRawData> getAllMessagesFromIccEfForSubscriber(in long subId, String callingPkg);
+    List<SmsRawData> getAllMessagesFromIccEfForSubscriber(in int subId, String callingPkg);
 
     /**
      * Update the specified message on the ICC.
@@ -75,7 +75,7 @@ interface ISms {
      * @return success or not
      *
      */
-     boolean updateMessageOnIccEfForSubscriber(in long subId, String callingPkg,
+     boolean updateMessageOnIccEfForSubscriber(in int subId, String callingPkg,
              int messageIndex, int newStatus, in byte[] pdu);
 
     /**
@@ -99,7 +99,7 @@ interface ISms {
      * @return success or not
      *
      */
-    boolean copyMessageToIccEfForSubscriber(in long subId, String callingPkg, int status,
+    boolean copyMessageToIccEfForSubscriber(in int subId, String callingPkg, int status,
             in byte[] pdu, in byte[] smsc);
 
     /**
@@ -152,7 +152,7 @@ interface ISms {
      *  raw pdu of the status report is in the extended data ("pdu").
      * @param subId the subId id.
      */
-    void sendDataForSubscriber(long subId, String callingPkg, in String destAddr,
+    void sendDataForSubscriber(int subId, String callingPkg, in String destAddr,
             in String scAddr, in int destPort, in byte[] data, in PendingIntent sentIntent,
             in PendingIntent deliveryIntent);
 
@@ -206,7 +206,7 @@ interface ISms {
      *  raw pdu of the status report is in the extended data ("pdu").
      * @param subId the subId on which the SMS has to be sent.
      */
-    void sendTextForSubscriber(in long subId, String callingPkg, in String destAddr,
+    void sendTextForSubscriber(in int subId, String callingPkg, in String destAddr,
             in String scAddr, in String text, in PendingIntent sentIntent,
             in PendingIntent deliveryIntent);
 
@@ -222,17 +222,6 @@ interface ISms {
      *  the same time an SMS received from radio is acknowledged back.
      */
     void injectSmsPdu(in byte[] pdu, String format, in PendingIntent receivedIntent);
-
-    /**
-     * Update the status of a pending (send-by-IP) SMS message and resend by PSTN if necessary.
-     * This outbound message was handled by the carrier app. If the carrier app fails to send
-     * this message, it would be resent by PSTN.
-     *
-     * @param messageRef the reference number of the SMS message.
-     * @param success True if and only if the message was sent successfully. If its value is
-     *  false, this message should be resent via PSTN.
-     */
-    void updateSmsSendStatus(int messageRef, boolean success);
 
     /**
      * Send a multi-part text based SMS.
@@ -283,88 +272,109 @@ interface ISms {
      *   extended data ("pdu").
      * @param subId the subId on which the SMS has to be sent.
      */
-    void sendMultipartTextForSubscriber(in long subId, String callingPkg,
+    void sendMultipartTextForSubscriber(in int subId, String callingPkg,
             in String destinationAddress, in String scAddress,
             in List<String> parts, in List<PendingIntent> sentIntents,
             in List<PendingIntent> deliveryIntents);
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcast(int)
+     * @see #disableCellBroadcast(int, int)
      */
-    boolean enableCellBroadcast(int messageIdentifier);
+    boolean enableCellBroadcast(int messageIdentifier, int ranType);
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param subId for which the broadcast has to be enabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcast(int)
+     * @see #disableCellBroadcast(int, int)
      */
-    boolean enableCellBroadcastForSubscriber(in long subId, int messageIdentifier);
+    boolean enableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType);
 
     /**
      * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #enableCellBroadcast(int)
+     * @see #enableCellBroadcast(int, int)
      */
-    boolean disableCellBroadcast(int messageIdentifier);
+    boolean disableCellBroadcast(int messageIdentifier, int ranType);
 
     /**
      * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param subId for which the broadcast has to be disabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #enableCellBroadcast(int)
+     * @see #enableCellBroadcast(int, int)
      */
-    boolean disableCellBroadcastForSubscriber(in long subId, int messageIdentifier);
+    boolean disableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType);
 
     /*
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
-     * a message identifier range, they must both disable it for the device
-     * to stop receiving those messages.
+     * message identifier range and RAN type. The RAN type specify this message
+     * ID range belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different
+     * clients enable a message identifier range, they must both disable it for
+     * the device to stop receiving those messages.
      *
      * @param startMessageId first message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcastRange(int, int)
+     * @see #disableCellBroadcastRange(int, int, int)
      */
-    boolean enableCellBroadcastRange(int startMessageId, int endMessageId);
+    boolean enableCellBroadcastRange(int startMessageId, int endMessageId, int ranType);
 
     /*
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
+     * message identifier range and RAN type. The RAN type specify this message ID range
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
      * a message identifier range, they must both disable it for the device
      * to stop receiving those messages.
      *
@@ -373,15 +383,20 @@ interface ISms {
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param subId for which the broadcast has to be enabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcastRange(int, int)
+     * @see #disableCellBroadcastRange(int, int, int)
      */
-    boolean enableCellBroadcastRangeForSubscriber(long subId, int startMessageId, int endMessageId);
+    boolean enableCellBroadcastRangeForSubscriber(int subId, int startMessageId, int endMessageId,
+            int ranType);
 
     /**
      * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
+     * message identifier range and RAN type. The RAN type specify this message ID range
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
      * a message identifier range, they must both disable it for the device
      * to stop receiving those messages.
      *
@@ -389,29 +404,36 @@ interface ISms {
      *   C.R1001-G (3GPP2)
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
-     * @return true if successful, false otherwise
-     *
-     * @see #enableCellBroadcastRange(int, int)
-     */
-    boolean disableCellBroadcastRange(int startMessageId, int endMessageId);
-
-    /**
-     * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
-     * a message identifier range, they must both disable it for the device
-     * to stop receiving those messages.
-     *
-     * @param startMessageId first message identifier as specified in TS 23.041 (3GPP) or
-     *   C.R1001-G (3GPP2)
-     * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
-     *   C.R1001-G (3GPP2)
-     * @param subId for which the broadcast has to be disabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
      * @see #enableCellBroadcastRange(int, int, int)
      */
-    boolean disableCellBroadcastRangeForSubscriber(long subId, int startMessageId,
-            int endMessageId);
+    boolean disableCellBroadcastRange(int startMessageId, int endMessageId, int ranType);
+
+    /**
+     * Disable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier range and RAN type. The RAN type specify this message ID range
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
+     * a message identifier range, they must both disable it for the device
+     * to stop receiving those messages.
+     *
+     * @param startMessageId first message identifier as specified in TS 23.041 (3GPP) or
+     *   C.R1001-G (3GPP2)
+     * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
+     *   C.R1001-G (3GPP2)
+     * @param subId for which the broadcast has to be disabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
+     * @return true if successful, false otherwise
+     *
+     * @see #enableCellBroadcastRange(int, int, int, int)
+     */
+    boolean disableCellBroadcastRangeForSubscriber(int subId, int startMessageId,
+            int endMessageId, int ranType);
 
     /**
      * Returns the premium SMS send permission for the specified package.
@@ -423,7 +445,7 @@ interface ISms {
      * Returns the premium SMS send permission for the specified package.
      * Requires system permission.
      */
-    int getPremiumSmsPermissionForSubscriber(long subId, String packageName);
+    int getPremiumSmsPermissionForSubscriber(int subId, String packageName);
 
     /**
      * Set the SMS send permission for the specified package.
@@ -431,15 +453,11 @@ interface ISms {
      */
     void setPremiumSmsPermission(String packageName, int permission);
 
-    /**
-     * Set the SMS send permission for the specified package.
-     * Requires system permission.
-     */
      /**
      * Set the SMS send permission for the specified package.
      * Requires system permission.
      */
-    void setPremiumSmsPermissionForSubscriber(long subId, String packageName, int permission);
+    void setPremiumSmsPermissionForSubscriber(int subId, String packageName, int permission);
 
     /**
      * SMS over IMS is supported if IMS is registered and SMS is supported
@@ -459,13 +477,21 @@ interface ISms {
      *
      * @see #getImsSmsFormat()
      */
-    boolean isImsSmsSupportedForSubscriber(long subId);
+    boolean isImsSmsSupportedForSubscriber(int subId);
+
+    /**
+     * User needs to pick SIM for SMS if multiple SIMs present and if current subId passed in is not
+     * active/valid.
+     * @param subId current subId for sending SMS
+     * @return true if SIM for SMS sending needs to be chosen
+     */
+    boolean isSmsSimPickActivityNeeded(int subId);
 
     /*
      * get user prefered SMS subId
      * @return subId id
      */
-    long getPreferredSmsSubscription();
+    int getPreferredSmsSubscription();
 
     /**
      * Gets SMS format supported on IMS.  SMS over IMS format is
@@ -489,7 +515,7 @@ interface ISms {
      *
      * @see #isImsSmsSupported()
      */
-    String getImsSmsFormatForSubscriber(long subId);
+    String getImsSmsFormatForSubscriber(int subId);
 
     /*
      * Get SMS prompt property,  enabled or not
@@ -524,7 +550,7 @@ interface ISms {
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended data ("pdu").
      */
-    void sendStoredText(long subId, String callingPkg, in Uri messageUri, String scAddress,
+    void sendStoredText(int subId, String callingPkg, in Uri messageUri, String scAddress,
             in PendingIntent sentIntent, in PendingIntent deliveryIntent);
 
     /**
@@ -560,7 +586,7 @@ interface ISms {
      *   to the recipient.  The raw pdu of the status report is in the
      *   extended data ("pdu").
      */
-    void sendStoredMultipartText(long subId, String callingPkg, in Uri messageUri,
+    void sendStoredMultipartText(int subId, String callingPkg, in Uri messageUri,
                 String scAddress, in List<PendingIntent> sentIntents,
                 in List<PendingIntent> deliveryIntents);
 }

@@ -298,162 +298,75 @@
        <item>@drawable/quickcontact_badge_overlay_pressed_light</item>
 
        <!-- Material assets -->
-       <item>@drawable/ab_share_pack_mtrl_alpha</item>
-       <item>@drawable/ab_solid_shadow_mtrl_alpha</item>
-       <item>@drawable/btn_cab_done_mtrl_alpha</item>
-       <item>@drawable/btn_check_to_off_mtrl_000</item>
-       <item>@drawable/btn_check_to_off_mtrl_001</item>
-       <item>@drawable/btn_check_to_off_mtrl_002</item>
-       <item>@drawable/btn_check_to_off_mtrl_003</item>
-       <item>@drawable/btn_check_to_off_mtrl_004</item>
-       <item>@drawable/btn_check_to_off_mtrl_005</item>
-       <item>@drawable/btn_check_to_off_mtrl_006</item>
-       <item>@drawable/btn_check_to_off_mtrl_007</item>
-       <item>@drawable/btn_check_to_off_mtrl_008</item>
-       <item>@drawable/btn_check_to_off_mtrl_009</item>
-       <item>@drawable/btn_check_to_off_mtrl_010</item>
-       <item>@drawable/btn_check_to_off_mtrl_011</item>
-       <item>@drawable/btn_check_to_off_mtrl_012</item>
-       <item>@drawable/btn_check_to_off_mtrl_013</item>
-       <item>@drawable/btn_check_to_off_mtrl_014</item>
-       <item>@drawable/btn_check_to_off_mtrl_015</item>
-       <item>@drawable/btn_check_to_on_mtrl_000</item>
-       <item>@drawable/btn_check_to_on_mtrl_001</item>
-       <item>@drawable/btn_check_to_on_mtrl_002</item>
-       <item>@drawable/btn_check_to_on_mtrl_003</item>
-       <item>@drawable/btn_check_to_on_mtrl_004</item>
-       <item>@drawable/btn_check_to_on_mtrl_005</item>
-       <item>@drawable/btn_check_to_on_mtrl_006</item>
-       <item>@drawable/btn_check_to_on_mtrl_007</item>
-       <item>@drawable/btn_check_to_on_mtrl_008</item>
-       <item>@drawable/btn_check_to_on_mtrl_009</item>
-       <item>@drawable/btn_check_to_on_mtrl_010</item>
-       <item>@drawable/btn_check_to_on_mtrl_011</item>
-       <item>@drawable/btn_check_to_on_mtrl_012</item>
-       <item>@drawable/btn_check_to_on_mtrl_013</item>
-       <item>@drawable/btn_check_to_on_mtrl_014</item>
-       <item>@drawable/btn_check_to_on_mtrl_015</item>
-       <item>@drawable/btn_radio_to_off_mtrl_000</item>
-       <item>@drawable/btn_radio_to_off_mtrl_001</item>
-       <item>@drawable/btn_radio_to_off_mtrl_002</item>
-       <item>@drawable/btn_radio_to_off_mtrl_003</item>
-       <item>@drawable/btn_radio_to_off_mtrl_004</item>
-       <item>@drawable/btn_radio_to_off_mtrl_005</item>
-       <item>@drawable/btn_radio_to_off_mtrl_006</item>
-       <item>@drawable/btn_radio_to_off_mtrl_007</item>
-       <item>@drawable/btn_radio_to_off_mtrl_008</item>
-       <item>@drawable/btn_radio_to_off_mtrl_009</item>
-       <item>@drawable/btn_radio_to_off_mtrl_010</item>
-       <item>@drawable/btn_radio_to_off_mtrl_011</item>
-       <item>@drawable/btn_radio_to_off_mtrl_012</item>
-       <item>@drawable/btn_radio_to_off_mtrl_013</item>
-       <item>@drawable/btn_radio_to_off_mtrl_014</item>
-       <item>@drawable/btn_radio_to_off_mtrl_015</item>
-       <item>@drawable/btn_radio_to_on_mtrl_000</item>
-       <item>@drawable/btn_radio_to_on_mtrl_001</item>
-       <item>@drawable/btn_radio_to_on_mtrl_002</item>
-       <item>@drawable/btn_radio_to_on_mtrl_003</item>
-       <item>@drawable/btn_radio_to_on_mtrl_004</item>
-       <item>@drawable/btn_radio_to_on_mtrl_005</item>
-       <item>@drawable/btn_radio_to_on_mtrl_006</item>
-       <item>@drawable/btn_radio_to_on_mtrl_007</item>
-       <item>@drawable/btn_radio_to_on_mtrl_008</item>
-       <item>@drawable/btn_radio_to_on_mtrl_009</item>
-       <item>@drawable/btn_radio_to_on_mtrl_010</item>
-       <item>@drawable/btn_radio_to_on_mtrl_011</item>
-       <item>@drawable/btn_radio_to_on_mtrl_012</item>
-       <item>@drawable/btn_radio_to_on_mtrl_013</item>
-       <item>@drawable/btn_radio_to_on_mtrl_014</item>
-       <item>@drawable/btn_radio_to_on_mtrl_015</item>
-       <item>@drawable/btn_rating_star_off_mtrl_alpha</item>
-       <item>@drawable/btn_rating_star_on_mtrl_alpha</item>
-       <item>@drawable/btn_star_mtrl_alpha</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00001</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00002</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00003</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00004</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00005</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00006</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00007</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00008</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00009</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00010</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00011</item>
-       <item>@drawable/btn_switch_to_off_mtrl_00012</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00001</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00002</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00003</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00004</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00005</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00006</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00007</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00008</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00009</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00010</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00011</item>
-       <item>@drawable/btn_switch_to_on_mtrl_00012</item>
-       <item>@drawable/btn_toggle_indicator_mtrl_alpha</item>
-       <item>@drawable/expander_close_mtrl_alpha</item>
-       <item>@drawable/expander_open_mtrl_alpha</item>
-       <item>@drawable/fastscroll_thumb_mtrl_alpha</item>
-       <item>@drawable/fastscroll_track_mtrl_alpha</item>
+       <item>@drawable/ab_share_pack_material</item>
+       <item>@drawable/ab_solid_shadow_material</item>
+       <item>@drawable/activated_background_material</item>
+       <item>@drawable/btn_borderless_material</item>
+       <item>@drawable/btn_cab_done_material</item>
+       <item>@drawable/btn_check_material_anim</item>
+       <item>@drawable/btn_default_material</item>
+       <item>@drawable/btn_radio_material_anim</item>
+       <item>@drawable/btn_star_material</item>
+       <item>@drawable/btn_toggle_material</item>
+       <item>@drawable/cab_background_bottom_material</item>
+       <item>@drawable/cab_background_top_material</item>
+       <item>@drawable/dialog_background_material</item>
+       <item>@drawable/dialog_background_shadow_material</item>
+       <item>@drawable/edit_text_material</item>
+       <item>@drawable/expander_group_material</item>
+       <item>@drawable/fastscroll_label_left_material</item>
+       <item>@drawable/fastscroll_label_right_material</item>
+       <item>@drawable/fastscroll_thumb_material</item>
+       <item>@drawable/fastscroll_track_material</item>
        <item>@drawable/ic_ab_back_material</item>
-       <item>@drawable/ic_cab_done_mtrl_alpha</item>
-       <item>@drawable/ic_clear_mtrl_alpha</item>
-       <item>@drawable/ic_commit_search_api_mtrl_alpha</item>
+       <item>@drawable/ic_clear_material</item>
+       <item>@drawable/ic_commit_search_api_material</item>
        <item>@drawable/ic_dialog_alert_material</item>
-       <item>@drawable/ic_find_next_mtrl_alpha</item>
-       <item>@drawable/ic_find_previous_mtrl_alpha</item>
+       <item>@drawable/ic_find_next_material</item>
+       <item>@drawable/ic_find_previous_material</item>
        <item>@drawable/ic_go_search_api_material</item>
-       <item>@drawable/ic_media_route_disabled_mtrl_alpha</item>
-       <item>@drawable/ic_media_route_off_mtrl_alpha</item>
-       <item>@drawable/ic_media_route_on_0_mtrl_alpha</item>
-       <item>@drawable/ic_media_route_on_1_mtrl_alpha</item>
-       <item>@drawable/ic_media_route_on_2_mtrl_alpha</item>
-       <item>@drawable/ic_media_route_on_mtrl_alpha</item>
+       <item>@drawable/ic_media_route_connecting_material</item>
+       <item>@drawable/ic_media_route_material</item>
        <item>@drawable/ic_menu_copy_material</item>
        <item>@drawable/ic_menu_cut_material</item>
-       <item>@drawable/ic_menu_find_mtrl_alpha</item>
+       <item>@drawable/ic_menu_find_material</item>
        <item>@drawable/ic_menu_moreoverflow_material</item>
        <item>@drawable/ic_menu_paste_material</item>
-       <item>@drawable/ic_menu_search_mtrl_alpha</item>
+       <item>@drawable/ic_menu_search_material</item>
        <item>@drawable/ic_menu_selectall_material</item>
        <item>@drawable/ic_menu_share_material</item>
        <item>@drawable/ic_search_api_material</item>
        <item>@drawable/ic_voice_search_api_material</item>
-       <item>@drawable/list_divider_mtrl_alpha</item>
-       <item>@drawable/list_section_divider_mtrl_alpha</item>
-       <item>@drawable/popup_background_mtrl_mult</item>
-       <item>@drawable/progress_mtrl_alpha</item>
-       <item>@drawable/scrollbar_handle_mtrl_alpha</item>
-       <item>@drawable/scrubber_control_from_pressed_mtrl_000</item>
-       <item>@drawable/scrubber_control_from_pressed_mtrl_001</item>
-       <item>@drawable/scrubber_control_from_pressed_mtrl_002</item>
-       <item>@drawable/scrubber_control_from_pressed_mtrl_003</item>
-       <item>@drawable/scrubber_control_from_pressed_mtrl_004</item>
-       <item>@drawable/scrubber_control_from_pressed_mtrl_005</item>
-       <item>@drawable/scrubber_control_off_pressed_mtrl_alpha</item>
-       <item>@drawable/scrubber_control_off_mtrl_alpha</item>
-       <item>@drawable/scrubber_control_on_pressed_mtrl_alpha</item>
-       <item>@drawable/scrubber_control_on_mtrl_alpha</item>
-       <item>@drawable/scrubber_control_to_pressed_mtrl_000</item>
-       <item>@drawable/scrubber_control_to_pressed_mtrl_001</item>
-       <item>@drawable/scrubber_control_to_pressed_mtrl_002</item>
-       <item>@drawable/scrubber_control_to_pressed_mtrl_003</item>
-       <item>@drawable/scrubber_control_to_pressed_mtrl_004</item>
-       <item>@drawable/scrubber_control_to_pressed_mtrl_005</item>
-       <item>@drawable/scrubber_primary_mtrl_alpha</item>
-       <item>@drawable/scrubber_track_mtrl_alpha</item>
-       <item>@drawable/spinner_mtrl_am_alpha</item>
-       <item>@drawable/switch_track_mtrl_alpha</item>
-       <item>@drawable/text_cursor_mtrl_alpha</item>
-       <item>@drawable/textfield_activated_mtrl_alpha</item>
-       <item>@drawable/textfield_default_mtrl_alpha</item>
-       <item>@drawable/textfield_search_activated_mtrl_alpha</item>
-       <item>@drawable/textfield_search_default_mtrl_alpha</item>
-       <item>@drawable/text_select_handle_left_mtrl_alpha</item>
-       <item>@drawable/text_select_handle_middle_mtrl_alpha</item>
-       <item>@drawable/text_select_handle_right_mtrl_alpha</item>
+       <item>@drawable/item_background_borderless_material</item>
+       <item>@drawable/item_background_material</item>
+       <item>@drawable/list_divider_material</item>
+       <item>@drawable/list_section_divider_material</item>
+       <item>@drawable/notification_material_action_background</item>
+       <item>@drawable/notification_material_media_action_background</item>
+       <item>@drawable/popup_background_material</item>
+       <item>@drawable/progress_horizontal_material</item>
+       <item>@drawable/progress_indeterminate_horizontal_material</item>
+       <item>@drawable/progress_large_material</item>
+       <item>@drawable/progress_medium_material</item>
+       <item>@drawable/progress_small_material</item>
+       <item>@drawable/ratingbar_full_empty_material</item>
+       <item>@drawable/ratingbar_full_filled_material</item>
+       <item>@drawable/ratingbar_full_material</item>
+       <item>@drawable/scrollbar_handle_material</item>
+       <item>@drawable/scrubber_control_material_anim</item>
+       <item>@drawable/scrubber_control_selector_material</item>
+       <item>@drawable/scrubber_progress_horizontal_material</item>
+       <item>@drawable/spinner_background_material</item>
+       <item>@drawable/spinner_textfield_background_material</item>
+       <item>@drawable/switch_thumb_material_anim</item>
+       <item>@drawable/switch_track_material</item>
+       <item>@drawable/tab_indicator_material</item>
+       <item>@drawable/text_cursor_material</item>
+       <item>@drawable/textfield_search_material</item>
+       <item>@drawable/text_select_handle_left_material</item>
+       <item>@drawable/text_select_handle_middle_material</item>
+       <item>@drawable/text_select_handle_right_material</item>
+       <item>@drawable/ic_account_circle</item>
     </array>
 
     <!-- Do not translate. These are all of the color state list resources that should be
@@ -527,5 +440,14 @@
         <item>中文 (简体)</item>
         <item>中文 (繁體)</item>
     </string-array>
+
+    <array name="sim_colors">
+        <item>@color/Teal_700</item>
+        <item>@color/Blue_700</item>
+        <item>@color/Indigo_700</item>
+        <item>@color/Purple_700</item>
+        <item>@color/Pink_700</item>
+        <item>@color/Red_700</item>
+    </array>
 
 </resources>

@@ -66,7 +66,7 @@ div.button-row input {
 var APP_LANGS = ['it','pt-br','pt-pt','nl','ko','ja','fr','es','es-419','en','de'];
 
 // variables for creating 'try it out' demo button
-var imagePath = "{@docRoot}images/brand/"
+var imagePath = "https://developer.android.com/images/brand/"
 var linkStart = "<a href=\"https://play.google.com/store/";
 var imageStart = "\">\n"
         + "  <img alt=\"";
@@ -99,7 +99,7 @@ function buildButton(form) {
     $("#button-preview").html(linkStart + "apps/details?id=" + packageName
             + imageStart + altText + imageSrc
             + selectedValue + imageEnd);
-            
+
     // Send the event to Analytics
     ga('send', 'event', 'Distribute', 'Create Google Play Badge', 'Package ' + selectedValue);
   } else if (form["publisher"].value != "Example, Inc.") {
@@ -111,7 +111,7 @@ function buildButton(form) {
     $("#button-preview").html(linkStart + "search?q=pub:" + publisherName
             + imageStart + altText + imageSrc
             + selectedValue + imageEnd);
-   
+
     // Send the event to Analytics
     ga('send', 'event', 'Distribute', 'Create Google Play Badge', 'Publisher ' + selectedValue);
   } else {
@@ -159,7 +159,7 @@ function clearLabel(id, example) {
 /** Switch the badge urls for selected language */
 function changeBadgeLang() {
   var lang = $('#locale option:selected').val();
-  
+
   // check if we have the 'app' badge for this lang and show notice if not
   $("div.button-row.error").remove();  // remove any existing instance of error message
   if ($.inArray(lang,APP_LANGS) == -1) {
@@ -173,7 +173,7 @@ function changeBadgeLang() {
   } else {
     $("div.button-row.app").show(); // show the 'app' badge row
   }
-  
+
   $('.button-row img').each(function() {
     var id = $(this).parent().attr('for');
     var imgName = lang + $('input#'+id).attr('value') + '.png';
@@ -356,7 +356,7 @@ alt="Get it on Google Play (large)" /></label>
 style="font-family:monospace;background-color:#efefef;padding:5px;display:none;margin-bottom:1em">
   </textarea >
 
-<p>Try it out:</p>
+<p>Test your badge:</p>
 <div id="button-preview" style="margin-top:1em"></div>
 </div>
 

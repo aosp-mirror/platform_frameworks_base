@@ -1,0 +1,411 @@
+
+page.title=Auto App Quality
+page.metaDescription=Auto apps integrate with the vehicle's input controls and display and minimize driver distraction to create a great experience.
+page.image=/distribute/images/gp-auto-quality.png
+@jd:body
+
+<div id="qv-wrapper"><div id="qv">
+<h2>Quality Criteria</h2>
+  <ol>
+    <li><a href="#core">Core App Quality</a></li>
+    <li><a href="#ux">Visual Design and Interaction</a></li>
+    <li><a href="#fn">Functionality</a></li>
+    <li><a href="#faq">Frequently Asked Questions</a></li>
+  </ol>
+
+  <h2>You Should Also Read</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/essentials/quality/core.html">
+      Core App Quality</a></li>
+    <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
+      Optimize Your App</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
+      for Media Applications</a></li>
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">Android Auto UX Guidelines
+      for Messaging Applications</a></li>
+  </ol>
+</div>
+</div>
+
+
+  <img src="{@docRoot}distribute/images/gp-auto-quality.png" style="width:480px;">
+
+
+<p>When designing support for Android Auto in your app, avoid driver distraction above all else.
+  Apps that work with the Auto user interface should minimize distractions faced by the driver
+  through best practices such as voice commands and very simple visual design.
+</p>
+
+<p>
+  Great auto experiences are predictive and predictable.  Apps that support Android Auto
+  should show timely information to the driver only when it is relevant, and use
+  simple, predictable patterns for common tasks.
+</p>
+
+<p class="caution">
+  <strong>Important:</strong> The criteria listed in this page apply to your app's user interface 
+  and behavior when running on devices connected to an Android Auto screen. Apps must meet these 
+  criteria to qualify as an Android Auto app on Google Play.
+</p>
+
+
+<div class="headerLine">
+  <h2 id="core">
+  Core App Quality
+  </h2>
+
+<p>
+ In addition to the Auto-specific criteria listed below, Auto apps should meet all relevant core app
+ quality criteria for the Android platform, as detailed in the
+  <a href="{@docRoot}distribute/essentials/quality/core.html">Core App Quality</a> criteria. Test
+  your app against those criteria to ensure that they meet Android standards for navigation and
+  design. Then test your app against all Auto-specific criteria, keeping in mind
+  that, when running on a device connected to Android auto, your app must meet the requirements
+  listed in this page.
+
+
+
+<div class="headerLine">
+  <h2 id="ux">
+  Visual Design and User Interaction
+  </h2>
+
+</div>
+
+<p>
+  These criteria ensure that your app follows critical design and interaction patterns
+  to ensure a consistent, intuitive, and enjoyable user experience on Android Auto. Many elements,
+  such as the navigation drawer, card backgrounds, fonts and icon colors, are set and rendered by
+  the system. Your own app-specific design elements must meet the following criteria.
+</p>
+
+<table>
+
+<tr>
+  <th style="width:2px;">
+    Type
+  </th>
+  <th style="width:54px;">
+    Test
+  </th>
+  <th>
+    Description
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="4" id="safety">
+    Driver Attention
+  </td>
+
+  <td id="AU-MV">
+    AU-MV
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App does not display on the Auto screen animated elements such as animated graphics, games, video, or
+      progress bars.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-VA">
+    AU-VA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App does not display any form of visual or text advertising on the Auto screen.  Only audio
+      ads are acceptable.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-IM">
+    AU-IM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App elements do not display any images on the Auto screen. Exceptions include: app may display 
+    a single static image for
+    content context in the background of the consumption screen, such as album art, and app may 
+    display icons in the content navigation drawer.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-DS">
+    AU-DS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+    App does not include any features that distract the driver.
+    </p>
+  </td>
+</tr>
+
+
+
+<tr>
+  <td rowspan="4" id="layout">
+    Layout
+  </td>
+
+<tr>
+  <td id="AU-SC">
+    AU-SC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App does not display automatically scrolling text.
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td id="AU-FT">
+    AU-FT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App displays all strings using the default Roboto fonts in two approved sizes.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-ST">
+    AU-ST
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App does not display any individual string longer than 120 characters.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="contrast">
+    Visual Contrast
+  </td>
+
+  <td id="AU-NM">
+    AU-NM
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App supports night mode, rendering light text and controls on a dark background.
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="interaction">
+    Interaction
+  </td>
+
+  <td id="AU-VC">
+    AU-VC
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App must support voice commands.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-AB">
+    AU-AB
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App-specific buttons respond to user actions with no more than a two-second delay.
+    </p>
+  </td>
+</tr>
+
+</table>
+
+
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/visualdesign"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+
+
+
+<div class="headerLine">
+  <h2 id="fn">
+  Functionality
+  </h2>
+
+
+</div>
+
+<p>
+  These criteria ensure that your app is configured correctly and provides expected
+  functional behavior.
+</p>
+
+
+<table>
+<tr>
+  <th style="width:2px;">
+    Type
+  </th>
+  <th style="width:54px;">
+    Test
+  </th>
+  <th>
+    Description
+  </th>
+</tr>
+
+<tr>
+  <td rowspan="2" id="general">
+   General
+  </td>
+
+  <td id="AU-RL">
+    AU-RL
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     When the app is relaunched from the home screen, the app restores the app state as closely as
+     possible to the previous state.
+    </p>
+  </td>
+</tr>
+
+
+</tr>
+  <td id="AU-SS">
+    AU-SS
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     No tasks in the app take more than six steps to complete.
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="media">
+    Media
+  </td>
+
+
+  <td id="AU-PA">
+    AU-PA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App has no more than four primary actions plus one optional action overflow toggle (or five if
+     no action overflow is used). For more information, see details on the media control card in the
+     <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
+      for Media Applications</a>.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-SA">
+    AU-SA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App has no more than four optional secondary actions plus one action overflow toggle. For more
+     information, see details on the media control card in the
+     <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
+      for Media Applications</a>.
+    </p>
+  </td>
+</tr>
+
+
+<tr>
+  <td rowspan="2" id="notifications">
+    Notifications
+  </td>
+
+  <td id="AU-NA">
+    AU-NA
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App does not present advertisements through notifications.
+    </p>
+  </td>
+</tr>
+
+<tr>
+  <td id="AU-NT">
+    AU-NT
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+     App displays notifications only when relevant to the driver’s needs.
+   </p>
+   <p>
+    Examples:<br />
+    Good: Notifying the user that a new message has arrived.<br />
+    Bad: Notifying the user about a new album release.
+    </p>
+  </td>
+</tr>
+
+</table>
+
+<!--
+<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query=
+"collection:distribute/essentials/autoqualityguidelines/functionality"
+data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
+</div>
+-->
+
+<div class="headerLine">
+  <h2 id="faq">
+  Frequently Asked Questions
+  </h2>
+</div>
+
+<p style="margin-top:30px;">
+  <strong>After I submit my app, how will find out if my app does not meet all
+    the requirements for Android Auto?</strong>
+</p>
+<p>If you are planning to develop apps for Auto, you are encouraged to begin enabling and testing
+  your apps now. However, Auto-enabled apps cannot be published at this time. Join the
+ <a href="http://g.co/AndroidAutoDev" class="external-link">Auto
+ Developers Google+ community</a> for updates on when you will be able to submit
+ your Auto-enabled apps.</p>
+</p>
+
+
+<p style="margin-top:30px;">
+  <strong>My app targets more than just Android Auto. If my app does not meet the Auto
+  requirements, will my new or updated app still appear on Google Play for phones and
+  tablets?</strong>
+</p>
+<p>
+  No. When Google begins the approval process, your auto app will undergo a driver safety
+  review, and will not be
+  available for distribution until the app is approved. Because this is the same APK as
+  for phones and tablets, your Play Store updates for those devices will not be available until the
+  Auto approval process is complete.  
+</p>
+
+<p class="caution">
+  <strong>Important:</strong> Due to this restriction, you should not use your production APK
+  for Auto support prototyping. 
+</p>
+

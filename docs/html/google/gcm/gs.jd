@@ -1,4 +1,4 @@
-page.title=Getting Started
+page.title=Getting Started on Android
 page.tags=cloud,push,messaging
 @jd:body
 
@@ -25,12 +25,12 @@ page.tags=cloud,push,messaging
 </div>
 </div>
 
-<p>This document tells you how to get started setting up a GCM
-implementation.
+<p>This document tells you how to get started setting up a Google Cloud Messaging
+(GCM) implementation.
 Before you begin, make sure to <a href="/google/play-services/setup.html">set up
 the Google Play Services SDK</a>. You need this SDK to use the
-<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
-{@code GoogleCloudMessaging}</a> methods.</p>
+<a href="{@docRoot}reference/com/google/android/gms/gcm/package-summary.html">
+GCM APIs</a>.</p>
 
 <h2 id="create-proj">Creating a Google API project</h2>
 <p>To create a Google API project:</p>
@@ -46,7 +46,7 @@ project number. For example, <strong>Project Number: 670330094152</strong>.</p><
 
   <li>Copy down your project number. You will use it later on as the
   <a href="{@docRoot}google/gcm/gcm.html#senderid">GCM sender ID</a>.</li>
-  
+
 </ol>
 <h2 id="gcm-service">Enabling the GCM Service</h2>
 <p>To enable the GCM service:</p>
@@ -71,7 +71,7 @@ purposes, you can use {@code 0.0.0.0/0}.</p></li>
 
 <li>In the refreshed page, copy the
 <a href="{@docRoot}google/gcm/gcm.html#apikey">API key</a>.
-You will need the API key later on to perform authentication in your application server.</li>
+You will need the API key later on to perform authentication in your app server.</li>
 
 <p class="note"><strong>Note:</strong> If you need to rotate the key, click
 <strong>Regenerate key</strong>. A new key  will be created. If you think the key has been
@@ -84,16 +84,11 @@ compromised and you want to delete it immediately, click <strong>Delete</strong>
 implementing GCM. Here is an overview of the basic steps:</p>
 
 <ol>
-  <li>Decide which Google-provided GCM connection server you want to use&mdash;
-  <a href="http.html">HTTP</a> or <a href="ccs.html">XMPP</a> (CCS). GCM connection servers
-take messages from a 3rd-party application
-server (written by you) and send them to a GCM-enabled Android application (the
-"client app," also written by you) running on a device. </li>
-  <li>Implement an application server (the "3rd-party application server") to interact
+  <li>Implement an app server (the "3rd-party app server") to interact
 with your chosen GCM connection server. The app server sends data to a
-GCM-enabled Android client application via the GCM connection server. For more
+GCM-enabled Android client app via the GCM connection server. For more
 information about implementing the server side, see <a href="server.html">
 Implementing GCM Server</a>.</li>
-<li>Write your client app. This is the GCM-enabled Android application that runs
+<li>Write your client app. This is the GCM-enabled Android app that runs
 on a device. See <a href="client.html">Implementing GCM Client</a> for more information.</li>
 </ol>

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Circle</li>
       </ul>
     </div>
@@ -772,6 +841,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -935,7 +1007,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getCenter()">getCenter</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -953,7 +1030,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getFillColor()">getFillColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the fill color of this Circle.</div>
+        <div class="jd-descrdiv">
+          Returns the fill color of this Circle.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -971,7 +1053,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getId()">getId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets this circle's id.</div>
+        <div class="jd-descrdiv">
+          Gets this circle's id.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -989,7 +1076,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getRadius()">getRadius</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the circle's radius, in meters.</div>
+        <div class="jd-descrdiv">
+          Returns the circle's radius, in meters.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1007,7 +1099,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getStrokeColor()">getStrokeColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the stroke color.</div>
+        <div class="jd-descrdiv">
+          Returns the stroke color.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1025,7 +1122,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getStrokeWidth()">getStrokeWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the stroke width.</div>
+        <div class="jd-descrdiv">
+          Returns the stroke width.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1043,7 +1145,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#getZIndex()">getZIndex</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the zIndex.</div>
+        <div class="jd-descrdiv">
+          Returns the zIndex.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1061,7 +1168,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#isVisible()">isVisible</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks whether the circle is visible.</div>
+        <div class="jd-descrdiv">
+          Checks whether the circle is visible.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1079,7 +1191,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#remove()">remove</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Removes this circle from the map.</div>
+        <div class="jd-descrdiv">
+          Removes this circle from the map.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1097,7 +1214,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setCenter(com.google.android.gms.maps.model.LatLng)">setCenter</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> center)</nobr>
         
-        <div class="jd-descrdiv">Sets the center using a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</div>
+        <div class="jd-descrdiv">
+          Sets the center using a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1115,7 +1237,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setFillColor(int)">setFillColor</a></span>(int color)</nobr>
         
-        <div class="jd-descrdiv">Sets the fill color.</div>
+        <div class="jd-descrdiv">
+          Sets the fill color.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1133,7 +1260,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setRadius(double)">setRadius</a></span>(double radius)</nobr>
         
-        <div class="jd-descrdiv">Sets the radius in meters.</div>
+        <div class="jd-descrdiv">
+          Sets the radius in meters.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1151,7 +1283,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setStrokeColor(int)">setStrokeColor</a></span>(int color)</nobr>
         
-        <div class="jd-descrdiv">Sets the stroke color.</div>
+        <div class="jd-descrdiv">
+          Sets the stroke color.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1169,7 +1306,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setStrokeWidth(float)">setStrokeWidth</a></span>(float width)</nobr>
         
-        <div class="jd-descrdiv">Sets the stroke width.</div>
+        <div class="jd-descrdiv">
+          Sets the stroke width.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1187,7 +1329,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setVisible(boolean)">setVisible</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">Sets the visibility of the circle.</div>
+        <div class="jd-descrdiv">
+          Sets the visibility of the circle.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1205,7 +1352,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Circle.html#setZIndex(float)">setZIndex</a></span>(float zIndex)</nobr>
         
-        <div class="jd-descrdiv">Sets the zIndex.</div>
+        <div class="jd-descrdiv">
+          Sets the zIndex.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1491,6 +1643,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1524,6 +1679,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the fill color of this Circle.</p></div>
   <div class="jd-tagdata">
@@ -1559,6 +1717,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets this circle's id.  The id will be unique amongst all Circles on a map.
 </p></div>
 
@@ -1588,6 +1749,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the circle's radius, in meters.</p></div>
   <div class="jd-tagdata">
@@ -1623,6 +1787,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the stroke color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1656,6 +1823,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Returns the stroke width.</p></div>
   <div class="jd-tagdata">
@@ -1691,6 +1861,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the zIndex.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1724,6 +1897,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Checks whether the circle is visible.</p></div>
   <div class="jd-tagdata">
@@ -1759,6 +1935,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Removes this circle from the map.
 </p></div>
 
@@ -1788,6 +1967,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the center using a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
 
@@ -1839,6 +2021,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the fill color.
 
  <p>The fill color is the color inside the circle, in the integer
@@ -1881,6 +2066,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the radius in meters.
 
@@ -1932,6 +2120,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the stroke color.
 
  <p>The stroke color is the color of this circle's outline, in the integer
@@ -1974,6 +2165,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the stroke width.
 
@@ -2027,6 +2221,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility of the circle.
 
  <p>If this circle is not visible then it will not be drawn. All other
@@ -2068,6 +2265,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the zIndex.
 

@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">PublisherAdRequest.Builder</li>
       </ul>
     </div>
@@ -775,6 +844,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -907,7 +979,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addCustomEventExtrasBundle(java.lang.Class<? extends com.google.android.gms.ads.mediation.customevent.CustomEvent>, android.os.Bundle)">addCustomEventExtrasBundle</a></span>(Class&lt;?&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEvent.html">CustomEvent</a>&gt; adapterClass, Bundle customEventExtras)</nobr>
         
-        <div class="jd-descrdiv">Add extra parameters to pass to a specific custom event adapter.</div>
+        <div class="jd-descrdiv">
+          Add extra parameters to pass to a specific custom event adapter.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -925,7 +1002,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addKeyword(java.lang.String)">addKeyword</a></span>(String keyword)</nobr>
         
-        <div class="jd-descrdiv">Add a keyword for targeting purposes.</div>
+        <div class="jd-descrdiv">
+          Add a keyword for targeting purposes.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -942,44 +1024,59 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addNetworkExtras(com.google.android.gms.ads.mediation.NetworkExtras)">addNetworkExtras</a></span>(<a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a> networkExtras)</nobr>
+        
+        <div class="jd-descrdiv">
+          Add extra parameters to pass to a specific ad network adapter.
+          
+    
 
-        <div class="jd-descrdiv">Add extra parameters to pass to a specific ad network adapter.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addNetworkExtrasBundle(java.lang.Class<? extends com.google.android.gms.ads.mediation.MediationAdapter>, android.os.Bundle)">addNetworkExtrasBundle</a></span>(Class&lt;?&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/ads/mediation/MediationAdapter.html">MediationAdapter</a>&gt; adapterClass, Bundle networkExtras)</nobr>
+        
+        <div class="jd-descrdiv">
+          Add extra parameters to pass to a specific ad network adapter.
+          
+    
 
-        <div class="jd-descrdiv">Add extra parameters to pass to a specific ad network adapter.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice</a></span>(String deviceId)</nobr>
         
-        <div class="jd-descrdiv">Causes a device to receive test ads.</div>
+        <div class="jd-descrdiv">
+          Causes a device to receive test ads.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -997,7 +1094,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#build()">build</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Constructs <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html">PublisherAdRequest</a></code> with the specified attributes.</div>
+        <div class="jd-descrdiv">
+          Constructs <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html">PublisherAdRequest</a></code> with the specified attributes.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1015,7 +1117,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setBirthday(java.util.Date)">setBirthday</a></span>(Date birthday)</nobr>
         
-        <div class="jd-descrdiv">Sets the user's birthday for targeting purposes.</div>
+        <div class="jd-descrdiv">
+          Sets the user's birthday for targeting purposes.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1032,26 +1139,36 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setContentUrl(java.lang.String)">setContentUrl</a></span>(String contentUrl)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the content URL for targeting purposes.
+          
+    
 
-        <div class="jd-descrdiv">Sets the content URL for targeting purposes.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setGender(int)">setGender</a></span>(int gender)</nobr>
         
-        <div class="jd-descrdiv">Sets the user's gender for targeting purposes.</div>
+        <div class="jd-descrdiv">
+          Sets the user's gender for targeting purposes.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1069,7 +1186,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setLocation(android.location.Location)">setLocation</a></span>(Location location)</nobr>
         
-        <div class="jd-descrdiv">Sets the user's location for targeting purposes.</div>
+        <div class="jd-descrdiv">
+          Sets the user's location for targeting purposes.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1087,7 +1209,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setManualImpressionsEnabled(boolean)">setManualImpressionsEnabled</a></span>(boolean manualImpressionsEnabled)</nobr>
         
-        <div class="jd-descrdiv">Enables manual impression reporting.</div>
+        <div class="jd-descrdiv">
+          Enables manual impression reporting.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1105,8 +1232,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#setPublisherProvidedId(java.lang.String)">setPublisherProvidedId</a></span>(String publisherProvidedId)</nobr>
         
-        <div class="jd-descrdiv">Sets an identifier for use in frequency capping, audience segmentation and targeting,
- sequential ad rotation, and other audience-based ad delivery controls across devices.</div>
+        <div class="jd-descrdiv">
+          Sets an identifier for use in frequency capping, audience segmentation and targeting,
+ sequential ad rotation, and other audience-based ad delivery controls across devices.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1124,10 +1256,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html#tagForChildDirectedTreatment(boolean)">tagForChildDirectedTreatment</a></span>(boolean tagForChildDirectedTreatment)</nobr>
         
-        <div class="jd-descrdiv">This method allows you to specify whether you would like your app to be treated as
+        <div class="jd-descrdiv">
+          This method allows you to specify whether you would like your app to be treated as
  child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA) -
  <a href="http://business.ftc.gov/privacy-and-security/childrens-privacy">
- http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.</div>
+ http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1405,6 +1542,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1428,14 +1568,14 @@ From class
 
 <A NAME="addCustomEventExtrasBundle(java.lang.Class<? extends com.google.android.gms.ads.mediation.customevent.CustomEvent>, android.os.Bundle)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
       </span>
       <span class="sympad">addCustomEventExtrasBundle</span>
@@ -1443,12 +1583,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Add extra parameters to pass to a specific custom event adapter.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1494,6 +1637,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Add a keyword for targeting purposes.
 </p></div>
 
@@ -1524,6 +1670,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Add extra parameters to pass to a specific ad network adapter. <code>networkExtras</code>
  should be an instance of <code>com.google.ads.mediation.NetworkExtras</code>, which is
  provided by ad network adapters.
@@ -1535,14 +1684,14 @@ From class
 
 <A NAME="addNetworkExtrasBundle(java.lang.Class<? extends com.google.android.gms.ads.mediation.MediationAdapter>, android.os.Bundle)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
       </span>
       <span class="sympad">addNetworkExtrasBundle</span>
@@ -1550,12 +1699,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Add extra parameters to pass to a specific ad network adapter.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1601,6 +1753,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Causes a device to receive test ads. The <code>deviceId</code> can be obtained by viewing the
  logcat output after creating a new ad. For emulators, use
  <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html#DEVICE_ID_EMULATOR">DEVICE_ID_EMULATOR</a></code>.
@@ -1633,6 +1788,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constructs <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html">PublisherAdRequest</a></code> with the specified attributes.
 </p></div>
 
@@ -1663,6 +1821,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the user's birthday for targeting purposes.
 </p></div>
 
@@ -1672,14 +1833,14 @@ From class
 
 <A NAME="setContentUrl(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.Builder.html">PublisherAdRequest.Builder</a>
       </span>
       <span class="sympad">setContentUrl</span>
@@ -1687,20 +1848,23 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the content URL for targeting purposes.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>NullPointerException</td>
             <td>If contentUrl is {code null}.</td>
-        </tr>
+        </tr>  
         <tr>
             <th>IllegalArgumentException</td>
             <td>If contentUrl is empty, or if its
@@ -1737,6 +1901,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the user's gender for targeting purposes. This should be
  <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html#GENDER_MALE">GENDER_MALE</a></code>, <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html#GENDER_FEMALE">GENDER_FEMALE</a></code>, or <code><a href="/reference/com/google/android/gms/ads/doubleclick/PublisherAdRequest.html#GENDER_UNKNOWN">GENDER_UNKNOWN</a></code>.
 </p></div>
@@ -1768,6 +1935,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the user's location for targeting purposes.
 </p></div>
 
@@ -1797,6 +1967,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Enables manual impression reporting.
 </p></div>
@@ -1828,6 +2001,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets an identifier for use in frequency capping, audience segmentation and targeting,
  sequential ad rotation, and other audience-based ad delivery controls across devices.
 </p></div>
@@ -1858,6 +2034,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>This method allows you to specify whether you would like your app to be treated as
  child-directed for purposes of the Children’s Online Privacy Protection Act (COPPA) -

@@ -1,0 +1,636 @@
+page.title=Android 5.0 API
+excludeFromSuggestions=true
+sdk.platform.version=5.0
+sdk.platform.apiLevel=21
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>이 도움말에서 다루는 내용 <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle"> <span class="more">더보기</span> <span class="less" style="display:none">간략히 보기</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#ApiLevel">타겟 API 수준 업데이트</a></li>
+  <li><a href="#Behaviors">중요 동작 변경사항</a>
+    <ol>
+      <li><a href="#ART">새 ART(Android 런타임)에서 앱을 테스트하지 않은 경우...</a></li>
+      <li><a href="#BehaviorNotifications">앱에서 알림을 구현하는 경우...</a></li>
+      <li><a href="#BehaviorMediaControl">앱에서 RemoteControlClient를 사용하는 경우...</a></li>
+<li><a href="#BehaviorGetRecentTasks">앱에서 getRecentTasks()를 사용하는 경우...</a></li>
+<li><a href="#64BitSupport">Android NDK(기본 개발 키트)를 사용 중인 경우...</a></li>
+<li><a href="#BindService">앱이 서비스에 결합된 경우...</a></li>
+<li><a href="#BehaviorWebView">앱에서 WebView를 사용하는 경우...</a></li>
+    </ol>
+  </li>
+  <li><a href="#UI">사용자 인터페이스</a>
+    <ol>
+      <li><a href="#MaterialDesign">머티리얼 디자인 지원</a></li>
+      <li><a href="#Recents">최근 화면의 동시 문서 및 액티비티</a></li>
+      <li><a href="#WebView">WebView 업데이트</a></li>
+      <li><a href="#ScreenCapture">화면 캡처 및 공유</a></li>
+    </ol>
+  </li>
+  <li><a href="#Notifications">알림</a>
+    <ol>
+      <li><a href="#LockscreenNotifications">잠금 화면 알림</a></li>
+      <li><a href="#NotificationsMetadata">알림 메타데이터</a></li>
+    </ol>
+  </li>
+  <li><a href="#Graphics">그래픽</a>
+    <ol>
+      <li><a href="#OpenGLES-3-1">OpenGL ES 3.1 지원</a></li>
+      <li><a href="#AndroidExtensionPack">Android 확장 프로그램 팩</a></li>
+    </ol>
+  </li>
+  <li><a href="#Media">미디어</a>
+    <ol>
+      <li><a href="#Camera-v2">고급 카메라 기능을 위한 카메라 API</a></li>
+      <li><a href="#AudioPlayback">오디오 재생</a></li>
+      <li><a href="#MediaPlaybackControl">미디어 재생 컨트롤</a></li>
+      <li><a href="#MediaBrowsing">미디어 탐색</a></li>
+    </ol>
+  </li>
+  <li><a href="#Storage">저장소</a>
+    <ol>
+      <li><a href="#DirectorySelection">디렉토리 선택</a></li>
+    </ol>
+  </li>
+  <li><a href="#Wireless">무선 및 연결</a>
+    <ol>
+      <li><a href="#Multinetwork">여러 네트워크 연결</a></li>
+      <li><a href="#BluetoothBroadcasting">블루투스 브로드캐스팅</a></li>
+      <li><a href="#NFCEnhancements">NFC 개선사항</a></li>
+    </ol>
+  </li>
+  <li><a href="#Power">프로젝트 Volta</a>
+    <ol>
+      <li><a href="#JobScheduler">작업 예약</a></li>
+      <li><a href="#PowerMeasurementTools">배터리 사용량을 위한 개발자 도구</a>
+    </ol>
+  </li>
+  <li><a href="#Enterprise">업무 및 교육을 위한 Android</a>
+    <ol>
+      <li><a href="#ManagedProvisioning">관리되는 프로비저닝</a></li>
+      <li><a href="#DeviceOwner">기기 소유자</a></li>
+      <li><a href="#ScreenPinning">화면 고정</a></li>
+    </ol>
+  </li>
+  <li><a href="#System">시스템</a>
+    <ol>
+      <li><a href="#AppUsageStatistics">앱 사용량 통계</a></li>
+    </ol>
+  </li>
+  <li><a href="#Printing">인쇄 프레임워크</a>
+    <ol>
+      <li><a href="#PDFRender">PDF를 비트맵으로 렌더링</a></li>
+    </ol>
+  </li>
+  <li><a href="#TestingA11y">테스트 및 접근성</a>
+    <ol>
+      <li><a href="#TestingA11yImprovements">테스트 및 접근성 개선사항</a></li>
+    </ol>
+  </li>
+  <li><a href="#IME">IME</a>
+    <ol>
+      <li><a href="#Switching">더 쉽게 입력 언어를 전환</a></li>
+    </ol>
+  </li>
+  <li><a href="#Manifest">매니페스트 선언</a>
+    <ol>
+      <li><a href="#ManifestFeatures">선언 가능한 필수 기능</a></li>
+      <li><a href="#Permissions">사용자 권한</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>API Differences</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/android-5.0-changes.html">Android 5.0 Behavior Changes</a> </li>
+<li><a href="{@docRoot}about/versions/lollipop.html">Android Lollipop Highlights</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>API 수준: {@sdkPlatformApiLevel}</p>
+
+<p>Android 5.0(<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#LOLLIPOP">LOLLIPOP</a>)에서는 사용자와 앱 개발자를 위한 새 기능을 제공합니다. 이 문서에서는 가장 주목할 만한 새 API에 대해 안내해 줍니다.</p>
+
+<p>상위 수준에서 새 플랫폼 기능을 확인하려면 <a href="{@docRoot}about/versions/lollipop.html">Android Lollipop 주요 기능</a>을 참조하세요.</p>
+
+
+<h3 id="Start">개발 시작</h3>
+
+<p>Android 5.0용 앱 개발을 시작하려면 먼저 <a href="{@docRoot}sdk/index.html">Android SDK를 다운로드</a>해야 합니다. 그런 다음 <a href="{@docRoot}tools/help/sdk-manager.html">SDK 관리자</a>를 사용하여 Android 5.0 SDK 플랫폼과 시스템 이미지를 다운로드합니다.</p>
+
+
+<h3 id="ApiLevel">타겟 API 수준 업데이트</h3>
+
+<p>Android {@sdkPlatformVersion}을 실행하는 기기에서 앱을 더욱 최적화하려면 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a>을 <code>"{@sdkPlatformApiLevel}"</code>로 설정하고 Android {@sdkPlatformVersion} 시스템 이미지에 앱을 설치한 다음, 앱을 테스트하고 이러한 변경사항으로 업데이트된 앱을 게시합니다.</p>
+
+<p>이전 버전을 지원하면서 Android {@sdkPlatformVersion} API를 사용할 수도 있습니다. <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>에서 지원하지 않는 API를 실행하기 전에 시스템 API 수준을 확인하는 코드에 조건을 추가하면 됩니다. 하위 호환성을 유지하는 방법에 대해 자세히 알아보려면 <a href="{@docRoot}training/basics/supporting-devices/platforms.html">여러 플랫폼 버전 지원</a>을 참조하세요.</p>
+
+<p>API 수준이 작동하는 방식에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 수준은 무엇인가요?</a>를 읽어 보세요.</p>
+
+<h2 id="Behaviors">중요 동작 변경사항</h2>
+
+<p>이전에 Android용 앱을 게시한 적이 있는 경우 앱이 Android 5.0 변경사항에 의해 영향을 받을 수 있으므로 주의해야 합니다.</p>
+
+<h3 id="ART">새 ART(Android 런타임)에서 앱을 테스트하지 않은 경우...</h3>
+
+<p>4.4 출시 버전에는 새 실험용 ART(Android 런타임)가 도입되었습니다. 4.4 이전 버전에서는 ART가 선택사항이었고 기본 런타임은 Dalvik으로 설정되었습니다. Android 5.0에서는 이제 ART가 기본 런타임입니다.</p>
+
+<p>ART의 새 기능에 대한 개요는 <a href="https://source.android.com/devices/tech/dalvik/art.html">ART 소개</a>를 참조하세요. 몇 가지 주요한 새 기능은 다음과 같습니다.</p>
+
+<ul>
+  <li>AOT(Ahead-of-time) 컴파일</li>
+  <li>개선된 GC(가비지 컬렉션)</li>
+  <li>개선된 디버깅 지원</li>
+</ul>
+
+<p>대부분의 Android 앱은 이전과 같이 ART에서도 작동해야 합니다. 하지만 Dalvik에서 작동하던 일부 기능은 ART에서 작동하지 않습니다. 가장 중요한 문제를 확인하려면 <a href="{@docRoot}guide/practices/verifying-apps-art.html">ART(Android 런타임)에서 앱 동작 확인</a>을 참조하세요. 다음과 같은 경우 특히 주의하세요.</p>
+
+<ul>
+  <li>앱이 JNI(자바 기본 인터페이스)를 사용하여 C/C++ 코드를 실행하는 경우</li>
+  <li>비표준 코드를 생성하는 개발 도구(예: 몇몇 난독화 도구)를 사용하는 경우</li>
+  <li>가비지 컬렉션 압축과 호환되지 않는 기능을 사용하는 경우 (ART는 현재 가비지 컬렉션 압축을 구현하지 않지만 Android 오픈소스 프로젝트에서 개발 중임)</li>
+</ul>
+
+<h3 id="BehaviorNotifications">앱에서 알림을 구현하는 경우...</h3>
+
+<p>알림이 다음과 같은 Android 5.0 변경사항을 고려하여 구현되는지 확인합니다. Android 5.0 이상에서 알림을 디자인하는 방법에 대해 자세히 알아보려면 <a href="{@docRoot}design/patterns/notifications.html">알림 디자인 가이드</a>를 참조하세요.
+</p>
+
+<h4 id="NotificationsMaterialDesignStyle">머티리얼 디자인 스타일</h4>
+<p>알림은 새 머티리얼 디자인 위젯과 어울리도록 흰색(또는 매우 밝은 색) 배경 위에 어두운 텍스트로 표시됩니다. 모든 알림이 새 색상 구성에서 올바르게 표시되는지 확인하세요. 알림이 올바르게 표시되지 않으면 다음과 같이 수정합니다.</p>
+
+<ul>
+  <li>{@link android.app.Notification.Builder#setColor(int) setColor()}를 사용하여 아이콘 이미지 뒤의 원에 강조 색상을 설정합니다. </li>
+  <li>색상을 포함하는 애셋을 업데이트하거나 제거합니다. 시스템은 작업 아이콘 및 기본 알림 아이콘에서 알파 이외의 모든 채널을 무시합니다. 알파 채널인 아이콘만 표시된다고 가정하면 됩니다. 시스템에서 알림 아이콘은 흰색으로, 작업 아이콘은 어두운 회색으로 표시합니다.</li>
+</ul>
+
+<h4 id="NotificationsSoundVibration">소리 및 진동</h4>
+<p>현재 {@link android.media.Ringtone}, {@link android.media.MediaPlayer} 또는 {@link android.os.Vibrator} 클래스를 사용하여 알림에 소리 및 진동을 추가한 경우, 이 코드를 제거해야 시스템이 <em>우선순위</em> 모드에서 알림을 올바르게 표시할 수 있습니다. 대신 {@link android.app.Notification.Builder} 메소드를 사용하여 소리 및 진동을 추가합니다.</p>
+
+<p>기기를 {@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT}로 설정하면 기기가 새 우선순위 모드로 설정됩니다. 기기를 {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} 또는 {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}로 설정하면 기기의 우선순위 모드가 종료됩니다.</p>
+
+<p>이전에는 Android에서 태블릿 기기의 볼륨을 조절하기 위해 마스터 스트림으로 {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC}을 사용했습니다. Android 5.0에서는 휴대전화 및 태블릿 기기의 마스터 볼륨 스트림이 통합되었으며 {@link android.media.AudioManager#STREAM_RING STREAM_RING} 또는 {@link android.media.AudioManager#STREAM_NOTIFICATION STREAM_NOTIFICATION}에서 제어합니다.</p>
+
+<h4 id="NotificationsLockscreenVisibility">잠금 화면 표시 여부</h4>
+<p>기본적으로 Android 5.0에서는 사용자의 잠금 화면에 알림이 표시됩니다. 사용자는 민감한 정보가 노출되지 않도록 선택할 수 있습니다. 이 경우 시스템에서 알림에 표시되는 텍스트를 자동으로 수정합니다. 이렇게 수정되는 알림을 맞춤설정하려면 {@link android.app.Notification.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}을 사용합니다.</p>
+<p>알림에 개인정보가 포함되지 않았거나 알림에서 미디어 재생 컨트롤을 허용하려는 경우 {@link android.app.Notification.Builder#setVisibility(int) setVisibility()} 메소드를 호출하고 알림의 표시 수준을 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}으로 설정합니다.
+</p>
+
+<h4 id="NotificationsMediaPlayback">미디어 재생</h4>
+<p>미디어 재생 상태 또는 이동 컨트롤을 표시하는 알림을 구현하는 경우 기존 {@link android.widget.RemoteViews.RemoteView} 개체 대신 새 {@link android.app.Notification.MediaStyle} 템플릿을 사용하는 것이 좋습니다. 어떤 방식을 선택하든 알림의 표시 여부를 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}으로 설정하여 잠금 화면에서 컨트롤에 액세스할 수 있도록 합니다. Android 5.0부터 시스템이 잠금 화면에서 더 이상 {@link android.media.RemoteControlClient} 개체를 표시하지 않습니다. 자세한 내용은 <a href="#BehaviorMediaControl">앱에서 RemoteControlClient를 사용하는 경우</a>를 참조하세요.</p>
+
+<h4 id="NotificationsHeadsup">헤드업 알림</h4>
+<p>이제 기기를 사용 중일 때(즉, 기기가 잠금 해제 상태이고 화면이 켜져 있는 경우) 작은 플로팅 창(헤드업 알림이라고도 함)에 알림이 표시될 수 있습니다. 이러한 알림은 간결한 형태의 알림과 비슷하게 표시되지만 헤드업 알림에는 작업 버튼도 표시됩니다. 사용자는 사용 중인 앱을 종료하지 않고 헤드업 알림에서 작업을 수행하거나 알림을 닫을 수 있습니다.</p>
+
+<p>다음은 헤드업 알림을 실행할 수 있는 조건의 예입니다.</p>
+
+<ul>
+  <li>사용자의 액티비티가 전체화면 모드인 경우(앱에서 {@link android.app.Notification#fullScreenIntent}를 사용하는 경우)</li>
+  <li>알림이 높은 우선순위를 가지며 벨소리 또는 진동을 사용하는 경우</li>
+</ul>
+
+<p>위와 같은 시나리오에서 앱이 알림을 구현하는 경우 헤드업 알림이 올바르게 표시되는지 확인하세요.</p>
+
+<h3 id="BehaviorMediaControl">앱에서 RemoteControlClient를 사용하는 경우...</h3>
+<p>{@link android.media.RemoteControlClient} 클래스는 이제 사용할 수 없습니다. 가능한 빨리 새 {@link android.media.session.MediaSession} API로 전환하세요.</p>
+
+<p>Android 5.0의 잠금 화면은 {@link android.media.session.MediaSession} 또는 {@link android.media.RemoteControlClient}의 이동 컨트롤을 표시하지 않습니다. 대신 앱에서 알림을 통해 잠금 화면의 미디어 재생 컨트롤을 제공할 수 있습니다. 이를 통해 앱에서 미디어 버튼 표시를 더욱 제어할 수 있게 되며, 잠금 설정 및 해제된 기기에서 사용자에게 일관된 경험을 제공할 수 있게 됩니다.</p>
+
+<p>이를 위해 Android 5.0에는 새 {@link android.app.Notification.MediaStyle} 템플릿이 도입되었습니다. {@link android.app.Notification.MediaStyle}에서 {@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence, android.app.PendingIntent) Notification.Builder.addAction()}을 사용하여 추가한 알림 작업을 앱의 미디어 재생 알림에 삽입된 간단한 버튼으로 전환합니다. 세션 토큰을 {@link android.app.Notification.MediaStyle#setMediaSession(android.media.session.MediaSession.Token) setSession()} 메소드로 전달하여 시스템에 이 알림이 진행 중인 미디어 세션을 제어한다는 것을 알립니다.</p>
+
+<p>알림의 표시 여부를 {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}으로 설정하여 알림이 모든 잠금 화면(보안 또는 비보안)에서 표시되어도 안전함을 나타냅니다. 자세한 내용은 <a href="#LockscreenNotifications">잠금 화면 알림</a>을 참조하세요.</p>
+
+<p>앱이 Android <a href="{@docRoot}tv/index.html">TV</a> 또는 <a href="{@docRoot}wear/index.html">Wear</a> 플랫폼에서 실행되는 경우 미디어 재생 컨트롤을 표시하려면 {@link android.media.session.MediaSession} 클래스를 구현합니다. 또한 앱이 Android 기기에서 미디어 버튼 이벤트를 수신해야 하는 경우 {@link android.media.session.MediaSession}도 구현해야 합니다.</p>
+
+<h3 id="BehaviorGetRecentTasks">앱에서 getRecentTasks()를 사용하는 경우...</h3>
+
+<p>Android 5.0에 새 <em>동시 문서 및 액티비티 작업</em> 기능(아래의 <a href="#Recents">최근 화면에서 동시 문서 및 액티비티</a> 참조)이 도입되면서, 사용자의 개인정보 보호를 개선하기 위해 이제 {@link android.app.ActivityManager#getRecentTasks ActivityManager.getRecentTasks()} 메소드가 사용 중지되었습니다. 하위 호환성을 위해 이 메소드에서는 여전히 관련 데이터의 일부 하위 집합을 반환합니다. 여기에는 호출 애플리케이션의 자체 작업과 가능한 경우 민감하지 않은 일부 기타 작업(예: 홈)이 포함됩니다. 앱에서 이 메소드를 사용하여 자체 작업을 가져오는 경우 {@link android.app.ActivityManager#getAppTasks() getAppTasks()}를 대신 사용하여 정보를 가져오세요.</p>
+
+<h3 id="64BitSupport">Android NDK(기본 개발 키트)를 사용 중인 경우...</h3>
+
+<p>Android 5.0에서는 64비트 시스템을 지원합니다. 64비트 지원을 통해 기존의 32비트 앱을 계속해서 완전하게 지원하면서 주소 공간을 넓히고 성능을 개선했습니다. 또한 64비트 지원으로 암호화를 위한 OpenSSL 성능이 개선되었습니다. 이외에 이 출시 버전에는 새 기본 미디어 NDK API와 함께 기본 OpenGL ES(GLES) 3.1 지원이 도입되었습니다.</p>
+
+<p>Android 5.0에서 제공되는 64비트 지원을 사용하려면 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK 페이지</a>에서 NDK 수정 버전 10c를 다운로드하고 설치하세요. NDK의 중요 변경사항 및 버그 수정에 대한 자세한 내용은 수정 버전 10c <a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">출시 노트</a>를 참조하세요.</p>
+
+<h3 id="BindService">앱이 서비스에 결합된 경우...</h3>
+
+<p>이제 {@link android.content.Context#bindService(android.content.Intent, android.content.ServiceConnection, int) Context.bindService()} 메소드에서 명시적 {@link android.content.Intent}를 요구하며 암시적 인텐트가 있는 경우 예외를 발생시킵니다. 앱이 안전한지 확인하려면 {@link android.app.Service}를 시작하거나 결합할 때 명시적 인텐트를 사용하고 서비스를 위한 인텐트 필터를 선언하지 마세요.</p>
+
+<h3 id="BehaviorWebView">앱에서 WebView를 사용하는 경우...</h3>
+
+<p>Android 5.0에서는 앱의 기본 동작이 변경되었습니다.</p>
+<ul>
+<li><strong>앱에서 API 수준 21 이상을 타겟팅하는 경우:</strong>
+  <ul>
+    <li>시스템에서 기본적으로 <a href="https://developer.mozilla.org/en-US/docs/Security/MixedContent" class="external-link">혼합된 콘텐츠</a>와 타사 쿠키를 차단합니다. 혼합된 콘텐츠와 타사 쿠키를 허용하려면 {@link android.webkit.WebSettings#setMixedContentMode(int) setMixedContentMode()} 및 {@link android.webkit.CookieManager#setAcceptThirdPartyCookies(android.webkit.WebView, boolean) setAcceptThirdPartyCookies()} 메소드를 각각 사용합니다.</li>
+    <li>이제 시스템에서 표시할 HTML 문서의 부분을 지능적으로 선택합니다. 이 새 기본 동작을 통해 메모리 사용량을 줄이고 성능을 개선할 수 있습니다. 문서 전체를 한 번에 렌더링하려면 {@link android.webkit.WebView#enableSlowWholeDocumentDraw()}를 호출하여 이 최적화 방식을 사용 중지합니다.</li>
+  </ul>
+</li>
+<li><strong>앱에서 API 수준 20 이하를 타겟팅하는 경우:</strong> 시스템에서 혼합된 콘텐츠와 타사 쿠키를 허용하며 항상 문서 전체를 한 번에 렌더링합니다.</li>
+</ul>
+
+<h2 id="UI">사용자 인터페이스</h2>
+
+<h3 id="MaterialDesign">머티리얼 디자인 지원</h3>
+
+<p>곧 출시되는 버전에는 Android의 새 <em>머티리얼 디자인</em> 스타일에 대한 지원이 추가되었습니다. 머티리얼 디자인을 사용하면 시각적으로 역동적이고 사용자가 자연스럽게 느낄 수 있는 UI 요소의 전환을 포함한 앱을 만들 수 있습니다. 지원에는 다음이 포함됩니다.</p>
+
+<ul>
+
+  <li>머티리얼 테마</li>
+  <li>그림자 보기</li>
+  <li>{@link android.support.v7.widget.RecyclerView} 위젯</li>
+  <li>드로어블 애니메이션 및 스타일 효과</li>
+  <li>머티리얼 디자인 애니메이션 및 액티비티 전환 효과</li>
+  <li>보기 상태에 따른 보기 속성의 애니메이터</li>
+  <li>제어할 수 있는 색상 팔레트로 맞춤설정할 수 있는 UI 위젯과 앱 막대</li>
+  <li>XML 벡터 그래픽을 기반으로 하는 애니메이션 및 애니메이션 이외 드로어블</li>
+</ul>
+
+<p>앱에 머티리얼 디자인 기능을 추가하는 방법에 대해 자세히 알아보려면 <a href="{@docRoot}training/material/index.html">머티리얼 디자인</a>을 참조하세요.</p>
+
+<h3 id="Recents">최근 화면의 동시 문서 및 액티비티</h3>
+
+<p>이전 출시 버전에서는 <a href="{@docRoot}guide/components/recents.html">최근 화면</a>에 각 앱에 대해 사용자가 가장 최근에 상호작용한 하나의 작업만 표시될 수 있었습니다. 이제 앱에서 문서의 추가적인 동시 액티비티에 필요한 만큼 더 많은 작업을 열 수 있습니다. 이 기능은 최근 화면에서 사용자가 개별 액티비티와 문서 간에 빠르게 전환할 수 있도록 하여 멀티태스킹을 용이하게 하며, 모든 앱에서 일관된 전환 경험을 제공해 줍니다. 이러한 동시 작업의 예로는 웹브라우저 앱에서 열려 있는 탭, 생산성 앱의 문서, 게임에서의 동시 대결 또는 메시지 앱에서의 채팅이 있습니다. 앱은 {@link android.app.ActivityManager.AppTask} 클래스를 통해 작업을 관리할 수 있습니다.</p>
+
+<p>논리 중단을 삽입하여 시스템이 액티비티를 새 작업으로 처리하도록 하려면, {@link android.app.Activity#startActivity(android.content.Intent) startActivity()}로 액티비티를 실행할 때 {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT}를 사용합니다. 매니페스트에서 <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a> 요소의 {@code documentLaunchMode} 속성을 {@code "intoExisting"} 또는 {@code "always"}로 설정하여 이 동작을 유도할 수도 있습니다.</p>
+
+<p>최근 화면이 지저분해지지 않게 하려면 앱에서 화면에 표시할 수 있는 작업의 최대 개수를 설정하면 됩니다. 설정하려면 <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> 속성 {@link android.R.attr#maxRecents android:maxRecents}를 설정합니다. 현재 사용자당 최대 50개의 작업을 지정할 수 있습니다(기기의 RAM이 낮은 경우는 25개)입니다.</a></p>
+
+<p>최근 화면의 작업은 재부팅해도 지속되도록 설정할 수 있습니다. 지속 동작을 제어하려면 <a href="{@docRoot}reference/android/R.attr.html#persistableMode">android:persistableMode</a> 속성을 사용합니다. 또한 최근 화면에서 {@link android.app.Activity#setTaskDescription(android.app.ActivityManager.TaskDescription) setTaskDescription()} 메소드를 호출하여 액티비티의 색상, 라벨, 아이콘과 같은 액티비티의 시각적 속성을 변경할 수도 있습니다.</p>
+
+<h3 id="WebView">WebView 업데이트</h3>
+<p>Android 5.0에서는 {@link android.webkit.WebView} 구현을 Chromium M37로 업데이트하여 보안 및 안정성을 개선하고 버그도 수정했습니다. Android 5.0에서 실행되는 {@link android.webkit.WebView}의 기본 사용자 에이전트 문자열이 37.0.0.0을 버전 번호로 통합하도록 업데이트되었습니다.</p>
+
+<p>이 출시 버전에는 {@link android.webkit.PermissionRequest} 클래스가 도입되었습니다. 이를 사용하면 앱에서 {@link android.webkit.WebView} 권한을 부여하여 <a href="https://developer.mozilla.org/en-US/docs/NavigatorUserMedia.getUserMedia" class="external-link">getUserMedia()</a>와 같은 웹 API를 통해 카메라와 마이크 등의 보호된 리소스에 액세스할 수 있습니다. {@link android.webkit.WebView}에 권한을 부여하려면 이러한 리소스에 대한 적절한 Android 권한이 앱에 있어야 합니다.</p>
+
+<p>이제 새 <code><a href="{@docRoot}reference/android/webkit/WebChromeClient.html#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams)">onShowFileChooser()</a></code> 메소드를 통해 {@link android.webkit.WebView}에서 입력 양식 필드를 사용할 수 있고, 파일 선택기를 실행하여 Android 기기에서 이미지 및 파일을 선택할 수 있습니다.</p>
+
+<p>또한 이 출시 버전에서는 <a href="http://webaudio.github.io/web-audio-api/" class="external-link">WebAudio</a>, <a href="https://www.khronos.org/webgl/" class="external-link">WebGL</a>, <a href="http://www.webrtc.org/" class="external-link">WebRTC</a> 개방형 표준을 지원합니다. 이 출시 버전에 포함된 새 기능에 대해 자세히 알아보려면 <a href="https://developer.chrome.com/multidevice/webview/overview" class="external-link">Android용 WebView</a>를 참조하세요.</p>
+
+<h3 id="ScreenCapture">화면 캡처 및 공유</h3>
+<p>Android 5.0에서는 새 {@link android.media.projection} API를 통해 앱에 화면 캡처 및 화면 공유 기능을 추가할 수 있습니다. 예를 들어 이 기능은 동영상 회의 앱에서 화면 공유를 사용하려는 경우 유용합니다.</p>
+
+<p>새 {@link android.media.projection.MediaProjection#createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler) createVirtualDisplay()} 메소드를 사용하면 앱에서 기본 화면(기본 디스플레이)의 콘텐츠를 {@link android.view.Surface} 개체로 캡처할 수 있으므로 앱에서 캡처한 콘텐츠를 네트워크를 통해 전송할 수 있습니다. 이 API는 비보안 화면 콘텐츠만 캡처할 수 있으며 시스템 오디오에는 적용되지 않습니다. 화면 캡처를 시작하려면 먼저 앱에서 사용자의 권한을 요청해야 하며, {@link android.content.Intent}({@link android.media.projection.MediaProjectionManager#createScreenCaptureIntent()} 메소드를 통해 가져옴)를 사용하는 화면 캡처 대화상자를 실행하여 권한을 요청할 수 있습니다.</p>
+
+<p>새 API를 사용하는 방법에 대한 예는 샘플 프로젝트의 {@code MediaProjectionDemo} 클래스를 참조하세요.</p>
+
+<h2 id="Notifications">알림</h2>
+
+<h3 id="LockscreenNotifications">잠금 화면 알림</h3>
+<p>Android 5.0의 잠금 화면에는 알림을 표시할 수 있습니다. 사용자는 <em>설정</em>을 통해 민감한 알림 내용의 보안 잠금 화면 표시 여부를 선택할 수 있습니다.</p>
+
+<p>앱에서 보안 잠금 화면에 알림이 표시될 때 세부내용의 표시 수준을 제어할 수 있습니다. 표시 수준을 제어하려면 {@link android.app.Notification.Builder#setVisibility(int) setVisibility()}를 호출하고 다음 값 중 하나를 지정합니다.</p>
+
+<ul>
+<li>{@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}: 알림 아이콘과 같은 기본 정보를 표시하고 알림의 전체 내용은 숨깁니다.</li>
+<li>{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}: 알림의 전체 내용을 표시합니다.</li>
+<li>{@link android.app.Notification#VISIBILITY_SECRET VISIBILITY_SECRET}: 알림 아이콘을 포함하여 아무것도 표시하지 않습니다.</li>
+</ul>
+
+<p>표시 수준이 {@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}인 경우 개인 세부정보를 숨기는 알림 내용의 수정된 버전을 제공할 수도 있습니다. 예를 들어 SMS 앱에서 '3개의 새 메시지가 있습니다'라는 알림을 표시하면서 메시지 내용과 보낸 사람을 숨길 수도 있습니다. 이러한 대체 알림을 제공하려면 먼저 {@link android.app.Notification.Builder}를 사용하여 대체 알림을 만듭니다. 비공개 알림 개체를 만드는 경우 {@link android.app.Notification.Builder#setPublicVersion(android.app.Notification) setPublicVersion()} 메소드를 통해 비공개 알림 개체에 대체 알림을 첨부합니다.</p>
+
+<h3 id="NotificationsMetadata">알림 메타데이터</h3>
+<p>Android 5.0에서는 앱 알림에 연결된 메타데이터를 사용하여 알림을 더욱 지능적으로 정렬합니다. 메타데이터를 설정하려면 알림을 생성할 때 {@link android.app.Notification.Builder}에서 다음 메소드를 호출합니다.</p>
+
+<ul>
+<li>{@link android.app.Notification.Builder#setCategory(java.lang.String) setCategory()}: 기기가 <em>우선순위</em> 모드일 때 앱 알림을 처리하는 방식을 시스템에 알립니다(예: 알림이 수신 전화, 메시지 또는 알람을 표시하는 경우).
+<li>{@link android.app.Notification.Builder#setPriority(int) setPriority()}: 알림을 일반 알림보다 더 중요한 또는 덜 중요한 알림으로 표시합니다. 알림에 소리나 진동도 포함된 경우, 우선순위 필드가 {@link android.app.Notification#PRIORITY_MAX PRIORITY_MAX} 또는 {@link android.app.Notification#PRIORITY_HIGH PRIORITY_HIGH}로 설정된 알림은 작은 플로팅 창에 표시됩니다.</li>
+<li>{@link android.app.Notification.Builder#addPerson(java.lang.String) addPerson()}: 알림과 관련된 사람을 한 명 이상 추가할 수 있습니다. 앱에서 이 메소드를 사용하여 지정한 사람의 알림을 모두 묶어야 하는지 또는 이 사람이 보낸 알림을 더 중요한 알림으로 표시해야 하는지를 시스템에 알릴 수 있습니다.</li>
+</ul>
+
+<h2 id="Graphics">그래픽</h2>
+
+<h3 id="OpenGLES-3-1">OpenGL ES 3.1 지원</h3>
+<p>Android 5.0에는 자바 인터페이스와 OpenGL ES 3.1에 대한 기본 지원이 추가되었습니다. OpenGL ES 3.1에서 제공하는 주요한 새 기능은 다음과 같습니다.</p>
+
+<ul>
+<li>셰이더 계산
+<li>셰이더 개체 분리
+<li>간접 그리기 명령
+<li>멀티샘플 및 스텐실 텍스처
+<li>셰이딩 언어 개선
+<li>고급 혼합 모드 및 디버깅을 위한 확장 프로그램
+<li>OpenGL ES 2.0 및 3.0과의 하위 호환성
+</ul>
+
+<p>Android의 OpenGL ES 3.1용 자바 인터페이스는 {@link android.opengl.GLES31}과 함께 제공됩니다. OpenGL ES 3.1을 사용하는 경우 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> 태그 및 {@code android:glEsVersion} 속성을 사용하여 매니페스트 파일에서 OpenGL을 선언해야 합니다. 예를 들어 다음과 같이 선언합니다.</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:glEsVersion="0x00030001" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>런타임에서 기기의 지원되는 OpenGL ES 버전을 확인하는 방법 등 OpenGL ES 사용에 대한 자세한 내용은 <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES API 가이드</a>를 확인하세요.</p>
+
+<h3 id="AndroidExtensionPack">Android 확장 프로그램 팩</h3>
+
+<p>OpenGL ES 3.1 외에, 이 출시 버전에서는 자바 인터페이스와 고급 그래픽 기능에 대한 기본 지원이 포함된 확장 프로그램 팩을 제공합니다. 이러한 확장 프로그램은 Android에서 단일 패키지로 취급합니다. {@code ANDROID_extension_pack_es31a} 확장 프로그램이 있는 경우 앱에서 패키지의 모든 확장 프로그램이 있다고 가정하고, 단일 {@code #extension} 구문을 통해 셰이딩 언어 기능을 사용 설정합니다.</p>
+
+<p>확장 프로그램 팩은 다음을 지원합니다.</p>
+
+<ul>
+<li>셰이더 저장소 버퍼, 이미지, 아토믹에 대한 보증된 프래그먼트 셰이더 지원(OpenGL ES 3.1에서는 프래그먼트 셰이더가 선택사항)</li>
+<li>테셀레이션 및 도형 셰이더</li>
+<li>ASTC(LDR) 텍스처 압축 형식</li>
+<li>샘플당 보간 및 셰이딩</li>
+<li>프레임 버퍼에서 각 색상을 추가하기 위한 여러 가지 혼합 모드</li>
+</ul>
+
+<p>확장 프로그램 팩의 자바 인터페이스는 {@link android.opengl.GLES31Ext}와 함께 제공됩니다. 앱 매니페스트에서 앱이 확장 프로그램 팩을 지원하는 기기에서만 설치되도록 선언할 수 있습니다. 예를 들어 다음과 같이 선언합니다.</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:name=“android.hardware.opengles.aep”
+        android:required="true" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="Media">미디어</h2>
+
+<h3 id="Camera-v2">고급 카메라 기능을 위한 카메라 API</h3>
+
+<p>Android 5.0에는 새 <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">android.hardware.camera2</a> API가 도입되어 고품질 사진 캡처 및 이미지 처리가 더욱 쉬워졌습니다. {@link android.hardware.camera2.CameraManager#getCameraIdList() getCameraIdList()}로 시스템에 사용할 수 있는 카메라 기기에 프로그램 방식으로 액세스할 수 있으며, {@link android.hardware.camera2.CameraManager#openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateCallback, android.os.Handler) openCamera()}로 특정 기기에 연결할 수 있습니다. 이미지 캡처를 시작하려면 {@link android.hardware.camera2.CameraCaptureSession}을 만들고 {@link android.view.Surface} 개체를 지정하여 캡처한 이미지를 전송합니다. 한 장의 사진 또는 한 번에 여러 이미지를 촬영하도록 {@link android.hardware.camera2.CameraCaptureSession}을 구성할 수 있습니다.</p>
+
+<p>새 이미지를 캡처할 때 알림을 받으려면 {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} 리스너를 구현하고 캡처 요청에서 이를 설정합니다. 이제 시스템에서 이미지 캡처 요청을 완료하면 {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} 리스너가 {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback#onCaptureCompleted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult) onCaptureCompleted()}에 대한 호출을 수신하고 {@link android.hardware.camera2.CaptureResult}의 이미지 캡처 메타데이터를 제공합니다.</p>
+
+<p>{@link android.hardware.camera2.CameraCharacteristics} 클래스를 사용하면 기기에서 사용할 수 있는 카메라 기능을 감지할 수 있습니다. 개체의 {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL INFO_SUPPORTED_HARDWARE_LEVEL} 속성은 카메라의 기능 수준을 나타냅니다.</p>
+
+<ul>
+  <li>모든 기기는 최소 {@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY} 하드웨어 수준을 지원하며, 이는 사용 중지된 {@link android.hardware.Camera} API의 수준과 거의 동등한 기능을 가집니다.</li>
+  <li>{@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL INFO_SUPPORTED_HARDWARE_LEVEL_FULL} 하드웨어 수준을 지원하는 기기는 캡처 및 후속 처리를 수동으로 제어할 수 있으며 높은 프레임 속도에서 고해상도 이미지를 캡처할 수 있습니다.</li>
+</ul>
+
+<p>업데이트된 <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">카메라</a> API를 사용하는 방법에 대해 알아보려면 이 출시 버전의 {@code Camera2Basic} 및 {@code Camera2Video} 구현 샘플을 참조하세요.</p>
+
+<h3 id="AudioPlayback">오디오 재생</h3>
+<p>이 출시 버전에는 다음과 같은 {@link android.media.AudioTrack}에 대한 변경사항이 포함되어 있습니다.</p>
+<ul>
+  <li>이제 앱에서 부동 소수점 형식({@link android.media.AudioFormat#ENCODING_PCM_FLOAT ENCODING_PCM_FLOAT})으로 오디오 데이터를 제공할 수 있습니다. 이를 통해 더 큰 음량비, 더 일관된 정밀도 및 더 큰 헤드룸이 가능해졌습니다. 부동 소수점 연산은 중간 과정 계산에 특히 유용합니다. 재생 엔드포인트는 오디오 데이터에 낮은 비트 심도로 정수 형식을 사용합니다 (Android 5.0에서 일부 내부 파이프라인은 아직 부동 소수점이 아님). 
+  <li>이제 앱에서 오디오 데이터를 {@link android.media.MediaCodec}에서 제공하는 것과 같은 형식인 {@link java.nio.ByteBuffer}로 제공할 수 있습니다.
+  <li>{@link android.media.AudioTrack#WRITE_NON_BLOCKING WRITE_NON_BLOCKING} 옵션은 일부 앱에서 버퍼링 및 멀티스레딩을 단순화할 수 있습니다.
+</ul>
+
+<h3 id="MediaPlaybackControl">미디어 재생 컨트롤</h3>
+<p>새 알림 및 미디어 API를 사용하면 시스템 UI에서 미디어 재생을 인식하고 앨범 아트를 추출 및 표시하도록 할 수 있습니다. 이제 새 {@link android.media.session.MediaSession} 및 {@link android.media.session.MediaController} 클래스를 통해 UI 및 서비스에서 미디어 재생을 제어하는 것이 더욱 쉬워졌습니다.</p>
+
+<p>새 {@link android.media.session.MediaSession} 클래스는 사용 중지된 {@link android.media.RemoteControlClient} 클래스를 대체하며 이동 컨트롤 및 미디어 버튼 처리에 하나의 콜백 메소드 집합을 제공합니다. 앱이 미디어 재생을 제공하고 Android <a href="{@docRoot}tv/index.html">TV</a> 또는 <a href="{@docRoot}wear/index.html">Wear</a> 플랫폼에서 실행되는 경우, {@link android.media.session.MediaSession} 클래스로 동일한 콜백 메소드를 사용하는 이동 컨트롤을 처리할 수 있습니다.</p>
+
+<p>이제 새 {@link android.media.session.MediaController} 클래스를 사용하여 미디어 컨트롤러 앱을 제작할 수 있습니다. 이 클래스는 스레드 안전성을 보장하면서 앱의 UI 프로세스에서 미디어 재생을 모니터링하고 제어할 수 있는 방법을 제시합다. 컨트롤러를 만들 때 {@link android.media.session.MediaSession.Token} 개체를 지정하여 앱이 기존 {@link android.media.session.MediaSession}과 상호작용할 수 있도록 합니다. {@link android.media.session.MediaController.TransportControls} 메소드를 사용하여 {@link android.media.session.MediaController.TransportControls#play() play()}, {@link android.media.session.MediaController.TransportControls#stop() stop()}, {@link android.media.session.MediaController.TransportControls#skipToNext() skipToNext()} 및 {@link android.media.session.MediaController.TransportControls#setRating(android.media.Rating) setRating()}과 같은 명령을 전송해 해당 세션에서 미디어 재생을 제어할 수 있습니다. 컨트롤러를 사용하면 {@link android.media.session.MediaController.Callback} 개체를 등록하여 세션의 메타데이터 및 상태 변경을 수신할 수도 있습니다.</p>
+
+<p>또한 새 {@link android.app.Notification.MediaStyle} 클래스를 사용하여 미디어 세션에 연결된 재생 컨트롤을 허용하는 리치 알림을 생성할 수 있습니다.</p>
+
+<h3 id="MediaBrowsing">미디어 탐색</h3>
+<p>Android 5.0에는 새 <a href="{@docRoot}reference/android/media/browse/package-summary.html">android.media.browse</a> API를 통해 앱에서 다른 앱의 미디어 콘텐츠 라이브러리를 탐색할 수 있는 기능이 도입되었습니다. 앱의 미디어 콘텐츠를 노출하려면 {@link android.service.media.MediaBrowserService} 클래스를 확장합니다. {@link android.service.media.MediaBrowserService} 구현하면서 {@link android.media.session.MediaSession.Token}에 대한 액세스 권한을 제공해야 서비스를 통해 제공된 미디어 콘텐츠를 앱에서 재생할 수 있습니다.</p>
+<p>미디어 브라우저 서비스와 상호작용하려면 {@link android.media.browse.MediaBrowser} 클래스를 사용합니다. {@link android.media.browse.MediaBrowser} 인스턴스를 만들 때 {@link android.media.session.MediaSession}의 구성요소 이름을 지정합니다. 이 브라우저 인스턴스를 사용하면 앱에서 서비스에 연결할 수 있고, {@link android.media.session.MediaSession.Token} 개체를 가져와 서비스를 통해 노출된 콘텐츠를 재생할 수 있습니다.</p>
+
+<h2 id="Storage">저장소</h2>
+
+<h3 id="DirectorySelection">디렉토리 선택</h3>
+
+<p>Android 5.0에서는 <a href="{@docRoot}guide/topics/providers/document-provider.html">저장소 액세스 프레임워크</a>를 확장하여 사용자가 전체 디렉토리 하위 트리를 선택할 수 있으며, 각 항목에 대한 사용자 확인 없이 포함된 모든 문서에 대한 읽기/쓰기 액세스 권한을 앱에 부여합니다.</p>
+
+<p>디렉토리 하위 트리를 선택하려면 {@link android.content.Intent#ACTION_OPEN_DOCUMENT_TREE OPEN_DOCUMENT_TREE} 인텐트를 만들어 전송합니다. 시스템에서 하위 트리 선택을 지원하는 모든 {@link android.provider.DocumentsProvider} 인스턴스를 표시하며, 사용자가 디렉토리를 탐색 및 선택할 수 있게 됩니다. 반환된 URI가 선택된 하위 트리에 대한 액세스를 표시합니다. 그러면 {@link android.provider.DocumentsContract#buildChildDocumentsUriUsingTree(android.net.Uri, java.lang.String) buildChildDocumentsUriUsingTree()} 및 {@link android.provider.DocumentsContract#buildDocumentUriUsingTree(android.net.Uri, java.lang.String) buildDocumentUriUsingTree()}를 {@link android.content.ContentResolver#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) query()}와 함께 사용하여 하위 트리를 탐색할 수 있습니다.</p>
+
+<p>새 {@link android.provider.DocumentsContract#createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String) createDocument()} 메소드를 사용하면 하위 트리의 모든 위치에서 새 문서나 디렉토리를 만들 수 있습니다. 기존 문서를 관리하려면 {@link android.provider.DocumentsContract#renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String) renameDocument()} 및 {@link android.provider.DocumentsProvider#deleteDocument(java.lang.String) deleteDocument()}를 사용합니다. 게시 전에 {@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS}에서 이러한 호출에 대한 제공업체 지원을 확인합니다.</p>
+
+<p>{@link android.provider.DocumentsProvider}를 구현하고 있고 하위 트리 선택을 지원하고자 하는 경우 {@link android.provider.DocumentsProvider#isChildDocument(java.lang.String, java.lang.String) isChildDocument()}를 구현하고 {@link android.provider.DocumentsContract.Root#FLAG_SUPPORTS_IS_CHILD FLAG_SUPPORTS_IS_CHILD}를 {@link android.provider.DocumentsContract.Root#COLUMN_FLAGS COLUMN_FLAGS}에 추가합니다.</p>
+
+<p>또한 Android 5.0에는 공유 저장소의 새 패키지 전용 디렉토리가 도입되었습니다. 앱에서 {@link android.provider.MediaStore}에 포함될 미디어 파일을 이 디렉토리에 저장할 수 있습니다. 새 {@link android.content.Context#getExternalMediaDirs()}는 공유된 모든 저장 기기에서 이 디렉토리의 경로를 반환합니다. {@link android.content.Context#getExternalFilesDir(java.lang.String) getExternalFilesDir()}과 비슷하게 앱에서 반환된 경로에 액세스하는 데 추가 권한이 필요하지 않습니다. 플랫폼에서 이 디렉토리에서 새 미디어가 있는지 주기적으로 스캔하지만 {@link android.media.MediaScannerConnection}을 사용하여 새 콘텐츠를 명시적으로 검색할 수도 있습니다.</p>
+
+<h2 id="Wireless">무선 및 연결</h2>
+
+<h3 id="Multinetwork">여러 네트워크 연결</h3>
+<p>Android 5.0에서는 앱이 특정 기능이 있는 사용 가능한 네트워크를 동적으로 스캔하고 이러한 네트워크에 연결을 설정하도록 해 주는 새 멀티 네트워킹 API를 제공합니다. 이 기능은 앱에서 특수한 네트워크(예: SUPL, MMS, 이동통신사 결제 네트워크 또는 특정 유형의 전송 프로토콜을 사용해 데이터를 전송하려는 경우)가 필요할 때 유용합니다.</p>
+
+<p>앱에서 네트워크를 동적으로 선택하고 연결하려면 다음 단계를 따릅니다.</p>
+
+<ol>
+ <li>{@link android.net.ConnectivityManager}를 만듭니다.</li>
+ <li>{@link android.net.NetworkRequest.Builder} 클래스를 사용하여 {@link android.net.NetworkRequest} 개체를 만들고 앱에서 사용하려는 네트워크 기능 및 전송 유형을 지정합니다.</li>
+<li>적합한 네트워크를 스캔하려면 {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} 또는 {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}을 호출하고 {@link android.net.NetworkRequest} 개체 및 {@link android.net.ConnectivityManager.NetworkCallback} 구현에 전달합니다. 적합한 네트워크가 감지되었을 때 능동적으로 전환하도록 하려면 {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} 메소드를 사용합니다. 능동적인 전환 없이 스캔한 네트워크에 대한 알림만 받으려면 {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()} 메소드를 사용합니다.</li>
+</ol>
+
+<p>시스템에서 적절한 네트워크를 감지하면 감지한 네트워크에 연결하고 {@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()} 콜백을 호출합니다. 콜백의 {@link android.net.Network} 개체를 사용하여 네트워크에 대한 추가 정보를 가져오거나, 트래픽이 선택한 네트워크를 사용하도록 유도합니다.</p>
+
+<h3 id="BluetoothBroadcasting">저전력 블루투스</h3>
+<p>Android 4.3에서는 <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">저전력 블루투스</a>(<em>블루투스 LE</em>)에 대한 플랫폼 지원이 도입되었습니다. Android 5.0에서는 Android 기기가 블루투스 LE <em>주변기기</em>로 작동할 수 있습니다. 앱에서 이 기능을 사용하여 주변 기기에 블루투스로 연결할 수 있음을 알릴 수 있습니다. 예를 들어 기기가 만보계나 건강 모니터링 기기로 작동하면서 다른 블루투스 LE 기기와 데이터를 통신할 수 있도록 하는 앱을 제작할 수 있습니다.</p> 
+<p>새 {@link android.bluetooth.le} API를 사용하면 앱에서 광고를 브로드캐스팅하고, 응답을 스캔하며, 주변의 블루투스 LE 기기와 연결을 설정하도록 할 수 있습니다. 새 광고 및 스캔 기능을 사용하려면 매니페스트에 {@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN} 권한을 추가합니다. 사용자가 Play 스토어에서 앱을 업데이트하거나 다운로드할 때 사용자에게 앱에 권한을 부여할 것인지 묻는 메시지('블루투스 연결 정보: 주변의 블루투스 기기에 브로드캐스팅하거나 이러한 기기에 대한 정보 수집하는 등 앱에서 블루투스를 제어하도록 허용합니다.')가 표시됩니다.</p>
+
+<p>다른 앱에서 내 앱을 찾을 수 있도록 블루투스 LE 광고를 시작하려면 {@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()}을 호출하고 이를 {@link android.bluetooth.le.AdvertiseCallback} 클래스 구현에 전달합니다. 콜백 개체는 광고 작업의 성공 또는 실패에 대한 보고서를 수신합니다.</p>
+
+<p> Android 5.0에는 {@link android.bluetooth.le.ScanFilter} 클래스가 도입되어 앱에서 연결하려는 특정 유형의 기기만 스캔하도록 할 수 있습니다. 블루투스 LE 기기 스캔을 시작하려면 {@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback) startScan()}을 호출하고 필터 목록으로 전달합니다. 메소드 호출에서 {@link android.bluetooth.le.ScanCallback} 구현도 제공하여 블루투스 LE 광고를 찾은 시점을 보고해야 합니다. </p>
+
+<h3 id="NFCEnhancements">NFC 개선사항</h3>
+<p>Android 5.0에서는 다음과 같은 개선사항을 통해 더욱 폭넓고 자유롭게 NFC를 사용할 수 있게 되었습니다.</p>
+
+<ul>
+<li>이제 <em>공유</em> 메뉴에서 Android Beam을 사용할 수 있습니다.</li>
+<li>{@link android.nfc.NfcAdapter#invokeBeam(android.app.Activity) invokeBeam()}을 호출하는 방식으로 앱이 사용자의 기기에서 Android Beam을 호출하여 데이터를 공유할 수 있습니다. 이를 통해 사용자가 데이터 전송을 완료하기 위해 기기를 다른 NFC 지원 기기에 직접 탭하지 않아도 됩니다.</li>
+<li>새 {@link android.nfc.NdefRecord#createTextRecord(java.lang.String, java.lang.String) createTextRecord()} 메소드를 사용하여 UTF-8 텍스트 데이터가 포함된 NDEF 기록을 만들 수 있습니다.</li>
+<li>결재 앱을 개발 중인 경우 <code><a href="{@docRoot}reference/android/nfc/cardemulation/CardEmulation.html#registerAidsForService(android.content.ComponentName, java.lang.String, java.util.List<java.lang.String>)">registerAidsForService()</a></code>를 호출하여 NFC AID(애플리케이션 ID)를 동적으로 등록할 수 있습니다. 또한 {@link android.nfc.cardemulation.CardEmulation#setPreferredService(android.app.Activity, android.content.ComponentName) setPreferredService()}를 사용하여 특정 액티비티가 포그라운드에 있을 때 사용되어야 하는 카드 에뮬레이션 서비스를 원하는 대로 설정할 수 있습니다.</li>
+</ul>
+
+<h2 id="Power">프로젝트 Volta</h2>
+
+<p>새 기능과 이외에, Android 5.0에서는 배터리 수명을 개선하는 데 집중하고 있습니다. 새 API 및 도구를 사용하여 앱의 전력 소비를 파악하고 최적화할 수 있습니다.</p>
+
+<h3 id="JobScheduler">작업 예약</h3>
+<p>Android 5.0에서는 시스템에서 나중에 또는 특정 조건(예: 기기가 충전될 때)에서 비동기식으로 실행할 작업을 정의하여 배터리 수명을 최적화할 수 있는 새 {@link android.app.job.JobScheduler} API를 제공합니다. 작업 예약은 다음과 같은 상황에서 유용합니다.</p>
+<ul>
+  <li>앱에 사용자가 확인하지 않아도 되며 연기할 수 있는 작업이 있는 경우</li>
+  <li>앱에 기기가 전원에 연결된 상태에서 수행하려는 작업이 있는 경우</li>
+  <li>앱에 네트워크 액세스 또는 Wi-Fi 연결이 필요한 작업이 있는 경우</li>
+  <li>앱에 정기으로 일괄 실행하려는 여러 작업이 있는 경우</li>
+
+</ul>
+
+<p>작업 단위는 {@link android.app.job.JobInfo} 개체에 의해 캡슐화됩니다. 이 개체는 예약 기준을 지정합니다.</p>
+
+<p>{@link android.app.job.JobInfo.Builder} 클래스를 사용하여 예약된 작업이 실행되어야 하는 방식을 구성합니다. 다음과 같은 특정 조건에서 작업이 실행되도록 예약할 수 있습니다.</p>
+
+<ul>
+  <li>기기가 충전 중일 때 시작</li>
+  <li>기기가 무제한 네트워크에 연결될 때 시작</li>
+  <li>기기가 유휴 상태일 때 시작</li>
+  <li>특정 기한 전에 종료 또는 지연을 최소화하여 종료</li>
+</ul>
+
+<p>예를 들어 다음과 같은 코드를 추가하여 무제한 네트워크에서 작업을 실행할 수 있습니다.</p>
+
+<pre>
+JobInfo uploadTask = new JobInfo.Builder(mJobId,
+                                         mServiceComponent /* JobService component */)
+        .setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED)
+        .build();
+JobScheduler jobScheduler =
+        (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+jobScheduler.schedule(uploadTask);
+</pre>
+
+<p>기기가 안정적인 전원에 연결된 경우(즉, 기기가 2분 이상 충전 중이며 배터리가 <a href="{@docRoot}reference/android/content/Intent.html#ACTION_BATTERY_OKAY">충분한 수준</a>인 경우) 시스템에서 작업의 기한이 지나지 않았더라도 실행 준비가 된 예약 작업을 실행합니다.</p>
+
+<p>{@link android.app.job.JobScheduler} API를 사용하는 방법의 예를 확인하려면 이 출시 버전의 {@code JobSchedulerSample} 구현 샘플을 참조하세요.</p>
+
+<h3 id="PowerMeasurementTools">배터리 사용량을 위한 개발자 도구</h3>
+
+<p>새 {@code dumpsys batterystats} 명령은 기기의 배터리 사용량에 대해 흥미로운 통계 데이터를 생성하고, 이러한 데이터는 고유한 UID(사용자 ID)로 정리됩니다. 통계에는 다음이 포함됩니다.</p>
+
+<ul>
+<li>배터리 관련 이벤트 기록
+<li>기기에 대한 전체 통계
+<li>UID 및 시스템 구성요소당 대략적인 전력 사용량
+<li>패킷당 앱별 모바일 ms
+<li>시스템 UID로 집계된 통계
+<li>앱 UID로 집계된 통계
+</ul>
+
+<p>{@code --help} 옵션을 사용하여 통계를 맞춤설정하는 다양한 방법에 대해 알아볼 수 있습니다. 예를 들어 기기가 마지막으로 충전된 이후 특정 앱 패키지에서의 배터리 사용량 통계를 출력하려면 다음 명령을 실행합니다.
+<pre>
+$ adb shell dumpsys batterystats --charged &lt;package-name&gt;
+</pre>
+
+<p>{@code dumpsys} 명령의 출력에서 <a href="https://github.com/google/battery-historian" class="external-link">Battery Historian</a> 도구를 사용하여 로그로부터 전력 관련 이벤트를 가져와 HTML 형식으로 볼 수 있습니다. 이 정보는 배터리 관련 문제를 쉽게 파악하고 진단할 수 있게 해 줍니다.</p>
+
+<h2 id="Enterprise">업무 및 교육을 위한 Android</h2>
+<h3 id="ManagedProvisioning">관리되는 프로비저닝</h3>
+
+<p>Android 5.0에서는 기업 환경에서 사용하는 앱을 위한 새 기능을 제공합니다. 사용자에게 기존 개인 계정이 있는 경우, <a href="{@docRoot}guide/topics/admin/device-admin.html">기기 관리자</a>는 관리되는 프로비저닝 과정을 시작하여 기기에 동시에 존재하지만 분리된 <em>관리되는 프로필</em>을 추가할 수 있습니다. 관리되는 프로필에 연결된 앱은 사용자의 런처, 최근 화면, 알림에서 관리되지 않는 앱과 함께 표시됩니다.</p>
+
+<p>관리되는 프로비저닝 과정을 시작하려면 {@link android.content.Intent}의 {@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE ACTION_PROVISION_MANAGED_PROFILE}을 전송합니다. 호출이 성공하면 시스템에서 {@link android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete(android.content.Context, android.content.Intent) onProfileProvisioningComplete()} 콜백을 실행합니다. 그러면 {@link android.app.admin.DevicePolicyManager#setProfileEnabled(android.content.ComponentName) setProfileEnabled()}를 호출하여 관리되는 프로필을 사용 설정할 수 있습니다.</p>
+
+<p>기본적으로 앱의 일부 하위 집합만 관리되는 프로필에서 사용 설정됩니다. {@link android.app.admin.DevicePolicyManager#enableSystemApp(android.content.ComponentName, android.content.Intent) enableSystemApp()}을 호출하여 관리되는 프로필에서 추가 앱을 설치할 수 있습니다.</p>
+
+<p>런처 앱을 개발 중인 경우 새 {@link android.content.pm.LauncherApps} 클래스를 사용하여 현재 사용자 및 연결된 관리되는 프로필에 대해 실행할 수 있는 액티비티의 목록을 가져올 수 있습니다. 런처에서는 작업 배지를 아이콘 드로어블에 추가하여 관리되는 앱을 눈에 띄게 만들 수 있습니다. 배지 아이콘을 가져오려면 {@link android.content.pm.PackageManager#getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle) getUserBadgedIcon()}을 호출합니다.</p>
+
+<p>새 기능을 사용하는 방법을 확인하려면 이 출시 버전의 {@code BasicManagedProfile} 구현 샘플을 참조하세요.</p>
+
+<h3 id="DeviceOwner">기기 소유자</h3>
+<p>Android 5.0에는 기기 소유자 앱을 배포할 수 있는 기능이 도입되었습니다. <em>기기 소유자</em>는 특수한 유형의 <a href="{@docRoot}guide/topics/admin/device-admin.html">기기 관리자</a>로, 보조 사용자를 만들거나 제거하고 기기에서 전체 설정을 구성할 수 있습니다. 기기 소유자 앱에서는 {@link android.app.admin.DevicePolicyManager} 클래스의 메소드를 사용하여 관리되는 기기에서 구성, 보안 및 앱을 세부적으로 제어할 수 있습니다. 기기에는 한 번에 한 명의 활성 기기 소유자만 있어야 합니다.</p>
+
+<p>기기 소유자를 적용하고 활성화하려면 기기가 프로비저닝되지 않은 상태에서, 프로그래밍 앱에서 기기로 NFC 데이터를 전송해야 합니다. 이 데이터 전송 시 <a href="#ManagedProvisioning">관리되는 프로비저닝</a>에서 설명한 프로비저닝 인텐트의 정보와 동일한 정보가 전송됩니다.</p>
+
+<h3 id="ScreenPinning">화면 고정</h3>
+
+<p>Android 5.0에는 새 화면 고정 API가 도입되어 일시적으로 사용자가 작업에서 벗어나거나 알림에 의해 방해받는 것을 제한할 수 있습니다. 예를 들어 이 기능은 Android에서 중대한 평가를 위한 교육용 앱, 용도가 하나로 고정된 애플리케이션이나 키오스크 용 애플리케이션을 개발 중인 경우에 사용할 수 있습니다. 앱에서 화면 고정을 활성화하면 앱에서 고정 모드를 종료할 때까지 사용자는 알림을 보거나 다른 앱에 액세스하거나 홈 화면으로 돌아갈 수 없습니다.</p>
+
+<p>다음과 같은 두 가지 방법으로 화면 고정을 활성화할 수 있습니다.</p>
+
+<ul>
+<li><strong>수동 방식:</strong> 사용자는 <em>설정 &gt; 보안 &gt; 화면 고정</em>으로 이동하여 화면 고정을 사용 설정하고, 최근 화면에서 녹색 핀 아이콘을 터치하여 고정하려는 작업을 선택할 수 있습니다.</li> <li><strong>프로그래밍 방식:</strong> 프로그래밍 방식으로 화면 고정을 활성화하려면 앱에서 {@link android.app.Activity#startLockTask() startLockTask()}를 호출합니다. 요청하는 앱이 기기 소유자가 아닌 경우 사용자에게 확인 메시지가 표시됩니다. 기기 소유자 앱은 {@link android.app.admin.DevicePolicyManager#setLockTaskPackages(android.content.ComponentName, java.lang.String[]) setLockTaskPackages()} 메소드를 호출하여 사용자 확인 단계 없이 앱을 고정 가능하게 설정할 수 있습니다.</li>
+</ul>
+
+<p>작업 잠금이 활성 상태이면 다음 동작이 진행됩니다.</p>
+
+<ul>
+<li>상태 표시줄이 공백으로 표시되고 사용자 알림 및 상태 정보가 숨겨집니다.</li>
+<li>홈 및 최근 앱 버튼이 숨겨집니다.</li>
+<li>다른 앱에서 새 액티비티를 실행할 수 없습니다.</li>
+<li>새 액티비티로 인해 새 작업이 생성되지 않는 이상 현재 앱에서 새 액티비티를 시작할 수 있습니다.</li>
+<li>기기 소유자가 화면 고정을 호출하면 앱에서 {@link android.app.Activity#stopLockTask() stopLockTask()}를 호출할 때까지 사용자의 앱이 잠금 상태로 남아 있습니다.</li>
+<li>화면 고정이 기기 소유자가 아닌 다른 앱 또는 사용자가 직접 수행하는 액티비티인 경우, 사용자는 뒤로 및 최근 버튼을 길게 터치하여 화면 고정을 종료할 수 있습니다.</li>
+
+</ul>
+
+<h2 id="Printing">인쇄 프레임워크</h2>
+
+<h3 id="PDFRender">PDF를 비트맵으로 렌더링</h3>
+<p>이제 새 {@link android.graphics.pdf.PdfRenderer} 클래스를 사용하여 PDF 문서 페이지를 비트맵 이미지로 렌더링하여 인쇄할 수 있습니다. 찾을 수 있는(즉, 콘텐츠에 임의로 액세스할 수 있는) {@link android.os.ParcelFileDescriptor}를 지정해야 합니다. 여기에 시스템에서 인쇄 가능한 콘텐츠를 쓰게 됩니다. 앱에서는 {@link android.graphics.pdf.PdfRenderer#openPage(int) openPage()}를 사용하여 렌더링하려는 페이지를 가져와서 {@link android.graphics.pdf.PdfRenderer.Page#render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int) render()}를 호출하여 열려 있는 {@link android.graphics.pdf.PdfRenderer.Page}를 비트맵으로 전환할 수 있습니다. 문서 일부만 비트맵 이미지로 전환하려는 경우 추가 매개변수를 설정할 수도 있습니다(예: 문서에서 확대하기 위해 <a href="http://en.wikipedia.org/wiki/Tiled_rendering" class="external-link">타일식 렌더링</a>을 구현하려는 경우).</p>
+
+<p>새 API를 사용하는 방법에 대한 예는 {@code PdfRendererBasic} 샘플을 참조하세요.</p>
+
+<h2 id="System">시스템</h2>
+<h3 id="AppUsageStatistics">앱 사용량 통계</h3>
+<p>새 {@link android.app.usage} API를 사용하여 Android 기기에서 앱 사용량 기록에 액세스할 수 있습니다. 이 API는 사용 중지된 {@link android.app.ActivityManager#getRecentTasks(int, int) getRecentTasks()} 메소드보다 더 자세한 사용량 정보를 제공합니다. 이 API를 사용하려면 먼저 매니페스트에서 {@code "android.permission.PACKAGE_USAGE_STATS"} 권한을 선언해야 합니다. 또한 사용자는 <em>설정 &gt; 보안 &gt; 앱</em>에서 사용량 액세스와 함께 해당 앱에 대한 액세스를 사용 설정해야 합니다.</p>
+
+<p>시스템에서는 앱 단위 사용량 데이터를 수집하며 일일, 주간, 월간 및 연간 단위로 데이터를 집계합니다. 시스템에서 이 데이터를 보관하는 최대 기간은 다음과 같습니다.</p>
+
+<ul>
+  <li>일일 데이터: 7일</li>
+  <li>주간 데이터: 4주</li>
+  <li>월간 데이터: 6개월</li>
+  <li>연간 데이터: 2년</li>
+</ul>
+
+<p>각 앱에 대해 시스템에서는 다음 데이터를 기록합니다.</p>
+<ul>
+<li>앱이 마지막으로 사용된 시간</li>
+<li>해당 기간(일, 주, 월 또는 연도별)에 앱이 포그라운드에서 작동한 총 시간</li>
+<li>구성요소(패키지 및 액티비티 이름으로 식별)가 하루 동안 포그라운드 또는 백그라운드로 이동한 시기를 캡처한 타임스탬프</li>
+<li>기기 구성이 변경된 시점(예: 회전으로 인해 기기 방향이 변경된 시점)을 캡처한 타임스탬프</li>
+</ul>
+
+<h2 id="TestingA11y">테스트 및 접근성 </h2>
+
+<h3 id="TestingA11yImprovements">테스트 및 접근성 개선사항</h3>
+<p>Android 5.0에는 다음과 같은 테스트 및 접근성 지원이 추가되었습니다.</p>
+
+<ul>
+<li>새 {@link android.app.UiAutomation#getWindowAnimationFrameStats() getWindowAnimationFrameStats()} 및 {@link android.app.UiAutomation#getWindowContentFrameStats(int) getWindowContentFrameStats()} 메소드는 창 애니메이션 및 콘텐츠에 대한 프레임 통계를 캡처합니다. 이러한 메소드를 사용하면 차질 없는 사용자 경험을 제공하기 위해 앱에서 충분한 새로고침 빈도로 프레임을 렌더링하는지 평가할 수 있는 작동 테스트를 작성할 수 있습니다.</li>
+
+<li>새 {@link android.app.UiAutomation#executeShellCommand(java.lang.String) executeShellCommand()} 메소드를 사용하면 작동 테스트에서 셸 명령을 실행할 수 있습니다. 명령 실행은 기기에 연결된 호스트에서 {@code adb shell}을 실행하는 것과 비슷하며, 실행하면 {@code dumpsys}, {@code am}, {@code content} 및 {@code pm}와 같은 셸 기반 도구를 사용할 수 있게 됩니다.</li>
+
+<li>이제 접근성 API(예: <a href="{@docRoot}tools/help/uiautomator/index.html">{@code UiAutomator}</a>)를 사용하는 접근성 서비스 및 테스트 도구에서 일반 사용자가 상호작용할 수 있는 화면의 창 속성에 대한 자세한 정보를 가져올 수 있습니다. {@link android.view.accessibility.AccessibilityWindowInfo} 개체 목록을 가져오려면 새 {@link android.accessibilityservice.AccessibilityService#getWindows() getWindows()} 메소드를 호출합니다.</li>
+
+<li>새 {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} 클래스를 사용하면 {@link android.view.accessibility.AccessibilityNodeInfo}에서 수행할 표준 또는 맞춤 작업을 정의할 수 있습니다. 새 {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} 클래스는 이전에 {@link android.view.accessibility.AccessibilityNodeInfo}에서 찾을 수 있던 작업 관련 API를 대체합니다.</li>
+
+<li>Android 5.0에서는 앱에서 TTS(텍스트 음성 변환) 합성을 세부적으로 제어할 수 있습니다. 새 {@link android.speech.tts.Voice} 클래스를 사용하면 앱에서 특정 언어에 연결된 음성 프로필, 품질과 지연 시간 평가 및 TTS(텍스트 음성 변환) 엔진 전용 매개변수를 사용할 수 있습니다.</li>
+</ul>
+
+<h2 id="IME">IME</h2>
+
+<h3 id="Switching">더 쉽게 입력 언어를 전환</h3>
+
+<p>Android 5.0부터 사용자는 플랫폼에서 지원하는 모든 <a href="{@docRoot}guide/topics/text/creating-input-method.html">IME(입력 방법 편집기)</a> 간에 더 쉽게 전환할 수 있습니다. 지정된 전환 작업(보통 소프트웨어 키보드에서 지구 아이콘을 터치)을 수행하면 이러한 모든 IME가 순환 적용됩니다. 이러한 작동 변경사항은 {@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod(android.os.IBinder) shouldOfferSwitchingToNextInputMethod()} 메소드에 의해 구현되었습니다.</p>
+
+<p>또한 이제 프레임워크에서 다음 IME에 전환 메커니즘이 포함되어 있는지, 즉 다음 IME가 그 다음 IME로의 전환을 지원하는지 확인합니다. 전환 메커니즘이 있는 IME는 메커니즘이 없는 IME로 순환 이동하지 않습니다. 이러한 작동 변경사항은 {@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod(android.os.IBinder, boolean) switchToNextInputMethod()} 메소드에 의해 구현되었습니다.
+
+<p>업데이트된 IME 전환 API를 사용하는 방법에 대한 예를 확인하려면 이 출시 버전의 업데이트된 소프트웨어 키보드 구현 샘플을 참조하세요. IME 간에 전환을 구현하는 방법에 대해 자세히 알아보려면 <a href="{@docRoot}guide/topics/text/creating-input-method.html">입력 방법 만들기</a>를 참조하세요.
+</p>
+
+<h2 id="Manifest">매니페스트 선언</h2>
+
+<h3 id="ManifestFeatures">선언 가능한 필수 기능</h3>
+<p>이제 다음 값이 <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> 요소에서 지원되므로, 앱에서 필요한 기능을 제공하는 기기에만 앱이 설치됩니다.</p>
+
+<ul>
+<li>{@link android.content.pm.PackageManager#FEATURE_AUDIO_OUTPUT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_POST_PROCESSING}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_SENSOR}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_RAW}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_LEVEL_FULL}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_GAMEPAD}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LIVE_TV}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_MANAGED_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LEANBACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_OPENGLES_EXTENSION_PACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SECURELY_REMOVES_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_AMBIENT_TEMPERATURE}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_HEART_RATE_ECG}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_RELATIVE_HUMIDITY}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_VERIFIED_BOOT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_WEBVIEW}</li>
+</ul>
+
+<h3 id="Permissions">사용자 권한</h3>
+
+<p>이제 다음 권한이 <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code <uses-permission>}</a> 요소에서 지원되어 앱이 특정 API에 액세스하는 데 필요한 권한을 선언할 수 있습니다.</p>
+
+<ul>
+<li>{@link android.Manifest.permission#BIND_DREAM_SERVICE}: API 수준 21 이상을 타겟팅하는 경우, 시스템만 <a href="{@docRoot}about/versions/android-4.2.html#Daydream">Daydream</a> 서비스에 결합할 수 있는지 확인하기 위해 Daydream 서비스에서 이 권한을 요구합니다.</li>
+</ul>

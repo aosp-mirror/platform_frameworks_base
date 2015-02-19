@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">DriveFolder</li>
       </ul>
     </div>
@@ -777,6 +846,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -850,7 +922,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a></td>
-      <td class="jd-descrcol" width="100%">A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code>.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code>.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -862,7 +939,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFolderResult.html">DriveFolder.DriveFolderResult</a></td>
-      <td class="jd-descrcol" width="100%">A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code>.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A result that contains a <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html">DriveFolder</a></code>.&nbsp;
+        
+    
+
+      </td>
     </tr>
     
     
@@ -887,7 +969,12 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#MIME_TYPE">MIME_TYPE</a></td>
-        <td class="jd-descrcol" width="100%">The MIME type associated with folder resources.</td>
+        <td class="jd-descrcol" width="100%">
+          The MIME type associated with folder resources.
+          
+    
+
+        </td>
     </tr>
     
     
@@ -926,56 +1013,44 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents, com.google.android.gms.drive.ExecutionOptions)">createFile</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents, <a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a> executionOptions)</nobr>
-
-        <div class="jd-descrdiv">Creates a new binary file within this folder, with the provided initial metadata and
- <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.Contents)">createFile</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
         
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    use <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)">createFile(GoogleApiClient, MetadataChangeSet, DriveContents)</a></code>
-     instead.
-</em></div>
+        <div class="jd-descrdiv">
+          Creates a new binary file within this folder, with the provided initial metadata and
+ <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.
+          
+    
 
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)">createFile</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents)</nobr>
-
-        <div class="jd-descrdiv">Creates a new binary file within this folder, with the provided initial metadata and
- <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.</div>
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)">createFile</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents)</nobr>
+        
+        <div class="jd-descrdiv">
+          Creates a new binary file within this folder, with the provided initial metadata and
+ <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -987,25 +1062,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFolder(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">createFolder</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
         
-        <div class="jd-descrdiv">Creates a new folder within this folder, with the provided initial metadata.</div>
-  
-  </td></tr>
+        <div class="jd-descrdiv">
+          Creates a new folder within this folder, with the provided initial metadata.
+          
+    
 
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#listChildren(com.google.android.gms.common.api.GoogleApiClient)">listChildren</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
-        
-        <div class="jd-descrdiv">Retrieves a collection of metadata for the direct children of this folder.</div>
+        </div>
   
   </td></tr>
 
@@ -1021,9 +1083,37 @@ Summary:
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#listChildren(com.google.android.gms.common.api.GoogleApiClient)">listChildren</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves a collection of metadata for the direct children of this folder.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFolder.html#queryChildren(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.query.Query)">queryChildren</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/query/Query.html">Query</a> query)</nobr>
         
-        <div class="jd-descrdiv">Retrieves a collection of metadata for the all authorized direct children of this folder.</div>
+        <div class="jd-descrdiv">
+          Retrieves a collection of metadata for the all authorized direct children of this folder.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1074,72 +1164,66 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">
+          Adds a new listener for changes on this resource.
+          
+    
 
-        <div class="jd-descrdiv">Adds a new listener for changes on this resource.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.DriveEvent.Listener<com.google.android.gms.drive.events.ChangeEvent>)">addChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">Listener</a>&lt;<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>&gt; listener)</nobr>
-
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener(GoogleApiClient, ChangeListener)</a></code>
-</em></div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeSubscription(com.google.android.gms.common.api.GoogleApiClient)">addChangeSubscription</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
-
-        <div class="jd-descrdiv">Adds a change subscription for this resource that will deliver events to the application
- event service.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getDriveId()">getDriveId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the DriveId that uniquely identifies this resource.</div>
+        <div class="jd-descrdiv">
+          Adds a change subscription for this resource that will deliver events to the application
+ event service.
+          
+    
+
+        </div>
   
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getDriveId()">getDriveId</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the DriveId that uniquely identifies this resource.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1151,7 +1235,36 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getMetadata(com.google.android.gms.common.api.GoogleApiClient)">getMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Retrieves the Metadata associated with this resource.</div>
+        <div class="jd-descrdiv">
+          Retrieves the Metadata associated with this resource.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#listParents(com.google.android.gms.common.api.GoogleApiClient)">listParents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves a collection of metadata for all of the parents of this resource that the calling
+ app has been authorized to view.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1160,112 +1273,92 @@ From interface
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveApi.MetadataBufferResult.html">DriveApi.MetadataBufferResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#listParents(com.google.android.gms.common.api.GoogleApiClient)">listParents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
-
-        <div class="jd-descrdiv">Retrieves a collection of metadata for all of the parents of this resource that the calling
- app has been authorized to view.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.DriveEvent.Listener<com.google.android.gms.drive.events.ChangeEvent>)">removeChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">Listener</a>&lt;<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>&gt; listener)</nobr>
-
-        <div class="jd-descrdiv"><em>
-      This method is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">removeChangeListener(GoogleApiClient, ChangeListener)</a></code>
-</em></div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">removeChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">
+          Removes a listener for changes on this resource that was previously added by
+ <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener(GoogleApiClient, ChangeListener)</a></code>.
+          
+    
 
-        <div class="jd-descrdiv">Removes a listener for changes on this resource that was previously added by
- <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener(GoogleApiClient, ChangeListener)</a></code>.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeSubscription(com.google.android.gms.common.api.GoogleApiClient)">removeChangeSubscription</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
+        
+        <div class="jd-descrdiv">
+          Removes any existing change subscription for this resource.
+          
+    
 
-        <div class="jd-descrdiv">Removes any existing change subscription for this resource.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#setParents(com.google.android.gms.common.api.GoogleApiClient, java.util.Set<com.google.android.gms.drive.DriveId>)">setParents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Set&lt;<a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a>&gt; parentIds)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets the parents of this resource.
+          
+    
 
-        <div class="jd-descrdiv">Sets the parents of this resource.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveResource.MetadataResult.html">DriveResource.MetadataResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#updateMetadata(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">updateMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
         
-        <div class="jd-descrdiv">Updates the Metadata that is associated with this resource with the changes described
- in the <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>.</div>
+        <div class="jd-descrdiv">
+          Updates the Metadata that is associated with this resource with the changes described
+ in the <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1325,6 +1418,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>The MIME type associated with folder resources.
 </p></div>
 
@@ -1365,69 +1461,6 @@ From interface
 
 <A NAME="createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents, com.google.android.gms.drive.ExecutionOptions)"></A>
 
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;
-      </span>
-      <span class="sympad">createFile</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents, <a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a> executionOptions)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a new binary file within this folder, with the provided initial metadata and
- <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>. See <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code> for more details on binary files.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>apiClient</td>
-          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
-     connected before invoking this method.</td>
-        </tr>
-        <tr>
-          <th>changeSet</td>
-          <td>A set of metadata fields that should be initially set.  This should
-     minimally include a title and mime type.</td>
-        </tr>
-        <tr>
-          <th>driveContents</td>
-          <td>The initial contents. The provided contents must have been obtained
-     through <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code>. This <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> cannot be reused
-     after this method returns.</td>
-        </tr>
-        <tr>
-          <th>executionOptions</td>
-          <td>A set of options for this method execution, such as whether to send
-     an event when the action has completed on the server. See <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></code> for
-     more details. <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html#setConflictStrategy(int)">setConflictStrategy(int)</a></code> is not supported for
-     this method.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>A PendingResult which can be used to retrieve the newly created DriveFile.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.Contents)"></A>
-
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
@@ -1439,7 +1472,7 @@ From interface
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;
       </span>
       <span class="sympad">createFile</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents, <a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a> executionOptions)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1448,41 +1481,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      <p>
-  <p class="caution"><strong>
-      This method is deprecated.</strong><br/>
-    use <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)">createFile(GoogleApiClient, MetadataChangeSet, DriveContents)</a></code>
-     instead.
+      
+    
 
-  </p>
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;
-      </span>
-      <span class="sympad">createFile</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new binary file within this folder, with the provided initial metadata and
  <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>. See <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code> for more details on binary files.</p></div>
@@ -1496,14 +1497,89 @@ From interface
         </tr>
         <tr>
           <th>changeSet</td>
-          <td>A set of metadata fields that should be initially set.  This should
+          <td>A set of metadata fields that should be initially set.  This must
      minimally include a title and mime type.</td>
         </tr>
         <tr>
           <th>driveContents</td>
           <td>The initial contents. The provided contents must have been obtained
      through <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code>. This <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> cannot be reused
-     after this method returns.</td>
+     after this method returns. This parameter may also be set to <code>null</code> to create an
+     empty file, but it is recommended to create non-empty files where the mime-type does not
+     support having a zero byte file (for example, image or PDF files).</td>
+        </tr>
+        <tr>
+          <th>executionOptions</td>
+          <td>A set of options for this method execution, such as whether to send
+     an event when the action has completed on the server. See <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></code> for
+     more details. <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.Builder.html#setConflictStrategy(int)">setConflictStrategy(int)</a></code> is not supported for
+     this method. When <code>null</code> is provided, this method will use default
+     <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></code>, that is no completion event requested and no operation tag.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>A PendingResult which can be used to retrieve the newly created DriveFile.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/drive/DriveFolder.DriveFileResult.html">DriveFolder.DriveFileResult</a>&gt;
+      </span>
+      <span class="sympad">createFile</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet, <a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a> driveContents)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a new binary file within this folder, with the provided initial metadata and
+ <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code>. See <code><a href="/reference/com/google/android/gms/drive/DriveFile.html">DriveFile</a></code> for more details on binary files.
+
+ <p>
+ This method behaves like <code><a href="/reference/com/google/android/gms/drive/DriveFolder.html#createFile(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet, com.google.android.gms.drive.DriveContents, com.google.android.gms.drive.ExecutionOptions)">createFile(GoogleApiClient, MetadataChangeSet, DriveContents, ExecutionOptions)</a></code> with <code>null</code> <code><a href="/reference/com/google/android/gms/drive/ExecutionOptions.html">ExecutionOptions</a></code>, which means
+     no completion event requested and no operation tag.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call. The client must be
+     connected before invoking this method.</td>
+        </tr>
+        <tr>
+          <th>changeSet</td>
+          <td>A set of metadata fields that should be initially set.  This must
+     minimally include a title and mime type.</td>
+        </tr>
+        <tr>
+          <th>driveContents</td>
+          <td>The initial contents. The provided contents must have been obtained
+     through <code><a href="/reference/com/google/android/gms/drive/DriveApi.html#newDriveContents(com.google.android.gms.common.api.GoogleApiClient)">newDriveContents(GoogleApiClient)</a></code>. This <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> cannot be reused
+     after this method returns. This parameter may also be set to <code>null</code> to create an
+     empty file, but it is recommended to create non-empty files where the mime-type does not
+     support having a zero byte file (for example, image or PDF files).</td>
         </tr>
       </table>
   </div>
@@ -1540,6 +1616,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new folder within this folder, with the provided initial metadata.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1551,14 +1630,14 @@ From interface
         </tr>
         <tr>
           <th>changeSet</td>
-          <td>A set of metadata fields that should be initially set.  This should
+          <td>A set of metadata fields that should be initially set.  This must
      minimally include a title.  The mime type will be set to the folder mime type.</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>A PendingResult which can be used to retrieve the newly created DriveFile.
+      <ul class="nolist"><li>A PendingResult which can be used to retrieve the newly created DriveFolder.
 </li></ul>
   </div>
 
@@ -1588,6 +1667,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a collection of metadata for the direct children of this folder. The result will
  include metadata for both files and folders.</p></div>
@@ -1633,6 +1715,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a collection of metadata for the all authorized direct children of this folder.
  Unless restricted by the query, the result will include metadata for both files and folders.</p></div>

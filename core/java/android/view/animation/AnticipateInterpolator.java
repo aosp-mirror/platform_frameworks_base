@@ -31,7 +31,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  * An interpolator where the change starts backward then flings forward.
  */
 @HasNativeInterpolator
-public class AnticipateInterpolator implements Interpolator, NativeInterpolatorFactory {
+public class AnticipateInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
     private final float mTension;
 
     public AnticipateInterpolator() {
@@ -60,9 +60,8 @@ public class AnticipateInterpolator implements Interpolator, NativeInterpolatorF
             a = res.obtainAttributes(attrs, R.styleable.AnticipateInterpolator);
         }
 
-        mTension =
-                a.getFloat(R.styleable.AnticipateInterpolator_tension, 2.0f);
-
+        mTension = a.getFloat(R.styleable.AnticipateInterpolator_tension, 2.0f);
+        setChangingConfiguration(a.getChangingConfigurations());
         a.recycle();
     }
 

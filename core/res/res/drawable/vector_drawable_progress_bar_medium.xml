@@ -17,7 +17,8 @@
         android:height="48dp"
         android:width="48dp"
         android:viewportHeight="48"
-        android:viewportWidth="48" >
+        android:viewportWidth="48"
+        android:tint="?attr/colorControlActivated">
 
     <group
         android:name="root"
@@ -27,7 +28,7 @@
             android:name="progressBar"
             android:fillColor="#00000000"
             android:pathData="M0, 0 m 0, -19 a 19,19 0 1,1 0,38 a 19,19 0 1,1 0,-38"
-            android:strokeColor="?attr/colorControlActivated"
+            android:strokeColor="@color/white"
             android:strokeLineCap="square"
             android:strokeLineJoin="miter"
             android:strokeWidth="4"

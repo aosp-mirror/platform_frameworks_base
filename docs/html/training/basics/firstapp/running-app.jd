@@ -3,18 +3,17 @@ parent.title=Building Your First App
 parent.link=index.html
 
 trainingnavtop=true
-previous.title=Creating a Project
-previous.link=creating-project.html
-next.title=Building a Simple User Interface
-next.link=building-ui.html
+
+page.tags=emulator
+helpoutsWidget=true
 
 @jd:body
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
- 
+<div id="tb-wrapper">
+<div id="tb">
+
 <h2>This lesson teaches you to</h2>
 
 <ol>
@@ -26,88 +25,35 @@ next.link=building-ui.html
 
 <ul>
   <li><a href="{@docRoot}tools/device.html">Using Hardware Devices</a></li>
-  <li><a href="{@docRoot}tools/devices/index.html">Managing Virtual Devices</a></li>
+  <li><a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a></li>
   <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
- 
- 
-</div> 
-</div> 
+
+
+</div>
+</div>
 
 
 <p>If you followed the <a href="creating-project.html">previous lesson</a> to create an
 Android project, it includes a default set of "Hello World" source files that allow you to
 immediately run the app.</p>
 
-<p>How you run your app depends on two things: whether you have a real Android-powered device and
-whether you're using Eclipse. This lesson shows you how to install and run your app on a
-real device and on the Android emulator, and in both cases with either Eclipse or the command line
-tools.</p>
-
-<p>Before you run your app, you should be aware of a few directories and files in the Android
-project:</p>
-
-<dl>
-  <dt><code>AndroidManifest.xml</code></dt>
-  <dd>The <a href="{@docRoot}guide/topics/manifest/manifest-intro.html">manifest file</a> describes
-the fundamental characteristics of the app and defines each of
-its components. You'll learn about various declarations in this file as you read more training
-classes.
-  <p>One of the most important elements your manifest should include is the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk>}</a>
-element. This declares your app's compatibility with different Android versions using the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
-and <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code android:targetSdkVersion}</a>
-attributes. For your first app, it should look like this:</p>
-<pre>
-&lt;manifest xmlns:android="http://schemas.android.com/apk/res/android" ... >
-    &lt;uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19" />
-    ...
-&lt;/manifest>
-</pre>
-<p>You should always set the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code android:targetSdkVersion}</a>
-as high as possible and test your app on the corresponding platform version. For more information,
-read <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Different
-Platform Versions</a>.</p>
-
-  </dd>
-  <dt><code>src/</code></dt>
-  <dd>Directory for your app's main source files. By default, it includes an {@link
-android.app.Activity} class that runs when your app is launched using the app icon.</dd>
-  <dt><code>res/</code></dt>
-  <dd>Contains several sub-directories for <a
-href="{@docRoot}guide/topics/resources/overview.html">app resources</a>. Here are just a few:
-    <dl style="margin-top:1em">
-      <dt><code>drawable-hdpi/</code></dt>
-        <dd>Directory for drawable objects (such as bitmaps) that are designed for high-density
-(hdpi) screens. Other drawable directories contain assets designed for other screen densities.</dd>
-      <dt><code>layout/</code></dt>
-        <dd>Directory for files that define your app's user interface.</dd>
-      <dt><code>values/</code></dt>
-        <dd>Directory for other various XML files that contain a collection of resources, such as
-string and color definitions.</dd>
-    </dl>  
-  </dd>
-</dl>
-
-<p>When you build and run the default Android app, the default {@link android.app.Activity}
-class starts and loads a layout file
-that says "Hello World." The result is nothing exciting, but it's
-important that you understand how to run your app before you start developing.</p>
-
-
+<p>How you run your app depends on two things: whether you have a real device running Android and
+whether you're using Android Studio. This lesson shows you how to install and run your app on a
+real device and on the Android emulator, and in both cases with either Android Studio or the command
+line tools.</p>
 
 <h2 id="RealDevice">Run on a Real Device</h2>
 
-<p>If you have a real Android-powered device, here's how you can install and run your app:</p>
+<p>If you have a device running Android, here's how to install and run your app.</p>
+
+<h3>Set up your device</h3>
 
 <ol>
   <li>Plug in your device to your development machine with a USB cable.
-If you're developing on Windows, you might need to install the appropriate USB driver for your
-device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM USB
-Drivers</a> document.</li>  
+    If you're developing on Windows, you might need to install the appropriate USB driver for your
+    device. For help installing drivers, see the <a href="{@docRoot}tools/extras/oem-usb.html">OEM
+    USB Drivers</a> document.</li>
   <li>Enable <strong>USB debugging</strong> on your device.
     <ul>
       <li>On most devices running Android 3.2 or older, you can find the option under
@@ -122,19 +68,20 @@ Drivers</a> document.</li>
   </li>
 </ol>
 
-<p>To run the app from Eclipse:</p>
+<h3>Run the app from Android Studio</h3>
 <ol>
-  <li>Open one of your project's files and click
+  <li>Select one of your project's files and click
 <strong>Run</strong> <img
-src="{@docRoot}images/tools/eclipse-run.png" style="vertical-align:baseline;margin:0" />
+src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" />
 from the toolbar.</li>
-  <li>In the <strong>Run as</strong> window that appears, select
-  <strong>Android Application</strong> and click <strong>OK</strong>.</li>
+  <li>In the <strong>Choose Device</strong> window that appears, select the
+  <strong>Choose a running device</strong> radio button, select your device, and click <strong>OK
+  </strong>.</li>
 </ol>
-<p>Eclipse installs the app on your connected device and starts it.</p>
+<p>Android Studio installs the app on your connected device and starts it.</p>
 
 
-<p>Or to run your app from a command line:</p>
+<h3>Run the app from a command line</h3>
 
 <ol>
   <li>Change directories to the root of your Android project and execute:
@@ -142,7 +89,7 @@ from the toolbar.</li>
   <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
 <code>PATH</code> environment variable, then execute:
 <pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
-  <li>On your device, locate <em>MyFirstActivity</em> and open it.</li>
+  <li>On your device, locate <em>MyFirstApp</em> and open it.</li>
 </ol>
 
 <p>That's how you build and run your Android app on a device!
@@ -153,64 +100,73 @@ lesson</a>.</p>
 
 <h2 id="Emulator">Run on the Emulator</h2>
 
-<p>Whether you're using Eclipse or the command line, to run your app on the emulator you need to
-first create an <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a> (AVD). An
-AVD is a device configuration for the Android emulator that allows you to model different
-devices.</p>
+<p>Whether you're using Android Studio or the command line, to run your app on the emulator you need
+to first create an <a href="{@docRoot}tools/devices/index.html">Android Virtual Device</a> (AVD). An
+AVD is a device configuration for the Android emulator that allows you to model a specific
+device.</p>
 
-<div class="figure" style="width:457px">
-  <img src="{@docRoot}images/screens_support/avds-config.png" alt="" />
-  <p class="img-caption"><strong>Figure 1.</strong> The AVD Manager showing a few virtual
-devices.</p>
-</div>
 
-<p>To create an AVD:</p>
+<h3>Create an AVD</h3>
 <ol>
   <li>Launch the Android Virtual Device Manager:
-    <ol type="a">
-      <li>In Eclipse, click Android Virtual Device Manager 
-        <img src="{@docRoot}images/tools/avd_manager.png"
-style="vertical-align:baseline;margin:0" /> from the toolbar.</li> 
-      <li>From the command line, change
-directories to <code>&lt;sdk>/tools/</code> and execute:
-<pre class="no-pretty-print">android avd</pre></li>
-    </ol>
+    <ul>
+      <li>In Android Studio, select <strong>Tools &gt; Android &gt; AVD Manager</strong>, or click
+  the AVD Manager icon <img src="{@docRoot}images/tools/avd-manager-studio.png" style="vertical-align:bottom;margin:0;height:19px"> in the toolbar.</li>
+      <li>Or, from the command line, change directories to
+      <code>&lt;sdk>/tools/</code> and execute:
+        <pre class="no-pretty-print">android avd</pre>
+        <p class="note"><strong>Note:</strong> The AVD Manager that appears
+        when launched from the command line is different from the version in
+        Android Studio, so the following instructions may not apply.</p>
+        </li>
+    </ul>
+
+  <img src="{@docRoot}images/studio-avdmgr-firstscreen.png" alt=""
+  style="margin-top:1em">
+  <p class="img-caption"><strong>Figure 1.</strong> The AVD Manager main screen shows your current virtual devices.</p>
+
   </li>
-  <li>In the <em>Android Virtual Device Manager</em> panel, click <strong>New</strong>.</li>
-  <li>Fill in the details for the AVD.
-Give it a name, a platform target, an SD card size, and a skin (HVGA is default).</li>
-  <li>Click <strong>Create AVD</strong>.</li>
-  <li>Select the new AVD from the <em>Android Virtual Device Manager</em> and click
-<strong>Start</strong>.</li>
-  <li>After the emulator boots up, unlock the emulator screen.</li>
+  <li>On the AVD Manager main screen (figure 1), click <strong>Create Virtual Device</strong>.</li>
+
+  <li>In the Select Hardware window, select a device configuration, such as Nexus 6,
+  then click <strong>Next</strong>.
+  </li>
+  <li>Select the desired system version for the AVD and click <strong>Next</strong>.
+  </li>
+  <li>Verify the configuration settings, then click <strong>Finish</strong>.
+  </li>
 </ol>
 
-<p>To run the app from Eclipse:</p>
+<p>For more information about using AVDs, see
+<a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs with AVD Manager</a>.</p>
+
+<h3>Run the app from Android Studio</h3>
 <ol>
-  <li>Open one of your project's files and click
-<strong>Run</strong> <img
-src="{@docRoot}images/tools/eclipse-run.png" style="vertical-align:baseline;margin:0" />
-from the toolbar.</li>
-  <li>In the <strong>Run as</strong> window that appears, select
-  <strong>Android Application</strong> and click <strong>OK</strong>.</li>
+  <li>In <strong>Android Studio</strong>, select your project and click <strong>Run</strong>
+    <img src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" />
+    from the toolbar.</li>
+  <li>In the <strong>Choose Device</strong> window, click the <strong>Launch emulator</strong> radio
+    button.</li>
+  <li>From the <strong>Android virtual device</strong> pull-down menu, select the emulator
+    you created, and click <strong>OK</strong>.</li>
 </ol>
-<p>Eclipse installs the app on your AVD and starts it.</p>
+<p>It can take a few minutes for the emulator to load itself. You may have to unlock the screen.
+  When you do, My First App appears on the emulator screen.</p>
 
 
-<p>Or to run your app from the command line:</p>
+<h3>Run your app from the command line</h3>
 
 <ol>
   <li>Change directories to the root of your Android project and execute:
-<pre class="no-pretty-print">ant debug</pre></li>
+    <pre class="no-pretty-print">ant debug</pre></li>
   <li>Make sure the Android SDK <code>platform-tools/</code> directory is included in your
-<code>PATH</code> environment
-variable, then execute:
-<pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
-  <li>On the emulator, locate <em>MyFirstActivity</em> and open it.</li>
+    <code>PATH</code> environment variable, then execute:
+    <pre class="no-pretty-print">adb install bin/MyFirstApp-debug.apk</pre></li>
+  <li>On the emulator, locate <em>MyFirstApp</em> and open it.</li>
 </ol>
 
 
-<p>That's how you build and run your Android app on the emulator! 
+<p>That's how you build and run your Android app on the emulator!
   To start developing, continue to the <a href="building-ui.html">next
 lesson</a>.</p>
 

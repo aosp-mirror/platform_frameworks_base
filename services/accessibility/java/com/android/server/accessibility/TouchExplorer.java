@@ -77,6 +77,10 @@ class TouchExplorer implements EventStreamTransformation {
     private static final int STATE_DELEGATING = 0x00000004;
     private static final int STATE_GESTURE_DETECTING = 0x00000005;
 
+    private static final int CLICK_LOCATION_NONE = 0;
+    private static final int CLICK_LOCATION_ACCESSIBILITY_FOCUS = 1;
+    private static final int CLICK_LOCATION_LAST_TOUCH_EXPLORED = 2;
+
     // The maximum of the cosine between the vectors of two moving
     // pointers so they can be considered moving in the same direction.
     private static final float MAX_DRAGGING_ANGLE_COS = 0.525321989f; // cos(pi/4)
@@ -942,12 +946,16 @@ class TouchExplorer implements EventStreamTransformation {
      *
      * @param prototype The prototype from which to create the injected events.
      * @param policyFlags The policy flags associated with the event.
+     * @param targetAccessibilityFocus Whether the event targets the accessibility focus.
      */
-    private void sendActionDownAndUp(MotionEvent prototype, int policyFlags) {
+    private void sendActionDownAndUp(MotionEvent prototype, int policyFlags,
+            boolean targetAccessibilityFocus) {
         // Tap with the pointer that last explored.
         final int pointerId = prototype.getPointerId(prototype.getActionIndex());
         final int pointerIdBits = (1 << pointerId);
+        prototype.setTargetAccessibilityFocus(targetAccessibilityFocus);
         sendMotionEvent(prototype, MotionEvent.ACTION_DOWN, pointerIdBits, policyFlags);
+        prototype.setTargetAccessibilityFocus(targetAccessibilityFocus);
         sendMotionEvent(prototype, MotionEvent.ACTION_UP, pointerIdBits, policyFlags);
     }
 
@@ -1155,7 +1163,8 @@ class TouchExplorer implements EventStreamTransformation {
             final int pointerIndex = secondTapUp.findPointerIndex(pointerId);
 
             Point clickLocation = mTempPoint;
-            if (!computeClickLocation(clickLocation)) {
+            final int result = computeClickLocation(clickLocation);
+            if (result == CLICK_LOCATION_NONE) {
                 return;
             }
 
@@ -1171,7 +1180,8 @@ class TouchExplorer implements EventStreamTransformation {
                     secondTapUp.getEventTime(), MotionEvent.ACTION_DOWN, 1, properties,
                     coords, 0, 0, 1.0f, 1.0f, secondTapUp.getDeviceId(), 0,
                     secondTapUp.getSource(), secondTapUp.getFlags());
-            sendActionDownAndUp(event, policyFlags);
+            final boolean targetAccessibilityFocus = (result == CLICK_LOCATION_ACCESSIBILITY_FOCUS);
+            sendActionDownAndUp(event, policyFlags, targetAccessibilityFocus);
             event.recycle();
         }
 
@@ -1216,7 +1226,7 @@ class TouchExplorer implements EventStreamTransformation {
                 MAX_DRAGGING_ANGLE_COS);
     }
 
-    private boolean computeClickLocation(Point outLocation) {
+    private int computeClickLocation(Point outLocation) {
         MotionEvent lastExploreEvent = mInjectedPointerTracker.getLastInjectedHoverEventForClick();
         if (lastExploreEvent != null) {
             final int lastExplorePointerIndex = lastExploreEvent.getActionIndex();
@@ -1224,14 +1234,17 @@ class TouchExplorer implements EventStreamTransformation {
             outLocation.y = (int) lastExploreEvent.getY(lastExplorePointerIndex);
             if (!mAms.accessibilityFocusOnlyInActiveWindow()
                     || mLastTouchedWindowId == mAms.getActiveWindowId()) {
-                mAms.getAccessibilityFocusClickPointInScreen(outLocation);
+                if (mAms.getAccessibilityFocusClickPointInScreen(outLocation)) {
+                    return CLICK_LOCATION_ACCESSIBILITY_FOCUS;
+                } else {
+                    return CLICK_LOCATION_LAST_TOUCH_EXPLORED;
+                }
             }
-            return true;
         }
         if (mAms.getAccessibilityFocusClickPointInScreen(outLocation)) {
-            return true;
+            return CLICK_LOCATION_ACCESSIBILITY_FOCUS;
         }
-        return false;
+        return CLICK_LOCATION_NONE;
     }
 
     /**
@@ -1310,14 +1323,13 @@ class TouchExplorer implements EventStreamTransformation {
                 return;
             }
 
-            int clickLocationX;
-            int clickLocationY;
-
             final int pointerId = mEvent.getPointerId(mEvent.getActionIndex());
             final int pointerIndex = mEvent.findPointerIndex(pointerId);
 
             Point clickLocation = mTempPoint;
-            if (!computeClickLocation(clickLocation)) {
+            final int result = computeClickLocation(clickLocation);
+
+            if (result == CLICK_LOCATION_NONE) {
                 return;
             }
 

@@ -1079,7 +1079,9 @@ public final class ProcessStats implements Parcelable {
         ProcessDataCollection totals = new ProcessDataCollection(screenStates,
                 memStates, procStates);
         computeProcessData(proc, totals, now);
-        if (totals.totalTime != 0 || totals.numPss != 0) {
+        double percentage = (double) totals.totalTime / (double) totalTime * 100;
+        // We don't print percentages < .01, so just drop those.
+        if (percentage >= 0.005 || totals.numPss != 0) {
             if (prefix != null) {
                 pw.print(prefix);
             }
@@ -2470,7 +2472,7 @@ public final class ProcessStats implements Parcelable {
                 totalMem.totalTime, totalPss, totalMem.sysMemSamples);
         totalPss = printMemoryCategory(pw, "  ", "Free   ", totalMem.sysMemFreeWeight,
                 totalMem.totalTime, totalPss, totalMem.sysMemSamples);
-        totalPss = printMemoryCategory(pw, "  ", "Z-Ram   ", totalMem.sysMemZRamWeight,
+        totalPss = printMemoryCategory(pw, "  ", "Z-Ram  ", totalMem.sysMemZRamWeight,
                 totalMem.totalTime, totalPss, totalMem.sysMemSamples);
         pw.print("  TOTAL  : ");
         printSizeValue(pw, totalPss);
@@ -2746,6 +2748,7 @@ public final class ProcessStats implements Parcelable {
         pw.print("total");
         dumpAdjTimesCheckin(pw, ",", mMemFactorDurations, mMemFactor,
                 mStartTime, now);
+        pw.println();
         if (mSysMemUsageTable != null) {
             pw.print("sysmemusage");
             for (int i=0; i<mSysMemUsageTableSize; i++) {

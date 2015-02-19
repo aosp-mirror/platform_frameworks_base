@@ -807,6 +807,9 @@ public class TypedArray {
 
     /**
      * Determines whether there is an attribute at <var>index</var>.
+     * <p>
+     * <strong>Note:</strong> If the attribute was set to {@code @empty} or
+     * {@code @undefined}, this method returns {@code false}.
      *
      * @param index Index of attribute to retrieve.
      *
@@ -821,6 +824,27 @@ public class TypedArray {
         final int[] data = mData;
         final int type = data[index+AssetManager.STYLE_TYPE];
         return type != TypedValue.TYPE_NULL;
+    }
+
+    /**
+     * Determines whether there is an attribute at <var>index</var>, returning
+     * {@code true} if the attribute was explicitly set to {@code @empty} and
+     * {@code false} only if the attribute was undefined.
+     *
+     * @param index Index of attribute to retrieve.
+     *
+     * @return True if the attribute has a value or is empty, false otherwise.
+     */
+    public boolean hasValueOrEmpty(int index) {
+        if (mRecycled) {
+            throw new RuntimeException("Cannot make calls to a recycled instance!");
+        }
+
+        index *= AssetManager.STYLE_NUM_ENTRIES;
+        final int[] data = mData;
+        final int type = data[index+AssetManager.STYLE_TYPE];
+        return type != TypedValue.TYPE_NULL
+                || data[index+AssetManager.STYLE_DATA] == TypedValue.DATA_NULL_EMPTY;
     }
 
     /**

@@ -301,7 +301,7 @@ public class CallerInfo {
     public static CallerInfo getCallerInfo(Context context, String number) {
         if (VDBG) Rlog.v(TAG, "getCallerInfo() based on number...");
 
-        long subId = SubscriptionManager.getDefaultSubId();
+        int subId = SubscriptionManager.getDefaultSubId();
         return getCallerInfo(context, number, subId);
     }
 
@@ -316,7 +316,7 @@ public class CallerInfo {
      * a matching number is not found, then a generic caller info is returned,
      * with all relevant fields empty or null.
      */
-    public static CallerInfo getCallerInfo(Context context, String number, long subId) {
+    public static CallerInfo getCallerInfo(Context context, String number, int subId) {
 
         if (TextUtils.isEmpty(number)) {
             return null;
@@ -418,12 +418,12 @@ public class CallerInfo {
     // string in the phone number field.
     /* package */ CallerInfo markAsVoiceMail() {
 
-        long subId = SubscriptionManager.getDefaultSubId();
+        int subId = SubscriptionManager.getDefaultSubId();
         return markAsVoiceMail(subId);
 
     }
 
-    /* package */ CallerInfo markAsVoiceMail(long subId) {
+    /* package */ CallerInfo markAsVoiceMail(int subId) {
         mIsVoiceMail = true;
 
         try {

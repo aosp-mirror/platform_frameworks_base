@@ -37,14 +37,6 @@
     <string name="all_printers" msgid="5018829726861876202">"Toate imprimantele..."</string>
     <string name="print_dialog" msgid="32628687461331979">"Caseta de dialog de printare"</string>
     <string name="current_page_template" msgid="1386638343571771292">"<xliff:g id="CURRENT_PAGE">%1$d</xliff:g> /<xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="page_description_template" msgid="6831239682256197161">"Pagina <xliff:g id="CURRENT_PAGE">%1$d</xliff:g> din <xliff:g id="PAGE_COUNT">%2$d</xliff:g>"</string>
-    <string name="summary_template" msgid="8899734908625669193">"Rezumat, copii <xliff:g id="COPIES">%1$s</xliff:g>, dimensiunea paginii <xliff:g id="PAPER_SIZE">%2$s</xliff:g>"</string>
-    <string name="expand_handle" msgid="7282974448109280522">"Ghidaj de extindere"</string>
-    <string name="collapse_handle" msgid="6886637989442507451">"Ghidaj de restrângere"</string>
-    <string name="print_button" msgid="645164566271246268">"Printați"</string>
-    <string name="savetopdf_button" msgid="2976186791686924743">"Salvați în format PDF"</string>
-    <string name="print_options_expanded" msgid="6944679157471691859">"Opțiuni de printare extinse"</string>
-    <string name="print_options_collapsed" msgid="7455930445670414332">"Opțiuni de printare restrânse"</string>
     <string name="search" msgid="5421724265322228497">"Căutați"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"Toate imprimantele"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"Adăugați un serviciu"</string>

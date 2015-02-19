@@ -1,0 +1,78 @@
+page.title=Creating Watch Faces
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Dependencies and Prerequisites</h2>
+  <ul>
+    <li>Android Studio 1.0.0 or later and Gradle 1.0 or later</li>
+    <li>Android 4.3 (API level 18) or higher on the handheld device</li>
+    <li>Android 5.0 (API level 21) or higher on the wearable device</li>
+  </ul>
+</div>
+</div>
+
+<!-- design guide box -->
+<a class="notice-designers wide" href="{@docRoot}design/wear/watchfaces.html">
+  <div>
+    <h3>Design Guide</h3>
+    <p>Watch Faces</p>
+  </div>
+</a>
+
+<a class="notice-developers-video wide"
+    href="https://www.youtube.com/watch?v=AK38PJZmIW8">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Watch Faces for Android Wear</p>
+</div>
+</a>
+
+<p>Watch faces in Android Wear leverage a dynamic digital canvas to tell time using colors,
+animations, and relevant contextual information. The <a
+href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app">Android
+Wear companion app</a> provides watch faces with different styles and shapes. When
+users select one of the available watch faces on the wearable or on the companion app, the
+wearable device previews the watch face and lets the user set configuration options.</p>
+
+<p>Android Wear enables you to create custom watch faces for Wear devices. When users install a
+handheld app that contains a <a href="{@docRoot}training/wearables/apps/index.html">wearable
+app</a> with watch faces, they become available in the Android Wear companion app
+on the handheld device and in the watch face picker on the wearable device.</p>
+
+<p>This class teaches you to implement custom watch faces and to package them inside a wearable
+app. This class also covers design considerations and implementation tips to ensure that your
+designs integrate with system UI elements and are power-efficient.</p>
+
+<p class="note"><strong>Note:</strong> We recommend using <a
+href="{@docRoot}sdk/index.html">Android Studio</a> for Android Wear development as
+it provides project setup, library inclusion, and packaging conveniences that aren't available
+in the Eclipse Android Developer Tools. This training assumes you are using Android Studio.</p>
+
+
+<h2>Lessons</h2>
+
+<dl>
+<dt><a href="{@docRoot}training/wearables/watch-faces/designing.html">
+Designing Watch Faces</a></dt>
+<dd>Learn how to design a watch face that works on any Android Wear device.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/service.html">
+Building a Watch Face Service</a></dt>
+<dd>Learn how to respond to important events during the lifecycle of your watch face.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/drawing.html">
+Drawing Watch Faces</a></dt>
+<dd>Learn how to draw your watch face on a Wear device screen.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/information.html">
+Showing Information in Watch Faces</a></dt>
+<dd>Learn how to incorporate contextual information into your watch face.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/configuration.html">
+Providing Configuration Activities</a></dt>
+<dd>Learn how to create watch faces with configurable parameters.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/issues.html">
+Addressing Common Issues</a></dt>
+<dd>Learn how to fix common problems when developing a watch face.</dd>
+<dt><a href="{@docRoot}training/wearables/watch-faces/performance.html">
+Optimizing Performance and Battery Life</a></dt>
+<dd>Learn how to improve the frame rate of your animations and how to save power.</dd>
+</dl>

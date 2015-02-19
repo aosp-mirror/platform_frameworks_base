@@ -1,0 +1,258 @@
+page.title=Android Studio Release Notes
+
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}sdk/installing/index.html">Installing Android Studio</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>Android Studio is the official IDE for Android development, and with a single download includes
+everything you need to begin developing Android apps:</p>
+
+<ul>
+<li>IntelliJ IDE + Android Studio plugin</li>
+<li>Android SDK Tools</li>
+<li>Android Platform-tools</li>
+<li>A version of the Android platform</li>
+<li>A version of the Android system image for the emulator</li>
+</ul>
+
+<p>For an introduction to Android Studio, read the
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
+
+<p>Periodic updates are pushed to Android Studio without requiring you to update from here. To
+manually check for updates, select <strong>Help > Check for updates</strong> (on Mac, select
+<strong>Android Studio > Check for updates</strong>).</p>
+
+
+<h2 id="Revisions">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+Android Studio, as denoted by revision number. </p>
+
+
+<div class="toggle-content opened">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.0.1</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Various fixes and enhancements:</p>
+    <ul>
+      <li>Fixed AVD Manager and <strong>device.xml</strong> file lock issue. </li>
+      <li>Fixed the emulator log on Windows systems. </li>
+      <li>Fixed issue with creating AVDs with Android Studio and Android SDK installed on different
+      drives on Windows systems.</li>
+      <li>Sets the default update channel for new downloads to <strong>Stable</strong>. If you
+      installed the 1.0.0 version of Android Studio and would like stable, production-ready version
+      updates, use <strong>File > Settings > Updates</strong> to change to the <strong>Stable</strong>
+      update channel.
+      </li>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.0</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Initial release of Android Studio.</p>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.8.14</a> <em>(October 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>See
+    <a href="http://tools.android.com/recent/androidstudio0814inbetachannel">tools.android.com</a>
+    for a full list of changes.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.8.6</a> <em>(August 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.8.0</a> <em>(June 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Added support for Android Wear projects.</p>
+    <p>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</p>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.5.2</a> <em>(May 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.4.6</a> <em>(March 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.4.2</a> <em>(Jan 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.3.2</a> <em>(Oct 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>See <a href="http://tools.android.com/recent">tools.android.com</a> for a full list of changes.</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.2.x</a> <em>(July 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>Merged in the latest IntelliJ codebase changes. Includes fixes for issues reported by Studio users such as tweaks to Linux font sizes and font rendering.</li>
+    <li>Android Gradle plug-in updated to 0.5.0.
+      <p class="caution"><strong>Caution:</strong> This new version is not backwards compatible.
+      When opening a project that uses an older version of the plug-in, Studio will show an error
+      stating <strong>Gradle &lt;project_name&gt; project refresh failed.</strong></p>
+      <p>The updated Gradle plug-in includes the following changes:</p>
+      <ul>
+        <li>Fixed IDE model to contain the output file even if it's customized through the DSL. Also
+        fixed the DSL to get/set the output file on the variant object so that it's not necessary to
+        use <code>variant.packageApplication or variant.zipAlign</code></li>
+        <li>Fixed dependency resolution so that we resolved the combination of (default config,
+        build types, flavor(s)) together instead of separately.</li>
+        <li>Fixed dependency for tests of library project to properly include all the dependencies
+        of the library itself.</li>
+        <li>Fixed case where two dependencies have the same leaf name.</li>
+        <li>Fixed issue where Proguard rules file cannot be applied on flavors.</li>
+      </ul>
+      <p>All Gradle plugin release notes are available are here: <a href=
+      "http://tools.android.com/tech-docs/new-build-system"
+      >http://tools.android.com/tech-docs/new-build-system</a>.</p>
+    </li>
+    <li>Gradle errors from aapt no longer point to merged output files in the build/ folder, they
+    point back to the real source locations.</li>
+    <li>Parallel Builds. It's now possible to use Gradle's parallel builds. Please be aware that
+    parallel builds are in "incubation" (see <a
+    href="http://www.gradle.org/docs/current/userguide/gradle_command_line.html">Gradle's
+    documentation</a>.) This feature is off by default. To enable it, go to
+    <strong>Preferences</strong> &gt; <strong>Compiler</strong> and check the box <em>Compile
+    independent modules in parallel</em>.</li>
+    <li>Further work on the new resource repository used for layout rendering, resource
+    folding in the editor, and more:
+      <ul>
+      <li>Basic support for .aar library dependencies (e.g. using a library without a local copy of
+      the sources). Still not working for resource XML validation and navigation in source editors.
+      </li>
+      <li>Cycle detection in resource references.</li>
+      <li>Quick Documentation (F1), which can show all translations of the string under the caret,
+      will now also show all resource overlays from the various Gradle flavors and build types, as
+      well as libraries. They are listed in reverse resource overlay order, with strikethrough on
+      the versions of the string that are masked.</li>
+      <li>Fixes to handle updating the merged resources when the set of module dependencies
+      change.</li>
+      <li>XML rendering fixes to properly handle character entity declarations and XML and unicode
+      escapes.</li>
+      </ul>
+    <li>Save screenshot support for the layout preview and layout editor windows.</li>
+    <li>Template bug fixes.</li>
+    <li>Lint bug fixes.</li>
+    <li>Various fixes for crash reports. Thank you, and keep filing crash reports!</li>
+  </ul>
+  </div>
+</div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Studio v0.1.x</a> <em>(May 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+  <ul>
+    <li>Various bug fixes, including a fix for a common Windows installation issue.
+  </ul>
+  </div>
+</div>
+
+<p>&nbsp;</p>
+
+
+<h2 id="Troubleshooting">Troubleshooting</h2>
+
+<p>If you encounter problems in Android Studio, look at the following page
+for possible resolutions to known issues: <a href="http://tools.android.com/knownissues"
+>http://tools.android.com/knownissues</a>.</p>
+
+
+
+</div><!-- end main content -->
+
+
+
+
+</div><!-- end relative position wrapper -->
+
+
+

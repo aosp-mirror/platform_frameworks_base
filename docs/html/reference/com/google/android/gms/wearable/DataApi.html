@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">DataApi</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -713,9 +782,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -725,17 +794,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     interface
 <h1 itemprop="name">DataApi</h1>
 
 
 
+  
+  
+  
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -747,10 +819,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
     <tr>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.wearable.DataApi</td>
     </tr>
-
+    
 
 </table>
 
@@ -764,17 +836,47 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Exposes an API for components to read or write <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s and <code><a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></code>s.
- <p>
- A <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> is synchronized across all devices in an Android Wear network. DataItems
- should generally be smaller in size, relying on <code><a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></code>s for the storage of larger, more
- persistent data objects such as images.
- <p>
- <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s are identified by a Uri, accessible with <code><a href="/reference/com/google/android/gms/wearable/DataItem.html#getUri()">getUri()</a></code> that
- indicates the item's creator and path.
- <p>
- A <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> is private to the application that created it and accessibly only by that
- application on other nodes.
+<p itemprop="articleBody">Exposes an API for components to read or write <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> and
+ <code><a href="/reference/com/google/android/gms/wearable/Asset.html">assets</a></code>.
+
+ <p>A <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> is synchronized across all devices in an Android Wear network. It is
+ possible to set data items while not connected to any nodes. Those data items will be
+ synchronized when the nodes eventually come online.
+
+ <p>Data items are private to the application that created them, and are only accessible by that
+ application on other nodes. They should generally be small in size, relying on
+ <code><a href="/reference/com/google/android/gms/wearable/Asset.html">assets</a></code> for the transfer of larger, more persistent data objects such as
+ images.
+
+ <h3>DataItem URI format</h3>
+ Each data item is identified by a URI, accessible with <code><a href="/reference/com/google/android/gms/wearable/DataItem.html#getUri()">getUri()</a></code>, that
+ indicates the item's creator and path. Fully specified URIs follow the following format:
+
+ <pre>wear://&lt;node_id&gt;/&lt;path&gt;</pre>
+
+ where &lt;node_id&gt; is the <code><a href="/reference/com/google/android/gms/wearable/Node.html#getId()">node ID</a></code> of the wearable node that created
+ the data item, and &lt;path&gt; is an application-defined path. This means that given a
+ data item's URI, calling <code><a href="/reference/android/net/Uri.html#getHost()">getHost()</a></code> will return the creator's node ID.
+
+ <p>In some of the methods below (such as <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)">getDataItems(GoogleApiClient, Uri)</a></code>), it is
+ possible to omit the node ID from the URI, and only leave a path. In that case, the URI may
+ refer to multiple data items, since multiple nodes may create data items with the same path.
+ Partially specified data item URIs follow the following format:
+
+ <pre>wear:/&lt;path&gt;</pre>
+
+ Note the single <code>/</code> after <code>wear:</code>.
+
+ <h3>Concurrency</h3>
+ Concurrent modification of data items from different nodes may result in inconsistent results. It
+ is recommended that apps are built with some concept of ownership of data items. Two common
+ patterns are:
+ <ul>
+   <li>Creator owns data items: Data items may be updated only by the original creator node.
+   <li>Producer-consumer: One node is responsible for creating a data item, and a second node is
+   responsible for deleting it, once it has been processed. Data items should have unique IDs when
+   using this pattern, and data items should not be modified once created.
+ </ul>
 </p>
 
 
@@ -809,55 +911,75 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
 
 
-
+  
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a></td>
-      <td class="jd-descrcol" width="100%">Contains a single data item.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Contains a single data item.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DataListener.html">DataApi.DataListener</a></td>
-      <td class="jd-descrcol" width="100%">Used with <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener(GoogleApiClient, DataApi.DataListener)</a></code> to receive data events.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Used with <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener(GoogleApiClient, DataApi.DataListener)</a></code> to receive data events.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a></td>
-      <td class="jd-descrcol" width="100%">Contains the number of deleted items.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Contains the number of deleted items.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a></td>
-      <td class="jd-descrcol" width="100%">Contains a file descriptor for the requested asset.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Contains a file descriptor for the requested asset.&nbsp;
+        
+    
+
+      </td>
     </tr>
-
-
+    
+    
 
 
 
@@ -890,165 +1012,212 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/wearable/DataApi.DataListener.html">DataApi.DataListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">
+          Registers a listener to receive data item changed and deleted events.
+          
+    
 
-        <div class="jd-descrdiv">Registers a listener to receive data item changed and deleted events.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)">deleteDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri)</nobr>
+        
+        <div class="jd-descrdiv">
+          Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
+          
+    
 
-        <div class="jd-descrdiv">Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s from the Android Wear network.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItem(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)">getDataItem</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves a single <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> from the Android Wear network.
+          
+    
 
-        <div class="jd-descrdiv">Retrieves a single <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> from the Android Wear network.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient)">getDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
+          
+    
 
-        <div class="jd-descrdiv">Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s from the Android Wear network.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)">getDataItems</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Uri uri)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> matching the provided URI, from the Android Wear
+ network.
+          
+    
 
-        <div class="jd-descrdiv">Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s matching the provided Uri, from the Android Wear network.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#getFdForAsset(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataItemAsset)">getFdForAsset</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/wearable/DataItemAsset.html">DataItemAsset</a> asset)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves a <code>ParcelFileDescriptor</code> pointing at the bytes of an asset.
+          
+    
 
-        <div class="jd-descrdiv">Retrieves a <code>ParcelFileDescriptor</code> pointing at the bytes of an asset.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#getFdForAsset(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.Asset)">getFdForAsset</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a> asset)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves a <code>ParcelFileDescriptor</code> pointing at the bytes of an asset.
+          
+    
 
-        <div class="jd-descrdiv">Retrieves a <code>ParcelFileDescriptor</code> pointing at the bytes of an asset.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)">putDataItem</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/wearable/PutDataRequest.html">PutDataRequest</a> request)</nobr>
+        
+        <div class="jd-descrdiv">
+          Adds a <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> to the Android Wear network.
+          
+    
 
-        <div class="jd-descrdiv">Adds <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> to the Android Wear network.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">removeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/wearable/DataApi.DataListener.html">DataApi.DataListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">
+          Removes a data listener which was previously added through
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener(GoogleApiClient, DataListener)</a></code>.
+          
+    
 
-        <div class="jd-descrdiv">Removes a data listener.</div>
-
+        </div>
+  
   </td></tr>
 
 
@@ -1102,14 +1271,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">addListener</span>
@@ -1117,13 +1286,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive data item changed and deleted events.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive data item changed and deleted events. This call should be
+ balanced with a call to <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">removeListener(GoogleApiClient, DataListener)</a></code>, to avoid
+ leaking resources.
+
+ <p>The listener will be notified of changes initiated by this node.
 </p></div>
 
     </div>
@@ -1132,14 +1308,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="deleteDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DeleteDataItemsResult.html">DataApi.DeleteDataItemsResult</a>&gt;
       </span>
       <span class="sympad">deleteDataItems</span>
@@ -1147,15 +1323,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s from the Android Wear network.
- <p>
- Using glob uri selectors will allow this call to delete multiple data items at once.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Removes all specified <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
+
+ <p>If <code>uri</code> is fully specified, this method will delete at
+ most one data item. If <code>uri</code> contains no host, multiple data items may be
+ deleted, since different nodes may create data items with the same path. See
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></code> for details of the URI format.
 </p></div>
 
     </div>
@@ -1164,14 +1346,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getDataItem(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a>&gt;
       </span>
       <span class="sympad">getDataItem</span>
@@ -1179,14 +1361,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a single <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> from the Android Wear network. A fully qualified Uri
- must be specified. The uri's host must be a node that created the item.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a single <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> from the Android Wear network. A fully qualified URI
+ must be specified. The URI's host must be the ID of the node that created the item.
+
+ <p>See <code><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></code> for details of the URI format.
 </p></div>
 
     </div>
@@ -1195,14 +1382,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getDataItems(com.google.android.gms.common.api.GoogleApiClient)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>&gt;
       </span>
       <span class="sympad">getDataItems</span>
@@ -1210,15 +1397,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s from the Android Wear network.
- <p>
- Callers should call <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> when finished processing results.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> from the Android Wear network.
+
+ <p>Callers must call <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> on the returned buffer when finished
+ processing results.
 </p></div>
 
     </div>
@@ -1227,14 +1418,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getDataItems(com.google.android.gms.common.api.GoogleApiClient, android.net.Uri)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a>&gt;
       </span>
       <span class="sympad">getDataItems</span>
@@ -1242,17 +1433,25 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s matching the provided Uri, from the Android Wear network.
- The Uri should contain a path, if the host is elided, all data items matching that path are
- returned.
- <p>
- Callers should call <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> when finished processing results.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves all <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">data items</a></code> matching the provided URI, from the Android Wear
+ network.
+
+ <p>The URI must contain a path. If <code>uri</code> is fully specified, at most one data item
+ will be returned. If <code>uri</code> contains no host, multiple data items may be returned,
+ since different nodes may create data items with the same path. See <code><a href="/reference/com/google/android/gms/wearable/DataApi.html">DataApi</a></code> for
+ details of the URI format.
+
+ <p>Callers must call <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> on the returned buffer when finished
+ processing results.
 </p></div>
 
     </div>
@@ -1261,14 +1460,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getFdForAsset(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataItemAsset)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a>&gt;
       </span>
       <span class="sympad">getFdForAsset</span>
@@ -1276,12 +1475,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code>ParcelFileDescriptor</code> pointing at the bytes of an asset. Only assets
  previously stored in a <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> may be retrieved.
 </p></div>
@@ -1292,14 +1494,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="getFdForAsset(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.Asset)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.GetFdForAssetResult.html">DataApi.GetFdForAssetResult</a>&gt;
       </span>
       <span class="sympad">getFdForAsset</span>
@@ -1307,12 +1509,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a <code>ParcelFileDescriptor</code> pointing at the bytes of an asset. Only assets
  previously stored in a <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> may be retrieved.
 </p></div>
@@ -1323,14 +1528,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/wearable/DataApi.DataItemResult.html">DataApi.DataItemResult</a>&gt;
       </span>
       <span class="sympad">putDataItem</span>
@@ -1338,13 +1543,16 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Adds <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> to the Android Wear network. The updated item is synchronized across
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code> to the Android Wear network. The updated item is synchronized across
  all devices.
 </p></div>
 
@@ -1354,14 +1562,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="removeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
       <span class="sympad">removeListener</span>
@@ -1369,13 +1577,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Removes a data listener.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Removes a data listener which was previously added through
+ <code><a href="/reference/com/google/android/gms/wearable/DataApi.html#addListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.DataApi.DataListener)">addListener(GoogleApiClient, DataListener)</a></code>.
 </p></div>
 
     </div>
@@ -1393,17 +1605,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1411,7 +1623,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1424,7 +1636,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

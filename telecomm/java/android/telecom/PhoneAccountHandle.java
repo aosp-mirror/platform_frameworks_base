@@ -20,23 +20,44 @@ import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
+import android.os.UserHandle;
 
 import java.util.Objects;
 
 /**
- * The unique identifier for a {@link PhoneAccount}.
+ * The unique identifier for a {@link PhoneAccount}. A {@code PhoneAccountHandle} is made of two
+ * parts:
+ * <ul>
+ *  <li>The component name of the associated {@link ConnectionService}.</li>
+ *  <li>A string identifier that is unique across {@code PhoneAccountHandle}s with the same
+ *      component name.</li>
+ * </ul>
+ *
+ * See {@link PhoneAccount},
+ * {@link TelecomManager#registerPhoneAccount TelecomManager.registerPhoneAccount}.
  * @hide
  */
 @SystemApi
 public class PhoneAccountHandle implements Parcelable {
-    private ComponentName mComponentName;
-    private String mId;
+    private final ComponentName mComponentName;
+    private final String mId;
+    private final UserHandle mUserHandle;
 
     public PhoneAccountHandle(
             ComponentName componentName,
             String id) {
+        this(componentName, id, Process.myUserHandle());
+    }
+
+    /** @hide */
+    public PhoneAccountHandle(
+            ComponentName componentName,
+            String id,
+            UserHandle userHandle) {
         mComponentName = componentName;
         mId = id;
+        mUserHandle = userHandle;
     }
 
     /**
@@ -67,16 +88,28 @@ public class PhoneAccountHandle implements Parcelable {
         return mId;
     }
 
+    /**
+     * @return the {@link UserHandle} to use when connecting to this PhoneAccount.
+     * @hide
+     */
+    public UserHandle getUserHandle() {
+        return mUserHandle;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hashCode(mComponentName) + Objects.hashCode(mId);
+        return Objects.hash(mComponentName, mId, mUserHandle);
     }
 
     @Override
     public String toString() {
+        // Note: Log.pii called for mId as it can contain personally identifying phone account
+        // information such as SIP account IDs.
         return new StringBuilder().append(mComponentName)
                     .append(", ")
-                    .append(mId)
+                    .append(Log.pii(mId))
+                    .append(", ")
+                    .append(mUserHandle)
                     .toString();
     }
 
@@ -86,7 +119,8 @@ public class PhoneAccountHandle implements Parcelable {
                 other instanceof PhoneAccountHandle &&
                 Objects.equals(((PhoneAccountHandle) other).getComponentName(),
                         getComponentName()) &&
-                Objects.equals(((PhoneAccountHandle) other).getId(), getId());
+                Objects.equals(((PhoneAccountHandle) other).getId(), getId()) &&
+                Objects.equals(((PhoneAccountHandle) other).getUserHandle(), getUserHandle());
     }
 
     //
@@ -100,8 +134,9 @@ public class PhoneAccountHandle implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mComponentName, flags);
+        mComponentName.writeToParcel(out, flags);
         out.writeString(mId);
+        mUserHandle.writeToParcel(out, flags);
     }
 
     public static final Creator<PhoneAccountHandle> CREATOR = new Creator<PhoneAccountHandle>() {
@@ -117,7 +152,8 @@ public class PhoneAccountHandle implements Parcelable {
     };
 
     private PhoneAccountHandle(Parcel in) {
-        mComponentName = in.readParcelable(getClass().getClassLoader());
-        mId = in.readString();
+        this(ComponentName.CREATOR.createFromParcel(in),
+                in.readString(),
+                UserHandle.CREATOR.createFromParcel(in));
     }
 }

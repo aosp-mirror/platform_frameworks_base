@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GoogleApiClient.Builder</li>
       </ul>
     </div>
@@ -775,6 +844,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -888,7 +960,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#GoogleApiClient.Builder(android.content.Context)">GoogleApiClient.Builder</a></span>(Context context)</nobr>
         
-        <div class="jd-descrdiv">Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.</div>
+        <div class="jd-descrdiv">
+          Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -906,7 +983,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#GoogleApiClient.Builder(android.content.Context, com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">GoogleApiClient.Builder</a></span>(Context context, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
         
-        <div class="jd-descrdiv">Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.</div>
+        <div class="jd-descrdiv">
+          Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -937,7 +1019,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<O>, O)">addApi</a></span>(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;O&gt; api, O options)</nobr>
         
-        <div class="jd-descrdiv">Specify which Apis are requested by your app.</div>
+        <div class="jd-descrdiv">
+          Specify which Apis are requested by your app.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -955,7 +1042,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi</a></span>(<a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;?&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NotRequiredOptions.html">Api.ApiOptions.NotRequiredOptions</a>&gt; api)</nobr>
         
-        <div class="jd-descrdiv">Specify which Apis are requested by your app.</div>
+        <div class="jd-descrdiv">
+          Specify which Apis are requested by your app.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -973,7 +1065,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">addConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GoogleApiClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection events from this <code>GoogleApiClient</code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -991,8 +1088,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addOnConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">addOnConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Adds a listener to register to receive connection failed events from this
- <code>GoogleApiClient</code>.</div>
+        <div class="jd-descrdiv">
+          Adds a listener to register to receive connection failed events from this
+ <code>GoogleApiClient</code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1010,7 +1112,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)">addScope</a></span>(<a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a> scope)</nobr>
         
-        <div class="jd-descrdiv">Specify the OAuth 2.0 scopes requested by your app.</div>
+        <div class="jd-descrdiv">
+          Specify the OAuth 2.0 scopes requested by your app.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1028,8 +1135,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#build()">build</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Builds a new <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object for communicating with the Google
- APIs.</div>
+        <div class="jd-descrdiv">
+          Builds a new <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object for communicating with the Google
+ APIs.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1046,27 +1158,37 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#enableAutoManage(android.support.v4.app.FragmentActivity, int, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">enableAutoManage</a></span>(FragmentActivity fragmentActivity, int clientId, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> unresolvedConnectionFailedListener)</nobr>
+        
+        <div class="jd-descrdiv">
+          Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
+ connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
+          
+    
 
-        <div class="jd-descrdiv">Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
- connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setAccountName(java.lang.String)">setAccountName</a></span>(String accountName)</nobr>
         
-        <div class="jd-descrdiv">Specify an account name on the device that should be used.</div>
+        <div class="jd-descrdiv">
+          Specify an account name on the device that should be used.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1084,8 +1206,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setGravityForPopups(int)">setGravityForPopups</a></span>(int gravityForPopups)</nobr>
         
-        <div class="jd-descrdiv">Specifies the part of the screen at which games service popups (for example, "welcome
- back" or "achievement unlocked" popups) will be displayed using gravity.</div>
+        <div class="jd-descrdiv">
+          Specifies the part of the screen at which games service popups (for example, "welcome
+ back" or "achievement unlocked" popups) will be displayed using gravity.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1102,26 +1229,36 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setHandler(android.os.Handler)">setHandler</a></span>(Handler handler)</nobr>
+        
+        <div class="jd-descrdiv">
+          Sets a <code><a href="/reference/android/os/Handler.html">Handler</a></code> to indicate which thread to use when invoking callbacks.
+          
+    
 
-        <div class="jd-descrdiv">Sets a <code><a href="/reference/android/os/Handler.html">Handler</a></code> to indicate which thread to use when invoking callbacks.</div>
-
+        </div>
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setViewForPopups(android.view.View)">setViewForPopups</a></span>(View viewForPopups)</nobr>
         
-        <div class="jd-descrdiv">Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.</div>
+        <div class="jd-descrdiv">
+          Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1139,7 +1276,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#useDefaultAccount()">useDefaultAccount</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Specify that the default account should be used when connecting to services.</div>
+        <div class="jd-descrdiv">
+          Specify that the default account should be used when connecting to services.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1417,6 +1559,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1455,6 +1600,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.</p></div>
   <div class="jd-tagdata">
@@ -1520,6 +1668,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify which Apis are requested by your app. See <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> for more information.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1567,6 +1718,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify which Apis are requested by your app. See <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> for more information.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1609,6 +1763,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GoogleApiClient</code>.
  Applications should balance calls to this method with calls to
@@ -1657,6 +1814,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Adds a listener to register to receive connection failed events from this
  <code>GoogleApiClient</code>. Applications should balance calls to this method with calls to
@@ -1707,6 +1867,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify the OAuth 2.0 scopes requested by your app. See <code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code> for more
  information.</p></div>
   <div class="jd-tagdata">
@@ -1751,6 +1914,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Builds a new <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object for communicating with the Google
  APIs.</p></div>
   <div class="jd-tagdata">
@@ -1765,14 +1931,14 @@ From class
 
 <A NAME="enableAutoManage(android.support.v4.app.FragmentActivity, int, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
       </span>
       <span class="sympad">enableAutoManage</span>
@@ -1780,12 +1946,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
  connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
  <p/>
@@ -1816,15 +1985,15 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>NullPointerException</td>
             <td>if fragmentActivity is null</td>
-        </tr>
+        </tr>  
         <tr>
             <th>IllegalArgumentException</td>
             <td>if clientId is negative.</td>
-        </tr>
+        </tr>  
         <tr>
             <th>IllegalStateException</td>
             <td>if clientId is already being auto-managed.
@@ -1859,6 +2028,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specify an account name on the device that should be used. If this is never called, the
  client will use the current default account for Google Play services for this
@@ -1902,6 +2074,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the part of the screen at which games service popups (for example, "welcome
  back" or "achievement unlocked" popups) will be displayed using gravity.
  <p>
@@ -1923,14 +2098,14 @@ From class
 
 <A NAME="setHandler(android.os.Handler)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
       </span>
       <span class="sympad">setHandler</span>
@@ -1938,12 +2113,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets a <code><a href="/reference/android/os/Handler.html">Handler</a></code> to indicate which thread to use when invoking callbacks. Will not
  be used directly to handle callbacks. If this is not called then the application's main
  thread will be used.
@@ -1975,6 +2153,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.</p></div>
   <div class="jd-tagdata">
@@ -2014,6 +2195,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Specify that the default account should be used when connecting to services.
 </p></div>

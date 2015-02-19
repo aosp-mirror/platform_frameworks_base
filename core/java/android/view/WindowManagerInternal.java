@@ -173,4 +173,20 @@ public abstract class WindowManagerInternal {
      * redrawn.
      */
     public abstract void waitForAllWindowsDrawn(Runnable callback, long timeout);
+
+    /**
+     * Adds a window token for a given window type.
+     *
+     * @param token The token to add.
+     * @param type The window type.
+     */
+    public abstract void addWindowToken(android.os.IBinder token, int type);
+
+    /**
+     * Removes a window token.
+     *
+     * @param token The toke to remove.
+     * @param removeWindows Whether to also remove the windows associated with the token.
+     */
+    public abstract void removeWindowToken(android.os.IBinder token, boolean removeWindows);
 }

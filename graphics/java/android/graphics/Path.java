@@ -678,7 +678,7 @@ public class Path {
     }
 
     /**
-     * Offset the path by (dx,dy), returning true on success
+     * Offset the path by (dx,dy)
      *
      * @param dx  The amount in the X direction to offset the entire path
      * @param dy  The amount in the Y direction to offset the entire path
@@ -695,7 +695,7 @@ public class Path {
     }
 
     /**
-     * Offset the path by (dx,dy), returning true on success
+     * Offset the path by (dx,dy)
      *
      * @param dx The amount in the X direction to offset the entire path
      * @param dy The amount in the Y direction to offset the entire path

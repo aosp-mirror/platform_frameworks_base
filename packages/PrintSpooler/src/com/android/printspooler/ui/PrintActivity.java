@@ -291,6 +291,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (isFinishing() || (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
                     return;
                 }
+                if (mPrintedDocument.isUpdating()) {
+                    mPrintedDocument.cancel();
+                }
                 setState(STATE_PRINT_CANCELED);
                 doFinish();
             }
@@ -378,7 +381,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return true;
         }
 
-        if (mState == STATE_PRINT_CANCELED ||mState == STATE_PRINT_CONFIRMED
+        if (mState == STATE_PRINT_CANCELED || mState == STATE_PRINT_CONFIRMED
                 || mState == STATE_PRINT_COMPLETED) {
             return true;
         }
@@ -405,12 +408,23 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public void onMalformedPdfFile() {
+        onPrintDocumentError("Cannot print a malformed PDF file");
+    }
+
+    @Override
+    public void onSecurePdfFile() {
+        onPrintDocumentError("Cannot print a password protected PDF file");
+    }
+
+    private void onPrintDocumentError(String message) {
         mProgressMessageController.cancel();
         ensureErrorUiShown(null, PrintErrorFragment.ACTION_RETRY);
 
         setState(STATE_UPDATE_FAILED);
 
         updateOptionsUi();
+
+        mPrintedDocument.kill(message);
     }
 
     @Override
@@ -471,6 +485,10 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         switch (mState) {
             case STATE_PRINT_CONFIRMED: {
                 requestCreatePdfFileOrFinish();
+            } break;
+
+            case STATE_PRINT_CANCELED: {
+                updateOptionsUi();
             } break;
 
             default: {
@@ -547,7 +565,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mPrintPreviewController.onOrientationChanged();
+        if (mPrintPreviewController != null) {
+            mPrintPreviewController.onOrientationChanged();
+        }
     }
 
     @Override
@@ -592,7 +612,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mDestinationSpinner.post(new Runnable() {
                 @Override
                 public void run() {
-                    shredPagesAndFinish(uri);
+                    transformDocumentAndFinish(uri);
                 }
             });
         } else if (resultCode == RESULT_CANCELED) {
@@ -688,43 +708,63 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         PrintAttributes currAttributes = mPrintJob.getAttributes();
         PrintAttributes newAttributes = printJobInfo.getAttributes();
 
-        // Take the media size only if the current printer supports is.
-        MediaSize oldMediaSize = currAttributes.getMediaSize();
-        MediaSize newMediaSize = newAttributes.getMediaSize();
-        if (!oldMediaSize.equals(newMediaSize)) {
-            final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
-            MediaSize newMediaSizePortrait = newAttributes.getMediaSize().asPortrait();
-            for (int i = 0; i < mediaSizeCount; i++) {
-                MediaSize supportedSizePortrait = mMediaSizeSpinnerAdapter.getItem(i)
-                        .value.asPortrait();
-                if (supportedSizePortrait.equals(newMediaSizePortrait)) {
-                    currAttributes.setMediaSize(newMediaSize);
-                    mMediaSizeSpinner.setSelection(i);
-                    if (currAttributes.getMediaSize().isPortrait()) {
-                        if (mOrientationSpinner.getSelectedItemPosition() != 0) {
-                            mOrientationSpinner.setSelection(0);
+        if (newAttributes != null) {
+            // Take the media size only if the current printer supports is.
+            MediaSize oldMediaSize = currAttributes.getMediaSize();
+            MediaSize newMediaSize = newAttributes.getMediaSize();
+            if (!oldMediaSize.equals(newMediaSize)) {
+                final int mediaSizeCount = mMediaSizeSpinnerAdapter.getCount();
+                MediaSize newMediaSizePortrait = newAttributes.getMediaSize().asPortrait();
+                for (int i = 0; i < mediaSizeCount; i++) {
+                    MediaSize supportedSizePortrait = mMediaSizeSpinnerAdapter.getItem(i)
+                            .value.asPortrait();
+                    if (supportedSizePortrait.equals(newMediaSizePortrait)) {
+                        currAttributes.setMediaSize(newMediaSize);
+                        mMediaSizeSpinner.setSelection(i);
+                        if (currAttributes.getMediaSize().isPortrait()) {
+                            if (mOrientationSpinner.getSelectedItemPosition() != 0) {
+                                mOrientationSpinner.setSelection(0);
+                            }
+                        } else {
+                            if (mOrientationSpinner.getSelectedItemPosition() != 1) {
+                                mOrientationSpinner.setSelection(1);
+                            }
                         }
-                    } else {
-                        if (mOrientationSpinner.getSelectedItemPosition() != 1) {
-                            mOrientationSpinner.setSelection(1);
-                        }
+                        break;
                     }
-                    break;
                 }
             }
-        }
 
-        // Take the color mode only if the current printer supports it.
-        final int currColorMode = currAttributes.getColorMode();
-        final int newColorMode = newAttributes.getColorMode();
-        if (currColorMode != newColorMode) {
-            final int colorModeCount = mColorModeSpinner.getCount();
-            for (int i = 0; i < colorModeCount; i++) {
-                final int supportedColorMode = mColorModeSpinnerAdapter.getItem(i).value;
-                if (supportedColorMode == newColorMode) {
-                    currAttributes.setColorMode(newColorMode);
-                    mColorModeSpinner.setSelection(i);
-                    break;
+            // Take the resolution only if the current printer supports is.
+            Resolution oldResolution = currAttributes.getResolution();
+            Resolution newResolution = newAttributes.getResolution();
+            if (!oldResolution.equals(newResolution)) {
+                PrinterCapabilitiesInfo capabilities = mCurrentPrinter.getCapabilities();
+                if (capabilities != null) {
+                    List<Resolution> resolutions = capabilities.getResolutions();
+                    final int resolutionCount = resolutions.size();
+                    for (int i = 0; i < resolutionCount; i++) {
+                        Resolution resolution = resolutions.get(i);
+                        if (resolution.equals(newResolution)) {
+                            currAttributes.setResolution(resolution);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Take the color mode only if the current printer supports it.
+            final int currColorMode = currAttributes.getColorMode();
+            final int newColorMode = newAttributes.getColorMode();
+            if (currColorMode != newColorMode) {
+                final int colorModeCount = mColorModeSpinner.getCount();
+                for (int i = 0; i < colorModeCount; i++) {
+                    final int supportedColorMode = mColorModeSpinnerAdapter.getItem(i).value;
+                    if (supportedColorMode == newColorMode) {
+                        currAttributes.setColorMode(newColorMode);
+                        mColorModeSpinner.setSelection(i);
+                        break;
+                    }
                 }
             }
         }
@@ -902,7 +942,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (mCurrentPrinter == mDestinationSpinnerAdapter.getPdfPrinter()) {
             startCreateDocumentActivity();
         } else {
-            shredPagesAndFinish(null);
+            transformDocumentAndFinish(null);
         }
     }
 
@@ -1392,12 +1432,16 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mCopiesEditText.setEnabled(true);
             mCopiesEditText.setFocusableInTouchMode(true);
         } else {
+            CharSequence text = mCopiesEditText.getText();
+            if (TextUtils.isEmpty(text) || !MIN_COPIES_STRING.equals(text.toString())) {
+                mCopiesEditText.setText(MIN_COPIES_STRING);
+            }
             mCopiesEditText.setEnabled(false);
             mCopiesEditText.setFocusable(false);
         }
         if (mCopiesEditText.getError() == null
                 && TextUtils.isEmpty(mCopiesEditText.getText())) {
-            mCopiesEditText.setText(String.valueOf(MIN_COPIES));
+            mCopiesEditText.setText(MIN_COPIES_STRING);
             mCopiesEditText.requestFocus();
         }
     }
@@ -1573,8 +1617,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         return true;
     }
 
-    private void shredPagesAndFinish(final Uri writeToUri) {
-        new PageShredder(this, mPrintJob, mFileProvider, new Runnable() {
+    private void transformDocumentAndFinish(final Uri writeToUri) {
+        // If saving to PDF, apply the attibutes as we are acting as a print service.
+        PrintAttributes attributes = mDestinationSpinnerAdapter.getPdfPrinter() == mCurrentPrinter
+                ?  mPrintJob.getAttributes() : null;
+        new DocumentTransformer(this, mPrintJob, mFileProvider, attributes, new Runnable() {
             @Override
             public void run() {
                 if (writeToUri != null) {
@@ -1582,7 +1629,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 }
                 doFinish();
             }
-        }).shred();
+        }).transform();
     }
 
     private void doFinish() {
@@ -2311,7 +2358,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         }
     }
 
-    private static final class PageShredder implements ServiceConnection {
+    private static final class DocumentTransformer implements ServiceConnection {
         private static final String TEMP_FILE_PREFIX = "print_job";
         private static final String TEMP_FILE_EXTENSION = ".pdf";
 
@@ -2323,20 +2370,24 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         private final PageRange[] mPagesToShred;
 
+        private final PrintAttributes mAttributesToApply;
+
         private final Runnable mCallback;
 
-        public PageShredder(Context context, PrintJobInfo printJob,
-                MutexFileProvider fileProvider, Runnable callback) {
+        public DocumentTransformer(Context context, PrintJobInfo printJob,
+                MutexFileProvider fileProvider, PrintAttributes attributes,
+                Runnable callback) {
             mContext = context;
             mPrintJob = printJob;
             mFileProvider = fileProvider;
             mCallback = callback;
             mPagesToShred = computePagesToShred(mPrintJob);
+            mAttributesToApply = attributes;
         }
 
-        public void shred() {
+        public void transform() {
             // If we have only the pages we want, done.
-            if (mPagesToShred.length <= 0) {
+            if (mPagesToShred.length <= 0 && mAttributesToApply == null) {
                 mCallback.run();
                 return;
             }
@@ -2358,14 +2409,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                     // final and this code is the last one to touch
                     // them as shredding is the very last step, so the
                     // UI is not interactive at this point.
-                    shredPages(editor);
+                    doTransform(editor);
                     updatePrintJob();
                     return null;
                 }
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
-                    mContext.unbindService(PageShredder.this);
+                    mContext.unbindService(DocumentTransformer.this);
                     mCallback.run();
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -2376,7 +2427,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             /* do nothing */
         }
 
-        private void shredPages(IPdfEditor editor) {
+        private void doTransform(IPdfEditor editor) {
             File tempFile = null;
             ParcelFileDescriptor src = null;
             ParcelFileDescriptor dst = null;
@@ -2394,6 +2445,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
                 // Drop the pages.
                 editor.removePages(mPagesToShred);
+
+                // Apply print attributes if needed.
+                if (mAttributesToApply != null) {
+                    editor.applyPrintAttributes(mAttributesToApply);
+                }
 
                 // Write the modified PDF to a temp file.
                 tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_EXTENSION,

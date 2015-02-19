@@ -241,6 +241,9 @@ public final class TvInputInfo implements Parcelable {
             if (DEBUG) {
                 Log.d(TAG, "Setup activity loaded. [" + input.mSetupActivity + "] for " + si.name);
             }
+            if (inputType == TYPE_TUNER && TextUtils.isEmpty(input.mSetupActivity)) {
+                throw new XmlPullParserException("Setup activity not found in " + si.name);
+            }
             input.mSettingsActivity = sa.getString(
                     com.android.internal.R.styleable.TvInputService_settingsActivity);
             if (DEBUG) {

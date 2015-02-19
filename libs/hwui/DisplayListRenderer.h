@@ -24,6 +24,7 @@
 
 #include "DisplayListLogBuffer.h"
 #include "RenderNode.h"
+#include "ResourceCache.h"
 
 namespace android {
 namespace uirenderer {
@@ -44,6 +45,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 class DeferredDisplayList;
+class DeferredLayerUpdater;
 class DisplayListRenderer;
 class DisplayListOp;
 class DrawOp;
@@ -150,7 +152,7 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    virtual status_t drawLayer(Layer* layer, float x, float y);
+    virtual status_t drawLayer(DeferredLayerUpdater* layerHandle, float x, float y);
     virtual status_t drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags);
 
     // TODO: rename for consistency
@@ -209,7 +211,7 @@ private:
             mDisplayListData->paths.add(pathCopy);
         }
         if (mDisplayListData->sourcePaths.indexOf(path) < 0) {
-            mCaches.resourceCache.incrementRefcount(path);
+            mResourceCache.incrementRefcount(path);
             mDisplayListData->sourcePaths.add(path);
         }
         return pathCopy;
@@ -267,31 +269,25 @@ private:
         return regionCopy;
     }
 
-    inline Layer* refLayer(Layer* layer) {
-        mDisplayListData->layers.add(layer);
-        mCaches.resourceCache.incrementRefcount(layer);
-        return layer;
-    }
-
     inline const SkBitmap* refBitmap(const SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
         mDisplayListData->bitmapResources.add(bitmap);
-        mCaches.resourceCache.incrementRefcount(bitmap);
+        mResourceCache.incrementRefcount(bitmap);
         return bitmap;
     }
 
     inline const SkBitmap* refBitmapData(const SkBitmap* bitmap) {
         mDisplayListData->ownedBitmapResources.add(bitmap);
-        mCaches.resourceCache.incrementRefcount(bitmap);
+        mResourceCache.incrementRefcount(bitmap);
         return bitmap;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {
         mDisplayListData->patchResources.add(patch);
-        mCaches.resourceCache.incrementRefcount(patch);
+        mResourceCache.incrementRefcount(patch);
         return patch;
     }
 
@@ -299,7 +295,7 @@ private:
     DefaultKeyedVector<const SkPath*, const SkPath*> mPathMap;
     DefaultKeyedVector<const SkRegion*, const SkRegion*> mRegionMap;
 
-    Caches& mCaches;
+    ResourceCache& mResourceCache;
     DisplayListData* mDisplayListData;
 
     float mTranslateX;

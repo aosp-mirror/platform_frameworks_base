@@ -23,8 +23,10 @@
           <li><a href="<?cs var:toroot ?>design/wear/creative-vision.html">Creative Vision</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/principles.html">Design Principles</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/structure.html">App Structure</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/context.html">Context Awareness</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/patterns.html">UI Patterns</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/style.html">Style</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/watchfaces.html">Watch Faces</a></li>
         </ul>
       </li>
       <li class="nav-section">
@@ -51,7 +53,7 @@
       <li><a href="<?cs var:toroot ?>design/style/color.html">Color</a></li>
       <li><a href="<?cs var:toroot ?>design/style/iconography.html">Iconography</a></li>
       <li><a href="<?cs var:toroot ?>design/style/branding.html">Your Branding</a></li>
-      <li><a href="<?cs var:toroot ?>design/style/writing.html">Writing Style</a></li>
+      <li><a href="<?cs var:toroot ?>design/style/writing.html" zh-cn-lang="写作风格">Writing Style</a></li>
     </ul>
   </li>
 

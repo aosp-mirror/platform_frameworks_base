@@ -105,10 +105,6 @@ public class ImageWallpaper extends WallpaperService {
         static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
         static final int EGL_OPENGL_ES2_BIT = 4;
 
-        // TODO: Not currently used, keeping around until we know we don't need it
-        @SuppressWarnings({"UnusedDeclaration"})
-        private WallpaperObserver mReceiver;
-
         Bitmap mBackground;
         int mBackgroundWidth = -1, mBackgroundHeight = -1;
         int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
@@ -151,22 +147,6 @@ public class ImageWallpaper extends WallpaperService {
         private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
         private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
 
-        class WallpaperObserver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (DEBUG) {
-                    Log.d(TAG, "onReceive");
-                }
-
-                mLastSurfaceWidth = mLastSurfaceHeight = -1;
-                mBackground = null;
-                mBackgroundWidth = -1;
-                mBackgroundHeight = -1;
-                mRedrawNeeded = true;
-                drawFrame();
-            }
-        }
-
         public DrawableEngine() {
             super();
             setFixedSizeAllowed(true);
@@ -174,7 +154,7 @@ public class ImageWallpaper extends WallpaperService {
 
         public void trimMemory(int level) {
             if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW &&
-                    mBackground != null && mIsHwAccelerated) {
+                    mBackground != null) {
                 if (DEBUG) {
                     Log.d(TAG, "trimMemory");
                 }
@@ -194,12 +174,6 @@ public class ImageWallpaper extends WallpaperService {
 
             super.onCreate(surfaceHolder);
 
-            // TODO: Don't need this currently because the wallpaper service
-            // will restart the image wallpaper whenever the image changes.
-            //IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-            //mReceiver = new WallpaperObserver();
-            //registerReceiver(mReceiver, filter, null, mHandler);
-
             updateSurfaceSize(surfaceHolder);
 
             setOffsetNotificationsEnabled(false);
@@ -208,10 +182,8 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onDestroy() {
             super.onDestroy();
-            if (mReceiver != null) {
-                unregisterReceiver(mReceiver);
-            }
             mBackground = null;
+            mWallpaperManager.forgetLoadedWallpaper();
         }
 
         void updateSurfaceSize(SurfaceHolder surfaceHolder) {
@@ -337,111 +309,116 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         void drawFrame() {
-            int newRotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).
-                    getDefaultDisplay().getRotation();
+            try {
+                int newRotation = ((WindowManager) getSystemService(WINDOW_SERVICE)).
+                        getDefaultDisplay().getRotation();
 
-            // Sometimes a wallpaper is not large enough to cover the screen in one dimension.
-            // Call updateSurfaceSize -- it will only actually do the update if the dimensions
-            // should change
-            if (newRotation != mLastRotation) {
-                // Update surface size (if necessary)
-                updateSurfaceSize(getSurfaceHolder());
-            }
-            SurfaceHolder sh = getSurfaceHolder();
-            final Rect frame = sh.getSurfaceFrame();
-            final int dw = frame.width();
-            final int dh = frame.height();
-            boolean surfaceDimensionsChanged = dw != mLastSurfaceWidth || dh != mLastSurfaceHeight;
-
-            boolean redrawNeeded = surfaceDimensionsChanged || newRotation != mLastRotation;
-            if (!redrawNeeded && !mOffsetsChanged) {
-                if (DEBUG) {
-                    Log.d(TAG, "Suppressed drawFrame since redraw is not needed "
-                            + "and offsets have not changed.");
+                // Sometimes a wallpaper is not large enough to cover the screen in one dimension.
+                // Call updateSurfaceSize -- it will only actually do the update if the dimensions
+                // should change
+                if (newRotation != mLastRotation) {
+                    // Update surface size (if necessary)
+                    updateSurfaceSize(getSurfaceHolder());
                 }
-                return;
-            }
-            mLastRotation = newRotation;
+                SurfaceHolder sh = getSurfaceHolder();
+                final Rect frame = sh.getSurfaceFrame();
+                final int dw = frame.width();
+                final int dh = frame.height();
+                boolean surfaceDimensionsChanged = dw != mLastSurfaceWidth
+                        || dh != mLastSurfaceHeight;
 
-            // Load bitmap if it is not yet loaded or if it was loaded at a different size
-            if (mBackground == null || surfaceDimensionsChanged) {
-                if (DEBUG) {
-                    Log.d(TAG, "Reloading bitmap: mBackground, bgw, bgh, dw, dh = " +
-                            mBackground + ", " +
-                            ((mBackground == null) ? 0 : mBackground.getWidth()) + ", " +
-                            ((mBackground == null) ? 0 : mBackground.getHeight()) + ", " +
-                            dw + ", " + dh);
-                }
-                mWallpaperManager.forgetLoadedWallpaper();
-                updateWallpaperLocked();
-                if (mBackground == null) {
+                boolean redrawNeeded = surfaceDimensionsChanged || newRotation != mLastRotation;
+                if (!redrawNeeded && !mOffsetsChanged) {
                     if (DEBUG) {
-                        Log.d(TAG, "Unable to load bitmap");
+                        Log.d(TAG, "Suppressed drawFrame since redraw is not needed "
+                                + "and offsets have not changed.");
                     }
                     return;
                 }
-                if (DEBUG) {
-                    if (dw != mBackground.getWidth() || dh != mBackground.getHeight()) {
-                        Log.d(TAG, "Surface != bitmap dimensions: surface w/h, bitmap w/h: " +
-                                dw + ", " + dh + ", " + mBackground.getWidth() + ", " +
-                                mBackground.getHeight());
+                mLastRotation = newRotation;
+
+                // Load bitmap if it is not yet loaded or if it was loaded at a different size
+                if (mBackground == null || surfaceDimensionsChanged) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Reloading bitmap: mBackground, bgw, bgh, dw, dh = " +
+                                mBackground + ", " +
+                                ((mBackground == null) ? 0 : mBackground.getWidth()) + ", " +
+                                ((mBackground == null) ? 0 : mBackground.getHeight()) + ", " +
+                                dw + ", " + dh);
+                    }
+                    mWallpaperManager.forgetLoadedWallpaper();
+                    updateWallpaperLocked();
+                    if (mBackground == null) {
+                        if (DEBUG) {
+                            Log.d(TAG, "Unable to load bitmap");
+                        }
+                        return;
+                    }
+                    if (DEBUG) {
+                        if (dw != mBackground.getWidth() || dh != mBackground.getHeight()) {
+                            Log.d(TAG, "Surface != bitmap dimensions: surface w/h, bitmap w/h: " +
+                                    dw + ", " + dh + ", " + mBackground.getWidth() + ", " +
+                                    mBackground.getHeight());
+                        }
                     }
                 }
-            }
 
-            // Center the scaled image
-            mScale = Math.max(1f, Math.max(dw / (float) mBackground.getWidth(),
-                    dh / (float) mBackground.getHeight()));
-            final int availw = dw - (int) (mBackground.getWidth() * mScale);
-            final int availh = dh - (int) (mBackground.getHeight() * mScale);
-            int xPixels = availw / 2;
-            int yPixels = availh / 2;
+                // Center the scaled image
+                mScale = Math.max(1f, Math.max(dw / (float) mBackground.getWidth(),
+                        dh / (float) mBackground.getHeight()));
+                final int availw = dw - (int) (mBackground.getWidth() * mScale);
+                final int availh = dh - (int) (mBackground.getHeight() * mScale);
+                int xPixels = availw / 2;
+                int yPixels = availh / 2;
 
-            // Adjust the image for xOffset/yOffset values. If window manager is handling offsets,
-            // mXOffset and mYOffset are set to 0.5f by default and therefore xPixels and yPixels
-            // will remain unchanged
-            final int availwUnscaled = dw - mBackground.getWidth();
-            final int availhUnscaled = dh - mBackground.getHeight();
-            if (availwUnscaled < 0) xPixels += (int)(availwUnscaled * (mXOffset - .5f) + .5f);
-            if (availhUnscaled < 0) yPixels += (int)(availhUnscaled * (mYOffset - .5f) + .5f);
+                // Adjust the image for xOffset/yOffset values. If window manager is handling offsets,
+                // mXOffset and mYOffset are set to 0.5f by default and therefore xPixels and yPixels
+                // will remain unchanged
+                final int availwUnscaled = dw - mBackground.getWidth();
+                final int availhUnscaled = dh - mBackground.getHeight();
+                if (availwUnscaled < 0)
+                    xPixels += (int) (availwUnscaled * (mXOffset - .5f) + .5f);
+                if (availhUnscaled < 0)
+                    yPixels += (int) (availhUnscaled * (mYOffset - .5f) + .5f);
 
-            mOffsetsChanged = false;
-            mRedrawNeeded = false;
-            if (surfaceDimensionsChanged) {
-                mLastSurfaceWidth = dw;
-                mLastSurfaceHeight = dh;
-            }
-            if (!redrawNeeded && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
-                if (DEBUG) {
-                    Log.d(TAG, "Suppressed drawFrame since the image has not "
-                            + "actually moved an integral number of pixels.");
+                mOffsetsChanged = false;
+                mRedrawNeeded = false;
+                if (surfaceDimensionsChanged) {
+                    mLastSurfaceWidth = dw;
+                    mLastSurfaceHeight = dh;
                 }
-                return;
-            }
-            mLastXTranslation = xPixels;
-            mLastYTranslation = yPixels;
+                if (!redrawNeeded && xPixels == mLastXTranslation && yPixels == mLastYTranslation) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Suppressed drawFrame since the image has not "
+                                + "actually moved an integral number of pixels.");
+                    }
+                    return;
+                }
+                mLastXTranslation = xPixels;
+                mLastYTranslation = yPixels;
 
-            if (DEBUG) {
-                Log.d(TAG, "Redrawing wallpaper");
-            }
+                if (DEBUG) {
+                    Log.d(TAG, "Redrawing wallpaper");
+                }
 
-            if (mIsHwAccelerated) {
-                if (!drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels)) {
+                if (mIsHwAccelerated) {
+                    if (!drawWallpaperWithOpenGL(sh, availw, availh, xPixels, yPixels)) {
+                        drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
+                    }
+                } else {
                     drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
                 }
-            } else {
-                drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
-                if (FIXED_SIZED_SURFACE) {
+            } finally {
+                if (FIXED_SIZED_SURFACE && !mIsHwAccelerated) {
                     // If the surface is fixed-size, we should only need to
                     // draw it once and then we'll let the window manager
                     // position it appropriately.  As such, we no longer needed
                     // the loaded bitmap.  Yay!
-                    // hw-accelerated path retains bitmap for faster rotation
+                    // hw-accelerated renderer retains bitmap for faster rotation
                     mBackground = null;
                     mWallpaperManager.forgetLoadedWallpaper();
                 }
             }
-
         }
 
         private void updateWallpaperLocked() {
@@ -556,7 +533,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean status = mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
             checkEglError();
 
-            finishGL();
+            finishGL(texture, program);
 
             return status;
         }
@@ -609,21 +586,18 @@ public class ImageWallpaper extends WallpaperService {
 
             int program = glCreateProgram();
             glAttachShader(program, vertexShader);
-            checkGlError();
-
             glAttachShader(program, fragmentShader);
-            checkGlError();
-
             glLinkProgram(program);
             checkGlError();
+
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
 
             int[] status = new int[1];
             glGetProgramiv(program, GL_LINK_STATUS, status, 0);
             if (status[0] != GL_TRUE) {
                 String error = glGetProgramInfoLog(program);
                 Log.d(GL_LOG_TAG, "Error while linking program:\n" + error);
-                glDeleteShader(vertexShader);
-                glDeleteShader(fragmentShader);
                 glDeleteProgram(program);
                 return 0;
             }
@@ -666,7 +640,11 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        private void finishGL() {
+        private void finishGL(int texture, int program) {
+            int[] textures = new int[1];
+            textures[0] = texture;
+            glDeleteTextures(1, textures, 0);
+            glDeleteProgram(program);
             mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
             mEgl.eglDestroyContext(mEglDisplay, mEglContext);

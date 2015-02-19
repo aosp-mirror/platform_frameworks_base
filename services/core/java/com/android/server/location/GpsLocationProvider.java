@@ -72,6 +72,9 @@ import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
@@ -88,6 +91,7 @@ import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -162,6 +166,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
     private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
+    private static final int GPS_CAPABILITY_GEOFENCING = 0x0000020;
+    private static final int GPS_CAPABILITY_MEASUREMENTS = 0x0000040;
+    private static final int GPS_CAPABILITY_NAV_MESSAGES = 0x0000080;
 
     // The AGPS SUPL mode
     private static final int AGPS_SUPL_MODE_MSA = 0x02;
@@ -348,20 +355,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private final ILocationManager mILocationManager;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
-    private GpsStatusListenerHelper mListenerHelper = new GpsStatusListenerHelper() {
-        @Override
-        protected boolean isSupported() {
-            return GpsLocationProvider.isSupported();
-        }
-
-        @Override
-        protected boolean registerWithService() {
-            return true;
-        }
-
-        @Override
-        protected void unregisterFromService() {}
-    };
+    private final GpsStatusListenerHelper mListenerHelper;
+    private final GpsMeasurementsProvider mGpsMeasurementsProvider;
+    private final GpsNavigationMessageProvider mGpsNavigationMessageProvider;
 
     // Handler for processing events
     private Handler mHandler;
@@ -409,41 +405,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     };
 
-    private final GpsMeasurementsProvider mGpsMeasurementsProvider = new GpsMeasurementsProvider() {
-        @Override
-        public boolean isSupported() {
-            return native_is_measurement_supported();
-        }
-
-        @Override
-        protected boolean registerWithService() {
-            return native_start_measurement_collection();
-        }
-
-        @Override
-        protected void unregisterFromService() {
-            native_stop_measurement_collection();
-        }
-    };
-
-    private final GpsNavigationMessageProvider mGpsNavigationMessageProvider =
-            new GpsNavigationMessageProvider() {
-        @Override
-        protected boolean isSupported() {
-            return native_is_navigation_message_supported();
-        }
-
-        @Override
-        protected boolean registerWithService() {
-            return native_start_navigation_message_collection();
-        }
-
-        @Override
-        protected void unregisterFromService() {
-            native_stop_navigation_message_collection();
-        }
-    };
-
     public IGpsStatusProvider getGpsStatusProvider() {
         return mGpsStatusProvider;
     }
@@ -473,14 +434,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 checkSmsSuplInit(intent);
             } else if (action.equals(Intents.WAP_PUSH_RECEIVED_ACTION)) {
                 checkWapSuplInit(intent);
-            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                int networkState;
-                if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
-                    networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
-                } else {
-                    networkState = LocationProvider.AVAILABLE;
-                }
-
+            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE)) {
                 // retrieve NetworkInfo result for this UID
                 NetworkInfo info =
                         intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
@@ -488,30 +442,49 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
                 info = connManager.getNetworkInfo(info.getType());
 
+                int networkState;
+                if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false) ||
+                    !info.isConnected()) {
+                    networkState = LocationProvider.TEMPORARILY_UNAVAILABLE;
+                } else {
+                    networkState = LocationProvider.AVAILABLE;
+                }
+
+
                 updateNetworkState(networkState, info);
             } else if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 updateLowPowerMode();
-            } else if (action.equals(SIM_STATE_CHANGED)
-                    || action.equals(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE)
-                    || action.equals(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED)) {
-                Log.d(TAG, "received SIM realted action: " + action);
-                TelephonyManager phone = (TelephonyManager)
-                        mContext.getSystemService(Context.TELEPHONY_SERVICE);
-                String mccMnc = phone.getSimOperator();
-                if (!TextUtils.isEmpty(mccMnc)) {
-                    Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
-                    synchronized (mLock) {
-                        reloadGpsProperties(context, mProperties);
-                        mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
-                    }
-                } else {
-                    Log.d(TAG, "SIM MCC/MNC is still not available");
-                }
+            } else if (action.equals(SIM_STATE_CHANGED)) {
+                subscriptionOrSimChanged(context);
             }
         }
     };
+
+    private final OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
+            new OnSubscriptionsChangedListener() {
+        @Override
+        public void onSubscriptionsChanged() {
+            subscriptionOrSimChanged(mContext);
+        }
+    };
+
+    private void subscriptionOrSimChanged(Context context) {
+        Log.d(TAG, "received SIM realted action: ");
+        TelephonyManager phone = (TelephonyManager)
+                mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        String mccMnc = phone.getSimOperator();
+        if (!TextUtils.isEmpty(mccMnc)) {
+            Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
+            synchronized (mLock) {
+                reloadGpsProperties(context, mProperties);
+                mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
+            }
+        } else {
+            Log.d(TAG, "SIM MCC/MNC is still not available");
+        }
+    }
 
     private void checkSmsSuplInit(Intent intent) {
         SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
@@ -667,6 +640,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
                                                 mNetInitiatedListener,
                                                 mSuplEsEnabled);
 
+        // TODO: When this object "finishes" we should unregister by invoking
+        // SubscriptionManager.getInstance(mContext).unregister(mOnSubscriptionsChangedListener);
+        // This is not strictly necessary because it will be unregistered if the
+        // notification fails but it is good form.
+
+        // Register for SubscriptionInfo list changes which is guaranteed
+        // to invoke onSubscriptionsChanged the first time.
+        SubscriptionManager.from(mContext)
+            .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
+
         // construct handler, listen for events
         mHandler = new ProviderHandler(looper);
         listenForBroadcasts();
@@ -694,6 +677,62 @@ public class GpsLocationProvider implements LocationProviderInterface {
                         mHandler.getLooper());
             }
         });
+
+        mListenerHelper = new GpsStatusListenerHelper(mHandler) {
+            @Override
+            protected boolean isAvailableInPlatform() {
+                return GpsLocationProvider.isSupported();
+            }
+
+            @Override
+            protected boolean isGpsEnabled() {
+                return isEnabled();
+            }
+        };
+
+        mGpsMeasurementsProvider = new GpsMeasurementsProvider(mHandler) {
+            @Override
+            public boolean isAvailableInPlatform() {
+                return native_is_measurement_supported();
+            }
+
+            @Override
+            protected boolean registerWithService() {
+                return native_start_measurement_collection();
+            }
+
+            @Override
+            protected void unregisterFromService() {
+                native_stop_measurement_collection();
+            }
+
+            @Override
+            protected boolean isGpsEnabled() {
+                return isEnabled();
+            }
+        };
+
+        mGpsNavigationMessageProvider = new GpsNavigationMessageProvider(mHandler) {
+            @Override
+            protected boolean isAvailableInPlatform() {
+                return native_is_navigation_message_supported();
+            }
+
+            @Override
+            protected boolean registerWithService() {
+                return native_start_navigation_message_collection();
+            }
+
+            @Override
+            protected void unregisterFromService() {
+                native_stop_navigation_message_collection();
+            }
+
+            @Override
+            protected boolean isGpsEnabled() {
+                return isEnabled();
+            }
+        };
     }
 
     private void listenForBroadcasts() {
@@ -715,15 +754,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter = new IntentFilter();
         intentFilter.addAction(ALARM_WAKEUP);
         intentFilter.addAction(ALARM_TIMEOUT);
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
         intentFilter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(SIM_STATE_CHANGED);
-        // TODO: remove the use TelephonyIntents. We are using it because SIM_STATE_CHANGED
-        // is not reliable at the moment.
-        intentFilter.addAction(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE);
-        intentFilter.addAction(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
     }
 
@@ -753,8 +788,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (info != null) {
-            boolean dataEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                                                         Settings.Global.MOBILE_DATA, 1) == 1;
+            boolean dataEnabled = TelephonyManager.getDefault().getDataEnabled();
             boolean networkAvailable = info.isAvailable() && dataEnabled;
             String defaultApn = getSelectedApn();
             if (defaultApn == null) {
@@ -1443,7 +1477,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (wasNavigating != mNavigating) {
-            mListenerHelper.onStatusChanged(mNavigating);
+            mListenerHelper.onGpsEnabledChanged(mNavigating);
+            mGpsMeasurementsProvider.onGpsEnabledChanged(mNavigating);
+            mGpsNavigationMessageProvider.onGpsEnabledChanged(mNavigating);
 
             // send an intent to notify that the GPS has been enabled or disabled
             Intent intent = new Intent(LocationManager.GPS_ENABLED_CHANGE_ACTION);
@@ -1596,6 +1632,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
             mPeriodicTimeInjection = true;
             requestUtcTime();
         }
+
+        mGpsMeasurementsProvider.onCapabilitiesUpdated(
+                (capabilities & GPS_CAPABILITY_MEASUREMENTS) == GPS_CAPABILITY_MEASUREMENTS);
+        mGpsNavigationMessageProvider.onCapabilitiesUpdated(
+                (capabilities & GPS_CAPABILITY_NAV_MESSAGES) == GPS_CAPABILITY_NAV_MESSAGES);
     }
 
     /**

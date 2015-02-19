@@ -26,6 +26,7 @@ import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLongArray;
 import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
+import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.android.internal.util.ArrayUtils.total;
 
 import android.os.Parcel;
@@ -38,6 +39,7 @@ import java.io.CharArrayWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ProtocolException;
 import java.util.Arrays;
 import java.util.Random;
@@ -573,8 +575,22 @@ public class NetworkStatsHistory implements Parcelable {
         return (long) (start + (r.nextFloat() * (end - start)));
     }
 
+    /**
+     * Quickly determine if this history intersects with given window.
+     */
+    public boolean intersects(long start, long end) {
+        final long dataStart = getStart();
+        final long dataEnd = getEnd();
+        if (start >= dataStart && start <= dataEnd) return true;
+        if (end >= dataStart && end <= dataEnd) return true;
+        if (dataStart >= start && dataStart <= end) return true;
+        if (dataEnd >= start && dataEnd <= end) return true;
+        return false;
+    }
+
     public void dump(IndentingPrintWriter pw, boolean fullHistory) {
-        pw.print("NetworkStatsHistory: bucketDuration="); pw.println(bucketDuration);
+        pw.print("NetworkStatsHistory: bucketDuration=");
+        pw.println(bucketDuration / SECOND_IN_MILLIS);
         pw.increaseIndent();
 
         final int start = fullHistory ? 0 : Math.max(0, bucketCount - 32);
@@ -583,17 +599,33 @@ public class NetworkStatsHistory implements Parcelable {
         }
 
         for (int i = start; i < bucketCount; i++) {
-            pw.print("bucketStart="); pw.print(bucketStart[i]);
-            if (activeTime != null) { pw.print(" activeTime="); pw.print(activeTime[i]); }
-            if (rxBytes != null) { pw.print(" rxBytes="); pw.print(rxBytes[i]); }
-            if (rxPackets != null) { pw.print(" rxPackets="); pw.print(rxPackets[i]); }
-            if (txBytes != null) { pw.print(" txBytes="); pw.print(txBytes[i]); }
-            if (txPackets != null) { pw.print(" txPackets="); pw.print(txPackets[i]); }
-            if (operations != null) { pw.print(" operations="); pw.print(operations[i]); }
+            pw.print("st="); pw.print(bucketStart[i] / SECOND_IN_MILLIS);
+            if (rxBytes != null) { pw.print(" rb="); pw.print(rxBytes[i]); }
+            if (rxPackets != null) { pw.print(" rp="); pw.print(rxPackets[i]); }
+            if (txBytes != null) { pw.print(" tb="); pw.print(txBytes[i]); }
+            if (txPackets != null) { pw.print(" tp="); pw.print(txPackets[i]); }
+            if (operations != null) { pw.print(" op="); pw.print(operations[i]); }
             pw.println();
         }
 
         pw.decreaseIndent();
+    }
+
+    public void dumpCheckin(PrintWriter pw) {
+        pw.print("d,");
+        pw.print(bucketDuration / SECOND_IN_MILLIS);
+        pw.println();
+
+        for (int i = 0; i < bucketCount; i++) {
+            pw.print("b,");
+            pw.print(bucketStart[i] / SECOND_IN_MILLIS); pw.print(',');
+            if (rxBytes != null) { pw.print(rxBytes[i]); } else { pw.print("*"); } pw.print(',');
+            if (rxPackets != null) { pw.print(rxPackets[i]); } else { pw.print("*"); } pw.print(',');
+            if (txBytes != null) { pw.print(txBytes[i]); } else { pw.print("*"); } pw.print(',');
+            if (txPackets != null) { pw.print(txPackets[i]); } else { pw.print("*"); } pw.print(',');
+            if (operations != null) { pw.print(operations[i]); } else { pw.print("*"); }
+            pw.println();
+        }
     }
 
     @Override

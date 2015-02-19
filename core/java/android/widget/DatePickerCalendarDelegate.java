@@ -21,13 +21,11 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -185,7 +183,13 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 mHeaderYearTextView.getTextColors(), R.attr.state_selected,
                 headerSelectedTextColor));
 
-        mDayPickerView = new DayPickerView(mContext, this);
+        mDayPickerView = new DayPickerView(mContext);
+        mDayPickerView.setFirstDayOfWeek(mFirstDayOfWeek);
+        mDayPickerView.setMinDate(mMinDate.getTimeInMillis());
+        mDayPickerView.setMaxDate(mMaxDate.getTimeInMillis());
+        mDayPickerView.setDate(mCurrentDate.getTimeInMillis());
+        mDayPickerView.setOnDaySelectedListener(mOnDaySelectedListener);
+
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
 
@@ -325,7 +329,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             String fullDateText = DateUtils.formatDateTime(mContext, millis, flags);
             mAnimator.announceForAccessibility(fullDateText);
         }
-        updatePickers();
     }
 
     private void setCurrentView(final int viewIndex) {
@@ -333,7 +336,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         switch (viewIndex) {
             case MONTH_AND_DAY_VIEW:
-                mDayPickerView.onDateChanged();
+                mDayPickerView.setDate(getSelectedDay().getTimeInMillis());
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(true);
                     mHeaderYearTextView.setSelected(false);
@@ -365,11 +368,13 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     @Override
     public void init(int year, int monthOfYear, int dayOfMonth,
             DatePicker.OnDateChangedListener callBack) {
-        mDateChangedListener = callBack;
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, monthOfYear);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        updateDisplay(false);
+
+        mDateChangedListener = callBack;
+
+        onDateChanged(false, false);
     }
 
     @Override
@@ -377,10 +382,29 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, month);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        if (mDateChangedListener != null) {
-            mDateChangedListener.onDateChanged(mDelegator, year, month, dayOfMonth);
+
+        onDateChanged(false, true);
+    }
+
+    private void onDateChanged(boolean fromUser, boolean callbackToClient) {
+        if (callbackToClient && mDateChangedListener != null) {
+            final int year = mCurrentDate.get(Calendar.YEAR);
+            final int monthOfYear = mCurrentDate.get(Calendar.MONTH);
+            final int dayOfMonth = mCurrentDate.get(Calendar.DAY_OF_MONTH);
+            mDateChangedListener.onDateChanged(mDelegator, year, monthOfYear, dayOfMonth);
         }
-        updateDisplay(false);
+
+        for (OnDateChangedListener listener : mListeners) {
+            listener.onDateChanged();
+        }
+
+        mDayPickerView.setDate(getSelectedDay().getTimeInMillis());
+
+        updateDisplay(fromUser);
+
+        if (fromUser) {
+            tryVibrate();
+        }
     }
 
     @Override
@@ -407,11 +431,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
         if (mCurrentDate.before(mTempDate)) {
             mCurrentDate.setTimeInMillis(minDate);
-            updatePickers();
-            updateDisplay(false);
+            onDateChanged(false, true);
         }
         mMinDate.setTimeInMillis(minDate);
-        mDayPickerView.goTo(getSelectedDay(), false, true, true);
+        mDayPickerView.setMinDate(minDate);
+        mYearPickerView.setRange(mMinDate, mMaxDate);
     }
 
     @Override
@@ -428,11 +452,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
         if (mCurrentDate.after(mTempDate)) {
             mCurrentDate.setTimeInMillis(maxDate);
-            updatePickers();
-            updateDisplay(false);
+            onDateChanged(false, true);
         }
         mMaxDate.setTimeInMillis(maxDate);
-        mDayPickerView.goTo(getSelectedDay(), false, true, true);
+        mDayPickerView.setMaxDate(maxDate);
+        mYearPickerView.setRange(mMinDate, mMaxDate);
     }
 
     @Override
@@ -443,6 +467,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     @Override
     public void setFirstDayOfWeek(int firstDayOfWeek) {
         mFirstDayOfWeek = firstDayOfWeek;
+
+        mDayPickerView.setFirstDayOfWeek(firstDayOfWeek);
     }
 
     @Override
@@ -451,36 +477,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             return mFirstDayOfWeek;
         }
         return mCurrentDate.getFirstDayOfWeek();
-    }
-
-    @Override
-    public int getMinYear() {
-        return mMinDate.get(Calendar.YEAR);
-    }
-
-    @Override
-    public int getMaxYear() {
-        return mMaxDate.get(Calendar.YEAR);
-    }
-
-    @Override
-    public int getMinMonth() {
-        return mMinDate.get(Calendar.MONTH);
-    }
-
-    @Override
-    public int getMaxMonth() {
-        return mMaxDate.get(Calendar.MONTH);
-    }
-
-    @Override
-    public int getMinDay() {
-        return mMinDate.get(Calendar.DAY_OF_MONTH);
-    }
-
-    @Override
-    public int getMaxDay() {
-        return mMaxDate.get(Calendar.DAY_OF_MONTH);
     }
 
     @Override
@@ -595,9 +591,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     public void onYearSelected(int year) {
         adjustDayInMonthIfNeeded(mCurrentDate.get(Calendar.MONTH), year);
         mCurrentDate.set(Calendar.YEAR, year);
-        updatePickers();
+        onDateChanged(true, true);
+
+        // Auto-advance to month and day view.
         setCurrentView(MONTH_AND_DAY_VIEW);
-        updateDisplay(true);
     }
 
     // If the newly selected month / year does not contain the currently selected day number,
@@ -635,28 +632,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     }
 
     @Override
-    public void onDayOfMonthSelected(int year, int month, int day) {
-        mCurrentDate.set(Calendar.YEAR, year);
-        mCurrentDate.set(Calendar.MONTH, month);
-        mCurrentDate.set(Calendar.DAY_OF_MONTH, day);
-        updatePickers();
-        updateDisplay(true);
-    }
-
-    private void updatePickers() {
-        for (OnDateChangedListener listener : mListeners) {
-            listener.onDateChanged();
-        }
-    }
-
-    @Override
     public void registerOnDateChangedListener(OnDateChangedListener listener) {
         mListeners.add(listener);
-    }
-
-    @Override
-    public void unregisterOnDateChangedListener(OnDateChangedListener listener) {
-        mListeners.remove(listener);
     }
 
     @Override
@@ -678,6 +655,18 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             setCurrentView(MONTH_AND_DAY_VIEW);
         }
     }
+
+    /**
+     * Listener called when the user selects a day in the day picker view.
+     */
+    private final DayPickerView.OnDaySelectedListener
+            mOnDaySelectedListener = new DayPickerView.OnDaySelectedListener() {
+        @Override
+        public void onDaySelected(DayPickerView view, Calendar day) {
+            mCurrentDate.setTimeInMillis(day.getTimeInMillis());
+            onDateChanged(true, true);
+        }
+    };
 
     /**
      * Class for managing state storing/restoring.

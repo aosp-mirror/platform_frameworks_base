@@ -33,7 +33,7 @@ import com.android.internal.view.animation.NativeInterpolatorFactoryHelper;
  *
  */
 @HasNativeInterpolator
-public class AccelerateInterpolator implements Interpolator, NativeInterpolatorFactory {
+public class AccelerateInterpolator extends BaseInterpolator implements NativeInterpolatorFactory {
     private final float mFactor;
     private final double mDoubleFactor;
 
@@ -70,7 +70,7 @@ public class AccelerateInterpolator implements Interpolator, NativeInterpolatorF
 
         mFactor = a.getFloat(R.styleable.AccelerateInterpolator_factor, 1.0f);
         mDoubleFactor = 2 * mFactor;
-
+        setChangingConfiguration(a.getChangingConfigurations());
         a.recycle();
     }
 

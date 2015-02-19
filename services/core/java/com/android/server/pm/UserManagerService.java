@@ -224,6 +224,7 @@ public class UserManagerService extends IUserManager.Stub {
                         |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                         -1, -1);
                 mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
+                initDefaultGuestRestrictions();
                 readUserListLocked();
                 // Prune out any partially created/partially removed users.
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
@@ -319,6 +320,9 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("get the profile parent");
         synchronized (mPackagesLock) {
             UserInfo profile = getUserInfoLocked(userHandle);
+            if (profile == null) {
+                return null;
+            }
             int parentUserId = profile.profileGroupId;
             if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
                 return null;
@@ -469,7 +473,7 @@ public class UserManagerService extends IUserManager.Stub {
     private void initDefaultGuestRestrictions() {
         if (mGuestRestrictions.isEmpty()) {
             mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
-            writeUserListLocked();
+            mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
         }
     }
 
@@ -653,8 +657,15 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                         }
                     } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {
-                        mGuestRestrictions.clear();
-                        readRestrictionsLocked(parser, mGuestRestrictions);
+                        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                                && type != XmlPullParser.END_TAG) {
+                            if (type == XmlPullParser.START_TAG) {
+                                if (parser.getName().equals(TAG_RESTRICTIONS)) {
+                                    readRestrictionsLocked(parser, mGuestRestrictions);
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -1298,7 +1309,12 @@ public class UserManagerService extends IUserManager.Stub {
                 if (userHandle == 0 || user == null || mRemovingUserIds.get(userHandle)) {
                     return false;
                 }
+
+                // We remember deleted user IDs to prevent them from being
+                // reused during the current boot; they can still be reused
+                // after a reboot.
                 mRemovingUserIds.put(userHandle, true);
+
                 try {
                     mAppOpsService.removeUser(userHandle);
                 } catch (RemoteException e) {
@@ -1386,18 +1402,6 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         mUsers.remove(userHandle);
-
-        // Have user ID linger for several seconds to let external storage VFS
-        // cache entries expire. This must be greater than the 'entry_valid'
-        // timeout used by the FUSE daemon.
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (mPackagesLock) {
-                    mRemovingUserIds.delete(userHandle);
-                }
-            }
-        }, MINUTE_IN_MILLIS);
 
         mRestrictionsPinStates.remove(userHandle);
         // Remove user file

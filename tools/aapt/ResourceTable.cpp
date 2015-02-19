@@ -6,10 +6,13 @@
 
 #include "ResourceTable.h"
 
+#include "AaptUtil.h"
 #include "XMLNode.h"
 #include "ResourceFilter.h"
 #include "ResourceIdCache.h"
+#include "SdkConstants.h"
 
+#include <algorithm>
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 #include <utils/TypeHelpers.h>
@@ -33,6 +36,8 @@ static const bool kPrintStringMetrics = true;
 #else
 static const bool kPrintStringMetrics = false;
 #endif
+
+static const char* kAttrPrivateType = "^attr-private";
 
 status_t compileXmlFile(const Bundle* bundle,
                         const sp<AaptAssets>& assets,
@@ -2151,8 +2156,16 @@ uint32_t ResourceTable::getResId(const String16& package,
     if (p == NULL) return 0;
     sp<Type> t = p->getTypes().valueFor(type);
     if (t == NULL) return 0;
-    sp<ConfigList> c =  t->getConfigs().valueFor(name);
-    if (c == NULL) return 0;
+    sp<ConfigList> c = t->getConfigs().valueFor(name);
+    if (c == NULL) {
+        if (type != String16("attr")) {
+            return 0;
+        }
+        t = p->getTypes().valueFor(String16(kAttrPrivateType));
+        if (t == NULL) return 0;
+        c = t->getConfigs().valueFor(name);
+        if (c == NULL) return 0;
+    }
     int32_t ei = c->getEntryIndex();
     if (ei < 0) return 0;
 
@@ -2291,7 +2304,15 @@ uint32_t ResourceTable::getCustomResource(
     sp<Type> t = p->getTypes().valueFor(type);
     if (t == NULL) return 0;
     sp<ConfigList> c =  t->getConfigs().valueFor(name);
-    if (c == NULL) return 0;
+    if (c == NULL) {
+        if (type != String16("attr")) {
+            return 0;
+        }
+        t = p->getTypes().valueFor(String16(kAttrPrivateType));
+        if (t == NULL) return 0;
+        c = t->getConfigs().valueFor(name);
+        if (c == NULL) return 0;
+    }
     int32_t ei = c->getEntryIndex();
     if (ei < 0) return 0;
     return getResId(p, t, ei);
@@ -2495,6 +2516,10 @@ status_t ResourceTable::assignResourceIds()
             continue;
         }
 
+        if (mPackageType == System) {
+            p->movePrivateAttrs();
+        }
+
         // This has no sense for packages being built as AppFeature (aka with a non-zero offset).
         status_t err = p->applyPublicTypeOrder();
         if (err != NO_ERROR && firstError == NO_ERROR) {
@@ -2565,15 +2590,20 @@ status_t ResourceTable::assignResourceIds()
             }
         }
 
+
         // Assign resource IDs to keys in bags...
         for (size_t ti = 0; ti < typeCount; ti++) {
             sp<Type> t = p->getOrderedTypes().itemAt(ti);
             if (t == NULL) {
                 continue;
             }
+
             const size_t N = t->getOrderedConfigs().size();
             for (size_t ci=0; ci<N; ci++) {
                 sp<ConfigList> c = t->getOrderedConfigs().itemAt(ci);
+                if (c == NULL) {
+                    continue;
+                }
                 //printf("Ordered config #%d: %p\n", ci, c.get());
                 const size_t N = c->getEntries().size();
                 for (size_t ei=0; ei<N; ei++) {
@@ -2611,9 +2641,15 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
             if (t == NULL) {
                 continue;
             }
+
             const size_t N = t->getOrderedConfigs().size();
-            sp<AaptSymbols> typeSymbols =
-                    outSymbols->addNestedSymbol(String8(t->getName()), t->getPos());
+            sp<AaptSymbols> typeSymbols;
+            if (t->getName() == String16(kAttrPrivateType)) {
+                typeSymbols = outSymbols->addNestedSymbol(String8("attr"), t->getPos());
+            } else {
+                typeSymbols = outSymbols->addNestedSymbol(String8(t->getName()), t->getPos());
+            }
+
             if (typeSymbols == NULL) {
                 return UNKNOWN_ERROR;
             }
@@ -2979,6 +3015,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
                 for (size_t ei=0; ei<N; ei++) {
                     sp<ConfigList> cl = t->getOrderedConfigs().itemAt(ei);
+                    if (cl == NULL) {
+                        continue;
+                    }
+
                     if (cl->getPublic()) {
                         typeSpecFlags[ei] |= htodl(ResTable_typeSpec::SPEC_PUBLIC);
                     }
@@ -3009,12 +3049,16 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
             // We need to write one type chunk for each configuration for
             // which we have entries in this type.
-            const size_t NC = t != NULL ? t->getUniqueConfigs().size() : 0;
+            SortedVector<ConfigDescription> uniqueConfigs;
+            if (t != NULL) {
+                uniqueConfigs = t->getUniqueConfigs();
+            }
             
             const size_t typeSize = sizeof(ResTable_type) + sizeof(uint32_t)*N;
             
+            const size_t NC = uniqueConfigs.size();
             for (size_t ci=0; ci<NC; ci++) {
-                ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
+                const ConfigDescription& config = uniqueConfigs[ci];
 
                 if (kIsDebug) {
                     printf("Writing config %zu config: imsi:%d/%d lang:%c%c cnt:%c%c "
@@ -3090,7 +3134,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 // Build the entries inside of this type.
                 for (size_t ei=0; ei<N; ei++) {
                     sp<ConfigList> cl = t->getOrderedConfigs().itemAt(ei);
-                    sp<Entry> e = cl->getEntries().valueFor(config);
+                    sp<Entry> e = NULL;
+                    if (cl != NULL) {
+                        e = cl->getEntries().valueFor(config);
+                    }
 
                     // Set the offset for this entry in its type.
                     uint32_t* index = (uint32_t*)
@@ -3125,9 +3172,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 for (size_t i = 0; i < N; ++i) {
                     if (!validResources[i]) {
                         sp<ConfigList> c = t->getOrderedConfigs().itemAt(i);
-                        fprintf(stderr, "%s: no entries written for %s/%s (0x%08x)\n", log_prefix,
-                                String8(typeName).string(), String8(c->getName()).string(),
-                                Res_MAKEID(p->getAssignedId() - 1, ti, i));
+                        if (c != NULL) {
+                            fprintf(stderr, "%s: no entries written for %s/%s (0x%08x)\n", log_prefix,
+                                    String8(typeName).string(), String8(c->getName()).string(),
+                                    Res_MAKEID(p->getAssignedId() - 1, ti, i));
+                        }
                         missing_entry = true;
                     }
                 }
@@ -3839,9 +3888,43 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
         */
     }
     
-    mUniqueConfigs.add(cdesc);
-    
     return e;
+}
+
+sp<ResourceTable::ConfigList> ResourceTable::Type::removeEntry(const String16& entry) {
+    ssize_t idx = mConfigs.indexOfKey(entry);
+    if (idx < 0) {
+        return NULL;
+    }
+
+    sp<ConfigList> removed = mConfigs.valueAt(idx);
+    mConfigs.removeItemsAt(idx);
+
+    Vector<sp<ConfigList> >::iterator iter = std::find(
+            mOrderedConfigs.begin(), mOrderedConfigs.end(), removed);
+    if (iter != mOrderedConfigs.end()) {
+        mOrderedConfigs.erase(iter);
+    }
+
+    mPublic.removeItem(entry);
+    return removed;
+}
+
+SortedVector<ConfigDescription> ResourceTable::Type::getUniqueConfigs() const {
+    SortedVector<ConfigDescription> unique;
+    const size_t entryCount = mOrderedConfigs.size();
+    for (size_t i = 0; i < entryCount; i++) {
+        if (mOrderedConfigs[i] == NULL) {
+            continue;
+        }
+        const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configs =
+                mOrderedConfigs[i]->getEntries();
+        const size_t configCount = configs.size();
+        for (size_t j = 0; j < configCount; j++) {
+            unique.add(configs.keyAt(j));
+        }
+    }
+    return unique;
 }
 
 status_t ResourceTable::Type::applyPublicEntryOrder()
@@ -3870,11 +3953,10 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
             //printf("#%d: \"%s\"\n", i, String8(e->getName()).string());
             if (e->getName() == name) {
                 if (idx >= (int32_t)mOrderedConfigs.size()) {
-                    p.sourcePos.error("Public entry identifier 0x%x entry index "
-                            "is larger than available symbols (index %d, total symbols %d).\n",
-                            p.ident, idx, mOrderedConfigs.size());
-                    hasError = true;
-                } else if (mOrderedConfigs.itemAt(idx) == NULL) {
+                    mOrderedConfigs.resize(idx + 1);
+                }
+
+                if (mOrderedConfigs.itemAt(idx) == NULL) {
                     e->setPublic(true);
                     e->setPublicSourcePos(p.sourcePos);
                     mOrderedConfigs.replaceAt(e, idx);
@@ -4045,6 +4127,61 @@ status_t ResourceTable::Package::applyPublicTypeOrder()
     }
 
     return NO_ERROR;
+}
+
+void ResourceTable::Package::movePrivateAttrs() {
+    sp<Type> attr = mTypes.valueFor(String16("attr"));
+    if (attr == NULL) {
+        // Nothing to do.
+        return;
+    }
+
+    Vector<sp<ConfigList> > privateAttrs;
+
+    bool hasPublic = false;
+    const Vector<sp<ConfigList> >& configs = attr->getOrderedConfigs();
+    const size_t configCount = configs.size();
+    for (size_t i = 0; i < configCount; i++) {
+        if (configs[i] == NULL) {
+            continue;
+        }
+
+        if (attr->isPublic(configs[i]->getName())) {
+            hasPublic = true;
+        } else {
+            privateAttrs.add(configs[i]);
+        }
+    }
+
+    // Only if we have public attributes do we create a separate type for
+    // private attributes.
+    if (!hasPublic) {
+        return;
+    }
+
+    // Create a new type for private attributes.
+    sp<Type> privateAttrType = getType(String16(kAttrPrivateType), SourcePos());
+
+    const size_t privateAttrCount = privateAttrs.size();
+    for (size_t i = 0; i < privateAttrCount; i++) {
+        const sp<ConfigList>& cl = privateAttrs[i];
+
+        // Remove the private attributes from their current type.
+        attr->removeEntry(cl->getName());
+
+        // Add it to the new type.
+        const DefaultKeyedVector<ConfigDescription, sp<Entry> >& entries = cl->getEntries();
+        const size_t entryCount = entries.size();
+        for (size_t j = 0; j < entryCount; j++) {
+            const sp<Entry>& oldEntry = entries[j];
+            sp<Entry> entry = privateAttrType->getEntry(
+                    cl->getName(), oldEntry->getPos(), &entries.keyAt(j));
+            *entry = *oldEntry;
+        }
+
+        // Move the symbols to the new type.
+
+    }
 }
 
 sp<ResourceTable::Package> ResourceTable::getPackage(const String16& package)
@@ -4226,38 +4363,80 @@ bool ResourceTable::getItemValue(
 }
 
 /**
- * Returns true if the given attribute ID comes from
- * a platform version from or after L.
+ * Returns the SDK version at which the attribute was
+ * made public, or -1 if the resource ID is not an attribute
+ * or is not public.
  */
-bool ResourceTable::isAttributeFromL(uint32_t attrId) {
-    const uint32_t baseAttrId = 0x010103f7;
-    if ((attrId & 0xffff0000) != (baseAttrId & 0xffff0000)) {
-        return false;
+int ResourceTable::getPublicAttributeSdkLevel(uint32_t attrId) const {
+    if (Res_GETPACKAGE(attrId) + 1 != 0x01 || Res_GETTYPE(attrId) + 1 != 0x01) {
+        return -1;
     }
 
     uint32_t specFlags;
     if (!mAssets->getIncludedResources().getResourceFlags(attrId, &specFlags)) {
-        return false;
+        return -1;
     }
 
-    return (specFlags & ResTable_typeSpec::SPEC_PUBLIC) != 0 &&
-        (attrId & 0x0000ffff) >= (baseAttrId & 0x0000ffff);
+    if ((specFlags & ResTable_typeSpec::SPEC_PUBLIC) == 0) {
+        return -1;
+    }
+
+    const size_t entryId = Res_GETENTRY(attrId);
+    if (entryId <= 0x021c) {
+        return 1;
+    } else if (entryId <= 0x021d) {
+        return 2;
+    } else if (entryId <= 0x0269) {
+        return SDK_CUPCAKE;
+    } else if (entryId <= 0x028d) {
+        return SDK_DONUT;
+    } else if (entryId <= 0x02ad) {
+        return SDK_ECLAIR;
+    } else if (entryId <= 0x02b3) {
+        return SDK_ECLAIR_0_1;
+    } else if (entryId <= 0x02b5) {
+        return SDK_ECLAIR_MR1;
+    } else if (entryId <= 0x02bd) {
+        return SDK_FROYO;
+    } else if (entryId <= 0x02cb) {
+        return SDK_GINGERBREAD;
+    } else if (entryId <= 0x0361) {
+        return SDK_HONEYCOMB;
+    } else if (entryId <= 0x0366) {
+        return SDK_HONEYCOMB_MR1;
+    } else if (entryId <= 0x03a6) {
+        return SDK_HONEYCOMB_MR2;
+    } else if (entryId <= 0x03ae) {
+        return SDK_JELLY_BEAN;
+    } else if (entryId <= 0x03cc) {
+        return SDK_JELLY_BEAN_MR1;
+    } else if (entryId <= 0x03da) {
+        return SDK_JELLY_BEAN_MR2;
+    } else if (entryId <= 0x03f1) {
+        return SDK_KITKAT;
+    } else if (entryId <= 0x03f6) {
+        return SDK_KITKAT_WATCH;
+    } else if (entryId <= 0x04ce) {
+        return SDK_LOLLIPOP;
+    } else {
+        // Anything else is marked as defined in
+        // SDK_LOLLIPOP_MR1 since after this
+        // version no attribute compat work
+        // needs to be done.
+        return SDK_LOLLIPOP_MR1;
+    }
 }
 
-static bool isMinSdkVersionLOrAbove(const Bundle* bundle) {
-    if (bundle->getMinSdkVersion() != NULL && strlen(bundle->getMinSdkVersion()) > 0) {
-        const char firstChar = bundle->getMinSdkVersion()[0];
-        if (firstChar >= 'L' && firstChar <= 'Z') {
-            // L is the code-name for the v21 release.
-            return true;
-        }
-
-        const int minSdk = atoi(bundle->getMinSdkVersion());
-        if (minSdk >= SDK_L) {
-            return true;
-        }
+/**
+ * First check the Manifest, then check the command line flag.
+ */
+static int getMinSdkVersion(const Bundle* bundle) {
+    if (bundle->getManifestMinSdkVersion() != NULL && strlen(bundle->getManifestMinSdkVersion()) > 0) {
+        return atoi(bundle->getManifestMinSdkVersion());
+    } else if (bundle->getMinSdkVersion() != NULL && strlen(bundle->getMinSdkVersion()) > 0) {
+        return atoi(bundle->getMinSdkVersion());
     }
-    return false;
+    return 0;
 }
 
 /**
@@ -4303,9 +4482,10 @@ static bool isMinSdkVersionLOrAbove(const Bundle* bundle) {
  * attribute will be respected.
  */
 status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
-    if (isMinSdkVersionLOrAbove(bundle)) {
-        // If this app will only ever run on L+ devices,
-        // we don't need to do any compatibility work.
+    const int minSdk = getMinSdkVersion(bundle);
+    if (minSdk >= SDK_LOLLIPOP_MR1) {
+        // Lollipop MR1 and up handles public attributes differently, no
+        // need to do any compat modifications.
         return NO_ERROR;
     }
 
@@ -4344,20 +4524,19 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     }
 
                     const ConfigDescription& config = entries.keyAt(ei);
-                    if (config.sdkVersion >= SDK_L) {
-                        // We don't need to do anything if the resource is
-                        // already qualified for version 21 or higher.
+                    if (config.sdkVersion >= SDK_LOLLIPOP_MR1) {
                         continue;
                     }
 
-                    Vector<String16> attributesToRemove;
+                    KeyedVector<int, Vector<String16> > attributesToRemove;
                     const KeyedVector<String16, Item>& bag = e->getBag();
                     const size_t bagCount = bag.size();
                     for (size_t bi = 0; bi < bagCount; bi++) {
                         const Item& item = bag.valueAt(bi);
                         const uint32_t attrId = getResId(bag.keyAt(bi), &attr16);
-                        if (isAttributeFromL(attrId)) {
-                            attributesToRemove.add(bag.keyAt(bi));
+                        const int sdkLevel = getPublicAttributeSdkLevel(attrId);
+                        if (sdkLevel > 1 && sdkLevel > config.sdkVersion && sdkLevel > minSdk) {
+                            AaptUtil::appendValue(attributesToRemove, sdkLevel, bag.keyAt(bi));
                         }
                     }
 
@@ -4365,16 +4544,41 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                         continue;
                     }
 
-                    // Duplicate the entry under the same configuration
-                    // but with sdkVersion == SDK_L.
-                    ConfigDescription newConfig(config);
-                    newConfig.sdkVersion = SDK_L;
-                    entriesToAdd.add(key_value_pair_t<ConfigDescription, sp<Entry> >(
-                            newConfig, new Entry(*e)));
+                    const size_t sdkCount = attributesToRemove.size();
+                    for (size_t i = 0; i < sdkCount; i++) {
+                        const int sdkLevel = attributesToRemove.keyAt(i);
+
+                        // Duplicate the entry under the same configuration
+                        // but with sdkVersion == sdkLevel.
+                        ConfigDescription newConfig(config);
+                        newConfig.sdkVersion = sdkLevel;
+
+                        sp<Entry> newEntry = new Entry(*e);
+
+                        // Remove all items that have a higher SDK level than
+                        // the one we are synthesizing.
+                        for (size_t j = 0; j < sdkCount; j++) {
+                            if (j == i) {
+                                continue;
+                            }
+
+                            if (attributesToRemove.keyAt(j) > sdkLevel) {
+                                const size_t attrCount = attributesToRemove[j].size();
+                                for (size_t k = 0; k < attrCount; k++) {
+                                    newEntry->removeFromBag(attributesToRemove[j][k]);
+                                }
+                            }
+                        }
+
+                        entriesToAdd.add(key_value_pair_t<ConfigDescription, sp<Entry> >(
+                                newConfig, newEntry));
+                    }
 
                     // Remove the attribute from the original.
                     for (size_t i = 0; i < attributesToRemove.size(); i++) {
-                        e->removeFromBag(attributesToRemove[i]);
+                        for (size_t j = 0; j < attributesToRemove[i].size(); j++) {
+                            e->removeFromBag(attributesToRemove[i][j]);
+                        }
                     }
                 }
 
@@ -4391,7 +4595,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     if (bundle->getVerbose()) {
                         entriesToAdd[i].value->getPos()
                                 .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                                        SDK_L,
+                                        entriesToAdd[i].key.sdkVersion,
                                         String8(p->getName()).string(),
                                         String8(t->getName()).string(),
                                         String8(entriesToAdd[i].value->getName()).string(),
@@ -4414,17 +4618,23 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                                         const String16& resourceName,
                                         const sp<AaptFile>& target,
                                         const sp<XMLNode>& root) {
-    if (isMinSdkVersionLOrAbove(bundle)) {
+    const int minSdk = getMinSdkVersion(bundle);
+    if (minSdk >= SDK_LOLLIPOP_MR1) {
+        // Lollipop MR1 and up handles public attributes differently, no
+        // need to do any compat modifications.
         return NO_ERROR;
     }
 
-    if (target->getResourceType() == "" || target->getGroupEntry().toParams().sdkVersion >= SDK_L) {
+    const ConfigDescription config(target->getGroupEntry().toParams());
+    if (target->getResourceType() == "" || config.sdkVersion >= SDK_LOLLIPOP_MR1) {
         // Skip resources that have no type (AndroidManifest.xml) or are already version qualified with v21
         // or higher.
         return NO_ERROR;
     }
 
-    Vector<key_value_pair_t<sp<XMLNode>, size_t> > attrsToRemove;
+    sp<XMLNode> newRoot = NULL;
+    ConfigDescription newConfig(target->getGroupEntry().toParams());
+    newConfig.sdkVersion = SDK_LOLLIPOP_MR1;
 
     Vector<sp<XMLNode> > nodesToVisit;
     nodesToVisit.push(root);
@@ -4433,11 +4643,31 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         nodesToVisit.pop();
 
         const Vector<XMLNode::attribute_entry>& attrs = node->getAttributes();
-        const size_t attrCount = attrs.size();
-        for (size_t i = 0; i < attrCount; i++) {
+        for (size_t i = 0; i < attrs.size(); i++) {
             const XMLNode::attribute_entry& attr = attrs[i];
-            if (isAttributeFromL(attr.nameResId)) {
-                attrsToRemove.add(key_value_pair_t<sp<XMLNode>, size_t>(node, i));
+            const int sdkLevel = getPublicAttributeSdkLevel(attr.nameResId);
+            if (sdkLevel > 1 && sdkLevel > config.sdkVersion && sdkLevel > minSdk) {
+                if (newRoot == NULL) {
+                    newRoot = root->clone();
+                }
+
+                // Find the smallest sdk version that we need to synthesize for
+                // and do that one. Subsequent versions will be processed on
+                // the next pass.
+                if (sdkLevel < newConfig.sdkVersion) {
+                    newConfig.sdkVersion = sdkLevel;
+                }
+
+                if (bundle->getVerbose()) {
+                    SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
+                            "removing attribute %s%s%s from <%s>",
+                            String8(attr.ns).string(),
+                            (attr.ns.size() == 0 ? "" : ":"),
+                            String8(attr.name).string(),
+                            String8(node->getElementName()).string());
+                }
+                node->removeAttribute(i);
+                i--;
             }
         }
 
@@ -4449,22 +4679,15 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         }
     }
 
-    if (attrsToRemove.isEmpty()) {
+    if (newRoot == NULL) {
         return NO_ERROR;
     }
-
-    ConfigDescription newConfig(target->getGroupEntry().toParams());
-    newConfig.sdkVersion = SDK_L;
 
     // Look to see if we already have an overriding v21 configuration.
     sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
             String16(target->getResourceType()), resourceName);
-    //if (cl == NULL) {
-    //    fprintf(stderr, "fuuuuck\n");
-    //}
     if (cl->getEntries().indexOfKey(newConfig) < 0) {
         // We don't have an overriding entry for v21, so we must duplicate this one.
-        sp<XMLNode> newRoot = root->clone();
         sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
                 AaptGroupEntry(newConfig), target->getResourceType());
         String8 resPath = String8::format("res/%s/%s",
@@ -4476,7 +4699,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         if (bundle->getVerbose()) {
             SourcePos(target->getSourceFile(), -1).printf(
                     "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                    SDK_L,
+                    newConfig.sdkVersion,
                     mAssets->getPackage().string(),
                     newFile->getResourceType().string(),
                     String8(resourceName).string(),
@@ -4499,21 +4722,36 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         mWorkQueue.push(item);
     }
 
-    const size_t removeCount = attrsToRemove.size();
-    for (size_t i = 0; i < removeCount; i++) {
-        sp<XMLNode> node = attrsToRemove[i].key;
-        size_t attrIndex = attrsToRemove[i].value;
-        const XMLNode::attribute_entry& ae = node->getAttributes()[attrIndex];
-        if (bundle->getVerbose()) {
-            SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
-                    "removing attribute %s%s%s from <%s>",
-                    String8(ae.ns).string(),
-                    (ae.ns.size() == 0 ? "" : ":"),
-                    String8(ae.name).string(),
-                    String8(node->getElementName()).string());
-        }
-        node->removeAttribute(attrIndex);
-    }
-
     return NO_ERROR;
+}
+
+void ResourceTable::getDensityVaryingResources(KeyedVector<Symbol, Vector<SymbolDefinition> >& resources) {
+    const ConfigDescription nullConfig;
+
+    const size_t packageCount = mOrderedPackages.size();
+    for (size_t p = 0; p < packageCount; p++) {
+        const Vector<sp<Type> >& types = mOrderedPackages[p]->getOrderedTypes();
+        const size_t typeCount = types.size();
+        for (size_t t = 0; t < typeCount; t++) {
+            const Vector<sp<ConfigList> >& configs = types[t]->getOrderedConfigs();
+            const size_t configCount = configs.size();
+            for (size_t c = 0; c < configCount; c++) {
+                const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configEntries = configs[c]->getEntries();
+                const size_t configEntryCount = configEntries.size();
+                for (size_t ce = 0; ce < configEntryCount; ce++) {
+                    const ConfigDescription& config = configEntries.keyAt(ce);
+                    if (AaptConfig::isDensityOnly(config)) {
+                        // This configuration only varies with regards to density.
+                        const Symbol symbol(mOrderedPackages[p]->getName(),
+                                types[t]->getName(),
+                                configs[c]->getName(),
+                                getResId(mOrderedPackages[p], types[t], configs[c]->getEntryIndex()));
+
+                        const sp<Entry>& entry = configEntries.valueAt(ce);
+                        AaptUtil::appendValue(resources, symbol, SymbolDefinition(symbol, config, entry->getPos()));
+                    }
+                }
+            }
+        }
+    }
 }

@@ -24,6 +24,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.Arrays;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
@@ -117,26 +119,48 @@ public class StateListDrawable extends DrawableContainer {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.StateListDrawable);
-
-        super.inflateWithAttributes(r, parser, a,
-                R.styleable.StateListDrawable_visible);
-
-        mStateListState.setVariablePadding(a.getBoolean(
-                R.styleable.StateListDrawable_variablePadding, false));
-        mStateListState.setConstantSize(a.getBoolean(
-                R.styleable.StateListDrawable_constantSize, false));
-        mStateListState.setEnterFadeDuration(a.getInt(
-                R.styleable.StateListDrawable_enterFadeDuration, 0));
-        mStateListState.setExitFadeDuration(a.getInt(
-                R.styleable.StateListDrawable_exitFadeDuration, 0));
-
-        setDither(a.getBoolean(R.styleable.StateListDrawable_dither, DEFAULT_DITHER));
-        setAutoMirrored(a.getBoolean(R.styleable.StateListDrawable_autoMirrored, false));
-
+        super.inflateWithAttributes(r, parser, a, R.styleable.StateListDrawable_visible);
+        updateStateFromTypedArray(a);
         a.recycle();
 
+        inflateChildElements(r, parser, attrs, theme);
+
+        onStateChange(getState());
+    }
+
+    /**
+     * Updates the constant state from the values in the typed array.
+     */
+    private void updateStateFromTypedArray(TypedArray a) {
+        final StateListState state = mStateListState;
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
+        state.mVariablePadding = a.getBoolean(
+                R.styleable.StateListDrawable_variablePadding, state.mVariablePadding);
+        state.mConstantSize = a.getBoolean(
+                R.styleable.StateListDrawable_constantSize, state.mConstantSize);
+        state.mEnterFadeDuration = a.getInt(
+                R.styleable.StateListDrawable_enterFadeDuration, state.mEnterFadeDuration);
+        state.mExitFadeDuration = a.getInt(
+                R.styleable.StateListDrawable_exitFadeDuration, state.mExitFadeDuration);
+        state.mDither = a.getBoolean(
+                R.styleable.StateListDrawable_dither, state.mDither);
+        state.mAutoMirrored = a.getBoolean(
+                R.styleable.StateListDrawable_autoMirrored, state.mAutoMirrored);
+    }
+
+    /**
+     * Inflates child elements from XML.
+     */
+    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
+        final StateListState state = mStateListState;
         final int innerDepth = parser.getDepth() + 1;
         int type;
         int depth;
@@ -151,29 +175,19 @@ public class StateListDrawable extends DrawableContainer {
                 continue;
             }
 
-            int drawableRes = 0;
+            // This allows state list drawable item elements to be themed at
+            // inflation time but does NOT make them work for Zygote preload.
+            final TypedArray a = obtainAttributes(r, theme, attrs,
+                    R.styleable.StateListDrawableItem);
+            Drawable dr = a.getDrawable(R.styleable.StateListDrawableItem_drawable);
+            a.recycle();
 
-            int i;
-            int j = 0;
-            final int numAttrs = attrs.getAttributeCount();
-            int[] states = new int[numAttrs];
-            for (i = 0; i < numAttrs; i++) {
-                final int stateResId = attrs.getAttributeNameResource(i);
-                if (stateResId == 0) break;
-                if (stateResId == R.attr.drawable) {
-                    drawableRes = attrs.getAttributeResourceValue(i, 0);
-                } else {
-                    states[j++] = attrs.getAttributeBooleanValue(i, false)
-                            ? stateResId
-                            : -stateResId;
-                }
-            }
-            states = StateSet.trimStateSet(states, j);
+            final int[] states = extractStateSet(attrs);
 
-            final Drawable dr;
-            if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes, theme);
-            } else {
+            // Loading child elements modifies the state of the AttributeSet's
+            // underlying parser, so it needs to happen after obtaining
+            // attributes and extracting states.
+            if (dr == null) {
                 while ((type = parser.next()) == XmlPullParser.TEXT) {
                 }
                 if (type != XmlPullParser.START_TAG) {
@@ -185,10 +199,37 @@ public class StateListDrawable extends DrawableContainer {
                 dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
 
-            mStateListState.addStateSet(states, dr);
+            state.addStateSet(states, dr);
         }
+    }
 
-        onStateChange(getState());
+    /**
+     * Extracts state_ attributes from an attribute set.
+     *
+     * @param attrs The attribute set.
+     * @return An array of state_ attributes.
+     */
+    int[] extractStateSet(AttributeSet attrs) {
+        int j = 0;
+        final int numAttrs = attrs.getAttributeCount();
+        int[] states = new int[numAttrs];
+        for (int i = 0; i < numAttrs; i++) {
+            final int stateResId = attrs.getAttributeNameResource(i);
+            switch (stateResId) {
+                case 0:
+                    break;
+                case R.attr.drawable:
+                case R.attr.id:
+                    // Ignore attributes from StateListDrawableItem and
+                    // AnimatedStateListDrawableItem.
+                    continue;
+                default:
+                    states[j++] = attrs.getAttributeBooleanValue(i, false)
+                            ? stateResId : -stateResId;
+            }
+        }
+        states = StateSet.trimStateSet(states, j);
+        return states;
     }
 
     StateListState getStateListState() {
@@ -249,18 +290,23 @@ public class StateListDrawable extends DrawableContainer {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            final int[][] sets = mStateListState.mStateSets;
-            final int count = sets.length;
-            mStateListState.mStateSets = new int[count][];
-            for (int i = 0; i < count; i++) {
-                final int[] set = sets[i];
-                if (set != null) {
-                    mStateListState.mStateSets[i] = set.clone();
-                }
-            }
+            mStateListState.mutate();
             mMutated = true;
         }
         return this;
+    }
+
+    @Override
+    StateListState cloneConstantState() {
+        return new StateListState(mStateListState, this, null);
+    }
+
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
     }
 
     /** @hide */
@@ -274,15 +320,28 @@ public class StateListDrawable extends DrawableContainer {
     }
 
     static class StateListState extends DrawableContainerState {
+        int[] mThemeAttrs;
         int[][] mStateSets;
 
         StateListState(StateListState orig, StateListDrawable owner, Resources res) {
             super(orig, owner, res);
 
             if (orig != null) {
-                mStateSets = Arrays.copyOf(orig.mStateSets, orig.mStateSets.length);
+                // Perform a shallow copy and rely on mutate() to deep-copy.
+                mThemeAttrs = orig.mThemeAttrs;
+                mStateSets = orig.mStateSets;
             } else {
+                mThemeAttrs = null;
                 mStateSets = new int[getCapacity()][];
+            }
+        }
+
+        private void mutate() {
+            mThemeAttrs = mThemeAttrs != null ? mThemeAttrs.clone() : null;
+
+            final int[][] stateSets = new int[mStateSets.length][];
+            for (int i = mStateSets.length - 1; i >= 0; i--) {
+                stateSets[i] = mStateSets[i] != null ? mStateSets[i].clone() : null;
             }
         }
 
@@ -314,6 +373,11 @@ public class StateListDrawable extends DrawableContainer {
         }
 
         @Override
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null || super.canApplyTheme();
+        }
+
+        @Override
         public void growArray(int oldSize, int newSize) {
             super.growArray(oldSize, newSize);
             final int[][] newStateSets = new int[newSize][];
@@ -322,13 +386,23 @@ public class StateListDrawable extends DrawableContainer {
         }
     }
 
-    void setConstantState(StateListState state) {
+    @Override
+    public void applyTheme(Theme theme) {
+        super.applyTheme(theme);
+
+        onStateChange(getState());
+    }
+
+    protected void setConstantState(@NonNull DrawableContainerState state) {
         super.setConstantState(state);
 
-        mStateListState = state;
+        if (state instanceof StateListState) {
+            mStateListState = (StateListState) state;
+        }
     }
 
     private StateListDrawable(StateListState state, Resources res) {
+        // Every state list drawable has its own constant state.
         final StateListState newState = new StateListState(state, this, res);
         setConstantState(newState);
         onStateChange(getState());
@@ -338,7 +412,7 @@ public class StateListDrawable extends DrawableContainer {
      * This constructor exists so subclasses can avoid calling the default
      * constructor and setting up a StateListDrawable-specific constant state.
      */
-    StateListDrawable(StateListState state) {
+    StateListDrawable(@Nullable StateListState state) {
         if (state != null) {
             setConstantState(state);
         }

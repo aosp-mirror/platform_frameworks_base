@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">R.id</li>
       </ul>
     </div>
@@ -775,6 +844,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -862,74 +934,141 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#book_now">book_now</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#adjust_height">adjust_height</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#adjust_width">adjust_width</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#book_now">book_now</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#buyButton">buyButton</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#buy_now">buy_now</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#buy_with_google">buy_with_google</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#classic">classic</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#contact">contact</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#demote_common_words">demote_common_words</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
@@ -940,172 +1079,252 @@ Summary:
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#demote_rfc822_hostnames">demote_rfc822_hostnames</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
       <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#donate_with_google">donate_with_google</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#email">email</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
-      <tr class=" api apilevel-" >
+      
+    
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#grayscale">grayscale</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#holo_dark">holo_dark</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-
-
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#holo_light">holo_light</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#html">html</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          </td>
       </tr>
       
     
       <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#holo_dark">holo_dark</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#holo_light">holo_light</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#html">html</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#hybrid">hybrid</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#icon_uri">icon_uri</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#instant_message">instant_message</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#intent_action">intent_action</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#intent_activity">intent_activity</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#intent_data">intent_data</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#intent_data_id">intent_data_id</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#intent_extra_data">intent_extra_data</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#large_icon_uri">large_icon_uri</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#match_global_nicknames">match_global_nicknames</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          </td>
       </tr>
       
     
@@ -1113,76 +1332,79 @@ Summary:
           <td class="jd-typecol"><nobr>
           public
           static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#match_global_nicknames">match_global_nicknames</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#match_parent">match_parent</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
-      <tr class="alt-color api apilevel-" >
+      
+    
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#monochrome">monochrome</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#none">none</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#normal">normal</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
-
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#omnibox_title_section">omnibox_title_section</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#omnibox_url_section">omnibox_url_section</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-
-
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#plain">plain</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          </td>
       </tr>
       
     
@@ -1190,54 +1412,143 @@ Summary:
           <td class="jd-typecol"><nobr>
           public
           static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#omnibox_title_section">omnibox_title_section</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#omnibox_url_section">omnibox_url_section</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#plain">plain</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#production">production</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
-      <tr class=" api apilevel-" >
+      
+    
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#rfc822">rfc822</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#sandbox">sandbox</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#satellite">satellite</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
           
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#selectionDetails">selectionDetails</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#strict_sandbox">strict_sandbox</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
@@ -1247,8 +1558,13 @@ Summary:
           static
           
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#strict_sandbox">strict_sandbox</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#terrain">terrain</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
       
     
@@ -1256,57 +1572,66 @@ Summary:
           <td class="jd-typecol"><nobr>
           public
           static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#terrain">terrain</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-
-
-      <tr class=" api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#text1">text1</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-
-          int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#text2">text2</a></td>
-          <td class="jd-descrcol" width="100%"></td>
-      </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
-
+          
           int</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#url">url</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#text2">text2</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
           static
+          
+          int</nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#url">url</a></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
 
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.id.html#wrap_content">wrap_content</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+            
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
 
 </table>
 
@@ -1589,6 +1914,68 @@ From class
 
 
 
+<A NAME="adjust_height"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        adjust_height
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="adjust_width"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        adjust_width
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
 <A NAME="book_now"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1608,6 +1995,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1637,6 +2027,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1664,6 +2057,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1693,6 +2089,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1720,6 +2119,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1749,6 +2151,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1776,6 +2181,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1805,6 +2213,40 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="donate_with_google"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+        int
+      </span>
+        donate_with_google
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1832,6 +2274,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1861,6 +2306,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1888,6 +2336,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1917,6 +2368,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1944,6 +2398,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1973,6 +2430,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -2000,6 +2460,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2029,6 +2492,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -2056,6 +2522,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2085,6 +2554,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -2113,6 +2585,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -2134,16 +2609,19 @@ From class
         intent_data_id
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2151,27 +2629,30 @@ From class
 
 <A NAME="intent_extra_data"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         intent_extra_data
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2179,27 +2660,30 @@ From class
 
 <A NAME="large_icon_uri"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         large_icon_uri
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2207,27 +2691,30 @@ From class
 
 <A NAME="match_global_nicknames"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         match_global_nicknames
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2235,27 +2722,30 @@ From class
 
 <A NAME="match_parent"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         match_parent
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2263,27 +2753,30 @@ From class
 
 <A NAME="monochrome"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         monochrome
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2291,27 +2784,30 @@ From class
 
 <A NAME="none"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         none
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2319,27 +2815,30 @@ From class
 
 <A NAME="normal"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         normal
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2347,27 +2846,30 @@ From class
 
 <A NAME="omnibox_title_section"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         omnibox_title_section
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2375,27 +2877,30 @@ From class
 
 <A NAME="omnibox_url_section"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         omnibox_url_section
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2403,27 +2908,30 @@ From class
 
 <A NAME="plain"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         plain
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2431,27 +2939,30 @@ From class
 
 <A NAME="production"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         production
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2459,27 +2970,30 @@ From class
 
 <A NAME="rfc822"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         rfc822
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2487,27 +3001,30 @@ From class
 
 <A NAME="sandbox"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         sandbox
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2515,27 +3032,30 @@ From class
 
 <A NAME="satellite"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         satellite
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2543,27 +3063,30 @@ From class
 
 <A NAME="selectionDetails"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         selectionDetails
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2571,27 +3094,30 @@ From class
 
 <A NAME="strict_sandbox"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         strict_sandbox
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2599,27 +3125,30 @@ From class
 
 <A NAME="terrain"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         terrain
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2627,27 +3156,30 @@ From class
 
 <A NAME="text1"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         text1
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2655,27 +3187,30 @@ From class
 
 <A NAME="text2"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         text2
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2683,27 +3218,30 @@ From class
 
 <A NAME="url"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         url
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
     </div>
 </div>
 
@@ -2711,12 +3249,12 @@ From class
 
 <A NAME="wrap_content"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
+        public 
+        static 
+         
         int
       </span>
         wrap_content
@@ -2728,6 +3266,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2768,6 +3309,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

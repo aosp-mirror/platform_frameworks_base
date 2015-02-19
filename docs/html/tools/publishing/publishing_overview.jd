@@ -67,11 +67,14 @@ tasks:</p>
     <a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
     element. You may also have to configure several other settings to meet Google Play
     requirements or accomodate whatever method you're using to release your application.</p>
+    <p>If you are using Gradle build files, you can use the <em>release</em> build type to set
+    your build settings for the published version of your app.  </p>
   </li>
   <li>Building and signing a release version of your application.
-    <p>The Android Development Tools (ADT) plugin and the Ant build script that are provided
-    with the Android SDK tools provide everything you need to build and sign a release version of
-    your application.</p>
+    <p>You can use the Gradle build files with the <em>release</em> build type to build and sign a
+    release version of your application. See
+    <a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android
+      Studio</a>.</p>
   </li>
   <li>Testing the release version of your application.
     <p>Before you distribute your application, you should thoroughly test the release version on at
@@ -107,7 +110,7 @@ application.</p>
 
 <p>You can release your Android applications several ways. Usually, you release applications
 through an application marketplace such as Google Play, but you can also release applications
-on your own website or by sending an application directly to a user. 
+on your own website or by sending an application directly to a user.
 
 <h3 id="publishing-marketplace">Releasing through an App Marketplace</h3>
 
@@ -181,7 +184,7 @@ button.</p>
 
 <p class="note"><strong>Note:</strong> The <strong>Install Now</strong> button
 shown in Figure 1 appears only if a user has configured their device to allow
-installation from <a href="#unknown-sources">unknown sources</a> and has opened your 
+installation from <a href="#unknown-sources">unknown sources</a> and has opened your
 email with the native Gmail application.</p>
 
 <p>Distributing applications through email is convenient if you are sending your application to
@@ -221,9 +224,9 @@ help prevent unauthorized installation and use of your application.</p>
        apps from unknown sources." style="width:240px;" />
   <p class="img-caption">
     <strong>Figure 2.</strong> Users must enable the <strong>Unknown sources</strong>
-    setting before they can install apps not downloaded from Google Play. 
+    setting before they can install apps not downloaded from Google Play.
   </p>
-</div> 
+</div>
 
 <p>Android protects users from inadvertent download and install of apps from
 locations other than Google Play (which is trusted). It blocks such installs
@@ -232,7 +235,7 @@ Settings&nbsp;<strong>&gt;</strong>&nbsp;Security, shown in Figure 2. To allow
 the installation of applications from other sources, users need to enable the
 Unknown sources setting on their devices, and they need to make this
 configuration change <em>before</em> they download your application to their
-devices.</p> 
+devices.</p>
 
 <p class="note">Note that some network providers do not allow users to install
 applications from unknown sources.</p>

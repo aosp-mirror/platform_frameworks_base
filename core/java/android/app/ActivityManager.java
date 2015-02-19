@@ -213,6 +213,13 @@ public class ActivityManager {
     public static final int BROADCAST_STICKY_CANT_HAVE_PERMISSION = -1;
 
     /**
+     * Result for IActivityManager.broadcastIntent: trying to send a broadcast
+     * to a stopped user. Fail.
+     * @hide
+     */
+    public static final int BROADCAST_FAILED_USER_STOPPED = -2;
+
+    /**
      * Type for IActivityManaqer.getIntentSender: this PendingIntent is
      * for a sendBroadcast operation.
      * @hide
@@ -1243,26 +1250,16 @@ public class ActivityManager {
     }
 
     /**
-     * If set, the process of the root activity of the task will be killed
-     * as part of removing the task.
-     * @hide
-     */
-    public static final int REMOVE_TASK_KILL_PROCESS = 0x0001;
-
-    /**
      * Completely remove the given task.
      *
      * @param taskId Identifier of the task to be removed.
-     * @param flags Additional operational flags.  May be 0 or
-     * {@link #REMOVE_TASK_KILL_PROCESS}.
      * @return Returns true if the given task was found and removed.
      *
      * @hide
      */
-    public boolean removeTask(int taskId, int flags)
-            throws SecurityException {
+    public boolean removeTask(int taskId) throws SecurityException {
         try {
-            return ActivityManagerNative.getDefault().removeTask(taskId, flags);
+            return ActivityManagerNative.getDefault().removeTask(taskId);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
             return false;

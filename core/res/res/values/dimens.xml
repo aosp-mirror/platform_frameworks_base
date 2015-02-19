@@ -123,6 +123,9 @@
          be either a fraction or a dimension. -->
     <item type="dimen" name="dialog_min_width_minor">95%</item>
 
+    <!-- Default padding for dialogs. -->
+    <dimen name="dialog_padding">16dp</dimen>
+
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
     <!-- The width of the big icons in notifications. -->
@@ -301,6 +304,9 @@
     <!-- Touch slop for the global toggle accessibility gesture -->
     <dimen name="accessibility_touch_slop">80dip</dimen>
 
+    <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
+    <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
+
     <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
     <dimen name="keyguard_security_width">320dp</dimen>
 
@@ -367,12 +373,14 @@
     <dimen name="timepicker_time_label_size">60sp</dimen>
     <dimen name="timepicker_extra_time_label_margin">-30dp</dimen>
     <dimen name="timepicker_ampm_label_size">16sp</dimen>
-    <dimen name="timepicker_ampm_left_padding">6dip</dimen>
-    <dimen name="timepicker_separator_padding">4dip</dimen>
-    <dimen name="timepicker_header_height">96dip</dimen>
-    <dimen name="timepicker_minimum_margin_sides">48dip</dimen>
-    <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
-    <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
+    <dimen name="timepicker_ampm_horizontal_padding">12dp</dimen>
+    <dimen name="timepicker_ampm_vertical_padding">16dp</dimen>
+    <dimen name="timepicker_pm_top_padding">3dp</dimen>
+    <dimen name="timepicker_separator_padding">4dp</dimen>
+    <dimen name="timepicker_header_height">96dp</dimen>
+    <dimen name="timepicker_minimum_margin_sides">48dp</dimen>
+    <dimen name="timepicker_minimum_margin_top_bottom">24dp</dimen>
+    <dimen name="timepicker_radial_picker_dimen">270dp</dimen>
 
     <!-- Used by SimpleMonthView -->
     <dimen name="datepicker_day_number_size">12sp</dimen>
@@ -380,17 +388,21 @@
     <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
     <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
     <dimen name="datepicker_day_number_select_circle_radius">16dp</dimen>
-    <dimen name="datepicker_view_animator_height">244dp</dimen>
+    <dimen name="datepicker_view_animator_height">226dp</dimen>
 
     <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
     <dimen name="datepicker_year_label_height">64dp</dimen>
     <dimen name="datepicker_year_label_text_size">22dp</dimen>
-    <dimen name="datepicker_component_width">270dp</dimen>
+    <dimen name="datepicker_component_width">260dp</dimen>
+    <dimen name="datepicker_dialog_width">520dp</dimen>
     <dimen name="datepicker_selected_date_day_size">88dp</dimen>
     <dimen name="datepicker_selected_date_month_size">24dp</dimen>
     <dimen name="datepicker_selected_date_year_size">24dp</dimen>
     <dimen name="datepicker_header_height">30dp</dimen>
     <dimen name="datepicker_header_text_size">14dp</dimen>
+
+    <!-- Minimum size of the fast scroller thumb's touch target. -->
+    <dimen name="fast_scroller_minimum_touch_target">48dp</dimen>
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
@@ -411,7 +423,7 @@
      <!-- Lighting and shadow properties -->
      <dimen name="light_y">-200dp</dimen>
      <dimen name="light_z">800dp</dimen>
-     <dimen name="light_radius">800dp</dimen>
+     <dimen name="light_radius">600dp</dimen>
      <item type="dimen" format="float" name="ambient_shadow_alpha">0.075</item>
      <item type="dimen" format="float" name="spot_shadow_alpha">0.15</item>
 

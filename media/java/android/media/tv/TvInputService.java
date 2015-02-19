@@ -25,10 +25,12 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -44,10 +46,12 @@ import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.CaptioningManager;
+import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -155,15 +159,6 @@ public abstract class TvInputService extends Service {
     }
 
     /**
-     * Get the number of callbacks that are registered.
-     * @hide
-     */
-    @VisibleForTesting
-    public final int getRegisteredCallbackCount() {
-        return mCallbacks.getRegisteredCallbackCount();
-    }
-
-    /**
      * Returns a concrete implementation of {@link Session}.
      * <p>
      * May return {@code null} if this TV input service fails to create a session for some reason.
@@ -241,16 +236,25 @@ public abstract class TvInputService extends Service {
      * Base class for derived classes to implement to provide a TV input session.
      */
     public abstract static class Session implements KeyEvent.Callback {
+        private static final int DETACH_OVERLAY_VIEW_TIMEOUT = 5000;
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
         private final WindowManager mWindowManager;
         final Handler mHandler;
         private WindowManager.LayoutParams mWindowParams;
         private Surface mSurface;
+        private Context mContext;
+        private FrameLayout mOverlayViewContainer;
         private View mOverlayView;
+        private OverlayViewCleanUpTask mOverlayViewCleanUpTask;
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
+
+        private Object mLock = new Object();
+        // @GuardedBy("mLock")
         private ITvInputSessionCallback mSessionCallback;
+        // @GuardedBy("mLock")
+        private List<Runnable> mPendingActions = new ArrayList<>();
 
         /**
          * Creates a new Session.
@@ -258,6 +262,7 @@ public abstract class TvInputService extends Service {
          * @param context The context of the application
          */
         public Session(Context context) {
+            mContext = context;
             mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             mHandler = new Handler(context.getMainLooper());
         }
@@ -295,16 +300,19 @@ public abstract class TvInputService extends Service {
          * @param eventArgs Optional arguments of the event.
          * @hide
          */
+        @SystemApi
         public void notifySessionEvent(final String eventType, final Bundle eventArgs) {
             if (eventType == null) {
                 throw new IllegalArgumentException("eventType should not be null.");
             }
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifySessionEvent(" + eventType + ")");
-                        mSessionCallback.onSessionEvent(eventType, eventArgs);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onSessionEvent(eventType, eventArgs);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in sending event (event=" + eventType + ")");
                     }
@@ -318,12 +326,14 @@ public abstract class TvInputService extends Service {
          * @param channelUri The URI of a channel.
          */
         public void notifyChannelRetuned(final Uri channelUri) {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyChannelRetuned");
-                        mSessionCallback.onChannelRetuned(channelUri);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onChannelRetuned(channelUri);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyChannelRetuned");
                     }
@@ -332,8 +342,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the change on the track information. This is expected to be called whenever a track
-         * is added/removed and the metadata of a track is modified.
+         * Sends the list of all audio/video/subtitle tracks. The is used by the framework to
+         * maintain the track information for a given session, which in turn is used by
+         * {@link TvView#getTracks} for the application to retrieve metadata for a given track type.
+         * The TV input service must call this method as soon as the track information becomes
+         * available or is updated. Note that in a case where a part of the information for a
+         * certain track is updated, it is not necessary to create a new {@link TvTrackInfo} object
+         * with a different track ID.
          *
          * @param tracks A list which includes track information.
          * @throws IllegalArgumentException if {@code tracks} contains redundant tracks.
@@ -350,12 +365,14 @@ public abstract class TvInputService extends Service {
             trackIdSet.clear();
 
             // TODO: Validate the track list.
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTracksChanged");
-                        mSessionCallback.onTracksChanged(tracks);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTracksChanged(tracks);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTracksChanged");
                     }
@@ -364,8 +381,12 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Sends the ID of the selected track for a given track type. This is expected to be called
-         * whenever there is a change on track selection.
+         * Sends the type and ID of a selected track. This is used to inform the application that a
+         * specific track is selected. The TV input service must call this method as soon as a track
+         * is selected either by default or in response to a call to {@link #onSelectTrack}. The
+         * selected track ID for a given type is maintained in the framework until the next call to
+         * this method even after the entire track list is updated (but is reset when the session is
+         * tuned to a new channel), so care must be taken not to result in an obsolete track ID.
          *
          * @param type The type of the selected track. The type can be
          *            {@link TvTrackInfo#TYPE_AUDIO}, {@link TvTrackInfo#TYPE_VIDEO} or
@@ -374,12 +395,14 @@ public abstract class TvInputService extends Service {
          * @see #onSelectTrack
          */
         public void notifyTrackSelected(final int type, final String trackId) {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyTrackSelected");
-                        mSessionCallback.onTrackSelected(type, trackId);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTrackSelected(type, trackId);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyTrackSelected");
                     }
@@ -395,12 +418,14 @@ public abstract class TvInputService extends Service {
          * @see #notifyVideoUnavailable
          */
         public void notifyVideoAvailable() {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyVideoAvailable");
-                        mSessionCallback.onVideoAvailable();
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onVideoAvailable();
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyVideoAvailable");
                     }
@@ -427,12 +452,14 @@ public abstract class TvInputService extends Service {
                     || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
                 throw new IllegalArgumentException("Unknown reason: " + reason);
             }
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyVideoUnavailable");
-                        mSessionCallback.onVideoUnavailable(reason);
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onVideoUnavailable(reason);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyVideoUnavailable");
                     }
@@ -466,12 +493,14 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentAllowed() {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyContentAllowed");
-                        mSessionCallback.onContentAllowed();
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onContentAllowed();
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyContentAllowed");
                     }
@@ -506,12 +535,14 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentBlocked(final TvContentRating rating) {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "notifyContentBlocked");
-                        mSessionCallback.onContentBlocked(rating.flattenToString());
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onContentBlocked(rating.flattenToString());
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyContentBlocked");
                     }
@@ -526,22 +557,25 @@ public abstract class TvInputService extends Service {
          * @param left Left position in pixels, relative to the overlay view.
          * @param top Top position in pixels, relative to the overlay view.
          * @param right Right position in pixels, relative to the overlay view.
-         * @param bottm Bottom position in pixels, relative to the overlay view.
+         * @param bottom Bottom position in pixels, relative to the overlay view.
          * @see #onOverlayViewSizeChanged
          * @hide
          */
         @SystemApi
-        public void layoutSurface(final int left, final int top, final int right, final int bottm) {
-            if (left > right || top > bottm) {
+        public void layoutSurface(final int left, final int top, final int right,
+                final int bottom) {
+            if (left > right || top > bottom) {
                 throw new IllegalArgumentException("Invalid parameter");
             }
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "layoutSurface (l=" + left + ", t=" + top + ", r="
-                                + right + ", b=" + bottm + ",)");
-                        mSessionCallback.onLayoutSurface(left, top, right, bottm);
+                                + right + ", b=" + bottom + ",)");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onLayoutSurface(left, top, right, bottom);
+                        }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in layoutSurface");
                     }
@@ -837,12 +871,18 @@ public abstract class TvInputService extends Service {
          * session.
          */
         void release() {
-            removeOverlayView(true);
             onRelease();
             if (mSurface != null) {
                 mSurface.release();
                 mSurface = null;
             }
+            synchronized(mLock) {
+                mSessionCallback = null;
+                mPendingActions.clear();
+            }
+            // Removes the overlay view lastly so that any hanging on the main thread can be handled
+            // in {@link #scheduleOverlayViewCleanup}.
+            removeOverlayView(true);
         }
 
         /**
@@ -927,9 +967,8 @@ public abstract class TvInputService extends Service {
          * @param frame A position of the overlay view.
          */
         void createOverlayView(IBinder windowToken, Rect frame) {
-            if (mOverlayView != null) {
-                mWindowManager.removeView(mOverlayView);
-                mOverlayView = null;
+            if (mOverlayViewContainer != null) {
+                removeOverlayView(false);
             }
             if (DEBUG) Log.d(TAG, "create overlay view(" + frame + ")");
             mWindowToken = windowToken;
@@ -942,6 +981,15 @@ public abstract class TvInputService extends Service {
             if (mOverlayView == null) {
                 return;
             }
+            if (mOverlayViewCleanUpTask != null) {
+                mOverlayViewCleanUpTask.cancel(true);
+                mOverlayViewCleanUpTask = null;
+            }
+            // Creates a container view to check hanging on the overlay view detaching.
+            // Adding/removing the overlay view to/from the container make the view attach/detach
+            // logic run on the main thread.
+            mOverlayViewContainer = new FrameLayout(mContext);
+            mOverlayViewContainer.addView(mOverlayView);
             // TvView's window type is TYPE_APPLICATION_MEDIA and we want to create
             // an overlay window above the media window but below the application window.
             int type = WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -958,7 +1006,7 @@ public abstract class TvInputService extends Service {
                     WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
             mWindowParams.gravity = Gravity.START | Gravity.TOP;
             mWindowParams.token = windowToken;
-            mWindowManager.addView(mOverlayView, mWindowParams);
+            mWindowManager.addView(mOverlayViewContainer, mWindowParams);
         }
 
         /**
@@ -975,29 +1023,47 @@ public abstract class TvInputService extends Service {
                 onOverlayViewSizeChanged(frame.right - frame.left, frame.bottom - frame.top);
             }
             mOverlayFrame = frame;
-            if (!mOverlayViewEnabled || mOverlayView == null) {
+            if (!mOverlayViewEnabled || mOverlayViewContainer == null) {
                 return;
             }
             mWindowParams.x = frame.left;
             mWindowParams.y = frame.top;
             mWindowParams.width = frame.right - frame.left;
             mWindowParams.height = frame.bottom - frame.top;
-            mWindowManager.updateViewLayout(mOverlayView, mWindowParams);
+            mWindowManager.updateViewLayout(mOverlayViewContainer, mWindowParams);
         }
 
         /**
          * Removes the current overlay view.
          */
         void removeOverlayView(boolean clearWindowToken) {
-            if (DEBUG) Log.d(TAG, "removeOverlayView(" + mOverlayView + ")");
+            if (DEBUG) Log.d(TAG, "removeOverlayView(" + mOverlayViewContainer + ")");
             if (clearWindowToken) {
                 mWindowToken = null;
                 mOverlayFrame = null;
             }
-            if (mOverlayView != null) {
-                mWindowManager.removeView(mOverlayView);
+            if (mOverlayViewContainer != null) {
+                // Removes the overlay view from the view hierarchy in advance so that it can be
+                // cleaned up in the {@link OverlayViewCleanUpTask} if the remove process is
+                // hanging.
+                mOverlayViewContainer.removeView(mOverlayView);
                 mOverlayView = null;
+                mWindowManager.removeView(mOverlayViewContainer);
+                mOverlayViewContainer = null;
                 mWindowParams = null;
+            }
+        }
+
+        /**
+         * Schedules a task which checks whether the overlay view is detached and kills the process
+         * if it is not. Note that this method is expected to be called in a non-main thread.
+         */
+        void scheduleOverlayViewCleanup() {
+            View overlayViewParent = mOverlayViewContainer;
+            if (overlayViewParent != null) {
+                mOverlayViewCleanUpTask = new OverlayViewCleanUpTask();
+                mOverlayViewCleanUpTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
+                        overlayViewParent);
             }
         }
 
@@ -1030,46 +1096,89 @@ public abstract class TvInputService extends Service {
                     }
                 }
             }
-            if (mOverlayView == null || !mOverlayView.isAttachedToWindow()) {
+            if (mOverlayViewContainer == null || !mOverlayViewContainer.isAttachedToWindow()) {
                 return TvInputManager.Session.DISPATCH_NOT_HANDLED;
             }
-            if (!mOverlayView.hasWindowFocus()) {
-                mOverlayView.getViewRootImpl().windowFocusChanged(true, true);
+            if (!mOverlayViewContainer.hasWindowFocus()) {
+                mOverlayViewContainer.getViewRootImpl().windowFocusChanged(true, true);
             }
-            if (isNavigationKey && mOverlayView.hasFocusable()) {
+            if (isNavigationKey && mOverlayViewContainer.hasFocusable()) {
                 // If mOverlayView has focusable views, navigation key events should be always
                 // handled. If not, it can make the application UI navigation messed up.
                 // For example, in the case that the left-most view is focused, a left key event
                 // will not be handled in ViewRootImpl. Then, the left key event will be handled in
                 // the application during the UI navigation of the TV input.
-                mOverlayView.getViewRootImpl().dispatchInputEvent(event);
+                mOverlayViewContainer.getViewRootImpl().dispatchInputEvent(event);
                 return TvInputManager.Session.DISPATCH_HANDLED;
             } else {
-                mOverlayView.getViewRootImpl().dispatchInputEvent(event, receiver);
+                mOverlayViewContainer.getViewRootImpl().dispatchInputEvent(event, receiver);
                 return TvInputManager.Session.DISPATCH_IN_PROGRESS;
             }
         }
 
-        private void setSessionCallback(ITvInputSessionCallback callback) {
-            mSessionCallback = callback;
+        private void initialize(ITvInputSessionCallback callback) {
+            synchronized(mLock) {
+                mSessionCallback = callback;
+                for (Runnable runnable : mPendingActions) {
+                    runnable.run();
+                }
+                mPendingActions.clear();
+            }
         }
 
-        private final void runOnMainThread(Runnable action) {
-            if (mHandler.getLooper().isCurrentThread() && mSessionCallback != null) {
-                action.run();
-            } else {
-                // Posts the runnable if this is not called from the main thread or the session
-                // is not initialized yet.
-                mHandler.post(action);
+        private final void executeOrPostRunnable(Runnable action) {
+            synchronized(mLock) {
+                if (mSessionCallback == null) {
+                    // The session is not initialized yet.
+                    mPendingActions.add(action);
+                } else {
+                    if (mHandler.getLooper().isCurrentThread()) {
+                        action.run();
+                    } else {
+                        // Posts the runnable if this is not called from the main thread
+                        mHandler.post(action);
+                    }
+                }
+            }
+        }
+
+        private final class OverlayViewCleanUpTask extends AsyncTask<View, Void, Void> {
+            @Override
+            protected Void doInBackground(View... views) {
+                View overlayViewParent = views[0];
+                try {
+                    Thread.sleep(DETACH_OVERLAY_VIEW_TIMEOUT);
+                } catch (InterruptedException e) {
+                    return null;
+                }
+                if (isCancelled()) {
+                    return null;
+                }
+                if (overlayViewParent.isAttachedToWindow()) {
+                    Log.e(TAG, "Time out on releasing overlay view. Killing "
+                            + overlayViewParent.getContext().getPackageName());
+                    Process.killProcess(Process.myPid());
+                }
+                return null;
             }
         }
     }
 
     /**
      * Base class for a TV input session which represents an external device connected to a
-     * hardware TV input. Once TV input returns an implementation of this class on
-     * {@link #onCreateSession(String)}, the framework will create a hardware session and forward
-     * the application's surface to the hardware TV input.
+     * hardware TV input.
+     * <p>
+     * This class is for an input which provides channels for the external set-top box to the
+     * application. Once a TV input returns an implementation of this class on
+     * {@link #onCreateSession(String)}, the framework will create a separate session for
+     * a hardware TV Input (e.g. HDMI 1) and forward the application's surface to the session so
+     * that the user can see the screen of the hardware TV Input when she tunes to a channel from
+     * this TV input. The implementation of this class is expected to change the channel of the
+     * external set-top box via a proprietary protocol when {@link HardwareSession#onTune(Uri)} is
+     * requested by the application.
+     * </p><p>
+     * Note that this class is not for inputs for internal hardware like built-in tuner and HDMI 1.
+     * </p>
      * @see #onCreateSession(String)
      */
     public abstract static class HardwareSession extends Session {
@@ -1106,17 +1215,20 @@ public abstract class TvInputService extends Service {
                 mHardwareSession = session;
                 SomeArgs args = SomeArgs.obtain();
                 if (session != null) {
-                    args.arg1 = mProxySession;
-                    args.arg2 = mProxySessionCallback;
-                    args.arg3 = session.getToken();
+                    args.arg1 = HardwareSession.this;
+                    args.arg2 = mProxySession;
+                    args.arg3 = mProxySessionCallback;
+                    args.arg4 = session.getToken();
                 } else {
                     args.arg1 = null;
-                    args.arg2 = mProxySessionCallback;
-                    args.arg3 = null;
+                    args.arg2 = null;
+                    args.arg3 = mProxySessionCallback;
+                    args.arg4 = null;
                     onRelease();
                 }
                 mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
                         .sendToTarget();
+                session.tune(TvContract.buildChannelUriForPassthroughInput(getHardwareInputId()));
             }
 
             @Override
@@ -1250,7 +1362,6 @@ public abstract class TvInputService extends Service {
                         }
                         return;
                     }
-                    sessionImpl.setSessionCallback(cb);
                     ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
                             sessionImpl, channel);
                     if (sessionImpl instanceof HardwareSession) {
@@ -1281,9 +1392,10 @@ public abstract class TvInputService extends Service {
                                 proxySession.mHardwareSessionCallback, mServiceHandler);
                     } else {
                         SomeArgs someArgs = SomeArgs.obtain();
-                        someArgs.arg1 = stub;
-                        someArgs.arg2 = cb;
-                        someArgs.arg3 = null;
+                        someArgs.arg1 = sessionImpl;
+                        someArgs.arg2 = stub;
+                        someArgs.arg3 = cb;
+                        someArgs.arg4 = null;
                         mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
                                 someArgs).sendToTarget();
                     }
@@ -1291,13 +1403,17 @@ public abstract class TvInputService extends Service {
                 }
                 case DO_NOTIFY_SESSION_CREATED: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    ITvInputSession stub = (ITvInputSession) args.arg1;
-                    ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
-                    IBinder hardwareSessionToken = (IBinder) args.arg3;
+                    Session sessionImpl = (Session) args.arg1;
+                    ITvInputSession stub = (ITvInputSession) args.arg2;
+                    ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg3;
+                    IBinder hardwareSessionToken = (IBinder) args.arg4;
                     try {
                         cb.onSessionCreated(stub, hardwareSessionToken);
                     } catch (RemoteException e) {
                         Log.e(TAG, "error in onSessionCreated");
+                    }
+                    if (sessionImpl != null) {
+                        sessionImpl.initialize(cb);
                     }
                     args.recycle();
                     return;

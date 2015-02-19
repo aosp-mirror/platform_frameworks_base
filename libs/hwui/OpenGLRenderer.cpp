@@ -42,6 +42,7 @@
 #include "ShadowTessellator.h"
 #include "SkiaShader.h"
 #include "utils/GLUtils.h"
+#include "utils/TraceUtils.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
 
@@ -136,7 +137,6 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         , mScissorOptimizationDisabled(false)
         , mSuppressTiling(false)
         , mFirstFrameAfterResize(true)
-        , mCountOverdraw(false)
         , mLightCenter((Vector3){FLT_MIN, FLT_MIN, FLT_MIN})
         , mLightRadius(FLT_MIN)
         , mAmbientShadowAlpha(0)
@@ -251,7 +251,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 }
 
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
-    if (!opaque || mCountOverdraw) {
+    if (!opaque) {
         mCaches.enableScissor();
         mCaches.setScissor(left, getViewportHeight() - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -311,6 +311,11 @@ void OpenGLRenderer::finish() {
     renderOverdraw();
     endTiling();
 
+    for (size_t i = 0; i < mTempPaths.size(); i++) {
+        delete mTempPaths[i];
+    }
+    mTempPaths.clear();
+
     // When finish() is invoked on FBO 0 we've reached the end
     // of the current frame
     if (getTargetFbo() == 0) {
@@ -330,10 +335,6 @@ void OpenGLRenderer::finish() {
             mCaches.dumpMemoryUsage();
         }
 #endif
-    }
-
-    if (mCountOverdraw) {
-        countOverdraw();
     }
 
     mFrameStarted = false;
@@ -401,6 +402,8 @@ void OpenGLRenderer::eventMarkDEBUG(const char* fmt, ...) const {
     va_end(ap);
 
     eventMark(buf);
+#else
+    (void)fmt;
 #endif
 }
 
@@ -449,21 +452,6 @@ void OpenGLRenderer::renderOverdraw() {
     }
 }
 
-void OpenGLRenderer::countOverdraw() {
-    size_t count = getWidth() * getHeight();
-    uint32_t* buffer = new uint32_t[count];
-    glReadPixels(0, 0, getWidth(), getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &buffer[0]);
-
-    size_t total = 0;
-    for (size_t i = 0; i < count; i++) {
-        total += buffer[i] & 0xff;
-    }
-
-    mOverdraw = total / float(count);
-
-    delete[] buffer;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Layers
 ///////////////////////////////////////////////////////////////////////////////
@@ -471,7 +459,6 @@ void OpenGLRenderer::countOverdraw() {
 bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
     if (layer->deferredUpdateScheduled && layer->renderer
             && layer->renderNode.get() && layer->renderNode->isRenderable()) {
-        ATRACE_CALL();
 
         if (inFrame) {
             endTiling();
@@ -512,11 +499,8 @@ void OpenGLRenderer::updateLayers() {
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            Layer* layer = mLayerUpdates.itemAt(i);
+            Layer* layer = mLayerUpdates.itemAt(i).get();
             updateLayer(layer, false);
-            if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
-                mCaches.resourceCache.decrementRefcount(layer);
-            }
         }
 
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
@@ -531,21 +515,10 @@ void OpenGLRenderer::flushLayers() {
     int count = mLayerUpdates.size();
     if (count > 0) {
         startMark("Apply Layer Updates");
-        char layerName[12];
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            sprintf(layerName, "Layer #%d", i);
-            startMark(layerName);
-
-            ATRACE_BEGIN("flushLayer");
-            Layer* layer = mLayerUpdates.itemAt(i);
-            layer->flush();
-            ATRACE_END();
-
-            mCaches.resourceCache.decrementRefcount(layer);
-
-            endMark();
+            mLayerUpdates.itemAt(i)->flush();
         }
 
         mLayerUpdates.clear();
@@ -567,7 +540,6 @@ void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
             }
         }
         mLayerUpdates.push_back(layer);
-        mCaches.resourceCache.incrementRefcount(layer);
     }
 }
 
@@ -576,27 +548,14 @@ void OpenGLRenderer::cancelLayerUpdate(Layer* layer) {
         for (int i = mLayerUpdates.size() - 1; i >= 0; i--) {
             if (mLayerUpdates.itemAt(i) == layer) {
                 mLayerUpdates.removeAt(i);
-                mCaches.resourceCache.decrementRefcount(layer);
                 break;
             }
         }
     }
 }
 
-void OpenGLRenderer::clearLayerUpdates() {
-    size_t count = mLayerUpdates.size();
-    if (count > 0) {
-        mCaches.resourceCache.lock();
-        for (size_t i = 0; i < count; i++) {
-            mCaches.resourceCache.decrementRefcountLocked(mLayerUpdates.itemAt(i));
-        }
-        mCaches.resourceCache.unlock();
-        mLayerUpdates.clear();
-    }
-}
-
 void OpenGLRenderer::flushLayerUpdates() {
-    ATRACE_CALL();
+    ATRACE_NAME("Update HW Layers");
     syncState();
     updateLayers();
     flushLayers();
@@ -629,6 +588,7 @@ void OpenGLRenderer::onSnapshotRestored(const Snapshot& removed, const Snapshot&
 
     if (restoreLayer) {
         endMark(); // Savelayer
+        ATRACE_END(); // SaveLayer
         startMark("ComposeLayer");
         composeLayer(removed, restored);
         endMark();
@@ -814,6 +774,9 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
     mSnapshot->flags |= Snapshot::kFlagIsLayer;
     mSnapshot->layer = layer;
 
+    ATRACE_FORMAT_BEGIN("%ssaveLayer %ux%u",
+            fboLayer ? "" : "unclipped ",
+            layer->getWidth(), layer->getHeight());
     startMark("SaveLayer");
     if (fboLayer) {
         return createFboLayer(layer, bounds, clip);
@@ -958,7 +921,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
         if (kDebugLayers) {
             ALOGD("Deleting layer");
         }
-        Caches::getInstance().resourceCache.decrementRefcount(layer);
+        layer->decStrong(0);
     }
 }
 
@@ -1623,8 +1586,6 @@ void OpenGLRenderer::setupDraw(bool clearLayer) {
     mDescription.hasDebugHighlight = !mCaches.debugOverdraw &&
             mCaches.debugStencilClip == Caches::kStencilShowHighlight &&
             mCaches.stencil.isTestEnabled();
-
-    mDescription.emulateStencil = mCountOverdraw;
 }
 
 void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
@@ -1708,13 +1669,6 @@ void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
         mColorR = mColorG = mColorB = 0.0f;
         mSetShaderColor = mDescription.modulate = true;
     }
-}
-
-static bool isBlendedColorFilter(const SkColorFilter* filter) {
-    if (filter == NULL) {
-        return false;
-    }
-    return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
 }
 
 void OpenGLRenderer::setupDrawBlending(const Layer* layer, bool swapSrcDst) {
@@ -1963,7 +1917,9 @@ status_t OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int
             return status | replayStruct.mDrawGlStatus;
         }
 
-        bool avoidOverdraw = !mCaches.debugOverdraw && !mCountOverdraw; // shh, don't tell devs!
+        // Don't avoid overdraw when visualizing, since that makes it harder to
+        // debug where it's coming from, and when the problem occurs.
+        bool avoidOverdraw = !mCaches.debugOverdraw;
         DeferredDisplayList deferredList(*currentClipRect(), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         renderNode->defer(deferStruct, 0);
@@ -2104,7 +2060,7 @@ status_t OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, i
     }
 
     mCaches.activeTexture(0);
-    Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     const UvMapper& mapper(getMapper(texture));
 
     for (int32_t y = 0; y < meshHeight; y++) {
@@ -2287,7 +2243,7 @@ status_t OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Res_png_9patch*
         return DrawGlInfo::kStatusDone;
     }
 
-    AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
+    AssetAtlas::Entry* entry = mRenderState.assetAtlas().getEntry(bitmap);
     const Patch* mesh = mCaches.patchCache.get(entry, bitmap->width(), bitmap->height(),
             right - left, bottom - top, patch);
 
@@ -3083,7 +3039,7 @@ const SkPaint* OpenGLRenderer::filterPaint(const SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     if (!texture) {
         return mCaches.textureCache.get(bitmap);
     }
@@ -3425,19 +3381,6 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         mDescription.hasRoundRectClip = true;
     }
     mSkipOutlineClip = true;
-
-    if (mCountOverdraw) {
-        if (!mCaches.blend) glEnable(GL_BLEND);
-        if (mCaches.lastSrcMode != GL_ONE || mCaches.lastDstMode != GL_ONE) {
-            glBlendFunc(GL_ONE, GL_ONE);
-        }
-
-        mCaches.blend = true;
-        mCaches.lastSrcMode = GL_ONE;
-        mCaches.lastDstMode = GL_ONE;
-
-        return;
-    }
 
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
 

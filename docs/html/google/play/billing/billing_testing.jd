@@ -10,7 +10,7 @@ page.tags="inapp, billing, iap"
   <ol>
     <li><a href="#testing-purchases">Testing In-app Purchases</a></li>
     <li><a href="#billing-testing-static">Testing with Static Responses</a></li>
-    <li><a href="#billing-testing-real">Setting Up for Test Purchases</a></li>
+    <li><a href="#billing-testing-test">Setting Up for Test Purchases</a></li>
     <li><a href="#draft_apps">Draft Apps are No Longer Supported</a></li>
   </ol>
   <h2>See also</h2>

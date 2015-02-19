@@ -24,63 +24,30 @@ page.tags=adt
         </li>
 
         <li><a href="#refactoring">Layout Factoring Support</a></li>
-        <li><a href="#Updating">Updating the ADT Plugin</h2>
+        <li><a href="#Updating">Updating the ADT Plugin</a></li>
 
-      </ol>
-
-      <h2>Related videos</h2>
-
-      <ol>
-        <li><a href="{@docRoot}videos/index.html#v=Oq05KqjXTvs">Android Developer Tools
-            Google I/O Session</a>
-        </li>
-      </ol>
-
-      <h2>See also</h2>
-
-      <ol>
-        <li><a href="http://tools.android.com/recent">Android Tools change blog</a></li>
       </ol>
     </div>
   </div>
 
   <p>ADT (Android Developer Tools) is a plugin for Eclipse that provides a suite of
   tools that are integrated with the Eclipse IDE. It offers you access to many features that help
-  you develop Android applications quickly. ADT
+  you develop Android applications. ADT
   provides GUI access to many of the command line SDK tools as well as a UI design tool for rapid
   prototyping, designing, and building of your application's user interface.</p>
 
-  <p>Because ADT is a plugin for Eclipse, you get the functionality of a well-established IDE,
-  along with Android-specific features that are bundled with ADT. The following
-  describes important features of Eclipse and ADT:</p>
+<p class="note"><strong>Note:</strong>
+If you have been using Eclipse with ADT, be aware that <a
+href="{@docRoot}tools/studio/index.html">Android Studio</a> is now the official IDE
+for Android, so you should migrate to Android Studio to receive all the
+latest IDE updates. For help moving projects,
+see <a href="/sdk/installing/migrate.html">Migrating to Android
+Studio</a>.</p>
 
-  <dl>
-    <dt><strong>Integrated Android project creation, building, packaging, installation, and
-    debugging</strong></dt>
+<p>If you still wish to use the ADT plugin for Eclipse, see
+<a href="{@docRoot}sdk/installing/installing-adt.html">Installing Eclipse Plugin.</a>
+</p>
 
-    <dd>ADT integrates many development workflow tasks into Eclipse, making it easy for you to
-    rapidly develop and test your Android applications.</dd>
-
-    <dt><strong>SDK Tools integration</strong></dt>
-
-    <dd>Many of the <a href="#tools">SDK tools</a> are integrated into Eclipse's menus,
-    perspectives, or as a part of background processes ran by ADT.</dd>
-
-    <dt><strong>Java programming language and XML editors</strong></dt>
-
-    <dd>The Java programming language editor contains common IDE features such as compile time
-    syntax checking, auto-completion, and integrated documentation for the Android framework APIs.
-    ADT also provides custom XML editors that let you
-    edit Android-specific XML files in a form-based UI. A graphical layout editor lets you design
-    user interfaces with a drag and drop interface.</dd>
-
-    <dt><strong>Integrated documentation for Android framework APIs</strong></dt>
-    <dd>You can access documentation by hovering over classes, methods, or variables.</dd>
-  </dl>
-
-  <p>You can find the most up-to-date and more detailed information about changes and new features
-on the <a  href="http://tools.android.com/recent">Recent Changes</a> page at the Android  Tools
-Project site.</p>
 
   <h2 id="tools">SDK Tools Integration</h2>
 
@@ -542,10 +509,10 @@ you should update to it as soon as convenient. </p>
 revision of the Android SDK Tools. If such dependencies exist, you will need to
 update the SDK Tools package of the SDK after installing the new revision of
 ADT. To update the SDK Tools package, use the Android SDK Manager, as
-described in <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
+described in <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</a>.</p>
 
 <p>To learn about new features of each ADT revision and also any dependencies on
-the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
+the SDK Tools, see the listings in the <a href="{@docRoot}tools/revisions/index.html">Revisions</a>
 section. To determine the version currently installed, open the
 Eclipse Installed Software window using <strong>Help</strong>
 &gt; <strong>Software Updates</strong> and refer to the version listed for
@@ -568,5 +535,6 @@ to install it. </p>
 
 
 <p>If you encounter problems during the update, remove the existing ADT plugin from Eclipse, then
-perform a fresh installation, using the instructions for <a href="#installing">Installing the ADT
+perform a fresh installation, using the instructions for <a
+href="{@docRoot}sdk/installing/installing-adt.html">Installing the ADT
 Plugin</a>.</p>

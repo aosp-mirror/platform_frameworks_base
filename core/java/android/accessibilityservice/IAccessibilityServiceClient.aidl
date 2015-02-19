@@ -28,7 +28,7 @@ import android.view.KeyEvent;
  */
  oneway interface IAccessibilityServiceClient {
 
-    void setConnection(in IAccessibilityServiceConnection connection, int connectionId);
+    void init(in IAccessibilityServiceConnection connection, int connectionId, IBinder windowToken);
 
     void onAccessibilityEvent(in AccessibilityEvent event);
 

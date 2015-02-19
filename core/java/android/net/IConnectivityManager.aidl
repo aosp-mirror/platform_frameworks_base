@@ -17,7 +17,6 @@
 package android.net;
 
 import android.app.PendingIntent;
-import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -50,6 +49,7 @@ interface IConnectivityManager
     NetworkInfo[] getAllNetworkInfo();
     Network getNetworkForType(int networkType);
     Network[] getAllNetworks();
+    NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId);
 
     NetworkInfo getProvisioningOrActiveNetworkInfo();
 
@@ -67,9 +67,6 @@ interface IConnectivityManager
     boolean isActiveNetworkMetered();
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
-
-    /** Policy control over specific {@link NetworkStateTracker}. */
-    void setPolicyDataEnable(int networkType, boolean enabled);
 
     int tether(String iface);
 
@@ -103,7 +100,7 @@ interface IConnectivityManager
 
     void setGlobalProxy(in ProxyInfo p);
 
-    ProxyInfo getProxy();
+    ProxyInfo getDefaultProxy();
 
     void setDataDependency(int networkType, boolean met);
 
@@ -133,12 +130,6 @@ interface IConnectivityManager
 
     String getMobileRedirectedProvisioningUrl();
 
-    LinkQualityInfo getLinkQualityInfo(int networkType);
-
-    LinkQualityInfo getActiveLinkQualityInfo();
-
-    LinkQualityInfo[] getAllLinkQualityInfo();
-
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 
     void setAirplaneMode(boolean enable);
@@ -156,6 +147,8 @@ interface IConnectivityManager
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
             in PendingIntent operation);
 
+    void releasePendingNetworkRequest(in PendingIntent operation);
+
     NetworkRequest listenForNetwork(in NetworkCapabilities networkCapabilities,
             in Messenger messenger, in IBinder binder);
 
@@ -168,4 +161,5 @@ interface IConnectivityManager
 
     boolean addVpnAddress(String address, int prefixLength);
     boolean removeVpnAddress(String address, int prefixLength);
+    boolean setUnderlyingNetworksForVpn(in Network[] networks);
 }

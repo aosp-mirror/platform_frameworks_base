@@ -34,4 +34,9 @@ public class DateFormat_Delegate {
     /*package*/ static boolean is24HourFormat(Context context) {
         return false;
     }
+
+    @LayoutlibDelegate
+    /*package*/ static boolean is24HourFormat(Context context, int userHandle) {
+        return false;
+    }
 }

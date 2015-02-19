@@ -1,12 +1,8 @@
 page.title=Pausing and Resuming an Activity
-parent.title=Managing the Activity Lifecycle
-parent.link=index.html
+page.tags=activity lifecycle
+helpoutsWidget=true
 
 trainingnavtop=true
-previous.title=Starting an Activity
-previous.link=starting.html
-next.title=Stopping and Restarting an Activity
-next.link=stopping.html
 
 @jd:body
 

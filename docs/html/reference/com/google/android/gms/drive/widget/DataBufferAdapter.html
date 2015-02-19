@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -360,7 +424,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">DataBufferAdapter</li>
       </ul>
     </div>
@@ -812,6 +881,9 @@ Summary:
   
 
 
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -950,14 +1022,24 @@ android.widget.Adapter
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">IGNORE_ITEM_VIEW_TYPE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">NO_SELECTION</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+          
+          
+    
+
+        </td>
     </tr>
     
     
@@ -1108,7 +1190,12 @@ android.widget.Adapter
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#append(com.google.android.gms.common.data.DataBuffer<T>)">append</a></span>(<a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a>&lt;T&gt; buffer)</nobr>
         
-        <div class="jd-descrdiv">Appends the specified buffer to the end of the adapter.</div>
+        <div class="jd-descrdiv">
+          Appends the specified buffer to the end of the adapter.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1126,7 +1213,12 @@ android.widget.Adapter
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#clear()">clear</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes and removes all buffers, and so all elements, from the adapter.</div>
+        <div class="jd-descrdiv">
+          Closes and removes all buffers, and so all elements, from the adapter.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1161,7 +1253,12 @@ android.widget.Adapter
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#getCount()">getCount</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-</div>
+          
+
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1180,7 +1277,12 @@ android.widget.Adapter
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#getDropDownView(int, android.view.View, android.view.ViewGroup)">getDropDownView</a></span>(int position, View convertView, ViewGroup parent)</nobr>
         
         <div class="jd-descrdiv">
-</div>
+          
+
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1199,7 +1301,12 @@ android.widget.Adapter
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#getItem(int)">getItem</a></span>(int position)</nobr>
         
         <div class="jd-descrdiv">
-</div>
+          
+
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1218,7 +1325,12 @@ android.widget.Adapter
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#getItemId(int)">getItemId</a></span>(int position)</nobr>
         
         <div class="jd-descrdiv">
-</div>
+          
+
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1237,7 +1349,12 @@ android.widget.Adapter
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#getView(int, android.view.View, android.view.ViewGroup)">getView</a></span>(int position, View convertView, ViewGroup parent)</nobr>
         
         <div class="jd-descrdiv">
-</div>
+          
+
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1256,8 +1373,13 @@ android.widget.Adapter
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#notifyDataSetChanged()">notifyDataSetChanged</a></span>()</nobr>
         
         <div class="jd-descrdiv">
+          
 
- This will also re-enable automatic notifications.</div>
+ This will also re-enable automatic notifications.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1275,7 +1397,12 @@ android.widget.Adapter
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#setDropDownViewResource(int)">setDropDownViewResource</a></span>(int resource)</nobr>
         
-        <div class="jd-descrdiv">Sets the layout resource to create the drop down views.</div>
+        <div class="jd-descrdiv">
+          Sets the layout resource to create the drop down views.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -1293,8 +1420,13 @@ android.widget.Adapter
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#setNotifyOnChange(boolean)">setNotifyOnChange</a></span>(boolean notifyOnChange)</nobr>
         
-        <div class="jd-descrdiv"><p>Control whether methods that change the list (<code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#append(com.google.android.gms.common.data.DataBuffer<T>)">append(DataBuffer<T>)</a></code>, <code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#clear()">clear()</a></code>)
- automatically call <code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#notifyDataSetChanged()">notifyDataSetChanged()</a></code>.</div>
+        <div class="jd-descrdiv">
+          <p>Control whether methods that change the list (<code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#append(com.google.android.gms.common.data.DataBuffer<T>)">append(DataBuffer<T>)</a></code>, <code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#clear()">clear()</a></code>)
+ automatically call <code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#notifyDataSetChanged()">notifyDataSetChanged()</a></code>.
+          
+    
+
+        </div>
   
   </td></tr>
 
@@ -2060,6 +2192,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2088,6 +2223,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2118,6 +2256,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2146,6 +2287,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2176,6 +2320,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2204,6 +2351,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2249,6 +2399,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Appends the specified buffer to the end of the adapter.
 </p></div>
 
@@ -2278,6 +2431,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>Closes and removes all buffers, and so all elements, from the adapter.
 </p></div>
@@ -2309,6 +2465,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2337,6 +2496,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>
 </p></div>
@@ -2368,6 +2530,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>
 </p></div>
 
@@ -2397,6 +2562,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>
 </p></div>
@@ -2437,6 +2605,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>
 </p></div>
 
@@ -2467,6 +2638,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>
 </p></div>
 
@@ -2496,6 +2670,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p>
 
@@ -2532,6 +2709,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the layout resource to create the drop down views.
 </p></div>
 
@@ -2561,6 +2741,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+      
+    
+
       
   <div class="jd-tagdata jd-tagdescr"><p><p>Control whether methods that change the list (<code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#append(com.google.android.gms.common.data.DataBuffer<T>)">append(DataBuffer<T>)</a></code>, <code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#clear()">clear()</a></code>)
  automatically call <code><a href="/reference/com/google/android/gms/drive/widget/DataBufferAdapter.html#notifyDataSetChanged()">notifyDataSetChanged()</a></code>. If set to false, caller must manually call

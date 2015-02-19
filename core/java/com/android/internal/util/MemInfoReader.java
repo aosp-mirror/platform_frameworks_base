@@ -34,40 +34,65 @@ public final class MemInfoReader {
         }
     }
 
+    /**
+     * Total amount of RAM available to the kernel.
+     */
     public long getTotalSize() {
         return mInfos[Debug.MEMINFO_TOTAL] * 1024;
     }
 
+    /**
+     * Amount of RAM that is not being used for anything.
+     */
     public long getFreeSize() {
         return mInfos[Debug.MEMINFO_FREE] * 1024;
     }
 
+    /**
+     * Amount of RAM that the kernel is being used for caches, not counting caches
+     * that are mapped in to processes.
+     */
     public long getCachedSize() {
-        return mInfos[Debug.MEMINFO_CACHED] * 1024;
+        return getCachedSizeKb() * 1024;
     }
 
+    /**
+     * Amount of RAM that is in use by the kernel for actual allocations.
+     */
+    public long getKernelUsedSize() {
+        return getKernelUsedSizeKb() * 1024;
+    }
+
+    /**
+     * Total amount of RAM available to the kernel.
+     */
     public long getTotalSizeKb() {
         return mInfos[Debug.MEMINFO_TOTAL];
     }
 
+    /**
+     * Amount of RAM that is not being used for anything.
+     */
     public long getFreeSizeKb() {
         return mInfos[Debug.MEMINFO_FREE];
     }
 
+    /**
+     * Amount of RAM that the kernel is being used for caches, not counting caches
+     * that are mapped in to processes.
+     */
     public long getCachedSizeKb() {
-        return mInfos[Debug.MEMINFO_CACHED];
+        return mInfos[Debug.MEMINFO_BUFFERS]
+                + mInfos[Debug.MEMINFO_CACHED] - mInfos[Debug.MEMINFO_MAPPED];
     }
 
-    public long getBuffersSizeKb() {
-        return mInfos[Debug.MEMINFO_BUFFERS];
-    }
-
-    public long getShmemSizeKb() {
-        return mInfos[Debug.MEMINFO_SHMEM];
-    }
-
-    public long getSlabSizeKb() {
-        return mInfos[Debug.MEMINFO_SLAB];
+    /**
+     * Amount of RAM that is in use by the kernel for actual allocations.
+     */
+    public long getKernelUsedSizeKb() {
+        return mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB]
+                + mInfos[Debug.MEMINFO_VM_ALLOC_USED] + mInfos[Debug.MEMINFO_PAGE_TABLES]
+                + mInfos[Debug.MEMINFO_KERNEL_STACK];
     }
 
     public long getSwapTotalSizeKb() {
@@ -80,5 +105,9 @@ public final class MemInfoReader {
 
     public long getZramTotalSizeKb() {
         return mInfos[Debug.MEMINFO_ZRAM_TOTAL];
+    }
+
+    public long[] getRawInfo() {
+        return mInfos;
     }
 }

@@ -24,6 +24,8 @@ package com.android.internal.telephony;
  * Also they should all probably be static final.
  */
 
+import android.os.SystemProperties;
+
 /**
  * {@hide}
  */
@@ -57,7 +59,17 @@ public interface RILConstants {
                                                  retries needed */
     int MISSING_RESOURCE = 16;                /* no logical channel available */
     int NO_SUCH_ELEMENT = 17;                 /* application not found on SIM */
+    int DIAL_MODIFIED_TO_USSD = 18;           /* DIAL request modified to USSD */
+    int DIAL_MODIFIED_TO_SS = 19;             /* DIAL request modified to SS */
+    int DIAL_MODIFIED_TO_DIAL = 20;           /* DIAL request modified to DIAL with different data*/
+    int USSD_MODIFIED_TO_DIAL = 21;           /* USSD request modified to DIAL */
+    int USSD_MODIFIED_TO_SS = 22;             /* USSD request modified to SS */
+    int USSD_MODIFIED_TO_USSD = 23;           /* USSD request modified to different USSD request */
+    int SS_MODIFIED_TO_DIAL = 24;             /* SS request modified to DIAL */
+    int SS_MODIFIED_TO_USSD = 25;             /* SS request modified to USSD */
     int SUBSCRIPTION_NOT_SUPPORTED = 26;      /* Subscription not supported */
+    int SS_MODIFIED_TO_SS = 27;               /* SS request modified to different SS request */
+
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
     int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */
@@ -76,7 +88,8 @@ public interface RILConstants {
     int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */
     int NETWORK_MODE_LTE_ONLY       = 11; /* LTE Only mode. */
     int NETWORK_MODE_LTE_WCDMA      = 12; /* LTE/WCDMA */
-    int PREFERRED_NETWORK_MODE      = NETWORK_MODE_WCDMA_PREF;
+    int PREFERRED_NETWORK_MODE      = SystemProperties.getInt("ro.telephony.default_network",
+            NETWORK_MODE_WCDMA_PREF);
 
     int CDMA_CELL_BROADCAST_SMS_DISABLED = 1;
     int CDMA_CELL_BROADCAST_SMS_ENABLED  = 0;
@@ -161,6 +174,7 @@ cat include/telephony/ril.h | \
     public static final int DATA_PROFILE_FOTA      = 3;
     public static final int DATA_PROFILE_CBS       = 4;
     public static final int DATA_PROFILE_OEM_BASE  = 1000;
+    public static final int DATA_PROFILE_INVALID   = 0xFFFFFFFF;
 
     int RIL_REQUEST_GET_SIM_STATUS = 1;
     int RIL_REQUEST_ENTER_SIM_PIN = 2;
@@ -291,6 +305,8 @@ cat include/telephony/ril.h | \
     int RIL_REQUEST_SET_DC_RT_INFO_RATE = 127;
     int RIL_REQUEST_SET_DATA_PROFILE = 128;
     int RIL_REQUEST_SHUTDOWN = 129;
+    int RIL_REQUEST_GET_RADIO_CAPABILITY = 130;
+    int RIL_REQUEST_SET_RADIO_CAPABILITY = 131;
 
     int RIL_UNSOL_RESPONSE_BASE = 1000;
     int RIL_UNSOL_RESPONSE_RADIO_STATE_CHANGED = 1000;
@@ -334,4 +350,8 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_UICC_SUBSCRIPTION_STATUS_CHANGED = 1038;
     int RIL_UNSOL_SRVCC_STATE_NOTIFY = 1039;
     int RIL_UNSOL_HARDWARE_CONFIG_CHANGED = 1040;
+    int RIL_UNSOL_DC_RT_INFO_CHANGED = 1041;
+    int RIL_UNSOL_RADIO_CAPABILITY = 1042;
+    int RIL_UNSOL_ON_SS = 1043;
+    int RIL_UNSOL_STK_CC_ALPHA_NOTIFY = 1044;
 }

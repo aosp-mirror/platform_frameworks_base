@@ -994,6 +994,47 @@ public class WallpaperManager {
     }
 
     /**
+     * Clear the wallpaper.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void clearWallpaper() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return;
+        }
+        try {
+            sGlobals.mService.clearWallpaper();
+        } catch (RemoteException e) {
+            // Ignore
+        }
+    }
+
+    /**
+     * Set the live wallpaper.
+     *
+     * This can only be called by packages with android.permission.SET_WALLPAPER_COMPONENT
+     * permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean setWallpaperComponent(ComponentName name) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            return false;
+        }
+        try {
+            sGlobals.mService.setWallpaperComponent(name);
+            return true;
+        } catch (RemoteException e) {
+            // Ignore
+        }
+        return false;
+    }
+
+    /**
      * Set the position of the current wallpaper within any larger space, when
      * that wallpaper is visible behind the given window.  The X and Y offsets
      * are floating point numbers ranging from 0 to 1, representing where the

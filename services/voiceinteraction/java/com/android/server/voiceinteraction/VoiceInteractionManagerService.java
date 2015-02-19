@@ -136,17 +136,29 @@ public class VoiceInteractionManagerService extends SystemService {
                     Settings.Secure.VOICE_INTERACTION_SERVICE, userHandle);
             ComponentName curRecognizer = getCurRecognizer(userHandle);
             VoiceInteractionServiceInfo curInteractorInfo = null;
-            if (curInteractorStr == null && curRecognizer != null) {
+            if (curInteractorStr == null && curRecognizer != null
+                    && !ActivityManager.isLowRamDeviceStatic()) {
                 // If there is no interactor setting, that means we are upgrading
                 // from an older platform version.  If the current recognizer is not
                 // set or matches the preferred recognizer, then we want to upgrade
                 // the user to have the default voice interaction service enabled.
+                // Note that we don't do this for low-RAM devices, since we aren't
+                // supporting voice interaction services there.
                 curInteractorInfo = findAvailInteractor(userHandle, curRecognizer);
                 if (curInteractorInfo != null) {
                     // Looks good!  We'll apply this one.  To make it happen, we clear the
                     // recognizer so that we don't think we have anything set and will
                     // re-apply the settings.
                     curRecognizer = null;
+                }
+            }
+
+            // If we are on a svelte device, make sure an interactor is not currently
+            // enabled; if it is, turn it off.
+            if (ActivityManager.isLowRamDeviceStatic() && curInteractorStr != null) {
+                if (!TextUtils.isEmpty(curInteractorStr)) {
+                    setCurInteractor(null, userHandle);
+                    curInteractorStr = "";
                 }
             }
 
@@ -171,10 +183,11 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
 
-            // Initializing settings, look for an interactor first.
-            if (curInteractorInfo == null) {
+            // Initializing settings, look for an interactor first (but only on non-svelte).
+            if (curInteractorInfo == null && !ActivityManager.isLowRamDeviceStatic()) {
                 curInteractorInfo = findAvailInteractor(userHandle, null);
             }
+
             if (curInteractorInfo != null) {
                 // Eventually it will be an error to not specify this.
                 setCurInteractor(new ComponentName(curInteractorInfo.getServiceInfo().packageName,

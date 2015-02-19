@@ -31,4 +31,27 @@
         <item>"*611:+19085594899,BAE0000000000000"</item>
         <item>"*86:+1MDN,BAE0000000000000"</item>
     </string-array>
+
+    <!-- Flag indicating whether strict threshold is used, or lenient threshold is used,
+          when evaluating RSRP for LTE antenna bar display
+           0. Strict threshold
+           1. Lenient threshold
+    -->
+    <integer name="config_LTE_RSRP_threshold_type">0</integer>
+
+    <string-array translatable="false" name="config_sms_convert_destination_number_support">
+        <item>true;BAE0000000000000</item>
+        <item>false</item>
+    </string-array>
+
+    <!-- String containing the apn value for tethering.  May be overriden by secure settings
+         TETHER_DUN_APN.  Value is a comma separated series of strings:
+         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
+         Or string format of ApnSettingV3.
+         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
+    <string-array translatable="false" name="config_tether_apndata">
+        <item>[ApnSettingV3]SaskTel Tethering,inet.stm.sk.ca,,,,,,,,,204,04,,DUN,,,true,0,,,,,,,gid,5A</item>
+    </string-array>
+
+    <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">true;BAE0000000000000</string>
 </resources>

@@ -1,0 +1,29 @@
+<!--
+Copyright (C) 2014 The Android Open Source Project
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="2.5dp"
+    android:insetRight="2.5dp">
+    <vector
+        android:width="17.0dp"
+        android:height="17.0dp"
+        android:viewportWidth="48.0"
+        android:viewportHeight="48.0">
+
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M24.000000,22.000000c-2.200000,0.000000 -4.000000,1.800000 -4.000000,4.000000c0.000000,2.200000 1.800000,4.000000 4.000000,4.000000c2.200000,0.000000 4.000000,-1.800000 4.000000,-4.000000C28.000000,23.799999 26.200001,22.000000 24.000000,22.000000zM36.000000,26.000000c0.000000,-6.600000 -5.400000,-12.000000 -12.000000,-12.000000c-6.600000,0.000000 -12.000000,5.400000 -12.000000,12.000000c0.000000,4.400000 2.400000,8.300000 6.000000,10.400000l2.000000,-3.500000c-2.400000,-1.400000 -4.000000,-3.900000 -4.000000,-6.900000c0.000000,-4.400000 3.600000,-8.000000 8.000000,-8.000000s8.000000,3.600000 8.000000,8.000000c0.000000,3.000000 -1.600000,5.500000 -4.000000,6.900000l2.000000,3.500000C33.599998,34.299999 36.000000,30.400000 36.000000,26.000000zM24.000000,6.000000C13.000000,6.000000 4.000000,15.000000 4.000000,26.000000c0.000000,7.400000 4.000000,13.800000 10.000000,17.299999l2.000000,-3.500000c-4.800000,-2.800000 -8.000000,-7.900000 -8.000000,-13.800000c0.000000,-8.800000 7.200000,-16.000000 16.000000,-16.000000s16.000000,7.200000 16.000000,16.000000c0.000000,5.900000 -3.200000,11.100000 -8.000000,13.800000l2.000000,3.500000c6.000000,-3.500000 10.000000,-9.900000 10.000000,-17.299999C44.000000,15.000000 35.000000,6.000000 24.000000,6.000000z"/>
+    </vector>
+</inset>

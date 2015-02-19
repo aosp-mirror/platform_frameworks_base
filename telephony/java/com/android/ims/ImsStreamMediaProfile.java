@@ -41,10 +41,18 @@ public class ImsStreamMediaProfile implements Parcelable {
      * Audio information
      */
     public static final int AUDIO_QUALITY_NONE = 0;
-    public static final int AUDIO_QUALITY_AMR = (1 << 0);
-    public static final int AUDIO_QUALITY_AMR_WB = (1 << 1);
+    public static final int AUDIO_QUALITY_AMR = 1;
+    public static final int AUDIO_QUALITY_AMR_WB = 2;
+    public static final int AUDIO_QUALITY_QCELP13K = 3;
+    public static final int AUDIO_QUALITY_EVRC = 4;
+    public static final int AUDIO_QUALITY_EVRC_B = 5;
+    public static final int AUDIO_QUALITY_EVRC_WB = 6;
+    public static final int AUDIO_QUALITY_EVRC_NW = 7;
+    public static final int AUDIO_QUALITY_GSM_EFR = 8;
+    public static final int AUDIO_QUALITY_GSM_FR = 9;
+    public static final int AUDIO_QUALITY_GSM_HR = 10;
 
-    /**
+   /**
      * Video information
      */
     public static final int VIDEO_QUALITY_NONE = 0;

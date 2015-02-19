@@ -1,10 +1,11 @@
-page.title=Creating a Notification
+page.title=Creating a Notification for Wearables
+page.tags=notifications
+helpoutsWidget=true
 
 @jd:body
 
 <div id="tb-wrapper">
 <div id="tb">
-
 <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#Import">Import the Necessary Classes</a></li>
@@ -30,7 +31,6 @@ Notifications using {@link android.widget.RemoteViews} are stripped of custom
 layouts and the wearable only displays the text and icons. However, you can create
 <a href="{@docRoot}training/wearables/apps/layouts.html#CustomNotifications">create custom notifications</a>
 that use custom card layouts by creating a wearable app that runs on the wearable device.</p>
-</div>
 
 <h2 id="Import">Import the necessary classes</h2>
 
@@ -255,7 +255,7 @@ NotificationCompat.WearableExtender wearableExtender =
 Notification notif = new NotificationCompat.Builder(mContext)
         .setContentTitle("New mail from " + sender)
         .setContentText(subject)
-        .setSmallIcon(R.drawable.new_mail);
+        .setSmallIcon(R.drawable.new_mail)
         .extend(wearableExtender)
         .build();
 </pre>
@@ -270,15 +270,15 @@ methods are just two examples of new notification features available with
 {@link android.support.v4.app.NotificationCompat.WearableExtender#setBackground setBackground()}
 should have a resolution of 400x400 for non-scrolling backgrounds and 640x400 for backgrounds
 that support parallax scrolling. Place these bitmap images in the <code>res/drawable-nodpi</code>
-directory of your handheld app. Place other non-bitmap resources for wearable notifications, such
+directory. Place other non-bitmap resources for wearable notifications, such
 as those used with the
 {@link android.support.v4.app.NotificationCompat.WearableExtender#setContentIcon setContentIcon()}
-method, in the <code>res/drawable-hdpi</code> directory of your handheld app.</p>
+method, in the <code>res/drawable-hdpi</code> directory.</p>
 
 <p>If you ever need to read wearable-specific options at a later time, use the corresponding get
 method for the option. This example calls the
 {@link android.support.v4.app.NotificationCompat.WearableExtender#getHintHideIcon()} method to
-get whether or not this notification hides the icon:
+get whether or not this notification hides the icon:</p>
 <pre>
 NotificationCompat.WearableExtender wearableExtender =
         new NotificationCompat.WearableExtender(notif);
@@ -303,15 +303,4 @@ notificationManager.notify(notificationId, notif);
 <p>If you use the framework's {@link android.app.NotificationManager}, some
 features from {@link android.support.v4.app.NotificationCompat.WearableExtender}
 do not work, so make sure to use {@link android.support.v4.app.NotificationCompat}.
-</p>
-
-<pre>
-NotificationCompat.WearableExtender wearableExtender =
-        new NotificationCompat.WearableExtender(notif);
-boolean hintHideIcon = wearableExtender.getHintHideIcon();
- </pre>
-
-<p>The {@link android.support.v4.app.NotificationCompat.WearableExtender} APIs allow you to add
-additional pages to notifications, stack notifications, and more. Continue to the following lessons
-to learn about these features.
 </p>

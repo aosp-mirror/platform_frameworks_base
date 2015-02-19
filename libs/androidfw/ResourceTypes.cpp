@@ -87,11 +87,11 @@ inline static T max(T a, T b) {
 // range checked; guaranteed to NUL-terminate within the stated number of available slots
 // NOTE: if this truncates the dst string due to running out of space, no attempt is
 // made to avoid splitting surrogate pairs.
-static void strcpy16_dtoh(char16_t* dst, const char16_t* src, size_t avail)
+static void strcpy16_dtoh(char16_t* dst, const uint16_t* src, size_t avail)
 {
     char16_t* last = dst + avail - 1;
     while (*src && (dst < last)) {
-        char16_t s = dtohs(*src);
+        char16_t s = dtohs(static_cast<char16_t>(*src));
         *dst++ = s;
         src++;
     }
@@ -501,7 +501,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         if (mHeader->flags&ResStringPool_header::UTF8_FLAG) {
             charSize = sizeof(uint8_t);
         } else {
-            charSize = sizeof(char16_t);
+            charSize = sizeof(uint16_t);
         }
 
         // There should be at least space for the smallest string
@@ -547,8 +547,8 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
                 e[i] = dtohl(mEntries[i]);
             }
             if (!(mHeader->flags&ResStringPool_header::UTF8_FLAG)) {
-                const char16_t* strings = (const char16_t*)mStrings;
-                char16_t* s = const_cast<char16_t*>(strings);
+                const uint16_t* strings = (const uint16_t*)mStrings;
+                uint16_t* s = const_cast<uint16_t*>(strings);
                 for (i=0; i<mStringPoolSize; i++) {
                     s[i] = dtohs(strings[i]);
                 }
@@ -558,7 +558,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         if ((mHeader->flags&ResStringPool_header::UTF8_FLAG &&
                 ((uint8_t*)mStrings)[mStringPoolSize-1] != 0) ||
                 (!mHeader->flags&ResStringPool_header::UTF8_FLAG &&
-                ((char16_t*)mStrings)[mStringPoolSize-1] != 0)) {
+                ((uint16_t*)mStrings)[mStringPoolSize-1] != 0)) {
             ALOGW("Bad string block: last string is not 0-terminated\n");
             return (mError=BAD_TYPE);
         }
@@ -656,7 +656,7 @@ void ResStringPool::uninit()
  * add it together with the next character.
  */
 static inline size_t
-decodeLength(const char16_t** str)
+decodeLength(const uint16_t** str)
 {
     size_t len = **str;
     if ((len & 0x8000) != 0) {
@@ -693,15 +693,15 @@ const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 {
     if (mError == NO_ERROR && idx < mHeader->stringCount) {
         const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
-        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(char):sizeof(char16_t));
+        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(uint8_t):sizeof(uint16_t));
         if (off < (mStringPoolSize-1)) {
             if (!isUTF8) {
-                const char16_t* strings = (char16_t*)mStrings;
-                const char16_t* str = strings+off;
+                const uint16_t* strings = (uint16_t*)mStrings;
+                const uint16_t* str = strings+off;
 
                 *u16len = decodeLength(&str);
                 if ((uint32_t)(str+*u16len-strings) < mStringPoolSize) {
-                    return str;
+                    return reinterpret_cast<const char16_t*>(str);
                 } else {
                     ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
                             (int)idx, (int)(str+*u16len-strings), (int)mStringPoolSize);
@@ -1212,7 +1212,11 @@ uint32_t ResXMLParser::getAttributeNameResID(size_t idx) const
 {
     int32_t id = getAttributeNameID(idx);
     if (id >= 0 && (size_t)id < mTree.mNumResIds) {
-        return dtohl(mTree.mResIds[id]);
+        uint32_t resId = dtohl(mTree.mResIds[id]);
+        if (mTree.mDynamicRefTable != NULL) {
+            mTree.mDynamicRefTable->lookupResourceId(&resId);
+        }
+        return resId;
     }
     return 0;
 }
@@ -3757,8 +3761,12 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
     Entry entry;
     status_t err = getEntry(grp, t, e, &desiredConfig, &entry);
     if (err != NO_ERROR) {
+        // Only log the failure when we're not running on the host as
+        // part of a tool. The caller will do its own logging.
+#ifndef STATIC_ANDROIDFW_FOR_TOOLS
         ALOGW("Failure getting entry for 0x%08x (t=%d e=%d) (error %d)\n",
                 resID, t, e, err);
+#endif
         return err;
     }
 
@@ -4308,6 +4316,9 @@ nope:
                 String8(package, packageLen).string());
     }
 
+    const String16 attr("attr");
+    const String16 attrPrivate("^attr-private");
+
     const size_t NG = mPackageGroups.size();
     for (size_t ig=0; ig<NG; ig++) {
         const PackageGroup* group = mPackageGroups[ig];
@@ -4322,66 +4333,72 @@ nope:
 
         const size_t packageCount = group->packages.size();
         for (size_t pi = 0; pi < packageCount; pi++) {
-            ssize_t ti = group->packages[pi]->typeStrings.indexOfString(type, typeLen);
-            if (ti < 0) {
-                continue;
-            }
+            const char16_t* targetType = type;
+            size_t targetTypeLen = typeLen;
 
-            ti += group->packages[pi]->typeIdOffset;
-
-            const TypeList& typeList = group->types[ti];
-            if (typeList.isEmpty()) {
-                if (kDebugTableNoisy) {
-                    ALOGI("Expected type structure not found in package %s for index %zd\n",
-                            String8(group->name).string(), ti);
-                }
-                continue;
-            }
-
-            const size_t typeCount = typeList.size();
-            for (size_t i = 0; i < typeCount; i++) {
-                const Type* t = typeList[i];
-                const ssize_t ei = t->package->keyStrings.indexOfString(name, nameLen);
-                if (ei < 0) {
+            do {
+                ssize_t ti = group->packages[pi]->typeStrings.indexOfString(
+                        targetType, targetTypeLen);
+                if (ti < 0) {
                     continue;
                 }
 
-                const size_t configCount = t->configs.size();
-                for (size_t j = 0; j < configCount; j++) {
-                    const TypeVariant tv(t->configs[j]);
-                    for (TypeVariant::iterator iter = tv.beginEntries();
-                         iter != tv.endEntries();
-                         iter++) {
-                        const ResTable_entry* entry = *iter;
-                        if (entry == NULL) {
-                            continue;
-                        }
+                ti += group->packages[pi]->typeIdOffset;
 
-                        if (dtohl(entry->key.index) == (size_t) ei) {
-                            uint32_t resId = Res_MAKEID(group->id - 1, ti, iter.index());
-                            if (outTypeSpecFlags) {
-                                Entry result;
-                                if (getEntry(group, ti, iter.index(), NULL, &result) != NO_ERROR) {
-                                    ALOGW("Failed to find spec flags for %s:%s/%s (0x%08x)",
-                                            String8(group->name).string(),
-                                            String8(String16(type, typeLen)).string(),
-                                            String8(String16(name, nameLen)).string(),
-                                            resId);
-                                    return 0;
-                                }
-                                *outTypeSpecFlags = result.specFlags;
-
-                                if (fakePublic) {
-                                    *outTypeSpecFlags |= ResTable_typeSpec::SPEC_PUBLIC;
-                                }
-                            }
-                            return resId;
-                        }
+                const uint32_t identifier = findEntry(group, ti, name, nameLen,
+                        outTypeSpecFlags);
+                if (identifier != 0) {
+                    if (fakePublic && outTypeSpecFlags) {
+                        *outTypeSpecFlags |= ResTable_typeSpec::SPEC_PUBLIC;
                     }
+                    return identifier;
+                }
+            } while (strzcmp16(attr.string(), attr.size(), targetType, targetTypeLen) == 0
+                    && (targetType = attrPrivate.string())
+                    && (targetTypeLen = attrPrivate.size())
+            );
+        }
+        break;
+    }
+    return 0;
+}
+
+uint32_t ResTable::findEntry(const PackageGroup* group, ssize_t typeIndex, const char16_t* name,
+        size_t nameLen, uint32_t* outTypeSpecFlags) const {
+    const TypeList& typeList = group->types[typeIndex];
+    const size_t typeCount = typeList.size();
+    for (size_t i = 0; i < typeCount; i++) {
+        const Type* t = typeList[i];
+        const ssize_t ei = t->package->keyStrings.indexOfString(name, nameLen);
+        if (ei < 0) {
+            continue;
+        }
+
+        const size_t configCount = t->configs.size();
+        for (size_t j = 0; j < configCount; j++) {
+            const TypeVariant tv(t->configs[j]);
+            for (TypeVariant::iterator iter = tv.beginEntries();
+                 iter != tv.endEntries();
+                 iter++) {
+                const ResTable_entry* entry = *iter;
+                if (entry == NULL) {
+                    continue;
+                }
+
+                if (dtohl(entry->key.index) == (size_t) ei) {
+                    uint32_t resId = Res_MAKEID(group->id - 1, typeIndex, iter.index());
+                    if (outTypeSpecFlags) {
+                        Entry result;
+                        if (getEntry(group, typeIndex, iter.index(), NULL, &result) != NO_ERROR) {
+                            ALOGW("Failed to find spec flags for 0x%08x", resId);
+                            return 0;
+                        }
+                        *outTypeSpecFlags = result.specFlags;
+                    }
+                    return resId;
                 }
             }
         }
-        break;
     }
     return 0;
 }
@@ -4786,7 +4803,14 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
 
         // It's a reference!
         if (len == 5 && s[1]=='n' && s[2]=='u' && s[3]=='l' && s[4]=='l') {
+            // Special case @null as undefined. This will be converted by
+            // AssetManager to TYPE_NULL with data DATA_NULL_UNDEFINED.
             outValue->data = 0;
+            return true;
+        } else if (len == 6 && s[1]=='e' && s[2]=='m' && s[3]=='p' && s[4]=='t' && s[5]=='y') {
+            // Special case @empty as explicitly defined empty value.
+            outValue->dataType = Res_value::TYPE_NULL;
+            outValue->data = Res_value::DATA_NULL_EMPTY;
             return true;
         } else {
             bool createIfNotFound = false;
@@ -5463,7 +5487,7 @@ const DynamicRefTable* ResTable::getDynamicRefTableForCookie(int32_t cookie) con
     return NULL;
 }
 
-void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
+void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap) const
 {
     const size_t packageCount = mPackageGroups.size();
     for (size_t i = 0; i < packageCount; i++) {
@@ -5474,6 +5498,12 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
             const size_t numTypes = typeList.size();
             for (size_t k = 0; k < numTypes; k++) {
                 const Type* type = typeList[k];
+                const ResStringPool& typeStrings = type->package->typeStrings;
+                if (ignoreMipmap && typeStrings.string8ObjectAt(
+                            type->typeSpec->id - 1) == "mipmap") {
+                    continue;
+                }
+
                 const size_t numConfigs = type->configs.size();
                 for (size_t m = 0; m < numConfigs; m++) {
                     const ResTable_type* config = type->configs[m];
@@ -5807,8 +5837,8 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     if (idx == 0) {
         idx = mPackageGroups.size() + 1;
 
-        char16_t tmpName[sizeof(pkg->name)/sizeof(char16_t)];
-        strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(char16_t));
+        char16_t tmpName[sizeof(pkg->name)/sizeof(pkg->name[0])];
+        strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(pkg->name[0]));
         group = new PackageGroup(this, String16(tmpName), id);
         if (group == NULL) {
             delete package;
@@ -6123,11 +6153,11 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
     // Do a proper lookup.
     uint8_t translatedId = mLookupTable[packageId];
     if (translatedId == 0) {
-        ALOGE("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
+        ALOGV("DynamicRefTable(0x%02x): No mapping for build-time package ID 0x%02x.",
                 (uint8_t)mAssignedPackageId, (uint8_t)packageId);
         for (size_t i = 0; i < 256; i++) {
             if (mLookupTable[i] != 0) {
-                ALOGE("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
+                ALOGV("e[0x%02x] -> 0x%02x", (uint8_t)i, mLookupTable[i]);
             }
         }
         return UNKNOWN_ERROR;
@@ -6186,7 +6216,10 @@ status_t ResTable::createIdmap(const ResTable& overlay,
     *outSize += 2 * sizeof(uint16_t);
 
     // overlay packages are assumed to contain only one package group
-    const String16 overlayPackage(overlay.mPackageGroups[0]->packages[0]->package->name);
+    const ResTable_package* overlayPackageStruct = overlay.mPackageGroups[0]->packages[0]->package;
+    char16_t tmpName[sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0])];
+    strcpy16_dtoh(tmpName, overlayPackageStruct->name, sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0]));
+    const String16 overlayPackage(tmpName);
 
     for (size_t typeIndex = 0; typeIndex < pg->types.size(); ++typeIndex) {
         const TypeList& typeList = pg->types[typeIndex];
@@ -6408,7 +6441,14 @@ String8 ResTable::normalizeForOutput( const char *input )
 void ResTable::print_value(const Package* pkg, const Res_value& value) const
 {
     if (value.dataType == Res_value::TYPE_NULL) {
-        printf("(null)\n");
+        if (value.data == Res_value::DATA_NULL_UNDEFINED) {
+            printf("(null)\n");
+        } else if (value.data == Res_value::DATA_NULL_EMPTY) {
+            printf("(null empty)\n");
+        } else {
+            // This should never happen.
+            printf("(null) 0x%08x\n", value.data);
+        }
     } else if (value.dataType == Res_value::TYPE_REFERENCE) {
         printf("(reference) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE) {
@@ -6488,8 +6528,10 @@ void ResTable::print(bool inclValues) const
             // Use a package's real ID, since the ID may have been assigned
             // if this package is a shared library.
             packageId = pkg->package->id;
+            char16_t tmpName[sizeof(pkg->package->name)/sizeof(pkg->package->name[0])];
+            strcpy16_dtoh(tmpName, pkg->package->name, sizeof(pkg->package->name)/sizeof(pkg->package->name[0]));
             printf("  Package %d id=0x%02x name=%s\n", (int)pkgIndex,
-                    pkg->package->id, String8(String16(pkg->package->name)).string());
+                    pkg->package->id, String8(tmpName).string());
         }
 
         for (size_t typeIndex=0; typeIndex < pg->types.size(); typeIndex++) {

@@ -170,6 +170,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private final Rect mTempRect = new Rect();
 
+    private final Rect mTempRect1 = new Rect();
+
     private final Point mTempPoint = new Point();
 
     private final PackageManager mPackageManager;
@@ -765,16 +767,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     /**
-     * Gets the bounds of the active window.
+     * Gets the bounds of a window.
      *
      * @param outBounds The output to which to write the bounds.
      */
-    boolean getActiveWindowBounds(Rect outBounds) {
-        // TODO: This should be refactored to work with accessibility
-        // focus in multiple windows.
+    boolean getWindowBounds(int windowId, Rect outBounds) {
         IBinder token;
         synchronized (mLock) {
-            final int windowId = mSecurityPolicy.mActiveWindowId;
             token = mGlobalWindowTokens.get(windowId);
             if (token == null) {
                 token = getCurrentUserStateLocked().mWindowTokens.get(windowId);
@@ -1040,7 +1039,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void addServiceLocked(Service service, UserState userState) {
         try {
-            service.linkToOwnDeathLocked();
+            service.onAdded();
             userState.mBoundServices.add(service);
             userState.mComponentNameToServiceMap.put(service.mComponentName, service);
         } catch (RemoteException re) {
@@ -1056,7 +1055,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     private void removeServiceLocked(Service service, UserState userState) {
         userState.mBoundServices.remove(service);
         userState.mComponentNameToServiceMap.remove(service.mComponentName);
-        service.unlinkToOwnDeathLocked();
+        service.onRemoved();
     }
 
     /**
@@ -1931,6 +1930,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         final ResolveInfo mResolveInfo;
 
+        final IBinder mOverlayWindowToken = new Binder();
+
         // the events pending events to be dispatched to this service
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<>();
@@ -2112,7 +2113,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                     userState.mBindingServices.remove(mComponentName);
                     mWasConnectedAndDied = false;
                     try {
-                       mServiceInterface.setConnection(this, mId);
+                       mServiceInterface.init(this, mId, mOverlayWindowToken);
                        onUserStateChangedLocked(userState);
                     } catch (RemoteException re) {
                         Slog.w(LOG_TAG, "Error while setting connection for service: "
@@ -2141,6 +2142,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 final boolean permissionGranted =
                         mSecurityPolicy.canRetrieveWindowsLocked(this);
                 if (!permissionGranted) {
+                    return null;
+                }
+                if (mSecurityPolicy.mWindows == null) {
                     return null;
                 }
                 List<AccessibilityWindowInfo> windows = new ArrayList<>();
@@ -2531,57 +2535,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         @Override
-        public  boolean computeClickPointInScreen(int accessibilityWindowId,
-                long accessibilityNodeId, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
-                throws RemoteException {
-            final int resolvedWindowId;
-            IAccessibilityInteractionConnection connection = null;
-            Region partialInteractiveRegion = mTempRegion;
-            synchronized (mLock) {
-                // We treat calls from a profile as if made by its parent as profiles
-                // share the accessibility state of the parent. The call below
-                // performs the current profile parent resolution.
-                final int resolvedUserId = mSecurityPolicy
-                        .resolveCallingUserIdEnforcingPermissionsLocked(
-                                UserHandle.USER_CURRENT);
-                if (resolvedUserId != mCurrentUserId) {
-                    return false;
-                }
-                resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
-                final boolean permissionGranted =
-                        mSecurityPolicy.canRetrieveWindowContentLocked(this);
-                if (!permissionGranted) {
-                    return false;
-                } else {
-                    connection = getConnectionLocked(resolvedWindowId);
-                    if (connection == null) {
-                        return false;
-                    }
-                }
-                if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
-                        resolvedWindowId, partialInteractiveRegion)) {
-                    partialInteractiveRegion = null;
-                }
-            }
-            final int interrogatingPid = Binder.getCallingPid();
-            final long identityToken = Binder.clearCallingIdentity();
-            MagnificationSpec spec = getCompatibleMagnificationSpecLocked(resolvedWindowId);
-            try {
-                connection.computeClickPointInScreen(accessibilityNodeId, partialInteractiveRegion,
-                        interactionId, callback, interrogatingPid, interrogatingTid, spec);
-                return true;
-            } catch (RemoteException re) {
-                if (DEBUG) {
-                    Slog.e(LOG_TAG, "Error computeClickPointInScreen().");
-                }
-            } finally {
-                Binder.restoreCallingIdentity(identityToken);
-            }
-            return false;
-        }
-
-        @Override
         public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
             mSecurityPolicy.enforceCallingPermission(Manifest.permission.DUMP, FUNCTION_DUMP);
             synchronized (mLock) {
@@ -2602,6 +2555,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             /* do nothing - #binderDied takes care */
         }
 
+        public void onAdded() throws RemoteException {
+            linkToOwnDeathLocked();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mWindowManagerService.addWindowToken(mOverlayWindowToken,
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        public void onRemoved() {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mWindowManagerService.removeWindowToken(mOverlayWindowToken, true);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            unlinkToOwnDeathLocked();
+        }
+
         public void linkToOwnDeathLocked() throws RemoteException {
             mService.linkToDeath(this, 0);
         }
@@ -2614,7 +2588,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             try {
                 // Clear the proxy in the other process so this
                 // IAccessibilityServiceConnection can be garbage collected.
-                mServiceInterface.setConnection(null, mId);
+                mServiceInterface.init(null, mId, null);
             } catch (RemoteException re) {
                 /* ignore */
             }
@@ -3156,13 +3130,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL:
                 case WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL:
-                case WindowManager.LayoutParams.TYPE_RECENTS_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ALERT:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_ERROR:
                 case WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY: {
                     return AccessibilityWindowInfo.TYPE_SYSTEM;
+                }
+
+                case WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY: {
+                    return AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY;
                 }
 
                 default: {
@@ -3210,38 +3187,36 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             synchronized (mLock) {
-                Point point = mClient.computeClickPointInScreen(mConnectionId,
-                        focus.getWindowId(), focus.getSourceNodeId());
+                Rect boundsInScreen = mTempRect;
+                focus.getBoundsInScreen(boundsInScreen);
 
-                if (point == null) {
+                // Clip to the window bounds.
+                Rect windowBounds = mTempRect1;
+                getWindowBounds(focus.getWindowId(), windowBounds);
+                boundsInScreen.intersect(windowBounds);
+                if (boundsInScreen.isEmpty()) {
                     return false;
                 }
 
+                // Apply magnification if needed.
                 MagnificationSpec spec = getCompatibleMagnificationSpecLocked(focus.getWindowId());
                 if (spec != null && !spec.isNop()) {
-                    point.offset((int) -spec.offsetX, (int) -spec.offsetY);
-                    point.x = (int) (point.x * (1 / spec.scale));
-                    point.y = (int) (point.y * (1 / spec.scale));
+                    boundsInScreen.offset((int) -spec.offsetX, (int) -spec.offsetY);
+                    boundsInScreen.scale(1 / spec.scale);
                 }
 
-                // Make sure the point is within the window.
-                Rect windowBounds = mTempRect;
-                getActiveWindowBounds(windowBounds);
-                if (!windowBounds.contains(point.x, point.y)) {
-                    return false;
-                }
-
-                // Make sure the point is within the screen.
+                // Clip to the screen bounds.
                 Point screenSize = mTempPoint;
                 mDefaultDisplay.getRealSize(screenSize);
-                if (point.x < 0 || point.x > screenSize.x
-                        || point.y < 0 || point.y > screenSize.y) {
+                boundsInScreen.intersect(0, 0, screenSize.x, screenSize.y);
+                if (boundsInScreen.isEmpty()) {
                     return false;
                 }
 
-                outPoint.set(point.x, point.y);
-                return true;
+                outPoint.set(boundsInScreen.centerX(), boundsInScreen.centerY());
             }
+
+            return true;
         }
 
         private AccessibilityNodeInfo getAccessibilityFocusNotLocked() {
@@ -3288,8 +3263,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         public int mAccessibilityFocusedWindowId = INVALID_WINDOW_ID;
         public long mAccessibilityFocusNodeId = AccessibilityNodeInfo.UNDEFINED_ITEM_ID;
 
-        public AccessibilityEvent mShowingFocusedWindowEvent;
-
         private boolean mTouchInteractionInProgress;
 
         private boolean canDispatchAccessibilityEventLocked(AccessibilityEvent event) {
@@ -3298,19 +3271,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 // All events that are for changes in a global window
                 // state should *always* be dispatched.
                 case AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED:
-                    if (mWindowsForAccessibilityCallback != null) {
-                        // OK, this is fun. Sometimes the focused window is notified
-                        // it has focus before being shown. Historically this event
-                        // means that the window is focused and can be introspected.
-                        // But we still have not gotten the window state from the
-                        // window manager, so delay the notification until then.
-                        AccessibilityWindowInfo window = findWindowById(event.getWindowId());
-                        if (window == null) {
-                            mShowingFocusedWindowEvent = AccessibilityEvent.obtain(event);
-                            return false;
-                        }
-                    }
-                // $fall-through$
                 case AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED:
                 case AccessibilityEvent.TYPE_ANNOUNCEMENT:
                 // All events generated by the user touching the
@@ -3402,18 +3362,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
             }
 
             notifyWindowsChanged();
-
-            // If we are delaying a window state change event as the window
-            // source was showing when it was fired, now is the time to send.
-            if (mShowingFocusedWindowEvent != null) {
-                final int windowId = mShowingFocusedWindowEvent.getWindowId();
-                AccessibilityWindowInfo window = findWindowById(windowId);
-                if (window != null) {
-                    // Sending does the recycle.
-                    sendAccessibilityEvent(mShowingFocusedWindowEvent, mCurrentUserId);
-                }
-                mShowingFocusedWindowEvent = null;
-            }
         }
 
         public boolean computePartialInteractiveRegionForWindowLocked(int windowId,
@@ -3422,7 +3370,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return false;
             }
 
-            // Windows are ordered in z order so start from the botton and find
+            // Windows are ordered in z order so start from the bottom and find
             // the window of interest. After that all windows that cover it should
             // be subtracted from the resulting region. Note that for accessibility
             // we are returning only interactive windows.
@@ -3440,7 +3388,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         windowInteractiveRegion = outRegion;
                         continue;
                     }
-                } else {
+                } else if (currentWindow.getType()
+                        != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
                     Rect currentWindowBounds = mTempRect;
                     currentWindow.getBoundsInScreen(currentWindowBounds);
                     if (windowInteractiveRegion.op(currentWindowBounds, Region.Op.DIFFERENCE)) {

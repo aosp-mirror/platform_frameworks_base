@@ -28,6 +28,7 @@
         android:layout_height="@dimen/notification_large_icon_height"
         />
     <LinearLayout
+        android:id="@+id/notification_main_column"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"

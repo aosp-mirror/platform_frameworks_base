@@ -23,7 +23,10 @@ import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Slog;
+
 import com.android.internal.util.FastPrintWriter;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -325,7 +328,12 @@ public class ProcessCpuTracker {
             mBaseIdleTime = idletime;
         }
 
-        mCurPids = collectStats("/proc", -1, mFirst, mCurPids, mProcStats);
+        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+        try {
+            mCurPids = collectStats("/proc", -1, mFirst, mCurPids, mProcStats);
+        } finally {
+            StrictMode.setThreadPolicy(savedPolicy);
+        }
 
         final float[] loadAverages = mLoadAverageData;
         if (Process.readProcFile("/proc/loadavg", LOAD_AVERAGE_FORMAT,
@@ -847,12 +855,7 @@ public class ProcessCpuTracker {
         } catch (java.io.FileNotFoundException e) {
         } catch (java.io.IOException e) {
         } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (java.io.IOException e) {
-                }
-            }
+            IoUtils.closeQuietly(is);
             StrictMode.setThreadPolicy(savedPolicy);
         }
         return null;

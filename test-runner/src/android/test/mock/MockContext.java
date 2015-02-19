@@ -37,6 +37,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.view.DisplayAdjustments;
@@ -483,6 +484,12 @@ public class MockContext extends Context {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public int checkPermission(String permission, int pid, int uid, IBinder callerToken) {
+        return checkPermission(permission, pid, uid);
+    }
+
     @Override
     public int checkCallingPermission(String permission) {
         throw new UnsupportedOperationException();
@@ -522,6 +529,12 @@ public class MockContext extends Context {
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
         throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
+    public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, IBinder callerToken) {
+        return checkUriPermission(uri, pid, uid, modeFlags);
     }
 
     @Override

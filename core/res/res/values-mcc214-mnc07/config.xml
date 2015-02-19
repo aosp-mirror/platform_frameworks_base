@@ -21,20 +21,14 @@
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
-    <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-    <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
-    <integer-array translatable="false" name="config_tether_upstream_types">
-      <item>1</item>
-      <item>4</item>
-      <item>7</item>
-      <item>9</item>
-    </integer-array>
-
     <!-- String containing the apn value for tethering.  May be overriden by secure settings
          TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
+         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
+         Or string format of ApnSettingV3.
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string translatable="false" name="config_tether_apndata">Conexion Compartida,movistar.es,,,MOVISTAR,MOVISTAR,,,,,214,07,1,DUN</string>
+    <string-array translatable="false" name="config_tether_apndata">
+        <item>Conexión Compartida,movistar.es,,,MOVISTAR,MOVISTAR,,,,,214,07,1,DUN</item>
+        <item>[ApnSettingV3]Jazztel Internet,jazzinternet,,,,,,,,,214,07,,DUN,,,true,0,,,,,,,spn,JAZZTEL</item>
+    </string-array>
 
 </resources>

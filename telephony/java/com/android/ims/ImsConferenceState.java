@@ -24,6 +24,8 @@ import java.util.Set;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telecom.Call;
+import android.telecom.Connection;
 
 /**
  * Provides the conference information (defined in RFC 4575) for IMS conference call.
@@ -139,4 +141,30 @@ public class ImsConferenceState implements Parcelable {
             return new ImsConferenceState[size];
         }
     };
+
+    /**
+     * Translates an {@code ImsConferenceState} status type to a telecom connection state.
+     *
+     * @param status The status type.
+     * @return The corresponding {@link android.telecom.Connection} state.
+     */
+    public static int getConnectionStateForStatus(String status) {
+        if (status.equals(STATUS_PENDING)) {
+            return Connection.STATE_INITIALIZING;
+        } else if (status.equals(STATUS_DIALING_IN)) {
+            return Connection.STATE_RINGING;
+        } else if (status.equals(STATUS_ALERTING) ||
+                status.equals(STATUS_DIALING_OUT)) {
+            return Connection.STATE_DIALING;
+        } else if (status.equals(STATUS_ON_HOLD)) {
+            return Connection.STATE_HOLDING;
+        } else if (status.equals(STATUS_CONNECTED) ||
+                status.equals(STATUS_MUTED_VIA_FOCUS) ||
+                status.equals(STATUS_DISCONNECTING)) {
+            return Connection.STATE_ACTIVE;
+        } else if (status.equals(STATUS_DISCONNECTED)) {
+            return Connection.STATE_DISCONNECTED;
+        }
+        return Call.STATE_ACTIVE;
+    }
 }

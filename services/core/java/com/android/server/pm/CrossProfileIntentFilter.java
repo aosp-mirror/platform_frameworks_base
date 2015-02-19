@@ -141,4 +141,11 @@ class CrossProfileIntentFilter extends IntentFilter {
         return "CrossProfileIntentFilter{0x" + Integer.toHexString(System.identityHashCode(this))
                 + " " + Integer.toString(mTargetUserId) + "}";
     }
+
+    boolean equalsIgnoreFilter(CrossProfileIntentFilter other) {
+        return mTargetUserId == other.mTargetUserId
+                && mOwnerUserId == other.mOwnerUserId
+                && mOwnerPackage.equals(other.mOwnerPackage)
+                && mFlags == other.mFlags;
+    }
 }

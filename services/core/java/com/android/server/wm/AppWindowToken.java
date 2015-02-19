@@ -252,11 +252,20 @@ class AppWindowToken extends WindowToken {
         return false;
     }
 
+    @Override
     void removeAllWindows() {
-        for (int winNdx = allAppWindows.size() - 1; winNdx >= 0; --winNdx) {
+        for (int winNdx = allAppWindows.size() - 1; winNdx >= 0;
+                // removeWindowLocked at bottom of loop may remove multiple entries from
+                // allAppWindows if the window to be removed has child windows. It also may
+                // not remove any windows from allAppWindows at all if win is exiting and
+                // currently animating away. This ensures that winNdx is monotonically decreasing
+                // and never beyond allAppWindows bounds.
+                winNdx = Math.min(winNdx - 1, allAppWindows.size() - 1)) {
             WindowState win = allAppWindows.get(winNdx);
-            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) Slog.w(WindowManagerService.TAG,
-                    "removeAllWindows: removing win=" + win);
+            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) {
+                Slog.w(WindowManagerService.TAG, "removeAllWindows: removing win=" + win);
+            }
+
             win.mService.removeWindowLocked(win.mSession, win);
         }
     }
@@ -295,10 +304,11 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("inPendingTransaction=");
                     pw.println(inPendingTransaction);
         }
-        if (startingData != null || removed || firstWindowDrawn) {
+        if (startingData != null || removed || firstWindowDrawn || mDeferRemoval) {
             pw.print(prefix); pw.print("startingData="); pw.print(startingData);
                     pw.print(" removed="); pw.print(removed);
-                    pw.print(" firstWindowDrawn="); pw.println(firstWindowDrawn);
+                    pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
+                    pw.print(" mDeferRemoval="); pw.println(mDeferRemoval);
         }
         if (startingWindow != null || startingView != null
                 || startingDisplayed || startingMoved) {

@@ -81,7 +81,7 @@ public class CallerInfoAsyncQuery {
         public int event;
         public String number;
 
-        public long subId;
+        public int subId;
     }
 
 
@@ -388,7 +388,7 @@ public class CallerInfoAsyncQuery {
     public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
             OnQueryCompleteListener listener, Object cookie) {
 
-        long subId = SubscriptionManager.getDefaultSubId();
+        int subId = SubscriptionManager.getDefaultSubId();
         return startQuery(token, context, number, listener, cookie, subId);
     }
 
@@ -404,7 +404,7 @@ public class CallerInfoAsyncQuery {
      * the phone type of the incoming connection.
      */
     public static CallerInfoAsyncQuery startQuery(int token, Context context, String number,
-            OnQueryCompleteListener listener, Object cookie, long subId) {
+            OnQueryCompleteListener listener, Object cookie, int subId) {
 
         if (DBG) {
             Rlog.d(LOG_TAG, "##### CallerInfoAsyncQuery startQuery()... #####");

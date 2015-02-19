@@ -38,6 +38,7 @@ import android.view.Surface;
 interface ITvInputManager {
     List<TvInputInfo> getTvInputList(int userId);
     TvInputInfo getTvInputInfo(in String inputId, int userId);
+    int getTvInputState(in String inputId, int userId);
 
     List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId);
 

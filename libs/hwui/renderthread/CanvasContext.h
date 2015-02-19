@@ -48,6 +48,11 @@ namespace renderthread {
 
 class EglManager;
 
+enum SwapBehavior {
+    kSwap_default,
+    kSwap_discardBuffer,
+};
+
 // This per-renderer class manages the bridge between the global EGL context
 // and the render surface.
 // TODO: Rename to Renderer or some other per-window, top-level manager
@@ -57,9 +62,14 @@ public:
             IContextFactory* contextFactory);
     virtual ~CanvasContext();
 
+    // Won't take effect until next EGLSurface creation
+    void setSwapBehavior(SwapBehavior swapBehavior);
+
     bool initialize(ANativeWindow* window);
     void updateSurface(ANativeWindow* window);
-    void pauseSurface(ANativeWindow* window);
+    bool pauseSurface(ANativeWindow* window);
+    bool hasSurface() { return mNativeWindow.get(); }
+
     void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setOpaque(bool opaque);
@@ -111,7 +121,8 @@ private:
     EglManager& mEglManager;
     sp<ANativeWindow> mNativeWindow;
     EGLSurface mEglSurface;
-    bool mDirtyRegionsEnabled;
+    bool mBufferPreserved;
+    SwapBehavior mSwapBehavior;
 
     bool mOpaque;
     OpenGLRenderer* mCanvas;

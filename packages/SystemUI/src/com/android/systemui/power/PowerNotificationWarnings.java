@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 
 import java.io.PrintWriter;
+import java.text.NumberFormat;
 
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -65,6 +66,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
     private static final String ACTION_START_SAVER = "PNW.startSaver";
     private static final String ACTION_STOP_SAVER = "PNW.stopSaver";
+    private static final String ACTION_DISMISSED_WARNING = "PNW.dismissedWarning";
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -143,7 +145,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             showSaverNotification();
             mShowing = SHOWING_SAVER;
         } else {
-            mNoMan.cancel(TAG_NOTIFICATION, ID_NOTIFICATION);
+            mNoMan.cancelAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, UserHandle.ALL);
             mShowing = SHOWING_NOTHING;
         }
     }
@@ -157,7 +159,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentTitle(mContext.getString(R.string.invalid_charger_title))
                 .setContentText(mContext.getString(R.string.invalid_charger_text))
                 .setPriority(Notification.PRIORITY_MAX)
-                .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setColor(mContext.getResources().getColor(
                         com.android.internal.R.color.system_notification_accent_color));
@@ -165,22 +166,23 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.CURRENT);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.ALL);
     }
 
     private void showWarningNotification() {
         final int textRes = mSaver ? R.string.battery_low_percent_format_saver_started
                 : R.string.battery_low_percent_format;
+        final String percentage = NumberFormat.getPercentInstance().format((double) mBatteryLevel / 100.0);
         final Notification.Builder nb = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.ic_power_low)
                 // Bump the notification when the bucket dropped.
                 .setWhen(mBucketDroppedNegativeTimeMs)
                 .setShowWhen(false)
                 .setContentTitle(mContext.getString(R.string.battery_low_title))
-                .setContentText(mContext.getString(textRes, mBatteryLevel))
+                .setContentText(mContext.getString(textRes, percentage))
                 .setOnlyAlertOnce(true)
+                .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
                 .setPriority(Notification.PRIORITY_MAX)
-                .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setColor(mContext.getResources().getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
@@ -202,7 +204,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (n.headsUpContentView != null) {
             n.headsUpContentView.setViewVisibility(com.android.internal.R.id.right_icon, View.GONE);
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.CURRENT);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, n, UserHandle.ALL);
     }
 
     private void showSaverNotification() {
@@ -212,7 +214,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentText(mContext.getString(R.string.battery_saver_notification_text))
                 .setOngoing(true)
                 .setShowWhen(false)
-                .setCategory(Notification.CATEGORY_SYSTEM)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setColor(mContext.getResources().getColor(
                         com.android.internal.R.color.battery_saver_mode_color));
@@ -220,7 +221,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         if (hasSaverSettings()) {
             nb.setContentIntent(pendingActivity(mOpenSaverSettings));
         }
-        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, nb.build(), UserHandle.CURRENT);
+        mNoMan.notifyAsUser(TAG_NOTIFICATION, ID_NOTIFICATION, nb.build(), UserHandle.ALL);
     }
 
     private void addStopSaverAction(Notification.Builder nb) {
@@ -341,6 +342,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         updateNotification();
     }
 
+    @Override
+    public void userSwitched() {
+        updateNotification();
+    }
+
     private void showStartSaverConfirmation() {
         if (mSaverConfirmation != null) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
@@ -370,7 +376,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_STOP_SAVER);
-            mContext.registerReceiver(this, filter, null, mHandler);
+            filter.addAction(ACTION_DISMISSED_WARNING);
+            mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, mHandler);
         }
 
         @Override
@@ -387,6 +394,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 dismissSaverNotification();
                 dismissLowBatteryNotification();
                 setSaverMode(false);
+            } else if (action.equals(ACTION_DISMISSED_WARNING)) {
+                dismissLowBatteryWarning();
             }
         }
     }

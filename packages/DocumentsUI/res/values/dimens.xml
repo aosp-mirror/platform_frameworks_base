@@ -18,10 +18,10 @@
     <dimen name="icon_size">40dp</dimen>
     <dimen name="root_icon_size">24dp</dimen>
 
-    <dimen name="grid_width">160dp</dimen>
+    <dimen name="grid_width">152dp</dimen>
     <dimen name="grid_height">176dp</dimen>
 
-    <dimen name="grid_item_width">160dp</dimen>
+    <dimen name="grid_item_width">152dp</dimen>
     <dimen name="grid_item_height">176dp</dimen>
     <dimen name="grid_item_padding">4dp</dimen>
 

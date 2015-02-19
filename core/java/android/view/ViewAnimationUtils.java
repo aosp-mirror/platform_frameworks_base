@@ -17,6 +17,7 @@
 package android.view;
 
 import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.RevealAnimator;
 
 /**
@@ -35,7 +36,11 @@ public final class ViewAnimationUtils {
      * {@link View#setClipToOutline(boolean) View Outline clipping}.
      * <p>
      * Note that the animation returned here is a one-shot animation. It cannot
-     * be re-used, and once started it cannot be paused or resumed.
+     * be re-used, and once started it cannot be paused or resumed. It is also
+     * an asynchronous animation that automatically runs off of the UI thread.
+     * As a result {@link AnimatorListener#onAnimationEnd(Animator)}
+     * will occur after the animation has ended, but it may be delayed depending
+     * on thread responsiveness.
      *
      * @param view The View will be clipped to the animating circle.
      * @param centerX The x coordinate of the center of the animating circle.

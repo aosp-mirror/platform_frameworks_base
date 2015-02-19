@@ -156,7 +156,7 @@ public class Handler {
      * one that is strictly asynchronous.
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
-     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * with respect to synchronous messages.  Asynchronous messages are not subject to
      * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
      *
      * @param async If true, the handler calls {@link Message#setAsynchronous(boolean)} for
@@ -176,7 +176,7 @@ public class Handler {
      * one that is strictly asynchronous.
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
-     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * with respect to synchronous messages.  Asynchronous messages are not subject to
      * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
      *
      * @param callback The callback interface in which to handle messages, or null.
@@ -214,7 +214,7 @@ public class Handler {
      * one that is strictly asynchronous.
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
-     * with represent to synchronous messages.  Asynchronous messages are not subject to
+     * with respect to synchronous messages.  Asynchronous messages are not subject to
      * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
      *
      * @param looper The looper, must not be null.

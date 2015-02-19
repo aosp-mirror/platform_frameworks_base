@@ -82,4 +82,9 @@ public class DozeTrigger {
     public boolean hasTriggered() {
         return mHasTriggered;
     }
+
+    /** Resets the doze trigger state. */
+    public void resetTrigger() {
+        mHasTriggered = false;
+    }
 }

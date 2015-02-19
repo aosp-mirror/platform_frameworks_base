@@ -42,7 +42,7 @@ public class KeyguardUserSwitcherScrim extends Drawable
 
     private int mDarkColor;
     private int mTop;
-    private int mAlpha;
+    private int mAlpha = 255;
     private Paint mRadialGradientPaint = new Paint();
     private int mLayoutWidth;
 

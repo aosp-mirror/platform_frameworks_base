@@ -18,28 +18,36 @@ page.title=Defining Shadows and Clipping Views
 </div>
 </div>
 
-<p>Material design introduces depth for UI elements. Depth helps users understand the relative
-importance of each element and focus their attention to the task at hand.</p>
+<p>Material design introduces elevation for UI elements. Elevation helps users understand the
+relative importance of each element and focus their attention to the task at hand.</p>
 
-<p>The elevation of a view, represented by the Z property, determines the size of its shadow:
-views with higher Z values cast bigger shadows. Views only cast shadows on the Z=0 plane; they
-don't cast shadows on other views placed below them and above the Z=0 plane.</p>
+<p>The elevation of a view, represented by the Z property, determines the visual appearance of its
+shadow: views with higher Z values cast larger, softer shadows. Views with higher Z values occlude
+views with lower Z values; however, the Z value of a view does not affect the view's size.</p>
 
-<p>Views with higher Z values occlude views with lower Z values. However, the Z value of a view
-does not affect the view's size.</p>
+<p>Shadows are drawn by the parent of the elevated view, and thus subject to standard view clipping,
+clipped by the parent by default.</p>
 
 <p>Elevation is also useful to create animations where widgets temporarily rise above the
 view plane when performing some action.</p>
 
+<p>For more information about elevation in material design, see
+<a href="http://www.google.com/design/spec/what-is-material/objects-in-3d-space.html">Objects
+in 3D space</a>.</p>
+
 
 <h2 id="Elevation">Assign Elevation to Your Views</h2>
 
-<p>The Z value for a view has two components, elevation and translation. The elevation is the
-static component, and the translation is used for animations:</p>
+<p>The Z value for a view has two components:
+
+<ul>
+<li>Elevation: The static component.</li>
+<li>Translation: The dynamic component used for animations.</li>
+</ul>
 
 <p><code>Z = elevation + translationZ</code></p>
 
-<img src="{@docRoot}training/material/images/shadows-depth.png" width="680" height="177" alt=""/>
+<img src="{@docRoot}training/material/images/shadows-depth.png" width="580" height="261" alt=""/>
 <p class="img-caption"><strong>Figure 1</strong> - Shadows for different view elevations.</p>
 
 <p>To set the elevation of a view in a layout definition, use the <code>android:elevation</code>
@@ -59,9 +67,9 @@ guide.</p>
 <p>You can also use a {@link android.animation.StateListAnimator} to
 specify these animations in a declarative way. This is especially useful for cases where state
 changes trigger animations, like when a user presses a button. For more information, see
-<a href="{@docRoot}training/material/animations.html#ViewState">Animate View State Changes</a></p>.
+<a href="{@docRoot}training/material/animations.html#ViewState">Animate View State Changes</a>.</p>
 
-<p>The Z values are measured in the same units as the X and Y values.</p>
+<p>The Z values are measured in dp (density-independent pixels).</p>
 
 
 <h2 id="Shadows">Customize View Shadows and Outlines</h2>

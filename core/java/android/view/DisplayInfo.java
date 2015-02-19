@@ -59,6 +59,11 @@ public final class DisplayInfo implements Parcelable {
     public String name;
 
     /**
+     * Unique identifier for the display. Shouldn't be displayed to the user.
+     */
+    public String uniqueId;
+
+    /**
      * The width of the portion of the display that is available to applications, in pixels.
      * Represents the size of the display minus any system decorations.
      */
@@ -257,7 +262,7 @@ public final class DisplayInfo implements Parcelable {
                 && flags == other.flags
                 && type == other.type
                 && Objects.equal(address, other.address)
-                && Objects.equal(name, other.name)
+                && Objects.equal(uniqueId, other.uniqueId)
                 && appWidth == other.appWidth
                 && appHeight == other.appHeight
                 && smallestNominalAppWidth == other.smallestNominalAppWidth
@@ -293,6 +298,7 @@ public final class DisplayInfo implements Parcelable {
         type = other.type;
         address = other.address;
         name = other.name;
+        uniqueId = other.uniqueId;
         appWidth = other.appWidth;
         appHeight = other.appHeight;
         smallestNominalAppWidth = other.smallestNominalAppWidth;
@@ -348,6 +354,7 @@ public final class DisplayInfo implements Parcelable {
         state = source.readInt();
         ownerUid = source.readInt();
         ownerPackageName = source.readString();
+        uniqueId = source.readString();
     }
 
     @Override
@@ -380,6 +387,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(state);
         dest.writeInt(ownerUid);
         dest.writeString(ownerPackageName);
+        dest.writeString(uniqueId);
     }
 
     @Override
@@ -445,6 +453,8 @@ public final class DisplayInfo implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append("DisplayInfo{\"");
         sb.append(name);
+        sb.append("\", uniqueId \"");
+        sb.append(uniqueId);
         sb.append("\", app ");
         sb.append(appWidth);
         sb.append(" x ");

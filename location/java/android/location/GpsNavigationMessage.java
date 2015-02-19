@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -28,6 +29,7 @@ import java.security.InvalidParameterException;
  *
  * @hide
  */
+@SystemApi
 public class GpsNavigationMessage implements Parcelable {
     private static final String TAG = "GpsNavigationMessage";
     private static final byte[] EMPTY_ARRAY = new byte[0];

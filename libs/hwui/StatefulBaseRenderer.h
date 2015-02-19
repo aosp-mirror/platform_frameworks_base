@@ -129,7 +129,8 @@ protected:
      *
      * Subclasses can override this method to handle layer restoration
      */
-    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) {};
+    virtual void onSnapshotRestored(const Snapshot& removed,
+                                    const Snapshot& restored) {};
 
     virtual void onViewportInitialized() {};
 

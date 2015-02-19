@@ -1,0 +1,156 @@
+page.title=Providing a Card View
+page.tags="card"
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>This lesson teaches you to</h2>
+  <ol>
+    <li><a href="#presenter">Create a Card Presenter</a></li>
+    <li><a href="#card-view">Create a Card View</a></li>
+  </ol>
+  <h2>Try it out</h2>
+  <ul>
+    <li><a class="external-link" href="https://github.com/googlesamples/androidtv-Leanback">Android
+    Leanback sample app</a></li>
+  </ul>
+</div>
+</div>
+
+<p>In the previous lesson, you created a catalog browser, implemented in a browse fragment, that
+displays a list of media items. In this lesson, you create the card views for your media items and
+present them in the browse fragment.</p>
+
+<p>The {@link android.support.v17.leanback.widget.BaseCardView} class and subclasses display the meta
+data associated with a media item. The {@link android.support.v17.leanback.widget.ImageCardView}
+class used in this lesson displays an image for the content along with the media item's title.</p>
+
+<p>This lesson describes code from the <a href="https://github.com/googlesamples/androidtv-Leanback">
+Android Leanback sample app</a>, available on GitHub. Use this sample code to start your own
+app.</p>
+
+<img itemprop="image" src="{@docRoot}images/tv/app-browse.png" alt="App main screen"/>
+<p class="img-caption"><b>Figure 1.</b> The <a href="https://github.com/googlesamples/androidtv-Leanback">
+Leanback sample app</a> browse fragment with a card presenter displaying card view objects.</p>
+
+<h2 id="presenter">Create a Card Presenter</h2>
+
+<p>A {@link android.support.v17.leanback.widget.Presenter} generates views and binds objects to them
+on demand. In the browse fragment where your app presents its content to the user, you create a
+{@link android.support.v17.leanback.widget.Presenter} for the content cards and pass it to the adapter
+that adds the content to the screen. In the following code, the <code>CardPresenter</code> is created
+in the {@link android.support.v4.app.LoaderManager.LoaderCallbacks#onLoadFinished(android.support.v4.content.Loader, java.lang.Object) onLoadFinished()}
+callback of the {@link android.support.v4.app.LoaderManager}.</p>
+
+<pre>
+&#64;Override
+public void onLoadFinished(Loader&lt;HashMap&lt;String, List&lt;Movie&gt;&gt;&gt; arg0,
+                           HashMap&lt;String, List&lt;Movie&gt;&gt; data) {
+
+    mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+    CardPresenter cardPresenter = new CardPresenter();
+
+    int i = 0;
+
+    for (Map.Entry&lt;String, List&lt;Movie&gt;&gt; entry : data.entrySet()) {
+        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(cardPresenter);
+        List&lt;Movie&gt; list = entry.getValue();
+
+        for (int j = 0; j &lt; list.size(); j++) {
+            listRowAdapter.add(list.get(j));
+        }
+        HeaderItem header = new HeaderItem(i, entry.getKey(), null);
+        i++;
+        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+    }
+
+    HeaderItem gridHeader = new HeaderItem(i, getString(R.string.more_samples),
+            null);
+
+    GridItemPresenter gridPresenter = new GridItemPresenter();
+    ArrayObjectAdapter gridRowAdapter = new ArrayObjectAdapter(gridPresenter);
+    gridRowAdapter.add(getString(R.string.grid_view));
+    gridRowAdapter.add(getString(R.string.error_fragment));
+    gridRowAdapter.add(getString(R.string.personal_settings));
+    mRowsAdapter.add(new ListRow(gridHeader, gridRowAdapter));
+
+    setAdapter(mRowsAdapter);
+
+    updateRecommendations();
+}
+</pre>
+
+<h2 id="card-view">Create a Card View</h2>
+
+<p>In this step, you build the card presenter with a view holder for the card view that describes
+your media content items. Note that each presenter must only create one view type. If you have two
+different card view types then you need two different card presenters.</p>
+
+<p>In the {@link android.support.v17.leanback.widget.Presenter}, implement an
+{@link android.support.v17.leanback.widget.Presenter#onCreateViewHolder(android.view.ViewGroup) onCreateViewHolder()}
+callback that creates a view holder that can be used to display a content item.</p>
+
+<pre>
+&#64;Override
+public class CardPresenter extends Presenter {
+
+    private Context mContext;
+    private static int CARD_WIDTH = 313;
+    private static int CARD_HEIGHT = 176;
+    private Drawable mDefaultCardImage;
+
+    &#64;Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent) {
+        mContext = parent.getContext();
+        mDefaultCardImage = mContext.getResources().getDrawable(R.drawable.movie);
+...
+</pre>
+
+<p>In the {@link android.support.v17.leanback.widget.Presenter#onCreateViewHolder(android.view.ViewGroup)
+onCreateViewHolder()} method, create a card view for content items. The sample below uses an
+{@link android.support.v17.leanback.widget.ImageCardView}.</p>
+
+<p>When a card is selected, the default behavior expands it to a larger size. If you want to designate
+a different color for the selected card, call {@link android.support.v17.leanback.widget.BaseCardView#setSelected(boolean)
+setSelected()}
+as shown here.</p>
+
+<pre>
+...
+    ImageCardView cardView = new ImageCardView(mContext) {
+        &#64;Override
+        public void setSelected(boolean selected) {
+            int selected_background = mContext.getResources().getColor(R.color.detail_background);
+            int default_background = mContext.getResources().getColor(R.color.default_background);
+            int color = selected ? selected_background : default_background;
+            findViewById(R.id.info_field).setBackgroundColor(color);
+            super.setSelected(selected);
+        }
+    };
+...
+</pre>
+
+<p>When the user opens your app, the {@link android.support.v17.leanback.widget.Presenter.ViewHolder}
+displays the <code>CardView</code> objects for your content items. You need to set these to receive
+focus from the D-pad controller by calling {@link android.view.View#setFocusable(boolean) setFocusable(true)}
+and {@link android.view.View#setFocusableInTouchMode(boolean) setFocusableInTouchMode(true)}.</p>
+
+<pre>
+...
+    cardView.setFocusable(true);
+    cardView.setFocusableInTouchMode(true);
+    return new ViewHolder(cardView);
+}
+</pre>
+
+<p>When the user selects the {@link android.support.v17.leanback.widget.ImageCardView}, it expands
+to reveal its text area with the background color you specify, as shown in figure 2.</p>
+
+<img itemprop="image" src="{@docRoot}images/tv/card-view.png" alt="App card view"/>
+<p class="img-caption"><b>Figure 2.</b> The <a href="https://github.com/googlesamples/androidtv-Leanback">
+Leanback sample app</a> image card view when selected.</p>
+
+

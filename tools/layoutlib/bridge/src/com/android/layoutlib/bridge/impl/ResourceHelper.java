@@ -32,6 +32,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.ColorStateList;
+import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.NinePatch_Delegate;
@@ -166,6 +167,17 @@ public final class ResourceHelper {
      * @param context the current context
      */
     public static Drawable getDrawable(ResourceValue value, BridgeContext context) {
+        return getDrawable(value, context, null);
+    }
+
+    /**
+     * Returns a drawable from the given value.
+     * @param value The value that contains a path to a 9 patch, a bitmap or a xml based drawable,
+     * or an hexadecimal color
+     * @param context the current context
+     * @param theme the theme to be used to inflate the drawable.
+     */
+    public static Drawable getDrawable(ResourceValue value, BridgeContext context, Theme theme) {
         if (value == null) {
             return null;
         }
@@ -209,7 +221,7 @@ public final class ResourceHelper {
                     BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                             parser, context, value.isFramework());
                     try {
-                        return Drawable.createFromXml(context.getResources(), blockParser);
+                        return Drawable.createFromXml(context.getResources(), blockParser, theme);
                     } finally {
                         blockParser.ensurePopped();
                     }

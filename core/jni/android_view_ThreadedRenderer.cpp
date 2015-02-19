@@ -270,14 +270,14 @@ static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject cla
     proxy->updateSurface(window);
 }
 
-static void android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject clazz,
+static jboolean android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<ANativeWindow> window;
     if (jsurface) {
         window = android_view_Surface_getNativeWindow(env, jsurface);
     }
-    proxy->pauseSurface(window);
+    return proxy->pauseSurface(window);
 }
 
 static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,
@@ -429,7 +429,7 @@ static JNINativeMethod gMethods[] = {
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nInitialize", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_initialize },
     { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
-    { "nPauseSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_pauseSurface },
+    { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
     { "nSetup", "(JIIFFFFII)V", (void*) android_view_ThreadedRenderer_setup },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSyncAndDrawFrame", "(JJJF)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },

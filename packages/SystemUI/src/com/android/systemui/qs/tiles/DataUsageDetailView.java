@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -61,7 +60,7 @@ public class DataUsageDetailView extends LinearLayout {
                 R.dimen.qs_data_usage_text_size);
     }
 
-    public void bind(NetworkController.DataUsageInfo info) {
+    public void bind(NetworkController.MobileDataController.DataUsageInfo info) {
         final Resources res = mContext.getResources();
         final int titleId;
         final long bytes;

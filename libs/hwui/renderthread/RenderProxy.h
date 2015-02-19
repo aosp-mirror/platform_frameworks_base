@@ -31,6 +31,7 @@
 
 #include "../Caches.h"
 #include "../IContextFactory.h"
+#include "CanvasContext.h"
 #include "DrawFrameTask.h"
 
 namespace android {
@@ -44,7 +45,6 @@ class Rect;
 
 namespace renderthread {
 
-class CanvasContext;
 class ErrorChannel;
 class RenderThread;
 class RenderProxyBridge;
@@ -63,11 +63,13 @@ public:
     ANDROID_API virtual ~RenderProxy();
 
     ANDROID_API void setFrameInterval(nsecs_t frameIntervalNanos);
+    // Won't take effect until next EGLSurface creation
+    ANDROID_API void setSwapBehavior(SwapBehavior swapBehavior);
     ANDROID_API bool loadSystemProperties();
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
-    ANDROID_API void pauseSurface(const sp<ANativeWindow>& window);
+    ANDROID_API bool pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setOpaque(bool opaque);
@@ -79,7 +81,6 @@ public:
 
     ANDROID_API void runWithGlContext(RenderTask* task);
 
-    static void enqueueDestroyLayer(Layer* layer);
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API void buildLayer(RenderNode* node);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
@@ -95,6 +96,7 @@ public:
     ANDROID_API void notifyFramePending();
 
     ANDROID_API void dumpProfileInfo(int fd);
+    ANDROID_API static void outputLogBuffer(int fd);
 
     ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
 
@@ -111,6 +113,8 @@ private:
 
     void post(RenderTask* task);
     void* postAndWait(MethodInvokeRenderTask* task);
+
+    static void* staticPostAndWait(MethodInvokeRenderTask* task);
 
     // Friend class to help with bridging
     friend class RenderProxyBridge;

@@ -1,0 +1,93 @@
+page.title=应用内结算概述
+parent.title=In-app Billing
+parent.link=index.html
+@jd:body
+
+      <div id="qv-wrapper">
+  <div id="qv">
+    <h2>概述</h2>
+    <ul>
+      <li>使用应用内结算销售数字商品，包括一次性商品和定期订阅。</li>
+      <li>在 Google Play 上发布的所有应用均可使用该服务。您只需有 Google Play 开发者控制台帐户和 Google 电子钱包商家帐户即可。</li>
+      <li>结帐流程由 Google Play 自动处理，其界面与应用购买流程的界面相同。</li>
+    </ul>
+    <h2>本文内容</h2>
+    <ol>
+      <li><a href="#api">应用内结算 API</a></li>
+      <li><a href="#products">应用内商品</a>
+         <ol>
+         <li><a href="#prodtypes">商品类型</a>
+         </li></ol>
+      </li>
+      <li><a href="#console">Google Play 开发者控制台</a></li>
+      <li><a href="#checkout">Google Play 购买流程</a></li>
+      <li><a href="#samples">示例应用</a></li>
+      <li><a href="#migration">迁移注意事项</a></li>
+    </ol>
+     <h2>相关示例</h2>
+    <ol>
+      <li><a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">示例应用（第 3 版）</a></li>
+    </ol>
+  </div>
+  </div>
+
+  <p>本文将介绍您需了解的应用内结算基本组件和功能，以便您将应用内结算功能添加到应用中。</p>
+
+  <p class="note"><b>注意</b>：请务必遵守目标国家/地区（您要在这些国家/地区分发应用）的适用法律。例如，在欧盟国家，<a href="http://ec.europa.eu/justice/consumer-marketing/unfair-trade/unfair-practices/">不公平商业行为指令</a>的相关法律禁止直接规劝儿童购买广告产品或者劝说其父母或其他成年人为儿童购买广告产品。请参阅<a href="http://ec.europa.eu/consumers/enforcement/docs/common_position_on_online_games_en.pdf">欧盟消费者保护机构的立场</a>，详细了解此主题及其他主题。
+  </p>
+
+  <h2 id="api">应用内结算 API</h2>
+  <p>您的应用会通过相应 API （由设备上安装的 Google Play 应用提供）来访问应用内结算服务。然后，Google Play 应用会在您的应用和 Google Play 服务器之间传送结算请求和响应。实际上，您的应用从不直接与 Google Play 服务器通信，而是通过进程间通信 (IPC) 向 Google Play 应用发送结算请求并接收 Google Play 应用发来的响应。此外，您的应用也不管理其与 Google Play 服务器之间的任何网络连接。</p>
+  <p>应用内结算只能在您通过 Google Play 发布的应用中实施。要完成应用内购买请求，Google Play 应用必须能够通过网络访问 Google Play 服务器。</p>
+
+  <p>应用内结算第 3 版是最新版本，依然具有非常广泛的兼容性，可用于各种 Android 设备。运行 Android 2.2 或更高版本且安装了最新版本的 Google Play 商店的设备（<a href="{@docRoot}about/dashboards/index.html">绝大多数</a>有效设备）都支持使用应用内结算第 3 版。</p>
+
+  <h4>第 3 版的功能</h4>
+  <ul>
+  <li>通过简化的 API 发送请求。此 API 可让您轻松地向 Google Play 请求商品详情、订购应用内商品以及根据用户对商品的所有权快速恢复商品</li>
+  <li>订单信息会在购买完成时同步传送到设备上</li>
+  <li>所有购买都是“托管的”（也就是说，Google Play 负责记录用户对应用内商品的所有权）。对于同一件应用内商品，用户无论何时都只能拥有该商品的一个副本而不能拥有多个副本</li>
+  <li>您可以消耗所购商品。当消耗后，该商品将切换回“未被拥有”状态，且可被用户从 Google Play 中再次购买</li>
+  <li>支持<a href="{@docRoot}google/play/billing/billing_subscriptions.html">订阅</a></li>
+  </ul>
+  <p>要详细了解应用内结算的其他版本，请参阅<a href="{@docRoot}google/play/billing/versions.html">版本说明</a>。</p>
+
+  <h2 id="products">应用内商品</h2>
+  <p>应用内商品是您在应用内向用户出售的数字商品，包括游戏代币、旨在改善用户体验的应用功能升级以及应用中的新增内容。</p>
+  <p>应用内结算只能用于销售数字内容，而不能用于销售实体商品、个人服务或任何需要进行实物交付的商品/服务。与明码标价的应用不同，一旦用户购买了应用内商品，系统便不会提供退款窗口。</p>
+  <p>Google Play 不提供任何形式的内容交付，您需要自行交付在应用内销售的数字内容。应用内商品始终与一个且仅与一个应用明确关联。也就是说，在一个应用中不能购买为另一个应用发布的应用内商品，即使这两个应用来自相同的开发者也是如此。</p>
+
+  <h3 id="prodtypes">商品类型</h3>
+  <p>应用内结算支持多种商品类型，因此您可灵活选择如何通过您的应用获利。无论是哪种商品，您均能通过 Google Play 开发者控制台进行定义。</p>
+  <p>您可以为应用内结算应用指定以下两类商品：“托管的应用内商品”和“订阅”。<em></em><em></em>Google Play 会按用户帐户来处理和跟踪您应用中的应用内商品和订阅的所有权。<a href="{@docRoot}google/play/billing/api.html#producttypes">详细了解应用内结算第 3 版支持的商品类型</a>。</p>
+
+  <h2 id="console">Google Play 开发者控制台</h2>
+  <p>在开发者控制台上，您不仅能发布应用内结算应用，还能管理您应用中出售的各种应用内商品。</p>
+  <p>对于与您的应用相关联的数字商品（包括一次性商品和定期订阅），您可以为其创建商品列表。对于每件商品，您都可以定义下列信息：唯一商品 ID（也称为 SKU）、商品类型、定价、说明以及 Google Play 应如何处理和用户对该商品的购买。</p>
+  <p>您还可以创建测试帐户，授权这些帐户测试尚未发布的应用。</p>
+  <p>要了解如何使用开发者控制台配置您的应用内商品和商品列表，请参阅<a href="{@docRoot}google/play/billing/billing_admin.html">管理应用内结算</a>。</p>
+
+  <h2 id="checkout">Google Play 购买流程</h2>
+  <p>Google Play 使用的结帐后端服务与用于应用购买的服务相同，因此您的用户将获得一致且熟悉的购买流程使用体验。</p>
+  <p class="note"><strong>重要提示</strong>：您必须有 Google 电子钱包商家帐户才能在 Google Play 上使用应用内结算服务。</p>
+  <p>购买开始时，您的应用需要针对相应的应用内商品发送结算请求。然后，Google Play 会处理此次交易的所有结帐详情，包括请求和验证付款方式以及处理财务交易。</p>
+  <p>当结帐流程完成后，Google Play 会向您的应用发送购买详情，例如订单号、订单日期和时间以及所付价格。您的应用从不需要处理任何财务交易，这些事宜完全 Google Play 负责。</p>
+
+  <h2 id="samples">示例应用</h2>
+  <p>为了帮您将应用内结算集成到您的应用中，Android SDK 提供了一个示例应用，向您演示如何在应用内销售应用内商品和订阅。</p>
+
+  <p><a href="{@docRoot}training/in-app-billing/preparing-iab-app.html#GetSample">API 第 3 版的 TrivialDrive 示例</a>演示了如何使用应用内结算 API 第 3 版在赛车游戏中实施应用内商品和订阅购买。该应用不仅演示了如何发送应用内结算请求以及处理来自 Google Play 的同步响应，还演示了如何通过此 API 记录商品的消耗情况。第 3 版示例包括多种工具类，非常便于处理应用内结算操作和执行自动签名验证。</p>
+
+  <p class="caution"><strong>建议</strong>：请务必在发布应用前混淆其中的代码。有关详情，请参阅<a href="{@docRoot}google/play/billing/billing_best_practices.html">安全性和设计</a>。</p>
+
+  <h2 id="migration">迁移注意事项</h2>
+  <p>应用内结算 API 第 2 版已弃用，将于 2015 年 1 月关闭。如果您现有的应用内结算实施使用的是 API 第 2 版或更低版本，则您必须迁移到<a href="{@docRoot}google/play/billing/api.html">应用内结算第 3 版</a>。</p>
+
+  <p>如果您在发布的应用中销售应用内商品，请注意以下事项：</p>
+  <ul>
+  <li>您之前在开发者控制台中定义的托管商品和订阅仍能使用第 3 版。</li>
+  <li>对于您已经为现有应用定义的非托管商品，如果您使用 API 第 3 版针对这些商品提出购买请求，这些商品将被视为托管商品。您无需在开发者控制台中为这些商品创建新的商品条目，且能使用相同的商品 ID 来购买这些商品。如果您使用 API 第 2 版或更低版本提出购买请求，这些商品仍会被视为非托管商品。
+  </li></ul>
+
+
+

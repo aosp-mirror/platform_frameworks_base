@@ -40,9 +40,12 @@ interface IStatusBarService
     // You need the STATUS_BAR_SERVICE permission
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,
             out int[] switches, out List<IBinder> binders);
-    void onPanelRevealed();
+    void onPanelRevealed(boolean clearNotificationEffects);
     void onPanelHidden();
+    // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
+    void clearNotificationEffects();
     void onNotificationClick(String key);
+    void onNotificationActionClick(String key, int actionIndex);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
@@ -50,7 +53,7 @@ interface IStatusBarService
     void onNotificationVisibilityChanged(
             in String[] newlyVisibleKeys, in String[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
-    void setSystemUiVisibility(int vis, int mask);
+    void setSystemUiVisibility(int vis, int mask, String cause);
     void setWindowState(int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);

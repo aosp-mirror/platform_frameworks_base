@@ -79,7 +79,7 @@ public final class NetworkScorerAppManager {
      * <ul>
      * <li>Declares the {@link android.Manifest.permission#SCORE_NETWORKS} permission.
      * <li>Includes a receiver for {@link NetworkScoreManager#ACTION_SCORE_NETWORKS} guarded by the
-     *     {@link android.Manifest.permission#BROADCAST_SCORE_NETWORKS} permission.
+     *     {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission.
      * </ul>
      *
      * @return the list of scorers, or the empty list if there are no valid scorers.
@@ -98,8 +98,8 @@ public final class NetworkScorerAppManager {
                 // Should never happen with queryBroadcastReceivers, but invalid nonetheless.
                 continue;
             }
-            if (!permission.BROADCAST_SCORE_NETWORKS.equals(receiverInfo.permission)) {
-                // Receiver doesn't require the BROADCAST_SCORE_NETWORKS permission, which means
+            if (!permission.BROADCAST_NETWORK_PRIVILEGED.equals(receiverInfo.permission)) {
+                // Receiver doesn't require the BROADCAST_NETWORK_PRIVILEGED permission, which means
                 // anyone could trigger network scoring and flood the framework with score requests.
                 continue;
             }

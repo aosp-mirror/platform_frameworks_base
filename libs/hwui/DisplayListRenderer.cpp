@@ -21,8 +21,9 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
-#include "Caches.h"
+#include "ResourceCache.h"
 #include "DeferredDisplayList.h"
+#include "DeferredLayerUpdater.h"
 #include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
 #include "DisplayListRenderer.h"
@@ -32,7 +33,7 @@ namespace android {
 namespace uirenderer {
 
 DisplayListRenderer::DisplayListRenderer()
-    : mCaches(Caches::getInstance())
+    : mResourceCache(ResourceCache::getInstance())
     , mDisplayListData(NULL)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)
@@ -177,7 +178,8 @@ bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     return StatefulBaseRenderer::clipRegion(region, op);
 }
 
-status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
+status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty,
+                                             int32_t flags) {
     LOG_ALWAYS_FATAL_IF(!renderNode, "missing rendernode");
 
     // dirty is an out parameter and should not be recorded,
@@ -188,9 +190,11 @@ status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
-    layer = refLayer(layer);
-    addDrawOp(new (alloc()) DrawLayerOp(layer, x, y));
+status_t DisplayListRenderer::drawLayer(DeferredLayerUpdater* layerHandle, float x, float y) {
+    // We ref the DeferredLayerUpdater due to its thread-safe ref-counting
+    // semantics.
+    mDisplayListData->ref(layerHandle);
+    addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer(), x, y));
     return DrawGlInfo::kStatusDone;
 }
 
@@ -280,13 +284,13 @@ status_t DisplayListRenderer::drawRoundRect(
         CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
         CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
         CanvasPropertyPaint* paint) {
-    mDisplayListData->refProperty(left);
-    mDisplayListData->refProperty(top);
-    mDisplayListData->refProperty(right);
-    mDisplayListData->refProperty(bottom);
-    mDisplayListData->refProperty(rx);
-    mDisplayListData->refProperty(ry);
-    mDisplayListData->refProperty(paint);
+    mDisplayListData->ref(left);
+    mDisplayListData->ref(top);
+    mDisplayListData->ref(right);
+    mDisplayListData->ref(bottom);
+    mDisplayListData->ref(rx);
+    mDisplayListData->ref(ry);
+    mDisplayListData->ref(paint);
     addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
             &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
     return DrawGlInfo::kStatusDone;
@@ -300,10 +304,10 @@ status_t DisplayListRenderer::drawCircle(float x, float y, float radius, const S
 
 status_t DisplayListRenderer::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
         CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
-    mDisplayListData->refProperty(x);
-    mDisplayListData->refProperty(y);
-    mDisplayListData->refProperty(radius);
-    mDisplayListData->refProperty(paint);
+    mDisplayListData->ref(x);
+    mDisplayListData->ref(y);
+    mDisplayListData->ref(radius);
+    mDisplayListData->ref(paint);
     addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
             &radius->value, &paint->value));
     return DrawGlInfo::kStatusDone;

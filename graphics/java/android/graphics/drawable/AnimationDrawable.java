@@ -16,11 +16,14 @@
 
 package android.graphics.drawable;
 
+import com.android.internal.R;
+
 import java.io.IOException;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
@@ -79,7 +82,7 @@ import android.util.AttributeSet;
  * @attr ref android.R.styleable#AnimationDrawableItem_drawable
  */
 public class AnimationDrawable extends DrawableContainer implements Runnable, Animatable {
-    private final AnimationState mAnimationState;
+    private AnimationState mAnimationState;
 
     /** The current frame, may be -1 when not animating. */
     private int mCurFrame = -1;
@@ -271,27 +274,24 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-
-        TypedArray a = obtainAttributes(r, theme, attrs,
-                com.android.internal.R.styleable.AnimationDrawable);
-
-        super.inflateWithAttributes(r, parser, a,
-                com.android.internal.R.styleable.AnimationDrawable_visible);
-
-        mAnimationState.setVariablePadding(a.getBoolean(
-                com.android.internal.R.styleable.AnimationDrawable_variablePadding, false));
-
-        mAnimationState.mOneShot = a.getBoolean(
-                com.android.internal.R.styleable.AnimationDrawable_oneshot, false);
-
+        final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.AnimationDrawable);
+        super.inflateWithAttributes(r, parser, a, R.styleable.AnimationDrawable_visible);
+        updateStateFromTypedArray(a);
         a.recycle();
 
+        inflateChildElements(r, parser, attrs, theme);
+
+        setFrame(0, true, false);
+    }
+
+    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
         int type;
 
         final int innerDepth = parser.getDepth()+1;
         int depth;
-        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT &&
-                ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
+        while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
+                && ((depth = parser.getDepth()) >= innerDepth || type != XmlPullParser.END_TAG)) {
             if (type != XmlPullParser.START_TAG) {
                 continue;
             }
@@ -300,31 +300,27 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 continue;
             }
 
-            a = obtainAttributes(
-                    r, theme, attrs, com.android.internal.R.styleable.AnimationDrawableItem);
-            int duration = a.getInt(
-                    com.android.internal.R.styleable.AnimationDrawableItem_duration, -1);
+            final TypedArray a = obtainAttributes(r, theme, attrs,
+                    R.styleable.AnimationDrawableItem);
+
+            final int duration = a.getInt(R.styleable.AnimationDrawableItem_duration, -1);
             if (duration < 0) {
-                throw new XmlPullParserException(
-                        parser.getPositionDescription()
+                throw new XmlPullParserException(parser.getPositionDescription()
                         + ": <item> tag requires a 'duration' attribute");
             }
-            int drawableRes = a.getResourceId(
-                    com.android.internal.R.styleable.AnimationDrawableItem_drawable, 0);
+
+            Drawable dr = a.getDrawable(R.styleable.AnimationDrawableItem_drawable);
 
             a.recycle();
 
-            Drawable dr;
-            if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes, theme);
-            } else {
+            if (dr == null) {
                 while ((type=parser.next()) == XmlPullParser.TEXT) {
                     // Empty
                 }
                 if (type != XmlPullParser.START_TAG) {
-                    throw new XmlPullParserException(parser.getPositionDescription() +
-                            ": <item> tag requires a 'drawable' attribute or child tag" +
-                            " defining a drawable");
+                    throw new XmlPullParserException(parser.getPositionDescription()
+                            + ": <item> tag requires a 'drawable' attribute or child tag"
+                            + " defining a drawable");
                 }
                 dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
@@ -334,22 +330,41 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 dr.setCallback(this);
             }
         }
+    }
 
-        setFrame(0, true, false);
+    private void updateStateFromTypedArray(TypedArray a) {
+        mAnimationState.mVariablePadding = a.getBoolean(
+                R.styleable.AnimationDrawable_variablePadding, mAnimationState.mVariablePadding);
+
+        mAnimationState.mOneShot = a.getBoolean(
+                R.styleable.AnimationDrawable_oneshot, mAnimationState.mOneShot);
     }
 
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mAnimationState.mDurations = mAnimationState.mDurations.clone();
+            mAnimationState.mutate();
             mMutated = true;
         }
         return this;
     }
 
+    @Override
+    AnimationState cloneConstantState() {
+        return new AnimationState(mAnimationState, this, null);
+    }
+
+    /**
+     * @hide
+     */
+    public void clearMutated() {
+        super.clearMutated();
+        mMutated = false;
+    }
+
     private final static class AnimationState extends DrawableContainerState {
         private int[] mDurations;
-        private boolean mOneShot;
+        private boolean mOneShot = false;
 
         AnimationState(AnimationState orig, AnimationDrawable owner,
                 Resources res) {
@@ -360,8 +375,12 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 mOneShot = orig.mOneShot;
             } else {
                 mDurations = new int[getCapacity()];
-                mOneShot = true;
+                mOneShot = false;
             }
+        }
+
+        private void mutate() {
+            mDurations = mDurations.clone();
         }
 
         @Override
@@ -390,9 +409,17 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         }
     }
 
+    @Override
+    protected void setConstantState(@NonNull DrawableContainerState state) {
+        super.setConstantState(state);
+
+        if (state instanceof AnimationState) {
+            mAnimationState = (AnimationState) state;
+        }
+    }
+
     private AnimationDrawable(AnimationState state, Resources res) {
-        AnimationState as = new AnimationState(state, this, res);
-        mAnimationState = as;
+        final AnimationState as = new AnimationState(state, this, res);
         setConstantState(as);
         if (state != null) {
             setFrame(0, true, false);

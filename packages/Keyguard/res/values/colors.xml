@@ -26,5 +26,5 @@
 
     <!-- Clock -->
     <color name="clock_white">#ffffffff</color>
-    <color name="clock_gray">#80ffffff</color>
+    <color name="clock_gray">#99ffffff</color>
 </resources>

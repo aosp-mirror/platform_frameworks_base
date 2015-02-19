@@ -122,8 +122,10 @@ public class IpConfigStore {
                     out.writeUTF(proxyProperties.getHost());
                     out.writeUTF(PROXY_PORT_KEY);
                     out.writeInt(proxyProperties.getPort());
-                    out.writeUTF(EXCLUSION_LIST_KEY);
-                    out.writeUTF(exclusionList);
+                    if (exclusionList != null) {
+                        out.writeUTF(EXCLUSION_LIST_KEY);
+                        out.writeUTF(exclusionList);
+                    }
                     written = true;
                     break;
                 case PAC:

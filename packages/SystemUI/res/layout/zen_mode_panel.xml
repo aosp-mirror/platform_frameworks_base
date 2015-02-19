@@ -23,9 +23,10 @@
     android:orientation="vertical" >
 
     <FrameLayout
+        android:id="@+id/zen_buttons_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="12dp"
+        android:minHeight="8dp"
         android:elevation="4dp"
         android:background="@drawable/qs_background_secondary" >
 
@@ -33,9 +34,8 @@
             android:id="@+id/zen_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/qs_panel_padding"
-            android:layout_marginRight="@dimen/qs_panel_padding"
-            android:layout_marginTop="4dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
             android:clipChildren="false" />
     </FrameLayout>
@@ -59,6 +59,8 @@
             android:background="@drawable/btn_borderless_rect"
             android:clickable="true"
             android:drawableEnd="@drawable/qs_subhead_caret"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textAppearance="@style/TextAppearance.QS.Subhead" />
 
         <TextView
@@ -68,6 +70,8 @@
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:paddingLeft="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textAppearance="@style/TextAppearance.QS.Subhead" />
 
         <ImageView
@@ -88,6 +92,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/qs_panel_padding" />
+        android:paddingBottom="@dimen/zen_mode_condition_detail_bottom_padding" />
 
 </com.android.systemui.volume.ZenModePanel>

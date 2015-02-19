@@ -84,6 +84,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -99,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -111,7 +123,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
+
+
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -128,16 +142,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+    
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -179,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -201,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -211,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -220,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -335,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -357,10 +421,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+        
+        
+        
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -397,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -420,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Fitness</li>
       </ul>
     </div>
@@ -430,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -683,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -698,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -708,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -724,14 +793,20 @@ Summary:
 
 
 
-
-
-  <a href="#lfields">Fields</a>
-
-
+  <a href="#constants">Constants</a>
+  
 
 
 
+  &#124; <a href="#lfields">Fields</a>
+  
+
+
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
 
 
 
@@ -741,9 +816,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -753,23 +828,26 @@ Summary:
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     class
 <h1 itemprop="name">Fitness</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -781,18 +859,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.Fitness</td>
     </tr>
-
+    
 
 </table>
 
@@ -808,25 +886,42 @@ Summary:
 <h2>Class Overview</h2>
 <p itemprop="articleBody">The main entry point to Google Fit APIs.
  <p>
- When connecting to the Google Fit API, apps should specify the necessary Google Fit scopes and
- the user account.  Apps can use <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)">addScope(Scope)</a></code> to add the
- necessary scopes.  Apps should add the necessary scopes from <code><a href="/reference/com/google/android/gms/fitness/FitnessScopes.html">FitnessScopes</a></code> based on the
- data access required.  To use a specific user account, apps can use
- <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setAccountName(java.lang.String)">(String)</a></code> or use <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#useDefaultAccount()">useDefaultAccount()</a></code> to use
- default account.  Fitness Client will use the specified account and scopes to get necessary
- OAuth tokens on behalf of the app to ensure that the calling app has the necessary permissions
- to access user's Google Fit data.
+ The Google Fit APIs help app developers collect and use fitness-related sensor data in their
+ applications.  There are several different APIs, each solving a different problem:
+ <ul>
+ <li><code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></code> exposes a unified view of sensor streams on the local
+ device and connected devices, and delivers live events to listeners.
+ <li><code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></code> enables low-battery, always-on background collection
+ of sensor data into the Google Fit store.
+ <li><code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></code> lets apps create and manage sessions of user activity.
+ <li><code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></code> allows querying and insertion of data in Google Fit.
+ <li><code><a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></code> can be used to work with Bluetooth Low Energy devices.
+ <li><code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a></code> can be used to access custom data types and settings.
+ </ul>
+ Most API methods require a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.  Each data type operation requires the
+ user to have granted the app permission to access and store fitness data for the given data type.
+ <h2>Authorization</h2>
+ When connecting to the Google Fit API, apps should specify the necessary scopes and the user
+ account.  Apps can use <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)">addScope(Scope)</a></code> to add the
+ necessary scopes, which should be selected from the <code>SCOPE_XXX</code> constants in this class.
+ To use a specific user account, apps can use <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setAccountName(java.lang.String)">setAccountName(String)</a></code>,
+ or use <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#useDefaultAccount()">useDefaultAccount()</a></code> to use the default account.  The specified account
+ and scopes will be used to acquire the necessary OAuth tokens on behalf of the app.
  <p>
  In case the app does not have the needed OAuth permissions for the requested scopes,
  Google Fit will send back a result with status code set
  to <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#NEEDS_OAUTH_PERMISSIONS">NEEDS_OAUTH_PERMISSIONS</a></code>.  In this case, the app should use
- <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code>
- to get the necessary OAuth permissions.
+ <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code> to get the necessary OAuth
+ permissions.
+ <p>
+ First connection to Fitness API requires network connection to verify the account and scopes
+ associated with it. In case no network connection is available, Google Fit will send back a
+ result with status code set to <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#NETWORK_ERROR">NETWORK_ERROR</a></code>.
  <p>
  Sample usage of Google Fit Client:
  <pre>
      public class MyActivity extends FragmentActivity
-             implements ConnectionCallbacks, OnConnectionFailedListener, DataSourceListener {
+             implements ConnectionCallbacks, OnConnectionFailedListener, OnDataPointListener {
         private static final int REQUEST_OAUTH = 1001;
         private GoogleApiClient mGoogleApiClient;
 
@@ -849,7 +944,7 @@ Summary:
         &#064;Override
         public void onConnected(Bundle connectionHint) {
             // Connected to Google Fit Client.
-            Fitness.SensorsApi.register(
+            Fitness.SensorsApi.add(
                     mGoogleApiClient,
                     new SensorRequest.Builder()
                             .setDataType(DataTypes.STEP_COUNT_DELTA)
@@ -858,7 +953,7 @@ Summary:
         }
 
         &#064;Override
-        public void onEvent(DataPoint dataPoint) {
+        public void onDataPoint(DataPoint dataPoint) {
             // Do cool stuff that matters.
         }
 
@@ -880,28 +975,24 @@ Summary:
 
         &#064;Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == REQUEST_OAUTH) {
-                if (resultCode == RESULT_OK) {
-                    mGoogleApiClient.connect();
-                }
+            if (requestCode == REQUEST_OAUTH && resultCode == RESULT_OK) {
+                mGoogleApiClient.connect();
             }
         }
  </pre>
- </p>
- The Google Fit APIs help app developers collect and use fitness-related sensor data in their
- applications.  There are several different APIs, each solving a different problem:
+ <h2>Intents</h2>
+ Google Fit supports different intents in order to help fitness apps collaborate.  To that
+ effect, different intent actions are defined in this class:
  <ul>
- <li><code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></code> exposes a unified view of sensor streams on the local
- device and connected devices, and delivers real-time events to listeners.
- <li><code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></code> enables low-battery, always-on background collection
- of sensor data into the Google Fit store.
- <li><code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></code> lets apps create and manage sessions of user activity.
- <li><code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></code> allows querying and insertion of data into the Google Fit store.
- <li><code><a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></code> can be used to work with Bluetooth Low Energy devices.
+     <li/><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_VIEW">ACTION_VIEW</a></code> defines an intent to view fitness data or a session
+     <li/><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_TRACK">ACTION_TRACK</a></code> defines an intent to track an activity
+     <li/><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_VIEW_GOAL">ACTION_VIEW_GOAL</a></code> defines an intent to view a fitness goal
  </ul>
- Most API methods require a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.  The list of supported data types can
- be found in <code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html">DataTypes</a></code>.  Each data type operation requires the user to have granted the
- app permission to access and store fitness data for the given data type.
+ Different objects in the Fitness data model can be used in intents, including
+ <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">sessions</a></code>, <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data sources</a></code>, <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data types</a></code>, and
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html">activities</a></code>.  The documentation for each intent action specifies the
+ different attributes of the intent, including actions, MIME types, and extras.  It also
+ specifies how the intents can be built and parsed using methods in the API.
 </p>
 
 
@@ -942,6 +1033,77 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_TRACK">ACTION_TRACK</a></td>
+        <td class="jd-descrcol" width="100%">
+          Broadcast action: the user has requested that an application start or stop tracking
+ their activity.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_VIEW">ACTION_VIEW</a></td>
+        <td class="jd-descrcol" width="100%">
+          Broadcast action: the user has requested that an application show the value of a
+ particular fitness <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_VIEW_GOAL">ACTION_VIEW_GOAL</a></td>
+        <td class="jd-descrcol" width="100%">
+          Broadcast action: the user has requested to view their current fitness goal.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#EXTRA_END_TIME">EXTRA_END_TIME</a></td>
+        <td class="jd-descrcol" width="100%">
+          Name for the long intent extra containing the end time.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#EXTRA_START_TIME">EXTRA_START_TIME</a></td>
+        <td class="jd-descrcol" width="100%">
+          Name for the long intent extra containing the start time.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+
+</table>
+
+
 
 
 
@@ -951,7 +1113,7 @@ Summary:
 <table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
 
 
-
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -959,10 +1121,15 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#API">API</a></td>
-          <td class="jd-descrcol" width="100%">Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable Google Fit services.</td>
+          <td class="jd-descrcol" width="100%">
+            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable Google Fit services.
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -970,10 +1137,15 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#BleApi">BleApi</a></td>
-          <td class="jd-descrcol" width="100%">Entry point to the <code><a href="/reference/com/google/android/gms/fitness/BleApi.html">Google Fit BLE API</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            Entry point to the <code><a href="/reference/com/google/android/gms/fitness/BleApi.html">Google Fit BLE API</a></code>.
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -981,10 +1153,15 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#ConfigApi">ConfigApi</a></td>
-          <td class="jd-descrcol" width="100%">Entry point to the <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">Google Fit History API</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            Entry point to the <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">Google Fit Config API</a></code>.
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -992,10 +1169,15 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#HistoryApi">HistoryApi</a></td>
-          <td class="jd-descrcol" width="100%">Entry point to the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">Google Fit History API</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            Entry point to the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">Google Fit History API</a></code>.
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1003,10 +1185,163 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#RecordingApi">RecordingApi</a></td>
-          <td class="jd-descrcol" width="100%">Entry point to the <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">Google Fit Recording API</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            Entry point to the <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">Google Fit Recording API</a></code>.
+            
+    
+
+          </td>
       </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SCOPE_ACTIVITY_READ">SCOPE_ACTIVITY_READ</a></td>
+          <td class="jd-descrcol" width="100%">
+            Scope for read access to activity-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity_sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity_segment</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">calories.consumed</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">calories.expended</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CADENCE">cycling.pedaling.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CUMULATIVE">cycling.pedaling.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_REVOLUTION">cycling.whell_revolution.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_RPM">cycling.whell_revolution.rpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_POWER_SAMPLE">power.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
+ </ul>
 
+            
+    
 
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SCOPE_ACTIVITY_READ_WRITE">SCOPE_ACTIVITY_READ_WRITE</a></td>
+          <td class="jd-descrcol" width="100%">
+            Scope for read/write access to activity-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity_sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity_segment</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">calories.consumed</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">calories.expended</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CADENCE">cycling.pedaling.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CUMULATIVE">cycling.pedaling.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_REVOLUTION">cycling.whell_revolution.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_RPM">cycling.whell_revolution.rpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_POWER_SAMPLE">power.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
+ </ul>
+
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SCOPE_BODY_READ">SCOPE_BODY_READ</a></td>
+          <td class="jd-descrcol" width="100%">
+            Scope for read access to the biometric data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
+ </ul>
+
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SCOPE_BODY_READ_WRITE">SCOPE_BODY_READ_WRITE</a></td>
+          <td class="jd-descrcol" width="100%">
+            Scope for read/write access to biometric data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
+ </ul>
+
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class=" api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SCOPE_LOCATION_READ">SCOPE_LOCATION_READ</a></td>
+          <td class="jd-descrcol" width="100%">
+            Scope for read access to location-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
+ </ul>
+
+            
+    
+
+          </td>
+      </tr>
+      
+    
+      <tr class="alt-color api apilevel-" >
+          <td class="jd-typecol"><nobr>
+          public
+          static
+          final
+          <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
+          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SCOPE_LOCATION_READ_WRITE">SCOPE_LOCATION_READ_WRITE</a></td>
+          <td class="jd-descrcol" width="100%">
+            Scope for read/write access to location-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
+ </ul>
+
+            
+    
+
+          </td>
+      </tr>
+      
+    
       <tr class=" api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1014,10 +1349,15 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SensorsApi">SensorsApi</a></td>
-          <td class="jd-descrcol" width="100%">Entry point to the <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">Google Fit Sensors API</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            Entry point to the <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">Google Fit Sensors API</a></code>.
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           public
@@ -1025,10 +1365,15 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html#SessionsApi">SessionsApi</a></td>
-          <td class="jd-descrcol" width="100%">Entry point to the <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">Google Fit Sessions API</a></code>.</td>
+          <td class="jd-descrcol" width="100%">
+            Entry point to the <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">Google Fit Sessions API</a></code>.
+            
+    
+
+          </td>
       </tr>
-
-
+      
+    
 
 </table>
 
@@ -1040,6 +1385,61 @@ Summary:
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/Fitness.html#getEndTime(android.content.Intent, java.util.concurrent.TimeUnit)">getEndTime</a></span>(Intent intent, TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves the end time extra from the given intent.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/Fitness.html#getStartTime(android.content.Intent, java.util.concurrent.TimeUnit)">getStartTime</a></span>(Intent intent, TimeUnit timeUnit)</nobr>
+        
+        <div class="jd-descrdiv">
+          Retrieves the start time extra from the given intent.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -1069,182 +1469,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1277,6 +1677,252 @@ From class
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="ACTION_TRACK"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        ACTION_TRACK
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Broadcast action: the user has requested that an application start or stop tracking
+ their activity.  The intent will include the following attributes:
+ <ul>
+     <li/>mimeType: this will be <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></code>
+          followed by the name of the activity.  Apps can use a MIME type filter to listen
+          only on activities they can track.
+          <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType(String)</a></code> can be used to generate a MIME
+          type from an activity.
+     <li/>Extra <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#EXTRA_STATUS">EXTRA_STATUS</a></code>: an extra indicating the current status
+          of the activity (active or completed).
+ </ul>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "vnd.google.fitness.TRACK"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="ACTION_VIEW"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        ACTION_VIEW
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Broadcast action: the user has requested that an application show the value of a
+ particular fitness <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.  This could be an intent to visualize
+ the current value of a data type (such as the current heart rate),
+ or the value of a data type over a period of time.  The extras will determine what the
+ particular intent is.
+ <p/>
+ The intent will include the following attributes:
+ <ul>
+     <li/>mimeType: this will be <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></code> followed by
+     the name of the data type the user would like to visualize.  Apps can use a MIME type
+     filter to listen only on data types they can visualize.  The MIME type can be generated
+     by <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType(String)</a></code>.
+     <li/>Extra <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#EXTRA_START_TIME">EXTRA_START_TIME</a></code>: an extra indicating the start time in
+     milliseconds since epoch, present if the user desires to visualize data over a period
+     of time.  The start time can be extracted by <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#getStartTime(android.content.Intent, java.util.concurrent.TimeUnit)">getStartTime(Intent, TimeUnit)</a></code>.
+     <li/>Extra <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#EXTRA_END_TIME">EXTRA_END_TIME</a></code>: an extra indicating the end time in
+     milliseconds since epoch, present if the user desires to visualize data over a period
+     of time.  If end time isn't specified, but start time is, then the end time used
+     should be "now".  The end time can be extracted by <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#getEndTime(android.content.Intent, java.util.concurrent.TimeUnit)">getEndTime(Intent, TimeUnit)</a></code>.
+     <li/>Extra <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#EXTRA_DATA_SOURCE">EXTRA_DATA_SOURCE</a></code>: an optional extra indicating the
+     specific data source the user would like to visualize, if any.  It can be extracted
+     using <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#extract(android.content.Intent)">extract(Intent)</a></code>.
+ </ul>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "vnd.google.fitness.VIEW"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="ACTION_VIEW_GOAL"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        ACTION_VIEW_GOAL
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Broadcast action: the user has requested to view their current fitness goal.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "vnd.google.fitness.VIEW_GOAL"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_END_TIME"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_END_TIME
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Name for the long intent extra containing the end time.  It can be extracted using
+ <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#getEndTime(android.content.Intent, java.util.concurrent.TimeUnit)">getEndTime(Intent, TimeUnit)</a></code>
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "vnd.google.fitness.end_time"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="EXTRA_START_TIME"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        EXTRA_START_TIME
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Name for the long intent extra containing the start time.  It can be extracted using
+ <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#getStartTime(android.content.Intent, java.util.concurrent.TimeUnit)">getStartTime(Intent, TimeUnit)</a></code>.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "vnd.google.fitness.start_time"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1288,28 +1934,31 @@ From class
 
 <A NAME="API"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;
       </span>
         API
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable Google Fit services.
 </p></div>
 
-
+    
     </div>
 </div>
 
@@ -1317,28 +1966,31 @@ From class
 
 <A NAME="BleApi"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a>
       </span>
         BleApi
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/BleApi.html">Google Fit BLE API</a></code>.
 </p></div>
 
-
+    
     </div>
 </div>
 
@@ -1346,28 +1998,31 @@ From class
 
 <A NAME="ConfigApi"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a>
       </span>
         ConfigApi
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-  <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">Google Fit History API</a></code>.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">Google Fit Config API</a></code>.
 </p></div>
 
-
+    
     </div>
 </div>
 
@@ -1375,28 +2030,31 @@ From class
 
 <A NAME="HistoryApi"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a>
       </span>
         HistoryApi
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">Google Fit History API</a></code>.
 </p></div>
 
-
+    
     </div>
 </div>
 
@@ -1404,28 +2062,269 @@ From class
 
 <A NAME="RecordingApi"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a>
       </span>
         RecordingApi
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">Google Fit Recording API</a></code>.
 </p></div>
 
+    
+    </div>
+</div>
 
+
+
+<A NAME="SCOPE_ACTIVITY_READ"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_ACTIVITY_READ
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Scope for read access to activity-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity_sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity_segment</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">calories.consumed</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">calories.expended</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CADENCE">cycling.pedaling.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CUMULATIVE">cycling.pedaling.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_REVOLUTION">cycling.whell_revolution.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_RPM">cycling.whell_revolution.rpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_POWER_SAMPLE">power.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
+ </ul>
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="SCOPE_ACTIVITY_READ_WRITE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_ACTIVITY_READ_WRITE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Scope for read/write access to activity-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity_sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity_segment</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_CONSUMED">calories.consumed</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CALORIES_EXPENDED">calories.expended</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CADENCE">cycling.pedaling.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_PEDALING_CUMULATIVE">cycling.pedaling.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_REVOLUTION">cycling.whell_revolution.cumulative</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_CYCLING_WHEEL_RPM">cycling.whell_revolution.rpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_POWER_SAMPLE">power.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.cadence</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_STEP_COUNT_DELTA">step_count.delta</a></code>
+ </ul>
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="SCOPE_BODY_READ"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_BODY_READ
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Scope for read access to the biometric data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
+ </ul>
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="SCOPE_BODY_READ_WRITE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_BODY_READ_WRITE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Scope for read/write access to biometric data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEART_RATE_BPM">heart_rate.bpm</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_HEIGHT">height</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_WEIGHT">weight</a></code>
+ </ul>
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="SCOPE_LOCATION_READ"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_LOCATION_READ
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Scope for read access to location-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
+ </ul>
+</p></div>
+
+    
+    </div>
+</div>
+
+
+
+<A NAME="SCOPE_LOCATION_READ_WRITE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a>
+      </span>
+        SCOPE_LOCATION_READ_WRITE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Scope for read/write access to location-related data types in Google Fit, which include:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_DISTANCE_DELTA">distance.delta</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_LOCATION_SAMPLE">location.sample</a></code>
+     <li><code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_SPEED">speed</a></code>
+ </ul>
+</p></div>
+
+    
     </div>
 </div>
 
@@ -1433,28 +2332,31 @@ From class
 
 <A NAME="SensorsApi"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a>
       </span>
         SensorsApi
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">Google Fit Sensors API</a></code>.
 </p></div>
 
-
+    
     </div>
 </div>
 
@@ -1462,28 +2364,31 @@ From class
 
 <A NAME="SessionsApi"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         <a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a>
       </span>
         SessionsApi
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      
   <div class="jd-tagdata jd-tagdescr"><p>Entry point to the <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">Google Fit Sessions API</a></code>.
 </p></div>
 
-
+    
     </div>
 </div>
 
@@ -1502,6 +2407,111 @@ From class
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
 
+<h2>Public Methods</h2>
+
+
+
+<A NAME="getEndTime(android.content.Intent, java.util.concurrent.TimeUnit)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        long
+      </span>
+      <span class="sympad">getEndTime</span>
+      <span class="normal">(Intent intent, TimeUnit timeUnit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the end time extra from the given intent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>intent</td>
+          <td>the intent to extract the end time from</td>
+        </tr>
+        <tr>
+          <th>timeUnit</td>
+          <td>the desired time unit for the returned end time</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the end time, in time unit since epoch, or <code>-1</code> if not found
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getStartTime(android.content.Intent, java.util.concurrent.TimeUnit)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        long
+      </span>
+      <span class="sympad">getStartTime</span>
+      <span class="normal">(Intent intent, TimeUnit timeUnit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the start time extra from the given intent.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>intent</td>
+          <td>the intent to extract the start time from</td>
+        </tr>
+        <tr>
+          <th>timeUnit</td>
+          <td>the desired time unit for the returned start time</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the start time, in time unit since epoch, or <code>-1</code> if not found
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+
 
 
 <!-- ========= METHOD DETAIL ======== -->
@@ -1512,17 +2522,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1530,7 +2540,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -1543,7 +2553,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

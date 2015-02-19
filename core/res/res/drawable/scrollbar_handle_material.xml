@@ -14,6 +14,9 @@
      limitations under the License.
 -->
 
-<nine-patch xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/scrollbar_handle_mtrl_alpha"
-    android:tint="?attr/colorControlNormal" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:tint="?attr/colorControlNormal"
+       android:shape="rectangle">
+    <solid android:color="#84ffffff" />
+    <size android:width="4dp" />
+</shape>

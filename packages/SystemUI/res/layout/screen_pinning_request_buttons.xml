@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2014, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<!--
+     This layout matches the structure of navigation_bar.xml and will need
+     to be kept up to sync with changes there.
+     On sw600dp, dimensions are changed to be large enough such that the
+     empty views between the buttons is reduced to nothing, if (nav bar)
+     sw600dp layout is changed then this will likely have to be adjusted
+     and possibly need a sw600dp specific one.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/screen_pinning_buttons"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/screen_pinning_request_button_height"
+    android:background="@color/screen_pinning_request_bg" >
+
+    <View
+        android:layout_width="@dimen/screen_pinning_request_side_width"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:visibility="invisible" />
+
+    <FrameLayout
+        android:id="@+id/screen_pinning_back_group"
+        android:layout_width="@dimen/screen_pinning_request_button_width"
+        android:layout_height="@dimen/screen_pinning_request_button_height"
+        android:layout_weight="0"
+        android:paddingStart="@dimen/screen_pinning_request_frame_padding"
+        android:paddingEnd="@dimen/screen_pinning_request_frame_padding" >
+
+        <ImageView
+            android:id="@+id/screen_pinning_back_bg_light"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="matrix"
+            android:src="@drawable/screen_pinning_light_bg_circ" />
+
+        <ImageView
+            android:id="@+id/screen_pinning_back_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/screen_pinning_request_inner_padding"
+            android:paddingStart="@dimen/screen_pinning_request_inner_padding"
+            android:paddingTop="@dimen/screen_pinning_request_inner_padding"
+            android:scaleType="matrix"
+            android:src="@drawable/screen_pinning_bg_circ" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/screen_pinning_request_nav_side_padding"
+            android:paddingStart="@dimen/screen_pinning_request_nav_side_padding"
+            android:paddingTop="@dimen/screen_pinning_request_nav_icon_padding"
+            android:scaleType="center"
+            android:src="@drawable/ic_sysbar_back" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:visibility="invisible" />
+
+    <FrameLayout
+        android:id="@+id/screen_pinning_home_group"
+        android:layout_width="@dimen/screen_pinning_request_button_width"
+        android:layout_height="@dimen/screen_pinning_request_button_height"
+        android:layout_weight="0"
+        android:paddingStart="@dimen/screen_pinning_request_frame_padding"
+        android:paddingEnd="@dimen/screen_pinning_request_frame_padding" >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/screen_pinning_request_nav_side_padding"
+            android:paddingStart="@dimen/screen_pinning_request_nav_side_padding"
+            android:paddingTop="@dimen/screen_pinning_request_nav_icon_padding"
+            android:scaleType="center"
+            android:src="@drawable/ic_sysbar_home" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:visibility="invisible" />
+
+    <FrameLayout
+        android:id="@+id/screen_pinning_recents_group"
+        android:layout_width="@dimen/screen_pinning_request_button_width"
+        android:layout_height="@dimen/screen_pinning_request_button_height"
+        android:layout_weight="0"
+        android:paddingStart="@dimen/screen_pinning_request_frame_padding"
+        android:paddingEnd="@dimen/screen_pinning_request_frame_padding" >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="matrix"
+            android:src="@drawable/screen_pinning_light_bg_circ" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/screen_pinning_request_inner_padding"
+            android:paddingStart="@dimen/screen_pinning_request_inner_padding"
+            android:paddingTop="@dimen/screen_pinning_request_inner_padding"
+            android:scaleType="matrix"
+            android:src="@drawable/screen_pinning_bg_circ" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/screen_pinning_request_nav_side_padding"
+            android:paddingStart="@dimen/screen_pinning_request_nav_side_padding"
+            android:paddingTop="@dimen/screen_pinning_request_nav_icon_padding"
+            android:scaleType="center"
+            android:src="@drawable/ic_sysbar_recent" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="@dimen/screen_pinning_request_side_width"
+        android:layout_height="match_parent"
+        android:layout_weight="0"
+        android:visibility="invisible" />
+
+</LinearLayout>
