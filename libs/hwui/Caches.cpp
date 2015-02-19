@@ -263,7 +263,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
             const Layer* layer = *it;
             log.appendFormat("    Layer size %dx%d; isTextureLayer()=%d; texid=%u fbo=%u; refs=%d\n",
                     layer->getWidth(), layer->getHeight(),
-                    layer->isTextureLayer(), layer->getTexture(),
+                    layer->isTextureLayer(), layer->getTextureId(),
                     layer->getFbo(), layer->getStrongCount());
             memused += layer->getWidth() * layer->getHeight() * 4;
         }

@@ -247,7 +247,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            layer->getTexture(), 0);
+            layer->getTextureId(), 0);
 
     renderState.bindFramebuffer(previousFbo);
 

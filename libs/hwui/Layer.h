@@ -200,8 +200,12 @@ public:
         return stencil;
     }
 
-    inline GLuint getTexture() const {
+    inline GLuint getTextureId() const {
         return texture.id;
+    }
+
+    inline Texture& getTexture() {
+        return texture;
     }
 
     inline GLenum getRenderTarget() const {

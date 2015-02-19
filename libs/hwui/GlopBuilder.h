@@ -39,9 +39,10 @@ public:
     GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop);
 
     GlopBuilder& setMeshUnitQuad();
-    GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper, bool isAlphaMaskTexture);
+    GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper);
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
     GlopBuilder& setMeshIndexedQuads(void* vertexData, int quadCount);
+    GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
 
     GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
     GlopBuilder& setFillTexturePaint(Texture& texture, bool isAlphaMaskTexture,
@@ -52,12 +53,15 @@ public:
             const SkPaint& paint, float alphaScale);
     GlopBuilder& setFillBlack();
     GlopBuilder& setFillClear();
+    GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
+            float alpha, SkXfermode::Mode mode);
 
-    GlopBuilder& setTransformClip(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
+    GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
     GlopBuilder& setModelViewOffsetRect(float offsetX, float offsetY, const Rect source);
+    GlopBuilder& setModelViewOffsetRectSnap(float offsetX, float offsetY, const Rect source);
 
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 

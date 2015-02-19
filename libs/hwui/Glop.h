@@ -76,18 +76,20 @@ struct Glop {
         GLuint indexBufferObject;
         const void* vertices;
         const void* indices;
+        GLvoid* texCoordOffset;
         int elementCount;
         GLsizei stride;
-        GLvoid* texCoordOffset;
         TextureVertex mappedVertices[4];
     } mesh;
 
     struct Fill {
         Program* program;
 
-        Texture* texture;
-        GLenum textureFilter;
-        GLenum textureClamp;
+        struct TextureData {
+            Texture* texture;
+            GLenum filter;
+            GLenum clamp;
+        } texture;
 
         bool colorEnabled;
         FloatColor color;

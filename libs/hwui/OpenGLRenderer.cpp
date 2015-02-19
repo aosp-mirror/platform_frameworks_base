@@ -753,7 +753,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, Rect& clip) {
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            layer->getTexture(), 0);
+            layer->getTextureId(), 0);
 
     // Expand the startTiling region by 1
     startTilingCurrentClip(true, true);
@@ -862,9 +862,9 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(layer->getColorFilter());
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
-        setupDrawTexture(layer->getTexture());
+        setupDrawTexture(layer->getTextureId());
     } else {
-        setupDrawExternalTexture(layer->getTexture());
+        setupDrawExternalTexture(layer->getTextureId());
     }
     if (currentTransform()->isPureTranslate() &&
             !layer->getForceFilter() &&
@@ -924,7 +924,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
         bool blend = layer->isBlend() || getLayerAlpha(layer) < 1.0f;
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
-                layer->getTexture(), &layerPaint, blend,
+                layer->getTextureId(), &layerPaint, blend,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, kUnitQuadCount, swap, swap || simpleTransform);
 
@@ -1061,7 +1061,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     setupDrawDirtyRegionsDisabled();
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms(layer->getColorFilter());
-    setupDrawTexture(layer->getTexture());
+    setupDrawTexture(layer->getTextureId());
     if (currentTransform()->isPureTranslate()) {
         const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
         const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
@@ -1233,7 +1233,7 @@ void OpenGLRenderer::clearLayerRegions() {
             GlopBuilder aBuilder(mRenderState, mCaches, &glop);
             aBuilder.setMeshIndexedQuads(&mesh[0], quadCount)
                     .setFillClear()
-                    .setTransformClip(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                    .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
                     .setModelViewOffsetRect(0, 0, currentSnapshot()->getClipRect())
                     .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                     .build();
@@ -1437,7 +1437,7 @@ void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
         aBuilder.setMeshIndexedQuads(&rectangleVertices[0], rectangleVertices.size() / 4)
                 .setFillBlack()
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
                 .setModelViewOffsetRect(0, 0, scissorBox)
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -1981,19 +1981,6 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
 }
 
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, const SkPaint* paint) {
-    if (USE_GLOPS) {
-        Glop glop;
-        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
-        aBuilder.setMeshTexturedUnitQuad(texture->uvMapper, true)
-                .setFillTexturePaint(*texture, true, paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
     float x = 0;
     float y = 0;
 
@@ -2060,6 +2047,20 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     Texture* texture = getTexture(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
+
+    if (USE_GLOPS) {
+        bool isAlpha8Texture = bitmap->colorType() == kAlpha_8_SkColorType;
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshTexturedUnitQuad(texture->uvMapper)
+                .setFillTexturePaint(*texture, isAlpha8Texture, paint, currentSnapshot()->alpha)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
 
     if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlphaBitmap(texture, paint);
@@ -2376,7 +2377,7 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
         bool shadowInterp = displayFlags & kVertexBuffer_ShadowInterp;
         aBuilder.setMeshVertexBuffer(vertexBuffer, shadowInterp)
                 .setFillPaint(*paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), fudgeOffset)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), fudgeOffset)
                 .setModelViewOffsetRect(translateX, translateY, vertexBuffer.getBounds())
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -2692,9 +2693,9 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
     if (USE_GLOPS) {
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
-        aBuilder.setMeshTexturedUnitQuad(nullptr, true)
+        aBuilder.setMeshTexturedUnitQuad(nullptr)
                 .setFillShadowTexturePaint(*texture, textShadow.color, *paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
                 .setModelViewMapUnitToRect(Rect(sx, sy, sx + texture->width, sy + texture->height))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -3048,45 +3049,58 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
                     composeLayerRect(layer, layer->regionRect));
         } else if (layer->mesh) {
-            const float a = getLayerAlpha(layer);
-            setupDraw();
-            setupDrawWithTexture();
-            setupDrawColor(a, a, a, a);
-            setupDrawColorFilter(layer->getColorFilter());
-            setupDrawBlending(layer);
-            setupDrawProgram();
-            setupDrawPureColorUniforms();
-            setupDrawColorFilterUniforms(layer->getColorFilter());
-            setupDrawTexture(layer->getTexture());
-            if (CC_LIKELY(currentTransform()->isPureTranslate())) {
-                int tx = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
-                int ty = (int) floorf(y + currentTransform()->getTranslateY() + 0.5f);
-
-                layer->setFilter(GL_NEAREST);
-                setupDrawModelView(kModelViewMode_Translate, false, tx, ty,
-                        tx + layer->layer.getWidth(), ty + layer->layer.getHeight(), true);
+            if (USE_GLOPS) {
+                Glop glop;
+                GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+                aBuilder.setMeshTexturedIndexedQuads(layer->mesh, layer->meshElementCount)
+                        .setFillLayer(layer->getTexture(), layer->getColorFilter(), getLayerAlpha(layer), layer->getMode())
+                        .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                        .setModelViewOffsetRectSnap(x, y, Rect(0, 0, layer->layer.getWidth(), layer->layer.getHeight()))
+                        .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                        .build();
+                DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate, renderGlop(glop));
             } else {
-                layer->setFilter(GL_LINEAR);
-                setupDrawModelView(kModelViewMode_Translate, false, x, y,
-                        x + layer->layer.getWidth(), y + layer->layer.getHeight());
+                const float a = getLayerAlpha(layer);
+                setupDraw();
+                setupDrawWithTexture();
+                setupDrawColor(a, a, a, a);
+                setupDrawColorFilter(layer->getColorFilter());
+                setupDrawBlending(layer);
+                setupDrawProgram();
+                setupDrawPureColorUniforms();
+                setupDrawColorFilterUniforms(layer->getColorFilter());
+                setupDrawTexture(layer->getTextureId());
+                if (CC_LIKELY(currentTransform()->isPureTranslate())) {
+                    int tx = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
+                    int ty = (int) floorf(y + currentTransform()->getTranslateY() + 0.5f);
+
+                    layer->setFilter(GL_NEAREST);
+                    setupDrawModelView(kModelViewMode_Translate, false, tx, ty,
+                            tx + layer->layer.getWidth(), ty + layer->layer.getHeight(), true);
+                } else {
+                    layer->setFilter(GL_LINEAR);
+                    setupDrawModelView(kModelViewMode_Translate, false, x, y,
+                            x + layer->layer.getWidth(), y + layer->layer.getHeight());
+                }
+
+
+                TextureVertex* mesh = &layer->mesh[0];
+                GLsizei elementsCount = layer->meshElementCount;
+
+
+                while (elementsCount > 0) {
+                    GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
+
+                    setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
+                    DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
+                            glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, nullptr));
+
+                    elementsCount -= drawCount;
+                    // Though there are 4 vertices in a quad, we use 6 indices per
+                    // quad to draw with GL_TRIANGLES
+                    mesh += (drawCount / 6) * 4;
+                }
             }
-
-            TextureVertex* mesh = &layer->mesh[0];
-            GLsizei elementsCount = layer->meshElementCount;
-
-            while (elementsCount > 0) {
-                GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
-
-                setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
-                DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
-                        glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, nullptr));
-
-                elementsCount -= drawCount;
-                // Though there are 4 vertices in a quad, we use 6 indices per
-                // quad to draw with GL_TRIANGLES
-                mesh += (drawCount / 6) * 4;
-            }
-
 #if DEBUG_LAYERS_AS_REGIONS
             drawRegionRectsDebug(layer->region);
 #endif
@@ -3139,9 +3153,9 @@ void OpenGLRenderer::drawPathTexture(PathTexture* texture, float x, float y,
     if (USE_GLOPS) {
         Glop glop;
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
-        aBuilder.setMeshTexturedUnitQuad(nullptr, true)
+        aBuilder.setMeshTexturedUnitQuad(nullptr)
                 .setFillPathTexturePaint(*texture, *paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
                 .setModelViewMapUnitToRect(Rect(x, y, x + texture->width, y + texture->height))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -3303,7 +3317,7 @@ void OpenGLRenderer::drawColorRects(const float* rects, int count, const SkPaint
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
         aBuilder.setMeshIndexedQuads(&mesh[0], count / 4)
                 .setFillPaint(*paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), transform, false)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
                 .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -3349,7 +3363,7 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
         GlopBuilder aBuilder(mRenderState, mCaches, &glop);
         aBuilder.setMeshUnitQuad()
                 .setFillPaint(*paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), transform, false)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), transform, false)
                 .setModelViewMapUnitToRect(Rect(left, top, right, bottom))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                 .build();
@@ -3381,19 +3395,6 @@ void OpenGLRenderer::drawColorRect(float left, float top, float right, float bot
 }
 
 void OpenGLRenderer::drawTextureRect(Texture* texture, const SkPaint* paint) {
-    if (USE_GLOPS) {
-        Glop glop;
-        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
-        aBuilder.setMeshTexturedUnitQuad(texture->uvMapper, false)
-                .setFillTexturePaint(*texture, false, paint, currentSnapshot()->alpha)
-                .setTransformClip(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
-                .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
-                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
-                .build();
-        renderGlop(glop);
-        return;
-    }
-
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
     GLvoid* vertices = (GLvoid*) nullptr;
