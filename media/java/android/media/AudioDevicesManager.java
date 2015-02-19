@@ -130,8 +130,7 @@ public class AudioDevicesManager {
     public ArrayList<AudioDeviceInfo> listDevices(int flags) {
         Slog.i(TAG, "AudioManager.listDevices(" + Integer.toHexString(flags) + ")");
 
-        //FIXME - Use ArrayList<AudioDevicePort> when mAudioManager.listAudioDevicePorts() is fixed.
-        ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
+        ArrayList<AudioDevicePort> ports = new ArrayList<AudioDevicePort>();
         int status = mAudioManager.listAudioDevicePorts(ports);
 
         Slog.i(TAG, "  status:" + status + " numPorts:" + ports.size());
@@ -140,9 +139,9 @@ public class AudioDevicesManager {
 
         if (status == AudioManager.SUCCESS) {
             deviceList = new ArrayList<AudioDeviceInfo>();
-             for (AudioPort port : ports) {
-                if (/*port instanceof AudioDevicePort &&*/ checkFlags((AudioDevicePort)port, flags)) {
-                    deviceList.add(new AudioDeviceInfo((AudioDevicePort)port));
+             for (AudioDevicePort port : ports) {
+                if (checkFlags(port, flags)) {
+                    deviceList.add(new AudioDeviceInfo(port));
                 }
             }
         }

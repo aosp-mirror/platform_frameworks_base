@@ -3459,14 +3459,14 @@ public class AudioManager {
      * @see listAudioPorts(ArrayList<AudioPort>)
      * @hide
      */
-    public int listAudioDevicePorts(ArrayList<AudioPort> devices) {
+    public int listAudioDevicePorts(ArrayList<AudioDevicePort> devices) {
         ArrayList<AudioPort> ports = new ArrayList<AudioPort>();
         int status = updateAudioPortCache(ports, null);
         if (status == SUCCESS) {
             devices.clear();
             for (int i = 0; i < ports.size(); i++) {
                 if (ports.get(i) instanceof AudioDevicePort) {
-                    devices.add(ports.get(i));
+                    devices.add((AudioDevicePort)ports.get(i));
                 }
             }
         }

@@ -699,15 +699,14 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
         private void findAudioSinkFromAudioPolicy(List<AudioDevicePort> sinks) {
             sinks.clear();
-            ArrayList<AudioPort> devicePorts = new ArrayList<AudioPort>();
+            ArrayList<AudioDevicePort> devicePorts = new ArrayList<AudioDevicePort>();
             if (mAudioManager.listAudioDevicePorts(devicePorts) != AudioManager.SUCCESS) {
                 return;
             }
             int sinkDevice = mAudioManager.getDevicesForStream(AudioManager.STREAM_MUSIC);
-            for (AudioPort port : devicePorts) {
-                AudioDevicePort devicePort = (AudioDevicePort) port;
-                if ((devicePort.type() & sinkDevice) != 0) {
-                    sinks.add(devicePort);
+            for (AudioDevicePort port : devicePorts) {
+                if ((port.type() & sinkDevice) != 0) {
+                    sinks.add(port);
                 }
             }
         }
@@ -716,14 +715,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             if (type == AudioManager.DEVICE_NONE) {
                 return null;
             }
-            ArrayList<AudioPort> devicePorts = new ArrayList<AudioPort>();
+            ArrayList<AudioDevicePort> devicePorts = new ArrayList<AudioDevicePort>();
             if (mAudioManager.listAudioDevicePorts(devicePorts) != AudioManager.SUCCESS) {
                 return null;
             }
-            for (AudioPort port : devicePorts) {
-                AudioDevicePort devicePort = (AudioDevicePort) port;
-                if (devicePort.type() == type && devicePort.address().equals(address)) {
-                    return devicePort;
+            for (AudioDevicePort port : devicePorts) {
+                if (port.type() == type && port.address().equals(address)) {
+                    return port;
                 }
             }
             return null;
