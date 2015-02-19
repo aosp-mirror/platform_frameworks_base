@@ -1711,6 +1711,7 @@ package android {
     field public static final int paste = 16908322; // 0x1020022
     field public static final int primary = 16908300; // 0x102000c
     field public static final int progress = 16908301; // 0x102000d
+    field public static final int redo = 16908338; // 0x1020032
     field public static final int secondaryProgress = 16908303; // 0x102000f
     field public static final int selectAll = 16908319; // 0x102001f
     field public static final int selectTextMode = 16908333; // 0x102002d
@@ -1727,6 +1728,7 @@ package android {
     field public static final int text2 = 16908309; // 0x1020015
     field public static final int title = 16908310; // 0x1020016
     field public static final int toggle = 16908311; // 0x1020017
+    field public static final int undo = 16908337; // 0x1020031
     field public static final int widget_frame = 16908312; // 0x1020018
   }
 
