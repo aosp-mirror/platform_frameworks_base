@@ -2294,8 +2294,10 @@ class ContextImpl extends Context {
         if (container != null) {
             compatInfo = container.getDisplayAdjustments(displayId).getCompatibilityInfo();
         }
-        if (compatInfo == null && displayId == Display.DEFAULT_DISPLAY) {
-            compatInfo = packageInfo.getCompatibilityInfo();
+        if (compatInfo == null) {
+            compatInfo = (displayId == Display.DEFAULT_DISPLAY)
+                    ? packageInfo.getCompatibilityInfo()
+                    : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
         }
         mDisplayAdjustments.setCompatibilityInfo(compatInfo);
         mDisplayAdjustments.setConfiguration(overrideConfiguration);
