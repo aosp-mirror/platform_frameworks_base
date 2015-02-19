@@ -63,7 +63,7 @@ String url ="http://www.google.com";
 
 // Request a string response from the provided URL.
 StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-            new Response.Listener<String>() {
+            new Response.Listener&lt;String&gt;() {
     &#64;Override
     public void onResponse(String response) {
         // Display the first 500 characters of the response string.
