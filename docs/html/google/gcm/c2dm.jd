@@ -75,7 +75,6 @@ page.title=Migration
 <dt><strong>Canonical registration ID</strong></dt>
 <dd>There may be situations where the server ends up with 2 registration IDs for the same device. If the GCM response contains a registration ID, simply replace the registration ID you have with the one provided. With this feature your application doesn't need to send the device ID to your server anymore. For more information, see <a href="adv.html#canonical">Advanced Topics</a>.</dd>
 </dl>
-<p>GCM also provides client and server <a href="{@docRoot}reference/com/google/android/gcm/package-summary.html">helper libraries</a> to make writing your code easier.</p>
 
 <h3 id="interop">Relationship between C2DM and GCM</h3>
 
