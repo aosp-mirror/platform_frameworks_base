@@ -47,7 +47,8 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mOpaque(!translucent)
         , mCanvas(NULL)
         , mHaveNewSurface(false)
-        , mRootRenderNode(rootRenderNode) {
+        , mRootRenderNode(rootRenderNode)
+        , mCurrentFrameInfo(NULL) {
     mAnimationContext = contextFactory->createAnimationContext(mRenderThread.timeLord());
     mRenderThread.renderState().registerCanvasContext(this);
 }
@@ -152,8 +153,12 @@ void CanvasContext::processLayerUpdate(DeferredLayerUpdater* layerUpdater) {
     }
 }
 
-void CanvasContext::prepareTree(TreeInfo& info) {
+void CanvasContext::prepareTree(TreeInfo& info, int64_t* uiFrameInfo) {
     mRenderThread.removeFrameCallback(this);
+
+    mCurrentFrameInfo = &mFrames.next();
+    mCurrentFrameInfo->importUiThreadInfo(uiFrameInfo);
+    mCurrentFrameInfo->markSyncStart();
 
     info.damageAccumulator = &mDamageAccumulator;
     info.renderer = mCanvas;
@@ -204,6 +209,7 @@ void CanvasContext::draw() {
             "drawRenderNode called on a context with no canvas or surface!");
 
     profiler().markPlaybackStart();
+    mCurrentFrameInfo->markIssueDrawCommandsStart();
 
     SkRect dirty;
     mDamageAccumulator.finish(&dirty);
@@ -241,12 +247,19 @@ void CanvasContext::draw() {
 
     profiler().markPlaybackEnd();
 
+    // Even if we decided to cancel the frame, from the perspective of jank
+    // metrics the frame was swapped at this point
+    mCurrentFrameInfo->markSwapBuffers();
+
     if (status & DrawGlInfo::kStatusDrew) {
         swapBuffers();
     } else {
         mEglManager.cancelFrame();
     }
 
+    // TODO: Use a fence for real completion?
+    mCurrentFrameInfo->markFrameCompleted();
+    mRenderThread.jankTracker().addFrame(*mCurrentFrameInfo);
     profiler().finishFrame();
 }
 
@@ -259,9 +272,14 @@ void CanvasContext::doFrame() {
     ATRACE_CALL();
 
     profiler().startFrame();
+    int64_t frameInfo[UI_THREAD_FRAME_INFO_SIZE];
+    UiFrameInfoBuilder(frameInfo)
+        .addFlag(FrameInfoFlags::kRTAnimation)
+        .setVsync(mRenderThread.timeLord().computeFrameTimeNanos(),
+                mRenderThread.timeLord().latestVsync());
 
     TreeInfo info(TreeInfo::MODE_RT_ONLY, mRenderThread.renderState());
-    prepareTree(info);
+    prepareTree(info, frameInfo);
     if (info.out.canDrawThisFrame) {
         draw();
     }
@@ -372,6 +390,28 @@ void CanvasContext::requireGlContext() {
 void CanvasContext::setTextureAtlas(RenderThread& thread,
         const sp<GraphicBuffer>& buffer, int64_t* map, size_t mapSize) {
     thread.eglManager().setTextureAtlas(buffer, map, mapSize);
+}
+
+void CanvasContext::dumpFrames(int fd) {
+    FILE* file = fdopen(fd, "a");
+    fprintf(file, "\n\n---PROFILEDATA---");
+    for (size_t i = 0; i < mFrames.size(); i++) {
+        FrameInfo& frame = mFrames[i];
+        if (frame[FrameInfoIndex::kSyncStart] == 0) {
+            continue;
+        }
+        fprintf(file, "\n");
+        for (int i = 0; i < FrameInfoIndex::kNumIndexes; i++) {
+            fprintf(file, "%" PRId64 ",", frame[i]);
+        }
+    }
+    fprintf(file, "\n---PROFILEDATA---\n\n");
+    fflush(file);
+}
+
+void CanvasContext::resetFrameStats() {
+    mFrames.clear();
+    mRenderThread.jankTracker().reset();
 }
 
 } /* namespace renderthread */
