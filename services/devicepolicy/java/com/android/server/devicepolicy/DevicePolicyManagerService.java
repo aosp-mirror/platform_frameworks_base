@@ -99,6 +99,7 @@ import com.android.internal.R;
 import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
@@ -1918,13 +1919,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         validateQualityConstant(quality);
 
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.passwordQuality != quality) {
@@ -1967,11 +1966,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordLength != length) {
@@ -2014,11 +2011,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.passwordHistoryLength != length) {
@@ -2061,14 +2056,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkArgumentNonnegative(timeout, "Timeout must be >= 0 ms");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
-            if (timeout < 0) {
-                throw new IllegalArgumentException("Timeout must be >= 0 ms");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_EXPIRE_PASSWORD);
             // Calling this API automatically bumps the expiration date
@@ -2230,11 +2221,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordUpperCase != length) {
@@ -2274,11 +2263,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void setPasswordMinimumLowerCase(ComponentName who, int length) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordLowerCase != length) {
@@ -2321,11 +2308,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordLetters != length) {
@@ -2368,11 +2353,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordNumeric != length) {
@@ -2415,11 +2398,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordSymbols != length) {
@@ -2462,11 +2443,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD);
             if (ap.minimumPasswordNonLetter != length) {
@@ -2559,11 +2538,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(who,
@@ -2770,11 +2747,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_FORCE_LOCK);
             if (ap.maximumTimeToUnlock != timeMs) {
@@ -2953,9 +2928,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean installKeyPair(ComponentName who, byte[] privKey, byte[] cert, String alias) {
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         }
@@ -3238,9 +3211,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return null;
         }
         synchronized(this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
+            Preconditions.checkNotNull(who, "ComponentName is null");
 
             // Only check if owner has set global proxy. We don't allow other users to set it.
             DevicePolicyData policy = getUserData(UserHandle.USER_OWNER);
@@ -3376,12 +3347,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
             // Check for permissions
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             // Only owner can set storage encryption
             if (userHandle != UserHandle.USER_OWNER
                     || UserHandle.getCallingUserId() != UserHandle.USER_OWNER) {
@@ -3512,11 +3481,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (ap.disableScreenCapture != disabled) {
@@ -3571,11 +3538,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             if (admin.requireAutoTime != required) {
@@ -3622,11 +3587,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA);
             if (ap.disableCamera != disabled) {
@@ -3671,12 +3634,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         enforceNotManagedProfile(userHandle, "disable keyguard features");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
             if (ap.disabledKeyguardFeatures != which) {
@@ -3820,9 +3781,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void clearDeviceOwner(String packageName) {
-        if (packageName == null) {
-            throw new NullPointerException("packageName is null");
-        }
+        Preconditions.checkNotNull(packageName, "packageName is null");
         try {
             int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
             if (uid != Binder.getCallingUid()) {
@@ -3947,12 +3906,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
         synchronized (this) {
-            // Check for permissions
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             // Check if this is the profile owner who is calling
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             int userId = UserHandle.getCallingUserId();
@@ -3974,12 +3930,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setProfileName(ComponentName who, String profileName) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         int userId = UserHandle.getCallingUserId();
-
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
-
         // Check if this is the profile owner (includes device owner).
         getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
@@ -4155,12 +4107,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void addPersistentPreferredActivity(ComponentName who, IntentFilter filter,
             ComponentName activity) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
-
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -4177,12 +4126,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void clearPackagePersistentPreferredActivities(ComponentName who, String packageName) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = UserHandle.getCallingUserId();
-
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -4199,12 +4145,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setApplicationRestrictions(ComponentName who, String packageName, Bundle settings) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
-
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4221,15 +4164,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(admin, "admin is null");
+        Preconditions.checkNotNull(agent, "agent is null");
         final int userHandle = UserHandle.getCallingUserId();
         enforceNotManagedProfile(userHandle, "set trust agent configuration");
         synchronized (this) {
-            if (admin == null) {
-                throw new NullPointerException("admin is null");
-            }
-            if (agent == null) {
-                throw new NullPointerException("agent is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
             ap.trustAgentInfos.put(agent.flattenToString(), new TrustAgentInfo(args));
@@ -4243,10 +4182,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
+        Preconditions.checkNotNull(agent, "agent null");
         enforceCrossUserPermission(userHandle);
-        if (agent == null) {
-            throw new NullPointerException("agent is null");
-        }
 
         synchronized (this) {
             final String componentName = agent.flattenToString();
@@ -4299,10 +4236,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setRestrictionsProvider(ComponentName who, ComponentName permissionProvider) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             int userHandle = UserHandle.getCallingUserId();
@@ -4324,11 +4259,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void addCrossProfileIntentFilter(ComponentName who, IntentFilter filter, int flags) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IPackageManager pm = AppGlobals.getPackageManager();
@@ -4351,11 +4284,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     public void clearCrossProfileIntentFilters(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             IPackageManager pm = AppGlobals.getPackageManager();
             long id = Binder.clearCallingIdentity();
@@ -4425,9 +4356,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
 
         if (packageList != null) {
             int userId = UserHandle.getCallingUserId();
@@ -4472,10 +4401,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
 
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
@@ -4580,9 +4506,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
 
         // TODO When InputMethodManager supports per user calls remove
         //      this restriction.
@@ -4625,10 +4549,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return null;
         }
-
-        if (who == null) {
-            throw new NullPointerException("ComponentName is null");
-        }
+        Preconditions.checkNotNull(who, "ComponentName is null");
 
         synchronized (this) {
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
@@ -4701,10 +4622,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public UserHandle createUser(ComponentName who, String name) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4755,10 +4674,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean removeUser(ComponentName who, UserHandle userHandle) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4772,10 +4689,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean switchUser(ComponentName who, UserHandle userHandle) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4796,12 +4711,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public Bundle getApplicationRestrictions(ComponentName who, String packageName) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final UserHandle userHandle = new UserHandle(UserHandle.getCallingUserId());
 
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4815,12 +4728,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setUserRestriction(ComponentName who, String key, boolean enabled) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final UserHandle user = new UserHandle(UserHandle.getCallingUserId());
         final int userHandle = user.getIdentifier();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             boolean isDeviceOwner = isDeviceOwner(activeAdmin.info.getPackageName());
@@ -4922,11 +4833,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean setApplicationHidden(ComponentName who, String packageName,
             boolean hidden) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4945,11 +4854,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isApplicationHidden(ComponentName who, String packageName) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -4968,11 +4875,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void enableSystemApp(ComponentName who, String packageName) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
-
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -5013,11 +4917,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public int enableSystemAppWithIntent(ComponentName who, Intent intent) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
-
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
@@ -5084,10 +4985,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (disabled) {
@@ -5125,12 +5024,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setUninstallBlocked(ComponentName who, String packageName,
             boolean uninstallBlocked) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         final int userId = UserHandle.getCallingUserId();
-
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = Binder.clearCallingIdentity();
@@ -5177,10 +5073,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return;
         }
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (admin.disableCallerId != disabled) {
@@ -5195,12 +5089,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
-
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             return admin.disableCallerId;
@@ -5221,13 +5111,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Sets which packages may enter lock task mode.
      *
      * This function can only be called by the device owner.
-     * @param components The list of components allowed to enter lock task mode.
+     * @param packages The list of packages allowed to enter lock task mode.
      */
     public void setLockTaskPackages(ComponentName who, String[] packages) throws SecurityException {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             int userHandle = Binder.getCallingUserHandle().getIdentifier();
@@ -5249,15 +5137,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * This function returns the list of components allowed to start the task lock mode.
      */
     public String[] getLockTaskPackages(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             int userHandle = Binder.getCallingUserHandle().getIdentifier();
             DevicePolicyData policy = getUserData(userHandle);
-            return policy.mLockTaskPackages.toArray(new String[0]);
+            return policy.mLockTaskPackages.toArray(new String[policy.mLockTaskPackages.size()]);
         }
     }
 
@@ -5313,11 +5199,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setGlobalSetting(ComponentName who, String setting, String value) {
         final ContentResolver contentResolver = mContext.getContentResolver();
+        Preconditions.checkNotNull(who, "ComponentName is null");
 
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)) {
@@ -5336,13 +5220,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setSecureSetting(ComponentName who, String setting, String value) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         int callingUserId = UserHandle.getCallingUserId();
         final ContentResolver contentResolver = mContext.getContentResolver();
 
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             ActiveAdmin activeAdmin =
                     getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
@@ -5367,10 +5249,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setMasterVolumeMuted(ComponentName who, boolean on) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             IAudioService iAudioService = IAudioService.Stub.asInterface(
@@ -5387,12 +5267,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isMasterVolumeMuted(ComponentName who) {
-        final ContentResolver contentResolver = mContext.getContentResolver();
-
+        Preconditions.checkNotNull(who, "ComponentName is null");
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
-            }
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             AudioManager audioManager =
