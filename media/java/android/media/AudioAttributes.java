@@ -209,8 +209,23 @@ public final class AudioAttributes implements Parcelable {
     @SystemApi
     public final static int FLAG_HW_HOTWORD = 0x1 << 5;
 
+    /**
+     * @hide
+     * Flag requesting audible playback even under limited interruptions.
+     */
+    @SystemApi
+    public final static int FLAG_BYPASS_INTERRUPTION_POLICY = 0x1 << 6;
+
+    /**
+     * @hide
+     * Flag requesting audible playback even when the underlying stream is muted.
+     */
+    @SystemApi
+    public final static int FLAG_BYPASS_MUTE = 0x1 << 7;
+
     private final static int FLAG_ALL = FLAG_AUDIBILITY_ENFORCED | FLAG_SECURE | FLAG_SCO |
-            FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD;
+            FLAG_BEACON | FLAG_HW_AV_SYNC | FLAG_HW_HOTWORD | FLAG_BYPASS_INTERRUPTION_POLICY |
+            FLAG_BYPASS_MUTE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED | FLAG_HW_AV_SYNC;
 
     private int mUsage = USAGE_UNKNOWN;
