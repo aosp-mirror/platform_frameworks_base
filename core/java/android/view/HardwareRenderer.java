@@ -278,7 +278,7 @@ public abstract class HardwareRenderer {
     /**
      * Outputs extra debugging information in the specified file descriptor.
      */
-    abstract void dumpGfxInfo(PrintWriter pw, FileDescriptor fd);
+    abstract void dumpGfxInfo(PrintWriter pw, FileDescriptor fd, String[] args);
 
     /**
      * Loads system properties used by the renderer. This method is invoked

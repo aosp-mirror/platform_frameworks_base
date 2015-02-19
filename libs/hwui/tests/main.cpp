@@ -85,7 +85,7 @@ public:
         proxy->initialize(surface);
         float lightX = width / 2.0;
         proxy->setup(width, height, (Vector3){lightX, dp(-200.0f), dp(800.0f)},
-                dp(800.0f), 255 * 0.075, 255 * 0.15);
+                dp(800.0f), 255 * 0.075, 255 * 0.15, gDisplay.density);
 
         android::uirenderer::Rect DUMMY;
 
@@ -100,8 +100,7 @@ public:
 
             ATRACE_NAME("UI-Draw Frame");
             animation.doFrame(i);
-            nsecs_t frameTimeNs = systemTime(CLOCK_MONOTONIC);
-            proxy->syncAndDrawFrame(frameTimeNs, 0, gDisplay.density);
+            proxy->syncAndDrawFrame();
         }
 
         sleep(5);

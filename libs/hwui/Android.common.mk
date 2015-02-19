@@ -43,11 +43,13 @@ LOCAL_SRC_FILES := \
     Extensions.cpp \
     FboCache.cpp \
     FontRenderer.cpp \
+    FrameInfo.cpp \
     GammaFontRenderer.cpp \
     GlopBuilder.cpp \
     GradientCache.cpp \
     Image.cpp \
     Interpolator.cpp \
+    JankTracker.cpp \
     Layer.cpp \
     LayerCache.cpp \
     LayerRenderer.cpp \

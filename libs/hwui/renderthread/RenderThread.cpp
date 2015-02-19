@@ -151,6 +151,11 @@ RenderThread::~RenderThread() {
     LOG_ALWAYS_FATAL("Can't destroy the render thread");
 }
 
+void RenderThread::setFrameInterval(nsecs_t frameInterval) {
+    mTimeLord.setFrameInterval(frameInterval);
+    mJankTracker->setFrameInterval(frameInterval);
+}
+
 void RenderThread::initializeDisplayEventReceiver() {
     LOG_ALWAYS_FATAL_IF(mDisplayEventReceiver, "Initializing a second DisplayEventReceiver?");
     mDisplayEventReceiver = new DisplayEventReceiver();
@@ -167,6 +172,7 @@ void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
     mRenderState = new RenderState(*this);
+    mJankTracker = new JankTracker(mTimeLord.frameIntervalNanos());
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
