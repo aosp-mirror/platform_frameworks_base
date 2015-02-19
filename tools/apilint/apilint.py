@@ -253,7 +253,7 @@ def verify_constants(clazz):
     for f in clazz.fields:
         if "static" in f.split and "final" in f.split:
             if re.match("[A-Z0-9_]+", f.name) is None:
-                error(clazz, f, "C2", "Constant field names should be FOO_NAME")
+                error(clazz, f, "C2", "Constant field names must be FOO_NAME")
 
 
 def verify_enums(clazz):
@@ -269,7 +269,7 @@ def verify_class_names(clazz):
     if re.match("android\.R\.[a-z]+", clazz.fullname): return
 
     if re.search("[A-Z]{2,}", clazz.name) is not None:
-        warn(clazz, None, "S1", "Class name style should be Mtp not MTP")
+        warn(clazz, None, "S1", "Class names with acronyms should be Mtp not MTP")
     if re.match("[^A-Z]", clazz.name):
         error(clazz, None, "S1", "Class must start with uppercase char")
 
@@ -282,7 +282,7 @@ def verify_method_names(clazz):
 
     for m in clazz.methods:
         if re.search("[A-Z]{2,}", m.name) is not None:
-            warn(clazz, m, "S1", "Method name style should be getMtu() instead of getMTU()")
+            warn(clazz, m, "S1", "Method names with acronyms should be getMtu() instead of getMTU()")
         if re.match("[^a-z]", m.name):
             error(clazz, m, "S1", "Method name must start with lowercase char")
 
@@ -294,13 +294,13 @@ def verify_callbacks(clazz):
     if clazz.fullname == "android.speech.tts.SynthesisCallback": return
 
     if clazz.name.endswith("Callbacks"):
-        error(clazz, None, "L1", "Class name must not be plural")
+        error(clazz, None, "L1", "Callback class names should be singular")
     if clazz.name.endswith("Observer"):
         warn(clazz, None, "L1", "Class should be named FooCallback")
 
     if clazz.name.endswith("Callback"):
         if "interface" in clazz.split:
-            error(clazz, None, "CL3", "Callback must be abstract class to enable extension in future API levels")
+            error(clazz, None, "CL3", "Callbacks must be abstract class to enable extension in future API levels")
 
         for m in clazz.methods:
             if not re.match("on[A-Z][a-z]*", m.name):
@@ -316,7 +316,7 @@ def verify_listeners(clazz):
 
     if clazz.name.endswith("Listener"):
         if " abstract class " in clazz.raw:
-            error(clazz, None, "L1", "Listener should be an interface, otherwise renamed Callback")
+            error(clazz, None, "L1", "Listeners should be an interface, or otherwise renamed Callback")
 
         for m in clazz.methods:
             if not re.match("on[A-Z][a-z]*", m.name):
@@ -325,7 +325,7 @@ def verify_listeners(clazz):
         if len(clazz.methods) == 1 and clazz.name.startswith("On"):
             m = clazz.methods[0]
             if (m.name + "Listener").lower() != clazz.name.lower():
-                error(clazz, m, "L1", "Single listener method name should match class name")
+                error(clazz, m, "L1", "Single listener method name must match class name")
 
 
 def verify_actions(clazz):
@@ -412,10 +412,10 @@ def verify_protected(clazz):
     """Verify that no protected methods or fields are allowed."""
     for m in clazz.methods:
         if "protected" in m.split:
-            error(clazz, m, "M7", "No protected methods; must be public")
+            error(clazz, m, "M7", "Protected methods not allowed; must be public")
     for f in clazz.fields:
         if "protected" in f.split:
-            error(clazz, f, "M7", "No protected fields; must be public")
+            error(clazz, f, "M7", "Protected fields not allowed; must be public")
 
 
 def verify_fields(clazz):
@@ -449,10 +449,10 @@ def verify_fields(clazz):
 
         if not "static" in f.split:
             if not re.match("[a-z]([a-zA-Z]+)?", f.name):
-                error(clazz, f, "S1", "Non-static fields must be named with myField style")
+                error(clazz, f, "S1", "Non-static fields must be named using myField style")
 
         if re.match("[ms][A-Z]", f.name):
-            error(clazz, f, "F1", "Don't expose your internal objects")
+            error(clazz, f, "F1", "Internal objects must not be exposed")
 
         if re.match("[A-Z_]+", f.name):
             if "static" not in f.split or "final" not in f.split:
@@ -496,7 +496,7 @@ def verify_sync(clazz):
     """Verify synchronized methods aren't exposed."""
     for m in clazz.methods:
         if "synchronized" in m.split:
-            error(clazz, m, "M5", "Internal lock exposed")
+            error(clazz, m, "M5", "Internal locks must not be exposed")
 
 
 def verify_intent_builder(clazz):
@@ -508,7 +508,7 @@ def verify_intent_builder(clazz):
             if m.name.startswith("create") and m.name.endswith("Intent"):
                 pass
             else:
-                error(clazz, m, "FW1", "Methods creating an Intent should be named createFooIntent()")
+                error(clazz, m, "FW1", "Methods creating an Intent must be named createFooIntent()")
 
 
 def verify_helper_classes(clazz):
@@ -537,7 +537,7 @@ def verify_helper_classes(clazz):
             if f.name == "PROVIDER_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "C4", "Inconsistent interface name; expected %s" % (clazz.fullname))
+                    error(clazz, f, "C4", "Inconsistent interface constant; expected %s" % (clazz.fullname))
 
     if "extends android.content.BroadcastReceiver" in clazz.raw:
         test_methods = True
@@ -578,11 +578,11 @@ def verify_builder(clazz):
         if m.name.startswith("clear"): continue
 
         if m.name.startswith("with"):
-            warn(clazz, m, None, "Builder methods names should follow setFoo() style")
+            warn(clazz, m, None, "Builder methods names should use setFoo() style")
 
         if m.name.startswith("set"):
             if not m.typ.endswith(clazz.fullname):
-                warn(clazz, m, "M4", "Methods should return the builder")
+                warn(clazz, m, "M4", "Methods must return the builder object")
 
     if not has_build:
         warn(clazz, None, None, "Missing build() method")
@@ -591,13 +591,13 @@ def verify_builder(clazz):
 def verify_aidl(clazz):
     """Catch people exposing raw AIDL."""
     if "extends android.os.Binder" in clazz.raw or "implements android.os.IInterface" in clazz.raw:
-        error(clazz, None, None, "Exposing raw AIDL interface")
+        error(clazz, None, None, "Raw AIDL interfaces must not be exposed")
 
 
 def verify_internal(clazz):
     """Catch people exposing internal classes."""
     if clazz.pkg.name.startswith("com.android"):
-        error(clazz, None, None, "Exposing internal class")
+        error(clazz, None, None, "Internal classes must not be exposed")
 
 
 def verify_layering(clazz):
@@ -645,25 +645,43 @@ def verify_layering(clazz):
 
 
 def verify_boolean(clazz, api):
-    """Catches people returning boolean from getFoo() style methods.
-    Ignores when matching setFoo() is present."""
+    """Verifies that boolean accessors are named correctly.
+    For example, hasFoo() and setHasFoo()."""
 
-    methods = [ m.name for m in clazz.methods ]
+    def is_get(m): return len(m.args) == 0 and m.typ == "boolean"
+    def is_set(m): return len(m.args) == 1 and m.args[0] == "boolean"
 
-    builder = clazz.fullname + ".Builder"
-    builder_methods = []
-    if builder in api:
-        builder_methods = [ m.name for m in api[builder].methods ]
+    gets = [ m for m in clazz.methods if is_get(m) ]
+    sets = [ m for m in clazz.methods if is_set(m) ]
+
+    def error_if_exists(methods, trigger, expected, actual):
+        for m in methods:
+            if m.name == actual:
+                error(clazz, m, "M6", "Symmetric method for %s must be named %s" % (trigger, expected))
 
     for m in clazz.methods:
-        if m.typ == "boolean" and m.name.startswith("get") and m.name != "get" and len(m.args) == 0:
-            setter = "set" + m.name[3:]
-            if setter in methods:
-                pass
-            elif builder is not None and setter in builder_methods:
-                pass
-            else:
-                warn(clazz, m, None, "Methods returning boolean should be named isFoo, hasFoo, areFoo")
+        if is_get(m):
+            if re.match("is[A-Z]", m.name):
+                target = m.name[2:]
+                expected = "setIs" + target
+                error_if_exists(sets, m.name, expected, "setHas" + target)
+            elif re.match("has[A-Z]", m.name):
+                target = m.name[3:]
+                expected = "setHas" + target
+                error_if_exists(sets, m.name, expected, "setIs" + target)
+                error_if_exists(sets, m.name, expected, "set" + target)
+            elif re.match("get[A-Z]", m.name):
+                target = m.name[3:]
+                expected = "set" + target
+                error_if_exists(sets, m.name, expected, "setIs" + target)
+                error_if_exists(sets, m.name, expected, "setHas" + target)
+
+        if is_set(m):
+            if re.match("set[A-Z]", m.name):
+                target = m.name[3:]
+                expected = "get" + target
+                error_if_exists(sets, m.name, expected, "is" + target)
+                error_if_exists(sets, m.name, expected, "has" + target)
 
 
 def verify_collections(clazz):
@@ -674,10 +692,10 @@ def verify_collections(clazz):
            "java.util.HashMap", "java.util.HashSet", "android.util.ArraySet", "android.util.ArrayMap"]
     for m in clazz.methods:
         if m.typ in bad:
-            error(clazz, m, "CL2", "Return type is concrete collection; should be interface")
+            error(clazz, m, "CL2", "Return type is concrete collection; must be higher-level interface")
         for arg in m.args:
             if arg in bad:
-                error(clazz, m, "CL2", "Argument is concrete collection; should be interface")
+                error(clazz, m, "CL2", "Argument is concrete collection; must be higher-level interface")
 
 
 def verify_flags(clazz):
@@ -740,7 +758,7 @@ def verify_manager(clazz):
     if not clazz.name.endswith("Manager"): return
 
     for c in clazz.ctors:
-        error(clazz, c, None, "Managers should always be obtained from Context")
+        error(clazz, c, None, "Managers must always be obtained from Context")
 
 
 def verify_boxed(clazz):
@@ -751,18 +769,18 @@ def verify_boxed(clazz):
     for c in clazz.ctors:
         for arg in c.args:
             if arg in boxed:
-                error(clazz, c, None, "Must avoid boxed primitives")
+                error(clazz, c, "M11", "Must avoid boxed primitives")
 
     for f in clazz.fields:
         if f.typ in boxed:
-            error(clazz, f, None, "Must avoid boxed primitives")
+            error(clazz, f, "M11", "Must avoid boxed primitives")
 
     for m in clazz.methods:
         if m.typ in boxed:
-            error(clazz, m, None, "Must avoid boxed primitives")
+            error(clazz, m, "M11", "Must avoid boxed primitives")
         for arg in m.args:
             if arg in boxed:
-                error(clazz, m, None, "Must avoid boxed primitives")
+                error(clazz, m, "M11", "Must avoid boxed primitives")
 
 
 def verify_static_utils(clazz):
@@ -875,20 +893,56 @@ def verify_callback_handlers(clazz):
             if "android.os.Handler" in m.args:
                 takes_handler = True
         if not takes_handler:
-            error(clazz, f, "L1", "Registration methods should have overload that accepts delivery Handler")
+            warn(clazz, f, "L1", "Registration methods should have overload that accepts delivery Handler")
 
 
 def verify_context_first(clazz):
     """Verifies that methods accepting a Context keep it the first argument."""
-    for m in clazz.ctors:
-        if len(m.args) > 1:
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
+        if len(m.args) > 1 and m.args[0] != "android.content.Context":
             if "android.content.Context" in m.args[1:]:
                 error(clazz, m, "M3", "Context is distinct, so it must be the first argument")
 
-    for m in clazz.methods:
-        if len(m.args) > 1:
-            if "android.content.Context" in m.args[1:]:
-                error(clazz, m, "M3", "Context is distinct, so it must be the first argument")
+
+def verify_listener_last(clazz):
+    """Verifies that methods accepting a Listener or Callback keep them as last arguments."""
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
+        if "Listener" in m.name or "Callback" in m.name: continue
+        found = False
+        for a in m.args:
+            if a.endswith("Callback") or a.endswith("Callbacks") or a.endswith("Listener"):
+                found = True
+            elif found and a != "android.os.Handler":
+                warn(clazz, m, "M3", "Listeners should always be at end of argument list")
+
+
+def verify_resource_names(clazz):
+    """Verifies that resource names have consistent case."""
+    if not re.match("android\.R\.[a-z]+", clazz.fullname): return
+
+    # Resources defined by files are foo_bar_baz
+    if clazz.name in ["anim","animator","color","dimen","drawable","interpolator","layout","transition","menu","mipmap","string","plurals","raw","xml"]:
+        for f in clazz.fields:
+            if re.match("[a-z1-9_]+$", f.name): continue
+            error(clazz, f, None, "Expected resource name in this class to be foo_bar_baz style")
+
+    # Resources defined inside files are fooBarBaz
+    if clazz.name in ["array","attr","id","bool","fraction","integer"]:
+        for f in clazz.fields:
+            if re.match("config_[a-z][a-zA-Z1-9]*$", f.name): continue
+            if re.match("layout_[a-z][a-zA-Z1-9]*$", f.name): continue
+            if re.match("state_[a-z_]*$", f.name): continue
+
+            if re.match("[a-z][a-zA-Z1-9]*$", f.name): continue
+            error(clazz, f, "C7", "Expected resource name in this class to be fooBarBaz style")
+
+    # Styles are FooBar_Baz
+    if clazz.name in ["style"]:
+        for f in clazz.fields:
+            if re.match("[A-Z][A-Za-z1-9]+(_[A-Z][A-Za-z1-9]+?)*$", f.name): continue
+            error(clazz, f, "C7", "Expected resource name in this class to be FooBar_Baz style")
 
 
 def verify_style(api):
@@ -938,6 +992,8 @@ def verify_style(api):
         verify_overload_args(clazz)
         verify_callback_handlers(clazz)
         verify_context_first(clazz)
+        verify_listener_last(clazz)
+        verify_resource_names(clazz)
 
     return failures
 
