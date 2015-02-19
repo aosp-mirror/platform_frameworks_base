@@ -2157,4 +2157,7 @@
   <java-symbol type="xml" name="bookmarks" />
 
   <java-symbol type="integer" name="config_defaultNightMode" />
+
+  <java-symbol type="integer" name="config_screen_magnification_multi_tap_adjustment" />
+  <java-symbol type="dimen" name="config_screen_magnification_scaling_threshold" />
 </resources>

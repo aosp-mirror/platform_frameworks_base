@@ -34,6 +34,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Property;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MagnificationSpec;
@@ -110,7 +111,6 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
     private static final int STATE_MAGNIFIED_INTERACTION = 4;
 
     private static final float DEFAULT_MAGNIFICATION_SCALE = 2.0f;
-    private static final int MULTI_TAP_TIME_SLOP_ADJUSTMENT = 50;
 
     private static final int MESSAGE_ON_MAGNIFIED_BOUNDS_CHANGED = 1;
     private static final int MESSAGE_ON_RECTANGLE_ON_SCREEN_REQUESTED = 2;
@@ -135,9 +135,8 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
 
     private final AccessibilityManagerService mAms;
 
-    private final int mTapTimeSlop = ViewConfiguration.getTapTimeout();
-    private final int mMultiTapTimeSlop =
-            ViewConfiguration.getDoubleTapTimeout() - MULTI_TAP_TIME_SLOP_ADJUSTMENT;
+    private final int mTapTimeSlop = ViewConfiguration.getJumpTapTimeout();
+    private final int mMultiTapTimeSlop;
     private final int mTapDistanceSlop;
     private final int mMultiTapDistanceSlop;
 
@@ -192,6 +191,9 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         mWindowManager = LocalServices.getService(WindowManagerInternal.class);
         mAms = service;
 
+        mMultiTapTimeSlop = ViewConfiguration.getDoubleTapTimeout()
+                + mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_screen_magnification_multi_tap_adjustment);
         mLongAnimationDuration = context.getResources().getInteger(
                 com.android.internal.R.integer.config_longAnimTime);
         mTapDistanceSlop = ViewConfiguration.get(context).getScaledTouchSlop();
@@ -481,15 +483,20 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
         private static final float MIN_SCALE = 1.3f;
         private static final float MAX_SCALE = 5.0f;
 
-        private static final float SCALING_THRESHOLD = 0.3f;
-
         private final ScaleGestureDetector mScaleGestureDetector;
         private final GestureDetector mGestureDetector;
+
+        private final float mScalingThreshold;
 
         private float mInitialScaleFactor = -1;
         private boolean mScaling;
 
         public MagnifiedContentInteractonStateHandler(Context context) {
+            final TypedValue scaleValue = new TypedValue();
+            context.getResources().getValue(
+                    com.android.internal.R.dimen.config_screen_magnification_scaling_threshold,
+                    scaleValue, false);
+            mScalingThreshold = scaleValue.getFloat();
             mScaleGestureDetector = new ScaleGestureDetector(context, this);
             mScaleGestureDetector.setQuickScaleEnabled(false);
             mGestureDetector = new GestureDetector(context, this);
@@ -537,7 +544,7 @@ public final class ScreenMagnifier implements WindowManagerInternal.Magnificatio
                     mInitialScaleFactor = detector.getScaleFactor();
                 } else {
                     final float deltaScale = detector.getScaleFactor() - mInitialScaleFactor;
-                    if (Math.abs(deltaScale) > SCALING_THRESHOLD) {
+                    if (Math.abs(deltaScale) > mScalingThreshold) {
                         mScaling = true;
                         return true;
                     }
