@@ -85,7 +85,7 @@ mImageView = (ImageView) findViewById(R.id.myImage);
 
 // Retrieves an image specified by the URL, displays it in the UI.
 ImageRequest request = new ImageRequest(url,
-    new Response.Listener<Bitmap>() {
+    new Response.Listener&lt;Bitmap&gt;() {
         &#64;Override
         public void onResponse(Bitmap bitmap) {
             mImageView.setImageBitmap(bitmap);
@@ -257,7 +257,7 @@ mTxtDisplay = (TextView) findViewById(R.id.txtDisplay);
 String url = "http://my-json-feed";
 
 JsonObjectRequest jsObjRequest = new JsonObjectRequest
-        (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        (Request.Method.GET, url, null, new Response.Listener&lt;JSONObject&gt;() {
 
     &#64;Override
     public void onResponse(JSONObject response) {
