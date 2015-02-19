@@ -116,6 +116,7 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from configuring bluetooth.
+     * This does <em>not</em> restrict the user from turning bluetooth on or off.
      * The default value is <code>false</code>.
      * <p/>This restriction has no effect in a managed profile.
      *
