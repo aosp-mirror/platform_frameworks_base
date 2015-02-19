@@ -83,6 +83,12 @@ public class TelecomManager {
             "android.telecom.action.SHOW_CALL_SETTINGS";
 
     /**
+     * The {@link android.content.Intent} action used to show the respond via SMS settings page.
+     */
+    public static final String ACTION_SHOW_RESPOND_VIA_SMS_SETTINGS =
+            "android.telecom.action.SHOW_RESPOND_VIA_SMS_SETTINGS";
+
+    /**
      * The {@link android.content.Intent} action used to show the settings page used to configure
      * {@link PhoneAccount} preferences.
      * @hide
