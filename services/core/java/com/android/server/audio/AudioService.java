@@ -1453,16 +1453,6 @@ public class AudioService extends IAudioService.Stub {
             flags = updateFlagsForSystemAudio(flags);
         }
         mVolumeController.postVolumeChanged(streamType, flags);
-
-        if ((flags & AudioManager.FLAG_FIXED_VOLUME) == 0) {
-            oldIndex = (oldIndex + 5) / 10;
-            index = (index + 5) / 10;
-            Intent intent = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
-            intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
-            intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
-            intent.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
-            sendBroadcastToAll(intent);
-        }
     }
 
     // If Hdmi-CEC system audio mode is on, we show volume bar only when TV
@@ -3500,6 +3490,7 @@ public class AudioService extends IAudioService.Stub {
         private int mIndexMax;
         private final ConcurrentHashMap<Integer, Integer> mIndex =
                                             new ConcurrentHashMap<Integer, Integer>(8, 0.75f, 4);
+        private final Intent mVolumeChanged;
 
         private VolumeStreamState(String settingName, int streamType) {
 
@@ -3511,6 +3502,8 @@ public class AudioService extends IAudioService.Stub {
             mIndexMax *= 10;
 
             readSettings();
+            mVolumeChanged = new Intent(AudioManager.VOLUME_CHANGED_ACTION);
+            mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, mStreamType);
         }
 
         public String getSettingNameForDevice(int device) {
@@ -3625,8 +3618,10 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public boolean setIndex(int index, int device) {
+            boolean changed = false;
+            int oldIndex;
             synchronized (VolumeStreamState.class) {
-                int oldIndex = getIndex(device);
+                oldIndex = getIndex(device);
                 index = getValidIndex(index);
                 synchronized (mCameraSoundForced) {
                     if ((mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED) && mCameraSoundForced) {
@@ -3635,7 +3630,8 @@ public class AudioService extends IAudioService.Stub {
                 }
                 mIndex.put(device, index);
 
-                if (oldIndex != index) {
+                changed = oldIndex != index;
+                if (changed) {
                     // Apply change to all streams using this one as alias
                     // if changing volume of current device, also change volume of current
                     // device on aliased stream
@@ -3653,11 +3649,16 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                     }
-                    return true;
-                } else {
-                    return false;
                 }
             }
+            if (changed) {
+                oldIndex = (oldIndex + 5) / 10;
+                index = (index + 5) / 10;
+                mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, index);
+                mVolumeChanged.putExtra(AudioManager.EXTRA_PREV_VOLUME_STREAM_VALUE, oldIndex);
+                sendBroadcastToAll(mVolumeChanged);
+            }
+            return changed;
         }
 
         public int getIndex(int device) {
