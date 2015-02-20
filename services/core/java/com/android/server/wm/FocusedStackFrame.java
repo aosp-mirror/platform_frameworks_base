@@ -16,14 +16,14 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.WindowManagerService.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerService.DEBUG_SURFACE_TRACE;
+import static com.android.server.wm.WindowManagerService.SHOW_LIGHT_TRANSACTIONS;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.util.Slog;
 import android.view.Display;
 import android.view.Surface.OutOfResourcesException;
@@ -35,14 +35,17 @@ import com.android.server.wm.WindowStateAnimator.SurfaceTrace;
 
 class FocusedStackFrame {
     private static final String TAG = "FocusedStackFrame";
-    private static final int THICKNESS = 10;
+    private static final boolean DEBUG = false;
+    private static final int THICKNESS = 2;
     private static final float ALPHA = 0.3f;
 
     private final SurfaceControl mSurfaceControl;
     private final Surface mSurface = new Surface();
+    private final Paint mInnerPaint = new Paint();
+    private final Paint mOuterPaint = new Paint();
+    private final Rect mBounds = new Rect();
     private final Rect mLastBounds = new Rect();
-    final Rect mBounds = new Rect();
-    private final Rect mTmpDrawRect = new Rect();
+    private int mLayer = -1;
 
     public FocusedStackFrame(Display display, SurfaceSession session) {
         SurfaceControl ctrl = null;
@@ -60,83 +63,84 @@ class FocusedStackFrame {
         } catch (OutOfResourcesException e) {
         }
         mSurfaceControl = ctrl;
+
+        mInnerPaint.setStyle(Paint.Style.STROKE);
+        mInnerPaint.setStrokeWidth(THICKNESS);
+        mInnerPaint.setColor(Color.WHITE);
+        mOuterPaint.setStyle(Paint.Style.STROKE);
+        mOuterPaint.setStrokeWidth(THICKNESS);
+        mOuterPaint.setColor(Color.BLACK);
     }
 
-    private void draw(Rect bounds, int color) {
-        if (false && DEBUG_STACK) Slog.i(TAG, "draw: bounds=" + bounds.toShortString() +
-                " color=" + Integer.toHexString(color));
-        mTmpDrawRect.set(bounds);
+    private void draw() {
+        if (mLastBounds.isEmpty()) {
+            // Currently unset. Set it.
+            mLastBounds.set(mBounds);
+        }
+
+        if (DEBUG) Slog.i(TAG, "draw: mBounds=" + mBounds + " mLastBounds=" + mLastBounds);
+
         Canvas c = null;
         try {
-            c = mSurface.lockCanvas(mTmpDrawRect);
+            c = mSurface.lockCanvas(mLastBounds);
         } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Unable to lock canvas", e);
         } catch (Surface.OutOfResourcesException e) {
+            Slog.e(TAG, "Unable to lock canvas", e);
         }
         if (c == null) {
+            if (DEBUG) Slog.w(TAG, "Canvas is null...");
             return;
         }
 
-        final int w = bounds.width();
-        final int h = bounds.height();
-
-        // Top
-        mTmpDrawRect.set(0, 0, w, THICKNESS);
-        c.clipRect(mTmpDrawRect, Region.Op.REPLACE);
-        c.drawColor(color);
-        // Left (not including Top or Bottom stripe).
-        mTmpDrawRect.set(0, THICKNESS, THICKNESS, h - THICKNESS);
-        c.clipRect(mTmpDrawRect, Region.Op.REPLACE);
-        c.drawColor(color);
-        // Right (not including Top or Bottom stripe).
-        mTmpDrawRect.set(w - THICKNESS, THICKNESS, w, h - THICKNESS);
-        c.clipRect(mTmpDrawRect, Region.Op.REPLACE);
-        c.drawColor(color);
-        // Bottom
-        mTmpDrawRect.set(0, h - THICKNESS, w, h);
-        c.clipRect(mTmpDrawRect, Region.Op.REPLACE);
-        c.drawColor(color);
-
+        c.drawRect(0, 0, mBounds.width(), mBounds.height(), mOuterPaint);
+        c.drawRect(THICKNESS, THICKNESS, mBounds.width() - THICKNESS, mBounds.height() - THICKNESS,
+                mInnerPaint);
+        if (DEBUG) Slog.w(TAG, "c.width=" + c.getWidth() + " c.height=" + c.getHeight()
+                + " c.clip=" + c .getClipBounds());
         mSurface.unlockCanvasAndPost(c);
+        mLastBounds.set(mBounds);
     }
 
-    private void positionSurface(Rect bounds) {
-        if (false && DEBUG_STACK) Slog.i(TAG, "positionSurface: bounds=" + bounds.toShortString());
-        mSurfaceControl.setSize(bounds.width(), bounds.height());
-        mSurfaceControl.setPosition(bounds.left, bounds.top);
+    private void setupSurface(boolean visible) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setupSurface");
+        SurfaceControl.openTransaction();
+        try {
+            if (visible) {
+                mSurfaceControl.setPosition(mBounds.left, mBounds.top);
+                mSurfaceControl.setSize(mBounds.width(), mBounds.height());
+                mSurfaceControl.show();
+            } else {
+                mSurfaceControl.hide();
+            }
+        } finally {
+            SurfaceControl.closeTransaction();
+            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setupSurface");
+        }
+    }
+
+    void setVisibility(TaskStack stack) {
+        if (stack == null || stack.isFullscreen()) {
+            setupSurface(false);
+        } else {
+            stack.getBounds(mBounds);
+            setupSurface(true);
+            if (!mBounds.equals(mLastBounds)) {
+                draw();
+            }
+        }
     }
 
     // Note: caller responsible for being inside
     // Surface.openTransaction() / closeTransaction()
-    public void setVisibility(boolean on) {
-        if (false && DEBUG_STACK) Slog.i(TAG, "setVisibility: on=" + on +
-                " mLastBounds=" + mLastBounds.toShortString() +
-                " mBounds=" + mBounds.toShortString());
-        if (mSurfaceControl == null) {
+    void setLayer(int layer) {
+        if (mLayer == layer) {
             return;
         }
-        if (on) {
-            if (!mLastBounds.equals(mBounds)) {
-                // Erase the previous rectangle.
-                positionSurface(mLastBounds);
-                draw(mLastBounds, Color.TRANSPARENT);
-                // Draw the latest rectangle.
-                positionSurface(mBounds);
-                draw(mBounds, Color.WHITE);
-                // Update the history.
-                mLastBounds.set(mBounds);
-            }
-            mSurfaceControl.show();
-        } else {
-            mSurfaceControl.hide();
-        }
-    }
-
-    public void setBounds(TaskStack stack) {
-        stack.getBounds(mBounds);
-        if (false && DEBUG_STACK) Slog.i(TAG, "setBounds: bounds=" + mBounds);
-    }
-
-    public void setLayer(int layer) {
-        mSurfaceControl.setLayer(layer);
+        mLayer = layer;
+        mSurfaceControl.setLayer(mLayer);
     }
 }

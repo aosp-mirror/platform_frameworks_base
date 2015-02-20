@@ -64,11 +64,9 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -127,7 +125,6 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicy;
@@ -136,7 +133,6 @@ import android.view.WindowManagerPolicy.FakeWindow;
 import android.view.WindowManagerPolicy.PointerEventListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Transformation;
 
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -181,7 +177,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
-    static final boolean DEBUG_REORDER = false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_WALLPAPER_LIGHT = false || DEBUG_WALLPAPER;
     static final boolean DEBUG_DRAG = false;
@@ -3936,20 +3931,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } else {
             stack = null;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setFocusedStackFrame");
-        SurfaceControl.openTransaction();
-        try {
-            if (stack == null) {
-                mFocusedStackFrame.setVisibility(false);
-            } else {
-                mFocusedStackFrame.setBounds(stack);
-                final boolean multipleStacks = !stack.isFullscreen();
-                mFocusedStackFrame.setVisibility(multipleStacks);
-            }
-        } finally {
-            SurfaceControl.closeTransaction();
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> CLOSE TRANSACTION setFocusedStackFrame");
-        }
+        mFocusedStackFrame.setVisibility(stack);
     }
 
     @Override
