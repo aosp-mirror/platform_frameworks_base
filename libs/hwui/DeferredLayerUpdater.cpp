@@ -62,7 +62,7 @@ bool DeferredLayerUpdater::apply() {
     if (mSurfaceTexture.get()) {
         if (mNeedsGLContextAttach) {
             mNeedsGLContextAttach = false;
-            mSurfaceTexture->attachToContext(mLayer->getTexture());
+            mSurfaceTexture->attachToContext(mLayer->getTextureId());
         }
         if (mUpdateTexImage) {
             mUpdateTexImage = false;

@@ -253,7 +253,6 @@ void RenderState::render(const Glop& glop) {
         glUniform1f(fill.program->getUniform("roundRectRadius"),
                 roundedOutRadius);
     }
-
     // --------------------------------
     // ---------- Mesh setup ----------
     // --------------------------------
@@ -269,16 +268,16 @@ void RenderState::render(const Glop& glop) {
         // glop.fill.texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
-        if (glop.fill.textureClamp != GL_INVALID_ENUM) {
-            glop.fill.texture->setWrap(glop.fill.textureClamp, true);
+        if (glop.fill.texture.clamp != GL_INVALID_ENUM) {
+            glop.fill.texture.texture->setWrap(glop.fill.texture.clamp, true);
         }
-        if (glop.fill.textureFilter != GL_INVALID_ENUM) {
-            glop.fill.texture->setFilter(glop.fill.textureFilter, true);
+        if (glop.fill.texture.filter != GL_INVALID_ENUM) {
+            glop.fill.texture.texture->setFilter(glop.fill.texture.filter, true);
         }
 
-        mCaches->textureState().bindTexture(fill.texture->id);
+        mCaches->textureState().bindTexture(fill.texture.texture->id);
         meshState().enableTexCoordsVertexArray();
-        meshState().bindTexCoordsVertexPointer(force, mesh.texCoordOffset);
+        meshState().bindTexCoordsVertexPointer(force, mesh.texCoordOffset, mesh.stride);
     } else {
         meshState().disableTexCoordsVertexArray();
     }
@@ -313,8 +312,13 @@ void RenderState::render(const Glop& glop) {
         while (elementsCount > 0) {
             GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);
 
-            // TODO: this double binds on first pass
-            meshState().bindPositionVertexPointer(true, vertices, mesh.stride);
+            // rebind pointers without forcing, since initial bind handled above
+            meshState().bindPositionVertexPointer(false, vertices, mesh.stride);
+            if (mesh.vertexFlags & kTextureCoord_Attrib) {
+                meshState().bindTexCoordsVertexPointer(false,
+                        vertices + kMeshTextureOffset, mesh.stride);
+            }
+
             glDrawElements(mesh.primitiveMode, drawCount, GL_UNSIGNED_SHORT, nullptr);
             elementsCount -= drawCount;
             vertices += (drawCount / 6) * 4 * mesh.stride;

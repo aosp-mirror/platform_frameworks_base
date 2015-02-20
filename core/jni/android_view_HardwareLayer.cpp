@@ -82,7 +82,7 @@ static void android_view_HardwareLayer_updateSurfaceTexture(JNIEnv* env, jobject
 static jint android_view_HardwareLayer_getTexName(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
-    return layer->backingLayer()->getTexture();
+    return layer->backingLayer()->getTextureId();
 }
 
 // ----------------------------------------------------------------------------
