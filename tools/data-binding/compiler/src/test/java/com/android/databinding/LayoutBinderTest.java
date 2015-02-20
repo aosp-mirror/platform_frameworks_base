@@ -93,7 +93,7 @@ public class LayoutBinderTest {
         fa.getResolvedType();
         final Callable getter = fa.getGetter();
         assertTrue(getter.type == Callable.Type.METHOD);
-        assertSame(id, fa.getParent());
+        assertSame(id, fa.getChild());
         assertTrue(fa.isDynamic());
     }
 

@@ -146,10 +146,6 @@ public class ExprModel {
         return register(new BracketExpr(variableExpr, argExpr));
     }
 
-    public Expr staticAccessExpr(ModelClass modelClass) {
-        return register(new StaticAccessExpr(modelClass));
-    }
-
     public Expr castExpr(String type, Expr expr) {
         return register(new CastExpr(type, expr));
     }
@@ -166,7 +162,9 @@ public class ExprModel {
     public Expr bindingExpr(Expr bindingExpr) {
         Preconditions.checkArgument(mExprMap.containsKey(bindingExpr.getUniqueKey()),
                 "Main expression should already be registered");
-        mBindingExpressions.add(bindingExpr);
+        if (!mBindingExpressions.contains(bindingExpr)) {
+            mBindingExpressions.add(bindingExpr);
+        }
         return bindingExpr;
     }
 
@@ -257,6 +255,9 @@ public class ExprModel {
         }
 
         // non-dynamic binding expressions receive some ids so that they can be invalidated
+        for (int i = 0; i < mBindingExpressions.size(); i++) {
+            L.d("[" + i + "] " + mBindingExpressions.get(i));
+        }
         for (Expr expr : mBindingExpressions) {
             if (!(expr.isDynamic() || !expr.hasId())) {
                 L.d("Expr " + expr + " is dynamic? " + expr.isDynamic() + ", has ID? " + expr.hasId());
@@ -348,7 +349,7 @@ public class ExprModel {
             public boolean apply(Expr input) {
                 return input instanceof IdentifierExpr
                         && !input.hasId()
-                        && !modelAnalyzer.isObservable(input.getResolvedType())
+                        && !input.isObservable()
                         && input.isDynamic();
             }
         });
@@ -358,7 +359,7 @@ public class ExprModel {
         return Iterables.filter(mExprMap.values(), new Predicate<Expr>() {
             @Override
             public boolean apply(Expr input) {
-                return modelAnalyzer.isObservable(input.getResolvedType());
+                return input.isObservable();
             }
         });
     }

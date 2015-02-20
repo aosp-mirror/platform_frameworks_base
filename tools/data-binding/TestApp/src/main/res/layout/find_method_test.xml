@@ -4,9 +4,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
     <variable name="obj" type="com.android.databinding.testapp.vo.FindMethodBindingObject"/>
-    <!--
-    <import name="FMBO" type=""/>
--->
+    <import type="com.android.databinding.testapp.vo.FindMethodBindingObject"/>
+    <import type="com.android.databinding.testapp.vo.FindMethodBindingObject" alias="FMBO"/>
     <TextView
             android:id="@+id/textView0"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -43,4 +42,29 @@
             android:id="@+id/textView8"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@{com.android.databinding.testapp.vo.FindMethodBindingObject.foo.bar}"/>
+    <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{FindMethodBindingObject.staticMethod()}"/>
+    <TextView
+            android:id="@+id/textView10"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{FindMethodBindingObject.foo.bar}"/>
+    <TextView
+            android:id="@+id/textView11"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{FMBO.staticMethod()}"/>
+    <TextView
+            android:id="@+id/textView12"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{FMBO.foo.bar}"/>
+    <!-- The following are just to test duplicate expressions -->
+    <TextView
+            android:id="@+id/textView13"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{FMBO.staticMethod()}"/>
+    <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{FMBO.foo.bar}"/>
 </LinearLayout>

@@ -23,6 +23,11 @@ public class StaticIdentifierExpr extends IdentifierExpr {
     }
 
     @Override
+    public boolean isObservable() {
+        return false;
+    }
+
+    @Override
     public boolean isDynamic() {
         return false;
     }

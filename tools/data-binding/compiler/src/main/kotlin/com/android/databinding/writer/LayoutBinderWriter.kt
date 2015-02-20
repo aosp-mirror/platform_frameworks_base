@@ -46,7 +46,6 @@ import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
 import com.android.databinding.reflection.Callable
 import com.android.databinding.expr.CastExpr
-import com.android.databinding.expr.StaticAccessExpr
 
 fun String.stripNonJava() = this.split("[^a-zA-Z0-9]").map{ it.trim() }.joinToCamelCaseAsVar()
 
@@ -161,7 +160,7 @@ fun Expr.toCode(full : Boolean = false) : KCode {
             app("", it.getRight().toCode())
         }
         is FieldAccessExpr -> kcode("") {
-            app("", it.getParent().toCode())
+            app("", it.getChild().toCode())
             if (it.getGetter().type == Callable.Type.FIELD) {
                 app(".", it.getGetter().name)
             } else {
@@ -221,9 +220,6 @@ fun Expr.toCode(full : Boolean = false) : KCode {
         is CastExpr -> kcode("") {
             app("(", it.getCastType())
             app(") ", it.getCastExpr().toCode())
-        }
-        is StaticAccessExpr -> kcode("") {
-            app("", it.getResolvedType().toJavaCode())
         }
         else -> kcode("//NOT IMPLEMENTED YET")
     }

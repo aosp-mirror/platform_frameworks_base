@@ -71,4 +71,24 @@ public class FindMethodTest
         TextView textView = mBinder.getTextView8();
         assertEquals("hello world", textView.getText().toString());
     }
+
+    public void testImportStaticMethod() throws Throwable {
+        TextView textView = mBinder.getTextView9();
+        assertEquals("world", textView.getText().toString());
+    }
+
+    public void testImportStaticField() throws Throwable {
+        TextView textView = mBinder.getTextView10();
+        assertEquals("hello world", textView.getText().toString());
+    }
+
+    public void testAliasStaticMethod() throws Throwable {
+        TextView textView = mBinder.getTextView11();
+        assertEquals("world", textView.getText().toString());
+    }
+
+    public void testAliasStaticField() throws Throwable {
+        TextView textView = mBinder.getTextView12();
+        assertEquals("hello world", textView.getText().toString());
+    }
 }

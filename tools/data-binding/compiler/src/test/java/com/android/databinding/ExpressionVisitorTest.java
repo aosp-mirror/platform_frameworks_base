@@ -139,8 +139,8 @@ public class ExpressionVisitorTest {
     @Test
     public void testInheritedFieldResolution() {
         final FieldAccessExpr parsed = parse("myStr.length", FieldAccessExpr.class);
-        assertTrue(parsed.getParent() instanceof IdentifierExpr);
-        final IdentifierExpr id = (IdentifierExpr) parsed.getParent();
+        assertTrue(parsed.getChild() instanceof IdentifierExpr);
+        final IdentifierExpr id = (IdentifierExpr) parsed.getChild();
         id.setUserDefinedType("java.lang.String");
         assertSame(int.class, parsed.getResolvedType());
         Callable getter = parsed.getGetter();
@@ -155,8 +155,8 @@ public class ExpressionVisitorTest {
     @Test
     public void testGetterResolution() {
         final FieldAccessExpr parsed = parse("myStr.bytes", FieldAccessExpr.class);
-        assertTrue(parsed.getParent() instanceof IdentifierExpr);
-        final IdentifierExpr id = (IdentifierExpr) parsed.getParent();
+        assertTrue(parsed.getChild() instanceof IdentifierExpr);
+        final IdentifierExpr id = (IdentifierExpr) parsed.getChild();
         id.setUserDefinedType("java.lang.String");
         assertSame(byte[].class, parsed.getResolvedType());
         Callable getter = parsed.getGetter();

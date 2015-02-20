@@ -39,7 +39,7 @@ public class FieldAccessExpr extends Expr {
         mIsObservableField = isObservableField;
     }
 
-    public Expr getParent() {
+    public Expr getChild() {
         return getChildren().get(0);
     }
 
@@ -52,7 +52,7 @@ public class FieldAccessExpr extends Expr {
 
     @Override
     public boolean isDynamic() {
-        if (!getParent().isDynamic()) {
+        if (!getChild().isDynamic()) {
             return false;
         }
         if (mGetter == null) {
@@ -66,7 +66,7 @@ public class FieldAccessExpr extends Expr {
     protected List<Dependency> constructDependencies() {
         final List<Dependency> dependencies = constructDynamicChildrenDependencies();
         for (Dependency dependency : dependencies) {
-            if (dependency.getOther() == getParent()) {
+            if (dependency.getOther() == getChild()) {
                 dependency.setMandatory(true);
             }
         }
@@ -94,16 +94,17 @@ public class FieldAccessExpr extends Expr {
     @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            replaceStaticAccess(modelAnalyzer);
-            Expr parent = getParent();
-            boolean isStatic = parent instanceof StaticAccessExpr;
-            mGetter = modelAnalyzer.findMethodOrField(parent.getResolvedType(), mName, isStatic);
+            replaceStaticIdentifiers(modelAnalyzer);
+            Expr child = getChild();
+            child.resolveType(modelAnalyzer);
+            boolean isStatic = child instanceof StaticIdentifierExpr;
+            mGetter = modelAnalyzer.findMethodOrField(child.getResolvedType(), mName, isStatic);
             if (modelAnalyzer.isObservableField(mGetter.resolvedType)) {
                 // Make this the ".get()" and add an extra field access for the observable field
-                parent.getParents().remove(this);
-                getChildren().remove(parent);
+                child.getParents().remove(this);
+                getChildren().remove(child);
 
-                FieldAccessExpr observableField = getModel().observableField(parent, mName);
+                FieldAccessExpr observableField = getModel().observableField(child, mName);
                 observableField.mGetter = mGetter;
 
                 getChildren().add(observableField);
@@ -117,7 +118,7 @@ public class FieldAccessExpr extends Expr {
 
     @Override
     protected String asPackage() {
-        String parentPackage = getParent().asPackage();
+        String parentPackage = getChild().asPackage();
         return parentPackage == null ? null : parentPackage + "." + mName;
     }
 }
