@@ -411,6 +411,24 @@ public class InputMethodUtils {
         return false;
     }
 
+    public static Locale constructLocaleFromString(String localeStr) {
+        if (TextUtils.isEmpty(localeStr)) {
+            return null;
+        }
+        // TODO: Use {@link Locale#toLanguageTag()} and {@link Locale#forLanguageTag(languageTag)}.
+        String[] localeParams = localeStr.split("_", 3);
+        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
+        // because localeStr is not empty.
+        if (localeParams.length == 1) {
+            return new Locale(localeParams[0]);
+        } else if (localeParams.length == 2) {
+            return new Locale(localeParams[0], localeParams[1]);
+        } else if (localeParams.length == 3) {
+            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
+        }
+        return null;
+    }
+
     public static boolean containsSubtypeOf(final InputMethodInfo imi,
             @Nullable final Locale locale, final boolean checkCountry, final String mode) {
         if (locale == null) {
@@ -420,15 +438,16 @@ public class InputMethodUtils {
         for (int i = 0; i < N; ++i) {
             final InputMethodSubtype subtype = imi.getSubtypeAt(i);
             if (checkCountry) {
-                // TODO: Use {@link Locale#toLanguageTag()} and
-                // {@link Locale#forLanguageTag(languageTag)} instead.
-                if (!TextUtils.equals(subtype.getLocale(), locale.toString())) {
+                final Locale subtypeLocale = constructLocaleFromString(subtype.getLocale());
+                if (subtypeLocale == null ||
+                        !TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage()) ||
+                        !TextUtils.equals(subtypeLocale.getCountry(), locale.getCountry())) {
                     continue;
                 }
             } else {
                 final Locale subtypeLocale = new Locale(getLanguageFromLocaleString(
                         subtype.getLocale()));
-                if (!subtypeLocale.getLanguage().equals(locale.getLanguage())) {
+                if (!TextUtils.equals(subtypeLocale.getLanguage(), locale.getLanguage())) {
                     continue;
                 }
             }

@@ -23,6 +23,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.inputmethod.InputMethodUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -379,7 +381,7 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
-        final Locale locale = constructLocaleFromString(mSubtypeLocale);
+        final Locale locale = InputMethodUtils.constructLocaleFromString(mSubtypeLocale);
         final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
         if (mSubtypeNameResId == 0) {
             return localeStr;
@@ -502,22 +504,6 @@ public final class InputMethodSubtype implements Parcelable {
             return new InputMethodSubtype[size];
         }
     };
-
-    private static Locale constructLocaleFromString(String localeStr) {
-        if (TextUtils.isEmpty(localeStr))
-            return null;
-        String[] localeParams = localeStr.split("_", 3);
-        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
-        // because localeStr is not empty.
-        if (localeParams.length == 1) {
-            return new Locale(localeParams[0]);
-        } else if (localeParams.length == 2) {
-            return new Locale(localeParams[0], localeParams[1]);
-        } else if (localeParams.length == 3) {
-            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
-        }
-        return null;
-    }
 
     private static int hashCodeInternal(String locale, String mode, String extraValue,
             boolean isAuxiliary, boolean overridesImplicitlyEnabledSubtype,

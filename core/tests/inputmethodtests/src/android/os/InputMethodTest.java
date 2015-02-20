@@ -554,13 +554,11 @@ public class InputMethodTest extends InstrumentationTestCase {
                     subtypes);
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_IN, !CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
-            // TODO: This should be true but the current behavior is broken.
-            assertFalse(InputMethodUtils.containsSubtypeOf(imi, LOCALE_IN, CHECK_COUNTRY,
+            assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_IN, CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
             assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_ID, !CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
-            // TODO: This should be true but the current behavior is broken.
-            assertFalse(InputMethodUtils.containsSubtypeOf(imi, LOCALE_ID, CHECK_COUNTRY,
+            assertTrue(InputMethodUtils.containsSubtypeOf(imi, LOCALE_ID, CHECK_COUNTRY,
                     SUBTYPE_MODE_KEYBOARD));
         }
     }
