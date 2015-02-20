@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.midi;
+package android.media.midi;
 
 import android.util.Log;
 
@@ -33,12 +33,16 @@ abstract public class MidiPort implements Closeable {
     private final int mPortNumber;
 
     /**
-     * Maximum size of a packet that can pass through our ParcelFileDescriptor
+     * Maximum size of a packet that can pass through our ParcelFileDescriptor.
+     * For internal use only. Implementation details may change in the future.
+     * @hide
      */
-    protected static final int MAX_PACKET_SIZE = 1024;
+    public static final int MAX_PACKET_SIZE = 1024;
 
     /**
      * size of message timestamp in bytes
+     * For internal use only. Implementation details may change in the future.
+     * @hide
      */
     private static final int TIMESTAMP_SIZE = 8;
 
@@ -65,6 +69,7 @@ abstract public class MidiPort implements Closeable {
      * Called when an IOExeption occurs while sending or receiving data.
      * Subclasses can override to be notified of such errors
      *
+     * @hide
      */
      public void onIOException() {
      }
@@ -77,8 +82,11 @@ abstract public class MidiPort implements Closeable {
      * timestamp is message timestamp to pack
      * dest is buffer to pack into
      * returns size of packed message
+     *
+     * For internal use only. Implementation details may change in the future.
+     * @hide
      */
-    protected static int packMessage(byte[] message, int offset, int size, long timestamp,
+    public static int packMessage(byte[] message, int offset, int size, long timestamp,
             byte[] dest) {
         if (size + TIMESTAMP_SIZE > MAX_PACKET_SIZE) {
             size = MAX_PACKET_SIZE - TIMESTAMP_SIZE;
@@ -98,8 +106,11 @@ abstract public class MidiPort implements Closeable {
     /**
      * Utility function for unpacking a MIDI message received from our ParcelFileDescriptor
      * returns the offset of the MIDI message in packed buffer
+     *
+     * For internal use only. Implementation details may change in the future.
+     * @hide
      */
-    protected static int getMessageOffset(byte[] buffer, int bufferLength) {
+    public static int getMessageOffset(byte[] buffer, int bufferLength) {
         // message is at the beginning
         return 0;
     }
@@ -107,8 +118,11 @@ abstract public class MidiPort implements Closeable {
     /**
      * Utility function for unpacking a MIDI message received from our ParcelFileDescriptor
      * returns size of MIDI data in packed buffer
+     *
+     * For internal use only. Implementation details may change in the future.
+     * @hide
      */
-    protected static int getMessageSize(byte[] buffer, int bufferLength) {
+    public static int getMessageSize(byte[] buffer, int bufferLength) {
         // message length is total buffer length minus size of the timestamp
         return bufferLength - TIMESTAMP_SIZE;
     }
@@ -116,8 +130,11 @@ abstract public class MidiPort implements Closeable {
     /**
      * Utility function for unpacking a MIDI message received from our ParcelFileDescriptor
      * unpacks timestamp from packed buffer
+     *
+     * For internal use only. Implementation details may change in the future.
+     * @hide
      */
-    protected static long getMessageTimeStamp(byte[] buffer, int bufferLength) {
+    public static long getMessageTimeStamp(byte[] buffer, int bufferLength) {
         // timestamp is at end of the packet
         int offset = bufferLength;
         long timestamp = 0;

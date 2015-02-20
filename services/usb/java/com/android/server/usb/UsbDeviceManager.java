@@ -31,7 +31,6 @@ import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
-import android.midi.MidiDeviceInfo;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;

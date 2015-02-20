@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.midi;
+package android.media.midi;
 
-import android.midi.IMidiDeviceServer;
-import android.midi.IMidiListener;
-import android.midi.MidiDeviceInfo;
+import android.media.midi.IMidiDeviceServer;
+import android.media.midi.IMidiListener;
+import android.media.midi.MidiDeviceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 

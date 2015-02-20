@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.midi;
+package android.media.midi;
 
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
