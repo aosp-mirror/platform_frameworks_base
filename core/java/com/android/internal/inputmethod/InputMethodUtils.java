@@ -35,6 +35,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.TextServicesManager;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -518,7 +520,8 @@ public class InputMethodUtils {
         return NOT_A_SUBTYPE_ID;
     }
 
-    private static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
+    @VisibleForTesting
+    public static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
             Resources res, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = InputMethodUtils.getSubtypes(imi);
         final String systemLocale = res.getConfiguration().locale.toString();
