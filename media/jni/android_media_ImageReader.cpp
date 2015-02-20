@@ -430,7 +430,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             pData = buffer->data;
             dataSize = Image_getJpegSize(buffer, usingRGBAOverride);
             break;
-        case HAL_PIXEL_FORMAT_RAW_SENSOR:
+        case HAL_PIXEL_FORMAT_RAW16:
             // Single plane 16bpp bayer data.
             bytesPerPixel = 2;
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
@@ -517,7 +517,7 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             pixelStride = 0;
             break;
         case HAL_PIXEL_FORMAT_Y16:
-        case HAL_PIXEL_FORMAT_RAW_SENSOR:
+        case HAL_PIXEL_FORMAT_RAW16:
         case HAL_PIXEL_FORMAT_RGB_565:
             // Single plane 16bpp data.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
@@ -584,7 +584,7 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
             rowStride = buffer->stride;
             break;
         case HAL_PIXEL_FORMAT_Y16:
-        case HAL_PIXEL_FORMAT_RAW_SENSOR:
+        case HAL_PIXEL_FORMAT_RAW16:
             // In native side, strides are specified in pixels, not in bytes.
             // Single plane 16bpp bayer data. even width/height,
             // row stride multiple of 16 pixels (32 bytes)
