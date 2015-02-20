@@ -91,6 +91,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private int mInitialHourOfDay;
     private int mInitialMinute;
     private boolean mIs24HourView;
+    private boolean mIsAmPmAtStart;
 
     // For hardware IME input.
     private char mPlaceholderText;
@@ -284,21 +285,34 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     }
 
     private void updateHeaderAmPm() {
+
         if (mIs24HourView) {
             mAmPmLayout.setVisibility(View.GONE);
         } else {
             // Ensure that AM/PM layout is in the correct position.
             final String dateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale, "hm");
-            final boolean amPmAtStart = dateTimePattern.startsWith("a");
-            final ViewGroup parent = (ViewGroup) mAmPmLayout.getParent();
-            final int targetIndex = amPmAtStart ? 0 : parent.getChildCount() - 1;
-            final int currentIndex = parent.indexOfChild(mAmPmLayout);
-            if (targetIndex != currentIndex) {
-                parent.removeView(mAmPmLayout);
-                parent.addView(mAmPmLayout, targetIndex);
-            }
+            final boolean isAmPmAtStart = dateTimePattern.startsWith("a");
+            setAmPmAtStart(isAmPmAtStart);
 
             updateAmPmLabelStates(mInitialHourOfDay < 12 ? AM : PM);
+        }
+    }
+
+    private void setAmPmAtStart(boolean isAmPmAtStart) {
+        if (mIsAmPmAtStart != isAmPmAtStart) {
+            mIsAmPmAtStart = isAmPmAtStart;
+
+            final RelativeLayout.LayoutParams params =
+                    (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
+            if (isAmPmAtStart) {
+                params.removeRule(RelativeLayout.RIGHT_OF);
+                params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
+            } else {
+                params.removeRule(RelativeLayout.LEFT_OF);
+                params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
+            }
+
+            mAmPmLayout.setLayoutParams(params);
         }
     }
 
