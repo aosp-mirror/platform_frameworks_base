@@ -417,7 +417,7 @@ feature image or screenshots for your Google Play app listing.</p>
       }
 
       if (this.archived) {
-        deviceList = '.device-list.archived';
+        deviceList = '.device-list.archive';
       } else if (this.hidden) {
         deviceList = '.device-list.hidden';
       }
