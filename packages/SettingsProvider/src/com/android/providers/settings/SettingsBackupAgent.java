@@ -32,14 +32,18 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+
+import com.android.internal.widget.LockPatternUtils;
 
 import libcore.io.IoUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.CharArrayReader;
 import java.io.DataInputStream;
@@ -76,10 +80,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final String KEY_SECURE = "secure";
     private static final String KEY_GLOBAL = "global";
     private static final String KEY_LOCALE = "locale";
+    private static final String KEY_LOCK_SETTINGS = "lock_settings";
 
     // Versioning of the state file.  Increment this version
     // number any time the set of state items is altered.
-    private static final int STATE_VERSION = 3;
+    private static final int STATE_VERSION = 4;
 
     // Slots in the checksum array.  Never insert new items in the middle
     // of this array; new slots must be appended.
@@ -89,20 +94,23 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_WIFI_SUPPLICANT = 3;
     private static final int STATE_WIFI_CONFIG     = 4;
     private static final int STATE_GLOBAL          = 5;
+    private static final int STATE_LOCK_SETTINGS   = 6;
 
-    private static final int STATE_SIZE            = 6; // The current number of state items
+    private static final int STATE_SIZE            = 7; // The current number of state items
 
     // Number of entries in the checksum array at various version numbers
     private static final int STATE_SIZES[] = {
         0,
         4,              // version 1
         5,              // version 2 added STATE_WIFI_CONFIG
-        STATE_SIZE      // version 3 added STATE_GLOBAL
+        6,              // version 3 added STATE_GLOBAL
+        STATE_SIZE      // version 4 added STATE_LOCK_SETTINGS
     };
 
     // Versioning of the 'full backup' format
-    private static final int FULL_BACKUP_VERSION = 2;
+    private static final int FULL_BACKUP_VERSION = 3;
     private static final int FULL_BACKUP_ADDED_GLOBAL = 2;  // added the "global" entry
+    private static final int FULL_BACKUP_ADDED_LOCK_SETTINGS = 3; // added the "lock_settings" entry
 
     private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
 
@@ -123,6 +131,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     // use very late unicode character to quasi-guarantee last sort position.
     private static final String KEY_WIFI_SUPPLICANT = "\uffedWIFI";
     private static final String KEY_WIFI_CONFIG = "\uffedCONFIG_WIFI";
+
+    // Keys within the lock settings section
+    private static final String KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED = "owner_info_enabled";
+    private static final String KEY_LOCK_SETTINGS_OWNER_INFO = "owner_info";
 
     // Name of the temporary file we use during full backup/restore.  This is
     // stored in the full-backup tarfile as well, so should not be changed.
@@ -367,6 +379,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
+        byte[] lockSettingsData   = getLockSettings();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
@@ -387,6 +400,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         stateChecksums[STATE_WIFI_CONFIG] =
             writeIfChanged(stateChecksums[STATE_WIFI_CONFIG], KEY_WIFI_CONFIG, wifiConfigData,
                     data);
+        stateChecksums[STATE_LOCK_SETTINGS] =
+            writeIfChanged(stateChecksums[STATE_LOCK_SETTINGS], KEY_LOCK_SETTINGS,
+                    lockSettingsData, data);
 
         writeNewChecksums(stateChecksums, newState);
     }
@@ -492,6 +508,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             } else if (KEY_WIFI_CONFIG.equals(key)) {
                 initWifiRestoreIfNecessary();
                 mWifiRestore.incorporateWifiConfigFile(data);
+            } else if (KEY_LOCK_SETTINGS.equals(key)) {
+                restoreLockSettings(data);
              } else {
                 data.skipEntityData();
             }
@@ -513,6 +531,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] systemSettingsData = getSystemSettings();
         byte[] secureSettingsData = getSecureSettings();
         byte[] globalSettingsData = getGlobalSettings();
+        byte[] lockSettingsData   = getLockSettings();
         byte[] locale = mSettingsHelper.getLocaleData();
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
@@ -547,6 +566,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             if (DEBUG_BACKUP) Log.d(TAG, wifiConfigData.length + " bytes of wifi config data");
             out.writeInt(wifiConfigData.length);
             out.write(wifiConfigData);
+            if (DEBUG_BACKUP) Log.d(TAG, lockSettingsData.length + " bytes of lock settings data");
+            out.writeInt(lockSettingsData.length);
+            out.write(lockSettingsData);
 
             out.flush();    // also flushes downstream
 
@@ -629,6 +651,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             in.readFully(buffer, 0, nBytes);
             restoreFileData(mWifiConfigFile, buffer, nBytes);
 
+            if (version >= FULL_BACKUP_ADDED_LOCK_SETTINGS) {
+                nBytes = in.readInt();
+                if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of lock settings data");
+                if (nBytes > buffer.length) buffer = new byte[nBytes];
+                if (nBytes > 0) {
+                    in.readFully(buffer, 0, nBytes);
+                    restoreLockSettings(buffer, nBytes);
+                }
+            }
+
             if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
         } else {
             data.close();
@@ -676,6 +708,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             return oldChecksum;
         }
         try {
+            if (DEBUG_BACKUP) {
+                Log.v(TAG, "Writing entity " + key + " of size " + data.length);
+            }
             output.writeEntityHeader(key, data.length);
             output.writeEntityData(data, data.length);
         } catch (IOException ioe) {
@@ -712,6 +747,31 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         } finally {
             cursor.close();
         }
+    }
+
+    /**
+     * Serialize the owner info settings
+     */
+    private byte[] getLockSettings() {
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
+        final boolean ownerInfoEnabled = lockPatternUtils.isOwnerInfoEnabled();
+        final String ownerInfo = lockPatternUtils.getOwnerInfo(UserHandle.myUserId());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(baos);
+        try {
+            out.writeUTF(KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED);
+            out.writeUTF(ownerInfoEnabled ? "1" : "0");
+            if (ownerInfo != null) {
+                out.writeUTF(KEY_LOCK_SETTINGS_OWNER_INFO);
+                out.writeUTF(ownerInfo != null ? ownerInfo : "");
+            }
+            // End marker
+            out.writeUTF("");
+            out.flush();
+        } catch (IOException ioe) {
+        }
+        return baos.toByteArray();
     }
 
     private void restoreSettings(BackupDataInput data, Uri contentUri,
@@ -794,6 +854,50 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 Log.d(TAG, "Restored setting: " + destination + " : "+ key + "=" + value);
             }
         }
+    }
+
+    /**
+     * Restores the owner info enabled and owner info settings in LockSettings.
+     *
+     * @param buffer
+     * @param nBytes
+     */
+    private void restoreLockSettings(byte[] buffer, int nBytes) {
+        final LockPatternUtils lockPatternUtils = new LockPatternUtils(this);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(buffer, 0, nBytes);
+        DataInputStream in = new DataInputStream(bais);
+        try {
+            String key;
+            // Read until empty string marker
+            while ((key = in.readUTF()).length() > 0) {
+                final String value = in.readUTF();
+                if (DEBUG_BACKUP) {
+                    Log.v(TAG, "Restoring lock_settings " + key + " = " + value);
+                }
+                switch (key) {
+                    case KEY_LOCK_SETTINGS_OWNER_INFO_ENABLED:
+                        lockPatternUtils.setOwnerInfoEnabled("1".equals(value));
+                        break;
+                    case KEY_LOCK_SETTINGS_OWNER_INFO:
+                        lockPatternUtils.setOwnerInfo(value, UserHandle.myUserId());
+                        break;
+                }
+            }
+            in.close();
+        } catch (IOException ioe) {
+        }
+    }
+
+    private void restoreLockSettings(BackupDataInput data) {
+        final byte[] settings = new byte[data.getDataSize()];
+        try {
+            data.readEntityData(settings, 0, settings.length);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Couldn't read entity data");
+            return;
+        }
+        restoreLockSettings(settings, settings.length);
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.android.server;
 
 import android.app.admin.DevicePolicyManager;
+import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -46,6 +47,7 @@ import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 
@@ -257,6 +259,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void setStringUnchecked(String key, int userId, String value) {
         mStorage.writeKeyValue(key, value, userId);
+        if (ArrayUtils.contains(SETTINGS_TO_BACKUP, key)) {
+            BackupManager.dataChanged("com.android.providers.settings");
+        }
     }
 
     @Override
@@ -459,6 +464,11 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     // These are protected with a read permission
     private static final String[] READ_PROFILE_PROTECTED_SETTINGS = new String[] {
+        Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
+        Secure.LOCK_SCREEN_OWNER_INFO
+    };
+
+    private static final String[] SETTINGS_TO_BACKUP = new String[] {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
     };
