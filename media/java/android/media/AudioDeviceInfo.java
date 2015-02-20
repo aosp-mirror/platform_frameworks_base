@@ -20,9 +20,8 @@ import android.util.SparseIntArray;
 
 /**
  * Class to provide information about the audio devices.
- * @hide
  */
-public class AudioDevice {
+public class AudioDeviceInfo {
 
     /**
      * A device type associated with an unknown or uninitialized device.
@@ -42,7 +41,7 @@ public class AudioDevice {
      */
     public static final int TYPE_WIRED_HEADSET    = 3;
     /**
-     * A device type describing a pair of wired headphones .
+     * A device type describing a pair of wired headphones.
      */
     public static final int TYPE_WIRED_HEADPHONES = 4;
     /**
@@ -54,7 +53,7 @@ public class AudioDevice {
      */
     public static final int TYPE_LINE_DIGITAL     = 6;
     /**
-     * A device type describing a Bluetooth device typically used for telephony .
+     * A device type describing a Bluetooth device typically used for telephony.
      */
     public static final int TYPE_BLUETOOTH_SCO    = 7;
     /**
@@ -106,46 +105,92 @@ public class AudioDevice {
      */
     public static final int TYPE_AUX_LINE         = 19;
 
-    AudioDevicePortConfig mConfig;
+    private final AudioDevicePort mPort;
 
-    AudioDevice(AudioDevicePortConfig config) {
-        mConfig = new AudioDevicePortConfig(config);
+    AudioDeviceInfo(AudioDevicePort port) {
+       mPort = port;
     }
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @return
+     * @return The internal device ID.
      */
-    public boolean isInputDevice() {
-        return (mConfig.port().role() == AudioPort.ROLE_SOURCE);
+    public int getId() {
+        return mPort.handle().id();
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @return
+     * @return The human-readable name of the audio device.
      */
-    public boolean isOutputDevice() {
-        return (mConfig.port().role() == AudioPort.ROLE_SINK);
+    public String getName() {
+        return mPort.name();
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @return
+     * @return The "address" string of the device. This generally contains device-specific
+     * parameters.
      */
-    public int getDeviceType() {
-        return INT_TO_EXT_DEVICE_MAPPING.get(mConfig.port().type(), TYPE_UNKNOWN);
-    }
-
-    /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @return
-     */
+    // TODO Is there a compelling reason to expose this?
     public String getAddress() {
-        return mConfig.port().address();
+        return mPort.address();
+    }
+
+   /**
+     * @return true if the audio device is a source for audio data (e.e an input).
+     */
+    public boolean isSource() {
+        return mPort.role() == AudioPort.ROLE_SOURCE;
+    }
+
+    /**
+     * @return true if the audio device is a sink for audio data (i.e. an output).
+     */
+    public boolean isSink() {
+        return mPort.role() == AudioPort.ROLE_SINK;
+    }
+
+    /**
+     * @return An array of sample rates supported by the audio device.
+     */
+    public int[] getSampleRates() {
+        return mPort.samplingRates();
+    }
+
+    /**
+     * @return An array of channel masks supported by the audio device (defined in
+     * AudioFormat.java).
+     */
+    public int[] getChannelMasks() {
+        return mPort.channelMasks();
+    }
+
+    /**
+     * @return An array of channel counts supported by the audio device.
+     */
+    public int[] getChannelCounts() {
+        int[] masks = getChannelMasks();
+        int[] counts = new int[masks.length];
+        for (int mask_index = 0; mask_index < masks.length; mask_index++) {
+            counts[mask_index] = isSink()
+                    ? AudioFormat.channelCountFromOutChannelMask(masks[mask_index])
+                    : AudioFormat.channelCountFromInChannelMask(masks[mask_index]);
+        }
+        return counts;
+    }
+
+    /**
+     * @return An array of audio format IDs supported by the audio device (defined in
+     * AudioFormat.java)
+     */
+    public int[] getFormats() {
+        return mPort.formats();
+    }
+
+   /**
+     * @return The device type identifier of the audio device (i.e. TYPE_BUILTIN_SPEAKER).
+     */
+    public int getType() {
+        return INT_TO_EXT_DEVICE_MAPPING.get(mPort.type(), TYPE_UNKNOWN);
     }
 
     /** @hide */
