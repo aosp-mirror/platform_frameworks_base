@@ -146,14 +146,14 @@ public class ExpandHelper implements Gefingerpoken {
         }
         public void setHeight(float h) {
             if (DEBUG_SCALE) Log.v(TAG, "SetHeight: setting to " + h);
-            mView.setActualHeight((int) h);
+            mView.setContentHeight((int) h);
             mCurrentHeight = h;
         }
         public float getHeight() {
-            return mView.getActualHeight();
+            return mView.getContentHeight();
         }
         public int getNaturalHeight(int maximum) {
-            return Math.min(maximum, mView.getMaxHeight());
+            return Math.min(maximum, mView.getMaxContentHeight());
         }
     }
 
@@ -386,7 +386,8 @@ public class ExpandHelper implements Gefingerpoken {
     }
 
     private boolean isFullyExpanded(ExpandableView underFocus) {
-        return underFocus.getIntrinsicHeight() == underFocus.getMaxHeight();
+        return underFocus.areChildrenExpanded() || underFocus.getIntrinsicHeight()
+                - underFocus.getBottomDecorHeight() == underFocus.getMaxContentHeight();
     }
 
     @Override

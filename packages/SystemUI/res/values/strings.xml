@@ -924,6 +924,12 @@
     <!-- continue action for notification educating the user about enabling notifications on the lockscreen. [CHAR LIMIT=20] -->
     <string name="hidden_notifications_setup">Set up</string>
 
+    <!-- Text for the button to expand the notifications to show notification children [CHAR LIMIT=20] -->
+    <string name="notification_expand_button_text">See all</string>
+
+    <!-- Text for the button to expand the notifications to hide notification children [CHAR LIMIT=20] -->
+    <string name="notification_collapse_button_text">Hide all</string>
+
     <!-- Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description. [CHAR LIMIT=20] -->
     <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
 

@@ -1680,7 +1680,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void onHeightChanged(ExpandableView view) {
+    public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
 
         // Block update if we are in quick settings and just the top padding changed
         // (i.e. view == null).

@@ -16,9 +16,13 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
@@ -26,10 +30,24 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.stack.StackScrollState;
+import com.android.systemui.statusbar.stack.StackStateAnimator;
+import com.android.systemui.statusbar.stack.StackViewState;
+
+import java.util.List;
 
 public class ExpandableNotificationRow extends ActivatableNotificationView {
+
+    private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
+    private static final int COLORED_DIVIDER_ALPHA = 0x7B;
+    private final LinearInterpolator mLinearInterpolator = new LinearInterpolator();
     private int mRowMinHeight;
 
     /** Does this row contain layouts that can adapt to row expansion */
@@ -69,7 +87,27 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     private StatusBarNotification mStatusBarNotification;
     private boolean mIsHeadsUp;
+    private View mExpandButton;
+    private View mExpandButtonDivider;
+    private ViewStub mExpandButtonStub;
+    private ViewStub mChildrenContainerStub;
+    private NotificationGroupManager mGroupManager;
+    private View mExpandButtonContainer;
+    private boolean mChildrenExpanded;
+    private NotificationChildrenContainer mChildrenContainer;
+    private ValueAnimator mChildExpandAnimator;
+    private float mChildrenExpandProgress;
+    private float mExpandButtonStart;
     private ViewStub mGutsStub;
+    private boolean mHasExpandAction;
+    private boolean mIsSystemChildExpanded;
+    private OnClickListener mExpandClickListener = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mGroupManager.setGroupExpanded(mStatusBarNotification,
+                    !mChildrenExpanded);
+        }
+    };
 
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
@@ -119,6 +157,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
         updateVetoButton();
+        updateExpandButton();
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -129,8 +168,99 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mIsHeadsUp = isHeadsUp;
     }
 
+    public void setGroupManager(NotificationGroupManager groupManager) {
+        mGroupManager = groupManager;
+    }
+
+    public void addChildNotification(ExpandableNotificationRow row) {
+        addChildNotification(row, -1);
+    }
+
+    /**
+     * Add a child notification to this view.
+     *
+     * @param row the row to add
+     * @param childIndex the index to add it at, if -1 it will be added at the end
+     */
+    public void addChildNotification(ExpandableNotificationRow row, int childIndex) {
+        if (mChildrenContainer == null) {
+            mChildrenContainerStub.inflate();
+        }
+        mChildrenContainer.addNotification(row, childIndex);
+    }
+
+    public void removeChildNotification(ExpandableNotificationRow row) {
+        if (mChildrenContainer != null) {
+            mChildrenContainer.removeNotification(row);
+        }
+    }
+
+    @Override
+    public boolean areChildrenExpanded() {
+        return mChildrenExpanded;
+    }
+
+    public List<ExpandableNotificationRow> getNotificationChildren() {
+        return mChildrenContainer == null ? null : mChildrenContainer.getNotificationChildren();
+    }
+
+    /**
+     * Apply the order given in the list to the children.
+     *
+     * @param childOrder the new list order
+     * @return whether the list order has changed
+     */
+    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder) {
+        return mChildrenContainer != null && mChildrenContainer.applyChildOrder(childOrder);
+    }
+
+    public void getChildrenStates(StackScrollState resultState) {
+        if (mChildrenExpanded) {
+            StackViewState parentState = resultState.getViewStateForView(this);
+            mChildrenContainer.getState(resultState, parentState);
+        }
+    }
+
+    public void applyChildrenState(StackScrollState state) {
+        if (mChildrenExpanded) {
+            mChildrenContainer.applyState(state);
+        }
+    }
+
+    public void prepareExpansionChanged(StackScrollState state) {
+        if (mChildrenExpanded) {
+            mChildrenContainer.prepareExpansionChanged(state);
+        }
+    }
+
+    public void startChildAnimation(StackScrollState finalState,
+            StackStateAnimator stateAnimator, boolean withDelays, long delay, long duration) {
+        if (mChildrenExpanded) {
+            mChildrenContainer.startAnimationToState(finalState, stateAnimator, withDelays, delay,
+                    duration);
+        }
+    }
+
+    public ExpandableNotificationRow getViewAtPosition(float y) {
+        if (!mChildrenExpanded) {
+            return this;
+        } else {
+            ExpandableNotificationRow view = mChildrenContainer.getViewAtPosition(y);
+            return view == null ? this : view;
+        }
+    }
+
     public NotificationGuts getGuts() {
         return mGuts;
+    }
+
+    protected int calculateContentHeightFromActualHeight(int actualHeight) {
+        int realActualHeight = actualHeight;
+        if (hasBottomDecor()) {
+            realActualHeight -= getBottomDecorHeight();
+        }
+        realActualHeight = Math.max(getMinHeight(), realActualHeight);
+        return realActualHeight;
     }
 
     public interface ExpansionLogger {
@@ -194,6 +324,27 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
                 mGutsStub = null;
             }
         });
+        mExpandButtonStub = (ViewStub) findViewById(R.id.more_button_stub);
+        mExpandButtonStub.setOnInflateListener(new ViewStub.OnInflateListener() {
+
+            @Override
+            public void onInflate(ViewStub stub, View inflated) {
+                mExpandButtonContainer = inflated;
+                mExpandButton = inflated.findViewById(R.id.notification_expand_button);
+                mExpandButtonDivider = inflated.findViewById(R.id.notification_expand_divider);
+                mExpandButtonContainer.setOnClickListener(mExpandClickListener);
+            }
+        });
+        mChildrenContainerStub = (ViewStub) findViewById(R.id.child_container_stub);
+        mChildrenContainerStub.setOnInflateListener(new ViewStub.OnInflateListener() {
+
+            @Override
+            public void onInflate(ViewStub stub, View inflated) {
+                mChildrenContainer = (NotificationChildrenContainer) inflated;
+                mChildrenContainer.setCollapseClickListener(mExpandClickListener);
+                updateChildrenVisibility(false);
+            }
+        });
         mVetoButton = findViewById(R.id.veto);
     }
 
@@ -201,6 +352,54 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (mGuts == null) {
             mGutsStub.inflate();
         }
+    }
+
+    private void updateChildrenVisibility(boolean animated) {
+        if (mChildrenContainer == null) {
+            return;
+        }
+        if (mChildExpandAnimator != null) {
+            mChildExpandAnimator.cancel();
+        }
+        float targetProgress = mChildrenExpanded ? 1.0f : 0.0f;
+        if (animated) {
+            if (mChildrenExpanded) {
+                mChildrenContainer.setVisibility(VISIBLE);
+            }
+            mExpandButtonStart = mExpandButtonContainer.getTranslationY();
+            mChildExpandAnimator = ValueAnimator.ofFloat(mChildrenExpandProgress, targetProgress);
+            mChildExpandAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    setChildrenExpandProgress((float) animation.getAnimatedValue());
+                }
+            });
+            mChildExpandAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mChildExpandAnimator = null;
+                    if (!mChildrenExpanded) {
+                        mChildrenContainer.setVisibility(INVISIBLE);
+                    }
+                }
+            });
+            mChildExpandAnimator.setInterpolator(mLinearInterpolator);
+            mChildExpandAnimator.setDuration(
+                    StackStateAnimator.ANIMATION_DURATION_EXPAND_CLICKED);
+            mChildExpandAnimator.start();
+        } else {
+            setChildrenExpandProgress(targetProgress);
+            mChildrenContainer.setVisibility(mChildrenExpanded ? VISIBLE : INVISIBLE);
+        }
+    }
+
+    private void setChildrenExpandProgress(float progress) {
+        mChildrenExpandProgress = progress;
+        updateExpandButtonAppearance();
+        NotificationContentView showingLayout = getShowingLayout();
+        float alpha = 1.0f - mChildrenExpandProgress;
+        alpha = PhoneStatusBar.ALPHA_OUT.getInterpolation(alpha);
+        showingLayout.setAlpha(alpha);
     }
 
     @Override
@@ -292,7 +491,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         if (expand != mIsSystemExpanded) {
             final boolean wasExpanded = isExpanded();
             mIsSystemExpanded = expand;
-            notifyHeightChanged();
+            notifyHeightChanged(false /* needsAnimation */);
             logExpansionEvent(false, wasExpanded);
         }
     }
@@ -306,7 +505,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             mExpansionDisabled = expansionDisabled;
             logExpansionEvent(false, wasExpanded);
             if (wasExpanded != isExpanded()) {
-                notifyHeightChanged();
+                notifyHeightChanged(false  /* needsAnimation */);
             }
         }
     }
@@ -324,9 +523,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     public void applyExpansionToLayout() {
         boolean expand = isExpanded();
         if (expand && mExpandable) {
-            setActualHeight(mMaxExpandHeight);
+            setContentHeight(mMaxExpandHeight);
         } else {
-            setActualHeight(mRowMinHeight);
+            setContentHeight(mRowMinHeight);
         }
     }
 
@@ -336,12 +535,26 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
             return getActualHeight();
         }
         boolean inExpansionState = isExpanded();
-        if (!inExpansionState) {
-            // not expanded, so we return the collapsed size
-            return mRowMinHeight;
+        int maxContentHeight;
+        if ((!inExpansionState && !mChildrenExpanded) || mShowingPublicForIntrinsicHeight) {
+            maxContentHeight = mRowMinHeight;
+        } else if (mChildrenExpanded) {
+            maxContentHeight = mChildrenContainer.getIntrinsicHeight();
+        } else {
+            maxContentHeight = getMaxExpandHeight();
         }
+        return maxContentHeight + getBottomDecorHeight();
+    }
 
-        return mShowingPublicForIntrinsicHeight ? mRowMinHeight : getMaxExpandHeight();
+    @Override
+    protected boolean hasBottomDecor() {
+        return BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS
+                && !mIsHeadsUp && mGroupManager.hasGroupChildren(mStatusBarNotification);
+    }
+
+    @Override
+    protected boolean canHaveBottomDecor() {
+        return BaseStatusBar.ENABLE_CHILD_NOTIFICATIONS && !mIsHeadsUp;
     }
 
     /**
@@ -354,7 +567,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      */
     private boolean isExpanded() {
         return !mExpansionDisabled
-                && (!hasUserChangedExpansion() && isSystemExpanded() || isUserExpanded());
+                && (!hasUserChangedExpansion() && (isSystemExpanded() || isSystemChildExpanded())
+                || isUserExpanded());
+    }
+
+    private boolean isSystemChildExpanded() {
+        return mIsSystemChildExpanded;
+    }
+
+    public void setSystemChildExpanded(boolean expanded) {
+        mIsSystemChildExpanded = expanded;
     }
 
     @Override
@@ -368,11 +590,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mWasReset = false;
     }
 
+    @Override
+    protected boolean isChildInvisible(View child) {
+
+        // We don't want to layout the ChildrenContainer if this is a heads-up view, otherwise the
+        // view will get too high and the shadows will be off.
+        boolean isInvisibleChildContainer = child == mChildrenContainer && mIsHeadsUp;
+        return super.isChildInvisible(child) || isInvisibleChildContainer;
+    }
+
     private void updateMaxExpandHeight() {
         int intrinsicBefore = getIntrinsicHeight();
         mMaxExpandHeight = mPrivateLayout.getMaxHeight();
         if (intrinsicBefore != getIntrinsicHeight()) {
-            notifyHeightChanged();
+            notifyHeightChanged(false  /* needsAnimation */);
         }
     }
 
@@ -439,8 +670,127 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mVetoButton.setVisibility(isClearable() && !mShowingPublic ? View.VISIBLE : View.GONE);
     }
 
+    public void setChildrenExpanded(boolean expanded, boolean animate) {
+        mChildrenExpanded = expanded;
+        updateChildrenVisibility(animate);
+    }
+
+    public void updateExpandButton() {
+        boolean hasExpand = hasBottomDecor();
+        if (hasExpand != mHasExpandAction) {
+            if (hasExpand) {
+                if (mExpandButtonContainer == null) {
+                    mExpandButtonStub.inflate();
+                }
+                mExpandButtonContainer.setVisibility(View.VISIBLE);
+                updateExpandButtonAppearance();
+                updateExpandButtonColor();
+            } else if (mExpandButtonContainer != null) {
+                mExpandButtonContainer.setVisibility(View.GONE);
+            }
+            notifyHeightChanged(true  /* needsAnimation */);
+        }
+        mHasExpandAction = hasExpand;
+    }
+
+    private void updateExpandButtonAppearance() {
+        if (mExpandButtonContainer == null) {
+            return;
+        }
+        float expandButtonAlpha = 0.0f;
+        float expandButtonTranslation = 0.0f;
+        float containerTranslation = 0.0f;
+        int minHeight = getMinHeight();
+        if (!mChildrenExpanded || mChildExpandAnimator != null) {
+            int expandActionHeight = getBottomDecorHeight();
+            int translationY = getActualHeight() - expandActionHeight;
+            if (translationY > minHeight) {
+                containerTranslation = translationY;
+                expandButtonAlpha = 1.0f;
+                expandButtonTranslation = 0.0f;
+            } else {
+                containerTranslation = minHeight;
+                float progress = expandActionHeight != 0
+                        ? (minHeight - translationY) / (float) expandActionHeight
+                        : 1.0f;
+                expandButtonTranslation = -progress * expandActionHeight * 0.7f;
+                float alphaProgress = Math.min(progress / 0.7f, 1.0f);
+                alphaProgress = PhoneStatusBar.ALPHA_OUT.getInterpolation(alphaProgress);
+                expandButtonAlpha = 1.0f - alphaProgress;
+            }
+        }
+        if (mChildExpandAnimator != null || mChildrenExpanded) {
+            expandButtonAlpha = (1.0f - mChildrenExpandProgress)
+                    * expandButtonAlpha;
+            expandButtonTranslation = (1.0f - mChildrenExpandProgress)
+                    * expandButtonTranslation;
+            float newTranslation = -getBottomDecorHeight();
+
+            // We don't want to take the actual height of the view as this is already
+            // interpolated by a custom interpolator leading to a confusing animation. We want
+            // to have a stable end value to interpolate in between
+            float collapsedHeight = !mChildrenExpanded
+                    ? Math.max(StackStateAnimator.getFinalActualHeight(this)
+                            - getBottomDecorHeight(), minHeight)
+                    : mExpandButtonStart;
+            float translationProgress = mFastOutSlowInInterpolator.getInterpolation(
+                    mChildrenExpandProgress);
+            containerTranslation = (1.0f - translationProgress) * collapsedHeight
+                    + translationProgress * newTranslation;
+        }
+        mExpandButton.setAlpha(expandButtonAlpha);
+        mExpandButtonDivider.setAlpha(expandButtonAlpha);
+        mExpandButton.setTranslationY(expandButtonTranslation);
+        mExpandButtonContainer.setTranslationY(containerTranslation);
+        NotificationContentView showingLayout = getShowingLayout();
+        float layoutTranslation =
+                mExpandButtonContainer.getTranslationY() - showingLayout.getContentHeight();
+        layoutTranslation = Math.min(layoutTranslation, 0);
+        if (!mChildrenExpanded && mChildExpandAnimator == null) {
+            // Needed for the DragDownHelper in order not to jump there, as the position
+            // can be negative for a short time.
+            layoutTranslation = 0;
+        }
+        showingLayout.setTranslationY(layoutTranslation);
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setTranslationY(
+                    mExpandButtonContainer.getTranslationY() + getBottomDecorHeight());
+        }
+    }
+
+    private void updateExpandButtonColor() {
+        // TODO: This needs some more baking, currently only the divider is colored according to
+        // the tint, but legacy black doesn't work yet perfectly for the button etc.
+        int color = getRippleColor();
+        if (color == mNormalRippleColor) {
+            color = 0;
+        }
+        if (mExpandButtonDivider != null) {
+            applyTint(mExpandButtonDivider, color);
+        }
+        if (mChildrenContainer != null) {
+            mChildrenContainer.setTintColor(color);
+        }
+    }
+
+    public static void applyTint(View v, int color) {
+        int alpha;
+        if (color != 0) {
+            alpha = COLORED_DIVIDER_ALPHA;
+        } else {
+            color = 0xff000000;
+            alpha = DEFAULT_DIVIDER_ALPHA;
+        }
+        if (v.getBackground() instanceof ColorDrawable) {
+            ColorDrawable background = (ColorDrawable) v.getBackground();
+            background.mutate();
+            background.setColor(color);
+            background.setAlpha(alpha);
+        }
+    }
+
     public int getMaxExpandHeight() {
-        return mShowingPublicForIntrinsicHeight ? mRowMinHeight : mMaxExpandHeight;
+        return mMaxExpandHeight;
     }
 
     @Override
@@ -451,17 +801,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
-        mPrivateLayout.setActualHeight(height);
-        mPublicLayout.setActualHeight(height);
+        super.setActualHeight(height, notifyListeners);
+        int contentHeight = calculateContentHeightFromActualHeight(height);
+        mPrivateLayout.setContentHeight(contentHeight);
+        mPublicLayout.setContentHeight(contentHeight);
         if (mGuts != null) {
             mGuts.setActualHeight(height);
         }
         invalidate();
-        super.setActualHeight(height, notifyListeners);
+        updateExpandButtonAppearance();
     }
 
     @Override
-    public int getMaxHeight() {
+    public int getMaxContentHeight() {
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMaxHeight();
     }

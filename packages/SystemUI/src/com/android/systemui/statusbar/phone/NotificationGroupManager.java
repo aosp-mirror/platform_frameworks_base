@@ -100,6 +100,8 @@ public class NotificationGroupManager {
                             }
                         }
                     });
+                } else {
+                    group.summary.row.updateExpandButton();
                 }
             }
         }
@@ -116,11 +118,15 @@ public class NotificationGroupManager {
         }
         if (notif.isGroupSummary()) {
             group.summary = added;
+            group.expanded = added.row.areChildrenExpanded();
             if (!group.children.isEmpty()) {
                 mListener.onGroupCreatedFromChildren(group);
             }
         } else {
             group.children.add(added);
+            if (group.summary != null && group.children.size() == 1 && !group.expanded) {
+                group.summary.row.updateExpandButton();
+            }
         }
     }
 

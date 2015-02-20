@@ -23,10 +23,12 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +59,18 @@ public class StackScrollState {
         for (int i = 0; i < numChildren; i++) {
             ExpandableView child = (ExpandableView) mHostView.getChildAt(i);
             resetViewState(child);
+
+            // handling reset for child notifications
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                List<ExpandableNotificationRow> children =
+                        row.getNotificationChildren();
+                if (row.areChildrenExpanded() && children != null) {
+                    for (ExpandableNotificationRow childRow : children) {
+                        resetViewState(childRow);
+                    }
+                }
+            }
         }
     }
 
@@ -153,6 +167,10 @@ public class StackScrollState {
         float oldClipTopOptimization = view.getClipTopOptimization();
         if (oldClipTopOptimization != state.topOverLap) {
             view.setClipTopOptimization(state.topOverLap);
+        }
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
+            row.applyChildrenState(this);
         }
         return true;
     }
