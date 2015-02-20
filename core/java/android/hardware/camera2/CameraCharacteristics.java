@@ -638,6 +638,44 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.HighSpeedVideoConfiguration[]>("android.control.availableHighSpeedVideoConfigurations", android.hardware.camera2.params.HighSpeedVideoConfiguration[].class);
 
     /**
+     * <p>Whether the camera device supports {@link CaptureRequest#CONTROL_AE_LOCK android.control.aeLock}</p>
+     * <p>LIMITED or FULL devices will always list <code>true</code></p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AE_LOCK
+     */
+    @PublicKey
+    public static final Key<Boolean> CONTROL_AE_LOCK_AVAILABLE =
+            new Key<Boolean>("android.control.aeLockAvailable", boolean.class);
+
+    /**
+     * <p>Whether the camera device supports {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}</p>
+     * <p>LIMITED or FULL devices will always list <code>true</code></p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     */
+    @PublicKey
+    public static final Key<Boolean> CONTROL_AWB_LOCK_AVAILABLE =
+            new Key<Boolean>("android.control.awbLockAvailable", boolean.class);
+
+    /**
+     * <p>List of control modes for {@link CaptureRequest#CONTROL_MODE android.control.mode} that are supported by this camera
+     * device.</p>
+     * <p>This list contains control modes that can be set for the camera device.
+     * LEGACY mode devices will always support AUTO mode. LIMITED and FULL
+     * devices will always support OFF, AUTO modes.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#CONTROL_MODE android.control.mode}</p>
+     * <p>This key is available on all devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_MODE
+     */
+    @PublicKey
+    public static final Key<int[]> CONTROL_AVAILABLE_MODES =
+            new Key<int[]>("android.control.availableModes", int[].class);
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; all devices will list FAST.</p>
