@@ -1,58 +1,67 @@
-page.title=Developing for Enterprise
-page.tags=policy,privacy
-
-trainingnavtop=true
-startpage=true
-next.title=Enhancing Security with Device Management Policies
-next.link=device-management-policy.html
+page.title=Building Apps for Work
+meta.tags="work, enterprise, corporate"
+page.tags="work", "enterprise", "corporate"
+page.metaDescription=Learn how to build Android apps for the enterprise and take advantage of Google's Android for Work program.
+page.tags="education"
+page.article=true
 
 @jd:body
 
-<div id="tb-wrapper">
-<div id="tb">
+<img src="{@docRoot}images/enterprise/work-launcher.png"
+  width="300"
+  style="float:right;margin:0 0 20px 20px"
+  alt="Android for Work apps in a managed profile">
 
-<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
-<h2>Dependencies and prerequisites</h2>
-<ul>
-  <li>Android 2.2 (API Level 8) or higher</li>
-</ul>
+<p>
+  The Android framework provides features to support the security, data separation, and
+  administration needs of a enterprise environment. As an app developer, you can make your app more
+  appealing to corporate customers by gracefully handling enterprise security and feature
+  restrictions. You can also modify your app so that technology administrators can remotely
+  configure it for use with enterprise resources.
+</p>
 
-<!-- related docs (NOT javadocs) -->
-<h2>You should also read</h2>
-<ul>
-  <li><a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a></li>
-</ul>
+<p>
+  To help businesses incorporate Android devices and apps into the workplace, Google provides the
+  <a href="http://www.google.com/work/android">Android for Work</a> program, which offers a suite
+  of APIs and services for device distribution and administration. Through this program companies
+  can connect with Enterprise Mobility Management (EMM) providers to help integrate Android with
+  their businesses.
+</p>
 
-<h2>Try it out</h2>
+<p>
+  For more information, follow the links below to learn how to update your Android app to support
+  the enterprise environment or build enterprise-specific solutions.
+</p>
 
-<div class="download-box">
- <a href="http://developer.android.com/shareables/training/DeviceManagement.zip"
-class="button">Download the sample</a>
- <p class="filename">DeviceManagement.zip</p>
+
+<h2 id="apps">App Development for Enterprises</h2>
+
+<p>
+  Learn how to make your app function smoothly in corporate environments that restrict device
+  features and data access. Go further to support enterprise use of your app by enabling
+  restrictions that corporate technology administrators can use to remotely configure your app:
+</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:training/work/apps"
+    data-cardSizes="9x3"
+    data-maxResults="6">
+  </div>
 </div>
 
+
+<h2 id="admin">Device and App Administration</h2>
+
+<p>
+  Learn how to build policy controller apps that enable enterprise technology administrators
+  to manage devices, manage corporate apps, and provide access to company resources:
+</p>
+
+<div class="dynamic-grid">
+  <div class="resource-widget resource-flow-layout landing col-12"
+    data-query="collection:training/work/admin"
+    data-cardSizes="9x3"
+    data-maxResults="4">
+  </div>
 </div>
-</div>
-
-
-<p>In this class, you'll learn APIs and techniques you can use when developing applications
-for the enterprise.</p>
-
-
-<h2>Lessons</h2>
-
-
-<dl>
-  <dt><b><a href="device-management-policy.html">Enhancing Security with Device Management
-Policies</a></b></dt>
-    <dd>In this lesson, you will learn how to create a security-aware application that manages
-access to its content by enforcing device management policies</dd>
-
-  <dt><b><a href="app-compatibility.html">Ensuring Compatibility with Managed Profiles</a></b></dt>
-
-    <dd>In this lesson, you will learn the best practices to follow to ensure
-      that your app functions properly on devices that use <a
-      href="{@docRoot}about/versions/android-5.0.html#Enterprise">managed
-      profiles</a></dd>
-
-</dl>
