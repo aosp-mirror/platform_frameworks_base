@@ -158,7 +158,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             removeView(mCustomView);
         }
         mCustomView = view;
-        if (mTitleLayout != null) {
+        if (view != null && mTitleLayout != null) {
             removeView(mTitleLayout);
             mTitleLayout = null;
         }
