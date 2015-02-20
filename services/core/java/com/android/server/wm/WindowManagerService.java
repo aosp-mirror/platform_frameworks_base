@@ -7904,16 +7904,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     break;
 
                 case TAP_OUTSIDE_STACK: {
-//                    int stackId;
-//                    synchronized (mWindowMap) {
-//                        stackId = ((DisplayContent)msg.obj).stackIdFromPoint(msg.arg1, msg.arg2);
-//                    }
-//                    if (stackId >= 0) {
-//                        try {
-//                            mActivityManager.setFocusedStack(stackId);
-//                        } catch (RemoteException e) {
-//                        }
-//                    }
+                    int stackId;
+                    synchronized (mWindowMap) {
+                        stackId = ((DisplayContent)msg.obj).stackIdFromPoint(msg.arg1, msg.arg2);
+                    }
+                    if (stackId >= 0) {
+                        try {
+                            mActivityManager.setFocusedStack(stackId);
+                        } catch (RemoteException e) {
+                        }
+                    }
                 }
                 break;
                 case NOTIFY_ACTIVITY_DRAWN:
