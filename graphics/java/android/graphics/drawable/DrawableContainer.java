@@ -306,7 +306,6 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
     }
 
-    /** @hide */
     @Override
     public void getHotspotBounds(Rect outRect) {
         if (mHotspotBounds != null) {
@@ -336,6 +335,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return mCurrDrawable.setLevel(level);
         }
         return false;
+    }
+
+    @Override
+    public boolean onLayoutDirectionChange(int layoutDirection) {
+        // Let the container handle setting its own layout direction. Otherwise,
+        // we're accessing potentially unused states.
+        return mDrawableContainerState.setLayoutDirection(layoutDirection, getCurrentIndex());
     }
 
     @Override
@@ -829,18 +835,25 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return null;
         }
 
-        final void setLayoutDirection(int layoutDirection) {
+        final boolean setLayoutDirection(int layoutDirection, int currentIndex) {
+            boolean changed = false;
+
             // No need to call createAllFutures, since future drawables will
             // change layout direction when they are prepared.
             final int N = mNumChildren;
             final Drawable[] drawables = mDrawables;
             for (int i = 0; i < N; i++) {
                 if (drawables[i] != null) {
-                    drawables[i].setLayoutDirection(layoutDirection);
+                    final boolean childChanged = drawables[i].setLayoutDirection(layoutDirection);
+                    if (i == currentIndex) {
+                        changed = childChanged;
+                    }
                 }
             }
 
             mLayoutDirection = layoutDirection;
+
+            return changed;
         }
 
         final void applyTheme(Theme theme) {

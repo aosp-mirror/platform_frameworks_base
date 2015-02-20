@@ -11792,15 +11792,8 @@ package android.graphics.drawable {
     method public final void setTileModeY(android.graphics.Shader.TileMode);
   }
 
-  public class ClipDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
+  public class ClipDrawable extends android.graphics.drawable.DrawableWrapper {
     ctor public ClipDrawable(android.graphics.drawable.Drawable, int, int);
-    method public void draw(android.graphics.Canvas);
-    method public int getOpacity();
-    method public void invalidateDrawable(android.graphics.drawable.Drawable);
-    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
-    method public void setAlpha(int);
-    method public void setColorFilter(android.graphics.ColorFilter);
-    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
     field public static final int HORIZONTAL = 1; // 0x1
     field public static final int VERTICAL = 2; // 0x2
   }
@@ -11842,8 +11835,10 @@ package android.graphics.drawable {
     method public android.graphics.Rect getDirtyBounds();
     method public boolean getDither();
     method public boolean getFilterBitmap();
+    method public void getHotspotBounds(android.graphics.Rect);
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
+    method public int getLayoutDirection();
     method public final int getLevel();
     method public int getMinimumHeight();
     method public int getMinimumWidth();
@@ -11861,6 +11856,7 @@ package android.graphics.drawable {
     method public void jumpToCurrentState();
     method public android.graphics.drawable.Drawable mutate();
     method protected void onBoundsChange(android.graphics.Rect);
+    method public boolean onLayoutDirectionChange(int);
     method protected boolean onLevelChange(int);
     method protected boolean onStateChange(int[]);
     method public static int resolveOpacity(int, int);
@@ -11877,6 +11873,7 @@ package android.graphics.drawable {
     method public void setFilterBitmap(boolean);
     method public void setHotspot(float, float);
     method public void setHotspotBounds(int, int, int, int);
+    method public final boolean setLayoutDirection(int);
     method public final boolean setLevel(int);
     method public boolean setState(int[]);
     method public void setTint(int);
@@ -11941,6 +11938,19 @@ package android.graphics.drawable {
     method public final void setVariablePadding(boolean);
   }
 
+  public abstract class DrawableWrapper extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
+    ctor public DrawableWrapper(android.graphics.drawable.Drawable);
+    method public void draw(android.graphics.Canvas);
+    method public android.graphics.drawable.Drawable getDrawable();
+    method public int getOpacity();
+    method public void invalidateDrawable(android.graphics.drawable.Drawable);
+    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
+    method public void setAlpha(int);
+    method public void setColorFilter(android.graphics.ColorFilter);
+    method public void setDrawable(android.graphics.drawable.Drawable);
+    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
+  }
+
   public class GradientDrawable extends android.graphics.drawable.Drawable {
     ctor public GradientDrawable();
     ctor public GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation, int[]);
@@ -11988,17 +11998,9 @@ package android.graphics.drawable {
     enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation TR_BL;
   }
 
-  public class InsetDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
+  public class InsetDrawable extends android.graphics.drawable.DrawableWrapper {
     ctor public InsetDrawable(android.graphics.drawable.Drawable, int);
     ctor public InsetDrawable(android.graphics.drawable.Drawable, int, int, int, int);
-    method public void draw(android.graphics.Canvas);
-    method public android.graphics.drawable.Drawable getDrawable();
-    method public int getOpacity();
-    method public void invalidateDrawable(android.graphics.drawable.Drawable);
-    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
-    method public void setAlpha(int);
-    method public void setColorFilter(android.graphics.ColorFilter);
-    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
   }
 
   public class LayerDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
@@ -12078,41 +12080,24 @@ package android.graphics.drawable {
     field public static final int RADIUS_AUTO = -1; // 0xffffffff
   }
 
-  public class RotateDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
+  public class RotateDrawable extends android.graphics.drawable.DrawableWrapper {
     ctor public RotateDrawable();
-    method public void draw(android.graphics.Canvas);
-    method public android.graphics.drawable.Drawable getDrawable();
     method public float getFromDegrees();
-    method public int getOpacity();
     method public float getPivotX();
     method public float getPivotY();
     method public float getToDegrees();
-    method public void invalidateDrawable(android.graphics.drawable.Drawable);
     method public boolean isPivotXRelative();
     method public boolean isPivotYRelative();
-    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
-    method public void setAlpha(int);
-    method public void setColorFilter(android.graphics.ColorFilter);
-    method public void setDrawable(android.graphics.drawable.Drawable);
     method public void setFromDegrees(float);
     method public void setPivotX(float);
     method public void setPivotXRelative(boolean);
     method public void setPivotY(float);
     method public void setPivotYRelative(boolean);
     method public void setToDegrees(float);
-    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
   }
 
-  public class ScaleDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
+  public class ScaleDrawable extends android.graphics.drawable.DrawableWrapper {
     ctor public ScaleDrawable(android.graphics.drawable.Drawable, int, float, float);
-    method public void draw(android.graphics.Canvas);
-    method public android.graphics.drawable.Drawable getDrawable();
-    method public int getOpacity();
-    method public void invalidateDrawable(android.graphics.drawable.Drawable);
-    method public void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
-    method public void setAlpha(int);
-    method public void setColorFilter(android.graphics.ColorFilter);
-    method public void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
   }
 
   public class ShapeDrawable extends android.graphics.drawable.Drawable {

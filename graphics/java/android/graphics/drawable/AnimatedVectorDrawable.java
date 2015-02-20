@@ -197,6 +197,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     }
 
     @Override
+    public boolean onLayoutDirectionChange(int layoutDirection) {
+        return mAnimatedVectorState.mVectorDrawable.setLayoutDirection(layoutDirection);
+    }
+
+    @Override
     public int getAlpha() {
         return mAnimatedVectorState.mVectorDrawable.getAlpha();
     }
@@ -235,12 +240,6 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     public boolean setVisible(boolean visible, boolean restart) {
         mAnimatedVectorState.mVectorDrawable.setVisible(visible, restart);
         return super.setVisible(visible, restart);
-    }
-
-    /** {@hide} */
-    @Override
-    public void setLayoutDirection(int layoutDirection) {
-        mAnimatedVectorState.mVectorDrawable.setLayoutDirection(layoutDirection);
     }
 
     @Override

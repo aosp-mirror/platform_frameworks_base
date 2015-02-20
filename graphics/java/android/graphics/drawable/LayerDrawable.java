@@ -834,7 +834,6 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         }
     }
 
-    /** @hide */
     @Override
     public void getHotspotBounds(Rect outRect) {
         if (mHotspotBounds != null) {
@@ -1230,16 +1229,16 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         mMutated = false;
     }
 
-    /** @hide */
     @Override
-    public void setLayoutDirection(int layoutDirection) {
-        super.setLayoutDirection(layoutDirection);
+    public boolean onLayoutDirectionChange(int layoutDirection) {
+        boolean changed = false;
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
-            array[i].mDrawable.setLayoutDirection(layoutDirection);
+            changed |= array[i].mDrawable.setLayoutDirection(layoutDirection);
         }
         updateLayerBounds(getBounds());
+        return changed;
     }
 
     static class ChildDrawable {
