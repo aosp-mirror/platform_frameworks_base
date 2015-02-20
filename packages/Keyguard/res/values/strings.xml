@@ -433,4 +433,7 @@
         This is displayed if the phone is not connected to a carrier.-->
     <string name="keyguard_carrier_default">No service.</string>
 
+    <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">Switch input method button.</string>
+
 </resources>
