@@ -214,7 +214,7 @@ public:
     void initTempProperties();
     void setTempProperty(const char* name, const char* value);
 
-    float propertyLightDiameter;
+    float propertyLightRadius;
     float propertyLightPosY;
     float propertyLightPosZ;
     float propertyAmbientRatio;

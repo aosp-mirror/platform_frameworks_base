@@ -405,7 +405,7 @@ TextureVertex* Caches::getRegionMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Caches::initTempProperties() {
-    propertyLightDiameter = -1.0f;
+    propertyLightRadius = -1.0f;
     propertyLightPosY = -1.0f;
     propertyLightPosZ = -1.0f;
     propertyAmbientRatio = -1.0f;
@@ -419,9 +419,9 @@ void Caches::setTempProperty(const char* name, const char* value) {
         propertyAmbientRatio = fmin(fmax(atof(value), 0.0), 10.0);
         ALOGD("ambientRatio = %.2f", propertyAmbientRatio);
         return;
-    } else if (!strcmp(name, "lightDiameter")) {
-        propertyLightDiameter = fmin(fmax(atof(value), 0.0), 3000.0);
-        ALOGD("lightDiameter = %.2f", propertyLightDiameter);
+    } else if (!strcmp(name, "lightRadius")) {
+        propertyLightRadius = fmin(fmax(atof(value), 0.0), 3000.0);
+        ALOGD("lightRadius = %.2f", propertyLightRadius);
         return;
     } else if (!strcmp(name, "lightPosY")) {
         propertyLightPosY = fmin(fmax(atof(value), 0.0), 3000.0);

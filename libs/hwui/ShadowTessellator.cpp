@@ -87,8 +87,8 @@ void ShadowTessellator::tessellateSpotShadow(bool isCasterOpaque,
     reverseReceiverTransform.loadInverse(receiverTransform);
     reverseReceiverTransform.mapPoint3d(adjustedLightCenter);
 
-    if (CC_UNLIKELY(caches.propertyLightDiameter > 0)) {
-        lightRadius = caches.propertyLightDiameter;
+    if (CC_UNLIKELY(caches.propertyLightRadius > 0)) {
+        lightRadius = caches.propertyLightRadius;
     }
 
     // Now light and caster are both in local space, we will check whether
