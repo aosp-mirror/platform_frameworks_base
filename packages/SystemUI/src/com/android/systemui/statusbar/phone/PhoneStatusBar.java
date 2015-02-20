@@ -161,7 +161,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout.OnChildLocationsChangedListener;
-import com.android.systemui.statusbar.stack.StackScrollState.ViewState;
+import com.android.systemui.statusbar.stack.StackViewState;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -444,10 +444,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
     private int mLastLoggedStateFingerprint;
 
-    private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
-            | ViewState.LOCATION_TOP_STACK_PEEKING
-            | ViewState.LOCATION_MAIN_AREA
-            | ViewState.LOCATION_BOTTOM_STACK_PEEKING;
+    private static final int VISIBLE_LOCATIONS = StackViewState.LOCATION_FIRST_CARD
+            | StackViewState.LOCATION_TOP_STACK_PEEKING
+            | StackViewState.LOCATION_MAIN_AREA
+            | StackViewState.LOCATION_BOTTOM_STACK_PEEKING;
 
     private final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
             new OnChildLocationsChangedListener() {
