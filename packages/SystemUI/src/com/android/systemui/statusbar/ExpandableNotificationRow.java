@@ -31,7 +31,6 @@ import com.android.systemui.R;
 
 public class ExpandableNotificationRow extends ActivatableNotificationView {
     private int mRowMinHeight;
-    private int mRowMaxHeight;
 
     /** Does this row contain layouts that can adapt to row expansion */
     private boolean mExpandable;
@@ -145,7 +144,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         super.reset();
         mRowMinHeight = 0;
         final boolean wasExpanded = isExpanded();
-        mRowMaxHeight = 0;
+        mMaxViewHeight = 0;
         mExpandable = false;
         mHasUserChangedExpansion = false;
         mUserLocked = false;
@@ -217,7 +216,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setHeightRange(int rowMinHeight, int rowMaxHeight) {
         mRowMinHeight = rowMinHeight;
-        mRowMaxHeight = rowMaxHeight;
+        mMaxViewHeight = rowMaxHeight;
     }
 
     public boolean isExpandable() {

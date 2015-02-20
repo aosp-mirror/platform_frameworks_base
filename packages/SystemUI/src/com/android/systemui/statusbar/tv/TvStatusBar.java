@@ -26,6 +26,7 @@ import android.view.WindowManager;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.NotificationData;
 
 /*
  * Status bar implementation for "large screen" products that mostly present no on-screen nav
@@ -47,7 +48,8 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void addNotification(StatusBarNotification notification, RankingMap ranking) {
+    public void addNotification(StatusBarNotification notification, RankingMap ranking,
+            NotificationData.Entry entry) {
     }
 
     @Override
