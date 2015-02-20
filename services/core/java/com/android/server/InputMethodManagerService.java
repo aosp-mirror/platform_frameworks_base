@@ -764,9 +764,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         InputMethodInfo defIm = null;
         for (InputMethodInfo imi : mMethodList) {
-            if (defIm == null) {
-                if (InputMethodUtils.isValidSystemDefaultIme(
-                        mSystemReady, imi, context)) {
+            if (defIm == null && mSystemReady) {
+                final Locale systemLocale = context.getResources().getConfiguration().locale;
+                if (InputMethodUtils.isSystemImeThatHasSubtypeOf(imi, context,
+                        true /* checkDefaultAttribute */, systemLocale, false /* checkCountry */,
+                        InputMethodUtils.SUBTYPE_MODE_ANY)) {
                     defIm = imi;
                     Slog.i(TAG, "Selected default: " + imi.getId());
                 }

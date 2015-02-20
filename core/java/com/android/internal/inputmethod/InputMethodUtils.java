@@ -120,18 +120,6 @@ public class InputMethodUtils {
                 & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
-    /**
-     * @deprecated Use {@link #isSystemImeThatHasSubtypeOf(InputMethodInfo, Context, boolean,
-     * Locale, boolean, String)} instead.
-     */
-    @Deprecated
-    public static boolean isSystemImeThatHasEnglishKeyboardSubtype(InputMethodInfo imi) {
-        if (!isSystemIme(imi)) {
-            return false;
-        }
-        return containsSubtypeOf(imi, ENGLISH_LOCALE.getLanguage(), SUBTYPE_MODE_KEYBOARD);
-    }
-
     public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
             final Context context, final boolean checkDefaultAttribute,
             @Nullable final Locale requiredLocale, final boolean checkCountry,
@@ -382,35 +370,6 @@ public class InputMethodUtils {
                 .build();
     }
 
-    /**
-     * @deprecated Use {@link #isSystemImeThatHasSubtypeOf(InputMethodInfo, Context, boolean,
-     * Locale, boolean, String)} instead.
-     */
-    @Deprecated
-    public static boolean isValidSystemDefaultIme(
-            boolean isSystemReady, InputMethodInfo imi, Context context) {
-        if (!isSystemReady) {
-            return false;
-        }
-        if (!isSystemIme(imi)) {
-            return false;
-        }
-        if (imi.getIsDefaultResourceId() != 0) {
-            try {
-                if (imi.isDefault(context) && containsSubtypeOf(
-                        imi, context.getResources().getConfiguration().locale.getLanguage(),
-                        SUBTYPE_MODE_ANY)) {
-                    return true;
-                }
-            } catch (Resources.NotFoundException ex) {
-            }
-        }
-        if (imi.getSubtypeCount() == 0) {
-            Slog.w(TAG, "Found no subtypes in a system IME: " + imi.getPackageName());
-        }
-        return false;
-    }
-
     public static Locale constructLocaleFromString(String localeStr) {
         if (TextUtils.isEmpty(localeStr)) {
             return null;
@@ -459,25 +418,6 @@ public class InputMethodUtils {
         return false;
     }
 
-    /**
-     * @deprecated Use {@link #containsSubtypeOf(InputMethodInfo, Locale, boolean, String)} instead.
-     */
-    @Deprecated
-    public static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
-        final int N = imi.getSubtypeCount();
-        for (int i = 0; i < N; ++i) {
-            final InputMethodSubtype subtype = imi.getSubtypeAt(i);
-            if (!subtype.getLocale().startsWith(language)) {
-                continue;
-            }
-            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode) ||
-                    mode.equalsIgnoreCase(subtype.getMode())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static ArrayList<InputMethodSubtype> getSubtypes(InputMethodInfo imi) {
         ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
         final int subtypeCount = imi.getSubtypeCount();
@@ -510,12 +450,15 @@ public class InputMethodUtils {
         while (i > 0) {
             i--;
             final InputMethodInfo imi = enabledImes.get(i);
-            if (InputMethodUtils.isSystemImeThatHasEnglishKeyboardSubtype(imi)
-                    && !imi.isAuxiliaryIme()) {
+            if (imi.isAuxiliaryIme()) {
+                continue;
+            }
+            if (InputMethodUtils.isSystemIme(imi)
+                    && containsSubtypeOf(imi, ENGLISH_LOCALE, false /* checkCountry */,
+                            SUBTYPE_MODE_KEYBOARD)) {
                 return imi;
             }
-            if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)
-                    && !imi.isAuxiliaryIme()) {
+            if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)) {
                 firstFoundSystemIme = i;
             }
         }
