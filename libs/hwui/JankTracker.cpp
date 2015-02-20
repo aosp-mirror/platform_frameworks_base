@@ -30,8 +30,8 @@ static const char* JANK_TYPE_NAMES[] = {
 };
 
 struct Comparison {
-    FrameInfoIndexEnum start;
-    FrameInfoIndexEnum end;
+    FrameInfoIndex start;
+    FrameInfoIndex end;
 };
 
 static const Comparison COMPARISONS[] = {
@@ -91,15 +91,15 @@ void JankTracker::setFrameInterval(nsecs_t frameInterval) {
 }
 
 void JankTracker::addFrame(const FrameInfo& frame) {
-    using namespace FrameInfoIndex;
     mTotalFrameCount++;
     // Fast-path for jank-free frames
-    int64_t totalDuration = frame[kFrameCompleted] - frame[kIntendedVsync];
+    int64_t totalDuration =
+            frame[FrameInfoIndex::kFrameCompleted] - frame[FrameInfoIndex::kIntendedVsync];
     if (CC_LIKELY(totalDuration < mFrameInterval)) {
         return;
     }
 
-    if (frame[kFlags] & EXEMPT_FRAMES_FLAGS) {
+    if (frame[FrameInfoIndex::kFlags] & EXEMPT_FRAMES_FLAGS) {
         return;
     }
 

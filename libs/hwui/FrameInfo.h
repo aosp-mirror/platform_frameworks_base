@@ -28,7 +28,7 @@ namespace uirenderer {
 
 #define UI_THREAD_FRAME_INFO_SIZE 9
 
-HWUI_ENUM(FrameInfoIndex,
+enum class FrameInfoIndex {
     kFlags = 0,
     kIntendedVsync,
     kVsync,
@@ -47,13 +47,14 @@ HWUI_ENUM(FrameInfoIndex,
 
     // Must be the last value!
     kNumIndexes
-);
+};
 
-HWUI_ENUM(FrameInfoFlags,
+enum class FrameInfoFlags {
     kWindowLayoutChanged = 1 << 0,
     kRTAnimation = 1 << 1,
     kSurfaceCanvas = 1 << 2,
-);
+};
+MAKE_FLAGS_ENUM(FrameInfoFlags)
 
 class ANDROID_API UiFrameInfoBuilder {
 public:
@@ -62,17 +63,21 @@ public:
     }
 
     UiFrameInfoBuilder& setVsync(nsecs_t vsyncTime, nsecs_t intendedVsync) {
-        mBuffer[FrameInfoIndex::kVsync] = vsyncTime;
-        mBuffer[FrameInfoIndex::kIntendedVsync] = intendedVsync;
+        set(FrameInfoIndex::kVsync) = vsyncTime;
+        set(FrameInfoIndex::kIntendedVsync) = intendedVsync;
         return *this;
     }
 
-    UiFrameInfoBuilder& addFlag(FrameInfoFlagsEnum flag) {
-        mBuffer[FrameInfoIndex::kFlags] |= static_cast<uint64_t>(flag);
+    UiFrameInfoBuilder& addFlag(FrameInfoFlags flag) {
+        set(FrameInfoIndex::kFlags) |= static_cast<uint64_t>(flag);
         return *this;
     }
 
 private:
+    inline int64_t& set(FrameInfoIndex index) {
+        return mBuffer[static_cast<int>(index)];
+    }
+
     int64_t* mBuffer;
 };
 
@@ -81,33 +86,37 @@ public:
     void importUiThreadInfo(int64_t* info);
 
     void markSyncStart() {
-        mFrameInfo[FrameInfoIndex::kSyncStart] = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::kSyncStart) = systemTime(CLOCK_MONOTONIC);
     }
 
     void markIssueDrawCommandsStart() {
-        mFrameInfo[FrameInfoIndex::kIssueDrawCommandsStart] = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::kIssueDrawCommandsStart) = systemTime(CLOCK_MONOTONIC);
     }
 
     void markSwapBuffers() {
-        mFrameInfo[FrameInfoIndex::kSwapBuffers] = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::kSwapBuffers) = systemTime(CLOCK_MONOTONIC);
     }
 
     void markFrameCompleted() {
-        mFrameInfo[FrameInfoIndex::kFrameCompleted] = systemTime(CLOCK_MONOTONIC);
+        set(FrameInfoIndex::kFrameCompleted) = systemTime(CLOCK_MONOTONIC);
     }
 
-    int64_t operator[](FrameInfoIndexEnum index) const {
+    int64_t operator[](FrameInfoIndex index) const {
         if (index == FrameInfoIndex::kNumIndexes) return 0;
         return mFrameInfo[static_cast<int>(index)];
     }
 
     int64_t operator[](int index) const {
-        if (index < 0 || index >= FrameInfoIndex::kNumIndexes) return 0;
-        return mFrameInfo[static_cast<int>(index)];
+        if (index < 0 || index >= static_cast<int>(FrameInfoIndex::kNumIndexes)) return 0;
+        return mFrameInfo[index];
     }
 
 private:
-    int64_t mFrameInfo[FrameInfoIndex::kNumIndexes];
+    inline int64_t& set(FrameInfoIndex index) {
+        return mFrameInfo[static_cast<int>(index)];
+    }
+
+    int64_t mFrameInfo[static_cast<int>(FrameInfoIndex::kNumIndexes)];
 };
 
 } /* namespace uirenderer */

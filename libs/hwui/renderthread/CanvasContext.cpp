@@ -399,7 +399,7 @@ void CanvasContext::dumpFrames(int fd) {
             continue;
         }
         fprintf(file, "\n");
-        for (int i = 0; i < FrameInfoIndex::kNumIndexes; i++) {
+        for (int i = 0; i < static_cast<int>(FrameInfoIndex::kNumIndexes); i++) {
             fprintf(file, "%" PRId64 ",", frame[i]);
         }
     }
