@@ -4139,7 +4139,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (this) {
             p.println("Current Device Policy Manager state:");
-
+            if (mDeviceOwner != null) {
+                mDeviceOwner.dump("  ", pw);
+            }
             int userCount = mUserData.size();
             for (int u = 0; u < userCount; u++) {
                 DevicePolicyData policy = getUserData(mUserData.keyAt(u));

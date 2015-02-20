@@ -39,7 +39,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -319,6 +321,24 @@ class DeviceOwner {
             this.name = name;
             this.admin = admin;
             this.packageName = admin.getPackageName();
+        }
+        public void dump(String prefix, PrintWriter pw) {
+            pw.println(prefix + "admin=" + admin);
+            pw.println(prefix + "name=" + name);
+            pw.println();
+        }
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        if (mDeviceOwner != null) {
+            pw.println(prefix + "Device Owner: ");
+            mDeviceOwner.dump(prefix + "  ", pw);
+        }
+        if (mProfileOwners != null) {
+            for (Map.Entry<Integer, OwnerInfo> entry : mProfileOwners.entrySet()) {
+                pw.println(prefix + "Profile Owner (User " + entry.getKey() + "): ");
+                entry.getValue().dump(prefix + "  ", pw);
+            }
         }
     }
 }
