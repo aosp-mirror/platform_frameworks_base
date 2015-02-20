@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.telecom.PhoneAccount;
 import android.telephony.CellInfo;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.NeighboringCellInfo;
@@ -879,4 +880,9 @@ interface ITelephony {
       *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
       */
     String getDeviceId();
+
+    /**
+     * Returns the subscription ID associated with the specified PhoneAccount.
+     */
+    int getSubIdForPhoneAccount(in PhoneAccount phoneAccount);
 }

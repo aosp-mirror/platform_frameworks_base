@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.telecom.PhoneAccount;
 import android.util.Log;
 
 import com.android.internal.telecom.ITelecomService;
@@ -3765,7 +3766,7 @@ public class TelephonyManager {
 
    /**
     * Returns the IMS Registration Status
-    *@hide
+    * @hide
     */
    public boolean isImsRegistered() {
        try {
@@ -4115,5 +4116,22 @@ public class TelephonyManager {
                     TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
                     ServiceState.rilRadioTechnologyToString(type));
         }
+    }
+
+    /**
+     * Returns the subscription ID for the given phone account.
+     * @hide
+     */
+    public int getSubIdForPhoneAccount(PhoneAccount phoneAccount) {
+        int retval = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                retval = service.getSubIdForPhoneAccount(phoneAccount);
+            }
+        } catch (RemoteException e) {
+        }
+
+        return retval;
     }
 }
