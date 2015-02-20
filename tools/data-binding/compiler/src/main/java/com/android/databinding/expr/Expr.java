@@ -580,7 +580,8 @@ abstract public class Expr {
             Expr child = mChildren.get(i);
             String packageName = child.asPackage();
             if (packageName != null) {
-                ModelClass modelClass = modelAnalyzer.findClass(packageName);
+                ModelClass modelClass = modelAnalyzer.findClass(packageName,
+                        getModel().getImports());
                 if (modelClass != null) {
                     child.removeParentAndUnregisterIfOrphan(this);
                     StaticIdentifierExpr staticAccessExpr = getModel().staticIdentifier(packageName);

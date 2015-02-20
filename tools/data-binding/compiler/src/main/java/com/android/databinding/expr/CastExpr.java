@@ -32,7 +32,7 @@ public class CastExpr extends Expr {
 
     @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
-        return modelAnalyzer.findClass(mType);
+        return modelAnalyzer.findClass(mType, getModel().getImports());
     }
 
     @Override
@@ -53,6 +53,6 @@ public class CastExpr extends Expr {
     }
 
     public String getCastType() {
-        return mType;
+        return getResolvedType().toJavaCode();
     }
 }

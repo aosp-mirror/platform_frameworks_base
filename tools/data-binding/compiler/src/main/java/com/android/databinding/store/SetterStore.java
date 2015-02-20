@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
@@ -256,7 +257,8 @@ public class SetterStore {
     }
 
     public String getSetterCall(String attribute, ModelClass viewType,
-            ModelClass valueType, String viewExpression, String valueExpression) {
+            ModelClass valueType, String viewExpression, String valueExpression,
+            Map<String, String> imports) {
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
@@ -266,7 +268,7 @@ public class SetterStore {
         HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
         MethodDescription adapter = null;
         String setterName = null;
-        ModelMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute);
+        ModelMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute, imports);
         ModelClass bestViewType = null;
         ModelClass bestValueType = null;
         if (bestSetterMethod != null) {
@@ -278,14 +280,15 @@ public class SetterStore {
         if (adapters != null) {
             for (AccessorKey key : adapters.keySet()) {
                 try {
-                    ModelClass adapterViewType = mClassAnalyzer.findClass(key.viewType);
+                    ModelClass adapterViewType = mClassAnalyzer.findClass(key.viewType, imports);
                     if (adapterViewType.isAssignableFrom(viewType)) {
                         try {
-                            ModelClass adapterValueType = mClassAnalyzer.findClass(key.valueType);
+                            ModelClass adapterValueType = mClassAnalyzer.findClass(key.valueType,
+                                    imports);
                             boolean isBetterView = bestViewType == null ||
                                     bestValueType.isAssignableFrom(adapterValueType);
                             if (isBetterParameter(valueType, adapterValueType, bestValueType,
-                                    isBetterView)) {
+                                    isBetterView, imports)) {
                                 bestViewType = adapterViewType;
                                 bestValueType = adapterValueType;
                                 adapter = adapters.get(key);
@@ -301,7 +304,7 @@ public class SetterStore {
             }
         }
 
-        MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType);
+        MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType, imports);
         if (conversionMethod != null) {
             valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +
                     valueExpression + ")";
@@ -318,14 +321,14 @@ public class SetterStore {
     }
 
     private ModelMethod getBestSetter(ModelClass viewType, ModelClass argumentType,
-            String attribute) {
+            String attribute, Map<String, String> imports) {
         String setterName = null;
 
         HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed != null) {
             for (String className : renamed.keySet()) {
                 try {
-                    ModelClass renamedViewType = mClassAnalyzer.findClass(className);
+                    ModelClass renamedViewType = mClassAnalyzer.findClass(className, imports);
                     if (renamedViewType.isAssignableFrom(viewType)) {
                         setterName = renamed.get(className).method;
                         break;
@@ -348,7 +351,7 @@ public class SetterStore {
             ModelClass[] parameterTypes = method.getParameterTypes();
             if (method.getReturnType(args).isVoid() && !method.isStatic() && method.isPublic()) {
                 ModelClass param = parameterTypes[0];
-                if (isBetterParameter(argumentType, param, bestParameterType, true)) {
+                if (isBetterParameter(argumentType, param, bestParameterType, true, imports)) {
                     bestParameterType = param;
                     bestMethod = method;
                 }
@@ -366,7 +369,7 @@ public class SetterStore {
     }
 
     private boolean isBetterParameter(ModelClass argument, ModelClass parameter,
-            ModelClass oldParameter, boolean isBetterViewTypeMatch) {
+            ModelClass oldParameter, boolean isBetterViewTypeMatch, Map<String, String> imports) {
         // Right view type. Check the value
         if (!isBetterViewTypeMatch && oldParameter.equals(argument)) {
             return false;
@@ -394,11 +397,12 @@ public class SetterStore {
                     return oldParameter.isAssignableFrom(parameter);
                 }
             } else {
-                MethodDescription conversionMethod = getConversionMethod(argument, parameter);
+                MethodDescription conversionMethod = getConversionMethod(argument, parameter,
+                        imports);
                 if (conversionMethod != null) {
                     return true;
                 }
-                if (getConversionMethod(argument, oldParameter) != null) {
+                if (getConversionMethod(argument, oldParameter, imports) != null) {
                     return false;
                 }
                 return argument.isObject() && !parameter.isPrimitive();
@@ -419,17 +423,19 @@ public class SetterStore {
         }
     }
 
-    private MethodDescription getConversionMethod(ModelClass from, ModelClass to) {
+    private MethodDescription getConversionMethod(ModelClass from, ModelClass to,
+            Map<String, String> imports) {
         if (from != null && to != null) {
             for (String fromClassName : mStore.conversionMethods.keySet()) {
                 try {
-                    ModelClass convertFrom = mClassAnalyzer.findClass(fromClassName);
+                    ModelClass convertFrom = mClassAnalyzer.findClass(fromClassName, imports);
                     if (canUseForConversion(from, convertFrom)) {
                         HashMap<String, MethodDescription> conversion =
                                 mStore.conversionMethods.get(fromClassName);
                         for (String toClassName : conversion.keySet()) {
                             try {
-                                ModelClass convertTo = mClassAnalyzer.findClass(toClassName);
+                                ModelClass convertTo = mClassAnalyzer.findClass(toClassName,
+                                        imports);
                                 if (canUseForConversion(convertTo, to)) {
                                     return conversion.get(toClassName);
                                 }

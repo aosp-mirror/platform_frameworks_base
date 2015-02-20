@@ -28,8 +28,13 @@ public class FindMethodBindingObject extends FindMethodBindingObjectBase {
 
     public static Foo foo = new Foo();
 
+    public static Bar<String> bar = new Bar<>();
 
     public static class Foo {
         public final String bar = "hello world";
+    }
+
+    public static class Bar<T> {
+        public T method(T value) { return value; }
     }
 }

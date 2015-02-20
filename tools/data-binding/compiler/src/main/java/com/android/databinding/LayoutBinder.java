@@ -48,7 +48,6 @@ public class LayoutBinder {
     private String mProjectPackage;
     private String mBaseClassName;
     private final HashMap<String, String> mUserDefinedVariables = new HashMap<>();
-    private final HashMap<String, String> mUserDefinedImports = new HashMap<>();
 
     private LayoutBinderWriter mWriter;
     private ResourceBundle.LayoutFileBundle mBundle;
@@ -68,7 +67,7 @@ public class LayoutBinder {
         }
 
         for (Map.Entry<String, String> userImport : mBundle.getImports().entrySet()) {
-            addImport(userImport.getKey(), userImport.getValue());
+            mExprModel.addImport(userImport.getKey(), userImport.getValue());
         }
         for (ResourceBundle.BindingTargetBundle targetBundle : mBundle.getBindingTargetBundles()) {
             final BindingTarget bindingTarget = createBindingTarget(targetBundle);
@@ -108,22 +107,8 @@ public class LayoutBinder {
         return id;
     }
 
-    public StaticIdentifierExpr addImport(String alias, String type) {
-        Preconditions.checkState(!mUserDefinedImports.containsKey(alias),
-                "%s has already been defined as %s", alias, type);
-        final StaticIdentifierExpr id = mExprModel.staticIdentifier(alias);
-        L.d("adding import %s as %s klass: %s", type, alias, id.getClass().getSimpleName());
-        id.setUserDefinedType(type);
-        mUserDefinedImports.put(alias, type);
-        return id;
-    }
-
     public HashMap<String, String> getUserDefinedVariables() {
         return mUserDefinedVariables;
-    }
-
-    public HashMap<String, String> getUserDefinedImports() {
-        return mUserDefinedImports;
     }
 
     public BindingTarget createBindingTarget(ResourceBundle.BindingTargetBundle targetBundle) {

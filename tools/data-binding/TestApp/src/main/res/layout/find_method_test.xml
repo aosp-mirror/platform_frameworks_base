@@ -4,6 +4,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
     <variable name="obj" type="com.android.databinding.testapp.vo.FindMethodBindingObject"/>
+    <import type="com.android.databinding.testapp.vo.FindMethodBindingObject.Bar"/>
+    <variable name="obj2" type="Bar&lt;String&gt;"/>
     <import type="com.android.databinding.testapp.vo.FindMethodBindingObject"/>
     <import type="com.android.databinding.testapp.vo.FindMethodBindingObject" alias="FMBO"/>
     <TextView
@@ -67,4 +69,9 @@
             android:id="@+id/textView14"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@{FMBO.foo.bar}"/>
+    <!-- Imported classes -->
+    <TextView
+            android:id="@+id/textView15"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@{obj2.method(`hello`)}"/>
 </LinearLayout>

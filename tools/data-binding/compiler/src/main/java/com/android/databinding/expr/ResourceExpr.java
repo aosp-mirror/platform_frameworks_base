@@ -110,7 +110,7 @@ public class ResourceExpr extends Expr {
                 type = mResourceType;
                 break;
         }
-        return modelAnalyzer.findClass(type);
+        return modelAnalyzer.findClass(type, getModel().getImports());
     }
 
     @Override

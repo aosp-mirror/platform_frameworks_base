@@ -19,6 +19,7 @@ import com.google.common.base.Preconditions;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.processing.ProcessingEnvironment;
 
@@ -99,7 +100,7 @@ public abstract class ModelAnalyzer {
         return "null";
     }
 
-    public abstract ModelClass findClass(String className);
+    public abstract ModelClass findClass(String className, Map<String, String> imports);
 
     public abstract List<URL> getResources(String name);
 

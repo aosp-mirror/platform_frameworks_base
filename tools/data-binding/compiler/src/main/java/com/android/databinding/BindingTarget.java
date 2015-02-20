@@ -24,6 +24,7 @@ import com.android.databinding.store.ResourceBundle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BindingTarget {
     List<Binding> mBindings = new ArrayList<>();
@@ -59,7 +60,8 @@ public class BindingTarget {
 
     public ModelClass getResolvedType() {
         if (mResolvedClass == null) {
-            mResolvedClass = ModelAnalyzer.getInstance().findClass(mBundle.getFullClassName());
+            mResolvedClass = ModelAnalyzer.getInstance().findClass(mBundle.getFullClassName(),
+                    mModel.getImports());
         }
         return mResolvedClass;
     }

@@ -62,6 +62,8 @@ public class ExprModel {
 
     private List<Expr> mObservables;
 
+    private Map<String, String> mImports = new HashMap<>();
+
     /**
      * Adds the expression to the list of expressions and returns it.
      * If it already exists, returns existing one.
@@ -152,6 +154,19 @@ public class ExprModel {
 
     public List<Expr> getBindingExpressions() {
         return mBindingExpressions;
+    }
+
+    public void addImport(String alias, String type) {
+        Preconditions.checkState(!mImports.containsKey(alias),
+                "%s has already been defined as %s", alias, type);
+        final StaticIdentifierExpr id = staticIdentifier(alias);
+        L.d("adding import %s as %s klass: %s", type, alias, id.getClass().getSimpleName());
+        id.setUserDefinedType(type);
+        mImports.put(alias, type);
+    }
+
+    public Map<String, String> getImports() {
+        return mImports;
     }
 
     /**

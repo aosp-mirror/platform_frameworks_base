@@ -23,14 +23,18 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 
 public class AnnotationMethod implements ModelMethod {
-    final ExecutableElement mMethod;
+    final ExecutableType mMethod;
     final DeclaredType mDeclaringType;
+    final ExecutableElement mExecutableElement;
 
-    public AnnotationMethod(DeclaredType declaringType, ExecutableElement method) {
+    public AnnotationMethod(DeclaredType declaringType, ExecutableElement executableElement) {
         mDeclaringType = declaringType;
-        mMethod = method;
+        mExecutableElement = executableElement;
+        Types typeUtils = AnnotationAnalyzer.instance.getTypeUtils();
+        mMethod = (ExecutableType) typeUtils.asMemberOf(declaringType, executableElement);
     }
 
     @Override
@@ -40,23 +44,22 @@ public class AnnotationMethod implements ModelMethod {
 
     @Override
     public ModelClass[] getParameterTypes() {
-        List<? extends VariableElement> parameters = mMethod.getParameters();
+        List<? extends TypeMirror> parameters = mMethod.getParameterTypes();
         ModelClass[] parameterTypes = new ModelClass[parameters.size()];
         for (int i = 0; i < parameters.size(); i++) {
-            parameterTypes[i] = new AnnotationClass(parameters.get(i).asType());
+            parameterTypes[i] = new AnnotationClass(parameters.get(i));
         }
         return parameterTypes;
     }
 
     @Override
     public String getName() {
-        return mMethod.getSimpleName().toString();
+        return mExecutableElement.getSimpleName().toString();
     }
 
     @Override
     public ModelClass getReturnType(List<ModelClass> args) {
-        ExecutableType executableType = (ExecutableType) AnnotationAnalyzer.instance.getTypeUtils().asMemberOf(mDeclaringType, mMethod);
-        TypeMirror returnType = executableType.getReturnType();
+        TypeMirror returnType = mMethod.getReturnType();
         // TODO: support argument-supplied types
         // for example: public T[] toArray(T[] arr)
         return new AnnotationClass(returnType);
@@ -64,11 +67,11 @@ public class AnnotationMethod implements ModelMethod {
 
     @Override
     public boolean isPublic() {
-        return mMethod.getModifiers().contains(Modifier.PUBLIC);
+        return mExecutableElement.getModifiers().contains(Modifier.PUBLIC);
     }
 
     @Override
     public boolean isStatic() {
-        return mMethod.getModifiers().contains(Modifier.STATIC);
+        return mExecutableElement.getModifiers().contains(Modifier.STATIC);
     }
 }

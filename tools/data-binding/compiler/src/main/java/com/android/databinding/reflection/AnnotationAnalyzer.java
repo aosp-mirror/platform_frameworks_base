@@ -113,7 +113,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         }
     }
 
-    TypeElement findType(String type) {
+    private TypeElement findType(String type) {
         return processingEnv.getElementUtils().getTypeElement(type);
     }
 
@@ -132,7 +132,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
                 if (method.isStatic() == staticAccess) {
                     ModelClass[] parameters = method.getParameterTypes();
                     boolean parametersMatch = true;
-                    boolean isVarArgs = ((AnnotationMethod) method).mMethod.isVarArgs();
+                    boolean isVarArgs = ((AnnotationMethod) method).mExecutableElement.isVarArgs();
                     for (int i = 0; i < parameters.length; i++) {
                         if (isVarArgs && i == parameters.length - 1) {
                             ModelClass component = parameters[i].getComponentType();
@@ -187,7 +187,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public boolean isBindable(ModelMethod method) {
-        ExecutableElement methodElement = ((AnnotationMethod) method).mMethod;
+        ExecutableElement methodElement = ((AnnotationMethod) method).mExecutableElement;
         return methodElement.getAnnotation(Bindable.class) != null;
     }
 
@@ -278,7 +278,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     }
 
     @Override
-    public AnnotationClass findClass(String className) {
+    public AnnotationClass findClass(String className, Map<String, String> imports) {
         className = className.trim();
         int numDimensions = 0;
         while (className.endsWith("[]")) {
@@ -293,7 +293,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         DeclaredType declaredType;
         Elements elementUtils = getElementUtils();
         if (templateOpenIndex < 0) {
-            TypeElement typeElement = elementUtils.getTypeElement(className);
+            TypeElement typeElement = getTypeElement(className, imports);
             if (typeElement == null) {
                 return null;
             }
@@ -303,12 +303,12 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
             String paramStr = className.substring(templateOpenIndex + 1, templateCloseIndex);
 
             String baseClassName = className.substring(0, templateOpenIndex);
-            TypeElement typeElement = elementUtils.getTypeElement(baseClassName);
+            TypeElement typeElement = getTypeElement(baseClassName, imports);
 
             ArrayList<String> templateParameters = splitTemplateParameters(paramStr);
             TypeMirror[] typeArgs = new TypeMirror[templateParameters.size()];
             for (int i = 0; i < typeArgs.length; i++) {
-                typeArgs[i] = findClass(templateParameters.get(i)).mTypeMirror;
+                typeArgs[i] = findClass(templateParameters.get(i), imports).mTypeMirror;
             }
 
             Types typeUtils = getTypeUtils();
@@ -323,6 +323,26 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
             numDimensions--;
         }
         return new AnnotationClass(type);
+    }
+
+    private TypeElement getTypeElement(String className, Map<String, String> imports) {
+        Elements elementUtils = getElementUtils();
+        if (className.indexOf('.') < 0 && imports != null) {
+            // try the imports
+            String importedClass = imports.get(className);
+            if (importedClass != null) {
+                className = importedClass;
+            }
+        }
+        if (className.indexOf('.') < 0) {
+            // try java.lang.
+            String javaLangClass = "java.lang." + className;
+            TypeElement javaLang = elementUtils.getTypeElement(javaLangClass);
+            if (javaLang != null) {
+                return javaLang;
+            }
+        }
+        return elementUtils.getTypeElement(className);
     }
 
     private ArrayList<String> splitTemplateParameters(String templateParameters) {
@@ -367,7 +387,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public ModelClass findClass(Class classType) {
-        return findClass(classType.getCanonicalName());
+        return findClass(classType.getCanonicalName(), null);
     }
 
     public Types getTypeUtils() {

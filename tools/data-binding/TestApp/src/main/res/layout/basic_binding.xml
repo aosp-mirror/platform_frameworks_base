@@ -17,8 +17,8 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <variable name="a" type="java.lang.String"/>
-    <variable name="b" type="java.lang.String"/>
+    <variable name="a" type="String"/>
+    <variable name="b" type="String"/>
     <TextView
             android:id="@+id/textView"
             android:text="@{a + b}"

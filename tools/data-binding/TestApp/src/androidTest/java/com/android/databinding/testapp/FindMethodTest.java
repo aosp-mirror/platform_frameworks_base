@@ -18,6 +18,7 @@ package com.android.databinding.testapp;
 import com.android.databinding.testapp.generated.FindMethodTestBinder;
 import com.android.databinding.testapp.vo.FindMethodBindingObject;
 
+import android.test.UiThreadTest;
 import android.widget.TextView;
 
 public class FindMethodTest
@@ -90,5 +91,13 @@ public class FindMethodTest
     public void testAliasStaticField() throws Throwable {
         TextView textView = mBinder.getTextView12();
         assertEquals("hello world", textView.getText().toString());
+    }
+
+    @UiThreadTest
+    public void testImports() throws Throwable {
+        mBinder.setObj2(new FindMethodBindingObject.Bar<String>());
+        mBinder.rebindDirty();
+        TextView textView = mBinder.getTextView15();
+        assertEquals("hello", textView.getText().toString());
     }
 }

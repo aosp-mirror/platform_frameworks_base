@@ -55,7 +55,7 @@ public class LayoutBinderTest {
 
     @Test
     public void testRegisterImport() {
-        mLayoutBinder.addImport("test", "java.lang.String");
+        mExprModel.addImport("test", "java.lang.String");
         assertEquals(1, mExprModel.size());
         final Map.Entry<String, Expr> entry = mExprModel.getExprMap().entrySet().iterator().next();
         final Expr value = entry.getValue();

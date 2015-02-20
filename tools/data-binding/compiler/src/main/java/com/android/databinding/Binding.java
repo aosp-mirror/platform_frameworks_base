@@ -41,7 +41,8 @@ public class Binding {
     public String toJavaCode(String targetViewName, String expressionCode) {
         ModelClass viewType = mTarget.getResolvedType();
         return SetterStore.get(ModelAnalyzer.getInstance()).getSetterCall(mName, viewType,
-                mExpr.getResolvedType(), targetViewName, expressionCode);
+                mExpr.getResolvedType(), targetViewName, expressionCode,
+                mExpr.getModel().getImports());
     }
 
 //    private String resolveJavaCode(ModelAnalyzer modelAnalyzer) {

@@ -61,7 +61,7 @@ public class IdentifierExpr extends Expr {
     protected ModelClass resolveType(final ModelAnalyzer modelAnalyzer) {
         Preconditions.checkNotNull(mUserDefinedType,
                 "Identifiers must have user defined types from the XML file. %s is missing it", mName);
-        return modelAnalyzer.findClass(mUserDefinedType);
+        return modelAnalyzer.findClass(mUserDefinedType, getModel().getImports());
     }
 
     @Override
