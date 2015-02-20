@@ -141,6 +141,19 @@ public final class Choreographer {
     private long mFrameIntervalNanos;
 
     /**
+     * Contains information about the current frame for jank-tracking,
+     * mainly timings of key events along with a bit of metadata about
+     * view tree state
+     *
+     * TODO: Is there a better home for this? Currently Choreographer
+     * is the only one with CALLBACK_ANIMATION start time, hence why this
+     * resides here.
+     *
+     * @hide
+     */
+    FrameInfo mFrameInfo = new FrameInfo();
+
+    /**
      * Callback type: Input callback.  Runs first.
      * @hide
      */
@@ -513,6 +526,7 @@ public final class Choreographer {
                 return; // no work to do
             }
 
+            long intendedFrameTimeNanos = frameTimeNanos;
             startNanos = System.nanoTime();
             final long jitterNanos = startNanos - frameTimeNanos;
             if (jitterNanos >= mFrameIntervalNanos) {
@@ -541,12 +555,18 @@ public final class Choreographer {
                 return;
             }
 
+            mFrameInfo.setVsync(intendedFrameTimeNanos, frameTimeNanos);
             mFrameScheduled = false;
             mLastFrameTimeNanos = frameTimeNanos;
         }
 
+        mFrameInfo.markInputHandlingStart();
         doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos);
+
+        mFrameInfo.markAnimationsStart();
         doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos);
+
+        mFrameInfo.markPerformTraversalsStart();
         doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos);
 
         if (DEBUG) {

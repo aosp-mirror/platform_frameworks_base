@@ -35,4 +35,12 @@
         static_assert(std::is_standard_layout<Type>::value, \
         #Type " must have standard layout")
 
+#define HWUI_ENUM(name, ...) \
+    namespace name { \
+        enum _##name { \
+            __VA_ARGS__ \
+        }; \
+    } \
+    typedef enum name::_##name name##Enum
+
 #endif /* MACROS_H */
