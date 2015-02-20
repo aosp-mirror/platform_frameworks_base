@@ -97,6 +97,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.phone.NavigationBarView;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.PreviewInflater;
@@ -155,6 +156,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     // all notifications
     protected NotificationData mNotificationData;
     protected NotificationStackScrollLayout mStackScroller;
+
+    protected NotificationGroupManager mGroupManager = new NotificationGroupManager();
 
     // for heads up notifications
     protected HeadsUpNotificationView mHeadsUpNotificationView;
@@ -438,8 +441,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                         // Ignore children of notifications that have a summary, since we're not
                         // going to show them anyway. This is true also when the summary is canceled,
                         // because children are automatically canceled by NoMan in that case.
-                        if (n.isGroupChild() &&
-                                mNotificationData.isGroupWithSummary(sbn.getGroupKey())) {
+                        if (mGroupManager.isChildInGroupWithSummary(sbn)) {
                             if (DEBUG) {
                                 Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
                             }
@@ -705,6 +707,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     @Override
     public String getCurrentMediaNotificationKey() {
         return null;
+    }
+
+    @Override
+    public NotificationGroupManager getGroupManager() {
+        return mGroupManager;
     }
 
     /**
@@ -2016,6 +2023,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && publicUnchanged) {
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
+            mGroupManager.onEntryUpdated(oldEntry, oldNotification);
             try {
                 if (oldEntry.icon != null) {
                     // Update the icon
@@ -2074,6 +2082,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (!shouldInterrupt) {
                     if (DEBUG) Log.d(TAG, "releasing heads up for key: " + key);
                     oldEntry.notification = notification;
+                    mGroupManager.onEntryUpdated(oldEntry, oldNotification);
                     mHeadsUpNotificationView.release();
                     return;
                 }
@@ -2087,6 +2096,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                 } else {
                     if (DEBUG) Log.d(TAG, "rebuilding update in place for key: " + key);
                     oldEntry.notification = notification;
+                    mGroupManager.onEntryUpdated(oldEntry, oldNotification);
                     final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                             notification.getUser(),
                             n.icon,
