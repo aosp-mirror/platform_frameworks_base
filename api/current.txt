@@ -886,6 +886,7 @@ package android {
     field public static final int numColumns = 16843032; // 0x1010118
     field public static final int numStars = 16843076; // 0x1010144
     field public static final int numbersBackgroundColor = 16843938; // 0x10104a2
+    field public static final int numbersInnerTextColor = 16843999; // 0x10104df
     field public static final int numbersSelectorColor = 16843939; // 0x10104a3
     field public static final int numbersTextColor = 16843937; // 0x10104a1
     field public static final deprecated int numeric = 16843109; // 0x1010165

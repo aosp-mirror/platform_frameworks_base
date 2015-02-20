@@ -2614,6 +2614,7 @@
   <public type="attr" name="start" />
   <public type="attr" name="end" />
   <public type="attr" name="windowHasLightStatusBar" />
+  <public type="attr" name="numbersInnerTextColor" />
 
   <public type="style" name="Widget.Material.Button.Colored" />
 

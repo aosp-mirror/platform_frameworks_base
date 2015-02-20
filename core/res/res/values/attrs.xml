@@ -4778,6 +4778,8 @@
         <attr name="headerBackground" />
         <!-- The color for the hours/minutes numbers. -->
         <attr name="numbersTextColor" format="color" />
+        <!-- The color for the inner hours numbers used in 24-hour mode. -->
+        <attr name="numbersInnerTextColor" format="color" />
         <!-- The background color for the hours/minutes numbers. -->
         <attr name="numbersBackgroundColor" format="color" />
         <!-- The color for the AM/PM selectors. -->

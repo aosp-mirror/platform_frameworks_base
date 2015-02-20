@@ -1996,15 +1996,13 @@
   <java-symbol type="string" name="deleted_key" />
   <java-symbol type="string" name="sans_serif" />
   <java-symbol type="string" name="radial_numbers_typeface" />
-  <java-symbol type="dimen" name="timepicker_text_size_multiplier_inner" />
-  <java-symbol type="dimen" name="timepicker_text_size_multiplier_outer" />
-  <java-symbol type="dimen" name="timepicker_text_size_multiplier_normal" />
-  <java-symbol type="dimen" name="timepicker_numbers_radius_multiplier_outer" />
-  <java-symbol type="dimen" name="timepicker_selection_radius_multiplier" />
-  <java-symbol type="dimen" name="timepicker_numbers_radius_multiplier_inner" />
-  <java-symbol type="dimen" name="timepicker_numbers_radius_multiplier_normal" />
-  <java-symbol type="dimen" name="timepicker_transition_mid_radius_multiplier" />
-  <java-symbol type="dimen" name="timepicker_transition_end_radius_multiplier" />
+  <java-symbol type="dimen" name="timepicker_selector_radius" />
+  <java-symbol type="dimen" name="timepicker_selector_dot_radius" />
+  <java-symbol type="dimen" name="timepicker_center_dot_radius" />
+  <java-symbol type="dimen" name="timepicker_text_inset_normal" />
+  <java-symbol type="dimen" name="timepicker_text_inset_inner" />
+  <java-symbol type="dimen" name="timepicker_text_size_normal" />
+  <java-symbol type="dimen" name="timepicker_text_size_inner" />
   <java-symbol type="string" name="battery_saver_description" />
   <java-symbol type="string" name="downtime_condition_summary" />
   <java-symbol type="string" name="downtime_condition_line_one" />

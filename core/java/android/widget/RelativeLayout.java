@@ -617,15 +617,17 @@ public class RelativeLayout extends ViewGroup {
             }
         }
 
-        // Use the bottom-most view as the baseline.
+        // Use the bottom-most laid out view as the baseline.
         View baselineView = null;
         int baseline = 0;
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            final int childBaseline = child.getBaseline();
-            if (childBaseline >= baseline) {
-                baselineView = child;
-                baseline = childBaseline;
+            if (child.getVisibility() != GONE) {
+                final int childBaseline = child.getBaseline();
+                if (childBaseline >= baseline) {
+                    baselineView = child;
+                    baseline = childBaseline;
+                }
             }
         }
         mBaselineView = baselineView;
