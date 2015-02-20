@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.stack;
 
-import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +39,6 @@ public class StackScrollState {
 
     private final ViewGroup mHostView;
     private Map<ExpandableView, StackViewState> mStateMap;
-    private final Rect mClipRect = new Rect();
     private final int mClearAllTopPadding;
 
     public StackScrollState(ViewGroup hostView) {
@@ -152,7 +150,10 @@ public class StackScrollState {
         if (oldClipTopAmount != state.clipTopAmount) {
             view.setClipTopAmount(state.clipTopAmount);
         }
-        updateChildClip(view, newHeight, state.topOverLap);
+        float oldClipTopOptimization = view.getClipTopOptimization();
+        if (oldClipTopOptimization != state.topOverLap) {
+            view.setClipTopOptimization(state.topOverLap);
+        }
         return true;
     }
 
@@ -209,21 +210,6 @@ public class StackScrollState {
             view.setScaleX(newScale);
             view.setScaleY(newScale);
         }
-    }
-
-    /**
-     * Updates the clipping of a view
-     *
-     * @param child the view to update
-     * @param height the currently applied height of the view
-     * @param clipInset how much should this view be clipped from the top
-     */
-    private void updateChildClip(View child, int height, int clipInset) {
-        mClipRect.set(0,
-                clipInset,
-                child.getWidth(),
-                height);
-        child.setClipBounds(mClipRect);
     }
 
     public void performSpeedBumpAnimation(int i, SpeedBumpView speedBump, StackViewState state,

@@ -41,6 +41,8 @@ public abstract class ExpandableView extends FrameLayout {
     private boolean mActualHeightInitialized;
     private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
+    private int mClipTopOptimization;
+    private static Rect mClipRect = new Rect();
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -141,6 +143,7 @@ public abstract class ExpandableView extends FrameLayout {
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
         mActualHeightInitialized = true;
         mActualHeight = actualHeight;
+        updateClipping();
         if (notifyListeners) {
             notifyHeightChanged();
         }
@@ -297,6 +300,26 @@ public abstract class ExpandableView extends FrameLayout {
         outRect.right += getTranslationX();
         outRect.bottom = (int) (outRect.top + getTranslationY() + getActualHeight());
         outRect.top += getTranslationY() + getClipTopAmount();
+    }
+
+    private void updateClipping() {
+        mClipRect.set(0, mClipTopOptimization, getWidth(), getActualHeight());
+        setClipBounds(mClipRect);
+    }
+
+    public int getClipTopOptimization() {
+        return mClipTopOptimization;
+    }
+
+    /**
+     * Set that the view will be clipped by a given amount from the top. Contrary to
+     * {@link #setClipTopAmount} this amount doesn't effect shadows and the background.
+     *
+     * @param clipTopOptimization the amount to clip from the top
+     */
+    public void setClipTopOptimization(int clipTopOptimization) {
+        mClipTopOptimization = clipTopOptimization;
+        updateClipping();
     }
 
     /**
