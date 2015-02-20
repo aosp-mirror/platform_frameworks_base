@@ -152,6 +152,7 @@ public class ProcessCpuTracker {
     private int mRelIrqTime;
     private int mRelSoftIrqTime;
     private int mRelIdleTime;
+    private boolean mRelStatsAreGood;
 
     private int[] mCurPids;
     private int[] mCurThreadPids;
@@ -285,10 +286,9 @@ public class ProcessCpuTracker {
 
     public void update() {
         if (DEBUG) Slog.v(TAG, "Update: " + this);
-        mLastSampleTime = mCurrentSampleTime;
-        mCurrentSampleTime = SystemClock.uptimeMillis();
-        mLastSampleRealTime = mCurrentSampleRealTime;
-        mCurrentSampleRealTime = SystemClock.elapsedRealtime();
+
+        final long nowUptime = SystemClock.uptimeMillis();
+        final long nowRealtime = SystemClock.elapsedRealtime();
 
         final long[] sysCpu = mSystemCpuData;
         if (Process.readProcFile("/proc/stat", SYSTEM_CPU_FORMAT,
@@ -304,29 +304,52 @@ public class ProcessCpuTracker {
             final long irqtime = sysCpu[5];
             final long softirqtime = sysCpu[6];
 
-            mRelUserTime = (int)(usertime - mBaseUserTime);
-            mRelSystemTime = (int)(systemtime - mBaseSystemTime);
-            mRelIoWaitTime = (int)(iowaittime - mBaseIoWaitTime);
-            mRelIrqTime = (int)(irqtime - mBaseIrqTime);
-            mRelSoftIrqTime = (int)(softirqtime - mBaseSoftIrqTime);
-            mRelIdleTime = (int)(idletime - mBaseIdleTime);
+            // This code is trying to avoid issues with idle time going backwards,
+            // but currently it gets into situations where it triggers most of the time. :(
+            if (true || (usertime >= mBaseUserTime && systemtime >= mBaseSystemTime
+                    && iowaittime >= mBaseIoWaitTime && irqtime >= mBaseIrqTime
+                    && softirqtime >= mBaseSoftIrqTime && idletime >= mBaseIdleTime)) {
+                mRelUserTime = (int)(usertime - mBaseUserTime);
+                mRelSystemTime = (int)(systemtime - mBaseSystemTime);
+                mRelIoWaitTime = (int)(iowaittime - mBaseIoWaitTime);
+                mRelIrqTime = (int)(irqtime - mBaseIrqTime);
+                mRelSoftIrqTime = (int)(softirqtime - mBaseSoftIrqTime);
+                mRelIdleTime = (int)(idletime - mBaseIdleTime);
+                mRelStatsAreGood = true;
 
-            if (DEBUG) {
-                Slog.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
-                      + " S:" + sysCpu[2] + " I:" + sysCpu[3]
-                      + " W:" + sysCpu[4] + " Q:" + sysCpu[5]
-                      + " O:" + sysCpu[6]);
-                Slog.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
-                      + " I:" + mRelIdleTime + " Q:" + mRelIrqTime);
+                if (DEBUG) {
+                    Slog.i("Load", "Total U:" + sysCpu[0] + " N:" + sysCpu[1]
+                          + " S:" + sysCpu[2] + " I:" + sysCpu[3]
+                          + " W:" + sysCpu[4] + " Q:" + sysCpu[5]
+                          + " O:" + sysCpu[6]);
+                    Slog.i("Load", "Rel U:" + mRelUserTime + " S:" + mRelSystemTime
+                          + " I:" + mRelIdleTime + " Q:" + mRelIrqTime);
+                }
+
+                mBaseUserTime = usertime;
+                mBaseSystemTime = systemtime;
+                mBaseIoWaitTime = iowaittime;
+                mBaseIrqTime = irqtime;
+                mBaseSoftIrqTime = softirqtime;
+                mBaseIdleTime = idletime;
+
+            } else {
+                mRelUserTime = 0;
+                mRelSystemTime = 0;
+                mRelIoWaitTime = 0;
+                mRelIrqTime = 0;
+                mRelSoftIrqTime = 0;
+                mRelIdleTime = 0;
+                mRelStatsAreGood = false;
+                Slog.w(TAG, "/proc/stats has gone backwards; skipping CPU update");
+                return;
             }
-
-            mBaseUserTime = usertime;
-            mBaseSystemTime = systemtime;
-            mBaseIoWaitTime = iowaittime;
-            mBaseIrqTime = irqtime;
-            mBaseSoftIrqTime = softirqtime;
-            mBaseIdleTime = idletime;
         }
+
+        mLastSampleTime = mCurrentSampleTime;
+        mCurrentSampleTime = nowUptime;
+        mLastSampleRealTime = mCurrentSampleRealTime;
+        mCurrentSampleRealTime = nowRealtime;
 
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
         try {
@@ -645,6 +668,10 @@ public class ProcessCpuTracker {
 
     final public int getLastIdleTime() {
         return mRelIdleTime;
+    }
+
+    final public boolean hasGoodLastStats() {
+        return mRelStatsAreGood;
     }
 
     final public float getTotalCpuPercent() {
