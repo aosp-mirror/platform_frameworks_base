@@ -20,8 +20,11 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.MessageQueue;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -34,6 +37,8 @@ import com.android.server.SystemService;
 import android.service.fingerprint.FingerprintUtils;
 import android.service.fingerprint.IFingerprintService;
 import android.service.fingerprint.IFingerprintServiceReceiver;
+import static android.Manifest.permission.MANAGE_FINGERPRINT;
+import static android.Manifest.permission.USE_FINGERPRINT;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -68,14 +73,13 @@ public class FingerprintService extends SystemService {
         }
     };
     private Context mContext;
+    private int mHalDeviceId;
 
     private static final int STATE_IDLE = 0;
     private static final int STATE_LISTENING = 1;
     private static final int STATE_ENROLLING = 2;
     private static final int STATE_REMOVING = 3;
     private static final long MS_PER_SEC = 1000;
-    public static final String USE_FINGERPRINT = "android.permission.USE_FINGERPRINT";
-    public static final String ENROLL_FINGERPRINT = "android.permission.ENROLL_FINGERPRINT";
 
     private static final class ClientData {
         public IFingerprintServiceReceiver receiver;
@@ -113,17 +117,17 @@ public class FingerprintService extends SystemService {
     public FingerprintService(Context context) {
         super(context);
         mContext = context;
-        nativeInit(this);
+        nativeInit(Looper.getMainLooper().getQueue(), this);
     }
 
     // TODO: Move these into separate process
     // JNI methods to communicate from FingerprintManagerService to HAL
-    native int nativeEnroll(int timeout);
-    native int nativeEnrollCancel();
-    native int nativeRemove(int fingerprintId);
-    native int nativeOpenHal();
-    native int nativeCloseHal();
-    native void nativeInit(FingerprintService service);
+    static native int nativeEnroll(int timeout);
+    static native int nativeEnrollCancel();
+    static native int nativeRemove(int fingerprintId);
+    static native int nativeOpenHal();
+    static native int nativeCloseHal();
+    static native void nativeInit(MessageQueue queue, FingerprintService service);
 
     // JNI methods for communicating from HAL to clients
     void notify(int msg, int arg1, int arg2) {
@@ -131,11 +135,13 @@ public class FingerprintService extends SystemService {
     }
 
     void handleNotify(int msg, int arg1, int arg2) {
-        Slog.v(TAG, "handleNotify(msg=" + msg + ", arg1=" + arg1 + ", arg2=" + arg2 + ")");
+        Slog.v(TAG, "handleNotify(msg=" + msg + ", arg1=" + arg1 + ", arg2=" + arg2 + ")"
+                + ", " + mClients.size() + " clients");
         for (int i = 0; i < mClients.size(); i++) {
+            if (DEBUG) Slog.v(TAG, "Client[" + i + "] binder token: " + mClients.keyAt(i));
             ClientData clientData = mClients.valueAt(i);
             if (clientData == null || clientData.receiver == null) {
-                if (DEBUG) Slog.v(TAG, "clientData at " + i + " is invalid!!");
+                if (DEBUG) Slog.v(TAG, "clientData is invalid!!");
                 continue;
             }
             switch (msg) {
@@ -282,26 +288,27 @@ public class FingerprintService extends SystemService {
         mClients.remove(token);
     }
 
-    void checkPermission(String permisison) {
-        // TODO
+    void checkPermission(String permission) {
+        getContext().enforceCallingOrSelfPermission(permission, "Must have "
+                + permission + " permission.");
     }
 
     private final class FingerprintServiceWrapper extends IFingerprintService.Stub {
         @Override // Binder call
         public void enroll(IBinder token, long timeout, int userId) {
-            checkPermission(ENROLL_FINGERPRINT);
+            checkPermission(MANAGE_FINGERPRINT);
             startEnroll(token, timeout, userId);
         }
 
         @Override // Binder call
         public void enrollCancel(IBinder token,int userId) {
-            checkPermission(ENROLL_FINGERPRINT);
+            checkPermission(MANAGE_FINGERPRINT);
             startEnrollCancel(token, userId);
         }
 
         @Override // Binder call
         public void remove(IBinder token, int fingerprintId, int userId) {
-            checkPermission(ENROLL_FINGERPRINT); // TODO: Maybe have another permission
+            checkPermission(MANAGE_FINGERPRINT); // TODO: Maybe have another permission
             startRemove(token, fingerprintId, userId);
         }
 
@@ -317,12 +324,19 @@ public class FingerprintService extends SystemService {
             checkPermission(USE_FINGERPRINT);
             removeListener(token, userId);
         }
+
+        @Override // Binder call
+        public boolean isHardwareDetected() {
+            checkPermission(USE_FINGERPRINT);
+            return mHalDeviceId != 0;
+        }
     }
 
     @Override
     public void onStart() {
        publishBinderService(Context.FINGERPRINT_SERVICE, new FingerprintServiceWrapper());
-       nativeOpenHal();
+       mHalDeviceId = nativeOpenHal();
+       if (DEBUG) Slog.v(TAG, "Fingerprint HAL id: " + mHalDeviceId);
     }
 
 }

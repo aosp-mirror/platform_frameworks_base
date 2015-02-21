@@ -21,7 +21,11 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utility class for dealing with fingerprints and fingerprint settings.
@@ -32,34 +36,50 @@ class FingerprintUtils {
     private static final boolean DEBUG = true;
     private static final String TAG = "FingerprintUtils";
 
+    private static int[] toIntArray(List<Integer> list) {
+        if (list == null) {
+            return null;
+        }
+        int[] arr = new int[list.size()];
+        int i = 0;
+        for (int elem : list) {
+            arr[i] = elem;
+            i++;
+        }
+        return arr;
+    }
+
     public static int[] getFingerprintIdsForUser(ContentResolver res, int userId) {
         String fingerIdsRaw = Settings.Secure.getStringForUser(res,
                 Settings.Secure.USER_FINGERPRINT_IDS, userId);
-
-        int result[] = {};
+        ArrayList<Integer> tmp = new ArrayList<Integer>();
         if (!TextUtils.isEmpty(fingerIdsRaw)) {
             String[] fingerStringIds = fingerIdsRaw.replace("[","").replace("]","").split(", ");
-            result = new int[fingerStringIds.length];
-            for (int i = 0; i < result.length; i++) {
+            int length = fingerStringIds.length;
+            for (int i = 0; i < length; i++) {
                 try {
-                    result[i] = Integer.decode(fingerStringIds[i]);
+                    tmp.add(Integer.decode(fingerStringIds[i]));
                 } catch (NumberFormatException e) {
-                    if (DEBUG) Log.d(TAG, "Error when parsing finger id " + fingerStringIds[i]);
+                    if (DEBUG) Log.w(TAG, "Error parsing finger id: '" + fingerStringIds[i] + "'");
                 }
             }
         }
-        return result;
+        return toIntArray(tmp);
     }
 
     public static void addFingerprintIdForUser(int fingerId, ContentResolver res, int userId) {
+        // FingerId 0 has special meaning.
+        if (fingerId == 0) {
+            Log.w(TAG, "Tried to add fingerId 0");
+            return;
+        }
+
         int[] fingerIds = getFingerprintIdsForUser(res, userId);
 
-        // FingerId 0 has special meaning.
-        if (fingerId == 0) return;
-
         // Don't allow dups
-        for (int i = 0; i < fingerIds.length; i++) {
-            if (fingerIds[i] == fingerId) return;
+        if (ArrayUtils.contains(fingerIds, fingerId)) {
+            Log.w(TAG, "finger already added " + fingerId);
+            return;
         }
         int[] newList = Arrays.copyOf(fingerIds, fingerIds.length + 1);
         newList[fingerIds.length] = fingerId;
@@ -72,19 +92,13 @@ class FingerprintUtils {
         // FingerId 0 has special meaning. The HAL layer is supposed to remove each finger one
         // at a time and invoke notify() for each fingerId.  If we get called with 0 here, it means
         // something bad has happened.
-        if (fingerId == 0) throw new IllegalStateException("Bad fingerId");
+        if (fingerId == 0) throw new IllegalArgumentException("fingerId can't be 0");
 
-        int[] fingerIds = getFingerprintIdsForUser(res, userId);
-        int[] resultIds = Arrays.copyOf(fingerIds, fingerIds.length);
-        int resultCount = 0;
-        for (int i = 0; i < fingerIds.length; i++) {
-            if (fingerId != fingerIds[i]) {
-                resultIds[resultCount++] = fingerIds[i];
-            }
-        }
-        if (resultCount > 0) {
+        final int[] fingerIds = getFingerprintIdsForUser(res, userId);
+        if (ArrayUtils.contains(fingerIds, fingerId)) {
+            final int[] result = ArrayUtils.removeInt(fingerIds, fingerId);
             Settings.Secure.putStringForUser(res, Settings.Secure.USER_FINGERPRINT_IDS,
-                    Arrays.toString(Arrays.copyOf(resultIds, resultCount)), userId);
+                    Arrays.toString(result), userId);
             return true;
         }
         return false;

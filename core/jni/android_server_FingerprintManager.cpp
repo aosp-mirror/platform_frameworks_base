@@ -20,10 +20,11 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
+#include <android_os_MessageQueue.h>
 #include <hardware/hardware.h>
 #include <hardware/fingerprint.h>
 #include <utils/Log.h>
-
+#include <utils/Looper.h>
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -34,7 +35,6 @@ static const char* FINGERPRINT_SERVICE = "com/android/server/fingerprint/Fingerp
 static struct {
     jclass clazz;
     jmethodID notify;
-    jobject callbackObject;
 } gFingerprintServiceClassInfo;
 
 static struct {
@@ -42,11 +42,26 @@ static struct {
     fingerprint_device_t *device;
 } gContext;
 
+static sp<Looper> gLooper;
+static jobject gCallback;
+
+class CallbackHandler : public MessageHandler {
+    int type;
+    int arg1, arg2;
+public:
+    CallbackHandler(int type, int arg1, int arg2) : type(type), arg1(arg1), arg2(arg2) { }
+
+    virtual void handleMessage(const Message& message) {
+        //ALOG(LOG_VERBOSE, LOG_TAG, "hal_notify(msg=%d, arg1=%d, arg2=%d)\n", msg.type, arg1, arg2);
+        JNIEnv* env = AndroidRuntime::getJNIEnv();
+        env->CallVoidMethod(gCallback, gFingerprintServiceClassInfo.notify, type, arg1, arg2);
+    }
+};
+
 // Called by the HAL to notify us of fingerprint events
 static void hal_notify_callback(fingerprint_msg_t msg) {
     uint32_t arg1 = 0;
     uint32_t arg2 = 0;
-    uint32_t arg3 = 0; // TODO
     switch (msg.type) {
         case FINGERPRINT_ERROR:
             arg1 = msg.data.error;
@@ -60,7 +75,6 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
         case FINGERPRINT_TEMPLATE_ENROLLING:
             arg1 = msg.data.enroll.finger.fid;
             arg2 = msg.data.enroll.samples_remaining;
-            arg3 = 0;
             break;
         case FINGERPRINT_TEMPLATE_REMOVED:
             arg1 = msg.data.removed.finger.fid;
@@ -69,32 +83,16 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
             ALOGE("fingerprint: invalid msg: %d", msg.type);
             return;
     }
-    (void)arg3;
-    //ALOG(LOG_VERBOSE, LOG_TAG, "hal_notify(msg=%d, arg1=%d, arg2=%d)\n", msg.type, arg1, arg2);
-
-	// TODO: fix gross hack to attach JNI to calling thread
-    JNIEnv* env = AndroidRuntime::getJNIEnv();
-    if (env == NULL) {
-        JavaVMAttachArgs args = {JNI_VERSION_1_4, NULL, NULL};
-        JavaVM* vm = AndroidRuntime::getJavaVM();
-        int result = vm->AttachCurrentThread(&env, (void*) &args);
-        if (result != JNI_OK) {
-            ALOGE("Can't call JNI method: attach failed: %#x", result);
-            return;
-        }
-    }
-    env->CallVoidMethod(gFingerprintServiceClassInfo.callbackObject,
-            gFingerprintServiceClassInfo.notify, msg.type, arg1, arg2);
+    // This call potentially comes in on a thread not owned by us. Hand it off to our
+    // looper so it runs on our thread when calling back to FingerprintService.
+    // CallbackHandler object is reference-counted, so no cleanup necessary.
+    gLooper->sendMessage(new CallbackHandler(msg.type, arg1, arg2), Message());
 }
 
-static void nativeInit(JNIEnv *env, jobject clazz, jobject callbackObj) {
+static void nativeInit(JNIEnv *env, jobject clazz, jobject mQueue, jobject callbackObj) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeInit()\n");
-    gFingerprintServiceClassInfo.clazz = FindClassOrDie(env, FINGERPRINT_SERVICE);
-    gFingerprintServiceClassInfo.clazz = MakeGlobalRefOrDie(env,
-                                                            gFingerprintServiceClassInfo.clazz);
-    gFingerprintServiceClassInfo.notify = GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,
-           "notify", "(III)V");
-    gFingerprintServiceClassInfo.callbackObject = MakeGlobalRefOrDie(env, callbackObj);
+    gCallback = MakeGlobalRefOrDie(env, callbackObj);
+    gLooper = android_os_MessageQueue_getMessageQueue(env, mQueue)->getLooper();
 }
 
 static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout) {
@@ -179,14 +177,15 @@ static const JNINativeMethod g_methods[] = {
     { "nativeRemove", "(I)I", (void*)nativeRemove },
     { "nativeOpenHal", "()I", (void*)nativeOpenHal },
     { "nativeCloseHal", "()I", (void*)nativeCloseHal },
-    { "nativeInit", "(Lcom/android/server/fingerprint/FingerprintService;)V", (void*)nativeInit }
+    { "nativeInit","(Landroid/os/MessageQueue;"
+            "Lcom/android/server/fingerprint/FingerprintService;)V", (void*)nativeInit }
 };
 
 int register_android_server_fingerprint_FingerprintService(JNIEnv* env) {
     jclass clazz = FindClassOrDie(env, FINGERPRINT_SERVICE);
     gFingerprintServiceClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
-    gFingerprintServiceClassInfo.notify = GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,
-                                                           "notify", "(III)V");
+    gFingerprintServiceClassInfo.notify =
+            GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,"notify", "(III)V");
     int result = RegisterMethodsOrDie(env, FINGERPRINT_SERVICE, g_methods, NELEM(g_methods));
     ALOG(LOG_VERBOSE, LOG_TAG, "FingerprintManager JNI ready.\n");
     return result;

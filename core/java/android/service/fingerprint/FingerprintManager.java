@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,6 +31,9 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
@@ -96,6 +100,15 @@ public class FingerprintManager {
             }
         }
     };
+
+    public static final class FingerprintItem {
+        CharSequence name;
+        int id;
+        FingerprintItem(CharSequence name, int id) {
+            this.name = name;
+            this.id = id;
+        }
+    }
 
     /**
      * @hide
@@ -247,5 +260,39 @@ public class FingerprintManager {
 
     private void sendError(int msg, int arg1, int arg2) {
         mHandler.obtainMessage(msg, arg1, arg2);
+    }
+
+    /**
+     * @return list of current fingerprint items
+     * @hide
+     */
+    public List<FingerprintItem> getEnrolledFingerprints() {
+        int[] ids = FingerprintUtils.getFingerprintIdsForUser(mContext.getContentResolver(),
+                getCurrentUserId());
+        List<FingerprintItem> result = new ArrayList<FingerprintItem>();
+        for (int i = 0; i < ids.length; i++) {
+            // TODO: persist names in Settings
+            FingerprintItem item = new FingerprintItem("Finger" + ids[i], ids[i]);
+            result.add(item);
+        }
+        return result;
+    }
+
+    /**
+     * Determine if fingerprint hardware is present and functional.
+     * @return true if hardware is present and functional, false otherwise.
+     * @hide
+     */
+    public boolean isHardwareDetected() {
+        if (mService != null) {
+            try {
+                return mService.isHardwareDetected();
+            } catch (RemoteException e) {
+                Log.v(TAG, "Remote exception in isFingerprintHardwareDetected(): ", e);
+            }
+        } else {
+            Log.w(TAG, "isFingerprintHardwareDetected(): Service not connected!");
+        }
+        return false;
     }
 }

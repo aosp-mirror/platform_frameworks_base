@@ -22,10 +22,10 @@ import android.service.fingerprint.IFingerprintServiceReceiver;
  * Communication channel from client to the fingerprint service.
  * @hide
  */
-oneway interface IFingerprintService {
+interface IFingerprintService {
     // Any errors resulting from this call will be returned to the listener
     void enroll(IBinder token, long timeout, int userId);
-    
+
     // Any errors resulting from this call will be returned to the listener
     void enrollCancel(IBinder token, int userId);
 
@@ -38,4 +38,7 @@ oneway interface IFingerprintService {
 
     // Stops listening for fingerprints
     void stopListening(IBinder token, int userId);
+
+    // Determine if HAL is loaded and ready
+    boolean isHardwareDetected();
 }
