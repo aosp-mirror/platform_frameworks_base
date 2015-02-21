@@ -200,10 +200,11 @@ public class Color {
      * exception. Supported formats are:
      * #RRGGBB
      * #AARRGGBB
+     * or one of the following names:
      * 'red', 'blue', 'green', 'black', 'white', 'gray', 'cyan', 'magenta',
      * 'yellow', 'lightgray', 'darkgray', 'grey', 'lightgrey', 'darkgrey',
-     * 'aqua', 'fuschia', 'lime', 'maroon', 'navy', 'olive', 'purple',
-     * 'silver', 'teal'
+     * 'aqua', 'fuchsia', 'lime', 'maroon', 'navy', 'olive', 'purple',
+     * 'silver', 'teal'.
      */
     public static int parseColor(String colorString) {
         if (colorString.charAt(0) == '#') {
