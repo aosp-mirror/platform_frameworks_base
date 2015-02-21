@@ -1154,6 +1154,23 @@ final class ActivityStack {
         return null;
     }
 
+    private ActivityStack getNextVisibleStackLocked() {
+        ArrayList<ActivityStack> stacks = mStacks;
+        final ActivityRecord parent = mActivityContainer.mParentActivity;
+        if (parent != null) {
+            stacks = parent.task.stack.mStacks;
+        }
+        if (stacks != null) {
+            for (int i = stacks.size() - 1; i >= 0; --i) {
+                ActivityStack stack = stacks.get(i);
+                if (stack != this && stack.isStackVisibleLocked()) {
+                    return stack;
+                }
+            }
+        }
+        return null;
+    }
+
     // Checks if any of the stacks above this one has a fullscreen activity behind it.
     // If so, this stack is hidden, otherwise it is visible.
     private boolean isStackVisibleLocked() {
@@ -1482,7 +1499,7 @@ final class ActivityStack {
         return result;
     }
 
-    final boolean resumeTopActivityInnerLocked(ActivityRecord prev, Bundle options) {
+    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, Bundle options) {
         if (ActivityManagerService.DEBUG_LOCKSCREEN) mService.logLockScreen("");
 
         if (!mService.mBooting && !mService.mBooted) {
@@ -1510,8 +1527,17 @@ final class ActivityStack {
 
         final TaskRecord prevTask = prev != null ? prev.task : null;
         if (next == null) {
-            // There are no more activities!  Let's just start up the
-            // Launcher...
+            // There are no more activities!
+            final String reason = "noMoreActivities";
+            if (!mFullscreen) {
+                // Try to move focus to the next visible stack with a running activity if this
+                // stack is not covering the entire screen.
+                final ActivityStack stack = getNextVisibleStackLocked();
+                if (adjustFocusToNextVisibleStackLocked(stack, reason)) {
+                    return mStackSupervisor.resumeTopActivitiesLocked(stack, prev, null);
+                }
+            }
+            // Let's just start up the Launcher...
             ActivityOptions.abort(options);
             if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: No more activities go home");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
@@ -1519,7 +1545,7 @@ final class ActivityStack {
             final int returnTaskType = prevTask == null || !prevTask.isOverHomeStack() ?
                     HOME_ACTIVITY_TYPE : prevTask.getTaskToReturnTo();
             return isOnHomeDisplay() &&
-                    mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, "noMoreActivities");
+                    mStackSupervisor.resumeHomeStackTask(returnTaskType, prev, reason);
         }
 
         next.delayedResume = false;
@@ -2516,18 +2542,43 @@ final class ActivityStack {
     private void adjustFocusedActivityLocked(ActivityRecord r, String reason) {
         if (mStackSupervisor.isFrontStack(this) && mService.mFocusedActivity == r) {
             ActivityRecord next = topRunningActivityLocked(null);
+            final String myReason = reason + " adjustFocus";
             if (next != r) {
                 final TaskRecord task = r.task;
                 if (r.frontOfTask && task == topTask() && task.isOverHomeStack()) {
-                    mStackSupervisor.moveHomeStackTaskToTop(task.getTaskToReturnTo(),
-                            reason + " adjustFocus");
+                    // For non-fullscreen stack, we want to move the focus to the next visible
+                    // stack to prevent the home screen from moving to the top and obscuring
+                    // other visible stacks.
+                    if (!mFullscreen
+                            && adjustFocusToNextVisibleStackLocked(null, myReason)) {
+                        return;
+                    }
+                    // Move the home stack to the top if this stack is fullscreen or there is no
+                    // other visible stack.
+                    mStackSupervisor.moveHomeStackTaskToTop(task.getTaskToReturnTo(), myReason);
                 }
             }
-            ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
+
+            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
             if (top != null) {
-                mService.setFocusedActivityLocked(top, reason + " adjustTopFocus");
+                mService.setFocusedActivityLocked(top, myReason);
             }
         }
+    }
+
+    private boolean adjustFocusToNextVisibleStackLocked(ActivityStack inStack, String reason) {
+        final ActivityStack stack = (inStack != null) ? inStack : getNextVisibleStackLocked();
+        final String myReason = reason + " adjustFocusToNextVisibleStack";
+        if (stack == null) {
+            return false;
+        }
+        final ActivityRecord top = stack.topRunningActivityLocked(null);
+        if (top == null) {
+            return false;
+        }
+        stack.moveToFront(myReason);
+        mService.setFocusedActivityLocked(top, myReason);
+        return true;
     }
 
     final void stopActivityLocked(ActivityRecord r) {
@@ -4161,10 +4212,13 @@ final class ActivityStack {
         }
 
         if (mTaskHistory.isEmpty()) {
-            if (DEBUG_STACK) Slog.i(TAG, "removeTask: moving to back stack=" + this);
+            if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing stack=" + this);
             final boolean notHomeStack = !isHomeStack();
             if (isOnHomeDisplay()) {
-                mStackSupervisor.moveHomeStack(notHomeStack, reason + " leftTaskHistoryEmpty");
+                String myReason = reason + " leftTaskHistoryEmpty";
+                if (mFullscreen || !adjustFocusToNextVisibleStackLocked(null, myReason)) {
+                    mStackSupervisor.moveHomeStack(notHomeStack, myReason);
+                }
             }
             if (mStacks != null) {
                 mStacks.remove(this);
