@@ -371,24 +371,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private boolean isTrustDisabled(int userId) {
-        final DevicePolicyManager dpm =
-                (DevicePolicyManager) mContext.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        if (dpm != null) {
-                // TODO once UI is finalized
-                final boolean disabledByGlobalActions = false;
-                final boolean disabledBySettings = false;
-
-                // Don't allow trust agent if device is secured with a SIM PIN. This is here
-                // mainly because there's no other way to prompt the user to enter their SIM PIN
-                // once they get past the keyguard screen.
-                final boolean disabledBySimPin = isSimPinSecure();
-
-                final boolean disabledByDpm = (dpm.getKeyguardDisabledFeatures(null, userId)
-                        & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
-                return disabledByDpm || disabledByGlobalActions || disabledBySettings
-                        || disabledBySimPin;
-        }
-        return false;
+        // Don't allow trust agent if device is secured with a SIM PIN. This is here
+        // mainly because there's no other way to prompt the user to enter their SIM PIN
+        // once they get past the keyguard screen.
+        final boolean disabledBySimPin = isSimPinSecure();
+        return disabledBySimPin;
     }
 
     private boolean isFingerprintDisabled(int userId) {
