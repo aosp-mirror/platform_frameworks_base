@@ -40,7 +40,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>Android Plugin for Gradle, Revision 1.1</a> <em>(February 2015)</em>
+      alt=""/>Android Plugin for Gradle, Revision 1.1.0</a> <em>(February 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -58,25 +58,59 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dt>General Notes:</dt>
     <dd>
     <ul>
-      <li>Fixed issue with Gradle build failure when accessing the
-      <code>extractReleaseAnnotations</code> module.
-      (<a href="http://b.android.com/81638">Issue 81638</a>).</li>
-      <li>Fixed debugging issue when displaying method input parameters at breakpoints.
-      (<a href="http://b.android.com/82031">Issue 82031</a>).</li>
-      <li>Fixed manifest merger issues when importing libraries with a <code>targetSdkVersion</code>
-      less than 16.</li>
-      <li>Fixed density ordering issue when using Android Studio with JDK 8.</li>
+      <li>Added new unit test support</li>
+      <ul>
+       <li>Enabled
+       <a href="{@docRoot}training/activity-testing/activity-unit-testing.html">unit tests</a> to
+       run on the local JVM against a special version of the <code>android.jar</code> file that is
+       compatible with popular mocking frameworks, for example Mockito. </li>
+       <li>Added new test tasks <code>testDebug</code>, <code>testRelease</code>, and
+       <code>testMyFlavorDebug</code> when using product flavors. </li>
+       <li>Added new source folders recognized as unit tests: <code>src/test/java/</code>,
+       <code>src/testDebug/java/</code>, <code>src/testMyFlavor/java/</code>.
+       <li>Added new configurations in the <code>build.gradle</code> file for declaring test-only
+       dependencies, for example, <code>testCompile 'junit:junit:4.11'</code>,
+       <code>testMyFlavorCompile 'some:library:1.0'</code>.
+        <p class="note"><strong>Note:</strong> Test-only dependencies are not currently compatible
+        with Jack (Java Android Compiler Kit). </p>
+       </li>
+       <li>Added the <code>android.testOptions.unitTests.returnDefaultValues</code> option to
+       control the behaviour of the mockable android.jar. </li>
+      </ul>
+      <li>Replaced <code>Test</code> in test task names with <code>AndroidTest</code>.
+      For example, the <code>assembleDebugTest</code> task is now
+      <code>assembleDebugAndroidTest</code> task. Unit test tasks still have <code>UnitTest</code>
+      in the task name, for example <code>assembleDebugUnitTest</code>. </li>
+      <li>Modified <a href="{@docRoot}tools/help/proguard.html">ProGuard</a> configuration files to
+      no longer apply to the test APK. If minification is enabled, ProGuard processes the test APK
+      and applies only the mapping file that is generated when minifying the main APK. </li>
+      <li>Updated dependency management</li>
+       <ul>
+       <li>Fixed issues using <code>provided</code> and <code>package</code> scopes.
+         <p class="note"><strong>Note:</strong> These scopes are incompatible with AAR
+         (Android ARchive) packages and will cause a build with AAR packages to fail.</p>
+       </li>
+       <li>Modified dependency resolution to compare the dependencies of an app under test and the
+       test app. If an artifact with the same version is found for both apps, it's not included with
+       the test app and is packaged only with the app under test. If an artifact with a different
+       version is found for both apps, the build fails.</li>
+       </ul>
+
+      <li>Added support for <code>anyDpi</code>
+      <a href="{@docRoot}guide/topics/resources/providing-resources.html"> resource qualifier</a>
+      in resource merger. </li>
+      <li>Improved evaluation and IDE sync speeds for projects with a large number of
+      Android <a href="{@docRoot}sdk/installing/create-project.html#CreatingAModule"> modules</a>. </li>
     </ul>
     </dd>
   </div>
 </div>
 
 
-
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
-      alt=""/>Android Plugin for Gradle, Revision 1.0</a> <em>(December 2014)</em>
+      alt=""/>Android Plugin for Gradle, Revision 1.0.1</a> <em>(January 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -86,7 +120,51 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
     <dd>
       <ul>
-        <li>Gradle 2.2.1 or higher.</li>
+        <li>Gradle 2.2.1 up to 2.3.x.
+        <p class="note"><strong>Note:</strong> This version of the Android Plugin for Gradle is
+        not compatible with Gradle 2.4 and higher. </p>
+        </li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+    <ul>
+      <li>Fixed issue with Gradle build failure when accessing the
+      <code>extractReleaseAnnotations</code> module.
+      (<a href="http://b.android.com/81638">Issue 81638</a>).</li>
+      <li>Fixed issue with <code>Disable</code> passing the
+      <code>--no-optimize</code> setting to the Dalvik Executable (dex) bytecode.
+      (<a href="http://b.android.com/82662">Issue 82662</a>).</li>
+      <li>Fixed manifest merger issues when importing libraries with a
+      <code>targetSdkVersion</code> less than 16.</li>
+      <li>Fixed density ordering issue when using Android Studio with JDK 8.</li>
+    </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.0.0</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 up to 2.3.x.
+        <p class="note"><strong>Note:</strong> This version of the Android Plugin for Gradle is
+        not compatible with Gradle 2.4 and higher. </p>
+        </li>
         <li>Build Tools 21.1.1 or higher.</li>
       </ul>
     </dd>
