@@ -338,6 +338,7 @@ public class MediaSessionService extends SystemService implements Monitor {
      */
     private void enforceMediaPermissions(ComponentName compName, int pid, int uid,
             int resolvedUserId) {
+        if (isCurrentVolumeController(uid)) return;
         if (getContext()
                 .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
                     != PackageManager.PERMISSION_GRANTED
@@ -347,13 +348,18 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    private void enforceSystemUiPermission(String action, int pid, int uid) {
+    private boolean isCurrentVolumeController(int uid) {
         if (mAudioManagerInternal != null) {
             final int vcuid = mAudioManagerInternal.getVolumeControllerUid();
             if (vcuid > 0 && uid == vcuid) {
-                return;
+                return true;
             }
         }
+        return false;
+    }
+
+    private void enforceSystemUiPermission(String action, int pid, int uid) {
+        if (isCurrentVolumeController(uid)) return;
         if (getContext().checkPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
                 pid, uid) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Only system ui may " + action);
