@@ -155,7 +155,7 @@ class Package():
         return self.raw
 
 
-def parse_api(f):
+def _parse_stream(f, clazz_cb=None):
     line = 0
     api = {}
     pkg = None
@@ -163,7 +163,7 @@ def parse_api(f):
     blame = None
 
     re_blame = re.compile("^([a-z0-9]{7,}) \(<([^>]+)>.+?\) (.+?)$")
-    for raw in f.readlines():
+    for raw in f:
         line += 1
         raw = raw.rstrip()
         match = re_blame.match(raw)
@@ -176,8 +176,13 @@ def parse_api(f):
         if raw.startswith("package"):
             pkg = Package(line, raw, blame)
         elif raw.startswith("  ") and raw.endswith("{"):
+            # When provided with class callback, we treat as incremental
+            # parse and don't build up entire API
+            if clazz and clazz_cb:
+                clazz_cb(clazz)
             clazz = Class(pkg, line, raw, blame)
-            api[clazz.fullname] = clazz
+            if not clazz_cb:
+                api[clazz.fullname] = clazz
         elif raw.startswith("    ctor"):
             clazz.ctors.append(Method(clazz, line, raw, blame))
         elif raw.startswith("    method"):
@@ -185,19 +190,16 @@ def parse_api(f):
         elif raw.startswith("    field"):
             clazz.fields.append(Field(clazz, line, raw, blame))
 
+    # Handle last trailing class
+    if clazz and clazz_cb:
+        clazz_cb(clazz)
+
     return api
-
-
-def parse_api_file(fn):
-    with open(fn) as f:
-        return parse_api(f)
 
 
 class Failure():
     def __init__(self, sig, clazz, detail, error, rule, msg):
         self.sig = sig
-        self.clazz = clazz
-        self.detail = detail
         self.error = error
         self.rule = rule
         self.msg = msg
@@ -644,7 +646,7 @@ def verify_layering(clazz):
                 warn(clazz, m, "FW6", "Method argument type violates package layering")
 
 
-def verify_boolean(clazz, api):
+def verify_boolean(clazz):
     """Verifies that boolean accessors are named correctly.
     For example, hasFoo() and setHasFoo()."""
 
@@ -809,7 +811,7 @@ def verify_overload_args(clazz):
         if "deprecated" in m.split: continue
         overloads[m.name].append(m)
 
-    for name, methods in overloads.iteritems():
+    for name, methods in overloads.items():
         if len(methods) <= 1: continue
 
         # Look for arguments common across all overloads
@@ -945,56 +947,65 @@ def verify_resource_names(clazz):
             error(clazz, f, "C7", "Expected resource name in this class to be FooBar_Baz style")
 
 
-def verify_style(api):
-    """Find all style issues in the given API level."""
-    global failures
+def examine_clazz(clazz):
+    """Find all style issues in the given class."""
+    if clazz.pkg.name.startswith("java"): return
+    if clazz.pkg.name.startswith("junit"): return
+    if clazz.pkg.name.startswith("org.apache"): return
+    if clazz.pkg.name.startswith("org.xml"): return
+    if clazz.pkg.name.startswith("org.json"): return
+    if clazz.pkg.name.startswith("org.w3c"): return
 
+    verify_constants(clazz)
+    verify_enums(clazz)
+    verify_class_names(clazz)
+    verify_method_names(clazz)
+    verify_callbacks(clazz)
+    verify_listeners(clazz)
+    verify_actions(clazz)
+    verify_extras(clazz)
+    verify_equals(clazz)
+    verify_parcelable(clazz)
+    verify_protected(clazz)
+    verify_fields(clazz)
+    verify_register(clazz)
+    verify_sync(clazz)
+    verify_intent_builder(clazz)
+    verify_helper_classes(clazz)
+    verify_builder(clazz)
+    verify_aidl(clazz)
+    verify_internal(clazz)
+    verify_layering(clazz)
+    verify_boolean(clazz)
+    verify_collections(clazz)
+    verify_flags(clazz)
+    verify_exception(clazz)
+    verify_google(clazz)
+    verify_bitset(clazz)
+    verify_manager(clazz)
+    verify_boxed(clazz)
+    verify_static_utils(clazz)
+    verify_overload_args(clazz)
+    verify_callback_handlers(clazz)
+    verify_context_first(clazz)
+    verify_listener_last(clazz)
+    verify_resource_names(clazz)
+
+
+def examine_stream(stream):
+    """Find all style issues in the given API stream."""
+    global failures
+    failures = {}
+    _parse_stream(stream, examine_clazz)
+    return failures
+
+
+def examine_api(api):
+    """Find all style issues in the given parsed API."""
+    global failures
     failures = {}
     for key in sorted(api.keys()):
-        clazz = api[key]
-
-        if clazz.pkg.name.startswith("java"): continue
-        if clazz.pkg.name.startswith("junit"): continue
-        if clazz.pkg.name.startswith("org.apache"): continue
-        if clazz.pkg.name.startswith("org.xml"): continue
-        if clazz.pkg.name.startswith("org.json"): continue
-        if clazz.pkg.name.startswith("org.w3c"): continue
-
-        verify_constants(clazz)
-        verify_enums(clazz)
-        verify_class_names(clazz)
-        verify_method_names(clazz)
-        verify_callbacks(clazz)
-        verify_listeners(clazz)
-        verify_actions(clazz)
-        verify_extras(clazz)
-        verify_equals(clazz)
-        verify_parcelable(clazz)
-        verify_protected(clazz)
-        verify_fields(clazz)
-        verify_register(clazz)
-        verify_sync(clazz)
-        verify_intent_builder(clazz)
-        verify_helper_classes(clazz)
-        verify_builder(clazz)
-        verify_aidl(clazz)
-        verify_internal(clazz)
-        verify_layering(clazz)
-        verify_boolean(clazz, api)
-        verify_collections(clazz)
-        verify_flags(clazz)
-        verify_exception(clazz)
-        verify_google(clazz)
-        verify_bitset(clazz)
-        verify_manager(clazz)
-        verify_boxed(clazz)
-        verify_static_utils(clazz)
-        verify_overload_args(clazz)
-        verify_callback_handlers(clazz)
-        verify_context_first(clazz)
-        verify_listener_last(clazz)
-        verify_resource_names(clazz)
-
+        examine_clazz(api[key])
     return failures
 
 
@@ -1054,18 +1065,20 @@ def verify_compat(cur, prev):
 
 
 if __name__ == "__main__":
-    cur = parse_api_file(sys.argv[1])
-    cur_fail = verify_style(cur)
+    with open(sys.argv[1]) as f:
+        cur_fail = examine_stream(f)
 
     if len(sys.argv) > 2:
-        prev = parse_api_file(sys.argv[2])
-        prev_fail = verify_style(prev)
+        with open(sys.argv[2]) as f:
+            prev_fail = examine_stream(f)
 
         # ignore errors from previous API level
         for p in prev_fail:
             if p in cur_fail:
                 del cur_fail[p]
 
+        """
+        # NOTE: disabled because of memory pressure
         # look for compatibility issues
         compat_fail = verify_compat(cur, prev)
 
@@ -1073,7 +1086,7 @@ if __name__ == "__main__":
         for f in sorted(compat_fail):
             print compat_fail[f]
             print
-
+        """
 
     print "%s API style issues %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True), format(reset=True)))
     for f in sorted(cur_fail):
