@@ -373,9 +373,7 @@ public class CameraDeviceImpl extends CameraDevice {
 
                 // Add all new streams
                 for (Surface s : addSet) {
-                    // TODO: remove width,height,format since we are ignoring
-                    // it.
-                    int streamId = mRemoteDevice.createStream(0, 0, 0, s);
+                    int streamId = mRemoteDevice.createStream(s);
                     mConfiguredOutputs.put(streamId, s);
                 }
 

@@ -161,8 +161,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertFalse(request.isEmpty());
         assertFalse(metadata.isEmpty());
         if (needStream) {
-            int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20,
-                    /* ignored */30, mSurface);
+            int streamId = mCameraUser.createStream(mSurface);
             assertEquals(0, streamId);
             request.addTarget(mSurface);
         }
@@ -235,12 +234,11 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testCreateStream() throws Exception {
-        int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20, /* ignored */30,
-                mSurface);
+        int streamId = mCameraUser.createStream(mSurface);
         assertEquals(0, streamId);
 
         assertEquals(CameraBinderTestUtils.ALREADY_EXISTS,
-                mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0, mSurface));
+                mCameraUser.createStream(mSurface));
 
         assertEquals(CameraBinderTestUtils.NO_ERROR, mCameraUser.deleteStream(streamId));
     }
@@ -257,20 +255,18 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     public void testCreateStreamTwo() throws Exception {
 
         // Create first stream
-        int streamId = mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0,
-                mSurface);
+        int streamId = mCameraUser.createStream(mSurface);
         assertEquals(0, streamId);
 
         assertEquals(CameraBinderTestUtils.ALREADY_EXISTS,
-                mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0, mSurface));
+                mCameraUser.createStream(mSurface));
 
         // Create second stream with a different surface.
         SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
         surfaceTexture.setDefaultBufferSize(640, 480);
         Surface surface2 = new Surface(surfaceTexture);
 
-        int streamId2 = mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0,
-                surface2);
+        int streamId2 = mCameraUser.createStream(surface2);
         assertEquals(1, streamId2);
 
         // Clean up streams
