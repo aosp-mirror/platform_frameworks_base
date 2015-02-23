@@ -17,10 +17,10 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Matrix;
-import android.graphics.Rect;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -55,7 +55,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         implements ActionProvider.SubUiVisibilityListener {
     private static final String TAG = "ActionMenuPresenter";
 
-    private View mOverflowButton;
+    private OverflowMenuButton mOverflowButton;
     private boolean mReserveOverflow;
     private boolean mReserveOverflowSet;
     private int mWidthLimit;
@@ -78,6 +78,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter
 
     private OpenOverflowRunnable mPostedOpenRunnable;
     private ActionMenuPopupCallback mPopupCallback;
+
+    private TintInfo mOverflowTintInfo;
 
     final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
     int mOpenSubMenuId;
@@ -113,6 +115,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                 mOverflowButton = new OverflowMenuButton(mSystemContext);
                 final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
                 mOverflowButton.measure(spec, spec);
+                applyOverflowTint();
             }
             width -= mOverflowButton.getMeasuredWidth();
         } else {
@@ -236,6 +239,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         if (hasOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mSystemContext);
+                applyOverflowTint();
             }
             ViewGroup parent = (ViewGroup) mOverflowButton.getParent();
             if (parent != mMenuView) {
@@ -550,6 +554,40 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         menuView.initialize(mMenu);
     }
 
+    public void setOverflowTintList(ColorStateList tint) {
+        if (mOverflowTintInfo == null) {
+            mOverflowTintInfo = new TintInfo();
+        }
+        mOverflowTintInfo.mTintList = tint;
+        mOverflowTintInfo.mHasTintList = true;
+
+        applyOverflowTint();
+    }
+
+    public void setOverflowTintMode(PorterDuff.Mode tintMode) {
+        if (mOverflowTintInfo == null) {
+            mOverflowTintInfo = new TintInfo();
+        }
+        mOverflowTintInfo.mTintMode = tintMode;
+        mOverflowTintInfo.mHasTintMode = true;
+
+        applyOverflowTint();
+    }
+
+    private void applyOverflowTint() {
+        final TintInfo tintInfo = mOverflowTintInfo;
+        if (tintInfo != null && (tintInfo.mHasTintList || tintInfo.mHasTintMode)) {
+            if (mOverflowButton != null) {
+                if (tintInfo.mHasTintList) {
+                    mOverflowButton.setImageTintList(tintInfo.mTintList);
+                }
+                if (tintInfo.mHasTintMode) {
+                    mOverflowButton.setImageTintMode(tintInfo.mTintMode);
+                }
+            }
+        }
+    }
+
     private static class SavedState implements Parcelable {
         public int openSubMenuId;
 
@@ -773,5 +811,12 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         public ListPopupWindow getPopup() {
             return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
         }
+    }
+
+    private static class TintInfo {
+        ColorStateList mTintList;
+        PorterDuff.Mode mTintMode;
+        boolean mHasTintMode;
+        boolean mHasTintList;
     }
 }

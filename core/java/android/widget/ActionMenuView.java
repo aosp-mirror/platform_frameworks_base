@@ -16,7 +16,9 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -544,6 +546,31 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     /** @hide */
     public void setOverflowReserved(boolean reserveOverflow) {
         mReserveOverflow = reserveOverflow;
+    }
+
+    /**
+     * Applies a tint to the overflow drawable. Does not modify the current tint
+     * mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     */
+    public void setOverflowTintList(ColorStateList tint) {
+        if (mPresenter != null) {
+            mPresenter.setOverflowTintList(tint);
+        }
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by {@link
+     * #setOverflowTintList(ColorStateList)} to the overflow drawable.
+     * The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be {@code null} to clear tint
+     */
+    public void setOverflowTintMode(PorterDuff.Mode tintMode) {
+        if (mPresenter != null) {
+            mPresenter.setOverflowTintMode(tintMode);
+        }
     }
 
     @Override
