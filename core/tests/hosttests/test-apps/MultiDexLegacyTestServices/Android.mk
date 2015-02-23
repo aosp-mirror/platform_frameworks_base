@@ -36,7 +36,7 @@ LOCAL_DEX_PREOPT := false
 
 include $(BUILD_PACKAGE)
 
-ifndef LOCAL_USE_JACK
+ifndef LOCAL_JACK_ENABLED
 $(mainDexList): $(full_classes_proguard_jar) | $(HOST_OUT_EXECUTABLES)/mainDexClasses
 	$(hide) mkdir -p $(dir $@)
 	$(HOST_OUT_EXECUTABLES)/mainDexClasses $< 1>$@
