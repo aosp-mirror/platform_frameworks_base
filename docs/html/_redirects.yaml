@@ -397,3 +397,7 @@ redirects:
 
 - from: /preview/google-play-services-wear.html
   to: /training/building-wearables.html
+
+# ---------- DISTRIBUTE ------------------
+- from /distribute/tools/promote/badge-files.html
+  to: /distribute/tools/promote/badges.html
