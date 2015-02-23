@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM 卡 PUK 碼操作失敗！"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"密碼正確！"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"沒有服務。"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
 </resources>

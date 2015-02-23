@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK 작업이 실패했습니다."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"코드 승인 완료"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"서비스 불가"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"입력 방법 버튼을 전환합니다."</string>
 </resources>

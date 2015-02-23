@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Échec du déverrouillage à l\'aide de la clé PUK de la carte SIM."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Code accepté."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Aucun service"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bouton \"Changer le mode de saisie\""</string>
 </resources>

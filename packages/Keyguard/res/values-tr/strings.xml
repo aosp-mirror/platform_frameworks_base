@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK işlemi başarısız oldu!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod Kabul Edildi!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Hizmet yok."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Giriş yöntemini değiştirme düğmesi."</string>
 </resources>
