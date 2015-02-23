@@ -6,25 +6,26 @@ parent.link=index.html
 <p>{@code android} is an important development tool that lets you:</p>
 
   <ul>
-    <li>Create, delete, and view Android Virtual Devices (AVDs). See <a href= 
-    "{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from the Command
-Line</a>.</li>
+    <li>Create, delete, and view Android Virtual Devices (AVDs). See <a href=
+    "{@docRoot}tools/devices/managing-avds-cmdline.html">Managing AVDs from the Command Line</a>.</li>
 
-    <li>Create and update Android projects. See <a href= 
+    <li>Create and update Android projects. See <a href=
     "{@docRoot}tools/projects/projects-cmdline.html">Managing Projects from
     the Command Line</a>.</li>
 
-    <li>Update your Android SDK with new platforms, add-ons, and documentation. See <a href= 
-    "{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</li>
-  </ul>If you are using Eclipse, the <code>android</code> tool's features are integrated
-  into ADT, so you should not need to use this tool directly.
-  
+    <li>Update your Android SDK with new platforms, add-ons, and documentation. See <a href=
+    "{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
+  </ul>
+
+<p>If you are using Android Studio or Eclipse, the <code>android</code> tool's features are
+integrated into the IDE, so you should not need to use this tool directly. </p>
+
   <p class="note"><strong>Note:</strong> The documentation of options below is not exhaustive
 and may be out of date. For the most current list of options, execute <code>android
 --help</code>.</p>
-  
-  
-  
+
+
+
 
   <h2>Syntax</h2>
   <pre>android [global options] action [action options]</pre>
