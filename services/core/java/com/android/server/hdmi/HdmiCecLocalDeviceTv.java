@@ -881,12 +881,24 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
         boolean oldStatus = mArcEstablished;
         // 1. Enable/disable ARC circuit.
-        mService.setAudioReturnChannel(getAvrDeviceInfo().getPortId(), enabled);
+        setAudioReturnChannel(enabled);
         // 2. Notify arc status to audio service.
         notifyArcStatusToAudioService(enabled);
         // 3. Update arc status;
         mArcEstablished = enabled;
         return oldStatus;
+    }
+
+    /**
+     * Switch hardware ARC circuit in the system.
+     */
+    @ServiceThreadOnly
+    void setAudioReturnChannel(boolean enabled) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo avr = getAvrDeviceInfo();
+        if (avr != null) {
+            mService.setAudioReturnChannel(avr.getPortId(), enabled);
+        }
     }
 
     @ServiceThreadOnly
