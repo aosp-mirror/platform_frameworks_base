@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ava lukk"</string>
     <string name="phone_label" msgid="2320074140205331708">"ava telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"ava kaamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Sisestusmeetodi vahetamise nupp."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Sobivussuumi nupp."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Suumi suuremale ekraanile vähem."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth on ühendatud."</string>

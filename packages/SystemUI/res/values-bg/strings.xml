@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"отключване"</string>
     <string name="phone_label" msgid="2320074140205331708">"отваряне на телефона"</string>
     <string name="camera_label" msgid="7261107956054836961">"отваряне на камерата"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Бутон за превключване на метода на въвеждане."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Бутон за промяна на мащаба с цел съвместимост."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Промяна на мащаба на екрана от по-малък до по-голям."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth е включен."</string>
@@ -190,10 +189,10 @@
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Затваряне на панела."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Повече време."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"По-малко време."</string>
-    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Светкавицата е изключена."</string>
-    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Светкавицата е включена."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Светкавицата се изключи."</string>
-    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Светкавицата се включи."</string>
+    <string name="accessibility_quick_settings_flashlight_off" msgid="4936432000069786988">"Фенерчето е изключено."</string>
+    <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Фенерчето е включено."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Фенерчето е изключено."</string>
+    <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Фенерчето е включено."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Функцията за инвертиране на цветовете се изключи."</string>
     <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Функцията за инвертиране на цветовете се включи."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Мобилната точка за достъп се изключи."</string>
@@ -266,7 +265,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Тетъринг"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Точка за достъп"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Известия"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Светкавица"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Фенерче"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобилни данни"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Пренос на данни"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Оставащи данни"</string>
