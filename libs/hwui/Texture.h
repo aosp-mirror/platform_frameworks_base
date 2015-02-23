@@ -30,8 +30,7 @@ class UvMapper;
  */
 class Texture {
 public:
-    Texture();
-    Texture(Caches& caches);
+    Texture(Caches& caches) : mCaches(caches) { }
 
     virtual ~Texture() { }
 
@@ -59,62 +58,62 @@ public:
     /**
      * Name of the texture.
      */
-    GLuint id;
+    GLuint id = 0;
     /**
      * Generation of the backing bitmap,
      */
-    uint32_t generation;
+    uint32_t generation = 0;
     /**
      * Indicates whether the texture requires blending.
      */
-    bool blend;
+    bool blend = false;
     /**
      * Width of the backing bitmap.
      */
-    uint32_t width;
+    uint32_t width = 0;
     /**
      * Height of the backing bitmap.
      */
-    uint32_t height;
+    uint32_t height = 0;
     /**
      * Indicates whether this texture should be cleaned up after use.
      */
-    bool cleanup;
+    bool cleanup= false;
     /**
      * Optional, size of the original bitmap.
      */
-    uint32_t bitmapSize;
+    uint32_t bitmapSize = 0;
     /**
      * Indicates whether this texture will use trilinear filtering.
      */
-    bool mipMap;
+    bool mipMap = false;
 
     /**
      * Optional, pointer to a texture coordinates mapper.
      */
-    const UvMapper* uvMapper;
+    const UvMapper* uvMapper = nullptr;
 
     /**
      * Whether or not the Texture is marked in use and thus not evictable for
      * the current frame. This is reset at the start of a new frame.
      */
-    bool isInUse;
+    bool isInUse = false;
 
 private:
     /**
-     * Last wrap modes set on this texture. Defaults to GL_CLAMP_TO_EDGE.
+     * Last wrap modes set on this texture.
      */
-    GLenum mWrapS;
-    GLenum mWrapT;
+    GLenum mWrapS = GL_CLAMP_TO_EDGE;
+    GLenum mWrapT = GL_CLAMP_TO_EDGE;
 
     /**
-     * Last filters set on this texture. Defaults to GL_NEAREST.
+     * Last filters set on this texture.
      */
-    GLenum mMinFilter;
-    GLenum mMagFilter;
+    GLenum mMinFilter = GL_NEAREST;
+    GLenum mMagFilter = GL_NEAREST;
 
-    bool mFirstFilter;
-    bool mFirstWrap;
+    bool mFirstFilter = true;
+    bool mFirstWrap = true;
 
     Caches& mCaches;
 }; // struct Texture

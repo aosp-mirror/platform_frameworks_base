@@ -24,46 +24,6 @@
 namespace android {
 namespace uirenderer {
 
-Texture::Texture()
-        : id(0)
-        , generation(0)
-        , blend(false)
-        , width(0)
-        , height(0)
-        , cleanup(false)
-        , bitmapSize(0)
-        , mipMap(false)
-        , uvMapper(nullptr)
-        , isInUse(false)
-        , mWrapS(GL_CLAMP_TO_EDGE)
-        , mWrapT(GL_CLAMP_TO_EDGE)
-        , mMinFilter(GL_NEAREST)
-        , mMagFilter(GL_NEAREST)
-        , mFirstFilter(true)
-        , mFirstWrap(true)
-        , mCaches(Caches::getInstance()) {
-}
-
-Texture::Texture(Caches& caches)
-        : id(0)
-        , generation(0)
-        , blend(false)
-        , width(0)
-        , height(0)
-        , cleanup(false)
-        , bitmapSize(0)
-        , mipMap(false)
-        , uvMapper(nullptr)
-        , isInUse(false)
-        , mWrapS(GL_CLAMP_TO_EDGE)
-        , mWrapT(GL_CLAMP_TO_EDGE)
-        , mMinFilter(GL_NEAREST)
-        , mMagFilter(GL_NEAREST)
-        , mFirstFilter(true)
-        , mFirstWrap(true)
-        , mCaches(caches) {
-}
-
 void Texture::setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture, bool force,
         GLenum renderTarget) {
 

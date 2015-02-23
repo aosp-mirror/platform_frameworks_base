@@ -166,7 +166,7 @@ Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
     GradientInfo info;
     getGradientInfo(colors, count, info);
 
-    Texture* texture = new Texture();
+    Texture* texture = new Texture(Caches::getInstance());
     texture->width = info.width;
     texture->height = 2;
     texture->blend = info.hasAlpha;
