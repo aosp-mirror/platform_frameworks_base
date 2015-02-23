@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"desbloqueja"</string>
     <string name="phone_label" msgid="2320074140205331708">"obre el telèfon"</string>
     <string name="camera_label" msgid="7261107956054836961">"obre la càmera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botó de canvi del mètode d\'entrada."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botó de zoom de compatibilitat."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Amplia menys com més gran sigui la pantalla."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connectat."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"El punt d\'accés mòbil està activat."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"S\'ha aturat l\'emissió de la pantalla."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Brillantor de la pantalla"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"L\'ús de dades 2G-3G està desactivat"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"L\'ús de dades 4G està desactivat"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Les dades mòbils estan desactivades"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Les dades estan desactivades"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"S\'han desactivat les dades del dispositiu perquè ha arribat al límit que has definit.\n\nSi les tornes a activar, l\'operador de telefonia mòbil et pot aplicar càrrecs."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Activa les dades"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Les dades 2G-3G estan aturades"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Les dades 4G estan aturades"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Les dades mòbils estan aturades"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Les dades estan aturades"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Com que has arribat al límit de dades establert, s\'ha aturat l\'ús de dades del dispositiu per a la resta d\'aquest cicle.\n\nSi el reprens, l\'operador de telefonia mòbil pot aplicar càrrecs."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reprèn"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"No hi ha connexió a Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: connectada"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"S\'està cercant un GPS"</string>

@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"i-unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"buksan ang telepono"</string>
     <string name="camera_label" msgid="7261107956054836961">"buksan ang camera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ilipat ang button na pamamaraan ng pag-input."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Button ng zoom ng pagiging tugma."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Mag-zoom nang mas maliit sa mas malaking screen."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Nakakonekta ang Bluetooth."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Na-on ang mobile hotspot."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Itinigil ang pagka-cast sa screen."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Liwanag ng display"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Naka-off ang 2G-3G data"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Naka-off ang 4G data"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Naka-off ang cellular data"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Naka-off ang data"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Ini-off ng device mo ang data dahil naabot na nito ang limitasyong iyong itinakda.\n\nAng muling pag-o-on dito ay maaaring humantong sa mga singiling magmumula sa iyong carrier."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"I-on ang data"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Naka-pause ang 2G-3G data"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Naka-pause ang 4G data"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Naka-pause ang cellular data"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Naka-pause ang data"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Dahil naabot ang iyong nakatakdang limitasyon sa data, na-pause ng device ang paggamit ng data para sa nalalabing bahagi ng cycle na ito.\n\nMaaaring makakuha ng mga singilin mula sa iyong carrier ang pagpapatuloy."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Ipagpatuloy"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Walang koneksyon sa Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"nakakonekta ang Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Naghahanap ng GPS"</string>

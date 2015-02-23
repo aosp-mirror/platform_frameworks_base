@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"திற"</string>
     <string name="phone_label" msgid="2320074140205331708">"ஃபோனைத் திற"</string>
     <string name="camera_label" msgid="7261107956054836961">"கேமராவைத் திற"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"உள்ளீட்டு முறையை மாற்றும் பொத்தான்."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"பொருந்துமாறு அளவை மாற்றும் பொத்தான்."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"சிறியதிலிருந்து பெரிய திரைக்கு அளவை மாற்றும்."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"புளூடூத் இணைக்கப்பட்டது."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"மொபைல் ஹாட்ஸ்பாட் இயக்கப்பட்டது."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"திரையை அனுப்புதல் நிறுத்தப்பட்டது."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"திரை பிரகாசம்"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G தரவு முடக்கப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G தரவு முடக்கப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"செல்லுலார் தரவு முடக்கப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"தரவு இணைப்பு முடக்கப்பட்டது"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"அமைத்த வரம்பை மீறிவிட்டதால், சாதனம் தரவு இணைப்பை முடக்கியது.\n\nஇதை மீண்டும் இயக்கினால், மொபைல் நிறுவனம் விதிக்கும் கட்டணங்கள் பொருந்தலாம்."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"தரவு இணைப்பை இயக்கு"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G டேட்டா இடைநிறுத்தப்பட்டது"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G டேட்டா இடைநிறுத்தப்பட்டது"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"செல்லுலார் தரவு இடைநிறுத்தப்பட்டது"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"தரவு இடைநிறுத்தப்பட்டது"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"அமைக்கப்பட்ட தரவின் வரம்பை அடைந்துவிட்டதால், இந்தச் சுழற்சியின் மீதமுள்ள நாட்களுக்கான தரவுப் பயன்பாட்டைச் சாதனம் இடைநிறுத்தியுள்ளது.\n\nமீண்டும் தொடங்குவது, மொபைல் நிறுவனக் கட்டணங்களுக்கு உட்படுத்தலாம்."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"மீண்டும் தொடங்கு"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"இணைய இணைப்பு இல்லை"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"வைஃபை இணைக்கப்பட்டது"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ஐத் தேடுகிறது"</string>

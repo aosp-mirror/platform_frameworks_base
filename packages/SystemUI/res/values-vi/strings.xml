@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"mở khóa"</string>
     <string name="phone_label" msgid="2320074140205331708">"mở điện thoại"</string>
     <string name="camera_label" msgid="7261107956054836961">"mở máy ảnh"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Nút chuyển phương thức nhập."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Nút thu phóng khả năng tương thích."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Thu phóng màn hình lớn hơn hoặc nhỏ hơn."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Đã kết nối bluetooth."</string>
@@ -201,12 +200,18 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Đã bật điểm phát sóng di động."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Đã ngừng truyền màn hình."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Độ sáng màn hình"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Dữ liệu 2G-3G bị tắt"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Dữ liệu 4G bị tắt"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Dữ liệu di động bị tắt"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Dữ liệu bị tắt"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Thiết bị của bạn đã tắt dữ liệu do đã đạt đến giới hạn bạn đã đặt.\n\nViệc bật lại dữ liệu có thể dẫn tới các khoản phí từ nhà cung cấp dịch vụ của bạn."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Bật dữ liệu"</string>
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (5281770593459841889) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (1601769736881078016) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (4651001290947318931) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_title (3932437232199671967) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog (8453242888903772524) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_enable (1412395410306390593) -->
+    <skip />
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Đang tìm kiếm GPS"</string>

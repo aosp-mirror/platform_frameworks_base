@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"déverrouiller"</string>
     <string name="phone_label" msgid="2320074140205331708">"ouvrir le téléphone"</string>
     <string name="camera_label" msgid="7261107956054836961">"ouvrir l\'appareil photo"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bouton \"Changer le mode de saisie\""</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Bouton \"Zoom de compatibilité\""</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de compatibilité avec la taille de l\'écran"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connecté"</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Point d\'accès mobile activé."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Diffusion d\'écran interrompue."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Luminosité de l\'affichage"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Données 2G-3G désactivées"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Données 4G désactivées"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Données mobiles désactivées"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Données désactivées"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Votre appareil a désactivé les données, car il a atteint la limite que vous avez définie.\n\nSi vous les réactivez, votre opérateur risque de vous facturer des frais supplémentaires."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Activer les données"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Données 2G-3G désactivées"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Données 4G désactivées"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Données mobiles désactivées"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Données désactivées"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Vous avez atteint le quota de données maximal. La consommation des données a donc été interrompue pour la fin de la période de facturation en cours.\n\nSi vous réactivez les données, votre opérateur risque de vous facturer des frais supplémentaires."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Réactiver"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Aucune connexion Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Connecté au Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Recherche de GPS..."</string>

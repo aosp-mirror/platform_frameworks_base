@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"desblokeatu"</string>
     <string name="phone_label" msgid="2320074140205331708">"ireki telefonoan"</string>
     <string name="camera_label" msgid="7261107956054836961">"ireki kamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Idazketa-metodoa aldatzeko botoia."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Zoom-bateragarritasunaren botoia."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Handiagotu pantaila txikia."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetootha konektatuta."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Konexioa partekatzeko aukera aktibatu egin da."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Pantaila igortzeari utzi zaio."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Bistaratu distira"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G datu-konexioa desaktibatuta dago"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G datu-konexioa desaktibatuta dago"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Datu mugikorrak desaktibatuta daude"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Datu-konexioa desaktibatuta dago"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Gailuak datu-konexioa desaktibatu du, ezarritako mugara iritsi delako.\n\nBerriro aktibatuz gero, operadoreak zerbait kobratuko dizu agian."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Aktibatu datu-konexioa"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Sare mugikorreko datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datuen erabilera eten da"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Zehaztuta duzun datuen erabilera-mugara iritsi zarenez, gailuak datuen erabilera eten du zikloa amaitzen den arte.\n\nDatuak erabiltzen jarraitzen baduzu, gastu gehiago ordaindu beharko dizkiozu agian operadoreari."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Jarraitu erabiltzen"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ez duzu Interneteko konexiorik"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi konektatuta"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS seinalearen bila"</string>

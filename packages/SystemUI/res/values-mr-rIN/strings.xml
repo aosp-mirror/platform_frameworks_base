@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करा"</string>
     <string name="phone_label" msgid="2320074140205331708">"फोन उघडा"</string>
     <string name="camera_label" msgid="7261107956054836961">"कॅमेरा उघडा"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट पद्धत स्‍विच करा बटण."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"सुसंगतता झूम बटण."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"लहानपासून मोठ्‍या स्‍क्रीनवर झूम करा."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब कनेक्‍ट केले."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"मोबाईल हॉटस्पॉट चालू केला."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"स्क्रीन कास्ट करणे थांबले."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"प्रदर्शन चमक"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G डेटा बंद आहे"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G डेटा बंद आहे"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"सेल्युलर डेटा बंद आहे"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"डेटा बंद आहे"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"डेटाने आपण सेट  केलेली मर्यादा गाठल्‍यामुळे आपल्‍या डिव्‍हाइसने तो बंद केला.\n\n तो पुन्‍हा चालू केल्‍यास आपल्‍या वाहकाकडील शुल्‍क लागू शकेल."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"डेटा चालू करा"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटास विराम दिला आहे"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटास विराम दिला आहे"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्युलर डेटास विराम दिला आहे"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटास विराम दिला आहे"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"आपली सेट केलेली डेटा मर्यादा गाठल्यामुळे, डिव्हाइसने या चक्राच्या उर्वरित डेटा वापरास विराम दिला आहे.\n\nपुन्हा सुरु करण्यामुळे आपल्या वाहकाकडून शुल्क आकारले जाऊ शकते."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुन्हा सुरु करा"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इंटरनेट कनेक्शन नाही"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाय-फाय कनेक्ट केले"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS शोधत आहे"</string>
@@ -369,9 +368,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"आपण सेटिंग्जमध्ये ते पुढील वेळी चालू कराल तेव्हा ते पुन्हा दिसेल."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"लपवा"</string>
-    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा आकारमान संवाद होऊ इच्छितो."</string>
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद होऊ इच्छितो."</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"अनुमती द्या"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"नकार द्या"</string>
-    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा आकारमान संवाद आहे"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> हा व्हॉल्यूम संवाद आहे"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"मूळ पुनर्संचयित करण्यासाठी स्पर्श करा."</string>
 </resources>

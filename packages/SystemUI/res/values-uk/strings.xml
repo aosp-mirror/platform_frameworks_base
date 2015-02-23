@@ -90,7 +90,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"розблокувати"</string>
     <string name="phone_label" msgid="2320074140205331708">"відкрити телефон"</string>
     <string name="camera_label" msgid="7261107956054836961">"відкрити камеру"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Кнопка перемикання методу введення."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Кнопка масштабування сумісності."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Збільшення екрана."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth під’єднано."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мобільну точку доступу ввімкнено."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Трансляцію екрана зупинено."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Яскравість дисплея"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Дані 2G–3G вимкнено"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Дані 4G вимкнено"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Мобільні дані вимкнено"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Дані вимкнено"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Пристрій вимкнув передавання даних, оскільки перевищено встановлений вами ліміт.\n\nЯкщо передавання даних знову ввімкнути, оператор може стягувати додаткову плату."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Увімкнути дані"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Передавання даних 2G–3G призупинено"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Передавання даних 4G призупинено"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Передавання мобільних даних призупинено"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Передавання даних призупинено"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Пристрій призупинив передавання даних до кінця цього циклу, оскільки ваш ліміт перевищено.\n\nЯкщо ви відновите передавання даних, оператор може стягувати додаткову плату."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Відновити"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Немає з’єднання"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi під’єднано"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Виконується пошук GPS-сигналу"</string>
@@ -371,9 +370,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Сховати <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"З’явиться знову, коли ви ввімкнете його в налаштуваннях."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Сховати"</string>
-    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> може стати діалоговим вікном налаштування гучності."</string>
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"Призначити додаток <xliff:g id="APP_NAME">%1$s</xliff:g> регулятором гучності?"</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Дозволити"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Відхилити"</string>
-    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> – діалогове вікно налаштування гучності"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> призначено регулятором гучності"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"Торкніться, щоб відновити оригінал."</string>
 </resources>

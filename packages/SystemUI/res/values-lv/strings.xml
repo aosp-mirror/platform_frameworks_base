@@ -89,7 +89,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"atbloķēt"</string>
     <string name="phone_label" msgid="2320074140205331708">"atvērt tālruni"</string>
     <string name="camera_label" msgid="7261107956054836961">"atvērt kameru"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ievades metodes maiņas poga."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Saderības tālummaiņas poga."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Veikt tālummaiņu no mazāka ekrāna uz lielāku."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth savienojums ir izveidots."</string>
@@ -202,12 +201,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilais tīklājs ir ieslēgts."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekrāna apraidīšana ir apturēta."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekrāna spilgtums"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G–3G dati ir atslēgti"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G dati ir atslēgti"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobilie dati ir atslēgti"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Dati ir atslēgti"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Jūsu ierīcē tika atslēgta datu lietošana, jo tika sasniegts jūsu noteiktais ierobežojums.\n\nJa atkal ieslēgsiet datu lietošanu, iespējams, jūsu mobilo sakaru operators iekasēs maksu."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Ieslēgt datus"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G datu lietojums ir apturēts"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G datu lietojums ir apturēts"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilo datu lietojums ir apturēts"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datu lietojums ir apturēts"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Tika sasniegts iestatītais datu lietojuma ierobežojums, tādēļ ierīcē ir apturēts datu lietojums cikla atlikušajā periodā.\n\nJa atsāksiet lietot datus, iespējams, jūsu mobilo sakaru operators iekasēs maksu."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Atsākt"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nav interneta sav."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Izv. sav. ar Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Notiek GPS meklēšana..."</string>

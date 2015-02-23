@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"खोल्नुहोस्"</string>
     <string name="phone_label" msgid="2320074140205331708">"फोन खोल्नुहोस्"</string>
     <string name="camera_label" msgid="7261107956054836961">"क्यामेरा खोल्नुहोस्"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"इनपुट विधि बटन स्विच गर्नुहोस्।"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"मिलाउने जुम बटन।"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"स्क्रिनलाई सानोबाट ठूलो पार्नुहोस्।"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लुटुथ जडान भयो।"</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"मोबाइल हटस्पट खुला गरियो।"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"स्क्रिन कास्टिङ रोकियो।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"प्रदर्शन चमक"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G डेटा बन्द छ"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G डेटा बन्द छ"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"सेलुलर डेटा बन्द छ"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"डेटा बन्द छ"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"तपाईंले सेट गर्नु भएको सीमा पुगेको हुनाले तपाईंको उपकरणले डेटा बंद गर्यो।\n\n यसलाई फिर्ता गर्दा आफ्नो वाहक बाट शुल्क लिन सक्छ।"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"डेटा खोल्नुहोस्"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डाटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डाटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्यूलर डाटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डाटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"तपाईंले सेट गर्नुभएको डाटा सीमा पुगेकाले, उपकरणले यस चक्रको बाँकीको लागि डाटा प्रयोग रोकेको छ।\n\nपुन: सुरू गर्दा तपाईंको क्यारियरले शुल्कहरू लिन सक्छ।"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुनः सुरु गर्नुहोस्"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इन्टरनेट जडान छैन"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाइफाइ जडित"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPSको लागि खोजी गर्दै"</string>
@@ -373,5 +372,5 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"अनुमति दिनुहोस्"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"अस्वीकार गर्नुहोस्"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> भोल्यूम संवाद हो"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल पुन: भण्डार गर्न छुनुहोस्।"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"मूल पुनर्स्थापना गर्न छुनुहोस्।"</string>
 </resources>

@@ -90,7 +90,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"odkleni"</string>
     <string name="phone_label" msgid="2320074140205331708">"odpri telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"odpri fotoaparat"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za preklop načina vnosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb povečave za združljivost."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Povečava manjšega na večji zaslon."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Povezava Bluetooth vzpostavljena."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilna dostopna točka je vklopljena."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Predvajanje zaslona je ustavljeno."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Svetlost zaslona"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Prenos podatkov v omrežjih 2G/3G je izklopljen"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Prenos podatkov v omrežjih 4G je izklopljen"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Prenos podatkov v mobilnih omrežjih je izklopljen"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Prenos podatkov je izklopljen"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Naprava je izklopila prenos podatkov, ker je bila dosežena omejitev, ki ste jo nastavili.\n\nČe prenos spet vklopite, vam bo operater morda zaračunal stroške."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Vklopi prenos podatkov"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Prenos podatkov v omrežju 2G/3G je zaustavljen"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Prenos podatkov v omrežju 4G je zaustavljen"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Prenos mobilnih podatkov je zaustavljen"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Prenos podatkov je zaustavljen"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Dosegli ste nastavljeno omejitev količine prenesenih podatkov, zato je naprava zaustavila porabo podatkov za preostanek cikla.\n\nČe nadaljujete s porabo, boste morda morali plačati stroške operaterju."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Nadaljuj"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ni internetne povez."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Iskanje GPS-a"</string>

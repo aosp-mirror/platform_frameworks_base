@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"buka kunci"</string>
     <string name="phone_label" msgid="2320074140205331708">"buka ponsel"</string>
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tombol beralih metode masukan."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tombol perbesar/perkecil kompatibilitas."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Perbesar dari layar kecil ke besar."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth tersambung."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Hotspot seluler diaktifkan."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Transmisi layar berhenti."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Kecerahan tampilan"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Data 2G-3G nonaktif"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Data 4G nonaktif"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Data seluler nonaktif"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Data nonaktif"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Perangkat Anda menonaktifkan data karena data mencapai batas yang Anda setel.\n\nMengaktifkan kembali data dapat membuat Anda terkena biaya dari operator."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Aktifkan data"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data 2G-3G dijeda"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Data seluler dijeda"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data dijeda"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Karena batas data yang disetel telah tercapai, perangkat telah menjeda penggunaan data selama sisa waktu siklus ini.\n\nMelanjutkan dapat mengakibatkan tagihan dari operator."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Lanjutkan"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Tidak ada sambungan internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tersambung"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Menelusuri GPS"</string>

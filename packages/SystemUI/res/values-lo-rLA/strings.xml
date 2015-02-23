@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ປົດລັອກ"</string>
     <string name="phone_label" msgid="2320074140205331708">"​ເປີດ​​ແປ້ນ​ໂທ​ລະ​ສັບ"</string>
     <string name="camera_label" msgid="7261107956054836961">"ເປີດ​ກ້ອງ"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ປຸ່ມສະລັບຮູບແບບການປ້ອນຂໍ້ມູນ."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ປຸ່ມຊູມທີ່ໃຊ້ຮ່ວມກັນໄດ້."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ຊູມຈໍນ້ອຍໄປເປັນຈໍຂະຫນາດໃຫຍ່."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ເຊື່ອມຕໍ່ Bluetooth ແລ້ວ."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ເປີດ​ຮັອດ​ສະ​ປອດ​ເຄື່ອນ​ທີ່​ແລ້ວ."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"ຢຸດ​ການ​ສົ່ງ​​ພາບ​ໜ້າ​ຈໍ​ແລ້ວ."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"​ຄວາມ​ແຈ້ງ​​ຂອງ​ຈໍ"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ຂໍ້​ມູນ 2G-3G ​ແມ່ນ​ປິດ"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ຂໍ້​ມູນ 4G ແມ່ນ​ປິດ"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ຂໍ້​ມູ​ນມ​ື​ຖື​ຖືກ​ປິດ"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ຂໍ້​ມູນ​ຖື​ກ​ປິດ"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ປິດ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ເນື່ອງ​ຈາກ​ມັນ​ໃຊ້​ຮອດ​ຈຳ​ນວນ​ທີ່​ທ່ານ​ກຳ​ນົດ​ໄວ້​ແລ້ວ.\n\nການ​ເປີດ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ຄືນ​ອາດ​ເຮັດ​ໃຫ​້​ຜູ່​ໃຫ້​ບໍ​ລິ​ການ​ຮຽກ​ເກັບ​ເງິນ​ທ່ານ​ເພີ່ມ​ໄດ້."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"​ເປີດ​ນຳ​ໃຊ້​ຂໍ້​ມູນ"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"ຂໍ້​ມູນ 2G​-3G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ຂໍ້​ມູນ 4G ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ຂໍ້​ມູນເຊວ​ລູ​ລາຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ຂໍ້​ມູນ​ຢຸດ​ຊົ່ວ​ຄາວແລ້ວ"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ເນື່ອງ​ຈາກວ່າ​ຮອດ​ຂີດ​ຈຳ​ກັດ​ຂໍ້​ມູນ​ທີ່​ຕັ້ງ​ໄວ້​ຂອ​ງ​ທ່ານ​ແລ້ວ, ອຸ​ປະ​ກອນ​ຢຸດ​ການ​ນຳ​ໃຊ້​ຂໍ້​ມູນ​ສຳ​ລັບ​ສ່ວນ​ທີ່​ຍັງ​ເຫຼືອ​ຂອງ​ຮອບ​ວຽນ​ນີ້.\n\nການ​ເລີ່ມ​ຕໍ່​ອາດ​ຈະ​ນຳ​ໄປ​ສູ່​ການ​ປ່ຽນ​ແປງ​ຈາກ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເຄືອ​ຂ່າຍ​ຂອງ​ທ່ານ."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ເລີ່ມຕໍ່"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ບໍ່ມີການເຊື່ອມຕໍ່ອິນເຕີເນັດ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ເຊື່ອມ​ຕໍ່ Wi-​-Fi ແລ້ວ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"ກຳລັງຊອກຫາ GPS"</string>
@@ -369,14 +368,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ເຊື່ອງ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ຫຼື​ບໍ່?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"​ມັນ​ຈະ​ສະ​ແດງ​ຄືນ​ໃໝ່​ເມື່ອ​ທ່ານ​ເປີດ​ນຳ​ໃຊ້​ມັນ​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ຄັ້ງ​ຕໍ່​ໄປ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ເຊື່ອງ"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> ຕ້ອງ​ການໃຫ້​ເປັນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ອະນຸຍາດ"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ປະຕິເສດ"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ໜ້າ​ຕ່າງ​ລະ​ດັບ​ສຽງ"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"ສໍາ​ຜັດ​ເພື່ອກູ້​ຄືນ​ຕົ້ນ​ສະ​ບັບ​."</string>
 </resources>

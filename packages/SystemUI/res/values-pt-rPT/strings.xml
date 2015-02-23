@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"desbloquear"</string>
     <string name="phone_label" msgid="2320074140205331708">"abrir telemóvel"</string>
     <string name="camera_label" msgid="7261107956054836961">"abrir câmara"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alternar botão de método de introdução."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botão zoom de compatibilidade."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom menor para ecrã maior."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ligado."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Zona Wi-Fi móvel ligada."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Transmissão do ecrã interrompida."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Brilho do visor"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Dados 2G-3G desligados"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Dados 4G desligados"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Dados de rede móvel desligados"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Dados desligados"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"O dispositivo desligou os dados porque atingiu o limite definido.\n\nVoltar a ligá-los pode resultar em cobranças por parte do operador."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Ligar dados"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Dados 2G-3G em pausa"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dados 4G em pausa"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Dados de redes móveis em pausa"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dados em pausa"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Uma vez que foi atingido o limite de dados definido, foi interrompida a utilização de dados no seu dispositivo durante o tempo restante deste ciclo.\n\nSe retomar a utilização, o seu operador pode efetuar cobranças."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Retomar"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem ligação internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ligado"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"A procurar GPS"</string>

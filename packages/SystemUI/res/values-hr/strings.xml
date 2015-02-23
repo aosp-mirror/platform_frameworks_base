@@ -89,7 +89,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"otključavanje"</string>
     <string name="phone_label" msgid="2320074140205331708">"otvaranje telefona"</string>
     <string name="camera_label" msgid="7261107956054836961">"otvaranje fotoaparata"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za promjenu načina unosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb za kompatibilnost zumiranja."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zumiranje manjeg zaslona na veći."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth povezan."</string>
@@ -202,12 +201,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilna žarišna točka uključena."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Emitiranje zaslona zaustavljeno."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Svjetlina zaslona"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G podaci isključeni"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G podaci isključeni"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobilni podaci isključeni"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Podaci su isključeni"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Uređaj je isključio podatke jer je dosegnuo ograničenje koje ste postavili.\n\nAko ih ponovno uključite, mogući su dodatni troškovi za mobilne usluge."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Uključi podatke"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G – 3G podaci pauzirani"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G podaci pauzirani"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilni podaci pauzirani"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Podaci su pauzirani"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Budući da je dosegnuto postavljeno ograničenje podataka, uređaj je pauzirao upotrebu podataka za preostali dio ovog ciklusa.\n\nMobilni operater može naplatiti daljnju upotrebu."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Nastavi"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internetske veze"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Traženje GPS-a"</string>

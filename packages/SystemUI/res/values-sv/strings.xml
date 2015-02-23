@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"lås upp"</string>
     <string name="phone_label" msgid="2320074140205331708">"öppna mobilen"</string>
     <string name="camera_label" msgid="7261107956054836961">"öppna kameran"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knapp för byte av inmatningsmetod."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Knapp för kompatibilitetszoom."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zooma mindre skärm till större."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ansluten."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Den mobila trådlösa surfzonen har aktiverats."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Castningen av skärmen har stoppats."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Skärmens ljusstyrka"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-/3G-data har inaktiverats"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G-data har inaktiverats"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobildata har inaktiverats"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Data har inaktiverats"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Data har stängts av på enheten eftersom den angivna gränsen har uppnåtts.\n\nOm du aktiverar den igen kan avgifter från operatören tillkomma."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Aktivera uppgifter"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G- och 3G-data har pausats"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data har pausats"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobildata har pausats"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dataanvändningen har pausats"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Eftersom du har nått den angivna datagränsen har dataanvändningen pausats under resten av perioden.\n\nOm du återupptar dataanvändningen kan avgifter från operatören tillkomma."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Återuppta"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen anslutning"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi-ansluten"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Sökning efter GPS pågår"</string>

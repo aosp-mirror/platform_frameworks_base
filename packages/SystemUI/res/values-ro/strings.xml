@@ -89,7 +89,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"deblocați"</string>
     <string name="phone_label" msgid="2320074140205331708">"deschideți telefonul"</string>
     <string name="camera_label" msgid="7261107956054836961">"deschideți camera foto"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Buton pentru comutarea metodei de introducere."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Buton zoom pentru compatibilitate."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Faceţi zoom de la o imagine mai mică la una mai mare."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Conectat prin Bluetooth."</string>
@@ -202,12 +201,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Hotspotul mobil este activat."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Transmiterea ecranului a fost oprită."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Luminozitatea ecranului"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Datele 2G-3G sunt dezactivate"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Datele 4G sunt dezactivate"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Datele mobile sunt dezactivate"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Datele sunt dezactivate"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Dispozitivul dvs. a dezactivat conexiunea de date deoarece s-a atins limita pe care ați setat-o.\n\nReactivarea conexiunii poate genera aplicarea de taxe de către operator."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Activați datele"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Conexiunea de date 2G – 3G este întreruptă"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Conexiunea de date 4G este întreruptă"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Conexiunea de date mobile este întreruptă"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Conexiunea de date este întreruptă"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Deoarece limita setată pentru date a fost atinsă, dispozitivul a întrerupt utilizarea datelor pentru restul acestui ciclu.\n\nReluarea utilizării de date poate genera aplicarea de taxe de către operator."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reluați"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Fără conex. internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectat"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Se caută GPS"</string>

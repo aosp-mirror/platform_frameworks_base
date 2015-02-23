@@ -113,7 +113,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"кулпуну ачуу"</string>
     <string name="phone_label" msgid="2320074140205331708">"телефонду ачуу"</string>
     <string name="camera_label" msgid="7261107956054836961">"камераны ачуу"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Киргизүү ыкмасын которуу баскычы."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Масштабды сыйыштыруу баскычы."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Кичинекейди чоң экранга масштабдоо."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth байланышта"</string>
@@ -226,12 +225,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мобилдик байланыш түйүнү күйгүзүлдү."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Тышкы экранга чыгаруу аракети токтотулду."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Жарыктыгын көрсөтүү"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2Гб-3Гб көлөмдөгү дайындар өчүрүлдү."</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4Гб көлөмдөгү дайындар өчүрүлдү"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Уюктук дайындар тармагы өчүк"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Дайындарды кабыл алуу өчүрүлгөн."</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Белгиленген эң жогорку чекке жеткендиктен, түзмөгүңүз дайындарды кабыл алууну токтотту.\n\nДайындарды кабыл алууну улантам десеңиз, операторго акы төлөп калышыңыз мүмкүн."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Дайындарды алууну иштетүү"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дайындары тындырылды."</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дайындары тындырылды"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Уюлдук дайындар тындырылды"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Дайындар тындырылды"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Киргизиле турган дайындар белгиленген эң жогорку чекке жеткендиктен, ушул мерчимдин калган бөлүгүндө түзмөгүңүздө дайындардын колдонулушу тындырылды.\n\nУлантсаңыз, байланыш операторуңузга акы төлөп калышыңыз мүмкүн."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Улантуу"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Интернет байланыш жок"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi байланышта"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS издөө"</string>

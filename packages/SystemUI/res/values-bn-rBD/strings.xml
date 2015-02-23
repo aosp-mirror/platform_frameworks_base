@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"আনলক করুন"</string>
     <string name="phone_label" msgid="2320074140205331708">"ফোন খুলুন"</string>
     <string name="camera_label" msgid="7261107956054836961">"ক্যামেরা খুলুন"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ইনপুট পদ্ধতির বোতাম পরিবর্তন করুন৷"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"সামঞ্জস্যের জুম বোতাম৷"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ছোট থেকে বৃহৎ স্ক্রীণে জুম করুন৷"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth সংযুক্ত হয়েছে৷"</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"মোবাইল হটস্পট চালু হয়েছে।"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"স্ক্রীন কাস্ট করা থেমেছে।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"প্রদর্শনের উজ্জ্বলতা"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ডেটা বন্ধ"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ডেটা বন্ধ"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"সেলুলার ডেটা বন্ধ"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ডেটা বন্ধ"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"আপনার সেট করা ডেটা সীমায় পৌঁছে যাওয়ায় আপনার ডিভাইসটি ডেটা বন্ধ করে দিয়েছে।\n\nএটি চালু করে দিলে আপনাকে পরিষেবা প্রদানকারীর করা চার্জ বহন করতে হতে পারে।"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"ডেটা চালু করুন"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ডেটা বিরতি দেওয়া হয়েছে"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ডেটা বিরতি দেওয়া হয়েছে"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"সেলুলার ডেটা বিরতি দেওয়া হয়েছে"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ডেট বিরতি দেওয়া হয়েছে"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"আপনার সেট ডেটার সীমা অবধি পৌঁছনোর কারনে ডিভাইস এই চক্রের অবশিষ্টাংশের জন্য ডেটা ব্যবহারে বিরতি দেওয়া হয়েছে৷ \n\nপুনরায় চালু করা হলে পরিষেবা প্রদানকারীর দ্বারা চার্জের করা হতে পারে৷"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"পুনঃসূচনা করুন"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"কোনো ইন্টারনেট সংযোগ নেই"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi সংযুক্ত হয়েছে"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS এর জন্য অনুসন্ধান করা হচ্ছে"</string>

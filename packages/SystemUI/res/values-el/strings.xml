@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ξεκλείδωμα"</string>
     <string name="phone_label" msgid="2320074140205331708">"άνοιγμα τηλεφώνου"</string>
     <string name="camera_label" msgid="7261107956054836961">"άνοιγμα φωτογραφικής μηχανής"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Κουμπί εναλλαγής μεθόδου εισόδου"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Κουμπί εστίασης συμβατότητας."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Ζουμ από μικρότερη σε μεγαλύτερη οθόνη."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Το Bluetooth είναι συνδεδεμένο."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Το σημείο πρόσβασης κινητής συσκευής ενεργοποιήθηκε."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Η μετάδοση της οθόνης διακόπηκε."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Φωτεινότητα οθόνης"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Τα δεδομένα 2G-3G είναι ανενεργά"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Τα δεδομένα 4G είναι ανενεργά"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Τα δεδομένα κινητής τηλεφωνίας είναι ανενεργά"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Τα δεδομένα είναι ανενεργά"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Τα δεδομένα απενεργοποιήθηκαν στη συσκευή σας, επειδή εξαντλήσατε το όριο που ορίσατε.\n\nΗ επανενεργοποίησή τους ενδέχεται να επιφέρει χρεώσεις από την εταιρεία κινητής τηλεφωνίας σας."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Ενεργοποίηση δεδομένων"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Τα δεδομένα 2G-3G τέθηκαν σε παύση"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Τα δεδομένα 4G τέθηκαν σε παύση"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Τα δεδομένα κινητής τηλεφωνίας τέθηκαν σε παύση"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Τα δεδομένα τέθηκαν σε παύση"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Επειδή συμπληρώθηκε το όριο των δεδομένων που ορίστηκε για τη συσκευή σας, η χρήση δεδομένων τέθηκε σε παύση για το υπόλοιπο αυτού του κύκλου.\n\nΗ εκ νέου ενεργοποίησή τους ενδέχεται να επιφέρει χρεώσεις από την εταιρεία κινητής τηλεφωνίας σας."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Συνέχιση"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Χωρ. σύνδ. στο Διαδ."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi συνδεδεμένο"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Αναζήτηση για GPS"</string>

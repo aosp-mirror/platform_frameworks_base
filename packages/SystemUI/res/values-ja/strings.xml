@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="camera_label" msgid="7261107956054836961">"カメラを起動"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"互換ズームボタン。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"小さい画面から大きい画面に拡大。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetoothに接続済み。"</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"モバイルアクセスポイントをONにしました。"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"画面のキャストが停止しました。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ディスプレイの明るさ"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G～3Gデータが無効になりました"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4Gデータが無効になりました"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"モバイルデータが無効になりました"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"データが無効になりました"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"設定された上限に達したため、端末のデータ接続が無効になりました。\n\n有効に戻すと、携帯通信会社から課金される可能性があります。"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"データ接続を有効にする"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G～3Gデータは一時停止中です"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4Gデータは一時停止中です"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"モバイルデータは一時停止中です"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"データの一時停止"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"設定されたデータの上限に達したため、このサイクルの終了までこの端末でのデータの利用を一時停止しました。\n\n再開すると、携帯通信会社から課金される可能性があります。"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"再開"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"インターネット未接続"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi接続済み"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPSで検索中"</string>
