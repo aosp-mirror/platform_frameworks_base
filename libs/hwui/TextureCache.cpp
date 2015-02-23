@@ -168,7 +168,7 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
         }
 
         if (canCache) {
-            texture = new Texture();
+            texture = new Texture(Caches::getInstance());
             texture->bitmapSize = size;
             generateTexture(bitmap, texture, false);
 
@@ -206,7 +206,7 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
         }
 
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
-        texture = new Texture();
+        texture = new Texture(Caches::getInstance());
         texture->bitmapSize = size;
         generateTexture(bitmap, texture, false);
         texture->cleanup = true;
@@ -216,7 +216,7 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
 }
 
 Texture* TextureCache::getTransient(const SkBitmap* bitmap) {
-    Texture* texture = new Texture();
+    Texture* texture = new Texture(Caches::getInstance());
     texture->bitmapSize = bitmap->rowBytes() * bitmap->height();
     texture->cleanup = true;
 

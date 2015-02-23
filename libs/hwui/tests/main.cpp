@@ -89,8 +89,6 @@ public:
 
         android::uirenderer::Rect DUMMY;
 
-        std::vector< sp<RenderNode> > cards;
-
         DisplayListRenderer* renderer = startRecording(rootNode);
         animation.createContent(width, height, renderer);
         endRecording(renderer, rootNode);
