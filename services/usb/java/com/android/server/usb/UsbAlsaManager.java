@@ -26,7 +26,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.media.AudioSystem;
 import android.media.IAudioService;
-import android.midi.MidiDeviceInfo;
+import android.media.midi.MidiDeviceInfo;
 import android.os.FileObserver;
 import android.os.Bundle;
 import android.os.IBinder;

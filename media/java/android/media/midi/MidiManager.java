@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package android.midi;
+package android.media.midi;
 
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -50,18 +51,38 @@ public class MidiManager {
 
     // Binder stub for receiving device notifications from MidiService
     private class DeviceListener extends IMidiListener.Stub {
-        private DeviceCallback mCallback;
+        private final DeviceCallback mCallback;
+        private final Handler mHandler;
 
-        public DeviceListener(DeviceCallback callback) {
+        public DeviceListener(DeviceCallback callback, Handler handler) {
             mCallback = callback;
+            mHandler = handler;
         }
 
         public void onDeviceAdded(MidiDeviceInfo device) {
-            mCallback.onDeviceAdded(device);
+            if (mHandler != null) {
+                final MidiDeviceInfo deviceF = device;
+                mHandler.post(new Runnable() {
+                        @Override public void run() {
+                            mCallback.onDeviceAdded(deviceF);
+                        }
+                    });
+            } else {
+                mCallback.onDeviceAdded(device);
+            }
         }
 
         public void onDeviceRemoved(MidiDeviceInfo device) {
-            mCallback.onDeviceRemoved(device);
+            if (mHandler != null) {
+                final MidiDeviceInfo deviceF = device;
+                mHandler.post(new Runnable() {
+                        @Override public void run() {
+                            mCallback.onDeviceRemoved(deviceF);
+                        }
+                    });
+            } else {
+                mCallback.onDeviceRemoved(device);
+            }
         }
     }
 
@@ -74,7 +95,7 @@ public class MidiManager {
          *
          * @param device a {@link MidiDeviceInfo} for the newly added device
          */
-        void onDeviceAdded(MidiDeviceInfo device) {
+        public void onDeviceAdded(MidiDeviceInfo device) {
         }
 
         /**
@@ -82,7 +103,7 @@ public class MidiManager {
          *
          * @param device a {@link MidiDeviceInfo} for the removed device
          */
-        void onDeviceRemoved(MidiDeviceInfo device) {
+        public void onDeviceRemoved(MidiDeviceInfo device) {
         }
     }
 
@@ -98,9 +119,12 @@ public class MidiManager {
      * Registers a callback to receive notifications when MIDI devices are added and removed.
      *
      * @param callback a {@link DeviceCallback} for MIDI device notifications
+     * @param handler The {@link android.os.Handler Handler} that will be used for delivering the
+     *                device notifications. If handler is null, then the thread used for the
+     *                callback is unspecified.
      */
-    public void registerDeviceCallback(DeviceCallback callback) {
-        DeviceListener deviceListener = new DeviceListener(callback);
+    public void registerDeviceCallback(DeviceCallback callback, Handler handler) {
+        DeviceListener deviceListener = new DeviceListener(callback, handler);
         try {
             mService.registerListener(mToken, deviceListener);
         } catch (RemoteException e) {
@@ -143,7 +167,7 @@ public class MidiManager {
     /**
      * Opens a MIDI device for reading and writing.
      *
-     * @param deviceInfo a {@link android.midi.MidiDeviceInfo} to open
+     * @param deviceInfo a {@link android.media.midi.MidiDeviceInfo} to open
      * @return a {@link MidiDevice} object for the device
      */
     public MidiDevice openDevice(MidiDeviceInfo deviceInfo) {

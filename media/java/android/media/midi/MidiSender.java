@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.midi;
+package android.media.midi;
 
 /**
  * Interface provided by a device to allow attaching

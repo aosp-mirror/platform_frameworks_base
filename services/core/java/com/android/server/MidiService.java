@@ -17,10 +17,10 @@
 package com.android.server;
 
 import android.content.Context;
-import android.midi.IMidiDeviceServer;
-import android.midi.IMidiListener;
-import android.midi.IMidiManager;
-import android.midi.MidiDeviceInfo;
+import android.media.midi.IMidiDeviceServer;
+import android.media.midi.IMidiListener;
+import android.media.midi.IMidiManager;
+import android.media.midi.MidiDeviceInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;

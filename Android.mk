@@ -174,9 +174,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/location/IGeofenceHardwareMonitorCallback.aidl \
 	core/java/android/hardware/soundtrigger/IRecognitionStatusCallback.aidl \
 	core/java/android/hardware/usb/IUsbManager.aidl \
-	core/java/android/midi/IMidiDeviceServer.aidl \
-	core/java/android/midi/IMidiListener.aidl \
-	core/java/android/midi/IMidiManager.aidl \
 	core/java/android/net/IConnectivityManager.aidl \
 	core/java/android/net/IEthernetManager.aidl \
 	core/java/android/net/IEthernetServiceListener.aidl \
@@ -335,7 +332,10 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
-        media/java/android/media/audiopolicy/IAudioPolicyCallback.aidl \
+	media/java/android/media/audiopolicy/IAudioPolicyCallback.aidl \
+	media/java/android/media/midi/IMidiDeviceServer.aidl \
+	media/java/android/media/midi/IMidiListener.aidl \
+	media/java/android/media/midi/IMidiManager.aidl \
 	media/java/android/media/projection/IMediaProjection.aidl \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \

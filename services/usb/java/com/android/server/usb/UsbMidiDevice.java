@@ -17,12 +17,12 @@
 package com.android.server.usb;
 
 import android.content.Context;
-import android.midi.MidiDeviceInfo;
-import android.midi.MidiDeviceServer;
-import android.midi.MidiManager;
-import android.midi.MidiPort;
-import android.midi.MidiReceiver;
-import android.midi.MidiSender;
+import android.media.midi.MidiDeviceInfo;
+import android.media.midi.MidiDeviceServer;
+import android.media.midi.MidiManager;
+import android.media.midi.MidiPort;
+import android.media.midi.MidiReceiver;
+import android.media.midi.MidiSender;
 import android.os.Bundle;
 import android.system.ErrnoException;
 import android.system.Os;

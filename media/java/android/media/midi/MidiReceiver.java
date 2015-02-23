@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.midi;
+package android.media.midi;
 
 import java.io.IOException;
 
 /**
- * Interface for receiving data from a MIDI device.
+ * Interface for sending and receiving data to and from a MIDI device.
  *
  * CANDIDATE FOR PUBLIC API
  * @hide
