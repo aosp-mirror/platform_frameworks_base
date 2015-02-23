@@ -97,8 +97,8 @@ top level of the project hierarchy and contains these three elements at the top 
 <code>ic_launcher.png</code> resource for different screen densities under the same element.</p>
 
 <p class="note"><strong>Note:</strong> The project structure on disk differs from this flattened
-representation. To switch to back the segregated project view, select <strong>Project</strong> from
-the <strong>Project</strong drop-down. </p>
+representation. To switch to back to the segregated project view, select <strong>Project</strong> from
+the <strong>Project</strong> drop-down. </p>
 
 
 
@@ -182,7 +182,7 @@ uniquely identify application packages for publishing. The application ID is set
 <p class="note"><strong>Note:</strong> The <em>applicationId</em> is specified only in your
 build.gradle file, and not in the AndroidManifest.xml file.</p>
 
-<p>When using build variants, the build system enables you to to uniquely identify different
+<p>When using build variants, the build system enables you to uniquely identify different
 packages for each product flavors and build types. The application ID in the build type is added as
 a suffix to those specified for the product flavors. </p>
 
