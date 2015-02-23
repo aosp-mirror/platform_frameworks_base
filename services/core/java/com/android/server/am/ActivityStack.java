@@ -152,25 +152,25 @@ final class ActivityStack {
      * The back history of all previous (and possibly still
      * running) activities.  It contains #TaskRecord objects.
      */
-    private ArrayList<TaskRecord> mTaskHistory = new ArrayList<TaskRecord>();
+    private ArrayList<TaskRecord> mTaskHistory = new ArrayList<>();
 
     /**
      * Used for validating app tokens with window manager.
      */
-    final ArrayList<TaskGroup> mValidateAppTokens = new ArrayList<TaskGroup>();
+    final ArrayList<TaskGroup> mValidateAppTokens = new ArrayList<>();
 
     /**
      * List of running activities, sorted by recent usage.
      * The first entry in the list is the least recently used.
      * It contains HistoryRecord objects.
      */
-    final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<>();
 
     /**
      * Animations that for the current transition have requested not to
      * be considered for the transition animation.
      */
-    final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<>();
 
     /**
      * When we are in the process of pausing an activity, before starting the
@@ -344,6 +344,10 @@ final class ActivityStack {
             count += mTaskHistory.get(taskNdx).mActivities.size();
         }
         return count;
+    }
+
+    int numTasks() {
+        return mTaskHistory.size();
     }
 
     ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
@@ -4177,8 +4181,14 @@ final class ActivityStack {
     }
 
     void removeTask(TaskRecord task, String reason) {
+        removeTask(task, reason, true);
+    }
+
+    void removeTask(TaskRecord task, String reason, boolean removeFromWindowManager) {
         mStackSupervisor.endLockTaskModeIfTaskEnding(task);
-        mWindowManager.removeTask(task.taskId);
+        if (removeFromWindowManager) {
+            mWindowManager.removeTask(task.taskId);
+        }
         final ActivityRecord r = mResumedActivity;
         if (r != null && r.task == task) {
             mResumedActivity = null;

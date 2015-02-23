@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 import static android.view.WindowManager.LayoutParams.*;
 
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -682,11 +683,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final WindowAnimator mAnimator;
 
-    SparseArray<Task> mTaskIdToTask = new SparseArray<Task>();
+    SparseArray<Task> mTaskIdToTask = new SparseArray<>();
 
     /** All of the TaskStacks in the window manager, unordered. For an ordered list call
      * DisplayContent.getStacks(). */
-    SparseArray<TaskStack> mStackIdToStack = new SparseArray<TaskStack>();
+    SparseArray<TaskStack> mStackIdToStack = new SparseArray<>();
 
     private final PointerEventDispatcher mPointerEventDispatcher;
 
@@ -5088,10 +5089,32 @@ public class WindowManagerService extends IWindowManager.Stub
                     + " to " + (toTop ? "top" : "bottom"));
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
+                if (DEBUG_STACK) Slog.i(TAG, "addTask: could not find taskId=" + taskId);
                 return;
             }
             TaskStack stack = mStackIdToStack.get(stackId);
             stack.addTask(task, toTop);
+            final DisplayContent displayContent = stack.getDisplayContent();
+            displayContent.layoutNeeded = true;
+            performLayoutAndPlaceSurfacesLocked();
+        }
+    }
+
+    public void moveTaskToStack(int taskId, int stackId, boolean toTop) {
+        synchronized (mWindowMap) {
+            if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: moving taskId=" + taskId
+                    + " to stackId=" + stackId + " at " + (toTop ? "top" : "bottom"));
+            Task task = mTaskIdToTask.get(taskId);
+            if (task == null) {
+                if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: could not find taskId=" + taskId);
+                return;
+            }
+            TaskStack stack = mStackIdToStack.get(stackId);
+            if (stack == null) {
+                if (DEBUG_STACK) Slog.i(TAG, "moveTaskToStack: could not find stackId=" + stackId);
+                return;
+            }
+            task.moveTaskToStack(stack, toTop);
             final DisplayContent displayContent = stack.getDisplayContent();
             displayContent.layoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
@@ -5126,6 +5149,24 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
         bounds.setEmpty();
+    }
+
+    /** Returns the id of an application (non-home stack) stack that match the input bounds.
+     * -1 if no stack matches.*/
+    public int getStackIdWithBounds(Rect bounds) {
+        Rect stackBounds = new Rect();
+        synchronized (mWindowMap) {
+            for (int i = mStackIdToStack.size() - 1; i >= 0; --i) {
+                TaskStack stack = mStackIdToStack.valueAt(i);
+                if (stack.mStackId != HOME_STACK_ID) {
+                    stack.getBounds(stackBounds);
+                    if (stackBounds.equals(bounds)) {
+                        return stack.mStackId;
+                    }
+                }
+            }
+        }
+        return -1;
     }
 
     /** Forces the stack to fullscreen if input is true, else un-forces the stack from fullscreen.

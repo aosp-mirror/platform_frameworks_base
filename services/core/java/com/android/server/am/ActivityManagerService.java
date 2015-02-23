@@ -7909,6 +7909,25 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void resizeTask(int taskId, Rect bounds) {
+        enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
+                "resizeTask()");
+        long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId, true);
+                if (task == null) {
+                    Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
+                    return;
+                }
+                mStackSupervisor.resizeTaskLocked(task, bounds);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public Bitmap getTaskDescriptionIcon(String filename) {
         if (!FileUtils.isValidExtFilename(filename)
                 || !filename.contains(ActivityRecord.ACTIVITY_ICON_SUFFIX)) {
