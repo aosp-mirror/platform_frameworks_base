@@ -37,7 +37,7 @@ import android.util.Log;
  * StateMachine that interacts with the native DHCP client and can talk to
  * a controller that also needs to be a StateMachine
  *
- * The Dhcp state machine provides the following features:
+ * The DhcpStateMachine provides the following features:
  * - Wakeup and renewal using the native DHCP client  (which will not renew
  *   on its own when the device is in suspend state and this can lead to device
  *   holding IP address beyond expiry)
@@ -72,11 +72,6 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
     //Used for sanity check on setting up renewal
     private static final int MIN_RENEWAL_TIME_SECS = 5 * 60;  // 5 minutes
 
-    private enum DhcpAction {
-        START,
-        RENEW
-    };
-
     private final String mInterfaceName;
     private boolean mRegisteredForPreDhcpNotification = false;
 
@@ -99,6 +94,9 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
      * after pre DHCP action is complete */
     public static final int CMD_PRE_DHCP_ACTION_COMPLETE    = BASE + 7;
 
+    /* Command from ourselves to see if DHCP results are available */
+    private static final int CMD_GET_DHCP_RESULTS           = BASE + 8;
+
     /* Message.arg1 arguments to CMD_POST_DHCP notification */
     public static final int DHCP_SUCCESS = 1;
     public static final int DHCP_FAILURE = 2;
@@ -108,6 +106,7 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
     private State mWaitBeforeStartState = new WaitBeforeStartState();
     private State mRunningState = new RunningState();
     private State mWaitBeforeRenewalState = new WaitBeforeRenewalState();
+    private State mPollingState = new PollingState();
 
     private DhcpStateMachine(Context context, StateMachine controller, String intf) {
         super(TAG);
@@ -139,6 +138,7 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
         addState(mDefaultState);
             addState(mStoppedState, mDefaultState);
             addState(mWaitBeforeStartState, mDefaultState);
+            addState(mPollingState, mDefaultState);
             addState(mRunningState, mDefaultState);
             addState(mWaitBeforeRenewalState, mDefaultState);
 
@@ -206,6 +206,10 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
+            if (!NetworkUtils.stopDhcp(mInterfaceName)) {
+                Log.e(TAG, "Failed to stop Dhcp on " + mInterfaceName);
+            }
+            mDhcpResults = null;
         }
 
         @Override
@@ -219,7 +223,7 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
                         mController.sendMessage(CMD_PRE_DHCP_ACTION);
                         transitionTo(mWaitBeforeStartState);
                     } else {
-                        if (runDhcp(DhcpAction.START)) {
+                        if (runDhcpStart()) {
                             transitionTo(mRunningState);
                         }
                     }
@@ -247,10 +251,10 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_PRE_DHCP_ACTION_COMPLETE:
-                    if (runDhcp(DhcpAction.START)) {
+                    if (runDhcpStart()) {
                         transitionTo(mRunningState);
                     } else {
-                        transitionTo(mStoppedState);
+                        transitionTo(mPollingState);
                     }
                     break;
                 case CMD_STOP_DHCP:
@@ -267,6 +271,55 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
         }
     }
 
+    class PollingState extends State {
+        private static final long MAX_DELAY_SECONDS = 32;
+        private long delaySeconds;
+
+        private void scheduleNextResultsCheck() {
+            sendMessageDelayed(obtainMessage(CMD_GET_DHCP_RESULTS), delaySeconds * 1000);
+            delaySeconds *= 2;
+            if (delaySeconds > MAX_DELAY_SECONDS) {
+                delaySeconds = MAX_DELAY_SECONDS;
+            }
+        }
+
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, "Entering " + getName() + "\n");
+            delaySeconds = 1;
+            scheduleNextResultsCheck();
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            boolean retValue = HANDLED;
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch (message.what) {
+                case CMD_GET_DHCP_RESULTS:
+                    if (DBG) Log.d(TAG, "GET_DHCP_RESULTS on " + mInterfaceName);
+                    if (dhcpSucceeded()) {
+                        transitionTo(mRunningState);
+                    } else {
+                        scheduleNextResultsCheck();
+                    }
+                    break;
+                case CMD_STOP_DHCP:
+                    transitionTo(mStoppedState);
+                    break;
+                default:
+                    retValue = NOT_HANDLED;
+                    break;
+            }
+            return retValue;
+        }
+
+        @Override
+        public void exit() {
+            if (DBG) Log.d(TAG, "Exiting " + getName() + "\n");
+            removeMessages(CMD_GET_DHCP_RESULTS);
+        }
+    }
+
     class RunningState extends State {
         @Override
         public void enter() {
@@ -280,9 +333,6 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
             switch (message.what) {
                 case CMD_STOP_DHCP:
                     mAlarmManager.cancel(mDhcpRenewalIntent);
-                    if (!NetworkUtils.stopDhcp(mInterfaceName)) {
-                        Log.e(TAG, "Failed to stop Dhcp on " + mInterfaceName);
-                    }
                     transitionTo(mStoppedState);
                     break;
                 case CMD_RENEW_DHCP:
@@ -292,7 +342,7 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
                         transitionTo(mWaitBeforeRenewalState);
                         //mDhcpRenewWakeLock is released in WaitBeforeRenewalState
                     } else {
-                        if (!runDhcp(DhcpAction.RENEW)) {
+                        if (!runDhcpRenew()) {
                             transitionTo(mStoppedState);
                         }
                         mDhcpRenewWakeLock.release();
@@ -321,13 +371,10 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
             switch (message.what) {
                 case CMD_STOP_DHCP:
                     mAlarmManager.cancel(mDhcpRenewalIntent);
-                    if (!NetworkUtils.stopDhcp(mInterfaceName)) {
-                        Log.e(TAG, "Failed to stop Dhcp on " + mInterfaceName);
-                    }
                     transitionTo(mStoppedState);
                     break;
                 case CMD_PRE_DHCP_ACTION_COMPLETE:
-                    if (runDhcp(DhcpAction.RENEW)) {
+                    if (runDhcpRenew()) {
                        transitionTo(mRunningState);
                     } else {
                        transitionTo(mStoppedState);
@@ -348,52 +395,68 @@ public class DhcpStateMachine extends BaseDhcpStateMachine {
         }
     }
 
-    private boolean runDhcp(DhcpAction dhcpAction) {
-        boolean success = false;
+    private boolean dhcpSucceeded() {
         DhcpResults dhcpResults = new DhcpResults();
-
-        if (dhcpAction == DhcpAction.START) {
-            /* Stop any existing DHCP daemon before starting new */
-            NetworkUtils.stopDhcp(mInterfaceName);
-            if (DBG) Log.d(TAG, "DHCP request on " + mInterfaceName);
-            success = NetworkUtils.runDhcp(mInterfaceName, dhcpResults);
-        } else if (dhcpAction == DhcpAction.RENEW) {
-            if (DBG) Log.d(TAG, "DHCP renewal on " + mInterfaceName);
-            success = NetworkUtils.runDhcpRenew(mInterfaceName, dhcpResults);
-            if (success) dhcpResults.updateFromDhcpRequest(mDhcpResults);
+        if (!NetworkUtils.getDhcpResults(mInterfaceName, dhcpResults)) {
+            return false;
         }
-        if (success) {
-            if (DBG) Log.d(TAG, "DHCP succeeded on " + mInterfaceName);
-            long leaseDuration = dhcpResults.leaseDuration; //int to long conversion
 
-            //Sanity check for renewal
-            if (leaseDuration >= 0) {
-                //TODO: would be good to notify the user that his network configuration is
-                //bad and that the device cannot renew below MIN_RENEWAL_TIME_SECS
-                if (leaseDuration < MIN_RENEWAL_TIME_SECS) {
-                    leaseDuration = MIN_RENEWAL_TIME_SECS;
-                }
-                //Do it a bit earlier than half the lease duration time
-                //to beat the native DHCP client and avoid extra packets
-                //48% for one hour lease time = 29 minutes
-                mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() +
-                        leaseDuration * 480, //in milliseconds
-                        mDhcpRenewalIntent);
-            } else {
-                //infinite lease time, no renewal needed
+        if (DBG) Log.d(TAG, "DHCP results found for " + mInterfaceName);
+        long leaseDuration = dhcpResults.leaseDuration; //int to long conversion
+
+        //Sanity check for renewal
+        if (leaseDuration >= 0) {
+            //TODO: would be good to notify the user that his network configuration is
+            //bad and that the device cannot renew below MIN_RENEWAL_TIME_SECS
+            if (leaseDuration < MIN_RENEWAL_TIME_SECS) {
+                leaseDuration = MIN_RENEWAL_TIME_SECS;
             }
-
-            mDhcpResults = dhcpResults;
-            mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_SUCCESS, 0, dhcpResults)
-                .sendToTarget();
+            //Do it a bit earlier than half the lease duration time
+            //to beat the native DHCP client and avoid extra packets
+            //48% for one hour lease time = 29 minutes
+            mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime() +
+                    leaseDuration * 480, //in milliseconds
+                    mDhcpRenewalIntent);
         } else {
-            Log.e(TAG, "DHCP failed on " + mInterfaceName + ": " +
-                    NetworkUtils.getDhcpError());
-            NetworkUtils.stopDhcp(mInterfaceName);
-            mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_FAILURE, 0)
-                .sendToTarget();
+            //infinite lease time, no renewal needed
         }
-        return success;
+
+        // Fill in any missing fields in dhcpResults from the previous results.
+        // If mDhcpResults is null (i.e. this is the first server response),
+        // this is a noop.
+        dhcpResults.updateFromDhcpRequest(mDhcpResults);
+        mDhcpResults = dhcpResults;
+        mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_SUCCESS, 0, dhcpResults)
+            .sendToTarget();
+        return true;
+    }
+
+    private boolean runDhcpStart() {
+        /* Stop any existing DHCP daemon before starting new */
+        NetworkUtils.stopDhcp(mInterfaceName);
+        mDhcpResults = null;
+
+        if (DBG) Log.d(TAG, "DHCP request on " + mInterfaceName);
+        if (!NetworkUtils.startDhcp(mInterfaceName) || !dhcpSucceeded()) {
+            Log.e(TAG, "DHCP request failed on " + mInterfaceName + ": " +
+                    NetworkUtils.getDhcpError());
+            mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_FAILURE, 0)
+                    .sendToTarget();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean runDhcpRenew() {
+        if (DBG) Log.d(TAG, "DHCP renewal on " + mInterfaceName);
+        if (!NetworkUtils.startDhcpRenew(mInterfaceName) || !dhcpSucceeded()) {
+            Log.e(TAG, "DHCP renew failed on " + mInterfaceName + ": " +
+                    NetworkUtils.getDhcpError());
+            mController.obtainMessage(CMD_POST_DHCP_ACTION, DHCP_FAILURE, 0)
+                    .sendToTarget();
+            return false;
+        }
+        return true;
     }
 }
