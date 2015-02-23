@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ปลดล็อก"</string>
     <string name="phone_label" msgid="2320074140205331708">"เปิดโทรศัพท์"</string>
     <string name="camera_label" msgid="7261107956054836961">"เปิดกล้อง"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"เชื่อมต่อบลูทูธแล้ว"</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"เปิดฮอตสปอตเคลื่อนที่แล้ว"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"หยุดการส่งหน้าจอแล้ว"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ความสว่างของหน้าจอ"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"ข้อมูล 2G-3G ปิดอยู่"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"ข้อมูล 4G ปิดอยู่"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ข้อมูลมือถือปิดอยู่"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ข้อมูลปิดอยู่"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"อุปกรณ์ของคุณปิดการใช้ข้อมูลเนื่องจากถึงขีดจำกัดที่คุณตั้งค่าไว้\n\nผู้ให้บริการอาจเรียกเก็บเงินหากเปิดใช้อีกครั้ง"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"เปิดใช้ข้อมูล"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"หยุดการใช้ข้อมูล 2G-3G ชั่วคราวแล้ว"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"หยุดการใช้ข้อมูล 4G ชั่วคราวแล้ว"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"หยุดการใช้ข้อมูลมือถือชั่วคราวแล้ว"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"หยุดการใช้ข้อมูลชั่วคราวแล้ว"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"เนื่องจากใช้งานข้อมูลถึงขีดจำกัดที่กำหนดไว้แล้ว อุปกรณ์จึงหยุดการใช้งานข้อมูลไว้ชั่วคราวตลอดระยะเวลาที่เหลือของรอบนี้\n\nการทำให้กลับมาทำงานอีกครั้งอาจทำให้เกิดค่าใช้จ่ายจากผู้ให้บริการ"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"บันทึกต่อ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ WiFi แล้ว"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"กำลังค้นหา GPS"</string>

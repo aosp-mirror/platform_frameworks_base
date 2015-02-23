@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"解锁"</string>
     <string name="phone_label" msgid="2320074140205331708">"打开电话"</string>
     <string name="camera_label" msgid="7261107956054836961">"打开相机"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"输入法切换按钮。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"兼容性缩放按钮。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"将小屏幕的图片放大在较大屏幕上显示。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"蓝牙已连接。"</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"移动热点已开启。"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"屏幕投射已停止。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"屏幕亮度"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G数据网络已关闭"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G数据网络已关闭"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"移动数据网络已关闭"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"数据网络已关闭"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"由于数据流量已达到您所设置的上限，因此您的设备已关闭数据网络。\n\n如果重新开启数据网络，那么您的运营商可能会向您收取相应费用。"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"开启数据网络"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 数据网络已暂停使用"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 数据网络已暂停使用"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"移动数据网络已暂停使用"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"数据网络已暂停使用"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"由于使用的数据流量已达到您所设置的上限，因此您的设备已暂停在此周期的剩余时间内使用数据流量。\n\n如果恢复数据流量使用，您的运营商可能会向您收取相应费用。"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢复"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"已连接到WLAN网络"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜索GPS"</string>
@@ -371,14 +370,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"要隐藏“<xliff:g id="TILE_LABEL">%1$s</xliff:g>”吗？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"下次在设置中将其开启后，此快捷设置条目将会重新显示。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"隐藏"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”请求用作音量控制对话框。"</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"允许"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒绝"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"“<xliff:g id="APP_NAME">%1$s</xliff:g>”已用作音量控制对话框"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"触摸即可恢复原始设置。"</string>
 </resources>

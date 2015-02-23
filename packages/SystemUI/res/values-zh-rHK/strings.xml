@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"解鎖"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="camera_label" msgid="7261107956054836961">"開啟相機"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"藍牙連線已建立。"</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"流動熱點已開啟。"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"已停止投放螢幕。"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"顯示光暗度"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G 數據連線已關閉"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G 數據連線已關閉"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"流動數據連線已關閉"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"數據連線已關閉"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"數據流量已達到您所設定的上限，因此裝置關閉了數據連線。\n\n若重新開啟數據連線，流動網絡供應商可能會向您收費。"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"開啟數據連線"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"已暫停 2G-3G 數據"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"已暫停 4G 數據"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"已暫停流動數據"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"已暫停數據功能"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"由於您已達到設定的數據用量上限，裝置已暫停使用數據，直到週期結束。 \n\n如果恢復，流動網絡供應商可能會向您收取費用。"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"恢復"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"沒有互聯網連線"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜尋 GPS"</string>
@@ -371,9 +370,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏 <xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"下一次您在設定開啟它時，它將再次出現。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"隱藏"</string>
-    <string name="volumeui_prompt_message" msgid="918680947433389110">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」想成為音量對話。"</string>
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」想成為音量對話框。"</string>
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"允許"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"拒絕"</string>
-    <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」為音量對話"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」為音量對話框"</string>
     <string name="volumeui_notification_text" msgid="1826889705095768656">"輕觸即可復原。"</string>
 </resources>

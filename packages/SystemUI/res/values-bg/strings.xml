@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"отключване"</string>
     <string name="phone_label" msgid="2320074140205331708">"отваряне на телефона"</string>
     <string name="camera_label" msgid="7261107956054836961">"отваряне на камерата"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Бутон за превключване на метода на въвеждане."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Бутон за промяна на мащаба с цел съвместимост."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Промяна на мащаба на екрана от по-малък до по-голям."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth е включен."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мобилната точка за достъп се включи."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Предаването на съдържанието от екрана спря."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Яркост на екрана"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Данните от 2G – 3G са изключени"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Данните от 4G са изключени"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Мобилните данни са изключени"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Данните са изключени"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Устройството ви изключи данните, защото зададеното от вас ограничение бе достигнато.\n\nПовторното им включване може да доведе до таксуване от оператора ви."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Включване на данните"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Данните от 2G – 3G са поставени на пауза"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Данните от 4G са поставени на пауза"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Мобилните данни са поставени на пауза"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Данните са поставени на пауза"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Тъй като зададеното от вас ограничение за данни бе достигнато, устройството постави преноса им на пауза за остатъка от този цикъл.\n\nВъзобновяването може да доведе до таксуване от оператора ви."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Възобновяване"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Няма връзка с интернет"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: Има връзка"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Търси се GPS"</string>

@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"lås op"</string>
     <string name="phone_label" msgid="2320074140205331708">"åbn telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"åbn kamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Skift indtastningsmetode-knappen."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Knap for kompatibilitetszoom."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom mindre til større skærm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth tilsluttet."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilhotspot er slået til."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Casting af din skærm er stoppet."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Skærmens lysstyrke"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G-data er deaktiveret"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G-data er deaktiveret"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobildata er deaktiveret"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Data er deaktiveret"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Enheden har deaktiveret data, fordi den grænse, du har angivet, er nået.\n\nHvis du aktiverer dataforbrug igen, kan mobilselskabet pålægge gebyrer."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Aktivér data"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G-data er sat på pause"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data er sat på pause"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobildata er sat på pause"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data er sat på pause"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Eftersom din fastsatte datagrænse blev nået, har enheden sat dataforbruget på pause i den resterende del af cyklussen.\n\nHvis du genaktiverer dataforbruget, kan det medføre gebyrer fra dit mobilselskab."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Genoptag"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen internetforb."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi er forbundet"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Søger efter GPS"</string>

@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"отклучи"</string>
     <string name="phone_label" msgid="2320074140205331708">"отвори телефон"</string>
     <string name="camera_label" msgid="7261107956054836961">"отвори камера"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Копче за префрање метод на внес."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Копче за компатибилност на зум."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Зумот е помал на поголем екран."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth е поврзан."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мобилната точка на пристап е вклучена."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Емитувањето на екранот запре."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Осветленост на екранот"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Податоците 2G-3G се исклучени"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Податоците 4G се исклучени"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Мобилните податоци се исклучени"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Податоците се исклучени"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Вашиот уред ги исклучи податоците затоа што го достигнаа лимитот што го поставивте.\n\nСо повторно вклучување, операторот може да ви наплати за тоа."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Вклучи податоци"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Податоците 2G-3G се паузирани"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Податоците 4G се паузирани"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Мобилните податоци се паузирани"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Податоците се паузирани"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Поради тоа што го достигнавте поставеното ограничување на податоци, уредот го паузираше користењето податоци до крајот на циклусот.\n\nОператорот може да ви наплати ако продолжите."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Продолжи"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Нема интернет"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Поврзано на Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Се пребарува за ГПС"</string>

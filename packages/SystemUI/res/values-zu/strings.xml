@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"vula"</string>
     <string name="phone_label" msgid="2320074140205331708">"vula ifoni"</string>
     <string name="camera_label" msgid="7261107956054836961">"vula ikhamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Vula indlela yokungena yenkinobho"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Inkinobho evumelekile yokusondeza"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Sondeza kancane esikrinini esikhudlwana"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ixhunyiwe"</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"I-hotspot ivuliwe."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ukusakaza kwesikrini kumisiwe."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Bonisa ukukhanya"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Idatha ye-2G-3G ivaliwe"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Idatha ye-4G ivaliwe"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Idatha yeselula ivaliwe"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Idatha ivaliwe"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Idivayisi yakho ivale idatha ngoba ifinyelele umkhawulo owubekile.\n\nUkuyivula futhi kungaholela ezindlekweni kusuka kunkampani yakho yenethiwekhi."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Vula idatha"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G idatha imisiwe"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G idatha imisiwe"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Idatha yeselula imisiwe"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Idatha imisiwe"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Ngoba umkhawulo wakho wedatha osethiwe ufinyelelwe, idivayisi imise kancane ukusetshenziswa kwedatha ngesikhumbuzi salo mjikelezo.\n\nUkuqhuba futhi kungaholela kuzindleko kusuka kwinkampani yakho yenethiwekhi."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Qalisa kabusha"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Alukho uxhumano lwe-Inthanethi"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"I-Wi-Fi ixhunyiwe"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Isesha i-GPS"</string>

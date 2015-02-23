@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"അൺലോക്കുചെയ്യുക"</string>
     <string name="phone_label" msgid="2320074140205331708">"ഫോൺ തുറക്കുക"</string>
     <string name="camera_label" msgid="7261107956054836961">"ക്യാമറ തുറക്കുക"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ടൈപ്പുചെയ്യൽ രീതി ബട്ടൺ മാറുക."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"അനുയോജ്യതാ സൂം ബട്ടൺ."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ചെറുതിൽ നിന്ന് വലിയ സ്‌ക്രീനിലേക്ക് സൂം ചെയ്യുക."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ബ്ലൂടൂത്ത് കണക്‌റ്റുചെയ്തു."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"മൊബൈൽ ഹോട്ട്‌സ്‌പോട്ട് ഓണാക്കി."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"സ്ക്രീൻ കാസ്‌റ്റുചെയ്യൽ നിർത്തി."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ഡിസ്പ്ലേ തെളിച്ചം"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ഡാറ്റ ഓഫാണ്"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ഡാറ്റ ഓഫാണ്"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"സെല്ലുലാർ ഡാറ്റ ഓഫാണ്"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ഡാറ്റ ഓഫാണ്"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"നിങ്ങൾ സജ്ജീകരിച്ചിരിക്കുന്ന പരിധിയിൽ എത്തിച്ചേർന്നിരിക്കുന്നതിനാൽ ഉപകരണം ഡാറ്റ ഓഫുചെയ്‌തു.\n\nഅത് തിരികെ ഓണാക്കുന്നത്, നിങ്ങളുടെ കാരിയറിൽ നിന്ന് നിരക്കീടാക്കുന്നതിന് ഇടയാക്കാം."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"ഡാറ്റ ഓണാക്കുക"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"സെല്ലുലാർ ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"നിങ്ങളുടെ സജ്ജീകരിച്ച ഡാറ്റ പരിധിയിലെത്തിയതിനാൽ, ഈ സൈക്കിളിന്റെ അവശേഷിക്കുന്ന ഡാറ്റ ഉപയോഗത്തെ ഉപകരണം താൽക്കാലികമായി നിർത്തി.\n\nപുനരാരംഭിക്കുന്നത്, നിങ്ങളുടെ കാരിയറിൽ നിന്ന് നിരക്കുകൾ ഈടാക്കിയേക്കാം."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"പുനരാരംഭിക്കുക"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS-നായി തിരയുന്നു"</string>
@@ -373,5 +372,5 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"അനുവദിക്കുക"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"നിരസിക്കുക"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>, വോളിയം ഡയലോഗാണ്"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"യഥാർത്ഥമായത് പുനഃസ്ഥാപിക്കാൻ സ്‌പർശിക്കുക."</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"ആദ്യത്തേത് പുനഃസ്ഥാപിക്കാൻ സ്‌പർശിക്കുക."</string>
 </resources>

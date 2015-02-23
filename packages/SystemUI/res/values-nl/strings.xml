@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ontgrendelen"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefoon openen"</string>
     <string name="camera_label" msgid="7261107956054836961">"camera openen"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knop voor wijzigen invoermethode."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Knop voor compatibiliteitszoom."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kleiner scherm uitzoomen naar groter scherm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-verbinding ingesteld."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiele hotspot ingeschakeld."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Casten van scherm gestopt."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Helderheid van het scherm"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G/3G-data zijn uitgeschakeld"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G-data zijn uitgeschakeld"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobiele data zijn uitgeschakeld"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Gegevens zijn uitgeschakeld"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Uw apparaat heeft gegevens uitgeschakeld omdat de ingestelde limiet is bereikt.\n\nAls u gegevens weer inschakelt, kan uw provider kosten in rekening brengen."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Gegevens inschakelen"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G/3G-data zijn onderbroken"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data zijn onderbroken"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobiele gegevens zijn onderbroken"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Gegevens zijn onderbroken"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Omdat de ingestelde gegevenslimiet is bereikt, heeft het apparaat het gegevensverbruik onderbroken voor de rest van deze cyclus.\n\nAls u het gegevensverbruik hervat, kan uw provider kosten in rekening brengen."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervatten"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Geen internetverbinding"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Verbonden via wifi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Zoeken naar GPS"</string>

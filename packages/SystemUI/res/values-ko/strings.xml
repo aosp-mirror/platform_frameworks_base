@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
     <string name="camera_label" msgid="7261107956054836961">"카메라 열기"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"입력 방법 버튼을 전환합니다."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"호환성 확대/축소 버튼입니다."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"작은 화면을 큰 화면으로 확대합니다."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"블루투스가 연결되었습니다."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"모바일 핫스팟을 사용합니다."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"화면 전송이 중지되었습니다."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"디스플레이 밝기"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G 데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G 데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"이동통신 데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"데이터 사용 중지됨"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"데이터가 설정 한도에 도달하여 사용 중지되었습니다.\n\n데이터를 다시 사용 설정하면 이동통신사로부터 대금이 청구될 수 있습니다."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"데이터 사용 설정"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G 데이터 사용 중지됨"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G 데이터 사용 중지됨"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"모바일 데이터 사용 중지됨"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"데이터 사용 중지됨"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"설정된 데이터 한도에 도달했기 때문에 기기에서 사이클의 나머지 기간 동안 데이터 사용을 일시 중지했습니다. \n\n데이터 사용을 재개하면 이동통신사 요금이 청구될 수 있습니다."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"재개"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"인터넷에 연결되지 않음"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 연결됨"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS 검색 중"</string>
@@ -369,14 +368,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>을(를) 숨기시겠습니까?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"다음번에 설정에서 사용 설정하면 다시 표시됩니다."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"숨기기"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g>이(가) 볼륨 대화가 되려고 합니다."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"허용"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"거부"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g>은(는) 볼륨 대화입니다."</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"원본을 복원하려면 터치하세요."</string>
 </resources>

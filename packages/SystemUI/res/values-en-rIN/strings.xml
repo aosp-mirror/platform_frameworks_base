@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"unlock"</string>
     <string name="phone_label" msgid="2320074140205331708">"open phone"</string>
     <string name="camera_label" msgid="7261107956054836961">"open camera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Switch input method button."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Compatibility zoom button."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom smaller to larger screen."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connected."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobile hotspot turned on."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Screen casting stopped."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Display brightness"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G data is off"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G data is off"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobile data is off"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Data is off"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Your device turned off data because it reached the limit you set.\n\nTurning it back on may lead to charges from your operator."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Turn on data"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G data is paused"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G data is paused"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobile data is paused"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data is paused"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Because your set data limit was reached, the device has paused data usage for the remainder of this cycle.\n\nResuming may lead to charges from your operator."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Resume"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"No Internet connection"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi connected"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Searching for GPS"</string>

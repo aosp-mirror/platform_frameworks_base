@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"သော့ဖွင့်ရန်"</string>
     <string name="phone_label" msgid="2320074140205331708">"ဖုန်းကို ဖွင့်ရန်"</string>
     <string name="camera_label" msgid="7261107956054836961">"ကင်မရာ ဖွင့်ရန်"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ထည့်သွင်းခြင်းခလုတ်အား ပြောင်းခြင်း"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"အံ့ဝင်သောချုံ့ချဲ့ခလုတ်"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ဖန်သားပြင်ပေါ်တွင် အသေးမှအကြီးသို့ချဲ့ခြင်း"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ဘလူးတုသ်ချိတ်ဆက်ထားမှု"</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"မိုဘိုင်း ဟော့စပေါ့ ဖွင့်ထား။"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"မျက်နှာပြင် ကာစ်တင် လုပ်မှု ရပ်လိုက်ပြီ။"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"တောက်ပမှုကို ပြရန်"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ဒေတာ ပိတ်ထား"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ဒေတာ ပိတ်ထား"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ဆယ်လူလာ ဒေတာကို ပိတ်ထား"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ဒေတာ ပိတ်ထား"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"သင်၏ ကိရိယာသည် သင်က သတ်မှတ်ခဲ့သည့် ကန့်သတ်ချက်ကို ပြည့်မီသွား၍ ပိတ်သွားသည်။ \n\n၎င်းကို ပြန်ပြီး ဖွင့်မှုအတွက် သင်၏ စီမံပေးသူ ထံမှ ငွေတောင်းခံ လာနိုင်ပါသည်။"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"ဒေတာ ဖွင့်ပေးရန်"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ဒေတာ ခေတ္တရပ်တန့်သည်"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G data ခေတ္တရပ်တန့်သည်"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"cellular data ခေတ္တရပ်တန့်သည်"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ဒေတာ ခေတ္တရပ်တန့်သည်"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"သင့် ဒေတာ အသုံးပြုမှု သတ်မှတ်ထားချက်သို့ ရောက်ရှိသောကြောင့်၊ ဤကာလအတွက် ကျန်ရှိသည့် ဒေတာအသုံးပြုမှုအား စက်ပစ္စည်းမှ ရပ်တန့်ထားသည်။\n\nဆက်လက်သွားပါက သင့်ဖုန်းဝန်ဆောင်မှုမှ သင့်အား ကုန်ကျစရိတ်တောင်းခံလိမ့်မည်။"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ပြန်ဆက်လုပ်ရန်"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"အင်တာနက်မရှိ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ကြိုးမဲ့ဆက်သွယ်မှု"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPSအားရှာဖွေသည်"</string>

@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"අඟුල අරින්න"</string>
     <string name="phone_label" msgid="2320074140205331708">"දුරකථනය විවෘත කරන්න"</string>
     <string name="camera_label" msgid="7261107956054836961">"කැමරාව විවෘත කරන්න"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ආදාන ක්‍රමය මාරු කිරීමේ බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ගැළපෙන විශාලන බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"විශාල තිරය වෙත කුඩාව විශාලනය කරන්න."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"බ්ලූටූත් සම්බන්ධිතයි."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ජංගම හොට්ස්පොටය සක්‍රිය කරන ලදි."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"තිරය විකාශය කිරීම නැවත් වන ලදි."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"දීප්තිය දර්ශනය කරන්න"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G දත්ත අක්‍රියයි"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G දත්ත අක්‍රියයි"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"සෙලියුලර් දත්ත අක්‍රියයි"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"දත්ත අක්‍රියයි"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"ඔබ සකසන ලද දත්ත සීමාවට එය ළඟාවී ඇති නිසා ඔබගේ උපාංගයේ දත්ත අක්‍රිය කර ඇත.\n\nඑය නැවත සක්‍රිය කිරීමෙන් ඔබගේ වාහකය ඇතැම් විට අය කර ගැනීමට හේතු වේ."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"දත්ත සක්‍රිය කරන්න"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G දත්ත විරාම කර ඇත"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G දත්ත විරාම කර ඇත"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"සෙල්‍යුලර් දත්ත විරාම කර ඇත"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"දත්ත විරාම කර ඇත"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ඔබ සකසා ඇති දත්ත සීමාවට ළඟා වූ නිසා, උපාංගය මගින් මෙම චක්‍රයේ ඉතිරිය සඳහා දත්ත භාවිතය විරාම කර ඇත. \n\nනැවත පටන් ගැනීමෙන් ඔබගේ වාහකයෙන් අය කිරීම්වලට පොළඹවනු ඇත."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"නැවත පටන්ගන්න"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"අන්තර්ජාල සම්බන්ධතාවයක් නැත"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi සම්බන්ධිතයි"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS සඳහා සොයමින්"</string>
@@ -373,5 +372,5 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"ඉඩ දෙන්න"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"ප්‍රතික්ෂේප කරන්න"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ධාරිතා සංවාදයයි"</string>
-    <string name="volumeui_notification_text" msgid="1826889705095768656">"මුල් තත්වය නැවත ප්‍රතිසාධනය කිරීමට ස්පර්ශ කරන්න."</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"මුල් තත්ත්වය නැවත ප්‍රතිසාධනය කිරීමට ස්පර්ශ කරන්න."</string>
 </resources>

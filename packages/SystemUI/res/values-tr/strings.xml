@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"kilidi aç"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonu aç"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamerayı aç"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Giriş yöntemini değiştirme düğmesi."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Uyumluluk zum düğmesi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Daha büyük ekrana daha küçük yakınlaştır."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth bağlandı."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobil hotspot açıldı."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekran yayını durduruldu."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekran parlaklığı"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G veri kullanımı kapalı"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G veri kullanımı kapalı"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Hücresel veri kapalı"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Veri kullanımı kapalı"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Ayarladığınız sınıra erişildiğinden cihazınız veri kullanımını kapattı.\n\nVeri kullanımını tekrar açmanız operatörünüzün ek ödemeler almasına neden olabilir."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Veri kullanımını aç"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G veri kullanımı duraklatıldı"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G veri kullanımı duraklatıldı"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Hücresel veri kullanımı duraklatıldı"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Veri kullanımı duraklatıldı"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Ayarlanmış olan veri sınırınıza ulaşıldığından, bu dönemin kalan süresi için cihazda veri kullanımı duraklatıldı.\n\nVeri kullanımını devam ettirmek, operatörünüzün sizden ödeme almasına neden olabilir."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Devam ettir"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"İnternet bağlantısı yok"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Kablosuz bağlandı"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS aranıyor"</string>
@@ -369,14 +368,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> gizlensin mi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ayarlardan etkinleştirdiğiniz bir sonraki sefer tekrar görünür."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Gizle"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> ses denetimi iletişim kutusu olmak istiyor."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"İzin ver"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Reddet"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ses denetimi iletişim kutusu olarak ayarlandı"</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"Orijinali geri yüklemek için dokunun."</string>
 </resources>

@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ಅನ್‌ಲಾಕ್ ಮಾಡು"</string>
     <string name="phone_label" msgid="2320074140205331708">"ಫೋನ್ ತೆರೆಯಿರಿ"</string>
     <string name="camera_label" msgid="7261107956054836961">"ಕ್ಯಾಮರಾ ತೆರೆಯಿರಿ"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ಇನ್‌ಪುಟ್ ವಿಧಾನ ಬದಲಿಸು ಬಟನ್."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ಹೊಂದಾಣಿಕೆಯ ಝೂಮ್ ಬಟನ್."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ಚಿಕ್ಕ ಪರದೆಯಿಂದ ದೊಡ್ಡ ಪರದೆಗೆ ಝೂಮ್ ಮಾಡು."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ಬ್ಲೂಟೂತ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"ಮೊಬೈಲ್ ಹಾಟ್‌ಸ್ಪಾಟ್ ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"ಸ್ಕ್ರೀನ್ ಪ್ರಸಾರವನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ಹೊಳಪನ್ನು ಪ್ರದರ್ಶಿಸಿ"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"ಡೇಟಾ ಆಫ್ ಆಗಿದೆ"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"ನೀವು ಹೊಂದಿಸಿದ ಮಿತಿಯನ್ನು ತಲುಪಿರುವ ಕಾರಣ ನಿಮ್ಮ ಸಾಧನವು ಡೇಟಾವನ್ನು ಆಫ್ ಮಾಡಿದೆ.\n\nಆನ್ ಮಾಡುವುದರಿಂದ ನಿಮ್ಮ ವಾಹಕದಲ್ಲಿ ಶುಲ್ಕಕ್ಕೆ ಕಾರಣವಾಗಬಹುದು."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"ಡೇಟಾ ಆನ್ ಮಾಡಿ"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ಡೇಟಾವನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ಡೇಟಾ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ಸೆಲ್ಯುಲಾರ್ ಡೇಟಾ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ಡೇಟಾ ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ಏಕೆಂದರೆ ನಿಮ್ಮ ಹೊಂದಾಣಿಕೆ ಡೇಟಾ ಮೀತಿಯನ್ನು ತಲುಪಿದೆ, ಈ ಆವರ್ತನೆಯ ಉಳಿದ ಭಾಗಕ್ಕೆ ಸಾಧನವು ಡೇಟಾ ಬಳಕೆಯನ್ನು ವಿರಾಮಗೊಳಿಸಿದೆ.\n\nಮುಂದುವರೆಯುವಿಕೆಯು ನಿಮ್ಮ ವಾಹಕದ ಶುಲ್ಕಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ಮುಂದುವರಿಸು"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವಿಲ್ಲ"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS ಗಾಗಿ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>

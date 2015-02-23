@@ -90,7 +90,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"בטל את הנעילה"</string>
     <string name="phone_label" msgid="2320074140205331708">"פתח את הטלפון"</string>
     <string name="camera_label" msgid="7261107956054836961">"פתח את המצלמה"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"לחצן מרחק מתצוגה של תאימות."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"שנה מרחק מתצוגה של מסך קטן לגדול יותר."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"‏Bluetooth מחובר."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"נקודה לשיתוף אינטרנט בנייד מופעלת."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"העברת המסך הופסקה."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"בהירות תצוגה"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"‏נתונים בחיבור 2G-3G כובו"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"‏נתונים בחיבור 4G כובו"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"נתונים בחיבור סלולרי כובו"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"חיבור הנתונים כובה"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"המכשיר שלך כיבה את חיבור הנתונים מפני שהוא הגיע למגבלה שהגדרת.\n\nהפעלה מחדש עשויה להוביל לחיובים על ידי הספק."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"הפעל חיבור נתונים"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"‏השימוש בנתוני 2G-3G מושהה"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"‏השימוש בנתוני 4G מושהה"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"השימוש בנתונים סלולריים מושהה"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"השימוש בנתונים מושהה"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"מכיוון שהגעת למגבלת הנתונים שהגדרת, המכשיר השהה את השימוש בנתונים עד סוף התקופה.\n\nאם תמשיך, אתה עשוי לקבל חיובים מהספק."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"המשך"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"‏Wi-Fi מחובר"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏מחפש GPS"</string>

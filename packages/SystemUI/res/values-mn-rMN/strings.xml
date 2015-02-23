@@ -86,7 +86,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"тайлах"</string>
     <string name="phone_label" msgid="2320074140205331708">"утас нээх"</string>
     <string name="camera_label" msgid="7261107956054836961">"камер нээх"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Оруулах аргыг сэлгэх товч."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Тохиромжтой өсгөх товч."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Жижгээс том дэлгэцрүү өсгөх."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Блютүүт холбогдсон."</string>
@@ -199,12 +198,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Мобайл хотспотыг асаасан."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Дэлгэц дамжуулалт зогссон."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Дэлгэцийн гэрэлтэлт"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G дата идэвхгүй"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G дата идэвхгүй"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Үүрэн дата идэвхгүй"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Дата идэвхгүй"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Таны тогтоосон хязгаарт хүрсэн учир төхөөрөмж датаг унтраасан.\n\nҮүнийг асааснаар таны төлбөр нэмэгдэхэд хүргэж болзошгүй."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Датаг асаах"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G дата-г түр зогсоосон байна"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G дата-г түр зогсоосон байна"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Гар утасны дата-г түр зогсоосон байна"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Дата-г түр зогсоосон байна"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Таны багц дата эрхийн дээд хэмжээнд хүрсэн байгаа тул төхөөрөмж нь үлдсэн хэсэгт дата хэрэглээг түр зогсоосон байна.\n\nТа үйлдлийг үргэлжлүүлэхийг хүсвэл үйлчилгээ үзүүлж буй үүрэн холбооны газраас нэмж дата эрх авна уу."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Үргэлжлүүлэх"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Интернет холболт байхгүй"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi холбогдсон"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS хайж байна"</string>
@@ -367,14 +366,9 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>-ийг нуух уу?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Тохируулгын хэсэгт үүнийг асаахад энэ дахин харагдана."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Нуух"</string>
-    <!-- no translation found for volumeui_prompt_message (918680947433389110) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_allow (7954396902482228786) -->
-    <skip />
-    <!-- no translation found for volumeui_prompt_deny (5720663643411696731) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_title (4906770126345910955) -->
-    <skip />
-    <!-- no translation found for volumeui_notification_text (1826889705095768656) -->
-    <skip />
+    <string name="volumeui_prompt_message" msgid="918680947433389110">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь дууны диалог болохыг хүсч байна."</string>
+    <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Зөвшөөрөх"</string>
+    <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Татгалзах"</string>
+    <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> нь дууны диалог юм."</string>
+    <string name="volumeui_notification_text" msgid="1826889705095768656">"Анхны хувилбарыг эргүүлэн хадгалахыг хүсвэл хүрнэ үү."</string>
 </resources>

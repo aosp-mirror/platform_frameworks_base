@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"sblocca"</string>
     <string name="phone_label" msgid="2320074140205331708">"apri telefono"</string>
     <string name="camera_label" msgid="7261107956054836961">"apri fotocamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Pulsante per cambiare metodo di immissione."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Pulsante zoom compatibilità."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom inferiore per schermo più grande."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth collegato."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Hotspot mobile attivato."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Trasmissione dello schermo interrotta."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Luminosità dello schermo"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Dati 2G-3G disattivati"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Dati 4G disattivati"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Rete dati disattivata"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Dati disattivati"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Il tuo dispositivo ha disattivato il traffico dati perché hai raggiunto il limite prestabilito.\n\nLa riattivazione potrebbe comportare l\'applicazione di costi aggiuntivi da parte del tuo operatore."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Attiva i dati"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Dati 2G-3G sospesi"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dati 4G sospesi"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Dati cellulari sospesi"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dati sospesi"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Hai raggiunto il tuo limite di dati, pertanto sul dispositivo è stato sospeso l\'utilizzo di dati per la parte rimanente del ciclo.\n\nSe riprendi a utilizzare i dati, l\'operatore potrebbe addebitarti costi."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Riprendi"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nessuna connessione"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi connesso"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Ricerca del GPS"</string>

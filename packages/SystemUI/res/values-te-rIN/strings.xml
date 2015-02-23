@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
     <string name="camera_label" msgid="7261107956054836961">"కెమెరాను తెరువు"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ఇన్‌పుట్ పద్ధతి మార్చే బటన్."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"అనుకూలత జూమ్ బటన్."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"చిన్న స్క్రీన్ నుండి పెద్దదానికి జూమ్ చేయండి."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"బ్లూటూత్ కనెక్ట్ చేయబడింది."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"మొబైల్ హాట్‌స్పాట్ ఆన్ చేయబడింది."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"స్క్రీన్ ప్రసారం ఆపివేయబడింది."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ప్రదర్శన ప్రకాశం"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G-3G డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"సెల్యూలార్ డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"డేటా ఆఫ్‌లో ఉంది"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"మీ పరికరం మీరు సెట్ చేసిన పరిమితిని చేరుకున్నందున డేటాను ఆఫ్ చేసింది.\n\nదీన్ని తిరిగి ఆన్ చేయడం వలన మీ క్యారియర్‌ను బట్టి ఛార్జీలు పడవచ్చు."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"డేటాను ఆన్ చేయి"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G డేటా పాజ్ చేయబడింది"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G డేటా పాజ్ చేయబడింది"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"సెల్యులార్ డేటా పాజ్ చేయబడింది"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"డేటా పాజ్ చేయబడింది"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"మీ సెట్ చేయబడిన డేటా పరిమితిని చేరుకున్నందున పరికరం ఈ సైకిల్‌లో మిగిలిన భాగానికి డేటా వినియోగాన్ని పాజ్ చేసింది.\n\nపునఃప్రారంభించడం వలన మీ క్యారియర్ ఛార్జీలు విధించవచ్చు."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"పునఃప్రారంభించు"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ఇంటర్నెట్ కనెక్షన్ లేదు"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi కనెక్ట్ చేయబడింది"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS కోసం శోధిస్తోంది"</string>

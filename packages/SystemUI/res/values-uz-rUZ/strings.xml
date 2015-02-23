@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"qulfdan chiqarish"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonni ochish"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamerani ochish"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Kiritish uslubi tugmasini almashtirish."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Kattalashtirish tugmasi mosligi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kattaroq ekran uchun kichikroqni kattalashtirish."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ulandi."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobil ulanish nuqtasi yoqildi."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekranni translatsiya qilish to‘xtadi."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekran yorqinligi"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G/3G internet o‘chirib qo‘yildi"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G internet o‘chirib qo‘yildi"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobil internet o‘chirib qo‘yildi"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Internet o‘chirib qo‘yildi"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Siz o‘rnatgan chegaraga yetib kelgani tufayli qurilmangizda internet o‘chirib qo‘yildi.\n\nUni qayta yoqishingiz mumkin, biroq buning uchun aloqa operatoringiz qo‘shimcha haq olishi mumkin."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Internetni yoqish"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G internet to‘xtatib qo‘yildi"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G internet to‘xtatib qo‘yildi"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobil internetdan foydalanish to‘xtatib qo‘yildi"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Internetdan foydalanish to‘xtatib qo‘yildi"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Siz o‘rnatgan mobil internet chekloviga yetgani bois joriy hisob-kitob davrining qolgan muddati uchun mobil internetdan foydalanish vaqtinchalik to‘xtatib qo‘yildi.\n\nAgar internetdan foydalanishni davom ettirsangiz, buning uchun uyali aloqa operatoringiz ortiqcha haq talab qilishi mumkin."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Davom etish"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Internetga ulanmagan"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ulandi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS qidirilmoqda"</string>

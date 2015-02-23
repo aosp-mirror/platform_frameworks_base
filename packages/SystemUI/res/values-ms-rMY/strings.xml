@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"buka kunci"</string>
     <string name="phone_label" msgid="2320074140205331708">"buka telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Butang tukar kaedah input."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Butang zum keserasian."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Skrin zum lebih kecil kepada lebih besar."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth disambungkan."</string>
@@ -201,12 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Tempat liputan mudah alih bergerak dihidupkan."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Penghantaran skrin dihentikan."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Kecerahan paparan"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"Data 2G-3G dimatikan"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"Data 4G dimatikan"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Data selular dimatikan"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Data dimatikan"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Peranti anda mematikan data kerana telah mencapai had yang anda tetapkan.\n\nMenghidupkan data semula boleh menyebabkan anda dikenakan caj oleh pembawa anda."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Hidupkan data"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Data 2G-3G dijeda"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Data 4G dijeda"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Data selular dijeda"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data dijeda"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Oleh kerana had data tetap anda telah dicapai, peranti telah menjeda penggunaan data bagi baki kitaran ini.\n\nMenyambung semula boleh menyebabkan anda dikenakan bayaran daripada pembawa anda."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Sambung semula"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Tiada smbg Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi disambungkan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Mencari GPS"</string>

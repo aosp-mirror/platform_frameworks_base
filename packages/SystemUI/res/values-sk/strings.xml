@@ -90,7 +90,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"odomknúť"</string>
     <string name="phone_label" msgid="2320074140205331708">"otvoriť telefón"</string>
     <string name="camera_label" msgid="7261107956054836961">"spustiť fotoaparát"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačidlo prepnutia metódy vstupu."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tlačidlo úpravy veľkosti z dôvodu kompatibility."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zväčšiť menší obrázok na väčšiu obrazovku."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth pripojené."</string>
@@ -205,12 +204,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobilný hotspot je zapnutý."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Prenášanie bolo zastavené."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Jas displeja"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"dáta 2G–3G sú vypnuté"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"dáta 4G sú vypnuté"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobilné dáta sú vypnuté"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Dáta sú vypnuté"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Zariadenie vyplo dáta, pretože dosiahlo limit, ktorý ste nastavili.\n\nAk ich znova zapnete, môže to viesť k účtovaniu poplatkov operátora."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Zapnúť dáta"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"Dátové prenosy 2G a 3G sú pozastavené"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Dátové prenosy 4G sú pozastavené"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Mobilné dáta sú pozastavené"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Dáta sú pozastavené"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Keďže ste dosiahli nastavený limit pre mobilné dáta, na zariadení bola pre zvyšok tohto cyklu pozastavená spotreba dát.\n\nJej opätovné spustenie môže mať za následok účtovanie poplatkov vaším operátorom."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Znova spustiť"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Vyhľadávanie satelitov GPS"</string>

@@ -90,7 +90,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"atrakinti"</string>
     <string name="phone_label" msgid="2320074140205331708">"atidaryti telefoną"</string>
     <string name="camera_label" msgid="7261107956054836961">"atidaryti fotoaparatą"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Perjungti įvesties metodo mygtuką."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Suderinamumo priartinimo mygtukas."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Padidinti ekraną."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"„Bluetooth“ prijungtas."</string>
@@ -203,12 +202,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiliojo ryšio viešosios interneto prieigos taškas įjungtas."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekrano perdavimas sustabdytas."</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"Ekrano šviesumas"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G–3G duomenys išjungti"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G duomenys išjungti"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobiliojo ryšio duomenys išjungti"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="8723412000355709802">"Duomenys išjungti"</string>
-    <string name="data_usage_disabled_dialog" msgid="6468718338038876604">"Įrenginys išjungė duomenis, nes buvo pasiektas nustatytas limitas.\n\nVėl juos įjungus gali būti taikomi operatoriaus mokesčiai."</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="5538068036107372895">"Įjungti duomenis"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G–3G duomenys pristabdyti"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G duomenys pristabdyti"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Korinio ryšio duomenys pristabdyti"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Duomenys pristabdyti"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Kadangi buvo pasiektas nustatytas duomenų limitas, įrenginys pristabdė duomenų naudojimą likusį šio ciklo laikotarpį.\n\nAtnaujinus gali būti taikomi operatoriaus mokesčiai."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Atnaujinti"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nėra interneto ryš."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Prisij. prie „Wi-Fi“"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Ieškoma GPS"</string>
