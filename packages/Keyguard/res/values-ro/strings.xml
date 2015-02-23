@@ -110,4 +110,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Deblocarea cu ajutorul codului PUK pentru cardul SIM nu a reușit!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Cod acceptat!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Fără serviciu."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Buton pentru comutarea metodei de introducere."</string>
 </resources>

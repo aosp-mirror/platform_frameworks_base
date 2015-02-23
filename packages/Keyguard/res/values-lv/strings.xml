@@ -110,4 +110,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM kartes PUK koda ievadīšana neizdevās."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kods ir pieņemts!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nav pakalpojuma."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Ievades metodes maiņas poga."</string>
 </resources>

@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Operasi PUK SIM gagal!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kod Diterima!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Tiada perkhidmatan."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Butang tukar kaedah input."</string>
 </resources>

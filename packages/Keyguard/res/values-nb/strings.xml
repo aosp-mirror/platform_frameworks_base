@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"PUK-koden for SIM-kortet ble avvist."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Koden er godkjent."</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Ingen tjeneste."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bytt knapp for inndatametode."</string>
 </resources>

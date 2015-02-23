@@ -110,4 +110,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Радња са SIM PUK кодом није успела!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Кôд је прихваћен!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Офлајн сте."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Дугме Промени метод уноса."</string>
 </resources>

@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Error al intentar desbloquear la tarjeta SIM con el código PUK"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Código aceptado"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sin servicio"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
 </resources>

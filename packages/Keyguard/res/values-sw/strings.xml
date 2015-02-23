@@ -108,4 +108,5 @@
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Utendakazi wa PUK ya SIM umeshindwa!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Msimbo Umekubaliwa!"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Hakuna huduma."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Swichi kitufe cha mbinu ingizi."</string>
 </resources>
