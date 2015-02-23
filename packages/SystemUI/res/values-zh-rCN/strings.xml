@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"解锁"</string>
     <string name="phone_label" msgid="2320074140205331708">"打开电话"</string>
     <string name="camera_label" msgid="7261107956054836961">"打开相机"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"输入法切换按钮。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"兼容性缩放按钮。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"将小屏幕的图片放大在较大屏幕上显示。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"蓝牙已连接。"</string>
@@ -143,7 +142,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"漫游中"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"WLAN"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"无SIM卡。"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"无 SIM 卡。"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"蓝牙网络共享。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"飞行模式。"</string>
     <!-- String.format failed for translation -->

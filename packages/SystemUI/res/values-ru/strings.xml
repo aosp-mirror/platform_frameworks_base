@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"Графический интерфейс системы"</string>
+    <string name="app_label" msgid="7164937344850004466">"Интерфейс системы"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удалить из списка"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"Разблокировать."</string>
     <string name="phone_label" msgid="2320074140205331708">"Открыть телефон."</string>
     <string name="camera_label" msgid="7261107956054836961">"Открыть камеру."</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Кнопка переключения способа ввода."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Кнопка масштабирования (режим совместимости)"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Уменьшение изображения для увеличения свободного места на экране."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-соединение установлено."</string>
@@ -260,7 +259,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОНАСТРОЙКА"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Инвертировать"</string>
     <string name="quick_settings_color_space_label" msgid="853443689745584770">"Коррекция цвета"</string>
-    <string name="quick_settings_more_settings" msgid="326112621462813682">"Дополнительные настройки"</string>
+    <string name="quick_settings_more_settings" msgid="326112621462813682">"Настройки"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Готово"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Подключено"</string>
     <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Установлено подключение через Ассистента Wi-Fi"</string>

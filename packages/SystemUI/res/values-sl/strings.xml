@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"odkleni"</string>
     <string name="phone_label" msgid="2320074140205331708">"odpri telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"odpri fotoaparat"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za preklop načina vnosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb povečave za združljivost."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Povečava manjšega na večji zaslon."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Povezava Bluetooth vzpostavljena."</string>

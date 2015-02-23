@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"feloldás"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefon megnyitása"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamera megnyitása"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Beviteli mód váltása gomb."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Kompatibilitási zoom gomb."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Kicsinyítsen a nagyobb képernyőhöz."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth csatlakoztatva."</string>
@@ -323,7 +322,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Akkumulátorkímélő mód bekapcsolva"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Akkumulátorkímélő mód kikapcsolása"</string>
-    <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalomjegyzék elrejtve"</string>
+    <string name="notification_hidden_text" msgid="1135169301897151909">"Tartalom elrejtve"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"A(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> alkalmazás rögzíteni fog mindent, ami megjelenik a képernyőn."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne jelenjen meg többé"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Az összes törlése"</string>

@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"kilidi aç"</string>
     <string name="phone_label" msgid="2320074140205331708">"telefonu aç"</string>
     <string name="camera_label" msgid="7261107956054836961">"kamerayı aç"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Giriş yöntemini değiştirme düğmesi."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Uyumluluk zum düğmesi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Daha büyük ekrana daha küçük yakınlaştır."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth bağlandı."</string>
@@ -144,7 +143,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Kablosuz"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM kart yok."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth İnternet paylaşımı"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth tethering"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Uçak modu."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Pil yüzdesi: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem ayarları."</string>

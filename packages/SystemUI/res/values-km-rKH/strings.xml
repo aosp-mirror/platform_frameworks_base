@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ដោះ​សោ"</string>
     <string name="phone_label" msgid="2320074140205331708">"បើក​ទូរស័ព្ទ"</string>
     <string name="camera_label" msgid="7261107956054836961">"បើក​ម៉ាស៊ីន​ថត"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ប្ដូរ​ប៊ូតុង​វិធីសាស្ត្រ​បញ្ចូល។"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ប៊ូតុង​ពង្រីក​ត្រូវ​គ្នា។"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ពង្រីក/បង្រួម​​អេក្រង់​ពី​​ទៅធំ"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"បាន​តភ្ជាប់​ប៊្លូធូស។"</string>

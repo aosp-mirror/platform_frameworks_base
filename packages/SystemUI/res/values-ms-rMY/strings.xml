@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"buka kunci"</string>
     <string name="phone_label" msgid="2320074140205331708">"buka telefon"</string>
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Butang tukar kaedah input."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Butang zum keserasian."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Skrin zum lebih kecil kepada lebih besar."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth disambungkan."</string>

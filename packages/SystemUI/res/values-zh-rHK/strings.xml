@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"解鎖"</string>
     <string name="phone_label" msgid="2320074140205331708">"開啟電話"</string>
     <string name="camera_label" msgid="7261107956054836961">"開啟相機"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"切換輸入法按鈕。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"藍牙連線已建立。"</string>
