@@ -167,4 +167,5 @@
     <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Pulsante Riproduci"</string>
     <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Pulsante di arresto"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nessun servizio."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Pulsante per cambiare metodo di immissione."</string>
 </resources>

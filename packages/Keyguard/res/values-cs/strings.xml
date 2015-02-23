@@ -167,4 +167,5 @@
     <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Tlačítko Přehrát"</string>
     <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Tlačítko Zastavit"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Žádný signál."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačítko přepnutí metody zadávání"</string>
 </resources>
