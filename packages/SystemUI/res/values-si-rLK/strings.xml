@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"අඟුල අරින්න"</string>
     <string name="phone_label" msgid="2320074140205331708">"දුරකථනය විවෘත කරන්න"</string>
     <string name="camera_label" msgid="7261107956054836961">"කැමරාව විවෘත කරන්න"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ආදාන ක්‍රමය මාරු කිරීමේ බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ගැළපෙන විශාලන බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"විශාල තිරය වෙත කුඩාව විශාලනය කරන්න."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"බ්ලූටූත් සම්බන්ධිතයි."</string>

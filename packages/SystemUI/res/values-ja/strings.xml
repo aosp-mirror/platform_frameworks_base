@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"ロック解除"</string>
     <string name="phone_label" msgid="2320074140205331708">"電話を起動"</string>
     <string name="camera_label" msgid="7261107956054836961">"カメラを起動"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"入力方法の切り替えボタン。"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"互換ズームボタン。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"小さい画面から大きい画面に拡大。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetoothに接続済み。"</string>

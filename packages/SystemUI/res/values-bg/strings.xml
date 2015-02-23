@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"отключване"</string>
     <string name="phone_label" msgid="2320074140205331708">"отваряне на телефона"</string>
     <string name="camera_label" msgid="7261107956054836961">"отваряне на камерата"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Бутон за превключване на метода на въвеждане."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Бутон за промяна на мащаба с цел съвместимост."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Промяна на мащаба на екрана от по-малък до по-голям."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth е включен."</string>

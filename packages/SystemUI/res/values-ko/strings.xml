@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"잠금 해제"</string>
     <string name="phone_label" msgid="2320074140205331708">"휴대전화 열기"</string>
     <string name="camera_label" msgid="7261107956054836961">"카메라 열기"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"입력 방법 버튼을 전환합니다."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"호환성 확대/축소 버튼입니다."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"작은 화면을 큰 화면으로 확대합니다."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"블루투스가 연결되었습니다."</string>
