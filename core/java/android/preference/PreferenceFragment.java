@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
@@ -153,15 +154,15 @@ public abstract class PreferenceFragment extends Fragment implements
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPreferenceManager = new PreferenceManager(getActivity(), FIRST_REQUEST_CODE);
         mPreferenceManager.setFragment(this);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
 
         TypedArray a = getActivity().obtainStyledAttributes(null,
                 com.android.internal.R.styleable.PreferenceFragment,
@@ -177,7 +178,7 @@ public abstract class PreferenceFragment extends Fragment implements
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         if (mHavePrefs) {

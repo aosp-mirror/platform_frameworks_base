@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.XmlRes;
 import android.app.Fragment;
@@ -531,7 +532,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Theming for the PreferenceActivity layout and for the Preference Header(s) layout
