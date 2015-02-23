@@ -1140,70 +1140,85 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     ActiveAdmin getActiveAdminForCallerLocked(ComponentName who, int reqPolicy)
             throws SecurityException {
         final int callingUid = Binder.getCallingUid();
-        final int userHandle = UserHandle.getUserId(callingUid);
-        final DevicePolicyData policy = getUserData(userHandle);
 
-        List<ActiveAdmin> candidates = new ArrayList<ActiveAdmin>();
+        ActiveAdmin result = getActiveAdminWithPolicyForUidLocked(who, reqPolicy, callingUid);
+        if (result != null) {
+            return result;
+        }
 
-        // Build a list of admins for this uid matching the given ComponentName
+        if (who != null) {
+            final int userId = UserHandle.getUserId(callingUid);
+            final DevicePolicyData policy = getUserData(userId);
+            ActiveAdmin admin = policy.mAdminMap.get(who);
+            if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
+                throw new SecurityException("Admin " + admin.info.getComponent()
+                         + " does not own the device");
+            }
+            if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
+                throw new SecurityException("Admin " + admin.info.getComponent()
+                        + " does not own the profile");
+            }
+            throw new SecurityException("Admin " + admin.info.getComponent()
+                    + " did not specify uses-policy for: "
+                    + admin.info.getTagForPolicy(reqPolicy));
+        } else {
+            throw new SecurityException("No active admin owned by uid "
+                    + Binder.getCallingUid() + " for policy #" + reqPolicy);
+        }
+    }
+
+    private ActiveAdmin getActiveAdminWithPolicyForUidLocked(ComponentName who, int reqPolicy,
+            int uid) {
+        // Try to find an admin which can use reqPolicy
+        final int userId = UserHandle.getUserId(uid);
+        final DevicePolicyData policy = getUserData(userId);
         if (who != null) {
             ActiveAdmin admin = policy.mAdminMap.get(who);
             if (admin == null) {
                 throw new SecurityException("No active admin " + who);
             }
-            if (admin.getUid() != callingUid) {
+            if (admin.getUid() != uid) {
                 throw new SecurityException("Admin " + who + " is not owned by uid "
                         + Binder.getCallingUid());
             }
-            candidates.add(admin);
+            if (isActiveAdminWithPolicyForUserLocked(admin, reqPolicy, userId)) {
+                return admin;
+            }
         } else {
             for (ActiveAdmin admin : policy.mAdminList) {
-                if (admin.getUid() == callingUid) {
-                    candidates.add(admin);
-                }
-            }
-        }
-
-        // Try to find an admin which can use reqPolicy
-        for (ActiveAdmin admin : candidates) {
-            boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
-            boolean ownsProfile = (getProfileOwner(userHandle) != null
-                    && getProfileOwner(userHandle).getPackageName()
-                        .equals(admin.info.getPackageName()));
-            boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
-                    && !hasUserSetupCompleted(userHandle);
-
-            if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-                if (ownsDevice || (userHandle == UserHandle.USER_OWNER && ownsInitialization)) {
-                    return admin;
-                }
-            } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-                if (ownsDevice || ownsProfile || ownsInitialization) {
-                    return admin;
-                }
-            } else {
-                if (admin.info.usesPolicy(reqPolicy)) {
+                if (admin.getUid() == uid && isActiveAdminWithPolicyForUserLocked(admin, reqPolicy,
+                        userId)) {
                     return admin;
                 }
             }
         }
 
-        if (who != null) {
-            if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-                throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
-                         + " does not own the device");
+        return null;
+    }
+
+    private boolean isActiveAdminWithPolicyForUserLocked(ActiveAdmin admin, int reqPolicy,
+            int userId) {
+        boolean ownsDevice = isDeviceOwner(admin.info.getPackageName());
+        boolean ownsProfile = (getProfileOwner(userId) != null
+                && getProfileOwner(userId).getPackageName()
+                    .equals(admin.info.getPackageName()));
+        boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
+                && !hasUserSetupCompleted(userId);
+
+        if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
+            if (ownsDevice || (userId == UserHandle.USER_OWNER && ownsInitialization)) {
+                return true;
             }
-            if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-                throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
-                        + " does not own the profile");
+        } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
+            if (ownsDevice || ownsProfile || ownsInitialization) {
+                return true;
             }
-            throw new SecurityException("Admin " + candidates.get(0).info.getComponent()
-                    + " did not specify uses-policy for: "
-                    + candidates.get(0).info.getTagForPolicy(reqPolicy));
         } else {
-            throw new SecurityException("No active admin owned by uid "
-                    + Binder.getCallingUid() + " for policy #" + reqPolicy);
+            if (admin.info.usesPolicy(reqPolicy)) {
+                return true;
+            }
         }
+        return false;
     }
 
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
@@ -5699,6 +5714,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 if (!mWidgetProviderListeners.contains(listener)) {
                     mWidgetProviderListeners.add(listener);
                 }
+            }
+        }
+
+        @Override
+        public boolean isActiveAdminWithPolicy(int uid, int reqPolicy) {
+            final int userId = UserHandle.getUserId(uid);
+            synchronized(DevicePolicyManagerService.this) {
+                return getActiveAdminWithPolicyForUidLocked(null, reqPolicy, uid) != null;
             }
         }
 
