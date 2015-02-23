@@ -18,8 +18,14 @@ package android.security;
 
 import com.android.org.conscrypt.NativeCrypto;
 
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.OperationResult;
 import android.util.Log;
 
 import java.util.Locale;
@@ -58,6 +64,8 @@ public class KeyStore {
 
     private final IKeystoreService mBinder;
 
+    private IBinder mToken;
+
     private KeyStore(IKeystoreService binder) {
         mBinder = binder;
     }
@@ -66,6 +74,13 @@ public class KeyStore {
         IKeystoreService keystore = IKeystoreService.Stub.asInterface(ServiceManager
                 .getService("android.security.keystore"));
         return new KeyStore(keystore);
+    }
+
+    private synchronized IBinder getToken() {
+        if (mToken == null) {
+            mToken = new Binder();
+        }
+        return mToken;
     }
 
     static int getKeyTypeForAlgorithm(String keyType) {
@@ -362,5 +377,101 @@ public class KeyStore {
 
     public int getLastError() {
         return mError;
+    }
+
+    public boolean addRngEntropy(byte[] data) {
+        try {
+            return mBinder.addRngEntropy(data) == NO_ERROR;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return false;
+        }
+    }
+
+    public int generateKey(String alias, KeymasterArguments args, int uid, int flags,
+            KeyCharacteristics outCharacteristics) {
+        try {
+            return mBinder.generateKey(alias, args, uid, flags, outCharacteristics);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
+    public int generateKey(String alias, KeymasterArguments args, int flags,
+            KeyCharacteristics outCharacteristics) {
+        return generateKey(alias, args, UID_SELF, flags, outCharacteristics);
+    }
+
+    public int getKeyCharacteristics(String alias, byte[] clientId, byte[] appId,
+            KeyCharacteristics outCharacteristics) {
+        try {
+            return mBinder.getKeyCharacteristics(alias, clientId, appId, outCharacteristics);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
+    public int importKey(String alias, KeymasterArguments args, int format, byte[] keyData,
+            int uid, int flags, KeyCharacteristics outCharacteristics) {
+        try {
+            return mBinder.importKey(alias, args, format, keyData, uid, flags,
+                    outCharacteristics);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
+    public int importKey(String alias, KeymasterArguments args, int format, byte[] keyData,
+            int flags, KeyCharacteristics outCharacteristics) {
+        return importKey(alias, args, format, keyData, UID_SELF, flags, outCharacteristics);
+    }
+
+    public ExportResult exportKey(String alias, int format, byte[] clientId, byte[] appId) {
+        try {
+            return mBinder.exportKey(alias, format, clientId, appId);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return null;
+        }
+    }
+
+    public OperationResult begin(String alias, int purpose, boolean pruneable,
+            KeymasterArguments args, KeymasterArguments outArgs) {
+        try {
+            return mBinder.begin(getToken(), alias, purpose, pruneable, args, outArgs);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return null;
+        }
+    }
+
+    public OperationResult update(IBinder token, KeymasterArguments arguments, byte[] input) {
+        try {
+            return mBinder.update(token, arguments, input);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return null;
+        }
+    }
+
+    public OperationResult finish(IBinder token, KeymasterArguments arguments, byte[] signature) {
+        try {
+            return mBinder.finish(token, arguments, signature);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return null;
+        }
+    }
+
+    public int abort(IBinder token) {
+        try {
+            return mBinder.abort(token);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
     }
 }
