@@ -88,7 +88,6 @@
     <string name="unlock_label" msgid="8779712358041029439">"అన్‌లాక్ చేయి"</string>
     <string name="phone_label" msgid="2320074140205331708">"ఫోన్‌ను తెరువు"</string>
     <string name="camera_label" msgid="7261107956054836961">"కెమెరాను తెరువు"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ఇన్‌పుట్ పద్ధతి మార్చే బటన్."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"అనుకూలత జూమ్ బటన్."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"చిన్న స్క్రీన్ నుండి పెద్దదానికి జూమ్ చేయండి."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"బ్లూటూత్ కనెక్ట్ చేయబడింది."</string>
