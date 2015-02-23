@@ -16,6 +16,10 @@
 
 package android.security;
 
+import android.security.keymaster.ExportResult;
+import android.security.keymaster.KeyCharacteristics;
+import android.security.keymaster.KeymasterArguments;
+import android.security.keymaster.OperationResult;
 import android.security.KeystoreArguments;
 
 /**
@@ -52,4 +56,19 @@ interface IKeystoreService {
     int reset_uid(int uid);
     int sync_uid(int sourceUid, int targetUid);
     int password_uid(String password, int uid);
+
+    // Keymaster 0.4 methods
+    int addRngEntropy(in byte[] data);
+    int generateKey(String alias, in KeymasterArguments arguments, int uid, int flags,
+        out KeyCharacteristics characteristics);
+    int getKeyCharacteristics(String alias, in byte[] clientId,
+        in byte[] appId, out KeyCharacteristics characteristics);
+    int importKey(String alias, in KeymasterArguments arguments, int format,
+        in byte[] keyData, int uid, int flags, out KeyCharacteristics characteristics);
+    ExportResult exportKey(String alias, int format, in byte[] clientId, in byte[] appId);
+    OperationResult begin(IBinder appToken, String alias, int purpose, boolean pruneable,
+        in KeymasterArguments params, out KeymasterArguments operationParams);
+    OperationResult update(IBinder token, in KeymasterArguments params, in byte[] input);
+    OperationResult finish(IBinder token, in KeymasterArguments params, in byte[] signature);
+    int abort(IBinder handle);
 }
