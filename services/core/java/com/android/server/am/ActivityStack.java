@@ -4162,14 +4162,17 @@ final class ActivityStack {
 
         if (mTaskHistory.isEmpty()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: moving to back stack=" + this);
+            final boolean notHomeStack = !isHomeStack();
             if (isOnHomeDisplay()) {
-                mStackSupervisor.moveHomeStack(!isHomeStack(), reason + " leftTaskHistoryEmpty");
+                mStackSupervisor.moveHomeStack(notHomeStack, reason + " leftTaskHistoryEmpty");
             }
             if (mStacks != null) {
                 mStacks.remove(this);
                 mStacks.add(0, this);
             }
-            mActivityContainer.onTaskListEmptyLocked();
+            if (notHomeStack) {
+                mActivityContainer.onTaskListEmptyLocked();
+            }
         }
 
         task.stack = null;
