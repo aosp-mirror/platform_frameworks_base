@@ -532,7 +532,7 @@ off64_t _FileAsset::seek(off64_t offset, int whence)
 void _FileAsset::close(void)
 {
     if (mMap != NULL) {
-        mMap->release();
+        delete mMap;
         mMap = NULL;
     }
     if (mBuf != NULL) {
@@ -612,7 +612,7 @@ const void* _FileAsset::getBuffer(bool wordAligned)
 
         map = new FileMap;
         if (!map->create(NULL, fileno(mFp), mStart, mLength, true)) {
-            map->release();
+            delete map;
             return NULL;
         }
 
@@ -827,7 +827,7 @@ off64_t _CompressedAsset::seek(off64_t offset, int whence)
 void _CompressedAsset::close(void)
 {
     if (mMap != NULL) {
-        mMap->release();
+        delete mMap;
         mMap = NULL;
     }
 
