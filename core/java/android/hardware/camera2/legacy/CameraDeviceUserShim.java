@@ -504,7 +504,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     @Override
-    public int createStream(int width, int height, int format, Surface surface) {
+    public int createStream(Surface surface) {
         if (DEBUG) {
             Log.d(TAG, "createStream called.");
         }

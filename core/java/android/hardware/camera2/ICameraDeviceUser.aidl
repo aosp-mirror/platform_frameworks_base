@@ -66,7 +66,7 @@ interface ICameraDeviceUser
     int deleteStream(int streamId);
 
     // non-negative value is the stream ID. negative value is status_t
-    int createStream(int width, int height, int format, in Surface surface);
+    int createStream(in Surface surface);
 
     int createDefaultRequest(int templateId, out CameraMetadataNative request);
 
