@@ -5,7 +5,7 @@ page.tags="brand, bugdroid, assets"
 
 @jd:body
 
-<p>We encourage you to use the Android and Google Play brands with your Android app
+<p>We encourage you to use the Android brand with your Android app
 promotional materials. You can use the icons and other assets on this page
 provided that you follow the guidelines.</p>
 
@@ -89,47 +89,9 @@ used according to terms described in the Creative Commons 3.0 Attribution Licens
 
 <p>The custom typeface may not be used.</p>
 
-<h2 id="brand-google_play">Google Play</h2>
+<p>The following are guidelines for the Google Play brand.</p>
 
-
- <p>The following are guidelines for the Google Play brand
- and related assets.</p>
-
-<h4>Google Play in text</h4>
-
-<p>Always include a TM symbol on the first or most prominent instance of Google Play&trade;
-in text.</p>
-
-<p>When referring to the mobile experience, use "Google Play" unless the text is clearly
-instructional for the user. For example, a marketing headline might read "Download our
-games on Google Play&trade;," but instructional text would read "Download our games using the Google
-Play&trade; store app."
-
- <p>Any use of the Google Play name or icon needs to include this
-    attribution in your communication:</p>
-
-<blockquote><em>Google Play is a trademark of Google Inc.</em></blockquote>
-
-
-  <div style="float:right;width:96px;margin-left:30px;margin-top:-20px">
-     <img src="{@docRoot}images/brand/Google_Play_Store_96.png" alt="">
-    <p style="text-align:center">
-       <a href="{@docRoot}images/brand/Google_Play_Store_48.png">48x48</a> |
-       <a href="{@docRoot}images/brand/Google_Play_Store_96.png">96x96</a><br>
-       <a href="{@docRoot}images/brand/Google_Play_Store_600.png">600x576</a>
-       </p>
-  </div>
-
-<h4>Google Play store icon</h4>
-
-<p>You may use the Google Play store icon, but you may not modify it.</p>
-
-<p>As mentioned above, when referring to the Google Play store app in copy, use the full name:
-"Google Play store." However, when labeling the Google Play store icon directly, it's OK to use
-"Play Store" alone to accurately reflect the icon label as it appears on a device.</p>
-
-
-<h4>Google Play badge</h4>
+<h4>Google Play&#8482; Badges</h4>
 
   <div style="float:right;clear:right;width:172px;margin-left:30px">
     <img src="{@docRoot}images/brand/en_app_rgb_wo_60.png" alt="">
@@ -145,21 +107,21 @@ Play&trade; store app."
        <a href="{@docRoot}images/brand/en_generic_rgb_wo_60.png">172x60</a></p>
   </div>
 
-  <p>The "Get it on Google Play" and "Android App on Google Play" logos are
-    badges that you can use on your website and promotional materials, to point
-    to your products on Google Play. Additional Google Play badge formats and
+  <p>Use the "Get it on Google Play" and "Android App on Google Play" badges on your website and
+  promotional materials to point to your products on Google Play. These badges are both available
+  in over 40 languages. Additional Google Play badge formats and
     badges for music, books, magazines, movies, and TV shows are also available.
     Use the  <a
     href="https://support.google.com/googleplay/contact/brand_developer">Android
     and Google Play Brand Permissions Inquiry form</a> to request
     those badges.</p>
 
+  <p>Google Play badge guidelines:</p>
   <ul>
-    <li>Don't modify the color, proportions, spacing, or any other aspect of the badge image.
-    </li>
-    <li>When used alongside logos for other application marketplaces, the Google Play logo
+    <li>Don't modify the color, proportions, spacing, or any other aspect of the badge.</li>
+    <li>When used alongside logos for other application marketplaces, the Google Play badge
     should be of equal or greater size.</li>
-    <li>When used online, the badge should link to either:
+    <li>When used online, the badge should link to either:</li>
       <ul>
         <li>A list of products published by you, for example:<br />
         <span style="margin-left:1em;">http://play.google.com/store/search?q=<em>publisherName</em></span>
@@ -168,20 +130,58 @@ Play&trade; store app."
         <span style="margin-left:1em;">http://play.google.com/store/apps/details?id=<em>packageName</em></span>
         </li>
       </ul>
+    <li>You do not need to include a legal attribution if you are only using a Google Play badge.
+    However, keep in mind that:</li>
+     <ul>
+     <li>If you make any mention of Google Play or Android outside of the badge a legal attribution
+     must be included. </li>
+     <li>If you are including another app store’s legal attribution then include this legal
+     attribution:</li>
+      <ul>
+      <li>Google Play is a trademark of Google Inc.</li>
+      </ul>
     </li>
+    <li>Use of the Google Play badge does not need to be reviewed or approved by the Google Play
+    brand team unless the marketing campaign will have over 1 million impressions.</li>
   </ul>
 
   <p>To quickly create a badge that links to your apps on Google Play,
   use the <a
   href="{@docRoot}distribute/tools/promote/badges.html">Google Play badge generator</a>
-  (provides the badge in over 40 languages).</p>
-
-  <p>To create your own size, download an Adobe&reg; Illustrator&reg; (.ai) file for the
-  <a href="{@docRoot}distribute/tools/promote/badge-files.html">Google Play
-  badge in over 40 languages</a>.</p>
+  (badges available in over 40 languages).</p>
 
   <p>For details on all the ways that you can link to your product details page in Google Play,
     see <a href="{@docRoot}distribute/tools/promote/linking.html">Linking to your products</a>.</p>
+
+<h2 id="Marketing_Review">Google Play in Text</h2>
+
+<p>Any use of Google Play in text must be reviewed and approved by the Google Play brand team.
+Submit your marketing via the <a href="https://support.google.com/googleplay/contact/brand_developer">
+Android and Google Play Partner Brand Inquiry Form.</a></p>
+
+<p>Always include a ™ symbol on the first or most prominent instance of Google Play™ in text.</p>
+
+<p>When mentioning that a product is available on Google Play always say “on Google Play”</p>
+
+<ul>
+<li><span style="color:red">Incorrect</span>: Our app is now available from Google Play.</li>
+<li><span style="color:green">Correct</span>: Our app is now available on Google Play.</li>
+</ul>
+<br>
+<p>Only refer to Google Play as the Google Play™ store app in instructional text meant to inform a
+customer about how to find or download your product on Google Play.</p>
+
+<ul>
+<li><span style="color:red">Incorrect</span>:  Download our games using the Google Play™ store app.</li>
+<li><span style="color:green">Correct</span>: This is how you download our app using the Google
+Play™ store app.</li>
+</ul>
+<br>
+
+<p>Any use of the Google Play name in your marketing or communications needs to be accompanied by
+this legal attribution:</p>
+
+<p><em>Google Play is a trademark of Google Inc.</em></p>
 
 <h2 id="Marketing_Review">Marketing Reviews and Brand Inquiries</h2>
 
