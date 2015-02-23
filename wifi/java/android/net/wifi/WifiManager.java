@@ -1238,6 +1238,21 @@ public class WifiManager {
     }
 
     /**
+    * get the country code.
+    * @return the country code in ISO 3166 format.
+    *
+    * @hide
+    */
+    public String getCountryCode() {
+       try {
+           String country = mService.getCountryCode();
+           return(country);
+       } catch (RemoteException e) {
+           return null;
+       }
+    }
+
+    /**
      * Set the operational frequency band.
      * @param band  One of
      *     {@link #WIFI_FREQUENCY_BAND_AUTO},
