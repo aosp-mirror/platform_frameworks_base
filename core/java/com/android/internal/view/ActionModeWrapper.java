@@ -24,13 +24,28 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.widget.ActionBarContextView;
 
 /**
  * ActionMode implementation that wraps several actions modes and creates them on the fly depending
  * on the ActionMode type chosen by the client.
  */
 public class ActionModeWrapper extends ActionMode {
+
+    /**
+     * Interface to defer the ActionMode creation until the type is chosen.
+     */
+    public interface ActionModeProvider {
+        /**
+         * Create the desired ActionMode, that will immediately be used as the current active mode
+         * in the decorator.
+         *
+         * @param callback The {@link ActionMode.Callback} to be used.
+         * @param menuBuilder The {@link MenuBuilder} that should be used by the created
+         *      {@link ActionMode}. This will already have been populated.
+         * @return A new {@link ActionMode} ready to be used that uses menuBuilder as its menu.
+         */
+        ActionMode createActionMode(ActionMode.Callback callback, MenuBuilder menuBuilder);
+    }
 
     private ActionMode mActionMode;
     private final Context mContext;
@@ -41,16 +56,16 @@ public class ActionModeWrapper extends ActionMode {
     private CharSequence mTitle;
     private CharSequence mSubtitle;
     private View mCustomView;
+    
+    private final ActionModeProvider mActionModeProvider;
 
-    // Fields for StandaloneActionMode
-    private ActionBarContextView mActionModeView;
-    private boolean mIsFocusable;
-
-    public ActionModeWrapper(Context context, ActionMode.Callback callback) {
+    public ActionModeWrapper(
+            Context context, ActionMode.Callback callback, ActionModeProvider actionModeProvider) {
         mContext = context;
         mMenu = new MenuBuilder(context).setDefaultShowAsAction(
                 MenuItem.SHOW_AS_ACTION_IF_ROOM);
         mCallback = callback;
+        mActionModeProvider = actionModeProvider;
     }
 
     @Override
@@ -107,9 +122,7 @@ public class ActionModeWrapper extends ActionMode {
         switch (getType()) {
             case ActionMode.TYPE_PRIMARY:
             default:
-                mActionMode = new StandaloneActionMode(
-                        mActionModeView.getContext(),
-                        mActionModeView, mCallback, mIsFocusable, mMenu);
+                mActionMode = mActionModeProvider.createActionMode(mCallback, mMenu);
                 break;
             case ActionMode.TYPE_FLOATING:
                 // Not implemented yet.
@@ -187,14 +200,6 @@ public class ActionModeWrapper extends ActionMode {
     @Override
     public MenuInflater getMenuInflater() {
         return new MenuInflater(mContext);
-    }
-
-    public void setActionModeView(ActionBarContextView actionModeView) {
-        mActionModeView = actionModeView;
-    }
-
-    public void setFocusable(boolean focusable) {
-        mIsFocusable = focusable;
     }
 
 }
