@@ -27,6 +27,7 @@ import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
 import android.app.trust.TrustManager;
 import android.app.usage.IUsageStatsManager;
+import android.app.usage.NetworkStatsManager;
 import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothManager;
@@ -637,6 +638,13 @@ final class SystemServiceRegistry {
                 IBinder iBinder = ServiceManager.getService(Context.USAGE_STATS_SERVICE);
                 IUsageStatsManager service = IUsageStatsManager.Stub.asInterface(iBinder);
                 return new UsageStatsManager(ctx.getOuterContext(), service);
+            }});
+
+        registerService(Context.NETWORK_STATS_SERVICE, NetworkStatsManager.class,
+                new CachedServiceFetcher<NetworkStatsManager>() {
+            @Override
+            public NetworkStatsManager createService(ContextImpl ctx) {
+                return new NetworkStatsManager(ctx.getOuterContext());
             }});
 
         registerService(Context.JOB_SCHEDULER_SERVICE, JobScheduler.class,

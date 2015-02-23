@@ -18,6 +18,7 @@ package android.util;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Arrays;
 import libcore.util.EmptyArray;
 
 /**
@@ -75,6 +76,24 @@ public class IntArray implements Cloneable {
 
         mValues[index] = value;
         mSize++;
+    }
+
+    /**
+     * Searches the array for the specified value using the binary search algorithm. The array must
+     * be sorted (as by the {@link Arrays#sort(int[], int, int)} method) prior to making this call.
+     * If it is not sorted, the results are undefined. If the range contains multiple elements with
+     * the specified value, there is no guarantee which one will be found.
+     *
+     * @param value The value to search for.
+     * @return index of the search key, if it is contained in the array; otherwise, <i>(-(insertion
+     *         point) - 1)</i>. The insertion point is defined as the point at which the key would
+     *         be inserted into the array: the index of the first element greater than the key, or
+     *         {@link #size()} if all elements in the array are less than the specified key.
+     *         Note that this guarantees that the return value will be >= 0 if and only if the key
+     *         is found.
+     */
+    public int binarySearch(int value) {
+        return ContainerHelpers.binarySearch(mValues, mSize, value);
     }
 
     /**
@@ -158,5 +177,12 @@ public class IntArray implements Cloneable {
      */
     public int size() {
         return mSize;
+    }
+
+    /**
+     * Returns a new array with the contents of this IntArray.
+     */
+    public int[] toArray() {
+        return Arrays.copyOf(mValues, mSize);
     }
 }

@@ -23,6 +23,9 @@ import android.net.NetworkTemplate;
 /** {@hide} */
 interface INetworkStatsSession {
 
+    /** Return device aggregated network layer usage summary for traffic that matches template. */
+    NetworkStats getDeviceSummaryForNetwork(in NetworkTemplate template, long start, long end);
+
     /** Return network layer usage summary for traffic that matches template. */
     NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
     /** Return historical network layer stats for traffic that matches template. */
@@ -32,6 +35,9 @@ interface INetworkStatsSession {
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
     /** Return historical network layer stats for specific UID traffic that matches template. */
     NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int set, int tag, int fields);
+
+    /** Return array of uids that have stats and are accessible to the calling user */
+    int[] getRelevantUids();
 
     void close();
 
