@@ -423,27 +423,41 @@ public abstract class Drawable {
      * Returns the resolved layout direction for this Drawable.
      *
      * @return One of {@link android.view.View#LAYOUT_DIRECTION_LTR},
-     *   {@link android.view.View#LAYOUT_DIRECTION_RTL}
-     *
-     * @hide
+     *         {@link android.view.View#LAYOUT_DIRECTION_RTL}
+     * @see #setLayoutDirection(int)
      */
     public int getLayoutDirection() {
         return mLayoutDirection;
     }
 
     /**
-     * Set the layout direction for this drawable. Should be a resolved direction as the
-     * Drawable as no capacity to do the resolution on his own.
+     * Set the layout direction for this drawable. Should be a resolved
+     * layout direction, as the Drawable as no capacity to do the resolution on
+     * its own.
      *
-     * @param layoutDirection One of {@link android.view.View#LAYOUT_DIRECTION_LTR},
-     *   {@link android.view.View#LAYOUT_DIRECTION_RTL}
-     *
-     * @hide
+     * @param layoutDirection the resolved layout direction for the drawable,
+     *                        either {@link android.view.View#LAYOUT_DIRECTION_LTR}
+     *                        or {@link android.view.View#LAYOUT_DIRECTION_RTL}
+     * @see #getLayoutDirection()
      */
-    public void setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
-        if (getLayoutDirection() != layoutDirection) {
+    public final boolean setLayoutDirection(@View.ResolvedLayoutDir int layoutDirection) {
+        if (mLayoutDirection != layoutDirection) {
             mLayoutDirection = layoutDirection;
+            return onLayoutDirectionChange(layoutDirection);
         }
+        return false;
+    }
+
+    /**
+     * Called when the drawable's resolved layout direction changes.
+     *
+     * @param layoutDirection the new resolved layout direction
+     * @return true if the layout direction change has caused the appearance of
+     *         the drawable to change and it needs to be re-drawn
+     * @see #setLayoutDirection(int)
+     */
+    public boolean onLayoutDirectionChange(@View.ResolvedLayoutDir int layoutDirection) {
+        return false;
     }
 
     /**
@@ -554,14 +568,20 @@ public abstract class Drawable {
      * Sets the bounds to which the hotspot is constrained, if they should be
      * different from the drawable bounds.
      *
-     * @param left
-     * @param top
-     * @param right
-     * @param bottom
+     * @param left position in pixels of the left bound
+     * @param top position in pixels of the top bound
+     * @param right position in pixels of the right bound
+     * @param bottom position in pixels of the bottom bound
+     * @see #getHotspotBounds(android.graphics.Rect)
      */
     public void setHotspotBounds(int left, int top, int right, int bottom) {}
 
-    /** @hide For internal use only. Individual results may vary. */
+    /**
+     * Populates {@code outRect} with the hotspot bounds.
+     *
+     * @param outRect the rect to populate with the hotspot bounds
+     * @see #setHotspotBounds(int, int, int, int)
+     */
     public void getHotspotBounds(Rect outRect) {
         outRect.set(getBounds());
     }

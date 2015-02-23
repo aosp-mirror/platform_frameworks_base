@@ -20,15 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.ColorFilter;
-import android.graphics.PorterDuff.Mode;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.util.Log;
 import android.os.SystemClock;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -41,35 +37,15 @@ import com.android.internal.R;
 /**
  * @hide
  */
-public class AnimatedRotateDrawable extends Drawable implements Drawable.Callback, Runnable,
-        Animatable {
-    private static final String TAG = "AnimatedRotateDrawable";
-
+public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable, Animatable {
     private AnimatedRotateState mState;
-    private boolean mMutated;
+
     private float mCurrentDegrees;
     private float mIncrement;
     private boolean mRunning;
 
     public AnimatedRotateDrawable() {
-        this(null, null);
-    }
-
-    private AnimatedRotateDrawable(AnimatedRotateState rotateState, Resources res) {
-        mState = new AnimatedRotateState(rotateState, this, res);
-        init();
-    }
-
-    private void init() {
-        final AnimatedRotateState state = mState;
-        mIncrement = 360.0f / state.mFramesCount;
-        final Drawable drawable = state.mDrawable;
-        if (drawable != null) {
-            drawable.setFilterBitmap(true);
-            if (drawable instanceof BitmapDrawable) {
-                ((BitmapDrawable) drawable).setAntiAlias(true);
-            }
-        }
+        this(new AnimatedRotateState(null), null);
     }
 
     @Override
@@ -131,8 +107,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        mState.mDrawable.setVisible(visible, restart);
-        boolean changed = super.setVisible(visible, restart);
+        final boolean changed = super.setVisible(visible, restart);
         if (visible) {
             if (changed || restart) {
                 mCurrentDegrees = 0.0f;
@@ -144,123 +119,6 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         return changed;
     }
 
-    /**
-     * Returns the drawable rotated by this RotateDrawable.
-     */
-    public Drawable getDrawable() {
-        return mState.mDrawable;
-    }
-
-    @Override
-    public int getChangingConfigurations() {
-        return super.getChangingConfigurations()
-                | mState.mChangingConfigurations
-                | mState.mDrawable.getChangingConfigurations();
-    }
-
-    @Override
-    public void setAlpha(int alpha) {
-        mState.mDrawable.setAlpha(alpha);
-    }
-
-    @Override
-    public int getAlpha() {
-        return mState.mDrawable.getAlpha();
-    }
-
-    @Override
-    public void setColorFilter(ColorFilter cf) {
-        mState.mDrawable.setColorFilter(cf);
-    }
-
-    @Override
-    public void setTintList(ColorStateList tint) {
-        mState.mDrawable.setTintList(tint);
-    }
-
-    @Override
-    public void setTintMode(Mode tintMode) {
-        mState.mDrawable.setTintMode(tintMode);
-    }
-
-    @Override
-    public int getOpacity() {
-        return mState.mDrawable.getOpacity();
-    }
-
-    @Override
-    public boolean canApplyTheme() {
-        return (mState != null && mState.canApplyTheme()) || super.canApplyTheme();
-    }
-
-    @Override
-    public void invalidateDrawable(Drawable who) {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.invalidateDrawable(this);
-        }
-    }
-
-    @Override
-    public void scheduleDrawable(Drawable who, Runnable what, long when) {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.scheduleDrawable(this, what, when);
-        }
-    }
-
-    @Override
-    public void unscheduleDrawable(Drawable who, Runnable what) {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.unscheduleDrawable(this, what);
-        }
-    }
-
-    @Override
-    public boolean getPadding(Rect padding) {
-        return mState.mDrawable.getPadding(padding);
-    }
-
-    @Override
-    public boolean isStateful() {
-        return mState.mDrawable.isStateful();
-    }
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        mState.mDrawable.setBounds(bounds.left, bounds.top, bounds.right, bounds.bottom);
-    }
-
-    @Override
-    protected boolean onLevelChange(int level) {
-        return mState.mDrawable.setLevel(level);
-    }
-
-    @Override
-    protected boolean onStateChange(int[] state) {
-        return mState.mDrawable.setState(state);
-    }
-
-    @Override
-    public int getIntrinsicWidth() {
-        return mState.mDrawable.getIntrinsicWidth();
-    }
-
-    @Override
-    public int getIntrinsicHeight() {
-        return mState.mDrawable.getIntrinsicHeight();
-    }
-
-    @Override
-    public ConstantState getConstantState() {
-        if (mState.canConstantState()) {
-            mState.mChangingConfigurations = getChangingConfigurations();
-            return mState;
-        }
-        return null;
-    }
-
     @Override
     public void inflate(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
@@ -268,50 +126,27 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.AnimatedRotateDrawable);
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedRotateDrawable_visible);
         updateStateFromTypedArray(a);
+        verifyRequiredAttributes(a);
         a.recycle();
 
-        inflateChildElements(r, parser, attrs, theme);
+        updateLocalState();
+    }
 
-        init();
+    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
+        // If we're not waiting on a theme, verify required attributes.
+        if (getDrawable() == null && (mState.mThemeAttrs == null
+                || mState.mThemeAttrs[R.styleable.AnimatedRotateDrawable_drawable] == 0)) {
+            throw new XmlPullParserException(a.getPositionDescription()
+                    + ": <animated-rotate> tag requires a 'drawable' attribute or "
+                    + "child tag defining a drawable");
+        }
     }
 
     @Override
-    public void applyTheme(@Nullable Theme t) {
-        super.applyTheme(t);
+    void updateStateFromTypedArray(TypedArray a) {
+        super.updateStateFromTypedArray(a);
 
         final AnimatedRotateState state = mState;
-        if (state == null) {
-            return;
-        }
-
-        if (state.mThemeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(
-                    state.mThemeAttrs, R.styleable.AnimatedRotateDrawable);
-            try {
-                updateStateFromTypedArray(a);
-                verifyRequiredAttributes(a);
-            } catch (XmlPullParserException e) {
-                throw new RuntimeException(e);
-            } finally {
-                a.recycle();
-            }
-        }
-
-        if (state.mDrawable != null && state.mDrawable.canApplyTheme()) {
-            state.mDrawable.applyTheme(t);
-        }
-
-        init();
-    }
-
-    private void updateStateFromTypedArray(TypedArray a) {
-        final AnimatedRotateState state = mState;
-
-        // Account for any configuration changes.
-        state.mChangingConfigurations |= a.getChangingConfigurations();
-
-        // Extract the theme attributes, if any.
-        state.mThemeAttrs = a.extractThemeAttrs();
 
         if (a.hasValue(R.styleable.AnimatedRotateDrawable_pivotX)) {
             final TypedValue tv = a.peekValue(R.styleable.AnimatedRotateDrawable_pivotX);
@@ -332,43 +167,35 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
 
         final Drawable dr = a.getDrawable(R.styleable.AnimatedRotateDrawable_drawable);
         if (dr != null) {
-            state.mDrawable = dr;
-            dr.setCallback(this);
+            setDrawable(dr);
         }
     }
 
-    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
-            Theme theme) throws XmlPullParserException, IOException {
+    @Override
+    public void applyTheme(@Nullable Theme t) {
         final AnimatedRotateState state = mState;
+        if (state == null) {
+            return;
+        }
 
-        Drawable dr = null;
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type != XmlPullParser.START_TAG) {
-                continue;
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(
+                    state.mThemeAttrs, R.styleable.AnimatedRotateDrawable);
+            try {
+                updateStateFromTypedArray(a);
+                verifyRequiredAttributes(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
             }
-
-            if ((dr = Drawable.createFromXmlInner(r, parser, attrs, theme)) == null) {
-                Log.w(TAG, "Bad element under <animated-rotate>: " + parser.getName());
-            }
         }
 
-        if (dr != null) {
-            state.mDrawable = dr;
-            dr.setCallback(this);
-        }
-    }
+        // The drawable may have changed as a result of applying the theme, so
+        // apply the theme to the wrapped drawable last.
+        super.applyTheme(t);
 
-    private void verifyRequiredAttributes(TypedArray a) throws XmlPullParserException {
-        // If we're not waiting on a theme, verify required attributes.
-        if (mState.mDrawable == null && (mState.mThemeAttrs == null
-                || mState.mThemeAttrs[R.styleable.AnimatedRotateDrawable_drawable] == 0)) {
-            throw new XmlPullParserException(a.getPositionDescription()
-                    + ": <animated-rotate> tag requires a 'drawable' attribute or "
-                    + "child tag defining a drawable");
-        }
+        updateLocalState();
     }
 
     public void setFramesCount(int framesCount) {
@@ -380,25 +207,7 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         mState.mFrameDuration = framesDuration;
     }
 
-    @Override
-    public Drawable mutate() {
-        if (!mMutated && super.mutate() == this) {
-            mState.mDrawable.mutate();
-            mMutated = true;
-        }
-        return this;
-    }
-
-    /**
-     * @hide
-     */
-    public void clearMutated() {
-        super.clearMutated();
-        mState.mDrawable.clearMutated();
-        mMutated = false;
-    }
-
-    final static class AnimatedRotateState extends Drawable.ConstantState {
+    static final class AnimatedRotateState extends DrawableWrapper.DrawableWrapperState {
         Drawable mDrawable;
         int[] mThemeAttrs;
 
@@ -414,32 +223,17 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
         private boolean mCanConstantState;
         private boolean mCheckedConstantState;
 
-        public AnimatedRotateState(AnimatedRotateState orig, AnimatedRotateDrawable owner,
-                Resources res) {
+        public AnimatedRotateState(AnimatedRotateState orig) {
+            super(orig);
+
             if (orig != null) {
-                if (res != null) {
-                    mDrawable = orig.mDrawable.getConstantState().newDrawable(res);
-                } else {
-                    mDrawable = orig.mDrawable.getConstantState().newDrawable();
-                }
-                mDrawable.setCallback(owner);
-                mDrawable.setLayoutDirection(orig.mDrawable.getLayoutDirection());
-                mDrawable.setBounds(orig.mDrawable.getBounds());
-                mDrawable.setLevel(orig.mDrawable.getLevel());
-                mThemeAttrs = orig.mThemeAttrs;
                 mPivotXRel = orig.mPivotXRel;
                 mPivotX = orig.mPivotX;
                 mPivotYRel = orig.mPivotYRel;
                 mPivotY = orig.mPivotY;
                 mFramesCount = orig.mFramesCount;
                 mFrameDuration = orig.mFrameDuration;
-                mCanConstantState = mCheckedConstantState = true;
             }
-        }
-
-        @Override
-        public Drawable newDrawable() {
-            return new AnimatedRotateDrawable(this, null);
         }
 
         @Override
@@ -465,6 +259,29 @@ public class AnimatedRotateDrawable extends Drawable implements Drawable.Callbac
             }
 
             return mCanConstantState;
+        }
+    }
+
+    private AnimatedRotateDrawable(AnimatedRotateState state, Resources res) {
+        super(state, res);
+
+        mState = state;
+
+        updateLocalState();
+    }
+
+    private void updateLocalState() {
+        final AnimatedRotateState state = mState;
+        mIncrement = 360.0f / state.mFramesCount;
+
+        // Force the wrapped drawable to use filtering and AA, if applicable,
+        // so that it looks smooth when rotated.
+        final Drawable drawable = state.mDrawable;
+        if (drawable != null) {
+            drawable.setFilterBitmap(true);
+            if (drawable instanceof BitmapDrawable) {
+                ((BitmapDrawable) drawable).setAntiAlias(true);
+            }
         }
     }
 }
