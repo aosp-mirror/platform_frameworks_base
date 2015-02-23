@@ -167,4 +167,5 @@
     <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Nupp Esita"</string>
     <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Nupp Peata"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Teenus puudub."</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Sisestusmeetodi vahetamise nupp."</string>
 </resources>
