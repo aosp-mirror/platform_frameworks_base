@@ -1244,7 +1244,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         mCalled = true;
     }
 
@@ -1310,7 +1310,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      * @param savedInstanceState If the fragment is being re-created from
      * a previous saved state, this is the state.
      */
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         mCalled = true;
     }
 
