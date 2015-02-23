@@ -423,8 +423,8 @@ public abstract class AbsSeekBar extends ProgressBar {
         }
 
         if (track != null) {
-            track.setBounds(0, trackOffset, w - mPaddingRight - mPaddingLeft,
-                    h - mPaddingBottom - trackOffset - mPaddingTop);
+            final int trackWidth = w - mPaddingRight - mPaddingLeft;
+            track.setBounds(0, trackOffset, trackWidth, trackOffset + trackHeight);
         }
 
         if (thumb != null) {
@@ -472,7 +472,6 @@ public abstract class AbsSeekBar extends ProgressBar {
 
         final Drawable background = getBackground();
         if (background != null) {
-            final Rect bounds = thumb.getBounds();
             final int offsetX = mPaddingLeft - mThumbOffset;
             final int offsetY = mPaddingTop;
             background.setHotspotBounds(left + offsetX, top + offsetY,

@@ -558,10 +558,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * default layer gravity behavior. See {@link #setLayerGravity(int, int)}
      * for more information.
      *
-     * @param index the index of the drawable to adjust
+     * @param index the index of the layer to adjust
      * @param w width in pixels, or -1 to use the intrinsic width
      * @param h height in pixels, or -1 to use the intrinsic height
-     *
      * @see #getLayerWidth(int)
      * @see #getLayerHeight(int)
      * @attr ref android.R.styleable#LayerDrawableItem_width
@@ -574,9 +573,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
+     * @param index the index of the layer to adjust
+     * @param w width in pixels, or -1 to use the intrinsic width
+     * @attr ref android.R.styleable#LayerDrawableItem_width
+     */
+    public void setLayerWidth(int index, int w) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mWidth = w;
+    }
+
+    /**
      * @param index the index of the drawable to adjust
      * @return the explicit width of the layer, or -1 if not specified
-     *
      * @see #setLayerSize(int, int, int)
      * @attr ref android.R.styleable#LayerDrawableItem_width
      */
@@ -586,9 +594,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     /**
+     * @param index the index of the layer to adjust
+     * @param h height in pixels, or -1 to use the intrinsic height
+     * @attr ref android.R.styleable#LayerDrawableItem_height
+     */
+    public void setLayerHeight(int index, int h) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mHeight = h;
+    }
+
+    /**
      * @param index the index of the drawable to adjust
      * @return the explicit height of the layer, or -1 if not specified
-     *
      * @see #setLayerSize(int, int, int)
      * @attr ref android.R.styleable#LayerDrawableItem_height
      */
@@ -656,7 +673,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      * Specifies the relative insets in pixels for the drawable at the
      * specified index.
      *
-     * @param index the index of the drawable to adjust
+     * @param index the index of the layer to adjust
      * @param s number of pixels to inset from the start bound
      * @param t number of pixels to inset from the top bound
      * @param e number of pixels to inset from the end bound
@@ -669,6 +686,126 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      */
     public void setLayerInsetRelative(int index, int s, int t, int e, int b) {
         setLayerInsetInternal(index, 0, t, 0, b, s, e);
+    }
+
+    /**
+     * @param index the index of the layer to adjust
+     * @param l number of pixels to inset from the left bound
+     * @attr ref android.R.styleable#LayerDrawableItem_left
+     */
+    public void setLayerInsetLeft(int index, int l) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetL = l;
+    }
+
+    /**
+     * @param index the index of the layer
+     * @return number of pixels to inset from the left bound
+     * @attr ref android.R.styleable#LayerDrawableItem_left
+     */
+    public int getLayerInsetLeft(int index) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        return childDrawable.mInsetL;
+    }
+
+    /**
+     * @param index the index of the layer to adjust
+     * @param r number of pixels to inset from the right bound
+     * @attr ref android.R.styleable#LayerDrawableItem_right
+     */
+    public void setLayerInsetRight(int index, int r) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetR = r;
+    }
+
+    /**
+     * @param index the index of the layer
+     * @return number of pixels to inset from the right bound
+     * @attr ref android.R.styleable#LayerDrawableItem_right
+     */
+    public int getLayerInsetRight(int index) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        return childDrawable.mInsetR;
+    }
+
+    /**
+     * @param index the index of the layer to adjust
+     * @param t number of pixels to inset from the top bound
+     * @attr ref android.R.styleable#LayerDrawableItem_top
+     */
+    public void setLayerInsetTop(int index, int t) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetT = t;
+    }
+
+    /**
+     * @param index the index of the layer
+     * @return number of pixels to inset from the top bound
+     * @attr ref android.R.styleable#LayerDrawableItem_top
+     */
+    public int getLayerInsetTop(int index) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        return childDrawable.mInsetT;
+    }
+
+    /**
+     * @param index the index of the layer to adjust
+     * @param b number of pixels to inset from the bottom bound
+     * @attr ref android.R.styleable#LayerDrawableItem_bottom
+     */
+    public void setLayerInsetBottom(int index, int b) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetB = b;
+    }
+
+    /**
+     * @param index the index of the layer
+     * @return number of pixels to inset from the bottom bound
+     * @attr ref android.R.styleable#LayerDrawableItem_bottom
+     */
+    public int getLayerInsetBottom(int index) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        return childDrawable.mInsetB;
+    }
+
+    /**
+     * @param index the index of the layer to adjust
+     * @param s number of pixels to inset from the start bound
+     * @attr ref android.R.styleable#LayerDrawableItem_start
+     */
+    public void setLayerInsetStart(int index, int s) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetS = s;
+    }
+
+    /**
+     * @param index the index of the layer
+     * @return number of pixels to inset from the start bound
+     * @attr ref android.R.styleable#LayerDrawableItem_start
+     */
+    public int getLayerInsetStart(int index) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        return childDrawable.mInsetS;
+    }
+
+    /**
+     * @param index the index of the layer to adjust
+     * @param e number of pixels to inset from the end bound
+     * @attr ref android.R.styleable#LayerDrawableItem_end
+     */
+    public void setLayerInsetEnd(int index, int e) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        childDrawable.mInsetE = e;
+    }
+
+    /**
+     * @param index the index of the layer
+     * @return number of pixels to inset from the end bound
+     * @attr ref android.R.styleable#LayerDrawableItem_end
+     */
+    public int getLayerInsetEnd(int index) {
+        final ChildDrawable childDrawable = mLayerState.mChildren[index];
+        return childDrawable.mInsetE;
     }
 
     private void setLayerInsetInternal(int index, int l, int t, int r, int b, int s, int e) {

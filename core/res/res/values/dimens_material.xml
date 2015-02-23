@@ -115,5 +115,6 @@
     <!-- Padding above and below selection dialog lists. -->
     <dimen name="dialog_list_padding_vertical_material">8dp</dimen>
 
+    <dimen name="scrubber_track_height_material">2dp</dimen>
     <dimen name="progress_bar_height_material">4dp</dimen>
 </resources>

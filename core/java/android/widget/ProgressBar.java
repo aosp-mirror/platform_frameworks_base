@@ -401,36 +401,49 @@ public class ProgressBar extends View {
      * traverse layer and state list drawables.
      */
     private Drawable tileify(Drawable drawable, boolean clip) {
+        // TODO: This is a terrible idea that potentially destroys any drawable
+        // that extends any of these classes. We *really* need to remove this.
 
         if (drawable instanceof LayerDrawable) {
-            LayerDrawable background = (LayerDrawable) drawable;
-            final int N = background.getNumberOfLayers();
-            Drawable[] outDrawables = new Drawable[N];
+            final LayerDrawable orig = (LayerDrawable) drawable;
+            final int N = orig.getNumberOfLayers();
+            final Drawable[] outDrawables = new Drawable[N];
 
             for (int i = 0; i < N; i++) {
-                int id = background.getId(i);
-                outDrawables[i] = tileify(background.getDrawable(i),
+                final int id = orig.getId(i);
+                outDrawables[i] = tileify(orig.getDrawable(i),
                         (id == R.id.progress || id == R.id.secondaryProgress));
             }
 
-            LayerDrawable newBg = new LayerDrawable(outDrawables);
-
+            final LayerDrawable clone = new LayerDrawable(outDrawables);
             for (int i = 0; i < N; i++) {
-                newBg.setId(i, background.getId(i));
+                clone.setId(i, orig.getId(i));
+                clone.setLayerGravity(i, orig.getLayerGravity(i));
+                clone.setLayerWidth(i, orig.getLayerWidth(i));
+                clone.setLayerHeight(i, orig.getLayerHeight(i));
+                clone.setLayerInsetLeft(i, orig.getLayerInsetLeft(i));
+                clone.setLayerInsetRight(i, orig.getLayerInsetRight(i));
+                clone.setLayerInsetTop(i, orig.getLayerInsetTop(i));
+                clone.setLayerInsetBottom(i, orig.getLayerInsetBottom(i));
+                clone.setLayerInsetStart(i, orig.getLayerInsetStart(i));
+                clone.setLayerInsetEnd(i, orig.getLayerInsetEnd(i));
             }
 
-            return newBg;
+            return clone;
+        }
 
-        } else if (drawable instanceof StateListDrawable) {
-            StateListDrawable in = (StateListDrawable) drawable;
-            StateListDrawable out = new StateListDrawable();
-            int numStates = in.getStateCount();
-            for (int i = 0; i < numStates; i++) {
+        if (drawable instanceof StateListDrawable) {
+            final StateListDrawable in = (StateListDrawable) drawable;
+            final StateListDrawable out = new StateListDrawable();
+            final int N = in.getStateCount();
+            for (int i = 0; i < N; i++) {
                 out.addState(in.getStateSet(i), tileify(in.getStateDrawable(i), clip));
             }
-            return out;
 
-        } else if (drawable instanceof BitmapDrawable) {
+            return out;
+        }
+
+        if (drawable instanceof BitmapDrawable) {
             final BitmapDrawable bitmap = (BitmapDrawable) drawable;
             final Bitmap tileBitmap = bitmap.getBitmap();
             if (mSampleTile == null) {
@@ -1648,7 +1661,7 @@ public class ProgressBar extends View {
             // rotates properly in its animation
             final int saveCount = canvas.save();
 
-            if(isLayoutRtl() && mMirrorForRtl) {
+            if (isLayoutRtl() && mMirrorForRtl) {
                 canvas.translate(getWidth() - mPaddingRight, mPaddingTop);
                 canvas.scale(-1.0f, 1.0f);
             } else {
@@ -1680,20 +1693,23 @@ public class ProgressBar extends View {
 
     @Override
     protected synchronized void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Drawable d = mCurrentDrawable;
-
         int dw = 0;
         int dh = 0;
+
+        final Drawable d = mCurrentDrawable;
         if (d != null) {
             dw = Math.max(mMinWidth, Math.min(mMaxWidth, d.getIntrinsicWidth()));
             dh = Math.max(mMinHeight, Math.min(mMaxHeight, d.getIntrinsicHeight()));
         }
+
         updateDrawableState();
+
         dw += mPaddingLeft + mPaddingRight;
         dh += mPaddingTop + mPaddingBottom;
 
-        setMeasuredDimension(resolveSizeAndState(dw, widthMeasureSpec, 0),
-                resolveSizeAndState(dh, heightMeasureSpec, 0));
+        final int measuredWidth = resolveSizeAndState(dw, widthMeasureSpec, 0);
+        final int measuredHeight = resolveSizeAndState(dh, heightMeasureSpec, 0);
+        setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
     @Override
@@ -1703,7 +1719,7 @@ public class ProgressBar extends View {
     }
 
     private void updateDrawableState() {
-        int[] state = getDrawableState();
+        final int[] state = getDrawableState();
 
         if (mProgressDrawable != null && mProgressDrawable.isStateful()) {
             mProgressDrawable.setState(state);

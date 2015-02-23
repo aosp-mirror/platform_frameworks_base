@@ -14,15 +14,7 @@
      limitations under the License.
 -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:gravity="center_vertical|fill_horizontal"
-          android:start="4dp"
-          android:end="4dp">
-        <shape android:shape="rectangle"
-               android:tint="@color/switch_track_material">
-            <corners android:radius="7dp" />
-            <solid android:color="@color/white_disabled_material" />
-            <size android:height="14dp" />
-        </shape>
-    </item>
-</layer-list>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/white"
+          android:alpha="?attr/disabledAlpha" />
+</selector>
