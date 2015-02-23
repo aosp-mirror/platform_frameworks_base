@@ -1058,7 +1058,7 @@
     <string name="factorytest_reboot" msgid="6320168203050791643">"Վերաբեռնել"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"«<xliff:g id="TITLE">%s</xliff:g>»-ի էջում ասվում է`"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
-    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Հաստատել կողմնորոշումը"</string>
+    <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Գործողության հաստատում"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Լքել այս էջը"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Մնալ այս էջում"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nՎստա՞հ եք, որ ցանկանում եք հեռանալ այս էջից:"</string>
