@@ -4199,6 +4199,13 @@ public class Editor {
     }
 
     /**
+     * @return True iff (start, end) is a valid range within the text.
+     */
+    private static boolean isValidRange(CharSequence text, int start, int end) {
+        return 0 <= start && start <= end && end <= text.length();
+    }
+
+    /**
      * An InputFilter that monitors text input to maintain undo history. It does not modify the
      * text being typed (and hence always returns null from the filter() method).
      */
@@ -4213,97 +4220,123 @@ public class Editor {
         public CharSequence filter(CharSequence source, int start, int end,
                 Spanned dest, int dstart, int dend) {
             if (DEBUG_UNDO) {
-                Log.d(TAG, "filter: source=" + source + " (" + start + "-" + end + ")");
-                Log.d(TAG, "filter: dest=" + dest + " (" + dstart + "-" + dend + ")");
+                Log.d(TAG, "filter: source=" + source + " (" + start + "-" + end + ") " +
+                        "dest=" + dest + " (" + dstart + "-" + dend + ")");
             }
             final UndoManager um = mEditor.mUndoManager;
             if (um.isInUndo()) {
-                if (DEBUG_UNDO) Log.d(TAG, "*** skipping, currently performing undo/redo");
+                if (DEBUG_UNDO) Log.d(TAG, "filter: skipping, currently performing undo/redo");
                 return null;
             }
 
+            // Text filters run before input operations are applied. However, some input operations
+            // are invalid and will throw exceptions when applied. This is common in tests. Don't
+            // attempt to undo invalid operations.
+            if (!isValidRange(source, start, end) || !isValidRange(dest, dstart, dend)) {
+                if (DEBUG_UNDO) Log.d(TAG, "filter: invalid op");
+                return null;
+            }
+
+            // Earlier filters can rewrite input to be a no-op, for example due to a length limit
+            // on an input field. Skip no-op changes.
+            if (start == end && dstart == dend) {
+                if (DEBUG_UNDO) Log.d(TAG, "filter: skipping no-op");
+                return null;
+            }
+
+            // Build a new operation with all the information from this edit.
+            EditOperation edit = new EditOperation(mEditor, source, start, end, dest, dstart, dend);
+
+            // Fetch the last edit operation and attempt to merge in the new edit.
             um.beginUpdate("Edit text");
-            TextModifyOperation op = um.getLastOperation(
-                    TextModifyOperation.class, mEditor.mUndoOwner, UndoManager.MERGE_MODE_UNIQUE);
-            if (op != null) {
-                if (DEBUG_UNDO) Log.d(TAG, "Last op: range=(" + op.mRangeStart + "-" + op.mRangeEnd
-                        + "), oldText=" + op.mOldText);
-                // See if we can continue modifying this operation.
-                if (op.mOldText == null) {
-                    // The current operation is an add...  are we adding more?  We are adding
-                    // more if we are either appending new text to the end of the last edit or
-                    // completely replacing some or all of the last edit.
-                    // TODO: This sequence doesn't work right: a, left-arrow, b, undo, undo.
-                    // The two edits are incorrectly merged, so there is only one undo available.
-                    if (start < end && ((dstart >= op.mRangeStart && dend <= op.mRangeEnd)
-                            || (dstart == op.mRangeEnd && dend == op.mRangeEnd))) {
-                        op.mRangeEnd = dstart + (end-start);
-                        um.endUpdate();
-                        if (DEBUG_UNDO) Log.d(TAG, "*** merging with last op, mRangeEnd="
-                                + op.mRangeEnd);
-                        return null;
-                    }
-                } else {
-                    // The current operation is a delete...  can we delete more?
-                    if (start == end && dend == op.mRangeStart-1) {
-                        SpannableStringBuilder str;
-                        if (op.mOldText instanceof SpannableString) {
-                            str = (SpannableStringBuilder)op.mOldText;
-                        } else {
-                            str = new SpannableStringBuilder(op.mOldText);
-                        }
-                        str.insert(0, dest, dstart, dend);
-                        op.mRangeStart = dstart;
-                        op.mOldText = str;
-                        um.endUpdate();
-                        if (DEBUG_UNDO) Log.d(TAG, "*** merging with last op, range=("
-                                + op.mRangeStart + "-" + op.mRangeEnd
-                                + "), oldText=" + op.mOldText);
-                        return null;
-                    }
-                }
-
-                // Couldn't add to the current undo operation, need to start a new
-                // undo state for a new undo operation.
-                um.commitState(null);
-                um.setUndoLabel("Edit text");
-            }
-
-            // Create a new undo state reflecting the operation being performed.
-            op = new TextModifyOperation(mEditor.mUndoOwner);
-            op.mRangeStart = dstart;
-            if (start < end) {
-                op.mRangeEnd = dstart + (end-start);
+            EditOperation lastEdit = um.getLastOperation(
+                  EditOperation.class, mEditor.mUndoOwner, UndoManager.MERGE_MODE_UNIQUE);
+            if (lastEdit == null) {
+                // Add this as the first edit.
+                if (DEBUG_UNDO) Log.d(TAG, "filter: adding first op " + edit);
+                um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
+            } else if (lastEdit.mergeWith(edit)) {
+                // Merge succeeded, nothing else to do.
+                if (DEBUG_UNDO) Log.d(TAG, "filter: merge succeeded, created " + lastEdit);
             } else {
-                op.mRangeEnd = dstart;
+                // Could not merge with the last edit, so commit the last edit and add this edit.
+                if (DEBUG_UNDO) Log.d(TAG, "filter: merge failed, adding " + edit);
+                um.commitState(mEditor.mUndoOwner);
+                um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
             }
-            if (dstart < dend) {
-                op.mOldText = dest.subSequence(dstart, dend);
-            }
-            if (DEBUG_UNDO) Log.d(TAG, "*** adding new op, range=(" + op.mRangeStart
-                    + "-" + op.mRangeEnd + "), oldText=" + op.mOldText);
-            um.addOperation(op, UndoManager.MERGE_MODE_NONE);
             um.endUpdate();
-            return null;
+            return null;  // Text not changed.
         }
     }
 
     /**
      * An operation to undo a single "edit" to a text view.
      */
-    public static class TextModifyOperation extends UndoOperation<Editor> {
-        int mRangeStart, mRangeEnd;
-        CharSequence mOldText;
+    public static class EditOperation extends UndoOperation<Editor> {
+        private static final int TYPE_INSERT = 0;
+        private static final int TYPE_DELETE = 1;
+        private static final int TYPE_REPLACE = 2;
 
-        public TextModifyOperation(UndoOwner owner) {
-            super(owner);
+        private int mType;
+        private String mOldText;
+        private int mOldTextStart;
+        private String mNewText;
+        private int mNewTextStart;
+
+        private int mOldCursorPos;
+        private int mNewCursorPos;
+
+        /**
+         * Constructs an edit operation from a text input operation that replaces the range
+         * (dstart, dend) of dest with (start, end) of source. See {@link InputFilter#filter}.
+         */
+        public EditOperation(Editor editor, CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
+            super(editor.mUndoOwner);
+
+            mOldText = dest.subSequence(dstart, dend).toString();
+            mNewText = source.subSequence(start, end).toString();
+
+            // Determine the type of the edit and store where it occurred. Avoid storing
+            // irrevelant data (e.g. mNewTextStart for a delete) because that makes the
+            // merging logic more complex (e.g. merging deletes could lead to mNewTextStart being
+            // outside the bounds of the final text).
+            if (mNewText.length() > 0 && mOldText.length() == 0) {
+                mType = TYPE_INSERT;
+                mNewTextStart = dstart;
+            } else if (mNewText.length() == 0 && mOldText.length() > 0) {
+                mType = TYPE_DELETE;
+                mOldTextStart = dstart;
+            } else {
+                mType = TYPE_REPLACE;
+                mOldTextStart = mNewTextStart = dstart;
+            }
+
+            // Store cursor data.
+            mOldCursorPos = editor.mTextView.getSelectionStart();
+            mNewCursorPos = dstart + (end - start);
         }
 
-        public TextModifyOperation(Parcel src, ClassLoader loader) {
+        public EditOperation(Parcel src, ClassLoader loader) {
             super(src, loader);
-            mRangeStart = src.readInt();
-            mRangeEnd = src.readInt();
-            mOldText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(src);
+            mType = src.readInt();
+            mOldText = src.readString();
+            mOldTextStart = src.readInt();
+            mNewText = src.readString();
+            mNewTextStart = src.readInt();
+            mOldCursorPos = src.readInt();
+            mNewCursorPos = src.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mType);
+            dest.writeString(mOldText);
+            dest.writeInt(mOldTextStart);
+            dest.writeString(mNewText);
+            dest.writeInt(mNewTextStart);
+            dest.writeInt(mOldCursorPos);
+            dest.writeInt(mNewCursorPos);
         }
 
         @Override
@@ -4312,62 +4345,139 @@ public class Editor {
 
         @Override
         public void undo() {
-            swapText();
+            if (DEBUG_UNDO) Log.d(TAG, "undo");
+            // Remove the new text and insert the old.
+            modifyText(mNewTextStart, getNewTextEnd(), mOldText, mOldTextStart, mOldCursorPos);
         }
 
         @Override
         public void redo() {
-            swapText();
+            if (DEBUG_UNDO) Log.d(TAG, "redo");
+            // Remove the old text and insert the new.
+            modifyText(mOldTextStart, getOldTextEnd(), mNewText, mNewTextStart, mNewCursorPos);
         }
 
-        private void swapText() {
-            // Both undo and redo involves swapping the contents of the range
-            // in the text view with our local text.
+        /**
+         * Attempts to merge this existing operation with a new edit.
+         * @param edit The new edit operation.
+         * @return If the merge succeeded, returns true. Otherwise returns false and leaves this
+         * object unchanged.
+         */
+        private boolean mergeWith(EditOperation edit) {
+            switch (mType) {
+                case TYPE_INSERT:
+                    return mergeInsertWith(edit);
+                case TYPE_DELETE:
+                    return mergeDeleteWith(edit);
+                case TYPE_REPLACE:
+                    return mergeReplaceWith(edit);
+                default:
+                    return false;
+            }
+        }
+
+        private boolean mergeInsertWith(EditOperation edit) {
+            if (DEBUG_UNDO) Log.d(TAG, "mergeInsertWith " + edit);
+            // Only merge continuous insertions.
+            if (edit.mType != TYPE_INSERT) {
+                return false;
+            }
+            // Only merge insertions that are contiguous.
+            if (getNewTextEnd() != edit.mNewTextStart) {
+                return false;
+            }
+            mNewText += edit.mNewText;
+            mNewCursorPos = edit.mNewCursorPos;
+            return true;
+        }
+
+        // TODO: Support forward delete.
+        private boolean mergeDeleteWith(EditOperation edit) {
+            if (DEBUG_UNDO) Log.d(TAG, "mergeDeleteWith " + edit);
+            // Only merge continuous deletes.
+            if (edit.mType != TYPE_DELETE) {
+                return false;
+            }
+            // Only merge deletions that are contiguous.
+            if (mOldTextStart != edit.getOldTextEnd()) {
+                return false;
+            }
+            mOldTextStart = edit.mOldTextStart;
+            mOldText = edit.mOldText + mOldText;
+            mNewCursorPos = edit.mNewCursorPos;
+            return true;
+        }
+
+        private boolean mergeReplaceWith(EditOperation edit) {
+            if (DEBUG_UNDO) Log.d(TAG, "mergeReplaceWith " + edit);
+            // Replacements can merge only with adjacent inserts and adjacent replacements.
+            if (edit.mType == TYPE_DELETE ||
+                    getNewTextEnd() != edit.mOldTextStart ||
+                    edit.mOldTextStart != edit.mNewTextStart) {
+                return false;
+            }
+            mOldText += edit.mOldText;
+            mNewText += edit.mNewText;
+            mNewCursorPos = edit.mNewCursorPos;
+            return true;
+        }
+
+        private int getNewTextEnd() {
+            return mNewTextStart + mNewText.length();
+        }
+
+        private int getOldTextEnd() {
+            return mOldTextStart + mOldText.length();
+        }
+
+        private void modifyText(int deleteFrom, int deleteTo, CharSequence newText,
+                int newTextInsertAt, int newCursorPos) {
             Editor editor = getOwnerData();
-            Editable editable = (Editable)editor.mTextView.getText();
-            CharSequence curText;
-            if (mRangeStart >= mRangeEnd) {
-                curText = null;
-            } else {
-                curText = editable.subSequence(mRangeStart, mRangeEnd);
+            Editable text = (Editable) editor.mTextView.getText();
+            // Apply the edit if it is still valid.
+            if (isValidRange(text, deleteFrom, deleteTo) &&
+                    newTextInsertAt <= text.length() - (deleteTo - deleteFrom)) {
+                if (deleteFrom != deleteTo) {
+                    text.delete(deleteFrom, deleteTo);
+                }
+                if (newText.length() != 0) {
+                    text.insert(newTextInsertAt, newText);
+                }
             }
-            if (DEBUG_UNDO) {
-                Log.d(TAG, "Swap: range=(" + mRangeStart + "-" + mRangeEnd
-                        + "), oldText=" + mOldText);
-                Log.d(TAG, "Swap: curText=" + curText);
+            // Restore the cursor position.
+            // TODO: Select all the text that was undone.
+            if (newCursorPos <= text.length()) {
+                Selection.setSelection(text, newCursorPos);
             }
-            if (mOldText == null) {
-                editable.delete(mRangeStart, mRangeEnd);
-                mRangeEnd = mRangeStart;
-            } else {
-                editable.replace(mRangeStart, mRangeEnd, mOldText);
-                mRangeEnd = mRangeStart + mOldText.length();
-            }
-            mOldText = curText;
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mRangeStart);
-            dest.writeInt(mRangeEnd);
-            TextUtils.writeToParcel(mOldText, dest, flags);
+        public String toString() {
+            return "EditOperation: [" +
+                    "mType=" + mType + ", " +
+                    "mOldText=" + mOldText + ", " +
+                    "mOldTextStart=" + mOldTextStart + ", " +
+                    "mNewText=" + mNewText + ", " +
+                    "mNewTextStart=" + mNewTextStart + ", " +
+                    "mOldCursorPos=" + mOldCursorPos + ", " +
+                    "mNewCursorPos=" + mNewCursorPos + "]";
         }
 
-        public static final Parcelable.ClassLoaderCreator<TextModifyOperation> CREATOR
-                = new Parcelable.ClassLoaderCreator<TextModifyOperation>() {
+        public static final Parcelable.ClassLoaderCreator<EditOperation> CREATOR
+                = new Parcelable.ClassLoaderCreator<EditOperation>() {
             @Override
-            public TextModifyOperation createFromParcel(Parcel in) {
-                return new TextModifyOperation(in, null);
+            public EditOperation createFromParcel(Parcel in) {
+                return new EditOperation(in, null);
             }
 
             @Override
-            public TextModifyOperation createFromParcel(Parcel in, ClassLoader loader) {
-                return new TextModifyOperation(in, loader);
+            public EditOperation createFromParcel(Parcel in, ClassLoader loader) {
+                return new EditOperation(in, loader);
             }
 
             @Override
-            public TextModifyOperation[] newArray(int size) {
-                return new TextModifyOperation[size];
+            public EditOperation[] newArray(int size) {
+                return new EditOperation[size];
             }
         };
     }
