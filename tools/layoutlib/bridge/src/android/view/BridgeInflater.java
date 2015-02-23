@@ -179,7 +179,7 @@ public final class BridgeInflater extends LayoutInflater {
                         XmlPullParser parser = ParserFactory.create(f);
 
                         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
-                                parser, bridgeContext, false);
+                                parser, bridgeContext, value.isFramework());
 
                         return inflate(bridgeParser, root);
                     } catch (Exception e) {
