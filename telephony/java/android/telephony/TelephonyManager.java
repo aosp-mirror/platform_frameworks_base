@@ -1213,6 +1213,10 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_HSPAP = 15;
     /** Current network is GSM {@hide} */
     public static final int NETWORK_TYPE_GSM = 16;
+     /** Current network is TD_SCDMA {@hide} */
+    public static final int NETWORK_TYPE_TD_SCDMA = 17;
+   /** Current network is IWLAN {@hide} */
+    public static final int NETWORK_TYPE_IWLAN = 18;
 
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
@@ -1383,8 +1387,10 @@ public class TelephonyManager {
             case NETWORK_TYPE_EVDO_B:
             case NETWORK_TYPE_EHRPD:
             case NETWORK_TYPE_HSPAP:
+            case NETWORK_TYPE_TD_SCDMA:
                 return NETWORK_CLASS_3_G;
             case NETWORK_TYPE_LTE:
+            case NETWORK_TYPE_IWLAN:
                 return NETWORK_CLASS_4_G;
             default:
                 return NETWORK_CLASS_UNKNOWN;
@@ -1444,6 +1450,10 @@ public class TelephonyManager {
                 return "HSPA+";
             case NETWORK_TYPE_GSM:
                 return "GSM";
+            case NETWORK_TYPE_TD_SCDMA:
+                return "TD_SCDMA";
+            case NETWORK_TYPE_IWLAN:
+                return "IWLAN";
             default:
                 return "UNKNOWN";
         }

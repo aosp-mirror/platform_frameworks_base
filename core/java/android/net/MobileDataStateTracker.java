@@ -430,6 +430,7 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
             networkTypeStr = "iden";
             break;
         case TelephonyManager.NETWORK_TYPE_LTE:
+        case TelephonyManager.NETWORK_TYPE_IWLAN:
             networkTypeStr = "lte";
             break;
         case TelephonyManager.NETWORK_TYPE_EHRPD:
