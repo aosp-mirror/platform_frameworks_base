@@ -20,6 +20,13 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	Result visitExpression(@NotNull BindingExpressionParser.ExpressionContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link BindingExpressionParser#resources}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitResources(@NotNull BindingExpressionParser.ResourcesContext ctx);
+
+	/**
 	 * Visit a parse tree produced by the {@code BracketOp}
 	 * labeled alternative in {@link BindingExpressionParser#expression}.
 	 * @param ctx the parse tree
@@ -42,6 +49,13 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	 * @return the visitor result
 	 */
 	Result visitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link BindingExpressionParser#resourceParameters}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitResourceParameters(@NotNull BindingExpressionParser.ResourceParametersContext ctx);
 
 	/**
 	 * Visit a parse tree produced by the {@code AndOrOp}

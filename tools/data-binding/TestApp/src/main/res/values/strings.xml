@@ -14,4 +14,9 @@
 <resources>
     <string name="app_name">TestApp</string>
     <string name="rain">Rain</string>
+    <string name="nameWithTitle">%1$s %2$s</string>
+    <plurals name="orange">
+        <item quantity="one">orange</item>
+        <item quantity="other">oranges</item>
+    </plurals>
 </resources>

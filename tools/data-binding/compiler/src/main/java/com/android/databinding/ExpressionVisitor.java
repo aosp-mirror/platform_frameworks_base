@@ -26,6 +26,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -150,8 +151,25 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
     }
 
     @Override
-    public Expr visitResource(@NotNull BindingExpressionParser.ResourceContext ctx) {
-        return mModel.resourceExpr(ctx.getText());
+    public Expr visitResources(@NotNull BindingExpressionParser.ResourcesContext ctx) {
+        final List<Expr> args = new ArrayList<>();
+        if (ctx.resourceParameters() != null) {
+            for (ParseTree item : ctx.resourceParameters().expressionList().children) {
+                if (Objects.equals(item.getText(), ",")) {
+                    continue;
+                }
+                args.add(item.accept(this));
+            }
+        }
+        final String resourceReference = ctx.ResourceReference().getText();
+        final int colonIndex = resourceReference.indexOf(':');
+        final int slashIndex = resourceReference.indexOf('/');
+        final String packageName = colonIndex < 0 ? null :
+                resourceReference.substring(1, colonIndex).trim();
+        final int startIndex = Math.max(1, colonIndex + 1);
+        final String resourceType = resourceReference.substring(startIndex, slashIndex).trim();
+        final String resourceName = resourceReference.substring(slashIndex + 1).trim();
+        return mModel.resourceExpr(packageName, resourceType, resourceName, args);
     }
 
     @Override

@@ -251,8 +251,8 @@ public class BindingExpressionParserTest {
     // ---------------------- Helpers --------------------
 
     private void compareResource(String value) throws Exception {
-        ResourceContext primaryContext = parseExpression(value);
-        assertEquals(value, primaryContext.ResourceReference().getText());
+        ResourceContext resourceContext = parseExpression(value);
+        assertEquals(value, resourceContext.getText());
     }
 
     private void compareUnaryOperators(String op) throws Exception {

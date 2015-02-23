@@ -15,22 +15,15 @@ package com.android.databinding.writer
 
 import com.android.databinding.LayoutBinder
 import com.android.databinding.expr.Expr
-import com.android.databinding.reflection.ModelAnalyzer
 import kotlin.properties.Delegates
 import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.BindingTarget
 import com.android.databinding.expr.IdentifierExpr
 import com.android.databinding.util.Log
 import java.util.BitSet
-import java.util.HashSet
-import com.android.databinding.util.L
-import org.apache.commons.lang3.NotImplementedException
 import com.android.databinding.expr.ExprModel
-import com.android.databinding.writer.FlagSet
 import java.util.Arrays
-import java.lang
 import com.android.databinding.expr.TernaryExpr
-import com.android.databinding.ext.androidId
 import com.android.databinding.expr.FieldAccessExpr
 import com.android.databinding.expr.ComparisonExpr
 import com.android.databinding.expr.GroupExpr
@@ -41,7 +34,6 @@ import com.android.databinding.expr.SymbolExpr
 import com.android.databinding.ext.androidId
 import com.android.databinding.ext.lazy
 import com.android.databinding.ext.br
-import com.android.databinding.ext.toJavaCode
 import com.android.databinding.expr.ResourceExpr
 import com.android.databinding.expr.BracketExpr
 import com.android.databinding.reflection.Callable

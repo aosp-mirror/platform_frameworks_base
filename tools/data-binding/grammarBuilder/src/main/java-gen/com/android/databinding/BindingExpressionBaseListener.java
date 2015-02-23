@@ -31,6 +31,19 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterResources(@NotNull BindingExpressionParser.ResourcesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitResources(@NotNull BindingExpressionParser.ResourcesContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBracketOp(@NotNull BindingExpressionParser.BracketOpContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -64,6 +77,19 @@ public class BindingExpressionBaseListener implements BindingExpressionListener 
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterResourceParameters(@NotNull BindingExpressionParser.ResourceParametersContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitResourceParameters(@NotNull BindingExpressionParser.ResourceParametersContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

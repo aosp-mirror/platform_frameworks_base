@@ -140,8 +140,9 @@ public class ExprModel {
         return register(new GroupExpr(grouped));
     }
 
-    public Expr resourceExpr(String resourceText) {
-        return register(new ResourceExpr(resourceText));
+    public Expr resourceExpr(String packageName, String resourceType, String resourceName,
+            List<Expr> args) {
+        return register(new ResourceExpr(packageName, resourceType, resourceName, args));
     }
 
     public Expr bracketExpr(Expr variableExpr, Expr argExpr) {

@@ -21,6 +21,17 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	void exitExpression(@NotNull BindingExpressionParser.ExpressionContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link BindingExpressionParser#resources}.
+	 * @param ctx the parse tree
+	 */
+	void enterResources(@NotNull BindingExpressionParser.ResourcesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BindingExpressionParser#resources}.
+	 * @param ctx the parse tree
+	 */
+	void exitResources(@NotNull BindingExpressionParser.ResourcesContext ctx);
+
+	/**
 	 * Enter a parse tree produced by the {@code BracketOp}
 	 * labeled alternative in {@link BindingExpressionParser#expression}.
 	 * @param ctx the parse tree
@@ -58,6 +69,17 @@ public interface BindingExpressionListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link BindingExpressionParser#resourceParameters}.
+	 * @param ctx the parse tree
+	 */
+	void enterResourceParameters(@NotNull BindingExpressionParser.ResourceParametersContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link BindingExpressionParser#resourceParameters}.
+	 * @param ctx the parse tree
+	 */
+	void exitResourceParameters(@NotNull BindingExpressionParser.ResourceParametersContext ctx);
 
 	/**
 	 * Enter a parse tree produced by the {@code AndOrOp}

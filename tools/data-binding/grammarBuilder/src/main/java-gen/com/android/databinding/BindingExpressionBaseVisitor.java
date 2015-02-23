@@ -27,6 +27,14 @@ public class BindingExpressionBaseVisitor<Result> extends AbstractParseTreeVisit
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public Result visitResources(@NotNull BindingExpressionParser.ResourcesContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public Result visitBracketOp(@NotNull BindingExpressionParser.BracketOpContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -44,6 +52,14 @@ public class BindingExpressionBaseVisitor<Result> extends AbstractParseTreeVisit
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public Result visitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public Result visitResourceParameters(@NotNull BindingExpressionParser.ResourceParametersContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

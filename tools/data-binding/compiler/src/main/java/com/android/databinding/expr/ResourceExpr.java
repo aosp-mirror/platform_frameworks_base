@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.writer.WriterPackage;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,26 +38,22 @@ public class ResourceExpr extends Expr {
                     .put("typedArray", "array")
                     .build();
 
-    private final String mPackage;
+    protected final String mPackage;
 
-    private final String mResourceType;
+    protected final String mResourceType;
 
-    private final String mResourceId;
+    protected final String mResourceId;
 
-    public ResourceExpr(String resourceText) {
-        int colonIndex = resourceText.indexOf(':');
-        int slashIndex = resourceText.indexOf('/');
-        mResourceType = resourceText.substring(colonIndex + 1, slashIndex).trim();
-        mResourceId = resourceText.substring(slashIndex + 1).trim();
-        String packageName = "";
-        if (colonIndex > 1) {
-            if ("android".equals(resourceText.substring(1, colonIndex).trim())) {
-                packageName = "android.";
-            } else {
-                packageName = "";
-            }
+    public ResourceExpr(String packageName, String resourceType, String resourceName,
+            List<Expr> args) {
+        super(args);
+        if ("android".equals(packageName)) {
+            mPackage = "android.";
+        } else {
+            mPackage = "";
         }
-        mPackage = packageName;
+        mResourceType = resourceType;
+        mResourceId = resourceName;
     }
 
     @Override
@@ -77,8 +74,13 @@ public class ResourceExpr extends Expr {
             case "id":
             case "integer":
             case "layout":
-            case "plurals":
                 return modelAnalyzer.findClass(int.class);
+            case "plurals":
+                if (getChildren().isEmpty()) {
+                    return modelAnalyzer.findClass(int.class);
+                } else {
+                    return modelAnalyzer.findClass(String.class);
+                }
             case "colorStateList":
                 type = "android.content.res.ColorStateList";
                 break;
@@ -115,31 +117,27 @@ public class ResourceExpr extends Expr {
 
     @Override
     protected List<Dependency> constructDependencies() {
-        return Collections.emptyList();
+        return constructDynamicChildrenDependencies();
     }
 
     @Override
     protected String computeUniqueKey() {
+        String base;
         if (mPackage == null) {
-            return "@" + mResourceType + "/" + mResourceId;
+            base = "@" + mResourceType + "/" + mResourceId;
         } else {
-            return "@" + "android:" + mResourceType + "/" + mResourceId;
+            base = "@" + "android:" + mResourceType + "/" + mResourceId;
         }
+        return sUniqueKeyJoiner.join(base, computeChildrenKey());
     }
 
-    @Override
-    public boolean isDynamic() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeInvalidated() {
-        return false;
+    public String getResourceId() {
+        return mPackage + "R." + getResourceObject() + "." + mResourceId;
     }
 
     public String toJava() {
-        final String context = "mRoot.getContext()";
-        final String resources = context + ".getResources()";
+        final String context = "getRoot().getContext()";
+        final String resources = "getRoot().getResources()";
         final String resourceName = mPackage + "R." + getResourceObject() + "." + mResourceId;
         switch (mResourceType) {
             case "anim": return "android.view.animation.AnimationUtils.loadAnimation(" + context + ", " + resourceName + ")";
@@ -157,9 +155,15 @@ public class ResourceExpr extends Expr {
             case "integer": return resources + ".getInteger(" + resourceName + ")";
             case "interpolator":  return "android.view.animation.AnimationUtils.loadInterpolator(" + context + ", " + resourceName + ")";
             case "layout": return resourceName;
-            case "plurals": return resourceName;
+            case "plurals": {
+                if (getChildren().isEmpty()) {
+                    return resourceName;
+                } else {
+                    return makeParameterCall(resourceName, "getQuantityString");
+                }
+            }
             case "stateListAnimator": return "android.animation.AnimatorInflater.loadStateListAnimator(" + context + ", " + resourceName + ")";
-            case "string": return resources + ".getString(" + resourceName + ")";
+            case "string": return makeParameterCall(resourceName, "getString");
             case "stringArray": return resources + ".getStringArray(" + resourceName + ")";
             case "transition": return "android.transition.TransitionInflater.from(" + context + ").inflateTransition(" + resourceName + ")";
             case "typedArray": return resources + ".obtainTypedArray(" + resourceName + ")";
@@ -168,6 +172,16 @@ public class ResourceExpr extends Expr {
                 mResourceType.substring(1);
         return resources + ".get" + property + "(" + resourceName + ")";
 
+    }
+
+    private String makeParameterCall(String resourceName, String methodCall) {
+        StringBuilder sb = new StringBuilder("getRoot().getResources().");
+        sb.append(methodCall).append("(").append(resourceName);
+        for (Expr expr : getChildren()) {
+            sb.append(", ").append(WriterPackage.toCode(expr, false).generate());
+        }
+        sb.append(")");
+        return sb.toString();
     }
 
     private String getResourceObject() {
