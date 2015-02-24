@@ -5468,6 +5468,470 @@ public class Notification implements Parcelable
     }
 
     /**
+     * <p>
+     * Helper class to add content info extensions to notifications. To create a notification with
+     * content info extensions:
+     * <ol>
+     * <li>Create an {@link Notification.Builder}, setting any desired properties.
+     * <li>Create a {@link ContentInfoExtender}.
+     * <li>Set content info specific properties using the {@code add} and {@code set} methods of
+     * {@link ContentInfoExtender}.
+     * <li>Call {@link Notification.Builder#extend(Notification.Extender)} to apply the extensions
+     * to a notification.
+     * </ol>
+     *
+     * <pre class="prettyprint">Notification notification = new Notification.Builder(context) * ... * .extend(new ContentInfoExtender() * .set*(...)) * .build(); * </pre>
+     * <p>
+     * Content info extensions can be accessed on an existing notification by using the
+     * {@code ContentInfoExtender(Notification)} constructor, and then using the {@code get} methods
+     * to access values.
+     */
+    public static final class ContentInfoExtender implements Extender {
+        private static final String TAG = "ContentInfoExtender";
+
+        // Key for the Content info extensions bundle in the main Notification extras bundle
+        private static final String EXTRA_CONTENT_INFO_EXTENDER = "android.CONTENT_INFO_EXTENSIONS";
+
+        // Keys within EXTRA_CONTENT_INFO_EXTENDER for individual content info options.
+
+        private static final String KEY_CONTENT_TYPE = "android.contentType";
+
+        private static final String KEY_CONTENT_GENRES = "android.contentGenre";
+
+        private static final String KEY_CONTENT_PRICING_TYPE = "android.contentPricing.type";
+
+        private static final String KEY_CONTENT_PRICING_VALUE = "android.contentPricing.value";
+
+        private static final String KEY_CONTENT_STATUS = "android.contentStatus";
+
+        private static final String KEY_CONTENT_MATURITY_RATING = "android.contentMaturity";
+
+        private static final String KEY_CONTENT_RUN_LENGTH = "android.contentLength";
+
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a video clip.
+         */
+        public static final String CONTENT_TYPE_VIDEO = "android.contentType.video";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a movie.
+         */
+        public static final String CONTENT_TYPE_MOVIE = "android.contentType.movie";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a trailer.
+         */
+        public static final String CONTENT_TYPE_TRAILER = "android.contentType.trailer";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is serial. It can refer to an entire show, a single season or
+         * series, or a single episode.
+         */
+        public static final String CONTENT_TYPE_SERIAL = "android.contentType.serial";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a song or album.
+         */
+        public static final String CONTENT_TYPE_MUSIC = "android.contentType.music";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a radio station.
+         */
+        public static final String CONTENT_TYPE_RADIO = "android.contentType.radio";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a podcast.
+         */
+        public static final String CONTENT_TYPE_PODCAST = "android.contentType.podcast";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a news item.
+         */
+        public static final String CONTENT_TYPE_NEWS = "android.contentType.news";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is sports.
+         */
+        public static final String CONTENT_TYPE_SPORTS = "android.contentType.sports";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is an application.
+         */
+        public static final String CONTENT_TYPE_APP = "android.contentType.app";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a game.
+         */
+        public static final String CONTENT_TYPE_GAME = "android.contentType.game";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a book.
+         */
+        public static final String CONTENT_TYPE_BOOK = "android.contentType.book";
+        
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a comic book.
+         */
+        public static final String CONTENT_TYPE_COMIC = "android.contentType.comic";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a magazine.
+         */
+        public static final String CONTENT_TYPE_MAGAZINE = "android.contentType.magazine";
+
+        /**
+         * Value to be used with {@link #setContentTypes} to indicate that the content referred by
+         * the notification item is a website.
+         */
+        public static final String CONTENT_TYPE_WEBSITE = "android.contentType.website";
+
+
+        /**
+         * Value to be used with {@link #setPricingInformation} to indicate that the content
+         * referred by the notification item is free to consume.
+         */
+        public static final String CONTENT_PRICING_FREE = "android.contentPrice.free";
+
+        /**
+         * Value to be used with {@link #setPricingInformation} to indicate that the content
+         * referred by the notification item is available as a rental, and the price value provided
+         * is the rental price for the item.
+         */
+        public static final String CONTENT_PRICING_RENTAL = "android.contentPrice.rental";
+
+        /**
+         * Value to be used with {@link #setPricingInformation} to indicate that the content
+         * referred by the notification item is available for purchase, and the price value provided
+         * is the purchase price for the item.
+         */
+        public static final String CONTENT_PRICING_PURCHASE = "android.contentPrice.purchase";
+
+        /**
+         * Value to be used with {@link #setPricingInformation} to indicate that the content
+         * referred by the notification item is available as part of a subscription based service,
+         * and the price value provided is the subscription price for the service.
+         */
+        public static final String CONTENT_PRICING_SUBSCRIPTION =
+                "android.contentPrice.subscription";
+
+        /**
+         * Value to be used with {@link #setStatus} to indicate that the content referred by the
+         * notification is available and ready to be consumed immediately.
+         */
+        public static final int CONTENT_STATUS_READY = 0;
+
+        /**
+         * Value to be used with {@link #setStatus} to indicate that the content referred by the
+         * notification is pending, waiting on either a download or purchase operation to complete
+         * before it can be consumed.
+         */
+        public static final int CONTENT_STATUS_PENDING = 1;
+
+        /**
+         * Value to be used with {@link #setStatus} to indicate that the content referred by the
+         * notification is available, but needs to be first purchased, rented, subscribed or
+         * downloaded before it can be consumed.
+         */
+        public static final int CONTENT_STATUS_AVAILABLE = 2;
+
+        /**
+         * Value to be used with {@link #setStatus} to indicate that the content referred by the
+         * notification is not available. This could be content not available in a certain region or
+         * incompatible with the device in use.
+         */
+        public static final int CONTENT_STATUS_UNAVAILABLE = 3;
+
+        /**
+         * Value to be used with {@link #setMaturityRating} to indicate that the content referred by
+         * the notification is suitable for all audiences.
+         */
+        public static final String CONTENT_MATURITY_ALL = "android.contentMaturity.all";
+
+        /**
+         * Value to be used with {@link #setMaturityRating} to indicate that the content
+         * referred by the notification is suitable for audiences of low maturity and above.
+         */
+        public static final String CONTENT_MATURITY_LOW = "android.contentMaturity.low";
+
+        /**
+         * Value to be used with {@link #setMaturityRating} to indicate that the content
+         * referred by the notification is suitable for audiences of medium maturity and above.
+         */
+        public static final String CONTENT_MATURITY_MEDIUM = "android.contentMaturity.medium";
+
+        /**
+         * Value to be used with {@link #setMaturityRating} to indicate that the content
+         * referred by the notification is suitable for audiences of high maturity and above.
+         */
+        public static final String CONTENT_MATURITY_HIGH = "android.contentMaturity.high";
+
+        private String[] mTypes;
+        private String[] mGenres;
+        private String mPricingType;
+        private String mPricingValue;
+        private int mContentStatus = -1;
+        private String mMaturityRating;
+        private long mRunLength = -1;
+
+        /**
+         * Create a {@link ContentInfoExtender} with default options.
+         */
+        public ContentInfoExtender() {
+        }
+
+        /**
+         * Create a {@link ContentInfoExtender} from the ContentInfoExtender options of an existing
+         * Notification.
+         *
+         * @param notif The notification from which to copy options.
+         */
+        public ContentInfoExtender(Notification notif) {
+            Bundle contentBundle = notif.extras == null ?
+                    null : notif.extras.getBundle(EXTRA_CONTENT_INFO_EXTENDER);
+            if (contentBundle != null) {
+                mTypes = contentBundle.getStringArray(KEY_CONTENT_TYPE);
+                mGenres = contentBundle.getStringArray(KEY_CONTENT_GENRES);
+                mPricingType = contentBundle.getString(KEY_CONTENT_PRICING_TYPE);
+                mPricingValue = contentBundle.getString(KEY_CONTENT_PRICING_VALUE);
+                mContentStatus = contentBundle.getInt(KEY_CONTENT_STATUS, -1);
+                mMaturityRating = contentBundle.getString(KEY_CONTENT_MATURITY_RATING);
+                mRunLength = contentBundle.getLong(KEY_CONTENT_RUN_LENGTH, -1);
+            }
+        }
+
+        /**
+         * Apply content extensions to a notification that is being built. This is typically called
+         * by the {@link Notification.Builder#extend(Notification.Extender)} method of
+         * {@link Notification.Builder}.
+         */
+        @Override
+        public Notification.Builder extend(Notification.Builder builder) {
+            Bundle contentBundle = new Bundle();
+
+            if (mTypes != null) {
+                contentBundle.putStringArray(KEY_CONTENT_TYPE, mTypes);
+            }
+            if (mGenres != null) {
+                contentBundle.putStringArray(KEY_CONTENT_GENRES, mGenres);
+            }
+            if (mPricingType != null) {
+                contentBundle.putString(KEY_CONTENT_PRICING_TYPE, mPricingType);
+            }
+            if (mPricingValue != null) {
+                contentBundle.putString(KEY_CONTENT_PRICING_VALUE, mPricingValue);
+            }
+            if (mContentStatus != -1) {
+                contentBundle.putInt(KEY_CONTENT_STATUS, mContentStatus);
+            }
+            if (mMaturityRating != null) {
+                contentBundle.putString(KEY_CONTENT_MATURITY_RATING, mMaturityRating);
+            }
+            if (mRunLength > 0) {
+                contentBundle.putLong(KEY_CONTENT_RUN_LENGTH, mRunLength);
+            }
+
+            builder.getExtras().putBundle(EXTRA_CONTENT_INFO_EXTENDER, contentBundle);
+            return builder;
+        }
+
+        /**
+         * Sets the content types associated with the notification content. The first tag entry will
+         * be considered the primary type for the content and will be used for ranking purposes.
+         * Other secondary type tags may be provided, if applicable, and may be used for filtering
+         * purposes.
+         *
+         * @param types Array of predefined type tags (see the <code>CONTENT_TYPE_*</code>
+         *            constants) that describe the content referred to by a notification.
+         */
+        public ContentInfoExtender setContentTypes(String[] types) {
+            mTypes = types;
+            return this;
+        }
+
+        /**
+         * Returns an array containing the content types that describe the content associated with
+         * the notification. The first tag entry is considered the primary type for the content, and
+         * is used for content ranking purposes.
+         *
+         * @return An array of predefined type tags (see the <code>CONTENT_TYPE_*</code> constants)
+         *         that describe the content associated with the notification.
+         * @see ContentInfoExtender#setContentTypes
+         */
+        public String[] getContentTypes() {
+            return mTypes;
+        }
+
+        /**
+         * Returns the primary content type tag for the content associated with the notification.
+         *
+         * @return A predefined type tag (see the <code>CONTENT_TYPE_*</code> constants) indicating
+         *         the primary type for the content associated with the notification.
+         * @see ContentInfoExtender#setContentTypes
+         */
+        public String getPrimaryContentType() {
+            if (mTypes == null || mTypes.length == 0) {
+                return null;
+            }
+            return mTypes[0];
+        }
+
+        /**
+         * Sets the content genres associated with the notification content. These genres may be
+         * used for content ranking. Genres are open ended String tags.
+         * <p>
+         * Some examples: "comedy", "action", "dance", "electronica", "racing", etc.
+         *
+         * @param genres Array of genre string tags that describe the content referred to by a
+         *            notification.
+         */
+        public ContentInfoExtender setGenres(String[] genres) {
+            mGenres = genres;
+            return this;
+        }
+
+        /**
+         * Returns an array containing the content genres that describe the content associated with
+         * the notification.
+         *
+         * @return An array of genre tags that describe the content associated with the
+         *         notification.
+         * @see ContentInfoExtender#setGenres
+         */
+        public String[] getGenres() {
+            return mGenres;
+        }
+
+        /**
+         * Sets the pricing and availability information for the content associated with the
+         * notification. The provided information will indicate the access model for the content
+         * (free, rental, purchase or subscription) and the price value (if not free).
+         *
+         * @param priceType Pricing type for this content. Must be one of the predefined pricing
+         *            type tags (see the <code>CONTENT_PRICING_*</code> constants).
+         * @param priceValue A string containing a representation of the content price in the
+         *            current locale and currency.
+         * @return This object for method chaining.
+         */
+        public ContentInfoExtender setPricingInformation(String priceType, String priceValue) {
+            mPricingType = priceType;
+            mPricingValue = priceValue;
+            return this;
+        }
+
+        /**
+         * Gets the pricing type for the content associated with the notification.
+         *
+         * @return A predefined tag indicating the pricing type for the content (see the <code>
+         *         CONTENT_PRICING_*</code> constants).
+         * @see ContentInfoExtender#setPricingInformation
+         */
+        public String getPricingType() {
+            return mPricingType;
+        }
+
+        /**
+         * Gets the price value (when applicable) for the content associated with a notification.
+         * The value will be provided as a String containing the price in the appropriate currency
+         * for the current locale.
+         *
+         * @return A string containing a representation of the content price in the current locale
+         *         and currency.
+         * @see ContentInfoExtender#setPricingInformation
+         */
+        public String getPricingValue() {
+            if (mPricingType == null || CONTENT_PRICING_FREE.equals(mPricingType)) {
+                return null;
+            }
+            return mPricingValue;
+        }
+
+        /**
+         * Sets the availability status for the content associated with the notification. This
+         * status indicates whether the referred content is ready to be consumed on the device, or
+         * if the user must first purchase, rent, subscribe to, or download the content.
+         *
+         * @param contentStatus The status value for this content. Must be one of the predefined
+         *            content status values (see the <code>CONTENT_STATUS_*</code> constants).
+         */
+        public ContentInfoExtender setStatus(int contentStatus) {
+            mContentStatus = contentStatus;
+            return this;
+        }
+
+        /**
+         * Returns status value for the content associated with the notification. This status
+         * indicates whether the referred content is ready to be consumed on the device, or if the
+         * user must first purchase, rent, subscribe to, or download the content.
+         *
+         * @return The status value for this content, or -1 is a valid status has not been specified
+         *         (see the <code>CONTENT_STATUS_*</code> for the defined valid status values).
+         * @see ContentInfoExtender#setStatus
+         */
+        public int getStatus() {
+            return mContentStatus;
+        }
+
+        /**
+         * Sets the maturity level rating for the content associated with the notification.
+         *
+         * @param maturityRating A tag indicating the maturity level rating for the content. This
+         *            tag must be one of the predefined maturity rating tags (see the <code>
+         *            CONTENT_MATURITY_*</code> constants).
+         */
+        public ContentInfoExtender setMaturityRating(String maturityRating) {
+            mMaturityRating = maturityRating;
+            return this;
+        }
+
+        /**
+         * Returns the maturity level rating for the content associated with the notification.
+         *
+         * @return returns a predefined tag indicating the maturity level rating for the content
+         *         (see the <code> CONTENT_MATURITY_*</code> constants).
+         * @see ContentInfoExtender#setMaturityRating
+         */
+        public String getMaturityRating() {
+            return mMaturityRating;
+        }
+
+        /**
+         * Sets the running time (when applicable) for the content associated with the notification.
+         *
+         * @param length The runing time, in seconds, of the content associated with the
+         *            notification.
+         */
+        public ContentInfoExtender setRunningTime(long length) {
+            mRunLength = length;
+            return this;
+        }
+
+        /**
+         * Returns the running time for the content associated with the notification.
+         *
+         * @return The running time, in seconds, of the content associated with the notification.
+         * @see ContentInfoExtender#setRunningTime
+         */
+        public long getRunningTime() {
+            return mRunLength;
+        }
+    }
+
+    /**
      * Get an array of Notification objects from a parcelable array bundle field.
      * Update the bundle to have a typed array so fetches in the future don't need
      * to do an array copy.

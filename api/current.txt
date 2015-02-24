@@ -4908,6 +4908,53 @@ package android.app {
     method public android.app.PendingIntent getReplyPendingIntent();
   }
 
+  public static final class Notification.ContentInfoExtender implements android.app.Notification.Extender {
+    ctor public Notification.ContentInfoExtender();
+    ctor public Notification.ContentInfoExtender(android.app.Notification);
+    method public android.app.Notification.Builder extend(android.app.Notification.Builder);
+    method public java.lang.String[] getContentTypes();
+    method public java.lang.String[] getGenres();
+    method public java.lang.String getMaturityRating();
+    method public java.lang.String getPricingType();
+    method public java.lang.String getPricingValue();
+    method public java.lang.String getPrimaryContentType();
+    method public long getRunningTime();
+    method public int getStatus();
+    method public android.app.Notification.ContentInfoExtender setContentTypes(java.lang.String[]);
+    method public android.app.Notification.ContentInfoExtender setGenres(java.lang.String[]);
+    method public android.app.Notification.ContentInfoExtender setMaturityRating(java.lang.String);
+    method public android.app.Notification.ContentInfoExtender setPricingInformation(java.lang.String, java.lang.String);
+    method public android.app.Notification.ContentInfoExtender setRunningTime(long);
+    method public android.app.Notification.ContentInfoExtender setStatus(int);
+    field public static final java.lang.String CONTENT_MATURITY_ALL = "android.contentMaturity.all";
+    field public static final java.lang.String CONTENT_MATURITY_HIGH = "android.contentMaturity.high";
+    field public static final java.lang.String CONTENT_MATURITY_LOW = "android.contentMaturity.low";
+    field public static final java.lang.String CONTENT_MATURITY_MEDIUM = "android.contentMaturity.medium";
+    field public static final java.lang.String CONTENT_PRICING_FREE = "android.contentPrice.free";
+    field public static final java.lang.String CONTENT_PRICING_PURCHASE = "android.contentPrice.purchase";
+    field public static final java.lang.String CONTENT_PRICING_RENTAL = "android.contentPrice.rental";
+    field public static final java.lang.String CONTENT_PRICING_SUBSCRIPTION = "android.contentPrice.subscription";
+    field public static final int CONTENT_STATUS_AVAILABLE = 2; // 0x2
+    field public static final int CONTENT_STATUS_PENDING = 1; // 0x1
+    field public static final int CONTENT_STATUS_READY = 0; // 0x0
+    field public static final int CONTENT_STATUS_UNAVAILABLE = 3; // 0x3
+    field public static final java.lang.String CONTENT_TYPE_APP = "android.contentType.app";
+    field public static final java.lang.String CONTENT_TYPE_BOOK = "android.contentType.book";
+    field public static final java.lang.String CONTENT_TYPE_COMIC = "android.contentType.comic";
+    field public static final java.lang.String CONTENT_TYPE_GAME = "android.contentType.game";
+    field public static final java.lang.String CONTENT_TYPE_MAGAZINE = "android.contentType.magazine";
+    field public static final java.lang.String CONTENT_TYPE_MOVIE = "android.contentType.movie";
+    field public static final java.lang.String CONTENT_TYPE_MUSIC = "android.contentType.music";
+    field public static final java.lang.String CONTENT_TYPE_NEWS = "android.contentType.news";
+    field public static final java.lang.String CONTENT_TYPE_PODCAST = "android.contentType.podcast";
+    field public static final java.lang.String CONTENT_TYPE_RADIO = "android.contentType.radio";
+    field public static final java.lang.String CONTENT_TYPE_SERIAL = "android.contentType.serial";
+    field public static final java.lang.String CONTENT_TYPE_SPORTS = "android.contentType.sports";
+    field public static final java.lang.String CONTENT_TYPE_TRAILER = "android.contentType.trailer";
+    field public static final java.lang.String CONTENT_TYPE_VIDEO = "android.contentType.video";
+    field public static final java.lang.String CONTENT_TYPE_WEBSITE = "android.contentType.website";
+  }
+
   public static abstract interface Notification.Extender {
     method public abstract android.app.Notification.Builder extend(android.app.Notification.Builder);
   }
