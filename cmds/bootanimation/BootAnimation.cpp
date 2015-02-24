@@ -179,7 +179,7 @@ status_t BootAnimation::initTexture(const Animation::Frame& frame)
     // FileMap memory is never released until application exit.
     // Release it now as the texture is already loaded and the memory used for
     // the packed resource can be released.
-    frame.map->release();
+    delete frame.map;
 
     // ensure we can call getPixels(). No need to call unlock, since the
     // bitmap will go out of scope when we return from this method.
@@ -446,7 +446,7 @@ bool BootAnimation::readFile(const char* name, String8& outString)
     }
 
     outString.setTo((char const*)entryMap->getDataPtr(), entryMap->getDataLength());
-    entryMap->release();
+    delete entryMap;
     return true;
 }
 

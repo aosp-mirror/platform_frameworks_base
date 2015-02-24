@@ -305,7 +305,7 @@ bool AudioPlayer::threadLoop()
 exit:
     if (pcm)
         pcm_close(pcm);
-    mCurrentFile->release();
+    delete mCurrentFile;
     mCurrentFile = NULL;
     return false;
 }
