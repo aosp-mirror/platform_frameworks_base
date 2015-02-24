@@ -22,7 +22,6 @@ public interface HotspotController {
     boolean isHotspotEnabled();
     boolean isHotspotSupported();
     void setHotspotEnabled(boolean enabled);
-    boolean isProvisioningNeeded();
 
     public interface Callback {
         void onHotspotChanged(boolean enabled);
