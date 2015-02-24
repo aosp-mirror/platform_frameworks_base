@@ -513,9 +513,7 @@ please see styles_device_defaults.xml.
         <item name="background">@null</item>
     </style>
 
-    <style name="Widget.Material.ButtonBar.AlertDialog">
-        <item name="background">@null</item>
-    </style>
+    <style name="Widget.Material.ButtonBar.AlertDialog" />
 
     <style name="Widget.Material.SearchView">
         <item name="layout">@layout/search_view</item>

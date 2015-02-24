@@ -2096,6 +2096,7 @@ package android {
     field public static final int ThemeOverlay_Material_ActionBar = 16974409; // 0x1030249
     field public static final int ThemeOverlay_Material_Dark = 16974411; // 0x103024b
     field public static final int ThemeOverlay_Material_Dark_ActionBar = 16974412; // 0x103024c
+    field public static final int ThemeOverlay_Material_Dialog = 16974564; // 0x10302e4
     field public static final int ThemeOverlay_Material_Light = 16974410; // 0x103024a
     field public static final int Theme_Black = 16973832; // 0x1030008
     field public static final int Theme_Black_NoTitleBar = 16973833; // 0x1030009
@@ -3834,8 +3835,8 @@ package android.app {
 
   public class AlertDialog extends android.app.Dialog implements android.content.DialogInterface {
     ctor protected AlertDialog(android.content.Context);
-    ctor protected AlertDialog(android.content.Context, int);
     ctor protected AlertDialog(android.content.Context, boolean, android.content.DialogInterface.OnCancelListener);
+    ctor protected AlertDialog(android.content.Context, int);
     method public android.widget.Button getButton(int);
     method public android.widget.ListView getListView();
     method public void setButton(int, java.lang.CharSequence, android.os.Message);
@@ -3854,11 +3855,11 @@ package android.app {
     method public void setMessage(java.lang.CharSequence);
     method public void setView(android.view.View);
     method public void setView(android.view.View, int, int, int, int);
-    field public static final int THEME_DEVICE_DEFAULT_DARK = 4; // 0x4
-    field public static final int THEME_DEVICE_DEFAULT_LIGHT = 5; // 0x5
-    field public static final int THEME_HOLO_DARK = 2; // 0x2
-    field public static final int THEME_HOLO_LIGHT = 3; // 0x3
-    field public static final int THEME_TRADITIONAL = 1; // 0x1
+    field public static final deprecated int THEME_DEVICE_DEFAULT_DARK = 4; // 0x4
+    field public static final deprecated int THEME_DEVICE_DEFAULT_LIGHT = 5; // 0x5
+    field public static final deprecated int THEME_HOLO_DARK = 2; // 0x2
+    field public static final deprecated int THEME_HOLO_LIGHT = 3; // 0x3
+    field public static final deprecated int THEME_TRADITIONAL = 1; // 0x1
   }
 
   public static class AlertDialog.Builder {
@@ -3873,7 +3874,7 @@ package android.app {
     method public android.app.AlertDialog.Builder setIcon(int);
     method public android.app.AlertDialog.Builder setIcon(android.graphics.drawable.Drawable);
     method public android.app.AlertDialog.Builder setIconAttribute(int);
-    method public android.app.AlertDialog.Builder setInverseBackgroundForced(boolean);
+    method public deprecated android.app.AlertDialog.Builder setInverseBackgroundForced(boolean);
     method public android.app.AlertDialog.Builder setItems(int, android.content.DialogInterface.OnClickListener);
     method public android.app.AlertDialog.Builder setItems(java.lang.CharSequence[], android.content.DialogInterface.OnClickListener);
     method public android.app.AlertDialog.Builder setMessage(int);
