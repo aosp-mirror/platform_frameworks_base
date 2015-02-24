@@ -47,6 +47,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -831,6 +832,7 @@ public final class ViewRootImpl implements ViewParent,
                 final int newDisplayState = mDisplay.getState();
                 if (oldDisplayState != newDisplayState) {
                     mAttachInfo.mDisplayState = newDisplayState;
+                    pokeDrawLockIfNeeded();
                     if (oldDisplayState != Display.STATE_UNKNOWN) {
                         final int oldScreenState = toViewScreenState(oldDisplayState);
                         final int newScreenState = toViewScreenState(newDisplayState);
@@ -860,6 +862,19 @@ public final class ViewRootImpl implements ViewParent,
                     View.SCREEN_STATE_OFF : View.SCREEN_STATE_ON;
         }
     };
+
+    void pokeDrawLockIfNeeded() {
+        final int displayState = mAttachInfo.mDisplayState;
+        if (mView != null && mAdded && mTraversalScheduled
+                && (displayState == Display.STATE_DOZE
+                        || displayState == Display.STATE_DOZE_SUSPEND)) {
+            try {
+                mWindowSession.pokeDrawLock(mWindow);
+            } catch (RemoteException ex) {
+                // System server died, oh well.
+            }
+        }
+    }
 
     @Override
     public void requestFitSystemWindows() {
@@ -1035,6 +1050,7 @@ public final class ViewRootImpl implements ViewParent,
                 scheduleConsumeBatchedInput();
             }
             notifyRendererOfFramePending();
+            pokeDrawLockIfNeeded();
         }
     }
 

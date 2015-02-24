@@ -19,9 +19,9 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
@@ -34,12 +34,15 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
 import android.os.Debug;
+import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.util.TimeUtils;
 import android.view.Display;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
+
 import com.android.server.input.InputWindowHandle;
 
 import android.content.Context;
@@ -344,6 +347,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     /** When true this window is at the top of the screen and should be layed out to extend under
      * the status bar */
     boolean mUnderStatusBar = true;
+
+    /**
+     * Wake lock for drawing.
+     * Even though it's slightly more expensive to do so, we will use a separate wake lock
+     * for each app that is requesting to draw while dozing so that we can accurately track
+     * who is preventing the system from suspending.
+     * This lock is only acquired on first use.
+     */
+    PowerManager.WakeLock mDrawLock;
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
            WindowState attachedWindow, int appOp, int seq, WindowManager.LayoutParams a,
@@ -1270,6 +1282,33 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
+    public void pokeDrawLockLw(long timeout) {
+        if (isVisibleOrAdding()) {
+            if (mDrawLock == null) {
+                // We want the tag name to be somewhat stable so that it is easier to correlate
+                // in wake lock statistics.  So in particular, we don't want to include the
+                // window's hash code as in toString().
+                CharSequence tag = mAttrs.getTitle();
+                if (tag == null) {
+                    tag = mAttrs.packageName;
+                }
+                mDrawLock = mService.mPowerManager.newWakeLock(
+                        PowerManager.DRAW_WAKE_LOCK, "Window:" + tag);
+                mDrawLock.setReferenceCounted(false);
+                mDrawLock.setWorkSource(new WorkSource(mOwnerUid, mAttrs.packageName));
+            }
+            // Each call to acquire resets the timeout.
+            if (DEBUG_POWER) {
+                Slog.d(TAG, "pokeDrawLock: poking draw lock on behalf of visible window owned by "
+                        + mAttrs.packageName);
+            }
+            mDrawLock.acquire(timeout);
+        } else if (DEBUG_POWER) {
+            Slog.d(TAG, "pokeDrawLock: suppressed draw lock request for invisible window "
+                    + "owned by " + mAttrs.packageName);
+        }
+    }
+
     @Override
     public boolean isAlive() {
         return mClient.asBinder().isBinderAlive();
@@ -1623,6 +1662,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(mWallpaperDisplayOffsetX);
                     pw.print(" mWallpaperDisplayOffsetY=");
                     pw.println(mWallpaperDisplayOffsetY);
+        }
+        if (mDrawLock != null) {
+            pw.println("mDrawLock=" + mDrawLock);
         }
     }
 

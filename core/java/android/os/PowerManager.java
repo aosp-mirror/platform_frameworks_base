@@ -205,6 +205,20 @@ public final class PowerManager {
     public static final int DOZE_WAKE_LOCK = 0x00000040;
 
     /**
+     * Wake lock level: Keep the device awake enough to allow drawing to occur.
+     * <p>
+     * This is used by the window manager to allow applications to draw while the
+     * system is dozing.  It currently has no effect unless the power manager is in
+     * the dozing state.
+     * </p><p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * {@hide}
+     */
+    public static final int DRAW_WAKE_LOCK = 0x00000080;
+
+    /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.
      *
      * @hide
@@ -489,6 +503,7 @@ public final class PowerManager {
             case FULL_WAKE_LOCK:
             case PROXIMITY_SCREEN_OFF_WAKE_LOCK:
             case DOZE_WAKE_LOCK:
+            case DRAW_WAKE_LOCK:
                 break;
             default:
                 throw new IllegalArgumentException("Must specify a valid wake lock level.");
