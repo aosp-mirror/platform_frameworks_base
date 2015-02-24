@@ -40,6 +40,16 @@
             android:clipChildren="false" />
     </FrameLayout>
 
+    <View
+        android:id="@+id/zen_embedded_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:visibility="gone"
+        android:layout_marginStart="@dimen/qs_panel_padding"
+        android:layout_marginEnd="@dimen/qs_panel_padding"
+        android:layout_marginBottom="@dimen/qs_panel_padding"
+        android:background="#4dffffff" />
+
     <RelativeLayout
         android:id="@+id/zen_subhead"
         android:layout_width="match_parent"

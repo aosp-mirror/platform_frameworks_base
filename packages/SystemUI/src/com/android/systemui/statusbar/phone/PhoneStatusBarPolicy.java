@@ -33,6 +33,7 @@ import android.util.Log;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
+import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
@@ -198,7 +199,11 @@ public class PhoneStatusBarPolicy {
         int volumeIconId = 0;
         String volumeDescription = null;
 
-        if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+        if (DndTile.isVisible(mContext)) {
+            zenVisible = mZen != Global.ZEN_MODE_OFF;
+            zenIconId = R.drawable.stat_sys_dnd;
+            zenDescription = mContext.getString(R.string.quick_settings_dnd_label);
+        } else if (mZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
             zenVisible = true;
             zenIconId = R.drawable.stat_sys_zen_none;
             zenDescription = mContext.getString(R.string.zen_no_interruptions);

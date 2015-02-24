@@ -44,6 +44,7 @@ import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.statusbar.ServiceMonitor;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -114,6 +115,7 @@ public class VolumeUI extends SystemUI {
             if (LOGD) Log.d(TAG, "Registering volume controller");
             mAudioManager.setVolumeController(mVolumeController);
             mMediaSessionManager.setRemoteVolumeController(mRemoteVolumeController);
+            DndTile.setVisible(mContext, false);
         } else {
             if (LOGD) Log.d(TAG, "Unregistering volume controller");
             mAudioManager.setVolumeController(null);

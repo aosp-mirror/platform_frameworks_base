@@ -90,9 +90,11 @@ public class ZenModePanel extends LinearLayout {
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
     private SegmentedButtons mZenButtons;
+    private ViewGroup mZenButtonsContainer;
     private View mZenSubhead;
     private TextView mZenSubheadCollapsed;
     private TextView mZenSubheadExpanded;
+    private View mZenEmbeddedDivider;
     private View mMoreSettings;
     private LinearLayout mZenConditions;
 
@@ -114,6 +116,7 @@ public class ZenModePanel extends LinearLayout {
     private Condition mSessionExitCondition;
     private Condition[] mConditions;
     private Condition mTimeCondition;
+    private boolean mEmbedded;
 
     public ZenModePanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -140,7 +143,23 @@ public class ZenModePanel extends LinearLayout {
         pw.print("  mExpanded="); pw.println(mExpanded);
         pw.print("  mSessionZen="); pw.println(mSessionZen);
         pw.print("  mAttachedZen="); pw.println(mAttachedZen);
+        pw.print("  mEmbedded="); pw.println(mEmbedded);
         mTransitionHelper.dump(fd, pw, args);
+    }
+
+    public void setEmbedded(boolean embedded) {
+        if (mEmbedded == embedded) return;
+        mEmbedded = embedded;
+        mZenButtonsContainer.setLayoutTransition(mEmbedded ? null : newLayoutTransition(null));
+        if (mEmbedded) {
+            mZenButtonsContainer.setBackground(null);
+        } else {
+            mZenButtonsContainer.setBackgroundResource(R.drawable.qs_background_secondary);
+        }
+        mZenButtons.getChildAt(2).setVisibility(mEmbedded ? GONE : VISIBLE);
+        mZenEmbeddedDivider.setVisibility(mEmbedded ? VISIBLE : GONE);
+        setExpanded(mEmbedded);
+        updateWidgets();
     }
 
     @Override
@@ -156,10 +175,11 @@ public class ZenModePanel extends LinearLayout {
                 Global.ZEN_MODE_OFF);
         mZenButtons.setCallback(mZenButtonsCallback);
 
-        final ViewGroup zenButtonsContainer = (ViewGroup) findViewById(R.id.zen_buttons_container);
-        zenButtonsContainer.setLayoutTransition(newLayoutTransition(null));
+        mZenButtonsContainer = (ViewGroup) findViewById(R.id.zen_buttons_container);
+        mZenButtonsContainer.setLayoutTransition(newLayoutTransition(null));
 
         mZenSubhead = findViewById(R.id.zen_subhead);
+        mZenEmbeddedDivider = findViewById(R.id.zen_embedded_divider);
 
         mZenSubheadCollapsed = (TextView) findViewById(R.id.zen_subhead_collapsed);
         mZenSubheadCollapsed.setOnClickListener(new View.OnClickListener() {
@@ -222,7 +242,9 @@ public class ZenModePanel extends LinearLayout {
         mAttachedZen = -1;
         mSessionZen = -1;
         setSessionExitCondition(null);
-        setExpanded(false);
+        if (!mEmbedded) {
+            setExpanded(false);
+        }
         setRequestingConditions(false);
         mTransitionHelper.clear();
     }
@@ -361,7 +383,7 @@ public class ZenModePanel extends LinearLayout {
 
     private void handleUpdateZen(int zen) {
         if (mSessionZen != -1 && mSessionZen != zen) {
-            setExpanded(zen != Global.ZEN_MODE_OFF);
+            setExpanded(mEmbedded || zen != Global.ZEN_MODE_OFF);
             mSessionZen = zen;
         }
         mZenButtons.setSelectedValue(zen);
@@ -403,7 +425,7 @@ public class ZenModePanel extends LinearLayout {
         final boolean expanded = !mHidden && mExpanded;
 
         mZenButtons.setVisibility(mHidden ? GONE : VISIBLE);
-        mZenSubhead.setVisibility(!mHidden && !zenOff ? VISIBLE : GONE);
+        mZenSubhead.setVisibility(!mHidden && !zenOff && !mEmbedded ? VISIBLE : GONE);
         mZenSubheadExpanded.setVisibility(expanded ? VISIBLE : GONE);
         mZenSubheadCollapsed.setVisibility(!expanded ? VISIBLE : GONE);
         mMoreSettings.setVisibility(zenImportant && expanded ? VISIBLE : GONE);
