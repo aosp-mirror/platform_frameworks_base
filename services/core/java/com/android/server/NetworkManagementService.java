@@ -1133,7 +1133,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setIpForwardingEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("ipfwd", enable ? "enable" : "disable");
+            mConnector.execute("ipfwd", enable ? "enable" : "disable", "tethering");
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
