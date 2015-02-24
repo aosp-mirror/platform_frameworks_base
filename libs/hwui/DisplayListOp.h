@@ -713,9 +713,7 @@ public:
             mBitmap(bitmap), mSrc(srcLeft, srcTop, srcRight, srcBottom) {}
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
-        renderer.drawBitmap(mBitmap, mSrc.left, mSrc.top, mSrc.right, mSrc.bottom,
-                mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
-                mPaint);
+        renderer.drawBitmap(mBitmap, mSrc, mLocalBounds, mPaint);
     }
 
     virtual void output(int level, uint32_t logFlags) const override {

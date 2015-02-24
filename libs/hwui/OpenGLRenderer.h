@@ -160,9 +160,8 @@ public:
     virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) override;
     void drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
-    virtual void drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
-            float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint) override;
+    virtual void drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst,
+            const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
     void drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
@@ -477,7 +476,6 @@ protected:
     virtual bool hasLayer() const {
         return (mState.currentFlags() & Snapshot::kFlagFboTarget) && mState.currentRegion();
     }
-
 
     /**
      * Renders the specified layer as a textured quad.

@@ -32,7 +32,7 @@ namespace android {
 namespace uirenderer {
 
 #define TRIGGER_STAGE(stageFlag) \
-    LOG_ALWAYS_FATAL_IF(stageFlag & mStageFlags, "Stage %d cannot be run twice"); \
+    LOG_ALWAYS_FATAL_IF((stageFlag) & mStageFlags, "Stage %d cannot be run twice", (stageFlag)); \
     mStageFlags = static_cast<StageFlags>(mStageFlags | (stageFlag))
 
 #define REQUIRE_STAGES(requiredFlags) \
@@ -40,10 +40,10 @@ namespace uirenderer {
             "not prepared for current stage")
 
 static void setUnitQuadTextureCoords(Rect uvs, TextureVertex* quadVertex) {
-    TextureVertex::setUV(quadVertex++, uvs.left, uvs.top);
-    TextureVertex::setUV(quadVertex++, uvs.right, uvs.top);
-    TextureVertex::setUV(quadVertex++, uvs.left, uvs.bottom);
-    TextureVertex::setUV(quadVertex++, uvs.right, uvs.bottom);
+    quadVertex[0] = {0, 0, uvs.left, uvs.top};
+    quadVertex[1] = {1, 0, uvs.right, uvs.top};
+    quadVertex[2] = {0, 1, uvs.left, uvs.bottom};
+    quadVertex[3] = {1, 1, uvs.right, uvs.bottom};
 }
 
 GlopBuilder::GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop)
@@ -74,25 +74,40 @@ GlopBuilder& GlopBuilder::setMeshUnitQuad() {
 }
 
 GlopBuilder& GlopBuilder::setMeshTexturedUnitQuad(const UvMapper* uvMapper) {
+    if (uvMapper) {
+        // can't use unit quad VBO, so build UV vertices manually
+        return setMeshTexturedUvQuad(uvMapper, Rect(0, 0, 1, 1));
+    }
+
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.vertexFlags = kTextureCoord_Attrib;
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
+    mOutGlop->mesh.vertexBufferObject = mRenderState.meshState().getUnitQuadVBO();
+    mOutGlop->mesh.vertices = nullptr;
+    mOutGlop->mesh.texCoordOffset = (GLvoid*) kMeshTextureOffset;
+    mOutGlop->mesh.indexBufferObject = 0;
+    mOutGlop->mesh.indices = nullptr;
+    mOutGlop->mesh.elementCount = 4;
+    mOutGlop->mesh.stride = kTextureVertexStride;
+    mDescription.hasTexture = true;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setMeshTexturedUvQuad(const UvMapper* uvMapper, Rect uvs) {
     TRIGGER_STAGE(kMeshStage);
 
     mOutGlop->mesh.vertexFlags = kTextureCoord_Attrib;
     mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
 
     if (CC_UNLIKELY(uvMapper)) {
-        Rect uvs(0, 0, 1, 1);
         uvMapper->map(uvs);
-        setUnitQuadTextureCoords(uvs, &mOutGlop->mesh.mappedVertices[0]);
-
-        mOutGlop->mesh.vertexBufferObject = 0;
-        mOutGlop->mesh.vertices = &mOutGlop->mesh.mappedVertices[0];
-        mOutGlop->mesh.texCoordOffset = &mOutGlop->mesh.mappedVertices[0].u;
-    } else {
-        // standard UV coordinates, use regular unit quad VBO
-        mOutGlop->mesh.vertexBufferObject = mRenderState.meshState().getUnitQuadVBO();
-        mOutGlop->mesh.vertices = nullptr;
-        mOutGlop->mesh.texCoordOffset = (GLvoid*) kMeshTextureOffset;
     }
+    setUnitQuadTextureCoords(uvs, &mOutGlop->mesh.mappedVertices[0]);
+
+    mOutGlop->mesh.vertexBufferObject = 0;
+    mOutGlop->mesh.vertices = &mOutGlop->mesh.mappedVertices[0].x;
+    mOutGlop->mesh.texCoordOffset = &mOutGlop->mesh.mappedVertices[0].u;
     mOutGlop->mesh.indexBufferObject = 0;
     mOutGlop->mesh.indices = nullptr;
     mOutGlop->mesh.elementCount = 4;

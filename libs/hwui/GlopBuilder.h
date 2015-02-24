@@ -40,6 +40,7 @@ public:
 
     GlopBuilder& setMeshUnitQuad();
     GlopBuilder& setMeshTexturedUnitQuad(const UvMapper* uvMapper);
+    GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
     GlopBuilder& setMeshIndexedQuads(void* vertexData, int quadCount);
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
