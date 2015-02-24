@@ -21,6 +21,7 @@ import android.util.Log;
 
 import libcore.io.IoUtils;
 
+import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -30,9 +31,10 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiOutputPort extends MidiPort implements MidiSender {
+public class MidiOutputPort implements MidiSender, Closeable {
     private static final String TAG = "MidiOutputPort";
 
+    private final int mPortNumber;
     private final FileInputStream mInputStream;
     private final MidiDispatcher mDispatcher = new MidiDispatcher();
 
@@ -41,7 +43,7 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
     private final Thread mThread = new Thread() {
         @Override
         public void run() {
-            byte[] buffer = new byte[MAX_PACKET_SIZE];
+            byte[] buffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
 
             try {
                 while (true) {
@@ -52,9 +54,9 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
                         // FIXME - inform receivers here?
                     }
 
-                    int offset = getMessageOffset(buffer, count);
-                    int size = getMessageSize(buffer, count);
-                    long timestamp = getMessageTimeStamp(buffer, count);
+                    int offset = MidiPortImpl.getMessageOffset(buffer, count);
+                    int size = MidiPortImpl.getMessageSize(buffer, count);
+                    long timestamp = MidiPortImpl.getMessageTimeStamp(buffer, count);
 
                     // dispatch to all our receivers
                     mDispatcher.post(buffer, offset, size, timestamp);
@@ -68,10 +70,19 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
         }
     };
 
-   /* package */ MidiOutputPort(ParcelFileDescriptor pfd, int portNumber) {
-        super(portNumber);
+    /* package */ MidiOutputPort(ParcelFileDescriptor pfd, int portNumber) {
+        mPortNumber = portNumber;
         mInputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
         mThread.start();
+    }
+
+    /**
+     * Returns the port number of this port
+     *
+     * @return the port's port number
+     */
+    public final int getPortNumber() {
+        return mPortNumber;
     }
 
     @Override

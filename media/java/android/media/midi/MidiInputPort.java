@@ -20,6 +20,7 @@ import android.os.ParcelFileDescriptor;
 
 import libcore.io.IoUtils;
 
+import java.io.Closeable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -29,16 +30,30 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiInputPort extends MidiPort implements MidiReceiver {
+public class MidiInputPort implements MidiReceiver, Closeable {
 
+    private final int mPortNumber;
     private final FileOutputStream mOutputStream;
 
     // buffer to use for sending messages out our output stream
-    private final byte[] mBuffer = new byte[MAX_PACKET_SIZE];
+    private final byte[] mBuffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
 
   /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
-        super(portNumber);
+        mPortNumber = portNumber;
         mOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(pfd);
+    }
+
+    /**
+     * Returns the port number of this port
+     *
+     * @return the port's port number
+     */
+    public final int getPortNumber() {
+        return mPortNumber;
+    }
+
+    //FIXME
+    public void onIOException() {
     }
 
     /**
@@ -56,9 +71,9 @@ public class MidiInputPort extends MidiPort implements MidiReceiver {
         synchronized (mBuffer) {
             try {
                 while (count > 0) {
-                    int length = packMessage(msg, offset, count, timestamp, mBuffer);
+                    int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
                     mOutputStream.write(mBuffer, 0, length);
-                    int sent = getMessageSize(mBuffer, length);
+                    int sent = MidiPortImpl.getMessageSize(mBuffer, length);
                     assert(sent >= 0 && sent <= length);
 
                     offset += sent;

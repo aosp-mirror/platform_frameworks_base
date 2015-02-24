@@ -21,7 +21,6 @@ import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
 import android.media.midi.MidiDispatcher;
 import android.media.midi.MidiManager;
-import android.media.midi.MidiPort;
 import android.media.midi.MidiReceiver;
 import android.media.midi.MidiSender;
 import android.os.Bundle;
@@ -45,6 +44,8 @@ public final class UsbMidiDevice implements Closeable {
     private MidiDeviceServer mServer;
 
     private final MidiReceiver[] mInputPortReceivers;
+
+    private static final int BUFFER_SIZE = 512;
 
     // for polling multiple FileDescriptors for MIDI events
     private final StructPollfd[] mPollFDs;
@@ -130,7 +131,7 @@ public final class UsbMidiDevice implements Closeable {
         new Thread() {
             @Override
             public void run() {
-                byte[] buffer = new byte[MidiPort.MAX_PACKET_DATA_SIZE];
+                byte[] buffer = new byte[BUFFER_SIZE];
                 try {
                     boolean done = false;
                     while (!done) {
