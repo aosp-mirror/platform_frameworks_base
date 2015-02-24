@@ -3100,17 +3100,6 @@ public final class ViewRootImpl implements ViewParent,
         return (theParent instanceof ViewGroup) && isViewDescendantOf((View) theParent, parent);
     }
 
-    private static void forceLayout(View view) {
-        view.forceLayout();
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-            final int count = group.getChildCount();
-            for (int i = 0; i < count; i++) {
-                forceLayout(group.getChildAt(i));
-            }
-        }
-    }
-
     private final static int MSG_INVALIDATE = 1;
     private final static int MSG_INVALIDATE_RECT = 2;
     private final static int MSG_DIE = 3;
@@ -3244,10 +3233,6 @@ public final class ViewRootImpl implements ViewParent,
                         mReportNextDraw = true;
                     }
 
-                    if (mView != null) {
-                        forceLayout(mView);
-                    }
-
                     requestLayout();
                 }
                 break;
@@ -3262,9 +3247,6 @@ public final class ViewRootImpl implements ViewParent,
                     mWinFrame.top = t;
                     mWinFrame.bottom = t + h;
 
-                    if (mView != null) {
-                        forceLayout(mView);
-                    }
                     requestLayout();
                 }
                 break;
