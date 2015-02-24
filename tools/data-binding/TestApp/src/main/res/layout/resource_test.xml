@@ -8,6 +8,8 @@
     <variable name="count" type="int"/>
     <variable name="title" type="String"/>
     <variable name="lastName" type="String"/>
+    <variable name="base" type="int"/>
+    <variable name="pbase" type="int"/>
 
     <TextView
             android:id="@+id/textView0"
@@ -20,4 +22,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{@plurals/orange(count)}"/>
+    <TextView
+            android:id="@+id/fractionNoParameters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + @fraction/myFraction}"/>
+    <TextView
+            android:id="@+id/fractionOneParameter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + @fraction/myFraction(base)}"/>
+    <TextView
+            android:id="@+id/fractionTwoParameters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`` + @fraction/myParentFraction(base, pbase)}"/>
 </LinearLayout>

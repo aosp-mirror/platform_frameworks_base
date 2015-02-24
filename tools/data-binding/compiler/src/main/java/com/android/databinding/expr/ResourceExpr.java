@@ -149,7 +149,12 @@ public class ResourceExpr extends Expr {
             case "dimenOffset": return resources + ".getDimensionPixelOffset(" + resourceName + ")";
             case "dimenSize": return resources + ".getDimensionPixelSize(" + resourceName + ")";
             case "drawable": return resources + ".getDrawable(" + resourceName + ")";
-            case "fraction": return resources + ".getFraction(" + resourceName + ", 1, 1)";
+            case "fraction": {
+                String base = getChildCode(0, "1");
+                String pbase = getChildCode(1, "1");
+                return resources + ".getFraction(" + resourceName + ", " + base + ", " + pbase +
+                        ")";
+            }
             case "id": return resourceName;
             case "intArray": return resources + ".getIntArray(" + resourceName + ")";
             case "integer": return resources + ".getInteger(" + resourceName + ")";
@@ -172,6 +177,14 @@ public class ResourceExpr extends Expr {
                 mResourceType.substring(1);
         return resources + ".get" + property + "(" + resourceName + ")";
 
+    }
+
+    private String getChildCode(int childIndex, String defaultValue) {
+        if (getChildren().size() <= childIndex) {
+            return defaultValue;
+        } else {
+            return WriterPackage.toCode(getChildren().get(childIndex), false).generate();
+        }
     }
 
     private String makeParameterCall(String resourceName, String methodCall) {
