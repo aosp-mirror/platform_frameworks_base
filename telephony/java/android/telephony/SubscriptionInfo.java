@@ -62,7 +62,8 @@ public class SubscriptionInfo implements Parcelable {
     private CharSequence mDisplayName;
 
     /**
-     * The string displayed to the user that identifies Subscription Provider Name
+     * String that identifies SPN/PLMN
+     * TODO : Add a new field that identifies only SPN for a sim
      */
     private CharSequence mCarrierName;
 
