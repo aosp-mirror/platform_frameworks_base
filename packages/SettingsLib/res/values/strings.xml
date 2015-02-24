@@ -67,4 +67,87 @@
 
     <!-- Status message of Wi-Fi when it is connected by a Wi-Fi assistant application. [CHAR LIMIT=NONE] -->
     <string name="connected_via_wfa">Connected via Wi\u2011Fi assistant</string>
+
+    <!-- Bluetooth settings.  Message when a device is disconnected -->
+    <string name="bluetooth_disconnected">Disconnected</string>
+    <!-- Bluetooth settings.  Message when disconnecting from a device -->
+    <string name="bluetooth_disconnecting">Disconnecting\u2026</string>
+     <!-- Bluetooth settings.  Message when connecting to a device -->
+    <string name="bluetooth_connecting">Connecting\u2026</string>
+    <!-- Bluetooth settings.  Message when connected to a device. [CHAR LIMIT=40] -->
+    <string name="bluetooth_connected">Connected</string>
+
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
+    <string name="bluetooth_profile_a2dp">Media audio</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
+    <string name="bluetooth_profile_headset">Phone audio</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the OPP profile. -->
+    <string name="bluetooth_profile_opp">File transfer</string>
+    <!-- Bluetooth settings. The user-visible string that is used whenever referring to the HID profile. -->
+    <string name="bluetooth_profile_hid">Input device</string>
+    <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (accessing Internet through remote device). [CHAR LIMIT=40] -->
+    <string name="bluetooth_profile_pan">Internet access</string>
+    <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PBAP profile. [CHAR LIMIT=40] -->
+    <string name="bluetooth_profile_pbap">Contact sharing</string>
+    <!-- Bluetooth settings. The user-visible summary string that is used whenever referring to the PBAP profile (sharing contacts). [CHAR LIMIT=60] -->
+    <string name="bluetooth_profile_pbap_summary">Use for contact sharing</string>
+    <!-- Bluetooth settings. The user-visible string that is used whenever referring to the PAN profile (sharing this device's Internet connection). [CHAR LIMIT=40] -->
+    <string name="bluetooth_profile_pan_nap">Internet connection sharing</string>
+    <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the map profile. -->
+    <string name="bluetooth_profile_map">Message Access</string>
+
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference when A2DP is connected. -->
+    <string name="bluetooth_a2dp_profile_summary_connected">Connected to media audio</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the headset checkbox preference when headset is connected. -->
+    <string name="bluetooth_headset_profile_summary_connected">Connected to phone audio</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the OPP checkbox preference when OPP is connected. -->
+    <string name="bluetooth_opp_profile_summary_connected">Connected to file transfer server</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the map checkbox preference when map is connected. -->
+    <string name="bluetooth_map_profile_summary_connected">Connected to map</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the OPP checkbox preference when OPP is not connected. -->
+    <string name="bluetooth_opp_profile_summary_not_connected">Not connected to file transfer server</string>
+    <!-- Bluetooth settings. Connection options screen. The summary for the HID checkbox preference when HID is connected. -->
+    <string name="bluetooth_hid_profile_summary_connected">Connected to input device</string>
+    <!-- Bluetooth settings. Connection options screen. The summary for the checkbox preference when PAN is connected (user role). [CHAR LIMIT=25]-->
+    <string name="bluetooth_pan_user_profile_summary_connected">Connected to device for Internet access</string>
+    <!-- Bluetooth settings. Connection options screen. The summary for the checkbox preference when PAN is connected (NAP role). [CHAR LIMIT=25]-->
+    <string name="bluetooth_pan_nap_profile_summary_connected">Sharing local Internet connection with device</string>
+
+    <!-- Bluetooth settings. Connection options screen. The summary
+         for the PAN checkbox preference that describes how checking it
+         will set the PAN profile as preferred. -->
+    <string name="bluetooth_pan_profile_summary_use_for">Use for Internet access</string>
+    <!-- Bluetooth settings. Connection options screen.  The summary for the map checkbox preference that describes how checking it will set the map profile as preferred. -->
+    <string name="bluetooth_map_profile_summary_use_for">Use for map</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the A2DP checkbox preference that describes how checking it will set the A2DP profile as preferred. -->
+    <string name="bluetooth_a2dp_profile_summary_use_for">Use for media audio</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the headset checkbox preference that describes how checking it will set the headset profile as preferred. -->
+    <string name="bluetooth_headset_profile_summary_use_for">Use for phone audio</string>
+    <!-- Bluetooth settings.  Connection options screen.  The summary for the OPP checkbox preference that describes how checking it will set the OPP profile as preferred. -->
+    <string name="bluetooth_opp_profile_summary_use_for">Use for file transfer</string>
+    <!-- Bluetooth settings. Connection options screen. The summary
+         for the HID checkbox preference that describes how checking it
+         will set the HID profile as preferred. -->
+    <string name="bluetooth_hid_profile_summary_use_for">Use for input</string>
+
+    <!-- Button text for accepting an incoming pairing request. [CHAR LIMIT=20] -->
+    <string name="bluetooth_pairing_accept">Pair</string>
+    <!-- Button text for accepting an incoming pairing request in all caps. [CHAR LIMIT=20] -->
+    <string name="bluetooth_pairing_accept_all_caps">PAIR</string>
+    <!-- Button text for declining an incoming pairing request. [CHAR LIMIT=20] -->
+    <string name="bluetooth_pairing_decline">Cancel</string>
+
+    <!-- Message in pairing dialogs.  [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_pairing_will_share_phonebook">Pairing grants access to your contacts and call history when connected.</string>
+    <!-- Message for the error dialog when BT pairing fails generically. -->
+    <string name="bluetooth_pairing_error_message">Couldn\'t pair with <xliff:g id="device_name">%1$s</xliff:g>.</string>
+
+    <!-- Message for the error dialog when BT pairing fails because the PIN /
+    Passkey entered is incorrect. -->
+    <string name="bluetooth_pairing_pin_error_message">Couldn\'t pair with <xliff:g id="device_name">%1$s</xliff:g> because of an incorrect PIN or passkey.</string>
+    <!-- Message for the error dialog when BT pairing fails because the other device is down. -->
+    <string name="bluetooth_pairing_device_down_error_message">Can\'t communicate with <xliff:g id="device_name">%1$s</xliff:g>.</string>
+    <!-- Message for the error dialog when BT pairing fails because the other device rejected the pairing. -->
+    <string name="bluetooth_pairing_rejected_error_message">Pairing rejected by <xliff:g id="device_name">%1$s</xliff:g>.</string>
+
 </resources>
