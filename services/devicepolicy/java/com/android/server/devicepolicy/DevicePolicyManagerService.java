@@ -196,13 +196,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.BLUETOOTH_ON);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.MODE_RINGER);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.NETWORK_PREFERENCE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.USB_MASS_STORAGE_ENABLED);
-        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_ON);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.WIFI_SLEEP_POLICY);
     }
 
@@ -5267,8 +5265,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
             if (!GLOBAL_SETTINGS_WHITELIST.contains(setting)) {
-                throw new SecurityException(String.format(
-                        "Permission denial: device owners cannot update %1$s", setting));
+                // BLUETOOTH_ON and WIFI_ON used to be supported but not any more. We do not want to
+                // throw a SecurityException not to break apps.
+                if (!Settings.Global.BLUETOOTH_ON.equals(setting)
+                        && !Settings.Global.WIFI_ON.equals(setting)) {
+                    throw new SecurityException(String.format(
+                            "Permission denial: device owners cannot update %1$s", setting));
+                }
             }
 
             long id = Binder.clearCallingIdentity();

@@ -3360,13 +3360,18 @@ public class DevicePolicyManager {
      * <li>{@link Settings.Global#ADB_ENABLED}</li>
      * <li>{@link Settings.Global#AUTO_TIME}</li>
      * <li>{@link Settings.Global#AUTO_TIME_ZONE}</li>
-     * <li>{@link Settings.Global#BLUETOOTH_ON}</li>
+     * <li>{@link Settings.Global#BLUETOOTH_ON}
+     * Changing this setting has not effect as of {@link android.os.Build.VERSION_CODES#MNC}. Use
+     * {@link android.bluetooth.BluetoothAdapter#enable()} and
+     * {@link android.bluetooth.BluetoothAdapter#disable()} instead.</li>
      * <li>{@link Settings.Global#DATA_ROAMING}</li>
      * <li>{@link Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}</li>
      * <li>{@link Settings.Global#MODE_RINGER}</li>
      * <li>{@link Settings.Global#NETWORK_PREFERENCE}</li>
      * <li>{@link Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
-     * <li>{@link Settings.Global#WIFI_ON}</li>
+     * <li>{@link Settings.Global#WIFI_ON}
+     * Changing this setting has not effect as of {@link android.os.Build.VERSION_CODES#MNC}. Use
+     * {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
      * <li>{@link Settings.Global#WIFI_SLEEP_POLICY}</li>
      * </ul>
      *
