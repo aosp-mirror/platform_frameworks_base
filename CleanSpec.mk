@@ -228,6 +228,11 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/SystemUI_intermediates/)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/Keyguard_intermediates/)
 $(call add-clean-step, rm -f $(OUT_DIR)/target/product/*/system/framework/android.policy.jar)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/bin/inputflinger $(PRODUCT_OUT)/symbols/system/bin/inputflinger)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/lib/libinputflingerhost.so $(PRODUCT_OUT)/system/lib64/libinputflingerhost.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/symbols/system/lib/libinputflingerhost.so $(PRODUCT_OUT)/symbols/system/lib64/libinputflingerhost.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/lib/libinputflingerhost.so $(PRODUCT_OUT)/obj_arm/lib/libinputflingerhost.so)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libinputflingerhost_intermediates $(PRODUCT_OUT)/obj_arm/SHARED_LIBRARIES/libinputflingerhost_intermediates)
 
 # ******************************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST ABOVE THIS BANNER
