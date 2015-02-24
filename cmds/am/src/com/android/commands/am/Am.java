@@ -138,6 +138,7 @@ public class Am extends BaseCommand {
                 "       am task lock <TASK_ID>\n" +
                 "       am task lock stop\n" +
                 "       am task resizeable <TASK_ID> [true|false]\n" +
+                "       am task resize <TASK_ID> <LEFT,TOP,RIGHT,BOTTOM>\n" +
                 "       am get-config\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
@@ -249,11 +250,11 @@ public class Am extends BaseCommand {
                 "am stack resize: change <STACK_ID> size and position to <LEFT,TOP,RIGHT,BOTTOM>" +
                 ".\n" +
                 "\n" +
-                "am stack split: split <STACK_ID> into 2 stacks <v>ertically or <h>orizontally" +
-                "   starting the new stack with [INTENT] if specified. If [INTENT] isn't" +
-                "   specified and the current stack has more than one task, then the top task" +
-                "   of the current task will be moved to the new stack. Command will also force" +
-                "   all current tasks in both stacks to be resizeable." +
+                "am stack split: split <STACK_ID> into 2 stacks <v>ertically or <h>orizontally\n" +
+                "   starting the new stack with [INTENT] if specified. If [INTENT] isn't\n" +
+                "   specified and the current stack has more than one task, then the top task\n" +
+                "   of the current task will be moved to the new stack. Command will also force\n" +
+                "   all current tasks in both stacks to be resizeable.\n" +
                 "\n" +
                 "am stack list: list all of the activity stacks and their sizes.\n" +
                 "\n" +
@@ -264,6 +265,10 @@ public class Am extends BaseCommand {
                 "am task lock stop: end the current task lock\n" +
                 "\n" +
                 "am task resizeable: change if <TASK_ID> is resizeable (true) or not (false).\n" +
+                "\n" +
+                "am task resize: makes sure <TASK_ID> is in a stack with the specified bounds.\n" +
+                "   Forces the task to be resizeable and creates a stack if no existing stack\n" +
+                "   has the specified bounds.\n" +
                 "\n" +
                 "am get-config: retrieve the configuration and any recent configurations\n" +
                 "  of the device\n" +
@@ -1742,33 +1747,14 @@ public class Am extends BaseCommand {
     private void runStackResize() throws Exception {
         String stackIdStr = nextArgRequired();
         int stackId = Integer.valueOf(stackIdStr);
-        String leftStr = nextArgRequired();
-        int left = Integer.valueOf(leftStr);
-        String topStr = nextArgRequired();
-        int top = Integer.valueOf(topStr);
-        String rightStr = nextArgRequired();
-        int right = Integer.valueOf(rightStr);
-        String bottomStr = nextArgRequired();
-        int bottom = Integer.valueOf(bottomStr);
-        if (left < 0) {
-            System.err.println("Error: bad left arg: " + leftStr);
-            return;
-        }
-        if (top < 0) {
-            System.err.println("Error: bad top arg: " + topStr);
-            return;
-        }
-        if (right <= 0) {
-            System.err.println("Error: bad right arg: " + rightStr);
-            return;
-        }
-        if (bottom <= 0) {
-            System.err.println("Error: bad bottom arg: " + bottomStr);
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
             return;
         }
 
         try {
-            mAm.resizeStack(stackId, new Rect(left, top, right, bottom));
+            mAm.resizeStack(stackId, bounds);
         } catch (RemoteException e) {
         }
     }
@@ -1857,6 +1843,8 @@ public class Am extends BaseCommand {
             runTaskLock();
         } else if (op.equals("resizeable")) {
             runTaskResizeable();
+        } else if (op.equals("resize")) {
+            runTaskResize();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -1886,6 +1874,20 @@ public class Am extends BaseCommand {
 
         try {
             mAm.setTaskResizeable(taskId, resizeable);
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runTaskResize() throws Exception {
+        final String taskIdStr = nextArgRequired();
+        final int taskId = Integer.valueOf(taskIdStr);
+        final Rect bounds = getBounds();
+        if (bounds == null) {
+            System.err.println("Error: invalid input bounds");
+            return;
+        }
+        try {
+            mAm.resizeTask(taskId, bounds);
         } catch (RemoteException e) {
         }
     }
@@ -1985,5 +1987,33 @@ public class Am extends BaseCommand {
             throw new FileNotFoundException("System server has no access to file context " + tcon);
         }
         return fd;
+    }
+
+    private Rect getBounds() {
+        String leftStr = nextArgRequired();
+        int left = Integer.valueOf(leftStr);
+        String topStr = nextArgRequired();
+        int top = Integer.valueOf(topStr);
+        String rightStr = nextArgRequired();
+        int right = Integer.valueOf(rightStr);
+        String bottomStr = nextArgRequired();
+        int bottom = Integer.valueOf(bottomStr);
+        if (left < 0) {
+            System.err.println("Error: bad left arg: " + leftStr);
+            return null;
+        }
+        if (top < 0) {
+            System.err.println("Error: bad top arg: " + topStr);
+            return null;
+        }
+        if (right <= 0) {
+            System.err.println("Error: bad right arg: " + rightStr);
+            return null;
+        }
+        if (bottom <= 0) {
+            System.err.println("Error: bad bottom arg: " + bottomStr);
+            return null;
+        }
+        return new Rect(left, top, right, bottom);
     }
 }

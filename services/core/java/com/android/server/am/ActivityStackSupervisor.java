@@ -2641,6 +2641,48 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    /** Makes sure the input task is in a stack with the specified bounds by either resizing the
+     * current task stack if it only has one entry, moving the task to a stack that matches the
+     * bounds, or creating a new stack with the required bounds. Also, makes the task resizeable.*/
+    void resizeTaskLocked(TaskRecord task, Rect bounds) {
+        task.mResizeable = true;
+        final ActivityStack currentStack = task.stack;
+        if (currentStack.isHomeStack()) {
+            // Can't move task off the home stack. Sorry!
+            return;
+        }
+
+        final int matchingStackId = mWindowManager.getStackIdWithBounds(bounds);
+        if (matchingStackId != -1) {
+            // There is already a stack with the right bounds!
+            if (currentStack != null && currentStack.mStackId == matchingStackId) {
+                // Nothing to do here. Already in the right stack...
+                return;
+            }
+            // Move task to stack with matching bounds.
+            moveTaskToStackLocked(task.taskId, matchingStackId, true);
+            return;
+        }
+
+        if (currentStack != null && currentStack.numTasks() == 1) {
+            // Just resize the current stack since this is the task in it.
+            resizeStackLocked(currentStack.mStackId, bounds);
+            return;
+        }
+
+        // Create new stack and move the task to it.
+        final int displayId = (currentStack != null && currentStack.mDisplayId != -1)
+                ? currentStack.mDisplayId : Display.DEFAULT_DISPLAY;
+        ActivityStack newStack = createStackOnDisplay(getNextStackId(), displayId);
+
+        if (newStack == null) {
+            Slog.e(TAG, "resizeTaskLocked: Can't create stack for task=" + task);
+            return;
+        }
+        moveTaskToStackLocked(task.taskId, newStack.mStackId, true);
+        resizeStackLocked(newStack.mStackId, bounds);
+    }
+
     ActivityStack createStackOnDisplay(int stackId, int displayId) {
         ActivityDisplay activityDisplay = mActivityDisplays.get(displayId);
         if (activityDisplay == null) {
@@ -2719,6 +2761,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
     void moveTaskToStackLocked(int taskId, int stackId, boolean toTop) {
         final TaskRecord task = anyTaskForIdLocked(taskId);
         if (task == null) {
+            Slog.w(TAG, "moveTaskToStack: no task for id=" + taskId);
             return;
         }
         final ActivityStack stack = getStack(stackId);
@@ -2726,9 +2769,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
             Slog.w(TAG, "moveTaskToStack: no stack for id=" + stackId);
             return;
         }
-        task.stack.removeTask(task, "moveTaskToStack");
+        mWindowManager.moveTaskToStack(taskId, stackId, toTop);
+        if (task.stack != null) {
+            task.stack.removeTask(task, "moveTaskToStack", false);
+        }
         stack.addTask(task, toTop, true);
-        mWindowManager.addTask(taskId, stackId, toTop);
         resumeTopActivitiesLocked();
     }
 
