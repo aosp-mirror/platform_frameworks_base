@@ -419,61 +419,67 @@ public abstract class BaseStatusBar extends SystemUI implements
         public void onNotificationPosted(final StatusBarNotification sbn,
                 final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationPosted: " + sbn);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Notification n = sbn.getNotification();
-                    boolean isUpdate = mNotificationData.get(sbn.getKey()) != null
-                            || isHeadsUp(sbn.getKey());
+            if (sbn != null) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Notification n = sbn.getNotification();
+                        boolean isUpdate = mNotificationData.get(sbn.getKey()) != null
+                                || isHeadsUp(sbn.getKey());
 
-                    // Ignore children of notifications that have a summary, since we're not
-                    // going to show them anyway. This is true also when the summary is canceled,
-                    // because children are automatically canceled by NoMan in that case.
-                    if (n.isGroupChild() &&
-                            mNotificationData.isGroupWithSummary(sbn.getGroupKey())) {
-                        if (DEBUG) {
-                            Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
+                        // Ignore children of notifications that have a summary, since we're not
+                        // going to show them anyway. This is true also when the summary is canceled,
+                        // because children are automatically canceled by NoMan in that case.
+                        if (n.isGroupChild() &&
+                                mNotificationData.isGroupWithSummary(sbn.getGroupKey())) {
+                            if (DEBUG) {
+                                Log.d(TAG, "Ignoring group child due to existing summary: " + sbn);
+                            }
+
+                            // Remove existing notification to avoid stale data.
+                            if (isUpdate) {
+                                removeNotification(sbn.getKey(), rankingMap);
+                            } else {
+                                mNotificationData.updateRanking(rankingMap);
+                            }
+                            return;
                         }
-
-                        // Remove existing notification to avoid stale data.
                         if (isUpdate) {
-                            removeNotification(sbn.getKey(), rankingMap);
+                            updateNotification(sbn, rankingMap);
                         } else {
-                            mNotificationData.updateRanking(rankingMap);
+                            addNotification(sbn, rankingMap);
                         }
-                        return;
                     }
-                    if (isUpdate) {
-                        updateNotification(sbn, rankingMap);
-                    } else {
-                        addNotification(sbn, rankingMap);
-                    }
-                }
-            });
+                });
+            }
         }
 
         @Override
-        public void onNotificationRemoved(final StatusBarNotification sbn,
+        public void onNotificationRemoved(StatusBarNotification sbn,
                 final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    removeNotification(sbn.getKey(), rankingMap);
-                }
-            });
+            if (sbn != null) {
+                final String key = sbn.getKey();
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        removeNotification(key, rankingMap);
+                    }
+                });
+            }
         }
 
         @Override
         public void onNotificationRankingUpdate(final RankingMap rankingMap) {
             if (DEBUG) Log.d(TAG, "onRankingUpdate");
+            if (rankingMap != null) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     updateNotificationRanking(rankingMap);
                 }
             });
-        }
+        }                            }
 
     };
 
