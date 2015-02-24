@@ -64,4 +64,8 @@ final class PackageSetting extends PackageSettingBase {
     public boolean isPrivileged() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
+
+    public boolean isForwardLocked() {
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
+    }
 }

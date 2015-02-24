@@ -55,6 +55,10 @@ import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.internal.util.ArrayUtils.removeInt;
+import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
+import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
+import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
+import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 
 import android.util.ArrayMap;
 
@@ -184,7 +188,6 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -213,7 +216,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import dalvik.system.DexFile;
-import dalvik.system.StaleDexCacheError;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -323,12 +325,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
 
-    private static String sPreferredInstructionSet;
-
     final ServiceThread mHandlerThread;
-
-    private static final String IDMAP_PREFIX = "/data/resource-cache/";
-    private static final String IDMAP_SUFFIX = "@idmap";
 
     final PackageHandler mHandler;
 
@@ -466,8 +463,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     final PackageInstallerService mInstallerService;
 
-    ArraySet<PackageParser.Package> mDeferredDexOpt = null;
-
+    private final PackageDexOptimizer mPackageDexOptimizer;
     // Cache of users who need badging.
     SparseBooleanArray mUserNeedsBadging = new SparseBooleanArray();
 
@@ -1050,7 +1046,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                         res.pkg.applicationInfo.packageName, null, updateUsers);
 
                                 // treat asec-hosted packages like removable media on upgrade
-                                if (isForwardLocked(res.pkg) || isExternal(res.pkg)) {
+                                if (res.pkg.isForwardLocked() || isExternal(res.pkg)) {
                                     if (DEBUG_INSTALL) {
                                         Slog.i(TAG, "upgrading pkg " + res.pkg
                                                 + " is ASEC-hosted -> AVAILABLE");
@@ -1338,6 +1334,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         mInstaller = installer;
+        mPackageDexOptimizer = new PackageDexOptimizer(this);
 
         getDefaultDisplayMetrics(context, mMetrics);
 
@@ -1438,9 +1435,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "No SYSTEMSERVERCLASSPATH found!");
             }
 
-            final List<String> allInstructionSets = getAllInstructionSets();
+            final List<String> allInstructionSets = InstructionSets.getAllInstructionSets();
             final String[] dexCodeInstructionSets =
-                getDexCodeInstructionSets(allInstructionSets.toArray(new String[allInstructionSets.size()]));
+                    getDexCodeInstructionSets(
+                            allInstructionSets.toArray(new String[allInstructionSets.size()]));
 
             /**
              * Ensure all external libraries have had dexopt run on them.
@@ -2330,6 +2328,19 @@ public class PackageManagerService extends IPackageManager.Stub {
                 String[] libs = new String[size];
                 libSet.toArray(libs);
                 return libs;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    PackageParser.Package findSharedNonSystemLibrary(String libName) {
+        synchronized (mPackages) {
+            PackageManagerService.SharedLibraryEntry lib = mSharedLibraries.get(libName);
+            if (lib != null && lib.apk != null) {
+                return mPackages.get(lib.apk);
             }
         }
         return null;
@@ -4616,8 +4627,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final ArraySet<PackageParser.Package> pkgs;
         synchronized (mPackages) {
-            pkgs = mDeferredDexOpt;
-            mDeferredDexOpt = null;
+            pkgs = mPackageDexOptimizer.clearDeferredDexOptPackages();
         }
 
         if (pkgs != null) {
@@ -4773,8 +4783,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         PackageParser.Package p = pkg;
         synchronized (mInstallLock) {
-            performDexOptLI(p, null /* instruction sets */, false /* force dex */,
-                            false /* defer */, true /* include dependencies */);
+            mPackageDexOptimizer.performDexOpt(p, null /* instruction sets */,
+                    false /* force dex */, false /* defer */, true /* include dependencies */);
         }
     }
 
@@ -4823,8 +4833,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         synchronized (mInstallLock) {
             final String[] instructionSets = new String[] { targetInstructionSet };
-            return performDexOptLI(p, instructionSets, false /* force dex */, false /* defer */,
-                    true /* include dependencies */) == DEX_OPT_PERFORMED;
+            int result = mPackageDexOptimizer.performDexOpt(p, instructionSets,
+                    false /* forceDex */, false /* defer */, true /* inclDependencies */);
+            return result == PackageDexOptimizer.DEX_OPT_PERFORMED;
         }
     }
 
@@ -4851,226 +4862,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         mPackageUsage.write(true);
     }
 
-    private void performDexOptLibsLI(ArrayList<String> libs, String[] instructionSets,
-             boolean forceDex, boolean defer, ArraySet<String> done) {
-        for (int i=0; i<libs.size(); i++) {
-            PackageParser.Package libPkg;
-            String libName;
-            synchronized (mPackages) {
-                libName = libs.get(i);
-                SharedLibraryEntry lib = mSharedLibraries.get(libName);
-                if (lib != null && lib.apk != null) {
-                    libPkg = mPackages.get(lib.apk);
-                } else {
-                    libPkg = null;
-                }
-            }
-            if (libPkg != null && !done.contains(libName)) {
-                performDexOptLI(libPkg, instructionSets, forceDex, defer, done);
-            }
-        }
-    }
-
-    static final int DEX_OPT_SKIPPED = 0;
-    static final int DEX_OPT_PERFORMED = 1;
-    static final int DEX_OPT_DEFERRED = 2;
-    static final int DEX_OPT_FAILED = -1;
-
-    private int performDexOptLI(PackageParser.Package pkg, String[] targetInstructionSets,
-            boolean forceDex, boolean defer, ArraySet<String> done) {
-        final String[] instructionSets = targetInstructionSets != null ?
-                targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
-
-        if (done != null) {
-            done.add(pkg.packageName);
-            if (pkg.usesLibraries != null) {
-                performDexOptLibsLI(pkg.usesLibraries, instructionSets, forceDex, defer, done);
-            }
-            if (pkg.usesOptionalLibraries != null) {
-                performDexOptLibsLI(pkg.usesOptionalLibraries, instructionSets, forceDex, defer, done);
-            }
-        }
-
-        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) == 0) {
-            return DEX_OPT_SKIPPED;
-        }
-
-        final boolean vmSafeMode = (pkg.applicationInfo.flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
-
-        final List<String> paths = pkg.getAllCodePathsExcludingResourceOnly();
-        boolean performedDexOpt = false;
-        // There are three basic cases here:
-        // 1.) we need to dexopt, either because we are forced or it is needed
-        // 2.) we are defering a needed dexopt
-        // 3.) we are skipping an unneeded dexopt
-        final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-        for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-            if (!forceDex && pkg.mDexOptPerformed.contains(dexCodeInstructionSet)) {
-                continue;
-            }
-
-            for (String path : paths) {
-                try {
-                    // This will return DEXOPT_NEEDED if we either cannot find any odex file for this
-                    // patckage or the one we find does not match the image checksum (i.e. it was
-                    // compiled against an old image). It will return PATCHOAT_NEEDED if we can find a
-                    // odex file and it matches the checksum of the image but not its base address,
-                    // meaning we need to move it.
-                    final byte isDexOptNeeded = DexFile.isDexOptNeededInternal(path,
-                            pkg.packageName, dexCodeInstructionSet, defer);
-                    if (forceDex || (!defer && isDexOptNeeded == DexFile.DEXOPT_NEEDED)) {
-                        Log.i(TAG, "Running dexopt on: " + path + " pkg="
-                                + pkg.applicationInfo.packageName + " isa=" + dexCodeInstructionSet
-                                + " vmSafeMode=" + vmSafeMode);
-                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                        final int ret = mInstaller.dexopt(path, sharedGid, !isForwardLocked(pkg),
-                                pkg.packageName, dexCodeInstructionSet, vmSafeMode);
-
-                        if (ret < 0) {
-                            // Don't bother running dexopt again if we failed, it will probably
-                            // just result in an error again. Also, don't bother dexopting for other
-                            // paths & ISAs.
-                            return DEX_OPT_FAILED;
-                        }
-
-                        performedDexOpt = true;
-                    } else if (!defer && isDexOptNeeded == DexFile.PATCHOAT_NEEDED) {
-                        Log.i(TAG, "Running patchoat on: " + pkg.applicationInfo.packageName);
-                        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-                        final int ret = mInstaller.patchoat(path, sharedGid, !isForwardLocked(pkg),
-                                pkg.packageName, dexCodeInstructionSet);
-
-                        if (ret < 0) {
-                            // Don't bother running patchoat again if we failed, it will probably
-                            // just result in an error again. Also, don't bother dexopting for other
-                            // paths & ISAs.
-                            return DEX_OPT_FAILED;
-                        }
-
-                        performedDexOpt = true;
-                    }
-
-                    // We're deciding to defer a needed dexopt. Don't bother dexopting for other
-                    // paths and instruction sets. We'll deal with them all together when we process
-                    // our list of deferred dexopts.
-                    if (defer && isDexOptNeeded != DexFile.UP_TO_DATE) {
-                        if (mDeferredDexOpt == null) {
-                            mDeferredDexOpt = new ArraySet<PackageParser.Package>();
-                        }
-                        mDeferredDexOpt.add(pkg);
-                        return DEX_OPT_DEFERRED;
-                    }
-                } catch (FileNotFoundException e) {
-                    Slog.w(TAG, "Apk not found for dexopt: " + path);
-                    return DEX_OPT_FAILED;
-                } catch (IOException e) {
-                    Slog.w(TAG, "IOException reading apk: " + path, e);
-                    return DEX_OPT_FAILED;
-                } catch (StaleDexCacheError e) {
-                    Slog.w(TAG, "StaleDexCacheError when reading apk: " + path, e);
-                    return DEX_OPT_FAILED;
-                } catch (Exception e) {
-                    Slog.w(TAG, "Exception when doing dexopt : ", e);
-                    return DEX_OPT_FAILED;
-                }
-            }
-
-            // At this point we haven't failed dexopt and we haven't deferred dexopt. We must
-            // either have either succeeded dexopt, or have had isDexOptNeededInternal tell us
-            // it isn't required. We therefore mark that this package doesn't need dexopt unless
-            // it's forced. performedDexOpt will tell us whether we performed dex-opt or skipped
-            // it.
-            pkg.mDexOptPerformed.add(dexCodeInstructionSet);
-        }
-
-        // If we've gotten here, we're sure that no error occurred and that we haven't
-        // deferred dex-opt. We've either dex-opted one more paths or instruction sets or
-        // we've skipped all of them because they are up to date. In both cases this
-        // package doesn't need dexopt any longer.
-        return performedDexOpt ? DEX_OPT_PERFORMED : DEX_OPT_SKIPPED;
-    }
-
-    private static String[] getAppDexInstructionSets(ApplicationInfo info) {
-        if (info.primaryCpuAbi != null) {
-            if (info.secondaryCpuAbi != null) {
-                return new String[] {
-                        VMRuntime.getInstructionSet(info.primaryCpuAbi),
-                        VMRuntime.getInstructionSet(info.secondaryCpuAbi) };
-            } else {
-                return new String[] {
-                        VMRuntime.getInstructionSet(info.primaryCpuAbi) };
-            }
-        }
-
-        return new String[] { getPreferredInstructionSet() };
-    }
-
-    private static String[] getAppDexInstructionSets(PackageSetting ps) {
-        if (ps.primaryCpuAbiString != null) {
-            if (ps.secondaryCpuAbiString != null) {
-                return new String[] {
-                        VMRuntime.getInstructionSet(ps.primaryCpuAbiString),
-                        VMRuntime.getInstructionSet(ps.secondaryCpuAbiString) };
-            } else {
-                return new String[] {
-                        VMRuntime.getInstructionSet(ps.primaryCpuAbiString) };
-            }
-        }
-
-        return new String[] { getPreferredInstructionSet() };
-    }
-
-    private static String getPreferredInstructionSet() {
-        if (sPreferredInstructionSet == null) {
-            sPreferredInstructionSet = VMRuntime.getInstructionSet(Build.SUPPORTED_ABIS[0]);
-        }
-
-        return sPreferredInstructionSet;
-    }
-
-    private static List<String> getAllInstructionSets() {
-        final String[] allAbis = Build.SUPPORTED_ABIS;
-        final List<String> allInstructionSets = new ArrayList<String>(allAbis.length);
-
-        for (String abi : allAbis) {
-            final String instructionSet = VMRuntime.getInstructionSet(abi);
-            if (!allInstructionSets.contains(instructionSet)) {
-                allInstructionSets.add(instructionSet);
-            }
-        }
-
-        return allInstructionSets;
-    }
-
-    /**
-     * Returns the instruction set that should be used to compile dex code. In the presence of
-     * a native bridge this might be different than the one shared libraries use.
-     */
-    private static String getDexCodeInstructionSet(String sharedLibraryIsa) {
-        String dexCodeIsa = SystemProperties.get("ro.dalvik.vm.isa." + sharedLibraryIsa);
-        return (dexCodeIsa.isEmpty() ? sharedLibraryIsa : dexCodeIsa);
-    }
-
-    private static String[] getDexCodeInstructionSets(String[] instructionSets) {
-        ArraySet<String> dexCodeInstructionSets = new ArraySet<String>(instructionSets.length);
-        for (String instructionSet : instructionSets) {
-            dexCodeInstructionSets.add(getDexCodeInstructionSet(instructionSet));
-        }
-        return dexCodeInstructionSets.toArray(new String[dexCodeInstructionSets.size()]);
-    }
-
-    /**
-     * Returns deduplicated list of supported instructions for dex code.
-     */
-    public static String[] getAllDexCodeInstructionSets() {
-        String[] supportedInstructionSets = new String[Build.SUPPORTED_ABIS.length];
-        for (int i = 0; i < supportedInstructionSets.length; i++) {
-            String abi = Build.SUPPORTED_ABIS[i];
-            supportedInstructionSets[i] = VMRuntime.getInstructionSet(abi);
-        }
-        return getDexCodeInstructionSets(supportedInstructionSets);
-    }
-
     @Override
     public void forceDexOpt(String packageName) {
         enforceSystemOrRoot("forceDexOpt");
@@ -5086,23 +4877,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mInstallLock) {
             final String[] instructionSets = new String[] {
                     getPrimaryInstructionSet(pkg.applicationInfo) };
-            final int res = performDexOptLI(pkg, instructionSets, true, false, true);
-            if (res != DEX_OPT_PERFORMED) {
+            final int res = mPackageDexOptimizer.performDexOpt(pkg, instructionSets,
+                    true /*forceDex*/, false /* defer */, true /* inclDependencies */);
+            if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
                 throw new IllegalStateException("Failed to dexopt: " + res);
             }
         }
-    }
-
-    private int performDexOptLI(PackageParser.Package pkg, String[] instructionSets,
-                                boolean forceDex, boolean defer, boolean inclDependencies) {
-        ArraySet<String> done;
-        if (inclDependencies && (pkg.usesLibraries != null || pkg.usesOptionalLibraries != null)) {
-            done = new ArraySet<String>();
-            done.add(pkg.packageName);
-        } else {
-            done = null;
-        }
-        return performDexOptLI(pkg, instructionSets,  forceDex, defer, done);
     }
 
     private boolean verifyPackageUpdateLPr(PackageSetting oldPkg, PackageParser.Package newPkg) {
@@ -5118,10 +4898,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             return false;
         }
         return true;
-    }
-
-    File getDataPathForUser(int userId) {
-        return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId);
     }
 
     private File getDataPathForPackage(String packageName, int userId) {
@@ -5791,7 +5567,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // pass once we've determined ABI below.
             setNativeLibraryPaths(pkg);
 
-            final boolean isAsec = isForwardLocked(pkg) || isExternal(pkg);
+            final boolean isAsec = pkg.isForwardLocked() || isExternal(pkg);
             final String nativeLibraryRootStr = pkg.applicationInfo.nativeLibraryRootDir;
             final boolean useIsaSpecificSubdirs = pkg.applicationInfo.nativeLibraryRootRequiresIsa;
 
@@ -5967,8 +5743,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         if ((scanFlags & SCAN_NO_DEX) == 0) {
-            if (performDexOptLI(pkg, null /* instruction sets */, forceDex,
-                    (scanFlags & SCAN_DEFER_DEX) != 0, false) == DEX_OPT_FAILED) {
+            int result = mPackageDexOptimizer.performDexOpt(pkg, null /* instruction sets */,
+                    forceDex, (scanFlags & SCAN_DEFER_DEX) != 0, false /* inclDependencies */);
+            if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                 throw new PackageManagerException(INSTALL_FAILED_DEXOPT, "scanPackageLI");
             }
         }
@@ -6042,8 +5819,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((scanFlags & SCAN_NO_DEX) == 0) {
                 for (int i = 0; i < clientLibPkgs.size(); i++) {
                     PackageParser.Package clientPkg = clientLibPkgs.get(i);
-                    if (performDexOptLI(clientPkg, null /* instruction sets */, forceDex,
-                            (scanFlags & SCAN_DEFER_DEX) != 0, false) == DEX_OPT_FAILED) {
+                    int result = mPackageDexOptimizer.performDexOpt(clientPkg,
+                            null /* instruction sets */, forceDex,
+                            (scanFlags & SCAN_DEFER_DEX) != 0, false);
+                    if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                         throw new PackageManagerException(INSTALL_FAILED_DEXOPT,
                                 "scanPackageLI failed to dexopt clientLibPkgs");
                     }
@@ -6512,14 +6291,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                         ps.pkg.applicationInfo.primaryCpuAbi = adjustedAbi;
                         Slog.i(TAG, "Adjusting ABI for : " + ps.name + " to " + adjustedAbi);
 
-                        if (performDexOptLI(ps.pkg, null /* instruction sets */, forceDexOpt,
-                                deferDexOpt, true) == DEX_OPT_FAILED) {
+                        int result = mPackageDexOptimizer.performDexOpt(ps.pkg,
+                                null /* instruction sets */, forceDexOpt, deferDexOpt, true);
+                        if (result == PackageDexOptimizer.DEX_OPT_FAILED) {
                             ps.primaryCpuAbiString = null;
                             ps.pkg.applicationInfo.primaryCpuAbi = null;
                             return;
                         } else {
                             mInstaller.rmdex(ps.codePathString,
-                                             getDexCodeInstructionSet(getPreferredInstructionSet()));
+                                    getDexCodeInstructionSet(getPreferredInstructionSet()));
                         }
                     }
                 }
@@ -6592,7 +6372,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         final String codePath = pkg.codePath;
         final File codeFile = new File(codePath);
         final boolean bundledApp = isSystemApp(info) && !isUpdatedSystemApp(info);
-        final boolean asecApp = isForwardLocked(info) || isExternal(info);
+        final boolean asecApp = info.isForwardLocked() || isExternal(info);
 
         info.nativeLibraryRootDir = null;
         info.nativeLibraryRootRequiresIsa = false;
@@ -9427,6 +9207,25 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    private void removeDexFiles(List<String> allCodePaths, String[] instructionSets) {
+        if (!allCodePaths.isEmpty()) {
+            if (instructionSets == null) {
+                throw new IllegalStateException("instructionSet == null");
+            }
+            String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
+            for (String codePath : allCodePaths) {
+                for (String dexCodeInstructionSet : dexCodeInstructionSets) {
+                    int retCode = mInstaller.rmdex(codePath, dexCodeInstructionSet);
+                    if (retCode < 0) {
+                        Slog.w(TAG, "Couldn't remove dex file for package: "
+                                + " at location " + codePath + ", retcode=" + retCode);
+                        // we don't consider this to be a failure of the core package deletion
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Logic to handle installation of non-ASEC applications, including copying
      * and renaming logic.
@@ -9639,23 +9438,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             cleanUp();
-
-            if (!allCodePaths.isEmpty()) {
-                if (instructionSets == null) {
-                    throw new IllegalStateException("instructionSet == null");
-                }
-                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-                for (String codePath : allCodePaths) {
-                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                        int retCode = mInstaller.rmdex(codePath, dexCodeInstructionSet);
-                        if (retCode < 0) {
-                            Slog.w(TAG, "Couldn't remove dex file for package: "
-                                    + " at location " + codePath + ", retcode=" + retCode);
-                            // we don't consider this to be a failure of the core package deletion
-                        }
-                    }
-                }
-            }
+            removeDexFiles(allCodePaths, instructionSets);
         }
 
         boolean doPostDeleteLI(boolean delete) {
@@ -9960,31 +9743,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         private void cleanUpResourcesLI(List<String> allCodePaths) {
             cleanUp();
-
-            if (!allCodePaths.isEmpty()) {
-                if (instructionSets == null) {
-                    throw new IllegalStateException("instructionSet == null");
-                }
-                String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
-                for (String codePath : allCodePaths) {
-                    for (String dexCodeInstructionSet : dexCodeInstructionSets) {
-                        int retCode = mInstaller.rmdex(codePath, dexCodeInstructionSet);
-                        if (retCode < 0) {
-                            Slog.w(TAG, "Couldn't remove dex file for package: "
-                                    + " at location " + codePath + ", retcode=" + retCode);
-                            // we don't consider this to be a failure of the core package deletion
-                        }
-                    }
-                }
-            }
+            removeDexFiles(allCodePaths, instructionSets);
         }
 
-        boolean matchContainer(String app) {
-            if (cid.startsWith(app)) {
-                return true;
-            }
-            return false;
-        }
+
 
         String getPackageName() {
             return getAsecPackageName(cid);
@@ -10302,7 +10064,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // If deleted package lived in a container, give users a chance to
             // relinquish resources before killing.
-            if (isForwardLocked(deletedPackage) || isExternal(deletedPackage)) {
+            if (deletedPackage.isForwardLocked() || isExternal(deletedPackage)) {
                 if (DEBUG_INSTALL) {
                     Slog.i(TAG, "upgrading pkg " + deletedPackage + " is ASEC-hosted -> UNAVAILABLE");
                 }
@@ -10343,7 +10105,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // Parse old package
                 boolean oldOnSd = isExternal(deletedPackage);
                 int oldParseFlags  = mDefParseFlags | PackageParser.PARSE_CHATTY |
-                        (isForwardLocked(deletedPackage) ? PackageParser.PARSE_FORWARD_LOCK : 0) |
+                        (deletedPackage.isForwardLocked() ? PackageParser.PARSE_FORWARD_LOCK : 0) |
                         (oldOnSd ? PackageParser.PARSE_ON_SDCARD : 0);
                 int oldScanFlags = SCAN_UPDATE_SIGNATURE | SCAN_UPDATE_TIME;
                 try {
@@ -10733,18 +10495,6 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private static boolean isForwardLocked(PackageParser.Package pkg) {
-        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
-    }
-
-    private static boolean isForwardLocked(ApplicationInfo info) {
-        return (info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
-    }
-
-    private boolean isForwardLocked(PackageSetting ps) {
-        return (ps.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
-    }
-
     private static boolean isMultiArch(PackageSetting ps) {
         return (ps.pkgFlags & ApplicationInfo.FLAG_MULTIARCH) != 0;
     }
@@ -10798,7 +10548,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (isExternal(ps)) {
             installFlags |= PackageManager.INSTALL_EXTERNAL;
         }
-        if (isForwardLocked(ps)) {
+        if (ps.isForwardLocked()) {
             installFlags |= PackageManager.INSTALL_FORWARD_LOCK;
         }
         return installFlags;
@@ -11652,7 +11402,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ps != null) {
                 libDirRoot = ps.legacyNativeLibraryPathString;
             }
-            if (p != null && (isExternal(p) || isForwardLocked(p))) {
+            if (p != null && (isExternal(p) || p.isForwardLocked())) {
                 String secureContainerId = cidFromCodePath(p.applicationInfo.getBaseCodePath());
                 if (secureContainerId != null) {
                     asecPath = PackageHelper.getSdFilesystem(secureContainerId);
@@ -11666,7 +11416,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
                 return false;
             }
-            if (isForwardLocked(p)) {
+            if (p.isForwardLocked()) {
                 publicSrcDir = applicationInfo.getBaseResourcePath();
             }
         }
@@ -13006,7 +12756,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
 
                     final AsecInstallArgs args = new AsecInstallArgs(cid,
-                            getAppDexInstructionSets(ps), isForwardLocked(ps));
+                            getAppDexInstructionSets(ps), ps.isForwardLocked());
                     // The package status is changed only if the code path
                     // matches between settings and the container id.
                     if (ps.codePathString != null
@@ -13288,7 +13038,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             Slog.w(TAG, "No move required. Trying to move to same location");
                             returnCode = PackageManager.MOVE_FAILED_INVALID_LOCATION;
                         } else {
-                            if (isForwardLocked(pkg)) {
+                            if (pkg.isForwardLocked()) {
                                 currInstallFlags |= PackageManager.INSTALL_FORWARD_LOCK;
                                 newInstallFlags |= PackageManager.INSTALL_FORWARD_LOCK;
                             }

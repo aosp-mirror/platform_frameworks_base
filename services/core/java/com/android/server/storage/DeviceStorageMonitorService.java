@@ -18,6 +18,7 @@ package com.android.server.storage;
 
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
+import com.android.server.pm.InstructionSets;
 import com.android.server.pm.PackageManagerService;
 
 import android.app.Notification;
@@ -341,7 +342,7 @@ public class DeviceStorageMonitorService extends SystemService {
     }
 
     private static boolean isBootImageOnDisk() {
-        for (String instructionSet : PackageManagerService.getAllDexCodeInstructionSets()) {
+        for (String instructionSet : InstructionSets.getAllDexCodeInstructionSets()) {
             if (!VMRuntime.isBootClassPathOnDisk(instructionSet)) {
                 return false;
             }
