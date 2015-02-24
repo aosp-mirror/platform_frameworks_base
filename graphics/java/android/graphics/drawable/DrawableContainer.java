@@ -173,7 +173,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     @Override
     public void setColorFilter(ColorFilter cf) {
-        mDrawableContainerState.mHasColorFilter = (cf != null);
+        mDrawableContainerState.mHasColorFilter = true;
 
         if (mDrawableContainerState.mColorFilter != cf) {
             mDrawableContainerState.mColorFilter = cf;
