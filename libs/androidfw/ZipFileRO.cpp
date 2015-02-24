@@ -200,7 +200,7 @@ FileMap* ZipFileRO::createEntryFileMap(ZipEntryRO entry) const
 
     FileMap* newMap = new FileMap();
     if (!newMap->create(mFileName, fd, ze.offset, actualLen, true)) {
-        newMap->release();
+        delete newMap;
         return NULL;
     }
 
