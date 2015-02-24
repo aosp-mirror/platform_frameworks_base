@@ -2999,6 +2999,8 @@ final class ActivityStack {
      * representation) and cleaning things up as a result of its hosting
      * processing going away, in which case there is no remaining client-side
      * state to destroy so only the cleanup here is needed.
+     *
+     * Note: Call before #removeActivityFromHistoryLocked.
      */
     final void cleanUpActivityLocked(ActivityRecord r, boolean cleanServices,
             boolean setState) {
@@ -3410,7 +3412,7 @@ final class ActivityStack {
                 if (DEBUG_CLEANUP) Slog.v(
                     TAG, "Record #" + i + " " + r + ": app=" + r.app);
                 if (r.app == app) {
-                    boolean remove;
+                    final boolean remove;
                     if ((!r.haveState && !r.stateNotNeeded) || r.finishing) {
                         // Don't currently have state for the activity, or
                         // it is finishing -- always remove it.
@@ -3444,8 +3446,6 @@ final class ActivityStack {
                                 mService.updateUsageStats(r, false);
                             }
                         }
-                        removeActivityFromHistoryLocked(r, "appDied");
-
                     } else {
                         // We have the current state for this activity, so
                         // it can be restarted later when needed.
@@ -3464,8 +3464,10 @@ final class ActivityStack {
                             r.icicle = null;
                         }
                     }
-
                     cleanUpActivityLocked(r, true, true);
+                    if (remove) {
+                        removeActivityFromHistoryLocked(r, "appDied");
+                    }
                 }
             }
         }
