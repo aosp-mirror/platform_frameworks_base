@@ -2798,6 +2798,7 @@ package android.accounts {
   }
 
   public class AccountManager {
+    method public boolean accountAuthenticated(android.accounts.Account);
     method public android.accounts.AccountManagerFuture<android.os.Bundle> addAccount(java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
     method public boolean addAccountExplicitly(android.accounts.Account, java.lang.String, android.os.Bundle);
     method public void addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean);
@@ -2858,6 +2859,7 @@ package android.accounts {
     field public static final java.lang.String KEY_ERROR_CODE = "errorCode";
     field public static final java.lang.String KEY_ERROR_MESSAGE = "errorMessage";
     field public static final java.lang.String KEY_INTENT = "intent";
+    field public static final java.lang.String KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH = "lastAuthenticatedTimeMillisEpoch";
     field public static final java.lang.String KEY_PASSWORD = "password";
     field public static final java.lang.String KEY_USERDATA = "userdata";
     field public static final java.lang.String LOGIN_ACCOUNTS_CHANGED_ACTION = "android.accounts.LOGIN_ACCOUNTS_CHANGED";

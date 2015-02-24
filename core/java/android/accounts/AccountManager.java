@@ -203,6 +203,14 @@ public class AccountManager {
     public static final String KEY_USERDATA = "userdata";
 
     /**
+     * Bundle key used to supply the last time the credentials of the account
+     * were authenticated successfully. Time is specified in milliseconds since
+     * epoch.
+     */
+    public static final String KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH =
+            "lastAuthenticatedTimeMillisEpoch";
+
+    /**
      * Authenticators using 'customTokens' option will also get the UID of the
      * caller
      */
@@ -658,6 +666,31 @@ public class AccountManager {
             return mService.addAccountExplicitly(account, password, userdata);
         } catch (RemoteException e) {
             // won't ever happen
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Informs the system that the account has been authenticated recently. This
+     * recency may be used by other applications to verify the account. This
+     * should be called only when the user has entered correct credentials for
+     * the account.
+     * <p>
+     * It is not safe to call this method from the main thread. As such, call it
+     * from another thread.
+     * <p>
+     * This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#AUTHENTICATE_ACCOUNTS} and should be
+     * called from the account's authenticator.
+     *
+     * @param account The {@link Account} to be updated.
+     */
+    public boolean accountAuthenticated(Account account) {
+        if (account == null)
+            throw new IllegalArgumentException("account is null");
+        try {
+            return mService.accountAuthenticated(account);
+        } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
     }
@@ -1544,15 +1577,20 @@ public class AccountManager {
      *     with these fields if activity or password was supplied and
      *     the account was successfully verified:
      * <ul>
-     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account created
+     * <li> {@link #KEY_ACCOUNT_NAME} - the name of the account verified
      * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
      * <li> {@link #KEY_BOOLEAN_RESULT} - true to indicate success
      * </ul>
      *
      * If no activity or password was specified, the returned Bundle contains
-     * only {@link #KEY_INTENT} with the {@link Intent} needed to launch the
-     * password prompt.  If an error occurred,
-     * {@link AccountManagerFuture#getResult()} throws:
+     * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
+     * password prompt.
+     * 
+     * <p>Also the returning Bundle may contain {@link
+     * #KEY_LAST_AUTHENTICATE_TIME_MILLIS_EPOCH} indicating the last time the
+     * credential was validated/created.
+     * 
+     * If an error occurred,{@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if the authenticator failed to respond
      * <li> {@link OperationCanceledException} if the operation was canceled for
@@ -1625,9 +1663,9 @@ public class AccountManager {
      * <li> {@link #KEY_ACCOUNT_TYPE} - the type of the account
      * </ul>
      *
-     * If no activity was specified, the returned Bundle contains only
+     * If no activity was specified, the returned Bundle contains
      * {@link #KEY_INTENT} with the {@link Intent} needed to launch the
-     * password prompt.  If an error occurred,
+     * password prompt. If an error occurred,
      * {@link AccountManagerFuture#getResult()} throws:
      * <ul>
      * <li> {@link AuthenticatorException} if the authenticator failed to respond
