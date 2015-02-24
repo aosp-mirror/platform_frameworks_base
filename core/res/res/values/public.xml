@@ -2639,5 +2639,8 @@
   <public type="id" name="undo" />
   <!-- Context menu ID for the "Redo" menu item to redo the last text edit operation. -->
   <public type="id" name="redo" />
+  <!-- Context menu ID for the "Paste as plain text" menu item to to copy the current contents
+          of the clipboard into the text view without formatting. -->
+  <public type="id" name="pasteAsPlainText" />
 
 </resources>

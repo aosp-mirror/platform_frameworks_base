@@ -1710,6 +1710,7 @@ package android {
     field public static final int message = 16908299; // 0x102000b
     field public static final int navigationBarBackground = 16908336; // 0x1020030
     field public static final int paste = 16908322; // 0x1020022
+    field public static final int pasteAsPlainText = 16908339; // 0x1020033
     field public static final int primary = 16908300; // 0x102000c
     field public static final int progress = 16908301; // 0x102000d
     field public static final int redo = 16908338; // 0x1020032

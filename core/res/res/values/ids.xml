@@ -91,4 +91,5 @@
   <item type="id" name="navigationBarBackground" />
   <item type="id" name="undo" />
   <item type="id" name="redo" />
+  <item type="id" name="pasteAsPlainText" />
 </resources>
