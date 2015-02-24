@@ -20,9 +20,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.ParcelableParcel;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Top-level class for managing and interacting with the global undo state for
@@ -54,7 +54,9 @@ import java.util.HashMap;
  * @hide
  */
 public class UndoManager {
-    private final HashMap<String, UndoOwner> mOwners = new HashMap<String, UndoOwner>();
+    // The common case is a single undo owner (e.g. for a TextView), so default to that capacity.
+    private final ArrayMap<String, UndoOwner> mOwners =
+            new ArrayMap<String, UndoOwner>(1 /* capacity */);
     private final ArrayList<UndoState> mUndos = new ArrayList<UndoState>();
     private final ArrayList<UndoState> mRedos = new ArrayList<UndoState>();
     private int mUpdateCount;
