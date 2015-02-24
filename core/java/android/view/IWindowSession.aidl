@@ -194,4 +194,19 @@ interface IWindowSession {
     void onRectangleOnScreenRequested(IBinder token, in Rect rectangle);
 
     IWindowId getWindowId(IBinder window);
+
+    /**
+     * When the system is dozing in a low-power partially suspended state, pokes a short
+     * lived wake lock and ensures that the display is ready to accept the next frame
+     * of content drawn in the window.
+     *
+     * This mechanism is bound to the window rather than to the display manager or the
+     * power manager so that the system can ensure that the window is actually visible
+     * and prevent runaway applications from draining the battery.  This is similar to how
+     * FLAG_KEEP_SCREEN_ON works.
+     *
+     * This method is synchronous because it may need to acquire a wake lock before returning.
+     * The assumption is that this method will be called rather infrequently.
+     */
+    void pokeDrawLock(IBinder window);
 }

@@ -461,6 +461,16 @@ final class Session extends IWindowSession.Stub
         return mService.getWindowId(window);
     }
 
+    @Override
+    public void pokeDrawLock(IBinder window) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.pokeDrawLock(this, window);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     void windowAddedLocked() {
         if (mSurfaceSession == null) {
             if (WindowManagerService.localLOGV) Slog.v(

@@ -189,6 +189,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_TASK_MOVEMENT = false;
     static final boolean DEBUG_STACK = false;
     static final boolean DEBUG_DISPLAY = false;
+    static final boolean DEBUG_POWER = false;
     static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean SHOW_LIGHT_TRANSACTIONS = false || SHOW_TRANSACTIONS;
@@ -327,6 +328,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mHaveInputMethods;
 
     final boolean mHasPermanentDpad;
+    final long mDrawLockTimeoutMillis;
 
     final boolean mAllowBootMessages;
 
@@ -846,6 +848,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInTouchMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultInTouchMode);
+        mDrawLockTimeoutMillis = context.getResources().getInteger(
+                com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings();
@@ -2957,6 +2961,15 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             WindowState window = mWindowMap.get(token);
             return window != null ? window.mWindowId : null;
+        }
+    }
+
+    public void pokeDrawLock(Session session, IBinder token) {
+        synchronized (mWindowMap) {
+            WindowState window = windowForClientLocked(session, token, false);
+            if (window != null) {
+                window.pokeDrawLockLw(mDrawLockTimeoutMillis);
+            }
         }
     }
 
@@ -9957,7 +9970,9 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mAllowTheaterModeWakeFromLayout
                     || Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.THEATER_MODE_ON, 0) == 0) {
-                if (DEBUG_VISIBILITY) Slog.v(TAG, "Turning screen on after layout!");
+                if (DEBUG_VISIBILITY || DEBUG_POWER) {
+                    Slog.v(TAG, "Turning screen on after layout!");
+                }
                 mPowerManager.wakeUp(SystemClock.uptimeMillis());
             }
             mTurnOnScreen = false;

@@ -1852,6 +1852,12 @@
         <item>users</item>
     </string-array>
 
+    <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
+         flushed to the display while dozing.  This value needs to be large enough
+         to account for processing and rendering time plus a frame or two of latency
+         in the display pipeline plus some slack just to be sure. -->
+    <integer name="config_drawLockTimeoutMillis">120</integer>
+
     <!-- default telephony hardware configuration for this platform.
     -->
     <!-- this string array should be overridden by the device to present a list
