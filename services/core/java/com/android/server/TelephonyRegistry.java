@@ -259,7 +259,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         + newDefaultSubIdObj + " newDefaultPhoneId=" + newDefaultPhoneId);
                 }
 
-                if(validatePhoneId(newDefaultPhoneId) && (newDefaultSubIdObj.equals(mDefaultSubId)
+                if(validatePhoneId(newDefaultPhoneId) && (!newDefaultSubIdObj.equals(mDefaultSubId)
                         || (newDefaultPhoneId != mDefaultPhoneId))) {
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_UPDATE_DEFAULT_SUB,
                             newDefaultPhoneId, 0, newDefaultSubIdObj));
