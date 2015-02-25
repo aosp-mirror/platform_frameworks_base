@@ -93,7 +93,9 @@ class EmulatorDisplayOverlay {
         }
         c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
         mSurfaceControl.setPosition(0, 0);
-        mOverlay.setBounds(0, 0, mScreenSize.x, mScreenSize.y);
+        // Always draw the overlay with square dimensions
+        int size = Math.max(mScreenSize.x, mScreenSize.y);
+        mOverlay.setBounds(0, 0, size, size);
         mOverlay.draw(c);
         mSurface.unlockCanvasAndPost(c);
     }
