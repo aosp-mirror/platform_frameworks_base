@@ -205,7 +205,7 @@
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"หยุดการใช้ข้อมูลมือถือชั่วคราวแล้ว"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"หยุดการใช้ข้อมูลชั่วคราวแล้ว"</string>
     <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"เนื่องจากใช้งานข้อมูลถึงขีดจำกัดที่กำหนดไว้แล้ว อุปกรณ์จึงหยุดการใช้งานข้อมูลไว้ชั่วคราวตลอดระยะเวลาที่เหลือของรอบนี้\n\nการทำให้กลับมาทำงานอีกครั้งอาจทำให้เกิดค่าใช้จ่ายจากผู้ให้บริการ"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"บันทึกต่อ"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"ทำต่อ"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ WiFi แล้ว"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"กำลังค้นหา GPS"</string>

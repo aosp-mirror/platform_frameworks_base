@@ -204,7 +204,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"സെല്ലുലാർ ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ഡാറ്റ താൽക്കാലികമായി നിർത്തി"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"നിങ്ങളുടെ സജ്ജീകരിച്ച ഡാറ്റ പരിധിയിലെത്തിയതിനാൽ, ഈ സൈക്കിളിന്റെ അവശേഷിക്കുന്ന ഡാറ്റ ഉപയോഗത്തെ ഉപകരണം താൽക്കാലികമായി നിർത്തി.\n\nപുനരാരംഭിക്കുന്നത്, നിങ്ങളുടെ കാരിയറിൽ നിന്ന് നിരക്കുകൾ ഈടാക്കിയേക്കാം."</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"നിങ്ങൾ നേരത്തെ ക്രമീകരിച്ച ഡാറ്റ പരിധിയിലെത്തിയതിനാൽ, ഈ സൈക്കിളിന്റെ അവശേഷിക്കുന്ന ഡാറ്റ ഉപയോഗം, ഉപകരണം താൽക്കാലികമായി നിർത്തി.\n\nപുനരാരംഭിക്കുന്നത്, നിങ്ങളുടെ കാരിയറിൽ നിന്ന് നിരക്കുകൾക്ക് ഇടയാക്കാം."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"പുനരാരംഭിക്കുക"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi കണക്‌റ്റുചെയ്‌തു"</string>

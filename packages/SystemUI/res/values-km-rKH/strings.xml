@@ -200,18 +200,12 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"បាន​បើក​ហតស្ប៉ត​ចល័ត។"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"បាន​បញ្ឈប់​ការ​ចាត់​ថ្នាក់​អេក្រង់។"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ពន្លឺ​ការ​បង្ហាញ"</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5281770593459841889) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (1601769736881078016) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (4651001290947318931) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (3932437232199671967) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (8453242888903772524) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (1412395410306390593) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"ទិន្នន័យ 2G-3G ត្រូវបានផ្អាក"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"ទិន្នន័យ 4G ត្រូវបានផ្អាក"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"ទិន្នន័យចល័តត្រូវបានផ្អាក"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ទិន្នន័យត្រូវបានផ្អាក"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ដោយសារទិន្នន័យរបស់អ្នកបានឈានដល់កំណត់ ឧបករណ៍នេះបានផ្អាកការប្រើប្រាស់ទិន្នន័យសម្រាប់ការរំលឹកនៃវគ្គនេះ។\n\nការបន្តប្រើប្រាស់អាចនាំឲ្យមានការគិតប្រាក់ពីក្រុមហ៊ុនផ្តល់សេវាកម្ម។"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"បន្ត"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"គ្មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"បាន​ភ្ជាប់​វ៉ាយហ្វាយ"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"ស្វែងរក GPS"</string>
