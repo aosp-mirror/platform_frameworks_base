@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.animation.TimeInterpolator;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -38,6 +39,7 @@ public class SwipeDismissLayout extends FrameLayout {
     private static final String TAG = "SwipeDismissLayout";
 
     private static final float DISMISS_MIN_DRAG_WIDTH_RATIO = .33f;
+    private boolean mUseDynamicTranslucency = true;
 
     public interface OnDismissedListener {
         void onDismissed(SwipeDismissLayout layout);
@@ -85,7 +87,7 @@ public class SwipeDismissLayout extends FrameLayout {
                     // and temporarily disables translucency when it is fully visible.
                     // As soon as the user starts swiping, we will re-enable
                     // translucency.
-                    if (getContext() instanceof Activity) {
+                    if (mUseDynamicTranslucency && getContext() instanceof Activity) {
                         ((Activity) getContext()).convertFromTranslucent();
                     }
                 }
@@ -117,6 +119,11 @@ public class SwipeDismissLayout extends FrameLayout {
                 android.R.integer.config_shortAnimTime);
         mCancelInterpolator = new DecelerateInterpolator(1.5f);
         mDismissInterpolator = new AccelerateInterpolator(1.5f);
+        TypedArray a = context.getTheme().obtainStyledAttributes(
+                com.android.internal.R.styleable.Theme);
+        mUseDynamicTranslucency = !a.hasValue(
+                com.android.internal.R.styleable.Window_windowIsTranslucent);
+        a.recycle();
     }
 
     public void setOnDismissedListener(OnDismissedListener listener) {
@@ -230,7 +237,7 @@ public class SwipeDismissLayout extends FrameLayout {
                 mLastX = ev.getRawX();
                 updateSwiping(ev);
                 if (mSwiping) {
-                    if (getContext() instanceof Activity) {
+                    if (mUseDynamicTranslucency && getContext() instanceof Activity) {
                         ((Activity) getContext()).convertToTranslucent(null, null);
                     }
                     setProgress(ev.getRawX() - mDownX);
@@ -254,7 +261,7 @@ public class SwipeDismissLayout extends FrameLayout {
     }
 
     protected void cancel() {
-        if (getContext() instanceof Activity) {
+        if (mUseDynamicTranslucency && getContext() instanceof Activity) {
             ((Activity) getContext()).convertFromTranslucent();
         }
         if (mProgressListener != null) {
