@@ -2923,6 +2923,15 @@
         android:description="@string/permdesc_bindCarrierMessagingService"
         android:protectionLevel="signature|system" />
 
+    <!-- The system process that pulls carrier configuration from carrier apps will
+         have this permission. Carrier apps that provide
+         {@link android.service.carrier.CarrierConfigService} should require this
+         permission for clients binding to their service. -->
+    <permission android:name="android.permission.BIND_CARRIER_CONFIG_SERVICE"
+        android:label="@string/permlab_bindCarrierConfigService"
+        android:description="@string/permdesc_bindCarrierConfigService"
+        android:protectionLevel="signature|system" />
+
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
     <uses-permission android:name="android.permission.CONFIRM_FULL_BACKUP"/>

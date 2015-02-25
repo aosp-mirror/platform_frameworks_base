@@ -2116,6 +2116,7 @@ public abstract class Context {
             AUDIO_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
+            CARRIER_CONFIG_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -2248,6 +2249,8 @@ public abstract class Context {
      * @see android.telephony.TelephonyManager
      * @see #TELEPHONY_SUBSCRIPTION_SERVICE
      * @see android.telephony.SubscriptionManager
+     * @see #CARRIER_CONFIG_SERVICE
+     * @see android.telephony.CarrierConfigManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -2609,6 +2612,15 @@ public abstract class Context {
      * @see android.telecom.TelecomManager
      */
     public static final String TELECOM_SERVICE = "telecom";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.telephony.CarrierConfigManager} for reading carrier configuration values.
+     *
+     * @see #getSystemService
+     * @see android.telephony.CarrierConfigManager
+     */
+    public static final String CARRIER_CONFIG_SERVICE = "carrier_config";
 
     /**
      * Use with {@link #getSystemService} to retrieve a

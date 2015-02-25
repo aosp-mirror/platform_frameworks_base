@@ -125,6 +125,7 @@ import android.print.PrintManager;
 import android.service.fingerprint.IFingerprintService;
 import android.service.fingerprint.FingerprintManager;
 import android.telecom.TelecomManager;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
@@ -768,6 +769,12 @@ class ContextImpl extends Context {
                 IBinder b = ServiceManager.getService(APPWIDGET_SERVICE);
                 return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
             }});
+
+        registerService(CARRIER_CONFIG_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                return new CarrierConfigManager();
+            }
+        });
     }
 
     static ContextImpl getImpl(Context context) {
