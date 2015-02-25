@@ -228,12 +228,23 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final void checkReadPermission(String requestedKey, int userId) {
         final int callingUid = Binder.getCallingUid();
+
         for (int i = 0; i < READ_PROFILE_PROTECTED_SETTINGS.length; i++) {
             String key = READ_PROFILE_PROTECTED_SETTINGS[i];
             if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(READ_PROFILE)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("uid=" + callingUid
                         + " needs permission " + READ_PROFILE + " to read "
+                        + requestedKey + " for user " + userId);
+            }
+        }
+
+        for (int i = 0; i < READ_PASSWORD_PROTECTED_SETTINGS.length; i++) {
+            String key = READ_PASSWORD_PROTECTED_SETTINGS[i];
+            if (key.equals(requestedKey) && mContext.checkCallingOrSelfPermission(PERMISSION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("uid=" + callingUid
+                        + " needs permission " + PERMISSION + " to read "
                         + requestedKey + " for user " + userId);
             }
         }
@@ -462,10 +473,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED
     };
 
-    // These are protected with a read permission
+    // Reading these settings needs the profile permission
     private static final String[] READ_PROFILE_PROTECTED_SETTINGS = new String[] {
         Secure.LOCK_SCREEN_OWNER_INFO_ENABLED,
         Secure.LOCK_SCREEN_OWNER_INFO
+    };
+
+    // Reading these settings needs the same permission as checking the password
+    private static final String[] READ_PASSWORD_PROTECTED_SETTINGS = new String[] {
+            LockPatternUtils.LOCK_PASSWORD_SALT_KEY,
+            LockPatternUtils.PASSWORD_HISTORY_KEY,
     };
 
     private static final String[] SETTINGS_TO_BACKUP = new String[] {
