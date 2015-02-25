@@ -111,48 +111,10 @@ $(eval include $(BUILD_PREBUILT))
 endef
 
 font_src_files := \
-    Roboto-Regular.ttf \
-    Roboto-Bold.ttf \
-    Roboto-Italic.ttf \
-    Roboto-BoldItalic.ttf \
     Clockopia.ttf \
     AndroidClock.ttf \
     AndroidClock_Highlight.ttf \
     AndroidClock_Solid.ttf
-
-ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
-
-$(eval $(call create-font-symlink,Roboto-Black.ttf,Roboto-Bold.ttf))
-$(eval $(call create-font-symlink,Roboto-BlackItalic.ttf,Roboto-BoldItalic.ttf))
-$(eval $(call create-font-symlink,Roboto-Light.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,Roboto-LightItalic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,Roboto-Medium.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,Roboto-MediumItalic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,Roboto-Thin.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,Roboto-ThinItalic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-Regular.ttf,Roboto-Regular.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-Bold.ttf,Roboto-Bold.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-Italic.ttf,Roboto-Italic.ttf))
-$(eval $(call create-font-symlink,RobotoCondensed-BoldItalic.ttf,Roboto-BoldItalic.ttf))
-
-else # !MINIMAL_FONT
-font_src_files += \
-    Roboto-Black.ttf \
-    Roboto-BlackItalic.ttf \
-    Roboto-Light.ttf \
-    Roboto-LightItalic.ttf \
-    Roboto-Medium.ttf \
-    Roboto-MediumItalic.ttf \
-    Roboto-Thin.ttf \
-    Roboto-ThinItalic.ttf \
-    RobotoCondensed-Regular.ttf \
-    RobotoCondensed-Bold.ttf \
-    RobotoCondensed-Italic.ttf \
-    RobotoCondensed-BoldItalic.ttf \
-    RobotoCondensed-Light.ttf \
-    RobotoCondensed-LightItalic.ttf
-
-endif # !MINIMAL_FONT
 
 $(foreach f, $(font_src_files), $(call build-one-font-module, $(f)))
 
