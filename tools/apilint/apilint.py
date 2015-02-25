@@ -132,10 +132,14 @@ class Class():
 
         if "extends" in raw:
             self.extends = raw[raw.index("extends")+1]
+            self.extends_path = self.extends.split(".")
         else:
             self.extends = None
+            self.extends_path = []
 
         self.fullname = self.pkg.name + "." + self.fullname
+        self.fullname_path = self.fullname.split(".")
+
         self.name = self.fullname[self.fullname.rindex(".")+1:]
 
     def __repr__(self):
@@ -150,6 +154,7 @@ class Package():
 
         raw = raw.split()
         self.name = raw[raw.index("package")+1]
+        self.name_path = self.name.split(".")
 
     def __repr__(self):
         return self.raw
@@ -760,7 +765,7 @@ def verify_manager(clazz):
     if not clazz.name.endswith("Manager"): return
 
     for c in clazz.ctors:
-        error(clazz, c, None, "Managers must always be obtained from Context")
+        error(clazz, c, None, "Managers must always be obtained from Context; no direct constructors")
 
 
 def verify_boxed(clazz):
@@ -846,35 +851,26 @@ def verify_callback_handlers(clazz):
     """Verifies that methods adding listener/callback have overload
     for specifying delivery thread."""
 
-    # Ignore UI components which deliver things on main thread
+    # Ignore UI packages which assume main thread
     skip = [
-        "android.animation",
-        "android.view",
-        "android.graphics",
-        "android.transition",
-        "android.widget",
-        "android.webkit",
+        "animation",
+        "view",
+        "graphics",
+        "transition",
+        "widget",
+        "webkit",
     ]
     for s in skip:
-        if clazz.fullname.startswith(s): return
-        if clazz.extends and clazz.extends.startswith(s): return
+        if s in clazz.pkg.name_path: return
+        if s in clazz.extends_path: return
 
-    skip = [
-        "android.app.ActionBar",
-        "android.app.AlertDialog",
-        "android.app.AlertDialog.Builder",
-        "android.app.Application",
-        "android.app.Activity",
-        "android.app.Dialog",
-        "android.app.Fragment",
-        "android.app.FragmentManager",
-        "android.app.LoaderManager",
-        "android.app.ListActivity",
-        "android.app.AlertDialog.Builder"
-        "android.content.Loader",
-    ]
-    for s in skip:
-        if clazz.fullname == s or clazz.extends == s: return
+    # Ignore UI classes which assume main thread
+    if "app" in clazz.pkg.name_path or "app" in clazz.extends_path:
+        for s in ["ActionBar","Dialog","Application","Activity","Fragment","Loader"]:
+            if s in clazz.fullname: return
+    if "content" in clazz.pkg.name_path or "content" in clazz.extends_path:
+        for s in ["Loader"]:
+            if s in clazz.fullname: return
 
     found = {}
     by_name = collections.defaultdict(list)
