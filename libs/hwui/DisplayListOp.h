@@ -1340,7 +1340,7 @@ public:
             const Vector<OpStatePair>& ops, const Rect& bounds) override {
         for (unsigned int i = 0; i < ops.size(); i++) {
             const DeferredDisplayState& state = *(ops[i].state);
-            DrawOpMode drawOpMode = (i == ops.size() - 1) ? kDrawOpMode_Flush : kDrawOpMode_Defer;
+            DrawOpMode drawOpMode = (i == ops.size() - 1) ? DrawOpMode::kFlush : DrawOpMode::kDefer;
             renderer.restoreDisplayState(state, true); // restore all but the clip
 
             DrawTextOp& op = *((DrawTextOp*)ops[i].op);

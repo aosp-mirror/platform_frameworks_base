@@ -17,6 +17,18 @@
 #ifndef ANDROID_HWUI_OPENGL_RENDERER_H
 #define ANDROID_HWUI_OPENGL_RENDERER_H
 
+#include "CanvasState.h"
+#include "Debug.h"
+#include "Extensions.h"
+#include "Matrix.h"
+#include "Program.h"
+#include "Rect.h"
+#include "Snapshot.h"
+#include "UvMapper.h"
+#include "Vertex.h"
+#include "Caches.h"
+#include "utils/PaintUtils.h"
+
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
@@ -38,23 +50,16 @@
 
 #include <androidfw/ResourceTypes.h>
 
-#include "CanvasState.h"
-#include "Debug.h"
-#include "Extensions.h"
-#include "Matrix.h"
-#include "Program.h"
-#include "Rect.h"
-#include "Renderer.h"
-#include "Snapshot.h"
-#include "UvMapper.h"
-#include "Vertex.h"
-#include "Caches.h"
-#include "utils/PaintUtils.h"
-
 class SkShader;
 
 namespace android {
 namespace uirenderer {
+
+enum class DrawOpMode {
+    kImmediate,
+    kDefer,
+    kFlush
+};
 
 class DeferredDisplayState;
 struct Glop;
@@ -118,23 +123,59 @@ enum ModelViewMode {
 /**
  * OpenGL Renderer implementation.
  */
-class OpenGLRenderer : public Renderer, public CanvasStateClient {
+class OpenGLRenderer : public CanvasStateClient {
 public:
     OpenGLRenderer(RenderState& renderState);
     virtual ~OpenGLRenderer();
+
+    /**
+     * Sets the dimension of the underlying drawing surface. This method must
+     * be called at least once every time the drawing surface changes size.
+     *
+     * @param width The width in pixels of the underlysing surface
+     * @param height The height in pixels of the underlysing surface
+     */
+    void setViewport(int width, int height) { mState.setViewport(width, height); }
 
     void initProperties();
     void initLight(const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
 
+    /*
+     * Prepares the renderer to draw a frame. This method must be invoked
+     * at the beginning of each frame. Only the specified rectangle of the
+     * frame is assumed to be dirty. A clip will automatically be set to
+     * the specified rectangle.
+     *
+     * @param opaque If true, the target surface is considered opaque
+     *               and will not be cleared. If false, the target surface
+     *               will be cleared
+     */
     virtual void prepareDirty(float left, float top, float right, float bottom,
-            bool opaque) override;
-    virtual void prepare(bool opaque) override {
+            bool opaque);
+
+    /**
+     * Prepares the renderer to draw a frame. This method must be invoked
+     * at the beginning of each frame. When this method is invoked, the
+     * entire drawing surface is assumed to be redrawn.
+     *
+     * @param opaque If true, the target surface is considered opaque
+     *               and will not be cleared. If false, the target surface
+     *               will be cleared
+     */
+    void prepare(bool opaque) {
         prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
     }
-    virtual bool finish() override;
 
-    virtual void callDrawGLFunction(Functor* functor, Rect& dirty) override;
+    /**
+     * Indicates the end of a frame. This method must be invoked whenever
+     * the caller is done rendering a frame.
+     * Returns true if any drawing was done during the frame (the output
+     * has changed / is "dirty" and should be displayed to the user).
+     */
+    virtual bool finish();
+
+    void callDrawGLFunction(Functor* functor, Rect& dirty);
 
     void pushLayerUpdate(Layer* layer);
     void cancelLayerUpdate(Layer* layer);
@@ -142,7 +183,7 @@ public:
     void markLayersAsBuildLayers();
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, int flags) override {
+            const SkPaint* paint, int flags) {
         return saveLayer(left, top, right, bottom, paint, flags, nullptr);
     }
 
@@ -154,49 +195,48 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags);
 
-    virtual void drawRenderNode(RenderNode* displayList, Rect& dirty,
-            int32_t replayFlags = 1) override;
-    virtual void drawLayer(Layer* layer, float x, float y);
-    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) override;
+    void drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
+    void drawLayer(Layer* layer, float x, float y);
+    void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
     void drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
-    virtual void drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst,
-            const SkPaint* paint) override;
-    virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint) override;
+    void drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst,
+            const SkPaint* paint);
+    void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+            const float* vertices, const int* colors, const SkPaint* paint);
     void drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
             TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint);
-    virtual void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
-            float left, float top, float right, float bottom, const SkPaint* paint) override;
+    void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+            float left, float top, float right, float bottom, const SkPaint* paint);
     void drawPatch(const SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
             float left, float top, float right, float bottom, const SkPaint* paint);
-    virtual void drawColor(int color, SkXfermode::Mode mode) override;
-    virtual void drawRect(float left, float top, float right, float bottom,
-            const SkPaint* paint) override;
-    virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint* paint) override;
-    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint) override;
-    virtual void drawOval(float left, float top, float right, float bottom,
-            const SkPaint* paint) override;
-    virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) override;
-    virtual void drawPath(const SkPath* path, const SkPaint* paint) override;
-    virtual void drawLines(const float* points, int count, const SkPaint* paint) override;
-    virtual void drawPoints(const float* points, int count, const SkPaint* paint) override;
-    virtual void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
-            float hOffset, float vOffset, const SkPaint* paint) override;
-    virtual void drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint) override;
-    virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
+    void drawColor(int color, SkXfermode::Mode mode);
+    void drawRect(float left, float top, float right, float bottom,
+            const SkPaint* paint);
+    void drawRoundRect(float left, float top, float right, float bottom,
+            float rx, float ry, const SkPaint* paint);
+    void drawCircle(float x, float y, float radius, const SkPaint* paint);
+    void drawOval(float left, float top, float right, float bottom,
+            const SkPaint* paint);
+    void drawArc(float left, float top, float right, float bottom,
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
+    void drawPath(const SkPath* path, const SkPaint* paint);
+    void drawLines(const float* points, int count, const SkPaint* paint);
+    void drawPoints(const float* points, int count, const SkPaint* paint);
+    void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+            float hOffset, float vOffset, const SkPaint* paint);
+    void drawPosText(const char* text, int bytesCount, int count,
+            const float* positions, const SkPaint* paint);
+    void drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
-            DrawOpMode drawOpMode = kDrawOpMode_Immediate) override;
-    virtual void drawRects(const float* rects, int count, const SkPaint* paint) override;
+            DrawOpMode drawOpMode = DrawOpMode::kImmediate);
+    void drawRects(const float* rects, int count, const SkPaint* paint);
 
     void drawShadow(float casterAlpha,
             const VertexBuffer* ambientShadowVertexBuffer,
             const VertexBuffer* spotShadowVertexBuffer);
 
-    virtual void setDrawFilter(SkDrawFilter* filter) override;
+    void setDrawFilter(SkDrawFilter* filter);
 
     // If this value is set to < 1.0, it overrides alpha set on layer (see drawBitmap, drawLayer)
     void setOverrideLayerAlpha(float alpha) { mDrawModifiers.mOverrideLayerAlpha = alpha; }
@@ -339,36 +379,34 @@ public:
     ///////////////////////////////////////////////////////////////////
     /// State manipulation
 
-    virtual void setViewport(int width, int height) override { mState.setViewport(width, height); }
+    int getSaveCount() const;
+    int save(int flags);
+    void restore();
+    void restoreToCount(int saveCount);
 
-    virtual int getSaveCount() const override;
-    virtual int save(int flags) override;
-    virtual void restore() override;
-    virtual void restoreToCount(int saveCount) override;
+    void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
+    void setMatrix(const SkMatrix& matrix) { mState.setMatrix(matrix); }
+    void concatMatrix(const SkMatrix& matrix) { mState.concatMatrix(matrix); }
 
-    virtual void getMatrix(SkMatrix* outMatrix) const override { mState.getMatrix(outMatrix); }
-    virtual void setMatrix(const SkMatrix& matrix) override { mState.setMatrix(matrix); }
-    virtual void concatMatrix(const SkMatrix& matrix) override { mState.concatMatrix(matrix); }
-
-    virtual void translate(float dx, float dy, float dz = 0.0f) override;
-    virtual void rotate(float degrees) override;
-    virtual void scale(float sx, float sy) override;
-    virtual void skew(float sx, float sy) override;
+    void translate(float dx, float dy, float dz = 0.0f);
+    void rotate(float degrees);
+    void scale(float sx, float sy);
+    void skew(float sx, float sy);
 
     void setMatrix(const Matrix4& matrix); // internal only convenience method
     void concatMatrix(const Matrix4& matrix); // internal only convenience method
 
-    virtual const Rect& getLocalClipBounds() const override { return mState.getLocalClipBounds(); }
+    const Rect& getLocalClipBounds() const { return mState.getLocalClipBounds(); }
     const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
-    virtual bool quickRejectConservative(float left, float top,
-            float right, float bottom) const override {
+    bool quickRejectConservative(float left, float top,
+            float right, float bottom) const {
         return mState.quickRejectConservative(left, top, right, bottom);
     }
 
-    virtual bool clipRect(float left, float top,
-            float right, float bottom, SkRegion::Op op) override;
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
+    bool clipRect(float left, float top,
+            float right, float bottom, SkRegion::Op op);
+    bool clipPath(const SkPath* path, SkRegion::Op op);
+    bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
     /**
      * Does not support different clipping Ops (that is, every call to setClippingOutline is

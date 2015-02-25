@@ -2874,7 +2874,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
         const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
         DrawOpMode drawOpMode) {
 
-    if (drawOpMode == kDrawOpMode_Immediate) {
+    if (drawOpMode == DrawOpMode::kImmediate) {
         // The checks for corner-case ignorable text and quick rejection is only done for immediate
         // drawing as ops from DeferredDisplayList are already filtered for these
         if (text == nullptr || count == 0 || mState.currentlyIgnored() || canSkipText(paint) ||
@@ -2934,7 +2934,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
 
     // don't call issuedrawcommand, do it at end of batch
-    bool forceFinish = (drawOpMode != kDrawOpMode_Defer);
+    bool forceFinish = (drawOpMode != DrawOpMode::kDefer);
     if (CC_UNLIKELY(paint->getTextAlign() != SkPaint::kLeft_Align)) {
         SkPaint paintCopy(*paint);
         paintCopy.setTextAlign(SkPaint::kLeft_Align);
@@ -2945,7 +2945,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
                 positions, hasActiveLayer ? &layerBounds : nullptr, &functor, forceFinish);
     }
 
-    if ((status || drawOpMode != kDrawOpMode_Immediate) && hasActiveLayer) {
+    if ((status || drawOpMode != DrawOpMode::kImmediate) && hasActiveLayer) {
         if (!pureTranslate) {
             transform.mapRect(layerBounds);
         }
