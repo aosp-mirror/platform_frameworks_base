@@ -159,7 +159,7 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
     }
 
     struct logger_list *logger_list = android_logger_list_open(
-        LOG_ID_EVENTS, O_RDONLY | O_NONBLOCK, 0, 0);
+        LOG_ID_EVENTS, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, 0);
 
     if (!logger_list) {
         jniThrowIOException(env, errno);
