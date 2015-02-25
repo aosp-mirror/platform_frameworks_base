@@ -2193,6 +2193,7 @@ public abstract class Context {
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
+            CARRIER_CONFIG_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -2338,6 +2339,8 @@ public abstract class Context {
      * @see android.telephony.TelephonyManager
      * @see #TELEPHONY_SUBSCRIPTION_SERVICE
      * @see android.telephony.SubscriptionManager
+     * @see #CARRIER_CONFIG_SERVICE
+     * @see android.telephony.CarrierConfigManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -2755,6 +2758,16 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.telephony.CarrierConfigManager} for reading carrier configuration values.
+     *
+     * @see #getSystemService
+     * @see android.telephony.CarrierConfigManager
+     */
+    public static final String CARRIER_CONFIG_SERVICE = "carrier_config";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.text.ClipboardManager} for accessing and modifying
      * {@link android.content.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
      *
