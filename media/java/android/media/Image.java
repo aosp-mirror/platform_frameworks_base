@@ -115,13 +115,48 @@ public abstract class Image implements AutoCloseable {
     /**
      * Get the timestamp associated with this frame.
      * <p>
-     * The timestamp is measured in nanoseconds, and is monotonically
-     * increasing. However, the zero point and whether the timestamp can be
-     * compared against other sources of time or images depend on the source of
-     * this image.
+     * The timestamp is measured in nanoseconds, and is normally monotonically
+     * increasing. However, the behavior of the timestamp depends on the source
+     * of this image. See {@link android.hardware.Camera Camera},
+     * {@link android.hardware.camera2.CameraDevice CameraDevice}, {@link MediaPlayer} and
+     * {@link MediaCodec} for more details.
      * </p>
      */
     public abstract long getTimestamp();
+
+    /**
+     * Set the timestamp associated with this frame.
+     * <p>
+     * The timestamp is measured in nanoseconds, and is normally monotonically
+     * increasing. However, However, the behavior of the timestamp depends on
+     * the destination of this image. See {@link android.hardware.Camera Camera}
+     * , {@link android.hardware.camera2.CameraDevice CameraDevice},
+     * {@link MediaPlayer} and {@link MediaCodec} for more details.
+     * </p>
+     * <p>
+     * For images dequeued from {@link ImageWriter} via
+     * {@link ImageWriter#dequeueInputImage()}, it's up to the application to
+     * set the timestamps correctly before sending them back to the
+     * {@link ImageWriter}, or the timestamp will be generated automatically when
+     * {@link ImageWriter#queueInputImage queueInputImage()} is called.
+     * </p>
+     *
+     * @param timestamp The timestamp to be set for this image.
+     */
+    public void setTimestamp(long timestamp) {
+        return;
+    }
+
+    /**
+     * <p>Check if the image is opaque.</p>
+     *
+     * <p>The pixel data of opaque images are not accessible to the application,
+     * and therefore {@link #getPlanes} will return an empty array for an opaque image.
+     * </p>
+     */
+    public boolean isOpaque() {
+        return false;
+    }
 
     private Rect mCropRect;
 
@@ -155,7 +190,10 @@ public abstract class Image implements AutoCloseable {
 
     /**
      * Get the array of pixel planes for this Image. The number of planes is
-     * determined by the format of the Image.
+     * determined by the format of the Image. The application will get an
+     * empty array if the image is opaque because the opaque image pixel data
+     * is not directly accessible. The application can check if an image is
+     * opaque by calling {@link Image#isOpaque}.
      */
     public abstract Plane[] getPlanes();
 
@@ -164,13 +202,53 @@ public abstract class Image implements AutoCloseable {
      * <p>
      * After calling this method, calling any methods on this {@code Image} will
      * result in an {@link IllegalStateException}, and attempting to read from
-     * {@link ByteBuffer ByteBuffers} returned by an earlier
-     * {@link Plane#getBuffer} call will have undefined behavior.
+     * or write to {@link ByteBuffer ByteBuffers} returned by an earlier
+     * {@link Plane#getBuffer} call will have undefined behavior. If the image
+     * was obtained from {@link ImageWriter} via
+     * {@link ImageWriter#dequeueInputImage()}, after calling this method, any
+     * image data filled by the application will be lost and the image will be
+     * returned to {@link ImageWriter} for reuse. Images given to
+     * {@link ImageWriter#queueInputImage queueInputImage()} are automatically
+     * closed.
      * </p>
      */
     @Override
     public abstract void close();
 
+    /**
+     * <p>
+     * Check if the image can be attached to a new owner (e.g. {@link ImageWriter}).
+     * </p>
+     * <p>
+     * This is a package private method that is only used internally.
+     * </p>
+     *
+     * @return true if the image is attachable to a new owner, false if the image is still attached
+     *         to its current owner, or the image is a stand-alone image and is not attachable to
+     *         a new owner.
+     */
+    boolean isAttachable() {
+        return false;
+    }
+
+    /**
+     * <p>
+     * Get the owner of the {@link Image}.
+     * </p>
+     * <p>
+     * The owner of an {@link Image} could be {@link ImageReader}, {@link ImageWriter},
+     * {@link MediaCodec} etc. This method returns the owner that produces this image, or null
+     * if the image is stand-alone image or the owner is unknown.
+     * </p>
+     * <p>
+     * This is a package private method that is only used internally.
+     * </p>
+     *
+     * @return The owner of the Image.
+     */
+    Object getOwner() {
+        return null;
+    }
     /**
      * <p>A single color plane of image data.</p>
      *
