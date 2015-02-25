@@ -202,9 +202,9 @@
     <string name="accessibility_brightness" msgid="8003681285547803095">"Skermhelderheid"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G-data is laat wag"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G-data is laat wag"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Sellulêre data is laat wag"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data is laat wag"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Omdat die dataperk wat gestel is, bereik is, het die toestel datagebruik vir die res van hierdie siklus laat wag.\n\nAs dit hervat word, kan dit tot heffings deur jou diensverskaffer lei."</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"Sellulêre data is onderbreek"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data is onderbreek"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"Omdat die gestelde dataperk bereik is, het die toestel datagebruik vir die res van hierdie siklus onderbreek.\n\nAs dit hervat word, kan dit tot heffings deur jou diensverskaffer lei."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Hervat"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Geen internetverbinding nie"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi gekoppel"</string>

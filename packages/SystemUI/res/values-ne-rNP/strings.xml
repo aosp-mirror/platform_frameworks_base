@@ -200,11 +200,11 @@
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"मोबाइल हटस्पट खुला गरियो।"</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"स्क्रिन कास्टिङ रोकियो।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"प्रदर्शन चमक"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डाटा रोकिएको छ"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डाटा रोकिएको छ"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्यूलर डाटा रोकिएको छ"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डाटा रोकिएको छ"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"तपाईंले सेट गर्नुभएको डाटा सीमा पुगेकाले, उपकरणले यस चक्रको बाँकीको लागि डाटा प्रयोग रोकेको छ।\n\nपुन: सुरू गर्दा तपाईंको क्यारियरले शुल्कहरू लिन सक्छ।"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G डेटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्यूलर डेटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटा रोकिएको छ"</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"तपाईंले सेट गर्नुभएको डेटाको सीमा पुगेकाले, यन्त्रले यस चक्रको बाँकी भागका लागि डेटा प्रयोग रोकेको छ।\n\nपुन: सुरू गर्दा तपाईंको क्यारियरले शुल्कहरू लिन सक्छ।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुनः सुरु गर्नुहोस्"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इन्टरनेट जडान छैन"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाइफाइ जडित"</string>

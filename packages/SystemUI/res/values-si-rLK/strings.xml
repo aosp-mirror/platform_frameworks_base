@@ -202,9 +202,9 @@
     <string name="accessibility_brightness" msgid="8003681285547803095">"දීප්තිය දර්ශනය කරන්න"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G දත්ත විරාම කර ඇත"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G දත්ත විරාම කර ඇත"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"සෙල්‍යුලර් දත්ත විරාම කර ඇත"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"සෙලියුලර් දත්ත විරාම කර ඇත"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"දත්ත විරාම කර ඇත"</string>
-    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ඔබ සකසා ඇති දත්ත සීමාවට ළඟා වූ නිසා, උපාංගය මගින් මෙම චක්‍රයේ ඉතිරිය සඳහා දත්ත භාවිතය විරාම කර ඇත. \n\nනැවත පටන් ගැනීමෙන් ඔබගේ වාහකයෙන් අය කිරීම්වලට පොළඹවනු ඇත."</string>
+    <string name="data_usage_disabled_dialog" msgid="8453242888903772524">"ඔබ සකසා ඇති දත්ත සීමාවට ළඟා වූ නිසා, උපාංගය මගින් මෙම චක්‍රයේ ඉතිරිය සඳහා දත්ත භාවිතය විරාම කර ඇත. \n\nනැවත පටන් ගැනීමෙන් ඔබගේ වාහකයෙන් අය කිරීම් වලට පොළඹවනු ඇත."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"නැවත පටන්ගන්න"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"අන්තර්ජාල සම්බන්ධතාවයක් නැත"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi සම්බන්ධිතයි"</string>
