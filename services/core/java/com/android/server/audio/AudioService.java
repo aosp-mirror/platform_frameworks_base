@@ -1425,6 +1425,7 @@ public class AudioService extends IAudioService.Stub {
 
     private void sendBroadcastToAll(Intent intent) {
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final long ident = Binder.clearCallingIdentity();
         try {
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
@@ -1434,6 +1435,7 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void sendStickyBroadcastToAll(Intent intent) {
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         final long ident = Binder.clearCallingIdentity();
         try {
             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
