@@ -40,6 +40,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
@@ -170,7 +171,7 @@ public class ImmersiveModeConfirmation {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_TOAST,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 0
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -179,8 +180,7 @@ public class ImmersiveModeConfirmation {
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         lp.setTitle("ImmersiveModeConfirmation");
-        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
-        lp.gravity = Gravity.FILL;
+        lp.windowAnimations = com.android.internal.R.style.Animation_ImmersiveModeConfirmation;
         return lp;
     }
 
@@ -194,10 +194,12 @@ public class ImmersiveModeConfirmation {
 
     private class ClingWindowView extends FrameLayout {
         private static final int BGCOLOR = 0x80000000;
-        private static final int OFFSET_DP = 48;
+        private static final int OFFSET_DP = 96;
+        private static final int ANIMATION_DURATION = 250;
 
         private final Runnable mConfirm;
         private final ColorDrawable mColor = new ColorDrawable(0);
+        private final Interpolator mInterpolator;
         private ValueAnimator mColorAnim;
         private ViewGroup mClingLayout;
 
@@ -222,8 +224,10 @@ public class ImmersiveModeConfirmation {
         public ClingWindowView(Context context, Runnable confirm) {
             super(context);
             mConfirm = confirm;
-            setClickable(true);
             setBackground(mColor);
+            setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+            mInterpolator = AnimationUtils
+                    .loadInterpolator(mContext, android.R.interpolator.linear_out_slow_in);
         }
 
         @Override
@@ -248,40 +252,40 @@ public class ImmersiveModeConfirmation {
             addView(mClingLayout, getBubbleLayoutParams());
 
             if (ActivityManager.isHighEndGfx()) {
-                final View bubble = mClingLayout.findViewById(R.id.text);
-                bubble.setAlpha(0f);
-                bubble.setTranslationY(-OFFSET_DP*density);
-                bubble.animate()
-                        .alpha(1f)
-                        .translationY(0)
-                        .setDuration(300)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start();
+                final View cling = mClingLayout;
+                cling.setAlpha(0f);
+                cling.setTranslationY(-OFFSET_DP * density);
 
-                ok.setAlpha(0f);
-                ok.setTranslationY(-OFFSET_DP*density);
-                ok.animate().alpha(1f)
-                        .translationY(0)
-                        .setDuration(300)
-                        .setStartDelay(200)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .start();
-
-                mColorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), 0, BGCOLOR);
-                mColorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                postOnAnimation(new Runnable() {
                     @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                        final int c = (Integer) animation.getAnimatedValue();
-                        mColor.setColor(c);
+                    public void run() {
+                        cling.animate()
+                                .alpha(1f)
+                                .translationY(0)
+                                .setDuration(ANIMATION_DURATION)
+                                .setInterpolator(mInterpolator)
+                                .withLayer()
+                                .start();
+
+                        mColorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), 0, BGCOLOR);
+                        mColorAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                            @Override
+                            public void onAnimationUpdate(ValueAnimator animation) {
+                                final int c = (Integer) animation.getAnimatedValue();
+                                mColor.setColor(c);
+                            }
+                        });
+                        mColorAnim.setDuration(ANIMATION_DURATION);
+                        mColorAnim.setInterpolator(mInterpolator);
+                        mColorAnim.start();
                     }
                 });
-                mColorAnim.setDuration(1000);
-                mColorAnim.start();
             } else {
                 mColor.setColor(BGCOLOR);
             }
 
-            mContext.registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED));
+            mContext.registerReceiver(mReceiver,
+                    new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED));
         }
 
         @Override
