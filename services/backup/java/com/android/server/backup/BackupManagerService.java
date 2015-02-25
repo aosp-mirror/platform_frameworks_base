@@ -2778,7 +2778,22 @@ public class BackupManagerService {
 
         @Override
         public void operationComplete() {
-            // Okay, the agent successfully reported back to us!
+            // The agent reported back to us!
+
+            if (mBackupData == null) {
+                // This callback was racing with our timeout, so we've cleaned up the
+                // agent state already and are on to the next thing.  We have nothing
+                // further to do here: agent state having been cleared means that we've
+                // initiated the appropriate next operation.
+                final String pkg = (mCurrentPackage != null)
+                        ? mCurrentPackage.packageName : "[none]";
+                if (DEBUG) {
+                    Slog.i(TAG, "Callback after agent teardown: " + pkg);
+                }
+                addBackupTrace("late opComplete; curPkg = " + pkg);
+                return;
+            }
+
             final String pkgName = mCurrentPackage.packageName;
             final long filepos = mBackupDataName.length();
             FileDescriptor fd = mBackupData.getFileDescriptor();
