@@ -46,9 +46,10 @@ between different states with a ripple effect.</p>
 background as:</p>
 
 <ul>
-<li><code>?android:attr/selectableItemBackground</code> for a bounded ripple</li>
+<li><code>?android:attr/selectableItemBackground</code> for a bounded ripple.</li>
 <li><code>?android:attr/selectableItemBackgroundBorderless</code> for a ripple that extends beyond
-the view</li>
+the view. It will be drawn upon, and bounded by, the nearest parent of the view with a non-null
+background.</li>
 </ul>
 
 <p class="note"><strong>Note:</strong> <code>selectableItemBackgroundBorderless</code> is a new
