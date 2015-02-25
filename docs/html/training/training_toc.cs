@@ -1040,6 +1040,32 @@ include the action bar on devices running Android 2.1 or higher."
   <!-- End: Building for Auto -->
 
 
+  <!-- Start: Building for Work -->
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/enterprise/index.html">
+      <span class="small">Building Apps for</span><br/>
+              Work
+      </a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>training/enterprise/app-compatibility.html">
+        Ensuring Compatibility with Managed Profiles
+      </a>
+      </li>
+      <li><a href="<?cs var:toroot ?>training/enterprise/app-restrictions.html">
+        Implementing App Restrictions
+      </a>
+      </li>
+      <li><a href="<?cs var:toroot ?>training/enterprise/work-policy-ctrl.html">
+        Building a Work Policy Controller
+      </a>
+      </li>
+    </ul>
+  </li>
+  <!-- End: Building for Work -->
+
+
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/best-ux.html">
@@ -1750,10 +1776,6 @@ results."
         <ul>
           <li><a href="<?cs var:toroot ?>training/enterprise/device-management-policy.html">
             Enhancing Security with Device Management Policies
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/enterprise/app-compatibility.html">
-            Ensuring Compatibility with Managed Profiles
           </a>
           </li>
         </ul>
