@@ -254,6 +254,7 @@
   <java-symbol type="bool" name="config_duplicate_port_omadm_wappush" />
   <java-symbol type="bool" name="config_enable_emergency_call_while_sim_locked" />
   <java-symbol type="bool" name="config_enable_puk_unlock_screen" />
+  <java-symbol type="bool" name="config_enableBurnInProtection" />
   <java-symbol type="bool" name="config_hotswapCapable" />
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
@@ -344,6 +345,11 @@
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="integer" name="config_bluetooth_max_advertisers" />
   <java-symbol type="integer" name="config_bluetooth_max_scan_filters" />
+  <java-symbol type="integer" name="config_burnInProtectionMinHorizontalOffset" />
+  <java-symbol type="integer" name="config_burnInProtectionMaxHorizontalOffset" />
+  <java-symbol type="integer" name="config_burnInProtectionMinVerticalOffset" />
+  <java-symbol type="integer" name="config_burnInProtectionMaxVerticalOffset" />
+  <java-symbol type="integer" name="config_burnInProtectionMaxRadius" />
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_drawLockTimeoutMillis" />
   <java-symbol type="integer" name="config_doublePressOnPowerBehavior" />
