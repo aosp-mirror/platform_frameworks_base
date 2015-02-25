@@ -48,6 +48,11 @@ solutions for Android-powered devices. It discusses the various features
 provided by the Device Administration API to provide stronger security for
 employee devices that are powered by Android.</p>
 
+<p class="note"><strong>Note</strong> For information on building a Work Policy
+Controller for Android for Work deployments, see <a
+href="{@docRoot}training/enterprise/work-policy-ctrl.html">Building a Work
+Policy Controller</a>.</p>
+
 
 <h2 id="overview">Device Administration API Overview</h2>
 
