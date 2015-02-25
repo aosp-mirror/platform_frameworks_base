@@ -4053,16 +4053,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Device owner can only be set on an unprovisioned device, unless it was initiated by "adb", in
-     * which case we allow it if no account is associated with the device.
+     * Device owner can only be set on an unprovisioned device. However, if initiated via "adb",
+     * we also allow it if no accounts or additional users are present on the device.
      */
     private boolean allowedToSetDeviceOwnerOnDevice() {
-        int callingId = Binder.getCallingUid();
-        if (callingId == Process.SHELL_UID || callingId == Process.ROOT_UID) {
-            return AccountManager.get(mContext).getAccounts().length == 0;
-        } else {
-            return !hasUserSetupCompleted(UserHandle.USER_OWNER);
+        if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+            return true;
         }
+
+        int callingId = Binder.getCallingUid();
+        return (callingId == Process.SHELL_UID || callingId == Process.ROOT_UID)
+                && mUserManager.getUserCount() == 1
+                && AccountManager.get(mContext).getAccounts().length == 0;
     }
 
     private void enforceCrossUserPermission(int userHandle) {
