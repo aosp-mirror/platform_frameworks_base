@@ -17916,6 +17916,8 @@ package android.net.wifi {
     field public int networkId;
     field public java.lang.String preSharedKey;
     field public int priority;
+    field public java.lang.String providerFriendlyName;
+    field public java.util.HashSet<java.lang.Long> roamingConsortiumIds;
     field public int status;
     field public java.lang.String[] wepKeys;
     field public int wepTxKeyIndex;
@@ -17973,6 +17975,7 @@ package android.net.wifi {
     ctor public WifiEnterpriseConfig();
     ctor public WifiEnterpriseConfig(android.net.wifi.WifiEnterpriseConfig);
     method public int describeContents();
+    method public java.lang.String getAltSubjectMatch();
     method public java.lang.String getAnonymousIdentity();
     method public java.security.cert.X509Certificate getCaCertificate();
     method public java.security.cert.X509Certificate getClientCertificate();
@@ -17980,7 +17983,10 @@ package android.net.wifi {
     method public java.lang.String getIdentity();
     method public java.lang.String getPassword();
     method public int getPhase2Method();
-    method public java.lang.String getSubjectMatch();
+    method public java.lang.String getPlmn();
+    method public java.lang.String getRealm();
+    method public deprecated java.lang.String getSubjectMatch();
+    method public void setAltSubjectMatch(java.lang.String);
     method public void setAnonymousIdentity(java.lang.String);
     method public void setCaCertificate(java.security.cert.X509Certificate);
     method public void setClientKeyEntry(java.security.PrivateKey, java.security.cert.X509Certificate);
@@ -17988,7 +17994,9 @@ package android.net.wifi {
     method public void setIdentity(java.lang.String);
     method public void setPassword(java.lang.String);
     method public void setPhase2Method(int);
-    method public void setSubjectMatch(java.lang.String);
+    method public void setPlmn(java.lang.String);
+    method public void setRealm(java.lang.String);
+    method public deprecated void setSubjectMatch(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.net.wifi.WifiEnterpriseConfig> CREATOR;
   }
