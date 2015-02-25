@@ -496,11 +496,20 @@ final class ActivityStack {
 
     final void moveToFront(String reason) {
         if (isAttached()) {
-            if (isOnHomeDisplay()) {
-                mStackSupervisor.moveHomeStack(isHomeStack(), reason);
+            final boolean homeStack = isHomeStack()
+                    || (mActivityContainer.mParentActivity != null
+                        && mActivityContainer.mParentActivity.isHomeActivity());
+            ActivityStack lastFocusStack = null;
+            if (!homeStack) {
+                // Need to move this stack to the front before calling
+                // {@link ActivityStackSupervisor#moveHomeStack} below.
+                lastFocusStack = mStacks.get(mStacks.size() - 1);
+                mStacks.remove(this);
+                mStacks.add(this);
             }
-            mStacks.remove(this);
-            mStacks.add(this);
+            if (isOnHomeDisplay()) {
+                mStackSupervisor.moveHomeStack(homeStack, reason, lastFocusStack);
+            }
             final TaskRecord task = topTask();
             if (task != null) {
                 mWindowManager.moveTaskToTop(task.taskId);
@@ -2580,7 +2589,6 @@ final class ActivityStack {
         if (top == null) {
             return false;
         }
-        stack.moveToFront(myReason);
         mService.setFocusedActivityLocked(top, myReason);
         return true;
     }
@@ -3656,8 +3664,7 @@ final class ActivityStack {
             }
         }
 
-        if (DEBUG_TRANSITION) Slog.v(TAG,
-                "Prepare to back transition: task=" + taskId);
+        if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare to back transition: task=" + taskId);
 
         boolean prevIsHome = false;
         if (tr.isOverHomeStack()) {
