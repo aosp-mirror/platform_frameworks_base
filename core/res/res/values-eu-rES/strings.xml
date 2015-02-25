@@ -190,9 +190,9 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefonoaren aukerak"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Pantailaren blokeoa"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Itzali"</string>
-    <string name="global_action_bug_report" msgid="7934010578922304799">"Programa-akatsen txostena"</string>
-    <string name="bugreport_title" msgid="2667494803742548533">"Sortu programa-akatsen txostena"</string>
-    <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira programa-akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
+    <string name="global_action_bug_report" msgid="7934010578922304799">"Akatsen txostena"</string>
+    <string name="bugreport_title" msgid="2667494803742548533">"Sortu akatsen txostena"</string>
+    <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Isilik modua"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Soinua DESAKTIBATUTA dago"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Soinua AKTIBATUTA dago"</string>
@@ -1658,7 +1658,7 @@
     <string name="media_route_status_available" msgid="6983258067194649391">"Erabilgarri"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Ez dago erabilgarri"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"Abian"</string>
-    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantaila barneratua"</string>
+    <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantaila integratua"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI pantaila"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. gainjartzea"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>

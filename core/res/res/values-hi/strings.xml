@@ -1750,8 +1750,8 @@
     <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
     <string name="mediasize_na_letter" msgid="2841414839888344296">"लेटर"</string>
     <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"गवर्नमेंट लेटर"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"लीगल"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर लीगल"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"वैधानिक"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर वैधानिक"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"लेजर"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"टेबलॉइड"</string>
     <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"इंडेक्स कार्ड 3x5"</string>

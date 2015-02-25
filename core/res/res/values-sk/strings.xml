@@ -1327,7 +1327,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Predvolený tón zvonenia"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Žiadny"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváňacie tóny"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tóny zvonenia"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy tón zvonenia"</string>
   <plurals name="wifi_available">
     <item quantity="one" msgid="6654123987418168693">"K dispozícii je sieť Wi-Fi"</item>
