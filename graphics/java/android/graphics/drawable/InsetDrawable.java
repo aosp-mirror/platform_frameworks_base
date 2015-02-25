@@ -58,7 +58,7 @@ public class InsetDrawable extends DrawableWrapper {
      * No-arg constructor used by drawable inflation.
      */
     InsetDrawable() {
-        this(new InsetState(), null);
+        this(new InsetState(null), null);
     }
 
     /**
@@ -82,7 +82,7 @@ public class InsetDrawable extends DrawableWrapper {
      */
     public InsetDrawable(Drawable drawable, int insetLeft, int insetTop,int insetRight,
             int insetBottom) {
-        this(new InsetState(), null);
+        this(new InsetState(null), null);
 
         mState.mInsetLeft = insetLeft;
         mState.mInsetTop = insetTop;
@@ -266,10 +266,6 @@ public class InsetDrawable extends DrawableWrapper {
         int mInsetTop = 0;
         int mInsetRight = 0;
         int mInsetBottom = 0;
-
-        InsetState() {
-            this(null);
-        }
 
         InsetState(InsetState orig) {
             super(orig);
