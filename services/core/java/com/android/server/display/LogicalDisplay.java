@@ -76,6 +76,10 @@ final class LogicalDisplay {
     // The pending requested refresh rate. 0 if no request is pending.
     private float mRequestedRefreshRate;
 
+    // The display offsets to apply to the display projection.
+    private int mDisplayOffsetX;
+    private int mDisplayOffsetY;
+
     // Temporary rectangle used when needed.
     private final Rect mTempLayerStackRect = new Rect();
     private final Rect mTempDisplayRect = new Rect();
@@ -313,6 +317,10 @@ final class LogicalDisplay {
         mTempDisplayRect.set(displayRectLeft, displayRectTop,
                 displayRectLeft + displayRectWidth, displayRectTop + displayRectHeight);
 
+        mTempDisplayRect.left += mDisplayOffsetX;
+        mTempDisplayRect.right += mDisplayOffsetX;
+        mTempDisplayRect.top += mDisplayOffsetY;
+        mTempDisplayRect.bottom += mDisplayOffsetY;
         device.setProjectionInTransactionLocked(orientation, mTempLayerStackRect, mTempDisplayRect);
     }
 
@@ -356,10 +364,34 @@ final class LogicalDisplay {
         return mRequestedRefreshRate;
     }
 
+    /**
+     * Gets the burn-in offset in X.
+     */
+    public int getDisplayOffsetXLocked() {
+        return mDisplayOffsetX;
+    }
+
+    /**
+     * Gets the burn-in offset in Y.
+     */
+    public int getDisplayOffsetYLocked() {
+        return mDisplayOffsetY;
+    }
+
+    /**
+     * Sets the burn-in offsets.
+     */
+    public void setDisplayOffsetsLocked(int x, int y) {
+        mDisplayOffsetX = x;
+        mDisplayOffsetY = y;
+    }
+
     public void dumpLocked(PrintWriter pw) {
         pw.println("mDisplayId=" + mDisplayId);
         pw.println("mLayerStack=" + mLayerStack);
         pw.println("mHasContent=" + mHasContent);
+        pw.println("mRequestedRefreshRate=" + mRequestedRefreshRate);
+        pw.println("mDisplayOffset=(" + mDisplayOffsetX + ", " + mDisplayOffsetY + ")");
         pw.println("mPrimaryDisplayDevice=" + (mPrimaryDisplayDevice != null ?
                 mPrimaryDisplayDevice.getNameLocked() : "null"));
         pw.println("mBaseDisplayInfo=" + mBaseDisplayInfo);
