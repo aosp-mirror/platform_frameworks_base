@@ -1541,27 +1541,25 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return err;
     }
 
-    ActivityStack computeStackFocus(ActivityRecord r, boolean newTask) {
+    ActivityStack adjustStackFocus(ActivityRecord r, boolean newTask) {
         final TaskRecord task = r.task;
 
         // On leanback only devices we should keep all activities in the same stack.
         if (!mLeanbackOnlyDevice &&
                 (r.isApplicationActivity() || (task != null && task.isApplicationTask()))) {
-
-            ActivityStack stack;
-
             if (task != null) {
-                stack = task.stack;
-                if (stack.isOnHomeDisplay()) {
-                    if (mFocusedStack != stack) {
-                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "computeStackFocus: Setting " +
+                final ActivityStack taskStack = task.stack;
+                if (taskStack.isOnHomeDisplay()) {
+                    if (mFocusedStack != taskStack) {
+                        if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "adjustStackFocus: Setting " +
                                 "focused stack to r=" + r + " task=" + task);
+                        mFocusedStack = taskStack;
                     } else {
                         if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
-                            "computeStackFocus: Focused stack already=" + mFocusedStack);
+                            "adjustStackFocus: Focused stack already=" + mFocusedStack);
                     }
                 }
-                return stack;
+                return taskStack;
             }
 
             final ActivityContainer container = r.mInitialActivityContainer;
@@ -1574,41 +1572,43 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (mFocusedStack != mHomeStack && (!newTask ||
                     mFocusedStack.mActivityContainer.isEligibleForNewTasks())) {
                 if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
-                        "computeStackFocus: Have a focused stack=" + mFocusedStack);
+                        "adjustStackFocus: Have a focused stack=" + mFocusedStack);
                 return mFocusedStack;
             }
 
             final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
             for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                stack = homeDisplayStacks.get(stackNdx);
+                final ActivityStack stack = homeDisplayStacks.get(stackNdx);
                 if (!stack.isHomeStack()) {
                     if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG,
-                            "computeStackFocus: Setting focused stack=" + stack);
-                    return stack;
+                            "adjustStackFocus: Setting focused stack=" + stack);
+                    mFocusedStack = stack;
+                    return mFocusedStack;
                 }
             }
 
             // Need to create an app stack for this user.
-            stack = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
-            if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "computeStackFocus: New stack r=" + r +
-                    " stackId=" + stack.mStackId);
-            return stack;
+            mFocusedStack = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
+            if (DEBUG_FOCUS || DEBUG_STACK) Slog.d(TAG, "adjustStackFocus: New stack r=" + r +
+                    " stackId=" + mFocusedStack.mStackId);
+            return mFocusedStack;
         }
         return mHomeStack;
     }
 
-    boolean setFocusedStack(ActivityRecord r, String reason) {
-        if (r == null) {
-            // Not sure what you are trying to do, but it is not going to work...
-            return false;
+    void setFocusedStack(ActivityRecord r, String reason) {
+        if (r != null) {
+            final TaskRecord task = r.task;
+            boolean isHomeActivity = !r.isApplicationActivity();
+            if (!isHomeActivity && task != null) {
+                isHomeActivity = !task.isApplicationTask();
+            }
+            if (!isHomeActivity && task != null) {
+                final ActivityRecord parent = task.stack.mActivityContainer.mParentActivity;
+                isHomeActivity = parent != null && parent.isHomeActivity();
+            }
+            moveHomeStack(isHomeActivity, reason);
         }
-        final TaskRecord task = r.task;
-        if (task == null || task.stack == null) {
-            Slog.w(TAG, "Can't set focus stack for r=" + r + " task=" + task);
-            return false;
-        }
-        task.stack.moveToFront(reason);
-        return true;
     }
 
     final int startActivityUncheckedLocked(final ActivityRecord r, ActivityRecord sourceRecord,
@@ -2082,9 +2082,10 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 return ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
             newTask = true;
-            targetStack = computeStackFocus(r, newTask);
-            targetStack.moveToFront("startingNewTask");
-
+            targetStack = adjustStackFocus(r, newTask);
+            if (!launchTaskBehind) {
+                targetStack.moveToFront("startingNewTask");
+            }
             if (reuseTask == null) {
                 r.setTask(targetStack.createTaskRecord(getNextTaskId(),
                         newTaskInfo != null ? newTaskInfo : r.info,
@@ -2205,7 +2206,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // This not being started from an existing activity, and not part
             // of a new task...  just put it in the top task, though these days
             // this case should never happen.
-            targetStack = computeStackFocus(r, newTask);
+            targetStack = adjustStackFocus(r, newTask);
             targetStack.moveToFront("addingToTopTask");
             ActivityRecord prev = targetStack.topActivity();
             r.setTask(prev != null ? prev.task : targetStack.createTaskRecord(getNextTaskId(),
