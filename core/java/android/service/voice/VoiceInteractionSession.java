@@ -53,10 +53,9 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 /**
  * An active voice interaction session, providing a facility for the implementation
- * to interact with the user in the voice interaction layer.  This interface is no shown
- * by default, but you can request that it be shown with {@link #showWindow()}, which
- * will result in a later call to {@link #onCreateContentView()} in which the UI can be
- * built
+ * to interact with the user in the voice interaction layer.  The user interface is
+ * initially shown by default, and can be created be overriding {@link #onCreateContentView()}
+ * in which the UI can be built.
  *
  * <p>A voice interaction session can be self-contained, ultimately calling {@link #finish}
  * when done.  It can also initiate voice interactions with applications by calling
@@ -150,6 +149,17 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     };
 
     final IVoiceInteractionSession mSession = new IVoiceInteractionSession.Stub() {
+        @Override
+        public void show(Bundle sessionArgs, int flags) {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageIO(MSG_SHOW,
+                    flags, sessionArgs));
+        }
+
+        @Override
+        public void hide() {
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessage(MSG_HIDE));
+        }
+
         @Override
         public void handleAssist(Bundle assistBundle) {
             mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(MSG_HANDLE_ASSIST,
@@ -284,6 +294,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     static final int MSG_CLOSE_SYSTEM_DIALOGS = 102;
     static final int MSG_DESTROY = 103;
     static final int MSG_HANDLE_ASSIST = 104;
+    static final int MSG_SHOW = 105;
+    static final int MSG_HIDE = 106;
 
     class MyCallbacks implements HandlerCaller.Callback, SoftInputWindow.Callback {
         @Override
@@ -324,9 +336,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                     args.arg1 = onGetSupportedCommands((Caller) args.arg1, (String[]) args.arg2);
                     break;
                 case MSG_CANCEL:
-                    args = (SomeArgs)msg.obj;
-                    if (DEBUG) Log.d(TAG, "onCancel: req=" + ((Request) args.arg1).mInterface);
-                    onCancel((Request)args.arg1);
+                    if (DEBUG) Log.d(TAG, "onCancel: req=" + ((Request)msg.obj));
+                    onCancel((Request)msg.obj);
                     break;
                 case MSG_TASK_STARTED:
                     if (DEBUG) Log.d(TAG, "onTaskStarted: intent=" + msg.obj
@@ -349,6 +360,15 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
                 case MSG_HANDLE_ASSIST:
                     if (DEBUG) Log.d(TAG, "onHandleAssist: " + (Bundle)msg.obj);
                     onHandleAssist((Bundle) msg.obj);
+                    break;
+                case MSG_SHOW:
+                    if (DEBUG) Log.d(TAG, "doShow: args=" + msg.obj
+                            + " flags=" + msg.arg1);
+                    doShow((Bundle) msg.obj, msg.arg1);
+                    break;
+                case MSG_HIDE:
+                    if (DEBUG) Log.d(TAG, "doHide");
+                    doHide();
                     break;
             }
         }
@@ -457,6 +477,45 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         onCreate(args, startFlags);
     }
 
+    void doShow(Bundle args, int flags) {
+        if (DEBUG) Log.v(TAG, "Showing window: mWindowAdded=" + mWindowAdded
+                + " mWindowVisible=" + mWindowVisible);
+
+        if (mInShowWindow) {
+            Log.w(TAG, "Re-entrance in to showWindow");
+            return;
+        }
+
+        try {
+            mInShowWindow = true;
+            if (!mWindowVisible) {
+                if (!mWindowAdded) {
+                    mWindowAdded = true;
+                    View v = onCreateContentView();
+                    if (v != null) {
+                        setContentView(v);
+                    }
+                }
+            }
+            onShow(args, flags);
+            if (!mWindowVisible) {
+                mWindowVisible = true;
+                mWindow.show();
+            }
+        } finally {
+            mWindowWasVisible = true;
+            mInShowWindow = false;
+        }
+    }
+
+    void doHide() {
+        if (mWindowVisible) {
+            mWindow.hide();
+            mWindowVisible = false;
+            onHide();
+        }
+    }
+
     void doDestroy() {
         onDestroy();
         if (mInitialized) {
@@ -484,39 +543,26 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mContentFrame = (FrameLayout)mRootView.findViewById(android.R.id.content);
     }
 
-    public void showWindow() {
-        if (DEBUG) Log.v(TAG, "Showing window: mWindowAdded=" + mWindowAdded
-                + " mWindowVisible=" + mWindowVisible);
-
-        if (mInShowWindow) {
-            Log.w(TAG, "Re-entrance in to showWindow");
-            return;
-        }
-
+    public void show() {
         try {
-            mInShowWindow = true;
-            if (!mWindowVisible) {
-                mWindowVisible = true;
-                if (!mWindowAdded) {
-                    mWindowAdded = true;
-                    View v = onCreateContentView();
-                    if (v != null) {
-                        setContentView(v);
-                    }
-                }
-                mWindow.show();
-            }
-        } finally {
-            mWindowWasVisible = true;
-            mInShowWindow = false;
+            mSystemService.showSessionFromSession(mToken, null, 0);
+        } catch (RemoteException e) {
         }
     }
 
-    public void hideWindow() {
-        if (mWindowVisible) {
-            mWindow.hide();
-            mWindowVisible = false;
+    public void hide() {
+        try {
+            mSystemService.hideSessionFromSession(mToken);
+        } catch (RemoteException e) {
         }
+    }
+
+    /** TODO: remove */
+    public void showWindow() {
+    }
+
+    /** TODO: remove */
+    public void hideWindow() {
     }
 
     /**
@@ -611,15 +657,33 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * Initiatize a new session.
+     * Initiatize a new session.  The given args and showFlags are the initial values
+     * passed to {@link VoiceInteractionService#showSession VoiceInteractionService.showSession},
+     * if possible.  Normally you should handle these in {@link #onShow}.
+     */
+    public void onCreate(Bundle args, int showFlags) {
+        onCreate(args);
+    }
+
+    /**
+     * Called when the session UI is going to be shown.  This is called after
+     * {@link #onCreateContentView} (if the session's content UI needed to be created) and
+     * immediately prior to the window being shown.  This may be called while the window
+     * is already shown, if a show request has come in while it is shown, to allow you to
+     * update the UI to match the new show arguments.
      *
      * @param args The arguments that were supplied to
-     * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
-     * @param startFlags The start flags originally provided to
-     * {@link VoiceInteractionService#startSession VoiceInteractionService.startSession}.
+     * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
+     * @param showFlags The show flags originally provided to
+     * {@link VoiceInteractionService#showSession VoiceInteractionService.showSession}.
      */
-    public void onCreate(Bundle args, int startFlags) {
-        onCreate(args);
+    public void onShow(Bundle args, int showFlags) {
+    }
+
+    /**
+     * Called immediately after stopping to show the session UI.
+     */
+    public void onHide() {
     }
 
     /**
@@ -663,7 +727,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     public void onBackPressed() {
-        finish();
+        hide();
     }
 
     /**
@@ -672,7 +736,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      * calls {@link #finish}.
      */
     public void onCloseSystemDialogs() {
-        finish();
+        hide();
     }
 
     /**
@@ -717,7 +781,7 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      * @param taskId Unique ID of the finished task.
      */
     public void onTaskFinished(Intent intent, int taskId) {
-        finish();
+        hide();
     }
 
     /**

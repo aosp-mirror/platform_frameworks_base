@@ -23,6 +23,8 @@ import android.os.Bundle;
  * @hide
  */
 oneway interface IVoiceInteractionSession {
+    void show(in Bundle sessionArgs, int flags);
+    void hide();
     void handleAssist(in Bundle assistData);
     void taskStarted(in Intent intent, int taskId);
     void taskFinished(in Intent intent, int taskId);

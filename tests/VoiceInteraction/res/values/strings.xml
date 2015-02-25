@@ -22,6 +22,7 @@
     <string name="complete">Complete</string>
     <string name="abortVoice">Abort Voice</string>
     <string name="completeVoice">Complete Voice</string>
+    <string name="cancelVoice">Cancel</string>
 
 </resources>
 

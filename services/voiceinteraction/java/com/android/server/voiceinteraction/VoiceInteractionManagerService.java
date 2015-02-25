@@ -385,7 +385,7 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public void startSession(IVoiceInteractionService service, Bundle args, int flags) {
+        public void showSession(IVoiceInteractionService service, Bundle args, int flags) {
             synchronized (this) {
                 if (mImpl == null || mImpl.mService == null
                         || service.asBinder() != mImpl.mService.asBinder()) {
@@ -396,7 +396,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    mImpl.startSessionLocked(callingPid, callingUid, args, flags);
+                    mImpl.showSessionLocked(callingPid, callingUid, args, flags);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -417,6 +417,42 @@ public class VoiceInteractionManagerService extends SystemService {
                 try {
                     return mImpl.deliverNewSessionLocked(callingPid, callingUid, token, session,
                             interactor);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public boolean showSessionFromSession(IBinder token, Bundle sessionArgs, int flags) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "showSessionFromSession without running voice interaction service");
+                    return false;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mImpl.showSessionLocked(callingPid, callingUid, sessionArgs, flags);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+            }
+        }
+
+        @Override
+        public boolean hideSessionFromSession(IBinder token) {
+            synchronized (this) {
+                if (mImpl == null) {
+                    Slog.w(TAG, "hideSessionFromSession without running voice interaction service");
+                    return false;
+                }
+                final int callingPid = Binder.getCallingPid();
+                final int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mImpl.hideSessionLocked(callingPid, callingUid);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

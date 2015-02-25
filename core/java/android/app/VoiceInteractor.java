@@ -156,8 +156,8 @@ public class VoiceInteractor {
 
         @Override
         public void deliverCancel(IVoiceInteractorRequest request) throws RemoteException {
-            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageO(
-                    MSG_CANCEL_RESULT, request));
+            mHandlerCaller.sendMessage(mHandlerCaller.obtainMessageOO(
+                    MSG_CANCEL_RESULT, request, null));
         }
     };
 

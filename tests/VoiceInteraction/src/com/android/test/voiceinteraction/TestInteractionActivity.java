@@ -31,8 +31,10 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
     static final String TAG = "TestInteractionActivity";
 
     VoiceInteractor mInteractor;
+    VoiceInteractor.Request mCurrentRequest = null;
     Button mAbortButton;
     Button mCompleteButton;
+    Button mCancelButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,9 +58,11 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
         mAbortButton.setOnClickListener(this);
         mCompleteButton = (Button)findViewById(R.id.complete);
         mCompleteButton.setOnClickListener(this);
+        mCancelButton = (Button)findViewById(R.id.cancel);
+        mCancelButton.setOnClickListener(this);
 
         mInteractor = getVoiceInteractor();
-        VoiceInteractor.ConfirmationRequest req = new VoiceInteractor.ConfirmationRequest(
+        mCurrentRequest = new VoiceInteractor.ConfirmationRequest(
                 "This is a confirmation", null) {
             @Override
             public void onCancel() {
@@ -72,7 +76,7 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                 getActivity().finish();
             }
         };
-        mInteractor.submitRequest(req);
+        mInteractor.submitRequest(mCurrentRequest);
     }
 
     @Override
@@ -112,6 +116,9 @@ public class TestInteractionActivity extends Activity implements View.OnClickLis
                 }
             };
             mInteractor.submitRequest(req);
+        } else if (v == mCancelButton && mCurrentRequest != null) {
+            Log.i(TAG, "Cancel request");
+            mCurrentRequest.cancel();
         }
     }
 
