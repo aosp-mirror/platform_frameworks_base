@@ -34883,6 +34883,7 @@ package android.view {
     method public boolean getTitleOptionalHint();
     method public int getType();
     method public abstract void invalidate();
+    method public void invalidateContentRect();
     method public boolean isTitleOptional();
     method public abstract void setCustomView(android.view.View);
     method public abstract void setSubtitle(java.lang.CharSequence);
@@ -34901,6 +34902,11 @@ package android.view {
     method public abstract boolean onCreateActionMode(android.view.ActionMode, android.view.Menu);
     method public abstract void onDestroyActionMode(android.view.ActionMode);
     method public abstract boolean onPrepareActionMode(android.view.ActionMode, android.view.Menu);
+  }
+
+  public static abstract class ActionMode.Callback2 implements android.view.ActionMode.Callback {
+    ctor public ActionMode.Callback2();
+    method public void onGetContentRect(android.view.ActionMode, android.view.View, android.graphics.Rect);
   }
 
   public abstract class ActionProvider {

@@ -2669,17 +2669,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         @Override
         public ActionMode startActionModeForChild(View originalView,
                 ActionMode.Callback callback) {
-            // originalView can be used here to be sure that we don't obscure
-            // relevant content with the context mode UI.
-            return startActionMode(callback);
+            return startActionModeForChild(originalView, callback, ActionMode.TYPE_PRIMARY);
         }
 
         @Override
         public ActionMode startActionModeForChild(
                 View child, ActionMode.Callback callback, int type) {
-            // originalView can be used here to be sure that we don't obscure
-            // relevant content with the context mode UI.
-            return startActionMode(callback, type);
+            return startActionMode(child, callback, type);
         }
 
         @Override
@@ -2689,7 +2685,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public ActionMode startActionMode(ActionMode.Callback callback, int type) {
-            ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
+            return startActionMode(this, callback, type);
+        }
+
+        private ActionMode startActionMode(
+                View originatingView, ActionMode.Callback callback, int type) {
+            ActionMode.Callback2 wrappedCallback = new ActionModeCallback2Wrapper(callback);
             ActionMode mode = null;
             if (getCallback() != null && !isDestroyed()) {
                 try {
@@ -3291,12 +3292,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         /**
-         * Clears out internal reference when the action mode is destroyed.
+         * Clears out internal references when the action mode is destroyed.
          */
-        private class ActionModeCallbackWrapper implements ActionMode.Callback {
-            private ActionMode.Callback mWrapped;
+        private class ActionModeCallback2Wrapper extends ActionMode.Callback2 {
+            private final ActionMode.Callback mWrapped;
 
-            public ActionModeCallbackWrapper(ActionMode.Callback wrapped) {
+            public ActionModeCallback2Wrapper(ActionMode.Callback wrapped) {
                 mWrapped = wrapped;
             }
 
