@@ -1004,7 +1004,7 @@
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Tablet şimdi fabrika varsayılanına sıfırlanacak."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"TV\'nizin kilidini <xliff:g id="NUMBER">%d</xliff:g> kez hatalı bir şekilde açmaya çalıştınız. TV\'niz şimdi fabrika ayarlarına sıfırlanacaktır."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon kilidini <xliff:g id="NUMBER">%d</xliff:g> defa yanlış bir şekilde açmaya çalıştınız. Telefon şimdi fabrika varsayılanına sıfırlanacak."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Deseni unuttunuz mu?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Hesap kilidini açma"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Çok fazla sayıda desen denemesi yapıldı"</string>
@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Medya cihazı olarak bağlandı"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Kamera olarak bağlandı"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI cihaz olarak bağlandı"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Yükleyici olarak bağlandı"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuarına bağlandı"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Diğer USB seçenekleri için dokunun."</string>
@@ -1614,7 +1615,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Yanlış Desen"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Yanlış Şifre"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Yanlış PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> saniye içinde yeniden deneyin."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> saniye içinde tekrar deneyin."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Deseninizi çizin"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN kodunu girin"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN\'i girin"</string>

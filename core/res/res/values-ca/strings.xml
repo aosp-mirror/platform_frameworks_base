@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"D\'acord"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connectat com a disp. multimèdia"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Connectat com a càmera"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Connectat com a dispositiu MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connectat com a instal·lador"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Toca per accedir a altres opcions d\'USB."</string>

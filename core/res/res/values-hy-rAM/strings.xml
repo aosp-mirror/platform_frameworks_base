@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"Բ"</string>
-    <string name="kilobyteShort" msgid="5973789783504771878">"Կբ"</string>
+    <string name="kilobyteShort" msgid="5973789783504771878">"ԿԲ"</string>
     <string name="megabyteShort" msgid="6355851576770428922">"ՄԲ"</string>
     <string name="gigabyteShort" msgid="3259882455212193214">"ԳԲ"</string>
     <string name="terabyteShort" msgid="231613018159186962">"Տբ"</string>
@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Լավ"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Կապակցված է որպես մեդիա սարք"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Միացված է որպես ֆոտոխցիկ"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Կապակցված է որպես MIDI սարք"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Միացված է որպես տեղադրիչ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Կապակցված է USB լրասարքի"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Հպեք` այլ USB ընտրանքների համար:"</string>

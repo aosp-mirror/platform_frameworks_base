@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक है"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"किसी मीडिया डिवाइस के रूप में कनेक्‍ट किया गया"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"कैमरे के रूप में कनेक्‍ट करें"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI डिवाइस के रूप में कनेक्‍ट है"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"किसी इंस्‍टॉलर के रूप में कनेक्‍ट किया गया"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"अन्‍य USB विकल्‍पों के लिए स्पर्श करें."</string>
@@ -1696,8 +1697,8 @@
     <string name="mediasize_iso_c10" msgid="5040764293406765584">"ISO C10"</string>
     <string name="mediasize_na_letter" msgid="2841414839888344296">"लेटर"</string>
     <string name="mediasize_na_gvrnmt_letter" msgid="5295836838862962809">"गवर्नमेंट लेटर"</string>
-    <string name="mediasize_na_legal" msgid="8621364037680465666">"लीगल"</string>
-    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर लीगल"</string>
+    <string name="mediasize_na_legal" msgid="8621364037680465666">"वैधानिक"</string>
+    <string name="mediasize_na_junior_legal" msgid="3309324162155085904">"जूनियर वैधानिक"</string>
     <string name="mediasize_na_ledger" msgid="5567030340509075333">"लेजर"</string>
     <string name="mediasize_na_tabloid" msgid="4571735038501661757">"टेबलॉइड"</string>
     <string name="mediasize_na_index_3x5" msgid="5182901917818625126">"इंडेक्स कार्ड 3x5"</string>

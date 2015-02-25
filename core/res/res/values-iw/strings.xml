@@ -1369,6 +1369,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"אישור"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"מחובר כמכשיר מדיה"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"מחובר כמצלמה"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏מחובר כהתקן MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"מחובר כמתקין"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏מחובר לאביזר USB"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"‏גע לקבלת אפשרויות USB נוספות."</string>

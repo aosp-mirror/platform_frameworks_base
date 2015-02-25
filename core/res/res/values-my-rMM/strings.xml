@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ကောင်းပြီ"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"မီဒီယာစက်အနေဖြင့် ချိတ်ဆက်သည်"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ကင်မရာအနေဖြင့်ဆက်သွယ်ခြင်း"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI စက်ပစ္စည်းအဖြစ် ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"installerအနေဖြင့် ချိတ်ဆက်သည်"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBတွဲဖက်ပစ္စည်းအား ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"အခြား USB စိတ်ကြိုက်ရွေးချယ်ခွင့်များ အတွက် တို့ထိပါ။"</string>

@@ -1362,6 +1362,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"U redu"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Spojen kao medijski uređaj"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Spojen kao fotoaparat"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Povezan kao MIDI uređaj"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Spojen kao instalacijski program"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Spojen na USB pribor"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Dodirnite za ostale opcije USB uređaja"</string>

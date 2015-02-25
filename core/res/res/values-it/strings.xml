@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Collegato come dispositivo multimediale"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Collegato come fotocamera"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Connesso come un dispositivo MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Collegato come installer"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Collegato a un accessorio USB"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Tocca per altre opzioni USB."</string>

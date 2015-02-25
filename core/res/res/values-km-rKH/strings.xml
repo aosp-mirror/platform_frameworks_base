@@ -1357,6 +1357,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"យល់ព្រម"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"បាន​តភ្ជាប់​ជា​ឧបករណ៍​​ផ្ទុក"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"បាន​ភ្ជាប់​ជា​ម៉ាស៊ីន​ថត"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"បានភ្ជាប់ជាឧបករណ៍មីឌី"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"បាន​ភ្ជាប់​ជា​កម្មវិធី​ដំឡើង"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"បាន​ភ្ជាប់​ឧបករណ៍​យូអេសប៊ី"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"ប៉ះ ដើម្បី​មើល​ជម្រើស​យូអេសប៊ី​ផ្សេង។"</string>

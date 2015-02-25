@@ -1280,7 +1280,7 @@
     <string name="ringtone_default" msgid="3789758980357696936">"Predvolený tón zvonenia"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Predvolený tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="7937634392408977062">"Žiadny"</string>
-    <string name="ringtone_picker_title" msgid="3515143939175119094">"Vyzváňacie tóny"</string>
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Tóny zvonenia"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Neznámy tón zvonenia"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="few">K dispozícii sú siete Wi-Fi</item>
@@ -1369,6 +1369,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Pripojené ako mediálne zariadenie"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Pripojené ako fotoaparát"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Pripojené ako zariadenie MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Pripojené ako inštalátor"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Pripojené k periférnemu zariadeniu USB"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Dotykom zobrazíte ďalšie možnosti USB."</string>

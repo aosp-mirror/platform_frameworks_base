@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ശരി"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"മീഡിയ ഉപകരണമായി കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ഒരു ക്യാമറയായി കണക്‌റ്റുചെയ്‌തു"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI ഉപകരണമായി കണക്‌റ്റുചെയ്‌തു"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ഇൻസ്‌റ്റാളറായി കണക്‌റ്റുചെയ്തു"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ഒരു USB ആക്‌സസ്സറി കണക്റ്റുചെയ്‌തു"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"മറ്റ് USB ഓപ്‌ഷനുകൾക്കായി സ്പർശിക്കുക."</string>
