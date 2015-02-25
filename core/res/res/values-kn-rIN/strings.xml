@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ಸರಿ"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"ಮಾಧ್ಯಮ ಸಾಧನದ ರೂಪದಲ್ಲಿ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ಕ್ಯಾಮರಾದಂತೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI ಸಾಧನದಂತೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ಸ್ಥಾಪಕದಂತೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ಪರಿಕರಕ್ಕೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"ಇತರ USB ಆಯ್ಕೆಗಳಿಗಾಗಿ ಸ್ಪರ್ಶಿಸಿ."</string>

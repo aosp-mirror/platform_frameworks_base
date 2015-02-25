@@ -1782,6 +1782,7 @@
     <skip />
     <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
     <skip />
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI түзмөк катары туташкан"</string>
     <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
     <skip />
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB аксессуарга байланышты"</string>

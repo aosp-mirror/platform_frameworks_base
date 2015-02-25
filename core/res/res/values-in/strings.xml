@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Oke"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Tersambung sebagai perangkat media"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Tersambung sebagai kamera"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"Terhubung sebagai perangkat MIDI"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Tersambung sebagai pemasang"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Tersambung ke aksesori USB"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Sentuh untuk opsi USB lainnya."</string>

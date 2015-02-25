@@ -1355,6 +1355,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ঠিক আছে"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"একটি মিডিয়া ডিভাইস হিসাবে সংযুক্ত হয়েছে"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"একটি ক্যামেরা হিসাবে সংযুক্ত"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"একটি MIDI ডিভাইস হিসাবে সংযুক্ত করা হয়েছে"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"একটি ইনস্টলার হিসাবে সংযুক্ত হয়েছে"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"একটি USB যন্ত্রাংশতে সংযুক্ত হয়েছে"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"অন্যন্য USB বিকল্পের জন্য স্পর্শ করুন৷"</string>
