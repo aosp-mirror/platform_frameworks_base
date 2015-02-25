@@ -4159,12 +4159,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         return mMediaController;
     }
 
-    private boolean isTranslucent() {
-        TypedArray a = getWindowStyle();
-        return a.getBoolean(a.getResourceId(
-                R.styleable.Window_windowIsTranslucent, 0), false);
-    }
-
     @Override
     public void setEnterTransition(Transition enterTransition) {
         mEnterTransition = enterTransition;
