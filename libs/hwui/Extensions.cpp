@@ -55,7 +55,6 @@ Extensions::Extensions() {
     mHasFramebufferFetch = hasGlExtension("GL_NV_shader_framebuffer_fetch");
     mHasDiscardFramebuffer = hasGlExtension("GL_EXT_discard_framebuffer");
     mHasDebugMarker = hasGlExtension("GL_EXT_debug_marker");
-    mHasDebugLabel = hasGlExtension("GL_EXT_debug_label");
     mHasTiledRendering = hasGlExtension("GL_QCOM_tiled_rendering");
     mHas1BitStencil = hasGlExtension("GL_OES_stencil1");
     mHas4BitStencil = hasGlExtension("GL_OES_stencil4");

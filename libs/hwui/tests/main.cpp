@@ -95,15 +95,15 @@ public:
         animation.createContent(width, height, renderer);
         endRecording(renderer, rootNode);
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < animation.getFrameCount(); i++) {
+#if !HWUI_NULL_GPU
             testContext.waitForVsync();
+#endif
 
             ATRACE_NAME("UI-Draw Frame");
             animation.doFrame(i);
             proxy->syncAndDrawFrame();
         }
-
-        sleep(5);
 
         rootNode->decStrong(nullptr);
     }

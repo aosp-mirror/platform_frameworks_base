@@ -207,9 +207,6 @@ public:
     PFNGLPUSHGROUPMARKEREXTPROC startMark;
     PFNGLPOPGROUPMARKEREXTPROC endMark;
 
-    PFNGLLABELOBJECTEXTPROC setLabel;
-    PFNGLGETOBJECTLABELEXTPROC getLabel;
-
     // TEMPORARY properties
     void initTempProperties();
     void setTempProperty(const char* name, const char* value);
@@ -243,14 +240,6 @@ private:
     static void eventMarkNull(GLsizei length, const GLchar* marker) { }
     static void startMarkNull(GLsizei length, const GLchar* marker) { }
     static void endMarkNull() { }
-
-    static void setLabelNull(GLenum type, uint object, GLsizei length,
-            const char* label) { }
-    static void getLabelNull(GLenum type, uint object, GLsizei bufferSize,
-            GLsizei* length, char* label) {
-        if (length) *length = 0;
-        if (label) *label = '\0';
-    }
 
     RenderState* mRenderState;
 
