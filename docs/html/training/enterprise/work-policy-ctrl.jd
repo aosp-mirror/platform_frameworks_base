@@ -1,0 +1,339 @@
+page.title=Building a Work Policy Controller
+page.metaDescription=Learn how to develop a Work Policy Controller to create and administer a managed profile on an employee's device.
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+ <li><a href="#after_creating_profile">Create a Managed Profile</a></li>
+ <li><a href="#set_up_policies">Set Up Device Policies</a></li>
+ <li><a href="#apply_restrictions">Apply App Restrictions</a></li>
+</ol>
+
+<!-- related docs (NOT javadocs) -->
+
+<h2>
+  You should also read
+</h2>
+
+<ul>
+  <li>
+    <a href="{@docRoot}guide/topics/admin/device-admin.html">Device
+    Administration</a>
+  </li>
+</ul>
+
+<h2>Resources</h2>
+<ul>
+
+  <li>
+    <a href=
+    "{@docRoot}samples/BasicManagedProfile/index.html">BasicManagedProfile</a>
+  </li>
+
+  <li>
+    <a href=
+    "{@docRoot}samples/AppRestrictionEnforcer/index.html">AppRestrictionEnforcer</a>
+  </li>
+</ul>
+
+</div>
+</div>
+
+
+<p>
+  In an Android for Work deployment, an enterprise needs to maintain control
+  over certain aspects of the employees' devices. The enterprise needs to
+  ensure that work-related information is encrypted and is kept separate from
+  employees' personal data. The enterprise may also need to limit device
+  capabilities, such as whether the device is allowed to use its camera. And
+  the enterprise may require that approved apps provide app restrictions, so
+  the enterprise can turn app capability on or off as needed.
+</p>
+
+<p>
+  To handle these tasks, an enterprise develops and deploys a Work Policy
+  Controller app. This app is installed on each employee's device. The
+  controller app installed on each employee's device and creates a work user
+  profile, which accesses enterprise apps and data separately from the user's
+  personal account. The controller app also acts as the
+  bridge between the enterprise's management software and the device; the
+  enterprise tells the controller app when it needs to make configuration
+  changes, and the controller app makes the appropriate settings changes for the
+  device and for other apps.
+</p>
+
+<p>
+  This lesson describes how to develop a Work Policy Controller app for devices
+  in an Android for Work deployment. The lesson describes how to create a work
+  user profile, how to set device policies, and how to apply
+  restrictions to other apps running on the managed profile.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> This lesson does not cover the situation where the
+  only profile on the device is the managed profile, under the enterprise's
+  control.
+</p>
+
+<h2 id="overview">Device Administration Overview</h2>
+
+<p>
+  In an Android for Work deployment, the enterprise administrator can set
+  policies to control the behavior of employees' devices and apps. The
+  enterprise administrator sets these policies with software provided by their
+  Enterprise Mobility Management (EMM) provider. The EMM software communicates
+  with a Work Policy Controller on each device. The Work Policy Controller, in
+  turn, manages the settings and behavior of the work user profile on each
+  individual’s device.
+</p>
+
+<p class="note">
+  <strong>Note:</strong> A Work Policy Controller is built on the existing
+  model used for device administration applications, as described in <a href=
+  "{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>.
+  In particular, your app needs to create a subclass of {@link
+  android.app.admin.DeviceAdminReceiver}, as described in that document.
+</p>
+
+<h3 id="managed_profiles">Managed profiles</h3>
+
+<p>
+  Users often want to use their personal devices in an enterprise setting. This
+  situation can present enterprises with a dilemma. If the user can use their
+  own device, the enterprise has to worry that confidential information (like
+  employee emails and contacts) are on a device the enterprise does not
+  control.
+</p>
+
+<p>
+  To address this situation, Android 5.0 (API level 21) allows enterprises to
+  set up a special work user profile using the Managed Profile API. This
+  user profile is called a <em>managed profile</em>, or a <em>work profile</em>
+  in the Android for Work program. If a device has a
+  managed profile for work, the profile's settings are under the control of the
+  enterprise administrator. The administrator can choose which apps are allowed
+  for that profile, and can control just what device features are available to
+  the profile.
+</p>
+
+<h2 id="create_profile">Create a Managed Profile</h2>
+
+<p>To create a managed profile on a device that already has a personal profile,
+first check that the device can support a managed profile, by seeing if the
+device supports the {@link
+android.content.pm.PackageManager#FEATURE_MANAGED_USERS FEATURE_MANAGED_USERS}
+system feature:</p>
+
+<pre>PackageManager pm = getPackageManager();
+if (!pm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS)) {
+
+    // This device does not support native managed profiles!
+
+}</pre>
+
+<p>If the device supports managed profiles, create one by sending an intent with
+an {@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE
+ACTION_PROVISION_MANAGED_PROFILE} action. Include the device admin package
+name as an extra.</p>
+
+<pre>Activity provisioningActivity = getActivity();
+
+// You'll need the package name for the WPC app.
+String myWPCPackageName = "com.example.myWPCApp";
+
+// Set up the provisioning intent
+Intent provisioningIntent =
+        new Intent("android.app.action.PROVISION_MANAGED_PROFILE");
+intent.putExtra(myWPCPackageName,
+        provisioningActivity.getApplicationContext().getPackageName());
+
+if (provisioningIntent.resolveActivity(provisioningActivity.getPackageManager())
+         == null) {
+
+    // No handler for intent! Can't provision this device.
+    // Show an error message and cancel.
+} else {
+
+    // REQUEST_PROVISION_MANAGED_PROFILE is defined
+    // to be a suitable request code
+    startActivityForResult(provisioningIntent,
+            REQUEST_PROVISION_MANAGED_PROFILE);
+    provisioningActivity.finish();
+}</pre>
+
+<p>The system responds to this intent by doing the following:</p>
+
+<ul>
+  <li>Verifies that the device is encrypted. If it is not, the system prompts
+  the user to encrypt the device before proceeding.
+  </li>
+
+  <li>Creates a managed profile.
+  </li>
+
+  <li>Removes non-required applications from the managed profile.
+  </li>
+
+  <li>Copies the Work Policy Controller application into the managed profile and
+    sets it as the profile owner.
+  </li>
+</ul>
+
+<p>Override {@link android.app.Activity#onActivityResult onActivityResult()} to
+see whether the provisioning was successful, as shown in the following 
+example code:</p>
+
+<pre>&#64;Override
+public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+    // Check if this is the result of the provisioning activity
+    if (requestCode == REQUEST_PROVISION_MANAGED_PROFILE) {
+
+        // If provisioning was successful, the result code is 
+        // Activity.RESULT_OK
+        if (resultCode == Activity.RESULT_OK) {
+            // Hurray! Managed profile created and provisioned!
+        } else {
+            // Boo! Provisioning failed!
+        }
+        return;
+
+    } else {
+        // This is the result of some other activity, call the superclass
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+}</pre>
+
+<h3 id="after_creating_profile">After Creating the Managed Profile</h3>
+
+<p>When the profile has been provisioned, the system calls the Work Policy
+Controller app's {@link
+android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete
+DeviceAdminReceiver.onProfileProvisioningComplete()} method. Override this
+callback method to finish enabling the managed profile.</p>
+
+<p>Typically, your {@link
+android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete
+DeviceAdminReceiver.onProfileProvisioningComplete()} callback implementation
+would perform these tasks:</p>
+
+<ul>
+  <li>Verify that the device is complying with the EMM's device policies, as
+  described in <a href="#set_up_policies">Set Up Device Policies</a>
+  </li>
+
+  <li>Enable any system applications that the administrator chooses to make
+  available within the managed profile, using {@link
+  android.app.admin.DevicePolicyManager#enableSystemApp
+  DevicePolicyManager.enableSystemApp()}   </li>
+
+  <li>If the device uses Google Play for Work, add the Google account
+  to the managed profile with {@link android.accounts.AccountManager#addAccount
+  AccountManager.addAccount()}, so administrators can install
+  applications to the device
+  </li>
+</ul>
+
+<p>Once you have completed these tasks, call the device policy manager's
+{@link android.app.admin.DevicePolicyManager#setProfileEnabled
+setProfileEnabled()} method to activate the managed profile:</p>
+
+
+<pre>// Get the device policy manager
+DevicePolicyManager myDevicePolicyMgr =
+        (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+
+ComponentName componentName = myDeviceAdminReceiver.getComponentName(this);
+
+// Set the name for the newly created managed profile.
+myDevicePolicyMgr.setProfileName(componentName, "My New Managed Profile");
+
+// ...and enable the profile
+manager.setProfileEnabled(componentName);</pre>
+
+<h2 id="set_up_policies">Set Up Device Policies</h2>
+
+<p>
+  The Work Policy Controller app is responsible for applying the enterprise's
+  device policies. For example, a particular enterprise might require that all
+  devices become locked after a certain number of failed attempts to enter the
+  device password. The controller app queries the EMM to find out what
+  the current policies are, then uses the <a href=
+  "{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
+  API to apply those policies.
+</p>
+
+<p>For information on how to apply device policies, see the 
+<a href="{@docRoot}guide/topics/admin/device-admin.html#policies">Device
+Administration</a> guide.</p>
+
+
+<h2 id="apply_restrictions">Apply App Restrictions</h2>
+
+<p>Enterprise environments may require that approved apps implement apps
+implement security or feature restrictions. App developers must implement these
+restrictions and declare them for use by enterprise administrators, as described
+in <a href="{@docRoot}training/enterprise/app-restrictions.html">Implementing
+App Restrictions</a>. The Work Policy Controller receives restriction changes
+from the enterprise administrator, and forwards those restriction changes to the
+apps.</p>
+
+<p>For example, a particular news app might have a restriction setting that
+controls whether the app is allowed to download videos over a cellular
+network. When the EMM wants to disable cellular downloads, it sends a
+notification to the controller app. The controller app, in turn,
+notifies the news app that the restriction setting has changed.</p>
+
+<p class="note"><strong>Note:</strong> This document covers how the Work Policy
+Controller app changes the restriction settings for the other apps on the
+managed profile. Details on how the Work Policy Controller app communicates with
+the EMM are out of scope for this document.</p>
+
+<p>To change an app's restrictions, call the {@link
+android.app.admin.DevicePolicyManager#setApplicationRestrictions
+DevicePolicyManager.setApplicationRestrictions()} method. This method is passed
+three parameters: the controller app's {@link
+android.app.admin.DeviceAdminReceiver}, the package name of the app whose
+restrictions are being changed, and a {@link android.os.Bundle Bundle} that
+contains the restrictions you want to set.</p>
+
+<p>For example, suppose there's an app on the managed profile with the package
+name <code>"com.example.newsfetcher"</code>. This app has a single boolean
+restriction that can be configured, with the key
+<code>"downloadByCellular"</code>. If this restriction is set to
+<code>false</code>, the newsfetcher app is not allowed to download data through
+a cellular network; it must use a Wi-Fi network instead.</p>
+
+<p>
+  If your Work Policy Controller app needs to turn off cellular downloads, it
+  would first fetch the device policy service object, as described above. It
+  then assembles a restrictions bundle and passes this bundle to {@link
+  android.app.admin.DevicePolicyManager#setApplicationRestrictions
+  setApplicationRestrictions()}:
+</p>
+
+<pre>// Fetch the DevicePolicyManager
+DevicePolicyManager myDevicePolicyMgr =
+        (DevicePolicyManager) thisActivity
+                .getSystemService(Context.DEVICE_POLICY_SERVICE);
+
+// Set up the restrictions bundle
+bundle restrictionsBundle = new Bundle();
+restrictionsBundle.putBoolean("downloadByCellular", false);
+
+// Pass the restrictions to the policy manager. Assume the WPC app
+// already has a DeviceAdminReceiver defined (myDeviceAdminReceiver).
+myDevicePolicyMgr.setApplicationRestrictions(
+        myDeviceAdminReceiver, "com.example.newsfetcher", restrictionsBundle);</pre>
+
+
+<p class="note"><strong>Note:</strong> The device policy service conveys the restrictions
+change to the app you name. However, it is up to that app to actually implement
+the restriction. For example, in this case, the app would be responsible for
+disabling its ability to use cellular networks for video downloads. Setting the
+restriction does not cause the system to enforce this restriction on the app.
+For more information, see <a href="{@docRoot}training/enterprise/app-
+restrictions.html">Implementing App Restrictions</a>.</p>
