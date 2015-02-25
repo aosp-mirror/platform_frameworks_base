@@ -142,7 +142,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"تجوال"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك بطاقة SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"‏ليست هناك شريحة SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ربط البلوتوث."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"وضع الطائرة."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"مستوى البطارية <xliff:g id="NUMBER">%d</xliff:g> في المائة."</string>
