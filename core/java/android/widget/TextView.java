@@ -8412,6 +8412,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return onTextContextMenuItem(ID_REDO);
                     }
                     break;
+                case KeyEvent.KEYCODE_V:
+                    if (canPaste()) {
+                        return onTextContextMenuItem(ID_PASTE_AS_PLAIN_TEXT);
+                    }
             }
         }
         return super.onKeyShortcut(keyCode, event);
@@ -8794,6 +8798,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final int ID_CUT = android.R.id.cut;
     static final int ID_COPY = android.R.id.copy;
     static final int ID_PASTE = android.R.id.paste;
+    static final int ID_PASTE_AS_PLAIN_TEXT = android.R.id.pasteAsPlainText;
 
     /**
      * Called when a context menu option for the text view is selected.  Currently
@@ -8834,7 +8839,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;  // Returns true even if nothing was undone.
 
             case ID_PASTE:
-                paste(min, max);
+                paste(min, max, true /* withFormatting */);
+                return true;
+
+            case ID_PASTE_AS_PLAIN_TEXT:
+                paste(min, max, false /* withFormatting */);
                 return true;
 
             case ID_CUT:
@@ -9018,14 +9027,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /**
      * Paste clipboard content between min and max positions.
      */
-    private void paste(int min, int max) {
+    private void paste(int min, int max, boolean withFormatting) {
         ClipboardManager clipboard =
             (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = clipboard.getPrimaryClip();
         if (clip != null) {
             boolean didFirst = false;
             for (int i=0; i<clip.getItemCount(); i++) {
-                CharSequence paste = clip.getItemAt(i).coerceToStyledText(getContext());
+                final CharSequence paste;
+                if (withFormatting) {
+                    paste = clip.getItemAt(i).coerceToStyledText(getContext());
+                } else {
+                    // Get an item as text and remove all spans by toString().
+                    final CharSequence text = clip.getItemAt(i).coerceToText(getContext());
+                    paste = (text instanceof Spanned) ? text.toString() : text;
+                }
                 if (paste != null) {
                     if (!didFirst) {
                         Selection.setSelection((Spannable) mText, max);
