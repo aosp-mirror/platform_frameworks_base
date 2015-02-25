@@ -132,6 +132,19 @@ public abstract class DisplayManagerInternal {
             float requestedRefreshRate, boolean inTraversal);
 
     /**
+     * Applies an offset to the contents of a display, for example to avoid burn-in.
+     * <p>
+     * TODO: Technically this should be associated with a physical rather than logical
+     * display but this is good enough for now.
+     * </p>
+     *
+     * @param displayId The logical display id to update.
+     * @param x The X offset by which to shift the contents of the display.
+     * @param y The Y offset by which to shift the contents of the display.
+     */
+    public abstract void setDisplayOffsets(int displayId, int x, int y);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the

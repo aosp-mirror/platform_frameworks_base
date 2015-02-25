@@ -303,6 +303,8 @@
     <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_DONE" />
     <protected-broadcast android:name="android.intent.action.ACTION_SET_RADIO_CAPABILITY_FAILED" />
 
+    <protected-broadcast android:name="android.internal.policy.action.BURN_IN_PROTECTION" />
+
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
     <!-- ====================================== -->
