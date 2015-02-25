@@ -122,7 +122,7 @@ you can access them at:</p>
     <li>If the SDK is not already installed, follow the setup wizard to install the SDK and any
     necessary SDK tools.
     <p class="note"><strong>Note:</strong> You may also need to install the ia32-libs,
-    lib32ncurses5-dev, and lib32stc++6 packages. These packages are required to support 32-bit apps
+    lib32ncurses5-dev, and lib32stdc++6 packages. These packages are required to support 32-bit apps
     on a 64-bit machine. </p>
     </li>
   </ol>
