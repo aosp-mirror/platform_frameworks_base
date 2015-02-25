@@ -36,7 +36,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.media.MediaScannerConnection.OnScanCompletedListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -469,10 +468,10 @@ public abstract class Context {
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(int[])}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(int[])}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(int[])
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(int[])
      */
     public final TypedArray obtainStyledAttributes(
             int[] attrs) {
@@ -481,10 +480,10 @@ public abstract class Context {
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(int, int[])}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(int, int[])
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(int, int[])
      */
     public final TypedArray obtainStyledAttributes(
             @StyleableRes int resid, int[] attrs) throws Resources.NotFoundException {
@@ -493,10 +492,10 @@ public abstract class Context {
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
     public final TypedArray obtainStyledAttributes(
             AttributeSet set, int[] attrs) {
@@ -505,10 +504,10 @@ public abstract class Context {
 
     /**
      * Retrieve styled attribute information in this Context's theme.  See
-     * {@link Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
+     * {@link android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)}
      * for more information.
      *
-     * @see Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
+     * @see android.content.res.Resources.Theme#obtainStyledAttributes(AttributeSet, int[], int, int)
      */
     public final TypedArray obtainStyledAttributes(
             AttributeSet set, int[] attrs, int defStyleAttr, int defStyleRes) {
@@ -753,7 +752,8 @@ public abstract class Context {
      * are not automatically scanned by the media scanner, you can explicitly
      * add them to the media database with
      * {@link android.media.MediaScannerConnection#scanFile(Context, String[], String[],
-     *      OnScanCompletedListener) MediaScannerConnection.scanFile}.
+     *      android.media.MediaScannerConnection.OnScanCompletedListener)
+     *      MediaScannerConnection.scanFile}.
      * Note that this is not the same as
      * {@link android.os.Environment#getExternalStoragePublicDirectory
      * Environment.getExternalStoragePublicDirectory()}, which provides
@@ -1918,7 +1918,7 @@ public abstract class Context {
      * @return The first sticky intent found that matches <var>filter</var>,
      *         or null if there are none.
      *
-     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler
+     * @see #registerReceiver(BroadcastReceiver, IntentFilter, String, Handler)
      * @see #sendBroadcast
      * @see #unregisterReceiver
      */
@@ -2081,7 +2081,9 @@ public abstract class Context {
      * @hide
      */
     @SystemApi
-    public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags, UserHandle user) {
+    @SuppressWarnings("unused")
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+            int flags, UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -2314,6 +2316,51 @@ public abstract class Context {
      * @see android.app.job.JobScheduler
      */
     public abstract Object getSystemService(@ServiceName @NonNull String name);
+
+    /**
+     * Return the handle to a system-level service by class.
+     * <p>
+     * Currently available classes are:
+     * {@link android.view.WindowManager}, {@link android.view.LayoutInflater},
+     * {@link android.app.ActivityManager}, {@link android.os.PowerManager},
+     * {@link android.app.AlarmManager}, {@link android.app.NotificationManager},
+     * {@link android.app.KeyguardManager}, {@link android.location.LocationManager},
+     * {@link android.app.SearchManager}, {@link android.os.Vibrator},
+     * {@link android.net.ConnectivityManager},
+     * {@link android.net.wifi.WifiManager},
+     * {@link android.media.AudioManager}, {@link android.media.MediaRouter},
+     * {@link android.telephony.TelephonyManager}, {@link android.telephony.SubscriptionManager},
+     * {@link android.view.inputmethod.InputMethodManager},
+     * {@link android.app.UiModeManager}, {@link android.app.DownloadManager},
+     * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler}.
+     * </p><p>
+     * Note: System services obtained via this API may be closely associated with
+     * the Context in which they are obtained from.  In general, do not share the
+     * service objects between various different contexts (Activities, Applications,
+     * Services, Providers, etc.)
+     * </p>
+     *
+     * @param serviceClass The class of the desired service.
+     * @return The service or null if the class is not a supported system service.
+     */
+    @SuppressWarnings("unchecked")
+    public final <T> T getSystemService(Class<T> serviceClass) {
+        // Because subclasses may override getSystemService(String) we cannot
+        // perform a lookup by class alone.  We must first map the class to its
+        // service name then invoke the string-based method.
+        String serviceName = getSystemServiceName(serviceClass);
+        return serviceName != null ? (T)getSystemService(serviceName) : null;
+    }
+
+    /**
+     * Gets the name of the system-level service that is represented by the specified class.
+     *
+     * @param serviceClass The class of the desired service.
+     * @return The service name or null if the class is not a supported system service.
+     *
+     * @hide
+     */
+    public abstract String getSystemServiceName(Class<?> serviceClass);
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -2610,7 +2657,7 @@ public abstract class Context {
      * of fingerprints.
      *
      * @see #getSystemService
-     * @see android.app.FingerprintManager
+     * @see android.service.fingerprint.FingerprintManager
      * @hide
      */
     public static final String FINGERPRINT_SERVICE = "fingerprint";
@@ -2666,11 +2713,11 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
-     * {@link android.text.ClipboardManager} for accessing and modifying
+     * {@link android.content.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
      *
      * @see #getSystemService
-     * @see android.text.ClipboardManager
+     * @see android.content.ClipboardManager
      */
     public static final String CLIPBOARD_SERVICE = "clipboard";
 
@@ -2965,7 +3012,7 @@ public abstract class Context {
      * android.media.projection.MediaProjectionManager} instance for managing
      * media projection sessions.
      * @see #getSystemService
-     * @see android.media.projection.ProjectionManager
+     * @see android.media.projection.MediaProjectionManager
      */
     public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
 
@@ -3401,7 +3448,7 @@ public abstract class Context {
      * are not shared, however they share common state (Resources, ClassLoader,
      * etc) so the Context instance itself is fairly lightweight.
      *
-     * <p>Throws {@link PackageManager.NameNotFoundException} if there is no
+     * <p>Throws {@link android.content.pm.PackageManager.NameNotFoundException} if there is no
      * application with the given package name.
      *
      * <p>Throws {@link java.lang.SecurityException} if the Context requested

@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.android;
 
 import android.os.IBinder;
+
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.AssetRepository;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
@@ -73,6 +74,7 @@ import android.util.TypedValue;
 import android.view.BridgeInflater;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -495,6 +497,34 @@ public final class BridgeContext extends Context {
         throw new UnsupportedOperationException("Unsupported Service: " + service);
     }
 
+    @Override
+    public String getSystemServiceName(Class<?> serviceClass) {
+        if (serviceClass.equals(LayoutInflater.class)) {
+            return LAYOUT_INFLATER_SERVICE;
+        }
+
+        if (serviceClass.equals(TextServicesManager.class)) {
+            return TEXT_SERVICES_MANAGER_SERVICE;
+        }
+
+        if (serviceClass.equals(WindowManager.class)) {
+            return WINDOW_SERVICE;
+        }
+
+        if (serviceClass.equals(PowerManager.class)) {
+            return POWER_SERVICE;
+        }
+
+        if (serviceClass.equals(DisplayManager.class)) {
+            return DISPLAY_SERVICE;
+        }
+
+        if (serviceClass.equals(AccessibilityManager.class)) {
+            return ACCESSIBILITY_SERVICE;
+        }
+
+        throw new UnsupportedOperationException("Unsupported Service: " + serviceClass);
+    }
 
     @Override
     public final BridgeTypedArray obtainStyledAttributes(int[] attrs) {

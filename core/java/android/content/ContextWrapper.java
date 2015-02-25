@@ -284,36 +284,43 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public Drawable getWallpaper() {
         return mBase.getWallpaper();
     }
 
     @Override
+    @Deprecated
     public Drawable peekWallpaper() {
         return mBase.peekWallpaper();
     }
 
     @Override
+    @Deprecated
     public int getWallpaperDesiredMinimumWidth() {
         return mBase.getWallpaperDesiredMinimumWidth();
     }
 
     @Override
+    @Deprecated
     public int getWallpaperDesiredMinimumHeight() {
         return mBase.getWallpaperDesiredMinimumHeight();
     }
 
     @Override
+    @Deprecated
     public void setWallpaper(Bitmap bitmap) throws IOException {
         mBase.setWallpaper(bitmap);
     }
 
     @Override
+    @Deprecated
     public void setWallpaper(InputStream data) throws IOException {
         mBase.setWallpaper(data);
     }
 
     @Override
+    @Deprecated
     public void clearWallpaper() throws IOException {
         mBase.clearWallpaper();
     }
@@ -445,11 +452,13 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         mBase.sendStickyBroadcast(intent);
     }
 
     @Override
+    @Deprecated
     public void sendStickyOrderedBroadcast(
         Intent intent, BroadcastReceiver resultReceiver,
         Handler scheduler, int initialCode, String initialData,
@@ -460,16 +469,19 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public void removeStickyBroadcast(Intent intent) {
         mBase.removeStickyBroadcast(intent);
     }
 
     @Override
+    @Deprecated
     public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
         mBase.sendStickyBroadcastAsUser(intent, user);
     }
 
     @Override
+    @Deprecated
     public void sendStickyOrderedBroadcastAsUser(Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
@@ -479,6 +491,7 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    @Deprecated
     public void removeStickyBroadcastAsUser(Intent intent, UserHandle user) {
         mBase.removeStickyBroadcastAsUser(intent, user);
     }
@@ -560,6 +573,11 @@ public class ContextWrapper extends Context {
     @Override
     public Object getSystemService(String name) {
         return mBase.getSystemService(name);
+    }
+
+    @Override
+    public String getSystemServiceName(Class<?> serviceClass) {
+        return mBase.getSystemServiceName(serviceClass);
     }
 
     @Override
@@ -679,6 +697,7 @@ public class ContextWrapper extends Context {
     }
 
     /** @hide */
+    @Override
     public Context createApplicationContext(ApplicationInfo application,
             int flags) throws PackageManager.NameNotFoundException {
         return mBase.createApplicationContext(application, flags);

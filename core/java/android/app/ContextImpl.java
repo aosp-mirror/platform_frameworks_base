@@ -16,17 +16,9 @@
 
 package android.app;
 
-import android.app.usage.IUsageStatsManager;
-import android.app.usage.UsageStatsManager;
-import android.appwidget.AppWidgetManager;
-import android.os.Build;
-import android.service.persistentdata.IPersistentDataBlockService;
-import android.service.persistentdata.PersistentDataBlockManager;
-
-import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -34,19 +26,15 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.IContentProvider;
+import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.IIntentReceiver;
 import android.content.IntentSender;
-import android.content.IRestrictionsManager;
 import android.content.ReceiverCallNotAllowedException;
-import android.content.RestrictionsManager;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.ILauncherApps;
 import android.content.pm.IPackageManager;
-import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
@@ -58,101 +46,28 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.hardware.ConsumerIrManager;
-import android.hardware.ISerialManager;
-import android.hardware.SerialManager;
-import android.hardware.SystemSensorManager;
-import android.hardware.hdmi.HdmiControlManager;
-import android.hardware.hdmi.IHdmiControlService;
-import android.hardware.camera2.CameraManager;
 import android.hardware.display.DisplayManager;
-import android.hardware.input.InputManager;
-import android.hardware.usb.IUsbManager;
-import android.hardware.usb.UsbManager;
-import android.location.CountryDetector;
-import android.location.ICountryDetector;
-import android.location.ILocationManager;
-import android.location.LocationManager;
-import android.media.AudioManager;
-import android.media.MediaRouter;
-import android.media.midi.IMidiManager;
-import android.media.midi.MidiManager;
-import android.media.projection.MediaProjectionManager;
-import android.media.session.MediaSessionManager;
-import android.media.tv.ITvInputManager;
-import android.media.tv.TvInputManager;
-import android.net.ConnectivityManager;
-import android.net.IConnectivityManager;
-import android.net.EthernetManager;
-import android.net.IEthernetManager;
-import android.net.INetworkPolicyManager;
-import android.net.NetworkPolicyManager;
-import android.net.NetworkScoreManager;
 import android.net.Uri;
-import android.net.nsd.INsdManager;
-import android.net.nsd.NsdManager;
-import android.net.wifi.IWifiManager;
-import android.net.wifi.WifiManager;
-import android.net.wifi.passpoint.IWifiPasspointManager;
-import android.net.wifi.passpoint.WifiPasspointManager;
-import android.net.wifi.p2p.IWifiP2pManager;
-import android.net.wifi.p2p.WifiP2pManager;
-import android.net.wifi.IWifiScanner;
-import android.net.wifi.WifiScanner;
-import android.net.wifi.IRttManager;
-import android.net.wifi.RttManager;
-import android.nfc.NfcManager;
-import android.os.BatteryManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IPowerManager;
-import android.os.IUserManager;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.SystemVibrator;
-import android.os.UserManager;
 import android.os.storage.IMountService;
-import android.os.storage.StorageManager;
-import android.print.IPrintManager;
-import android.print.PrintManager;
-import android.service.fingerprint.IFingerprintService;
-import android.service.fingerprint.FingerprintManager;
-import android.telecom.TelecomManager;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
-import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.view.DisplayAdjustments;
-import android.view.ContextThemeWrapper;
 import android.view.Display;
-import android.view.PhoneLayoutInflater;
-import android.view.WindowManagerImpl;
-import android.view.accessibility.AccessibilityManager;
-import android.view.accessibility.CaptioningManager;
-import android.view.inputmethod.InputMethodManager;
-import android.view.textservice.TextServicesManager;
-import android.accounts.AccountManager;
-import android.accounts.IAccountManager;
-import android.app.admin.DevicePolicyManager;
-import android.app.job.IJobScheduler;
-import android.app.trust.TrustManager;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.os.IDropBoxManagerService;
+import android.view.DisplayAdjustments;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -160,8 +75,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -270,521 +183,8 @@ class ContextImpl extends Context {
 
     private static final String[] EMPTY_FILE_LIST = {};
 
-    /**
-     * Override this class when the system service constructor needs a
-     * ContextImpl.  Else, use StaticServiceFetcher below.
-     */
-    /*package*/ static class ServiceFetcher {
-        int mContextCacheIndex = -1;
-
-        /**
-         * Main entrypoint; only override if you don't need caching.
-         */
-        public Object getService(ContextImpl ctx) {
-            ArrayList<Object> cache = ctx.mServiceCache;
-            Object service;
-            synchronized (cache) {
-                if (cache.size() == 0) {
-                    // Initialize the cache vector on first access.
-                    // At this point sNextPerContextServiceCacheIndex
-                    // is the number of potential services that are
-                    // cached per-Context.
-                    for (int i = 0; i < sNextPerContextServiceCacheIndex; i++) {
-                        cache.add(null);
-                    }
-                } else {
-                    service = cache.get(mContextCacheIndex);
-                    if (service != null) {
-                        return service;
-                    }
-                }
-                service = createService(ctx);
-                cache.set(mContextCacheIndex, service);
-                return service;
-            }
-        }
-
-        /**
-         * Override this to create a new per-Context instance of the
-         * service.  getService() will handle locking and caching.
-         */
-        public Object createService(ContextImpl ctx) {
-            throw new RuntimeException("Not implemented");
-        }
-    }
-
-    /**
-     * Override this class for services to be cached process-wide.
-     */
-    abstract static class StaticServiceFetcher extends ServiceFetcher {
-        private Object mCachedInstance;
-
-        @Override
-        public final Object getService(ContextImpl unused) {
-            synchronized (StaticServiceFetcher.this) {
-                Object service = mCachedInstance;
-                if (service != null) {
-                    return service;
-                }
-                return mCachedInstance = createStaticService();
-            }
-        }
-
-        public abstract Object createStaticService();
-    }
-
-    private static final HashMap<String, ServiceFetcher> SYSTEM_SERVICE_MAP =
-            new HashMap<String, ServiceFetcher>();
-
-    private static int sNextPerContextServiceCacheIndex = 0;
-    private static void registerService(String serviceName, ServiceFetcher fetcher) {
-        if (!(fetcher instanceof StaticServiceFetcher)) {
-            fetcher.mContextCacheIndex = sNextPerContextServiceCacheIndex++;
-        }
-        SYSTEM_SERVICE_MAP.put(serviceName, fetcher);
-    }
-
-    // This one's defined separately and given a variable name so it
-    // can be re-used by getWallpaperManager(), avoiding a HashMap
-    // lookup.
-    private static ServiceFetcher WALLPAPER_FETCHER = new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new WallpaperManager(ctx.getOuterContext(),
-                        ctx.mMainThread.getHandler());
-            }};
-
-    static {
-        registerService(ACCESSIBILITY_SERVICE, new ServiceFetcher() {
-                public Object getService(ContextImpl ctx) {
-                    return AccessibilityManager.getInstance(ctx);
-                }});
-
-        registerService(CAPTIONING_SERVICE, new ServiceFetcher() {
-                public Object getService(ContextImpl ctx) {
-                    return new CaptioningManager(ctx);
-                }});
-
-        registerService(ACCOUNT_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(ACCOUNT_SERVICE);
-                    IAccountManager service = IAccountManager.Stub.asInterface(b);
-                    return new AccountManager(ctx, service);
-                }});
-
-        registerService(ACTIVITY_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new ActivityManager(ctx.getOuterContext(), ctx.mMainThread.getHandler());
-                }});
-
-        registerService(ALARM_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(ALARM_SERVICE);
-                    IAlarmManager service = IAlarmManager.Stub.asInterface(b);
-                    return new AlarmManager(service, ctx);
-                }});
-
-        registerService(AUDIO_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new AudioManager(ctx);
-                }});
-
-        registerService(MEDIA_ROUTER_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new MediaRouter(ctx);
-                }});
-
-        registerService(BLUETOOTH_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new BluetoothManager(ctx);
-                }});
-
-        registerService(HDMI_CONTROL_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    IBinder b = ServiceManager.getService(HDMI_CONTROL_SERVICE);
-                    return new HdmiControlManager(IHdmiControlService.Stub.asInterface(b));
-                }});
-
-        registerService(CLIPBOARD_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new ClipboardManager(ctx.getOuterContext(),
-                            ctx.mMainThread.getHandler());
-                }});
-
-        registerService(CONNECTIVITY_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(CONNECTIVITY_SERVICE);
-                    return new ConnectivityManager(IConnectivityManager.Stub.asInterface(b));
-                }});
-
-        registerService(COUNTRY_DETECTOR, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    IBinder b = ServiceManager.getService(COUNTRY_DETECTOR);
-                    return new CountryDetector(ICountryDetector.Stub.asInterface(b));
-                }});
-
-        registerService(DEVICE_POLICY_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return DevicePolicyManager.create(ctx, ctx.mMainThread.getHandler());
-                }});
-
-        registerService(DOWNLOAD_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new DownloadManager(ctx.getContentResolver(), ctx.getPackageName());
-                }});
-
-        registerService(BATTERY_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new BatteryManager();
-                }});
-
-        registerService(NFC_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new NfcManager(ctx);
-                }});
-
-        registerService(DROPBOX_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    return createDropBoxManager();
-                }});
-
-        registerService(INPUT_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    return InputManager.getInstance();
-                }});
-
-        registerService(DISPLAY_SERVICE, new ServiceFetcher() {
-                @Override
-                public Object createService(ContextImpl ctx) {
-                    return new DisplayManager(ctx.getOuterContext());
-                }});
-
-        registerService(INPUT_METHOD_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
-                    return InputMethodManager.getInstance();
-                }});
-
-        registerService(TEXT_SERVICES_MANAGER_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return TextServicesManager.getInstance();
-                }});
-
-        registerService(KEYGUARD_SERVICE, new ServiceFetcher() {
-                public Object getService(ContextImpl ctx) {
-                    // TODO: why isn't this caching it?  It wasn't
-                    // before, so I'm preserving the old behavior and
-                    // using getService(), instead of createService()
-                    // which would do the caching.
-                    return new KeyguardManager();
-                }});
-
-        registerService(LAYOUT_INFLATER_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new PhoneLayoutInflater(ctx.getOuterContext());
-                }});
-
-        registerService(LOCATION_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(LOCATION_SERVICE);
-                    return new LocationManager(ctx, ILocationManager.Stub.asInterface(b));
-                }});
-
-        registerService(NETWORK_POLICY_SERVICE, new ServiceFetcher() {
-            @Override
-            public Object createService(ContextImpl ctx) {
-                return new NetworkPolicyManager(INetworkPolicyManager.Stub.asInterface(
-                        ServiceManager.getService(NETWORK_POLICY_SERVICE)));
-            }
-        });
-
-        registerService(NOTIFICATION_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    final Context outerContext = ctx.getOuterContext();
-                    return new NotificationManager(
-                        new ContextThemeWrapper(outerContext,
-                                Resources.selectSystemTheme(0,
-                                        outerContext.getApplicationInfo().targetSdkVersion,
-                                        com.android.internal.R.style.Theme_Dialog,
-                                        com.android.internal.R.style.Theme_Holo_Dialog,
-                                        com.android.internal.R.style.Theme_DeviceDefault_Dialog,
-                                        com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog)),
-                        ctx.mMainThread.getHandler());
-                }});
-
-        registerService(NSD_SERVICE, new ServiceFetcher() {
-                @Override
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(NSD_SERVICE);
-                    INsdManager service = INsdManager.Stub.asInterface(b);
-                    return new NsdManager(ctx.getOuterContext(), service);
-                }});
-
-        // Note: this was previously cached in a static variable, but
-        // constructed using mMainThread.getHandler(), so converting
-        // it to be a regular Context-cached service...
-        registerService(POWER_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(POWER_SERVICE);
-                    IPowerManager service = IPowerManager.Stub.asInterface(b);
-                    if (service == null) {
-                        Log.wtf(TAG, "Failed to get power manager service.");
-                    }
-                    return new PowerManager(ctx.getOuterContext(),
-                            service, ctx.mMainThread.getHandler());
-                }});
-
-        registerService(SEARCH_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new SearchManager(ctx.getOuterContext(),
-                            ctx.mMainThread.getHandler());
-                }});
-
-        registerService(SENSOR_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new SystemSensorManager(ctx.getOuterContext(),
-                      ctx.mMainThread.getHandler().getLooper());
-                }});
-
-        registerService(STATUS_BAR_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new StatusBarManager(ctx.getOuterContext());
-                }});
-
-        registerService(STORAGE_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    try {
-                        return new StorageManager(
-                                ctx.getContentResolver(), ctx.mMainThread.getHandler().getLooper());
-                    } catch (RemoteException rex) {
-                        Log.e(TAG, "Failed to create StorageManager", rex);
-                        return null;
-                    }
-                }});
-
-        registerService(TELEPHONY_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new TelephonyManager(ctx.getOuterContext());
-                }});
-
-        registerService(TELEPHONY_SUBSCRIPTION_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new SubscriptionManager(ctx.getOuterContext());
-            }});
-
-        registerService(TELECOM_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new TelecomManager(ctx.getOuterContext());
-                }});
-
-        registerService(UI_MODE_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new UiModeManager();
-                }});
-
-        registerService(USB_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(USB_SERVICE);
-                    return new UsbManager(ctx, IUsbManager.Stub.asInterface(b));
-                }});
-
-        registerService(SERIAL_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(SERIAL_SERVICE);
-                    return new SerialManager(ctx, ISerialManager.Stub.asInterface(b));
-                }});
-
-        registerService(VIBRATOR_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new SystemVibrator(ctx);
-                }});
-
-        registerService(WALLPAPER_SERVICE, WALLPAPER_FETCHER);
-
-        registerService(WIFI_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(WIFI_SERVICE);
-                    IWifiManager service = IWifiManager.Stub.asInterface(b);
-                    return new WifiManager(ctx.getOuterContext(), service);
-                }});
-
-        registerService(WIFI_PASSPOINT_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(WIFI_PASSPOINT_SERVICE);
-                    IWifiPasspointManager service = IWifiPasspointManager.Stub.asInterface(b);
-                    return new WifiPasspointManager(ctx.getOuterContext(), service);
-                }});
-
-        registerService(WIFI_P2P_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(WIFI_P2P_SERVICE);
-                    IWifiP2pManager service = IWifiP2pManager.Stub.asInterface(b);
-                    return new WifiP2pManager(service);
-                }});
-
-        registerService(WIFI_SCANNING_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(WIFI_SCANNING_SERVICE);
-                IWifiScanner service = IWifiScanner.Stub.asInterface(b);
-                return new WifiScanner(ctx.getOuterContext(), service);
-            }});
-
-        registerService(WIFI_RTT_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(WIFI_RTT_SERVICE);
-                IRttManager service = IRttManager.Stub.asInterface(b);
-                return new RttManager(ctx.getOuterContext(), service);
-            }});
-
-        registerService(ETHERNET_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(ETHERNET_SERVICE);
-                    IEthernetManager service = IEthernetManager.Stub.asInterface(b);
-                    return new EthernetManager(ctx.getOuterContext(), service);
-                }});
-
-        registerService(WINDOW_SERVICE, new ServiceFetcher() {
-                Display mDefaultDisplay;
-                public Object getService(ContextImpl ctx) {
-                    Display display = ctx.mDisplay;
-                    if (display == null) {
-                        if (mDefaultDisplay == null) {
-                            DisplayManager dm = (DisplayManager)ctx.getOuterContext().
-                                    getSystemService(Context.DISPLAY_SERVICE);
-                            mDefaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
-                        }
-                        display = mDefaultDisplay;
-                    }
-                    return new WindowManagerImpl(display);
-                }});
-
-        registerService(USER_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(USER_SERVICE);
-                IUserManager service = IUserManager.Stub.asInterface(b);
-                return new UserManager(ctx, service);
-            }});
-
-        registerService(APP_OPS_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(APP_OPS_SERVICE);
-                IAppOpsService service = IAppOpsService.Stub.asInterface(b);
-                return new AppOpsManager(ctx, service);
-            }});
-
-        registerService(CAMERA_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new CameraManager(ctx);
-            }
-        });
-
-        registerService(LAUNCHER_APPS_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(LAUNCHER_APPS_SERVICE);
-                ILauncherApps service = ILauncherApps.Stub.asInterface(b);
-                return new LauncherApps(ctx, service);
-            }
-        });
-
-        registerService(RESTRICTIONS_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(RESTRICTIONS_SERVICE);
-                IRestrictionsManager service = IRestrictionsManager.Stub.asInterface(b);
-                return new RestrictionsManager(ctx, service);
-            }
-        });
-        registerService(PRINT_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder iBinder = ServiceManager.getService(Context.PRINT_SERVICE);
-                IPrintManager service = IPrintManager.Stub.asInterface(iBinder);
-                return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
-                        UserHandle.getAppId(Process.myUid()));
-            }});
-
-        registerService(CONSUMER_IR_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new ConsumerIrManager(ctx);
-            }});
-
-        registerService(MEDIA_SESSION_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new MediaSessionManager(ctx);
-            }
-        });
-
-        registerService(TRUST_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(TRUST_SERVICE);
-                return new TrustManager(b);
-            }
-        });
-
-        registerService(FINGERPRINT_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder binder = ServiceManager.getService(FINGERPRINT_SERVICE);
-                IFingerprintService service = IFingerprintService.Stub.asInterface(binder);
-                return new FingerprintManager(ctx.getOuterContext(), service);
-            }
-        });
-
-        registerService(TV_INPUT_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder iBinder = ServiceManager.getService(TV_INPUT_SERVICE);
-                ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
-                return new TvInputManager(service, UserHandle.myUserId());
-            }
-        });
-
-        registerService(NETWORK_SCORE_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new NetworkScoreManager(ctx);
-            }
-        });
-
-        registerService(USAGE_STATS_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder iBinder = ServiceManager.getService(USAGE_STATS_SERVICE);
-                IUsageStatsManager service = IUsageStatsManager.Stub.asInterface(iBinder);
-                return new UsageStatsManager(ctx.getOuterContext(), service);
-            }
-        });
-
-        registerService(JOB_SCHEDULER_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(JOB_SCHEDULER_SERVICE);
-                return new JobSchedulerImpl(IJobScheduler.Stub.asInterface(b));
-        }});
-
-        registerService(PERSISTENT_DATA_BLOCK_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(PERSISTENT_DATA_BLOCK_SERVICE);
-                IPersistentDataBlockService persistentDataBlockService =
-                        IPersistentDataBlockService.Stub.asInterface(b);
-                if (persistentDataBlockService != null) {
-                    return new PersistentDataBlockManager(persistentDataBlockService);
-                } else {
-                    // not supported
-                    return null;
-                }
-            }
-        });
-
-        registerService(MEDIA_PROJECTION_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    return new MediaProjectionManager(ctx);
-                }
-        });
-
-        registerService(APPWIDGET_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(APPWIDGET_SERVICE);
-                return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
-            }});
-
-        registerService(MIDI_SERVICE, new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService(MIDI_SERVICE);
-                    return new MidiManager(ctx, IMidiManager.Stub.asInterface(b));
-                }});
-    }
+    // The system service cache for the system services that are cached per-ContextImpl.
+    final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
 
     static ContextImpl getImpl(Context context) {
         Context nextContext;
@@ -794,11 +194,6 @@ class ContextImpl extends Context {
         }
         return (ContextImpl)context;
     }
-
-    // The system service cache for the system services that are
-    // cached per-ContextImpl.  Package-scoped to avoid accessor
-    // methods.
-    final ArrayList<Object> mServiceCache = new ArrayList<Object>();
 
     @Override
     public AssetManager getAssets() {
@@ -914,6 +309,7 @@ class ContextImpl extends Context {
         throw new RuntimeException("Not supported in system context");
     }
 
+    @Override
     public File getSharedPrefsFile(String name) {
         return makeFilename(getPreferencesDir(), name + ".xml");
     }
@@ -1201,38 +597,49 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public Drawable getWallpaper() {
         return getWallpaperManager().getDrawable();
     }
 
     @Override
+    @Deprecated
     public Drawable peekWallpaper() {
         return getWallpaperManager().peekDrawable();
     }
 
     @Override
+    @Deprecated
     public int getWallpaperDesiredMinimumWidth() {
         return getWallpaperManager().getDesiredMinimumWidth();
     }
 
     @Override
+    @Deprecated
     public int getWallpaperDesiredMinimumHeight() {
         return getWallpaperManager().getDesiredMinimumHeight();
     }
 
     @Override
-    public void setWallpaper(Bitmap bitmap) throws IOException  {
+    @Deprecated
+    public void setWallpaper(Bitmap bitmap) throws IOException {
         getWallpaperManager().setBitmap(bitmap);
     }
 
     @Override
+    @Deprecated
     public void setWallpaper(InputStream data) throws IOException {
         getWallpaperManager().setStream(data);
     }
 
     @Override
+    @Deprecated
     public void clearWallpaper() throws IOException {
         getWallpaperManager().clear();
+    }
+
+    private WallpaperManager getWallpaperManager() {
+        return getSystemService(WallpaperManager.class);
     }
 
     @Override
@@ -1506,6 +913,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public void sendStickyBroadcast(Intent intent) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
@@ -1520,6 +928,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public void sendStickyOrderedBroadcast(Intent intent,
             BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
@@ -1554,6 +963,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public void removeStickyBroadcast(Intent intent) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         if (resolvedType != null) {
@@ -1569,6 +979,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public void sendStickyBroadcastAsUser(Intent intent, UserHandle user) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
@@ -1581,6 +992,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public void sendStickyOrderedBroadcastAsUser(Intent intent,
             UserHandle user, BroadcastReceiver resultReceiver,
             Handler scheduler, int initialCode, String initialData,
@@ -1614,6 +1026,7 @@ class ContextImpl extends Context {
     }
 
     @Override
+    @Deprecated
     public void removeStickyBroadcastAsUser(Intent intent, UserHandle user) {
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         if (resolvedType != null) {
@@ -1850,25 +1263,12 @@ class ContextImpl extends Context {
 
     @Override
     public Object getSystemService(String name) {
-        ServiceFetcher fetcher = SYSTEM_SERVICE_MAP.get(name);
-        return fetcher == null ? null : fetcher.getService(this);
+        return SystemServiceRegistry.getSystemService(this, name);
     }
 
-    private WallpaperManager getWallpaperManager() {
-        return (WallpaperManager) WALLPAPER_FETCHER.getService(this);
-    }
-
-    /* package */ static DropBoxManager createDropBoxManager() {
-        IBinder b = ServiceManager.getService(DROPBOX_SERVICE);
-        IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
-        if (service == null) {
-            // Don't return a DropBoxManager that will NPE upon use.
-            // This also avoids caching a broken DropBoxManager in
-            // getDropBoxManager during early boot, before the
-            // DROPBOX_SERVICE is registered.
-            return null;
-        }
-        return new DropBoxManager(service);
+    @Override
+    public String getSystemServiceName(Class<?> serviceClass) {
+        return SystemServiceRegistry.getSystemServiceName(serviceClass);
     }
 
     @Override
@@ -1937,6 +1337,7 @@ class ContextImpl extends Context {
         }
     }
 
+    @Override
     public void enforcePermission(
             String permission, int pid, int uid, String message) {
         enforce(permission,
@@ -1946,6 +1347,7 @@ class ContextImpl extends Context {
                 message);
     }
 
+    @Override
     public void enforceCallingPermission(String permission, String message) {
         enforce(permission,
                 checkCallingPermission(permission),
@@ -1954,6 +1356,7 @@ class ContextImpl extends Context {
                 message);
     }
 
+    @Override
     public void enforceCallingOrSelfPermission(
             String permission, String message) {
         enforce(permission,
@@ -2091,6 +1494,7 @@ class ContextImpl extends Context {
         }
     }
 
+    @Override
     public void enforceUriPermission(
             Uri uri, int pid, int uid, int modeFlags, String message) {
         enforceForUri(
@@ -2098,6 +1502,7 @@ class ContextImpl extends Context {
                 false, uid, uri, message);
     }
 
+    @Override
     public void enforceCallingUriPermission(
             Uri uri, int modeFlags, String message) {
         enforceForUri(
@@ -2106,6 +1511,7 @@ class ContextImpl extends Context {
                 Binder.getCallingUid(), uri, message);
     }
 
+    @Override
     public void enforceCallingOrSelfUriPermission(
             Uri uri, int modeFlags, String message) {
         enforceForUri(
@@ -2114,6 +1520,7 @@ class ContextImpl extends Context {
                 Binder.getCallingUid(), uri, message);
     }
 
+    @Override
     public void enforceUriPermission(
             Uri uri, String readPermission, String writePermission,
             int pid, int uid, int modeFlags, String message) {
@@ -2209,6 +1616,14 @@ class ContextImpl extends Context {
                 mUser, mRestricted, display, null);
     }
 
+    Display getDisplay() {
+        if (mDisplay != null) {
+            return mDisplay;
+        }
+        DisplayManager dm = getSystemService(DisplayManager.class);
+        return dm.getDisplay(Display.DEFAULT_DISPLAY);
+    }
+
     private int getDisplayId() {
         return mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
     }
@@ -2243,6 +1658,7 @@ class ContextImpl extends Context {
     }
 
     /** {@hide} */
+    @Override
     public int getUserId() {
         return mUser.getIdentifier();
     }
@@ -2368,6 +1784,7 @@ class ContextImpl extends Context {
         return mActivityToken;
     }
 
+    @SuppressWarnings("deprecation")
     static void setFilePermissionsFromMode(String name, int mode,
             int extraPermissions) {
         int perms = FileUtils.S_IRUSR|FileUtils.S_IWUSR

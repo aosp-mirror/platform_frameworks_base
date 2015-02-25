@@ -480,6 +480,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public String getSystemServiceName(Class<?> serviceClass) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int checkPermission(String permission, int pid, int uid) {
         throw new UnsupportedOperationException();
     }

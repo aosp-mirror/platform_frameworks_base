@@ -162,7 +162,15 @@ public class BatteryManager {
      */
     public static final int BATTERY_PROPERTY_ENERGY_COUNTER = 5;
 
-    private IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
+    private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
+
+    /**
+     * @removed Was previously made visible by accident.
+     */
+    public BatteryManager() {
+        mBatteryPropertiesRegistrar = IBatteryPropertiesRegistrar.Stub.asInterface(
+                ServiceManager.getService("batteryproperties"));
+    }
 
     /**
      * Query a battery property from the batteryproperties service.
@@ -174,12 +182,7 @@ public class BatteryManager {
         long ret;
 
         if (mBatteryPropertiesRegistrar == null) {
-            IBinder b = ServiceManager.getService("batteryproperties");
-            mBatteryPropertiesRegistrar =
-                IBatteryPropertiesRegistrar.Stub.asInterface(b);
-
-            if (mBatteryPropertiesRegistrar == null)
-                return Long.MIN_VALUE;
+            return Long.MIN_VALUE;
         }
 
         try {

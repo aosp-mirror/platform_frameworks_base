@@ -16,6 +16,10 @@ package android.net {
 
 package android.os {
 
+  public class BatteryManager {
+    ctor public BatteryManager();
+  }
+
   public final class PowerManager {
     method public void goToSleep(long);
     method public deprecated void userActivity(long, boolean);

@@ -7524,6 +7524,7 @@ package android.content {
     method public final java.lang.String getString(int);
     method public final java.lang.String getString(int, java.lang.Object...);
     method public abstract java.lang.Object getSystemService(java.lang.String);
+    method public final T getSystemService(java.lang.Class<T>);
     method public final java.lang.CharSequence getText(int);
     method public abstract android.content.res.Resources.Theme getTheme();
     method public abstract deprecated android.graphics.drawable.Drawable getWallpaper();
@@ -7659,7 +7660,7 @@ package android.content {
     method public int checkPermission(java.lang.String, int, int);
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
-    method public void clearWallpaper() throws java.io.IOException;
+    method public deprecated void clearWallpaper() throws java.io.IOException;
     method public android.content.Context createConfigurationContext(android.content.res.Configuration);
     method public android.content.Context createDisplayContext(android.view.Display);
     method public android.content.Context createPackageContext(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -7702,20 +7703,21 @@ package android.content {
     method public android.content.res.Resources getResources();
     method public android.content.SharedPreferences getSharedPreferences(java.lang.String, int);
     method public java.lang.Object getSystemService(java.lang.String);
+    method public java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public android.content.res.Resources.Theme getTheme();
-    method public android.graphics.drawable.Drawable getWallpaper();
-    method public int getWallpaperDesiredMinimumHeight();
-    method public int getWallpaperDesiredMinimumWidth();
+    method public deprecated android.graphics.drawable.Drawable getWallpaper();
+    method public deprecated int getWallpaperDesiredMinimumHeight();
+    method public deprecated int getWallpaperDesiredMinimumWidth();
     method public void grantUriPermission(java.lang.String, android.net.Uri, int);
     method public java.io.FileInputStream openFileInput(java.lang.String) throws java.io.FileNotFoundException;
     method public java.io.FileOutputStream openFileOutput(java.lang.String, int) throws java.io.FileNotFoundException;
     method public android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler);
-    method public android.graphics.drawable.Drawable peekWallpaper();
+    method public deprecated android.graphics.drawable.Drawable peekWallpaper();
     method public android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter);
     method public android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, java.lang.String, android.os.Handler);
-    method public void removeStickyBroadcast(android.content.Intent);
-    method public void removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
+    method public deprecated void removeStickyBroadcast(android.content.Intent);
+    method public deprecated void removeStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
     method public void revokeUriPermission(android.net.Uri, int);
     method public void sendBroadcast(android.content.Intent);
     method public void sendBroadcast(android.content.Intent, java.lang.String);
@@ -7724,13 +7726,13 @@ package android.content {
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String);
     method public void sendOrderedBroadcast(android.content.Intent, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void sendOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, java.lang.String, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
-    method public void sendStickyBroadcast(android.content.Intent);
-    method public void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
-    method public void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
-    method public void sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public deprecated void sendStickyBroadcast(android.content.Intent);
+    method public deprecated void sendStickyBroadcastAsUser(android.content.Intent, android.os.UserHandle);
+    method public deprecated void sendStickyOrderedBroadcast(android.content.Intent, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
+    method public deprecated void sendStickyOrderedBroadcastAsUser(android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, android.os.Handler, int, java.lang.String, android.os.Bundle);
     method public void setTheme(int);
-    method public void setWallpaper(android.graphics.Bitmap) throws java.io.IOException;
-    method public void setWallpaper(java.io.InputStream) throws java.io.IOException;
+    method public deprecated void setWallpaper(android.graphics.Bitmap) throws java.io.IOException;
+    method public deprecated void setWallpaper(java.io.InputStream) throws java.io.IOException;
     method public void startActivities(android.content.Intent[]);
     method public void startActivities(android.content.Intent[], android.os.Bundle);
     method public void startActivity(android.content.Intent);
@@ -23368,7 +23370,6 @@ package android.os {
   }
 
   public class BatteryManager {
-    ctor public BatteryManager();
     method public int getIntProperty(int);
     method public long getLongProperty(int);
     field public static final int BATTERY_HEALTH_COLD = 7; // 0x7
@@ -32003,6 +32004,7 @@ package android.test.mock {
     method public android.content.res.Resources getResources();
     method public android.content.SharedPreferences getSharedPreferences(java.lang.String, int);
     method public java.lang.Object getSystemService(java.lang.String);
+    method public java.lang.String getSystemServiceName(java.lang.Class<?>);
     method public android.content.res.Resources.Theme getTheme();
     method public android.graphics.drawable.Drawable getWallpaper();
     method public int getWallpaperDesiredMinimumHeight();
