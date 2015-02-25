@@ -253,12 +253,6 @@ public class QSPanel extends ViewGroup {
             @Override
             public void onStateChanged(QSTile.State state) {
                 int visibility = state.visible ? VISIBLE : GONE;
-                if (state.visible && !mGridContentVisible) {
-
-                    // We don't want to show it if the content is hidden,
-                    // then we just set it to invisible, to ensure that it gets visible again
-                    visibility = INVISIBLE;
-                }
                 setTileVisibility(r.tileView, visibility);
                 r.tileView.onStateChanged(state);
             }

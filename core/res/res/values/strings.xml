@@ -5073,7 +5073,7 @@
     <string name="zen_mode_until">Until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g></string>
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever">Indefinitely</string>
+    <string name="zen_mode_forever">Until you turn this off</string>
 
     <!-- Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] -->
     <string name="toolbar_collapse_description">Collapse</string>
