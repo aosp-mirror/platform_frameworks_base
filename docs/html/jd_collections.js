@@ -1186,5 +1186,21 @@ var RESOURCE_COLLECTIONS = {
       "training/multiscreen/index.html",
       "training/monitoring-device-state/index.html"
     ]
+  },
+  "training/work/apps": {
+    "title": "",
+    "resources": [
+      "training/enterprise/app-compatibility.html",
+      "training/enterprise/app-restrictions.html",
+      "samples/AppRestrictionSchema/index.html",
+      "samples/AppRestrictionEnforcer/index.html"
+    ]
+  },
+  "training/work/admin": {
+    "title": "",
+    "resources": [
+      "training/enterprise/work-policy-ctrl.html",
+      "samples/BasicManagedProfile/index.html"
+    ]
   }
 }
