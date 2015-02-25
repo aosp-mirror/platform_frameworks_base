@@ -165,15 +165,24 @@ public final class DeviceAdminInfo implements Parcelable {
     /** @hide */
     public static class PolicyInfo {
         public final int ident;
-        final public String tag;
-        final public int label;
-        final public int description;
+        public final String tag;
+        public final int label;
+        public final int description;
+        public final int labelForSecondaryUsers;
+        public final int descriptionForSecondaryUsers;
 
-        public PolicyInfo(int identIn, String tagIn, int labelIn, int descriptionIn) {
-            ident = identIn;
-            tag = tagIn;
-            label = labelIn;
-            description = descriptionIn;
+        public PolicyInfo(int ident, String tag, int label, int description) {
+            this(ident, tag, label, description, label, description);
+        }
+
+        public PolicyInfo(int ident, String tag, int label, int description,
+                int labelForSecondaryUsers, int descriptionForSecondaryUsers) {
+            this.ident = ident;
+            this.tag = tag;
+            this.label = label;
+            this.description = description;
+            this.labelForSecondaryUsers = labelForSecondaryUsers;
+            this.descriptionForSecondaryUsers = descriptionForSecondaryUsers;
         }
     }
 
@@ -184,7 +193,10 @@ public final class DeviceAdminInfo implements Parcelable {
     static {
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_WIPE_DATA, "wipe-data",
                 com.android.internal.R.string.policylab_wipeData,
-                com.android.internal.R.string.policydesc_wipeData));
+                com.android.internal.R.string.policydesc_wipeData,
+                com.android.internal.R.string.policylab_wipeData_secondaryUser,
+                com.android.internal.R.string.policydesc_wipeData_secondaryUser
+                ));
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_RESET_PASSWORD, "reset-password",
                 com.android.internal.R.string.policylab_resetPassword,
                 com.android.internal.R.string.policydesc_resetPassword));
@@ -193,7 +205,10 @@ public final class DeviceAdminInfo implements Parcelable {
                 com.android.internal.R.string.policydesc_limitPassword));
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_WATCH_LOGIN, "watch-login",
                 com.android.internal.R.string.policylab_watchLogin,
-                com.android.internal.R.string.policydesc_watchLogin));
+                com.android.internal.R.string.policydesc_watchLogin,
+                com.android.internal.R.string.policylab_watchLogin,
+                com.android.internal.R.string.policydesc_watchLogin_secondaryUser
+        ));
         sPoliciesDisplayOrder.add(new PolicyInfo(USES_POLICY_FORCE_LOCK, "force-lock",
                 com.android.internal.R.string.policylab_forceLock,
                 com.android.internal.R.string.policydesc_forceLock));
