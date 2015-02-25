@@ -5336,7 +5336,6 @@ package android.app.admin {
     method public boolean getScreenCaptureDisabled(android.content.ComponentName);
     method public boolean getStorageEncryption(android.content.ComponentName);
     method public int getStorageEncryptionStatus();
-    method public java.util.List<android.os.PersistableBundle> getTrustAgentConfiguration(android.content.ComponentName, android.content.ComponentName);
     method public boolean hasCaCertInstalled(android.content.ComponentName, byte[]);
     method public boolean hasGrantedPolicy(android.content.ComponentName, int);
     method public boolean installCaCert(android.content.ComponentName, byte[]);
@@ -5385,7 +5384,6 @@ package android.app.admin {
     method public void setScreenCaptureDisabled(android.content.ComponentName, boolean);
     method public void setSecureSetting(android.content.ComponentName, java.lang.String, java.lang.String);
     method public int setStorageEncryption(android.content.ComponentName, boolean);
-    method public void setTrustAgentConfiguration(android.content.ComponentName, android.content.ComponentName, android.os.PersistableBundle);
     method public void setUninstallBlocked(android.content.ComponentName, java.lang.String, boolean);
     method public boolean switchUser(android.content.ComponentName, android.os.UserHandle);
     method public void uninstallAllUserCaCerts(android.content.ComponentName);
