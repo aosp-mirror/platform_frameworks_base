@@ -206,7 +206,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     private ArrayList<GhostViewListeners> mGhostViewListeners =
             new ArrayList<GhostViewListeners>();
     private ArrayMap<View, Float> mOriginalAlphas = new ArrayMap<View, Float>();
-    final private ArrayList<View> mRootSharedElements = new ArrayList<View>();
     private ArrayList<Matrix> mSharedElementParentMatrices;
 
     public ActivityTransitionCoordinator(Window window,
@@ -253,17 +252,10 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 final String name = sharedElements.keyAt(i);
                 if (isFirstRun && (view == null || !view.isAttachedToWindow() || name == null)) {
                     sharedElements.removeAt(i);
-                } else {
-                    if (!isNested(view, sharedElements)) {
-                        mSharedElementNames.add(name);
-                        mSharedElements.add(view);
-                        sharedElements.removeAt(i);
-                        if (isFirstRun) {
-                            // We need to keep track which shared elements are roots
-                            // and which are nested.
-                            mRootSharedElements.add(view);
-                        }
-                    }
+                } else if (!isNested(view, sharedElements)) {
+                    mSharedElementNames.add(name);
+                    mSharedElements.add(view);
+                    sharedElements.removeAt(i);
                 }
             }
             isFirstRun = false;
@@ -520,24 +512,9 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
     }
 
     private void getSharedElementParentMatrix(View view, Matrix matrix) {
-        final boolean isNestedInOtherSharedElement = !mRootSharedElements.contains(view);
-        final boolean useParentMatrix;
-        if (isNestedInOtherSharedElement) {
-            useParentMatrix = true;
-        } else {
-            final int index = mSharedElementParentMatrices == null ? -1
-                    : mSharedElements.indexOf(view);
-            if (index < 0) {
-                useParentMatrix = true;
-            } else {
-                // The indices of mSharedElementParentMatrices matches the
-                // mSharedElement matrices.
-                Matrix parentMatrix = mSharedElementParentMatrices.get(index);
-                matrix.set(parentMatrix);
-                useParentMatrix = false;
-            }
-        }
-        if (useParentMatrix) {
+        final int index = mSharedElementParentMatrices == null ? -1
+                : mSharedElements.indexOf(view);
+        if (index < 0) {
             matrix.reset();
             ViewParent viewParent = view.getParent();
             if (viewParent instanceof ViewGroup) {
@@ -545,6 +522,11 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                 ViewGroup parent = (ViewGroup) viewParent;
                 parent.transformMatrixToLocal(matrix);
             }
+        } else {
+            // The indices of mSharedElementParentMatrices matches the
+            // mSharedElement matrices.
+            Matrix parentMatrix = mSharedElementParentMatrices.get(index);
+            matrix.set(parentMatrix);
         }
     }
 
@@ -701,7 +683,6 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         mResultReceiver = null;
         mPendingTransition = null;
         mListener = null;
-        mRootSharedElements.clear();
         mSharedElementParentMatrices = null;
     }
 
@@ -817,9 +798,12 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         ViewGroup decor = getDecor();
         if (decor != null) {
             boolean moveWithParent = moveSharedElementWithParent();
+            Matrix tempMatrix = new Matrix();
             for (int i = 0; i < numSharedElements; i++) {
                 View view = mSharedElements.get(i);
-                GhostView.addGhost(view, decor);
+                tempMatrix.reset();
+                mSharedElementParentMatrices.get(i).invert(tempMatrix);
+                GhostView.addGhost(view, decor, tempMatrix);
                 ViewGroup parent = (ViewGroup) view.getParent();
                 if (moveWithParent && !isInTransitionGroup(parent, decor)) {
                     GhostViewListeners listener = new GhostViewListeners(view, parent, decor);
