@@ -20,6 +20,9 @@ import com.google.common.base.Preconditions;
 
 import com.android.databinding.expr.Expr;
 import com.android.databinding.expr.ExprModel;
+import com.android.databinding.expr.StaticIdentifierExpr;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -72,8 +75,17 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
 
     @Override
     public Expr visitDotOp(@NotNull BindingExpressionParser.DotOpContext ctx) {
-        return mModel.field(ctx.expression().accept(this),
-                ctx.Identifier().getSymbol().getText());
+        ModelAnalyzer analyzer = ModelAnalyzer.getInstance();
+        ModelClass modelClass = analyzer.findClass(ctx.getText(), mModel.getImports());
+        if (modelClass == null) {
+            return mModel.field(ctx.expression().accept(this),
+                    ctx.Identifier().getSymbol().getText());
+        } else {
+            String name = modelClass.toJavaCode();
+            StaticIdentifierExpr expr = mModel.staticIdentifier(name);
+            expr.setUserDefinedType(name);
+            return expr;
+        }
     }
 
     @Override

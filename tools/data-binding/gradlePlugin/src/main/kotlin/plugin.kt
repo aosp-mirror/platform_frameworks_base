@@ -63,7 +63,7 @@ class DataBinderPlugin : Plugin<Project> {
         }
     }
 
-    var xmlParserChef: CompilerChef by Delegates.notNull()
+    var xmlProcessor: LayoutXmlProcessor by Delegates.notNull()
     var project : Project by Delegates.notNull()
 
     var generatedBinderSrc : File by Delegates.notNull()
@@ -92,14 +92,13 @@ class DataBinderPlugin : Plugin<Project> {
 
     override fun apply(project: Project?) {
         if (project == null) return
-        val generateAttr = MethodClosure(this, "generateAttr")
-        val generateBrFile = MethodClosure(this, "generateBrFile")
-        val generateBinders = MethodClosure(this, "generateBinders")
+        val generateIntermediateFile = MethodClosure(this, "generateIntermediateFile")
+        val preprocessLayoutFiles = MethodClosure(this, "preprocessLayoutFiles")
         this.project = project
         project.afterEvaluate {
             // TODO read from app
             val variants = arrayListOf("Debug")
-            xmlParserChef = createChef(project)
+            xmlProcessor = createXmlProcessor(project)
             log("after eval")
             //processDebugResources
             variants.forEach { variant ->
@@ -109,19 +108,8 @@ class DataBinderPlugin : Plugin<Project> {
 //                }
                 val processResTasks = it.getTasksByName("process${variant}Resources", true)
                 processResTasks.forEach {
-                    it.doFirst (generateAttr)
-                }
-                val generateSourcesTasks = it.getTasksByName("generate${variant}Sources", true)
-                log("generate sources tasks ${generateSourcesTasks}")
-                generateSourcesTasks.forEach {
-                    it.doFirst(generateBrFile)
-                }
-
-                val compileTasks = it.getTasksByName("compile${variant}Java", true)
-                log("compile tasks ${compileTasks}")
-                compileTasks.forEach {
-                    it.doFirst(MethodClosure(this, "cleanBinderOutFolder"))
-                    it.doFirst(generateBinders)
+                    it.doFirst(preprocessLayoutFiles)
+                    it.doLast(generateIntermediateFile)
                 }
             }
         }
@@ -131,7 +119,7 @@ class DataBinderPlugin : Plugin<Project> {
         System.out.println("PLOG: $s")
     }
 
-    fun createChef(p: Project): CompilerChef {
+    fun createXmlProcessor(p: Project): LayoutXmlProcessor {
         val ss = p.getExtensions().getByName("android") as AppExtension
         androidJar = File(ss.getSdkDirectory().getAbsolutePath() + "/platforms/${ss.getCompileSdkVersion()}/android.jar")
         log("creating parser!")
@@ -183,7 +171,7 @@ class DataBinderPlugin : Plugin<Project> {
         dexTask.doFirst(MethodClosure(this, "preDexAnalysis"))
         val writerOutBase = codeGenTargetFolder.getAbsolutePath();
         fileWriter = GradleFileWriter(writerOutBase)
-        return CompilerChef.createChef(packageName, resourceFolders, fileWriter)
+        return LayoutXmlProcessor(packageName, resourceFolders, fileWriter)
     }
 
 
@@ -204,85 +192,12 @@ class DataBinderPlugin : Plugin<Project> {
         cpFiles.addAll(jCompileTask.getClasspath().getFiles())
         //project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
-    fun compileGenerated(o : Any?) {
-        val fis = FileInputStream(serializedBinderBundlePath)
-        val compilerChef = CompilerChef.createChef(
-                fis, GradleFileWriter(viewBinderSource.getAbsolutePath())
-        )
-        IOUtils.closeQuietly(fis)
-        log("compiling generated. ${compilerChef.hasAnythingToGenerate()}")
-        if (!compilerChef.hasAnythingToGenerate()) {
-            return
-        }
-        val compiler = ToolProvider.getSystemJavaCompiler()
-        val fileManager = compiler.getStandardFileManager(null, null, null)
-        val javaCompileTask = variantData.javaCompileTask
-        val dexTask = variantData.dexTask
-        //fileWriter.outputBase = viewBinderSource.getAbsolutePath()
-        compilerChef.writeViewBinders()
-        compilerChef.writeDbrFile()
 
-
-        viewBinderCompileOutput.mkdirs()
-        val cpFiles = arrayListOf<File>()
-        cpFiles.addAll(dexTask.getInputFiles())
-        cpFiles.addAll(javaCompileTask.getClasspath().getFiles())
-        cpFiles.add(javaCompileTask.getDestinationDir())
-        cpFiles.add(androidJar)
-        val filesToCompile = FileUtils.listFiles(viewBinderSource, array("java"), true).map { (it as File).getAbsolutePath() }
-        log("files to compile ${filesToCompile}")
-        val fileObjects = fileManager.getJavaFileObjectsFromStrings(filesToCompile)
-        val optionList = arrayListOf<String>()
-        // set compiler's classpath to be same as the runtime's
-        optionList.addAll(Arrays.asList("-classpath",cpFiles.map{it.getAbsolutePath()}.join(":")))
-        optionList.add("-verbose")
-        optionList.add("-d")
-        optionList.add(viewBinderCompileOutput.getAbsolutePath())
-        log("compile options: ${optionList}")
-        val javac = compiler.getTask(null, fileManager, null, optionList, null, fileObjects) as JavaCompiler.CompilationTask
-        val compileResult = javac.call()
-
-        if (!compileResult) {
-            throw RuntimeException("cannot compile generated files. see error for details")
-        }
+    fun preprocessLayoutFiles(o: Any?) {
+        xmlProcessor.processResources()
     }
 
-    fun generateAttr(o: Any?) {
-        xmlParserChef.processResources()
-    }
-
-    fun cleanBinderOutFolder(o : Any?) {
-        log("cleaning out folder pre-compile of $o")
-        viewBinderSource.mkdirs()
-        FileUtils.cleanDirectory(viewBinderSource)
-        viewBinderCompileOutput.mkdirs()
-        FileUtils.cleanDirectory(viewBinderCompileOutput)
-        saveResourceBundle(xmlParserChef)
-    }
-
-    fun generateBrFile(o: Any?) {
-        xmlParserChef.processResources()
-        log("generating BR ${o}")
-        xmlParserChef.writeViewBinderInterfaces()
-    }
-
-    fun saveResourceBundle(chef : CompilerChef) {
-        File(serializedBinderBundlePath).getParentFile().mkdirs()
-        val bundleStream = ByteArrayOutputStream();
-        chef.exportResourceBundle(bundleStream)
-        IOUtils.closeQuietly(bundleStream)
-        val fw = FileWriter(serializedBinderBundlePath);
-        fw.write("import android.binding.BinderBundle;\n\n")
-        fw.write("@BinderBundle(\"");
-        fw.write(Base64.encodeBase64String(bundleStream.toByteArray()));
-        fw.write("\")\n");
-        fw.write("public class BinderInfo {}\n");
-        IOUtils.closeQuietly(fw);
-    }
-
-    fun generateBinders(o: Any?) {
-        log("generating binders ${o}")
-//        parser.writeViewBinders()
-//        parser.writeDbrFile()
+    fun generateIntermediateFile(o: Any?) {
+        xmlProcessor.writeIntermediateFile()
     }
 }

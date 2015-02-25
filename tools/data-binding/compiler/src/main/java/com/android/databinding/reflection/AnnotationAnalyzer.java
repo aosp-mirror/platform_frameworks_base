@@ -82,35 +82,91 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
                     .build();
 
     public final ProcessingEnvironment processingEnv;
-    public final TypeMirror listType;
-    public final TypeMirror mapType;
-    public final TypeMirror stringType;
-    public final TypeMirror objectType;
 
-    private final AnnotationClass mObservableType;
-    private final AnnotationClass mObservableListType;
-    private final AnnotationClass mObservableMapType;
-    private final AnnotationClass[] mObservableFieldTypes;
-    private final AnnotationClass mIViewDataBinderType;
+    private AnnotationClass mListType;
+    private AnnotationClass mMapType;
+    private AnnotationClass mStringType;
+    private AnnotationClass mObjectType;
+    private AnnotationClass mObservableType;
+    private AnnotationClass mObservableListType;
+    private AnnotationClass mObservableMapType;
+    private AnnotationClass[] mObservableFieldTypes;
+    private AnnotationClass mIViewDataBinderType;
 
     public AnnotationAnalyzer(ProcessingEnvironment processingEnvironment) {
         processingEnv = processingEnvironment;
         instance = this;
-        Types typeUtil = processingEnv.getTypeUtils();
-        listType = typeUtil.erasure(findType(LIST_CLASS_NAME).asType());
-        mapType = typeUtil.erasure(findType(MAP_CLASS_NAME).asType());
-        stringType = typeUtil.erasure(findType(STRING_CLASS_NAME).asType());
-        objectType = typeUtil.erasure(findType(OBJECT_CLASS_NAME).asType());
-        mObservableType = new AnnotationClass(findType(OBSERVABLE_CLASS_NAME).asType());
-        mObservableListType = new AnnotationClass(typeUtil.erasure(
-                findType(OBSERVABLE_LIST_CLASS_NAME).asType()));
-        mObservableMapType = new AnnotationClass(typeUtil.erasure(
-                findType(OBSERVABLE_MAP_CLASS_NAME).asType()));
-        mIViewDataBinderType = new AnnotationClass(findType(I_VIEW_DATA_BINDER).asType());
-        mObservableFieldTypes = new AnnotationClass[OBSERVABLE_FIELDS.length];
-        for (int i = 0; i < OBSERVABLE_FIELDS.length; i++) {
-            mObservableFieldTypes[i] = new AnnotationClass(findType(OBSERVABLE_FIELDS[i]).asType());
+    }
+
+    public AnnotationClass getListType() {
+        if (mListType == null) {
+            mListType = loadClassErasure(LIST_CLASS_NAME);
         }
+        return mListType;
+    }
+
+    public AnnotationClass getMapType() {
+        if (mMapType == null) {
+            mMapType = loadClassErasure(MAP_CLASS_NAME);
+        }
+        return mMapType;
+    }
+
+    public AnnotationClass getStringType() {
+        if (mStringType == null) {
+            mStringType = new AnnotationClass(findType(STRING_CLASS_NAME).asType());
+        }
+        return mStringType;
+    }
+
+    public AnnotationClass getObjectType() {
+        if (mObjectType == null) {
+            mObjectType = new AnnotationClass(findType(OBJECT_CLASS_NAME).asType());
+        }
+        return mObjectType;
+    }
+
+    private AnnotationClass getObservableType() {
+        if (mObservableType == null) {
+            mObservableType = new AnnotationClass(findType(OBSERVABLE_CLASS_NAME).asType());
+        }
+        return mObservableType;
+    }
+
+    private AnnotationClass getObservableListType() {
+        if (mObservableListType == null) {
+            mObservableListType = loadClassErasure(OBSERVABLE_LIST_CLASS_NAME);
+        }
+        return mObservableListType;
+    }
+    
+    private AnnotationClass getObservableMapType() {
+        if (mObservableMapType == null) {
+            mObservableMapType = loadClassErasure(OBSERVABLE_MAP_CLASS_NAME);
+        }
+        return mObservableMapType;
+    }
+
+    private AnnotationClass getIViewDataBinderType() {
+        if (mIViewDataBinderType == null) {
+            mIViewDataBinderType = new AnnotationClass(findType(I_VIEW_DATA_BINDER).asType());
+        }
+        return mIViewDataBinderType;
+    }
+
+    private AnnotationClass loadClassErasure(String className) {
+        Types typeUtils = getTypeUtils();
+        return new AnnotationClass(typeUtils.erasure(findType(className).asType()));
+    }
+
+    private AnnotationClass[] getObservableFieldTypes() {
+        if (mObservableFieldTypes == null) {
+            mObservableFieldTypes = new AnnotationClass[OBSERVABLE_FIELDS.length];
+            for (int i = 0; i < OBSERVABLE_FIELDS.length; i++) {
+                mObservableFieldTypes[i] = loadClassErasure(OBSERVABLE_FIELDS[i]);
+            }
+        }
+        return mObservableFieldTypes;
     }
 
     private TypeElement findType(String type) {
@@ -119,7 +175,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public boolean isDataBinder(ModelClass modelClass) {
-        return mIViewDataBinderType.isAssignableFrom(modelClass);
+        return getIViewDataBinderType().isAssignableFrom(modelClass);
     }
 
     @Override
@@ -154,7 +210,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
                 }
             }
         }
-        String message = "cannot find method " + name + " at class " + clazz.toJavaCode();
+        String message = "cannot find method '" + name + "' in class " + clazz.toJavaCode();
         printMessage(Diagnostic.Kind.ERROR, message);
         throw new IllegalArgumentException(message);
     }
@@ -162,16 +218,16 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     @Override
     public boolean isObservable(ModelClass modelClass) {
         AnnotationClass annotationClass = (AnnotationClass)modelClass;
-        return mObservableType.isAssignableFrom(annotationClass) ||
-                mObservableListType.isAssignableFrom(annotationClass) ||
-                mObservableMapType.isAssignableFrom(annotationClass);
+        return getObservableType().isAssignableFrom(annotationClass) ||
+                getObservableListType().isAssignableFrom(annotationClass) ||
+                getObservableMapType().isAssignableFrom(annotationClass);
     }
 
     @Override
     public boolean isObservableField(ModelClass modelClass) {
         AnnotationClass annotationClass = (AnnotationClass)modelClass;
         AnnotationClass erasure = new AnnotationClass(getTypeUtils().erasure(annotationClass.mTypeMirror));
-        for (AnnotationClass observableField : mObservableFieldTypes) {
+        for (AnnotationClass observableField : getObservableFieldTypes()) {
             if (observableField.isAssignableFrom(erasure)) {
                 return true;
             }
@@ -337,12 +393,20 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         if (className.indexOf('.') < 0) {
             // try java.lang.
             String javaLangClass = "java.lang." + className;
-            TypeElement javaLang = elementUtils.getTypeElement(javaLangClass);
-            if (javaLang != null) {
-                return javaLang;
+            try {
+                TypeElement javaLang = elementUtils.getTypeElement(javaLangClass);
+                if (javaLang != null) {
+                    return javaLang;
+                }
+            } catch (Exception e) {
+                // try the normal way
             }
         }
-        return elementUtils.getTypeElement(className);
+        try {
+            return elementUtils.getTypeElement(className);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private ArrayList<String> splitTemplateParameters(String templateParameters) {

@@ -265,49 +265,55 @@ public class SetterStore {
                 attribute = attribute.substring(colon + 1);
             }
         }
-        HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
         MethodDescription adapter = null;
         String setterName = null;
-        ModelMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute, imports);
-        ModelClass bestViewType = null;
-        ModelClass bestValueType = null;
-        if (bestSetterMethod != null) {
-            bestViewType = bestSetterMethod.getDeclaringClass();
-            bestValueType = bestSetterMethod.getParameterTypes()[0];
-            setterName = bestSetterMethod.getName();
-        }
+        if (viewType != null) {
+            HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
+            ModelMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute, imports);
+            ModelClass bestViewType = null;
+            ModelClass bestValueType = null;
+            if (bestSetterMethod != null) {
+                bestViewType = bestSetterMethod.getDeclaringClass();
+                bestValueType = bestSetterMethod.getParameterTypes()[0];
+                setterName = bestSetterMethod.getName();
+            }
 
-        if (adapters != null) {
-            for (AccessorKey key : adapters.keySet()) {
-                try {
-                    ModelClass adapterViewType = mClassAnalyzer.findClass(key.viewType, imports);
-                    if (adapterViewType.isAssignableFrom(viewType)) {
-                        try {
-                            ModelClass adapterValueType = mClassAnalyzer.findClass(key.valueType,
-                                    imports);
-                            boolean isBetterView = bestViewType == null ||
-                                    bestValueType.isAssignableFrom(adapterValueType);
-                            if (isBetterParameter(valueType, adapterValueType, bestValueType,
-                                    isBetterView, imports)) {
-                                bestViewType = adapterViewType;
-                                bestValueType = adapterValueType;
-                                adapter = adapters.get(key);
+            if (adapters != null) {
+                for (AccessorKey key : adapters.keySet()) {
+                    try {
+                        ModelClass adapterViewType = mClassAnalyzer
+                                .findClass(key.viewType, imports);
+                        if (adapterViewType.isAssignableFrom(viewType)) {
+                            try {
+                                ModelClass adapterValueType = mClassAnalyzer
+                                        .findClass(key.valueType,
+                                                imports);
+                                boolean isBetterView = bestViewType == null ||
+                                        bestValueType.isAssignableFrom(adapterValueType);
+                                if (isBetterParameter(valueType, adapterValueType, bestValueType,
+                                        isBetterView, imports)) {
+                                    bestViewType = adapterViewType;
+                                    bestValueType = adapterValueType;
+                                    adapter = adapters.get(key);
+                                }
+
+                            } catch (Exception e) {
+                                printMessage(Diagnostic.Kind.NOTE,
+                                        "Unknown class: " + key.valueType);
                             }
-
-                        } catch (Exception e) {
-                            printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + key.valueType);
                         }
+                    } catch (Exception e) {
+                        printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + key.viewType);
                     }
-                } catch (Exception e) {
-                    printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + key.viewType);
                 }
             }
-        }
 
-        MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType, imports);
-        if (conversionMethod != null) {
-            valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +
-                    valueExpression + ")";
+            MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType,
+                    imports);
+            if (conversionMethod != null) {
+                valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +
+                        valueExpression + ")";
+            }
         }
         if (adapter == null) {
             if (setterName == null) {

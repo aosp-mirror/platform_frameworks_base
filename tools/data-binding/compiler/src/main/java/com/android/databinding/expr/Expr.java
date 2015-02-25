@@ -575,36 +575,6 @@ abstract public class Expr {
         }
     }
 
-    protected void replaceStaticIdentifiers(ModelAnalyzer modelAnalyzer) {
-        for (int i = 0; i < mChildren.size(); i++) {
-            Expr child = mChildren.get(i);
-            String packageName = child.asPackage();
-            if (packageName != null) {
-                ModelClass modelClass = modelAnalyzer.findClass(packageName,
-                        getModel().getImports());
-                if (modelClass != null) {
-                    child.removeParentAndUnregisterIfOrphan(this);
-                    StaticIdentifierExpr staticAccessExpr = getModel().staticIdentifier(packageName);
-                    staticAccessExpr.setUserDefinedType(packageName);
-                    staticAccessExpr.getParents().add(this);
-                    mChildren.set(i, staticAccessExpr);
-                }
-            }
-        }
-    }
-
-    private void removeParentAndUnregisterIfOrphan(Expr parent) {
-        while (mParents.remove(parent)) {
-        }
-        if (getParents().isEmpty()) {
-            for (Expr expr : mChildren) {
-                expr.removeParentAndUnregisterIfOrphan(this);
-            }
-            mChildren.clear();
-            getModel().unregister(this);
-        }
-    }
-
     protected String asPackage() {
         return null;
     }

@@ -61,21 +61,15 @@ public class LayoutFileParser {
         if (original == null) {
             return null;
         }
-        return parseOriginalXml(original, pkg);
-    }
-
-    private ResourceBundle.LayoutFileBundle parseOriginalXml(File xml, String pkg)
-            throws ParserConfigurationException, IOException, SAXException,
-            XPathExpressionException {
-        ResourceBundle.LayoutFileBundle bundle = new ResourceBundle.LayoutFileBundle(ParserHelper.INSTANCE$.stripExtension(xml.getName()));
-
         L.d("parsing file %s", xml.getAbsolutePath());
 
-        bundle.setTransientFile(xml);
+        ResourceBundle.LayoutFileBundle bundle = new ResourceBundle.LayoutFileBundle(
+                ParserHelper.INSTANCE$.stripExtension(xml.getName()), layoutId,
+                xml.getParentFile().getName());
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder builder = factory.newDocumentBuilder();
-        final Document doc = builder.parse(xml);
+        final Document doc = builder.parse(original);
 
         final XPathFactory xPathFactory = XPathFactory.newInstance();
         final XPath xPath = xPathFactory.newXPath();
@@ -110,41 +104,49 @@ public class LayoutFileParser {
 
         final List<Node> bindingNodes = getBindingNodes(doc, xPath);
         L.d("number of binding nodes %d", bindingNodes.size());
+        int tagNumber = 1;
         for (Node parent : bindingNodes) {
             NamedNodeMap attributes = parent.getAttributes();
-            Node id = attributes.getNamedItem("android:id");
-            if (id != null) {
-                String nodeName = parent.getNodeName();
-                String layoutName = null;
-                final String fullClassName;
-                if ("include".equals(nodeName)) {
-                    // get the layout attribute
-                    final Node includedLayout = attributes.getNamedItem("layout");
-                    Preconditions.checkNotNull(includedLayout, "must include a layout");
-                    final String includeValue = includedLayout.getNodeValue();
-                    Preconditions.checkArgument(includeValue.startsWith(LAYOUT_PREFIX));
-                    // if user is binding something there, there MUST be a layout file to be
-                    // generated.
-                    layoutName = includeValue.substring(LAYOUT_PREFIX.length());
-                    L.d("replaced node name to " + nodeName);
-                    fullClassName = pkg + ".generated." + ParserHelper.INSTANCE$.toClassName(layoutName) + "Binder";
-                } else {
-                    fullClassName = getFullViewClassName(nodeName);
+            String nodeName = parent.getNodeName();
+            String className;
+            String includedLayoutName = null;
+            final Node id = attributes.getNamedItem("android:id");
+            if ("include".equals(nodeName)) {
+                if (id == null) {
+                    L.e("<include> must have android:id attribute with binding expressions.");
+                    throw new RuntimeException("<include> must have android:id attribute " +
+                            "with binding expressions.");
                 }
-                final ResourceBundle.BindingTargetBundle bindingTargetBundle = bundle.createBindingTarget(id.getNodeValue(), fullClassName, true);
-                bindingTargetBundle.setIncludedLayout(layoutName);
-                int attrCount = attributes.getLength();
-                for (int i = 0; i < attrCount; i ++) {
-                    final Node attr = attributes.item(i);
-                    String value = attr.getNodeValue();
-                    if (value.charAt(0) == '@' && value.charAt(1) == '{' &&
-                            value.charAt(value.length() - 1) == '}') {
-                        final String strippedValue = value.substring(2, value.length() - 1);
-                        bindingTargetBundle.addBinding(attr.getNodeName(), strippedValue);
-                    }
-                }
+                // get the layout attribute
+                final Node includedLayout = attributes.getNamedItem("layout");
+                Preconditions.checkNotNull(includedLayout, "must include a layout");
+                final String includeValue = includedLayout.getNodeValue();
+                Preconditions.checkArgument(includeValue.startsWith(LAYOUT_PREFIX));
+                // if user is binding something there, there MUST be a layout file to be
+                // generated.
+                String layoutName = includeValue.substring(LAYOUT_PREFIX.length());
+                className = pkg + ".generated." +
+                        ParserHelper.INSTANCE$.toClassName(layoutName) + "Binder";
+                includedLayoutName = layoutName;
             } else {
-                throw new RuntimeException("data binding requires id for now.");
+                className = getFullViewClassName(nodeName);
+            }
+            final Node originalTag = attributes.getNamedItem("android:tag");
+            final String tag = String.valueOf(tagNumber++);
+            final ResourceBundle.BindingTargetBundle bindingTargetBundle =
+                    bundle.createBindingTarget(id == null ? null : id.getNodeValue(),
+                            className, true, tag, originalTag == null ? null : originalTag.getNodeValue());
+            bindingTargetBundle.setIncludedLayout(includedLayoutName);
+
+            final int attrCount = attributes.getLength();
+            for (int i = 0; i < attrCount; i ++) {
+                final Node attr = attributes.item(i);
+                String value = attr.getNodeValue();
+                if (value.charAt(0) == '@' && value.charAt(1) == '{' &&
+                        value.charAt(value.length() - 1) == '}') {
+                    final String strippedValue = value.substring(2, value.length() - 1);
+                    bindingTargetBundle.addBinding(attr.getNodeName(), strippedValue);
+                }
             }
         }
 
@@ -199,7 +201,7 @@ public class LayoutFileParser {
     private File stripFileAndGetOriginal(File xml, String binderId)
             throws ParserConfigurationException, IOException, SAXException,
             XPathExpressionException {
-        L.d("parsing resourceY file %s", xml.getAbsolutePath());
+        L.d("parsing resource file %s", xml.getAbsolutePath());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(xml);

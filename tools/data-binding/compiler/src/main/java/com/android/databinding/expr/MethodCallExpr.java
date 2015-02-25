@@ -45,7 +45,6 @@ public class MethodCallExpr extends Expr {
     @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            replaceStaticIdentifiers(modelAnalyzer);
             List<ModelClass> args = new ArrayList<>();
             for (Expr expr : getArgs()) {
                 args.add(expr.getResolvedType());

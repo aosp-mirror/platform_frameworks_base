@@ -20,7 +20,6 @@ import com.google.common.collect.Iterables;
 import com.android.databinding.util.L;
 import com.android.databinding.util.ParserHelper;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +27,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * This is a serializable class that can keep the result of parsing layout files.
@@ -38,6 +46,10 @@ public class ResourceBundle implements Serializable {
 
     private HashMap<String, List<LayoutFileBundle>> mLayoutBundles = new HashMap<>();
 
+    public ResourceBundle(String appPackage) {
+        mAppPackage = appPackage;
+    }
+
     public void addLayoutBundle(LayoutFileBundle bundle, int layoutId) {
         Preconditions.checkArgument(bundle.mFileName != null, "File bundle must have a name");
         if (!mLayoutBundles.containsKey(bundle.mFileName)) {
@@ -45,10 +57,6 @@ public class ResourceBundle implements Serializable {
         }
         bundle.mLayoutId = layoutId;
         mLayoutBundles.get(bundle.mFileName).add(bundle);
-    }
-
-    public void setAppPackage(String appPackage) {
-        mAppPackage = appPackage;
     }
 
     public HashMap<String, List<LayoutFileBundle>> getLayoutBundles() {
@@ -154,7 +162,8 @@ public class ResourceBundle implements Serializable {
                 for (Map.Entry<String, String> viewType : viewTypes.entrySet()) {
                     BindingTargetBundle target = bundle.getBindingTargetById(viewType.getKey());
                     if (target == null) {
-                        bundle.createBindingTarget(viewType.getKey(), viewType.getValue(), false);
+                        bundle.createBindingTarget(viewType.getKey(), viewType.getValue(), false,
+                                null, null);
                     } else {
                         L.d("setting interface type on %s (%s) as %s", target.mId, target.mFullClassName, viewType.getValue());
                         target.setInterfaceType(viewType.getValue());
@@ -168,8 +177,8 @@ public class ResourceBundle implements Serializable {
                 final String configName;
                 if (bundle.hasVariations()) {
                     // append configuration specifiers.
-                    final String parentFileName = bundle.mTransientFile.getParentFile().getName();
-                    L.d("parent file for %s is %s", bundle.mTransientFile.getName(), parentFileName);
+                    final String parentFileName = bundle.mDirectory;
+                    L.d("parent file for %s is %s", bundle.getFileName(), parentFileName);
                     if ("layout".equals(parentFileName)) {
                         configName = "";
                     } else {
@@ -183,20 +192,39 @@ public class ResourceBundle implements Serializable {
         }
     }
 
+    @XmlAccessorType(XmlAccessType.NONE)
+    @XmlRootElement(name="Layout")
     public static class LayoutFileBundle implements Serializable {
-        private int mLayoutId;
-        private String mFileName;
+        @XmlAttribute(name="layoutId", required = true)
+        public int mLayoutId;
+        @XmlAttribute(name="layout", required = true)
+        public String mFileName;
         private String mConfigName;
-        private boolean mHasVariations;
-        transient private File mTransientFile;
 
-        private Map<String, String> mVariables = new HashMap<>();
+        @XmlAttribute(name="directory", required = true)
+        public String mDirectory;
+        public boolean mHasVariations;
 
-        private Map<String, String> mImports = new HashMap<>();
+        @XmlElement(name="Variables")
+        @XmlJavaTypeAdapter(NameTypeAdapter.class)
+        public Map<String, String> mVariables = new HashMap<>();
 
-        private List<BindingTargetBundle> mBindingTargetBundles = new ArrayList<>();
-        public LayoutFileBundle(String fileName) {
+        @XmlElement(name="Imports")
+        @XmlJavaTypeAdapter(NameTypeAdapter.class)
+        public Map<String, String> mImports = new HashMap<>();
+
+        @XmlElementWrapper(name="Targets")
+        @XmlElement(name="Target")
+        public List<BindingTargetBundle> mBindingTargetBundles = new ArrayList<>();
+
+        // for XML binding
+        public LayoutFileBundle() {
+        }
+
+        public LayoutFileBundle(String fileName, int layoutId, String directory) {
             mFileName = fileName;
+            mLayoutId = layoutId;
+            mDirectory = directory;
         }
 
         public void addVariable(String name, String type) {
@@ -207,12 +235,10 @@ public class ResourceBundle implements Serializable {
             mImports.put(alias, type);
         }
 
-        public void setTransientFile(File transientFile) {
-            mTransientFile = transientFile;
-        }
-
-        public BindingTargetBundle createBindingTarget(String id, String fullClassName, boolean used) {
-            BindingTargetBundle target = new BindingTargetBundle(id, fullClassName, used);
+        public BindingTargetBundle createBindingTarget(String id, String fullClassName,
+                boolean used, String tag, String originalTag) {
+            BindingTargetBundle target = new BindingTargetBundle(id, fullClassName, used, tag,
+                    originalTag);
             mBindingTargetBundles.add(target);
             return target;
         }
@@ -242,6 +268,10 @@ public class ResourceBundle implements Serializable {
             return mConfigName;
         }
 
+        public String getDirectory() {
+            return mDirectory;
+        }
+
         public boolean hasVariations() {
             return mHasVariations;
         }
@@ -259,19 +289,49 @@ public class ResourceBundle implements Serializable {
         }
     }
 
-    public static class BindingTargetBundle implements Serializable {
+    @XmlAccessorType(XmlAccessType.NONE)
+    public static class MarshalledNameType {
+        @XmlAttribute(name="type", required = true)
+        public String type;
 
-        private String mId;
-        private String mFullClassName;
-        private boolean mUsed;
-        private List<BindingBundle> mBindingBundleList = new ArrayList<>();
-        private String mIncludedLayout;
+        @XmlAttribute(name="name", required = true)
+        public String name;
+    }
+
+    public static class MarshalledMapType {
+        public List<MarshalledNameType> entries;
+    }
+
+    @XmlAccessorType(XmlAccessType.NONE)
+    public static class BindingTargetBundle implements Serializable {
+        // public for XML serialization
+
+        @XmlAttribute(name="id")
+        public String mId;
+        @XmlAttribute(name="tag", required = true)
+        public String mTag;
+        @XmlAttribute(name="originalTag")
+        public String mOriginalTag;
+        @XmlAttribute(name="boundClass", required = true)
+        public String mFullClassName;
+        public boolean mUsed = true;
+        @XmlElementWrapper(name="Expressions")
+        @XmlElement(name="Expression")
+        public List<BindingBundle> mBindingBundleList = new ArrayList<>();
+        @XmlAttribute(name="include")
+        public String mIncludedLayout;
         private String mInterfaceType;
 
-        public BindingTargetBundle(String id, String fullClassName, boolean used) {
+        // For XML serialization
+        public BindingTargetBundle() {}
+
+        public BindingTargetBundle(String id, String fullClassName, boolean used,
+                String tag, String originalTag) {
             mId = id;
             mFullClassName = fullClassName;
             mUsed = used;
+            mTag = tag;
+            mOriginalTag = originalTag;
         }
 
         public void addBinding(String name, String expr) {
@@ -314,24 +374,67 @@ public class ResourceBundle implements Serializable {
             return mInterfaceType;
         }
 
+        @XmlAccessorType(XmlAccessType.NONE)
         public static class BindingBundle implements Serializable {
 
             private String mName;
             private String mExpr;
+
+            public BindingBundle() {}
 
             public BindingBundle(String name, String expr) {
                 mName = name;
                 mExpr = expr;
             }
 
+            @XmlAttribute(name="attribute", required=true)
             public String getName() {
                 return mName;
             }
 
+            @XmlAttribute(name="text", required=true)
             public String getExpr() {
                 return mExpr;
+            }
+
+            public void setName(String name) {
+                mName = name;
+            }
+
+            public void setExpr(String expr) {
+                mExpr = expr;
             }
         }
     }
 
+    private final static class NameTypeAdapter
+            extends XmlAdapter<MarshalledMapType, Map<String, String>> {
+
+        @Override
+        public HashMap<String, String> unmarshal(MarshalledMapType v) throws Exception {
+            HashMap<String, String> map = new HashMap<>();
+            if (v.entries != null) {
+                for (MarshalledNameType entry : v.entries) {
+                    map.put(entry.name, entry.type);
+                }
+            }
+            return map;
+        }
+
+        @Override
+        public MarshalledMapType marshal(Map<String, String> v) throws Exception {
+            if (v.isEmpty()) {
+                return null;
+            }
+            MarshalledMapType marshalled = new MarshalledMapType();
+            marshalled.entries = new ArrayList<>();
+            for (String name : v.keySet()) {
+                MarshalledNameType nameType = new MarshalledNameType();
+                nameType.name = name;
+                nameType.type = v.get(name);
+                marshalled.entries.add(nameType);
+            }
+            return marshalled;
+        }
+    }
 }

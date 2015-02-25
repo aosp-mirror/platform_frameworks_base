@@ -94,7 +94,6 @@ public class FieldAccessExpr extends Expr {
     @Override
     protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
         if (mGetter == null) {
-            replaceStaticIdentifiers(modelAnalyzer);
             Expr child = getChild();
             child.resolveType(modelAnalyzer);
             boolean isStatic = child instanceof StaticIdentifierExpr;

@@ -54,8 +54,9 @@ public class DataBinder {
             if (writtenFiles.contains(interfaceName)) {
                 continue;
             }
-            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + layoutBinder.getInterfaceName(),
+            mFileWriter.writeToFile(layoutBinder.getPackage() + "." + interfaceName,
                     layoutBinder.writeViewBinderInterface());
+            writtenFiles.add(interfaceName);
         }
     }
     

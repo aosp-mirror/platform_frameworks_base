@@ -46,8 +46,8 @@ public class BracketExpr extends Expr {
             mAccessor = BracketAccessor.MAP;
         } else {
             throw new IllegalArgumentException("Cannot determine variable type used in [] " +
-                    "expression. Cast the value to List, ObservableList, Map, " +
-                    "Cursor, or array.");
+                    "expression. Cast the value to List, Map, " +
+                    "or array. Type detected: " + targetType.toJavaCode());
         }
         return targetType.getComponentType();
     }

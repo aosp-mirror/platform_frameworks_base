@@ -28,6 +28,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
@@ -41,8 +42,7 @@ import javax.tools.StandardLocation;
 @SupportedAnnotationTypes({"android.binding.Bindable"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class ProcessBindable extends AbstractProcessor {
-
-    private boolean mFileGenerated;
+    Intermediate mProperties = new IntermediateV1();
 
     public ProcessBindable() {
     }
@@ -55,24 +55,25 @@ public class ProcessBindable extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (mFileGenerated) {
-            return false;
-        }
-        Intermediate properties = readIntermediateFile();
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-            TypeElement enclosing = (TypeElement) element.getEnclosingElement();
-            properties.cleanProperties(enclosing.getQualifiedName().toString());
-        }
-        for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-            TypeElement enclosing = (TypeElement) element.getEnclosingElement();
+            Element enclosingElement = element.getEnclosingElement();
+            ElementKind kind = enclosingElement.getKind();
+            if (kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                        "Bindable must be on a member field or method. The enclosing type is " +
+                            enclosingElement.getKind(), element);
+                continue;
+            }
+            TypeElement enclosing = (TypeElement) enclosingElement;
             String name = getPropertyName(element);
             if (name != null) {
-                properties.addProperty(enclosing.getQualifiedName().toString(), name);
+                mProperties.addProperty(enclosing.getQualifiedName().toString(), name);
             }
         }
-        writeIntermediateFile(properties);
-        generateBR(properties);
-        mFileGenerated = true;
+        if (roundEnv.processingOver()) {
+            writeIntermediateFile(mProperties);
+            generateBR(mProperties);
+        }
         return true;
     }
 
@@ -294,8 +295,6 @@ public class ProcessBindable extends AbstractProcessor {
     private interface Intermediate {
         void captureProperties(Set<String> properties);
 
-        void cleanProperties(String className);
-
         void addProperty(String className, String propertyName);
     }
 
@@ -309,11 +308,6 @@ public class ProcessBindable extends AbstractProcessor {
             for (HashSet<String> propertySet : mProperties.values()) {
                 properties.addAll(propertySet);
             }
-        }
-
-        @Override
-        public void cleanProperties(String className) {
-            mProperties.remove(className);
         }
 
         @Override

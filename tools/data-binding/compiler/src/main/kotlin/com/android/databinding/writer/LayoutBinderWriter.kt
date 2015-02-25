@@ -658,25 +658,12 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
         kcode("package ${layoutBinder.getPackage()};") {
             nl("import android.binding.Bindable;")
             nl("import com.android.databinding.library.IViewDataBinder;")
-            // TODO: use real types instead of imports. When this moves
-            // to the annotation processor, we'll be able to grab types better.
-            val imports = model.getImports();
-            imports.keySet().forEach {
-                val className = imports.get(it);
-                if (className != null) {
-                    val lastDotIndex = className.lastIndexOf('.');
-                    if (lastDotIndex >= 0 && lastDotIndex < className.length() - 1 &&
-                            it.equals(className.substring(lastDotIndex + 1))) {
-                        nl("import ${className};")
-                    }
-                }
-            }
-
             nl("public interface ${interfaceName} extends IViewDataBinder {")
             variables.forEach {
                 if (it.getUserDefinedType() != null) {
                     tab("@Bindable")
-                    tab("public void ${it.setterName}(${it.getUserDefinedType()} ${it.readableUniqueName});")
+                    val type = it.getResolvedType().toJavaCode();
+                    tab("public void ${it.setterName}(${type} ${it.readableUniqueName});")
                 }
             }
             layoutBinder.getBindingTargets().forEach {

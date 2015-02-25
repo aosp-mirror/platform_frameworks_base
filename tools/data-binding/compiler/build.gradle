@@ -36,6 +36,7 @@ dependencies {
     compile 'org.apache.commons:commons-io:1.3.2'
     compile 'com.google.guava:guava:18.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    compile 'commons-codec:commons-codec:1.10'
     compile project(":baseLibrary")
     compile project(":grammarBuilder")
     compile project(":xmlGrammar")

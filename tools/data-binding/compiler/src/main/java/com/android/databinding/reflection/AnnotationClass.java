@@ -59,13 +59,13 @@ public class AnnotationClass implements ModelClass {
         if (isArray()) {
             component = ((ArrayType) mTypeMirror).getComponentType();
         } else if (isList()) {
-            DeclaredType listType = findInterface(getListType());
+            DeclaredType listType = findInterface(getListType().mTypeMirror);
             if (listType == null) {
                 return null;
             }
             component = listType.getTypeArguments().get(0);
         } else {
-            DeclaredType mapType = findInterface(getMapType());
+            DeclaredType mapType = findInterface(getMapType().mTypeMirror);
             if (mapType == null) {
                 return null;
             }
@@ -111,18 +111,18 @@ public class AnnotationClass implements ModelClass {
     @Override
     public boolean isList() {
         Types typeUtil = getTypeUtils();
-        return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getListType());
+        return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getListType().mTypeMirror);
     }
 
     @Override
     public boolean isMap() {
         Types typeUtil = getTypeUtils();
-        return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getMapType());
+        return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getMapType().mTypeMirror);
     }
 
     @Override
     public boolean isString() {
-        return getTypeUtils().isSameType(mTypeMirror, getStringType());
+        return getTypeUtils().isSameType(mTypeMirror, getStringType().mTypeMirror);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class AnnotationClass implements ModelClass {
 
     @Override
     public boolean isObject() {
-        return getTypeUtils().isSameType(mTypeMirror, getObjectType());
+        return getTypeUtils().isSameType(mTypeMirror, getObjectType().mTypeMirror);
     }
 
     @Override
@@ -230,10 +230,8 @@ public class AnnotationClass implements ModelClass {
         if (that == null) {
             return false;
         }
-        AnnotationClass thisBoxed = box();
-        AnnotationClass thatBoxed = (AnnotationClass) that.box();
-        final TypeMirror thatType = thatBoxed.mTypeMirror;
-        return getTypeUtils().isAssignable(thatType, thisBoxed.mTypeMirror);
+        AnnotationClass thatAnnotationClass = (AnnotationClass) that;
+        return getTypeUtils().isAssignable(thatAnnotationClass.mTypeMirror, this.mTypeMirror);
     }
 
     @Override
@@ -296,20 +294,20 @@ public class AnnotationClass implements ModelClass {
         return AnnotationAnalyzer.instance.processingEnv.getElementUtils();
     }
 
-    private static TypeMirror getListType() {
-        return AnnotationAnalyzer.instance.listType;
+    private static AnnotationClass getListType() {
+        return AnnotationAnalyzer.instance.getListType();
     }
 
-    private static TypeMirror getMapType() {
-        return AnnotationAnalyzer.instance.mapType;
+    private static AnnotationClass getMapType() {
+        return AnnotationAnalyzer.instance.getMapType();
     }
 
-    private static TypeMirror getStringType() {
-        return AnnotationAnalyzer.instance.stringType;
+    private static AnnotationClass getStringType() {
+        return AnnotationAnalyzer.instance.getStringType();
     }
 
-    private static TypeMirror getObjectType() {
-        return AnnotationAnalyzer.instance.objectType;
+    private static AnnotationClass getObjectType() {
+        return AnnotationAnalyzer.instance.getObjectType();
     }
 
     private static void printMessage(Diagnostic.Kind kind, String message) {

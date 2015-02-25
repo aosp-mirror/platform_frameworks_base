@@ -13,29 +13,10 @@
 
 package com.android.databinding;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-
-import com.android.databinding.store.LayoutFileParser;
 import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.util.L;
 import com.android.databinding.writer.DataBinderWriter;
 import com.android.databinding.writer.JavaFileWriter;
-
-import org.apache.commons.io.IOUtils;
-import org.xml.sax.SAXException;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.List;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
 
 /**
  * Chef class for compiler.
@@ -43,92 +24,35 @@ import javax.xml.xpath.XPathExpressionException;
  * Different build systems can initiate a version of this to handle their work
  */
 public class CompilerChef {
-    public static final String RESOURCE_BUNDLE_FILE_NAME = "BinderInfo.java";
     private JavaFileWriter mFileWriter;
-    private LayoutFileParser mLayoutFileParser;
     private ResourceBundle mResourceBundle;
     private DataBinder mDataBinder;
-    
-    private String mAppPackage;
-    private List<File> mResourceFolders;
 
     private CompilerChef() {
-
     }
 
-    public static CompilerChef createChef(String appPkg, List<File> resourceFolders,
-            JavaFileWriter fileWriter) {
+    public static CompilerChef createChef(ResourceBundle bundle, JavaFileWriter fileWriter) {
         CompilerChef chef = new CompilerChef();
-        chef.mAppPackage = appPkg;
-        chef.mResourceFolders = resourceFolders;
+
+        chef.mResourceBundle = bundle;
         chef.mFileWriter = fileWriter;
+        chef.mResourceBundle.validateMultiResLayouts();
         return chef;
     }
 
-    public static CompilerChef createChef(InputStream inputStream, JavaFileWriter fileWriter)
-            throws IOException, ClassNotFoundException {
-        ObjectInputStream ois = null;
-        try {
-            ois = new ObjectInputStream(inputStream);
-            return createChef((ResourceBundle) ois.readObject(), fileWriter);
-        } finally {
-            IOUtils.closeQuietly(ois);
-        }
+    public ResourceBundle getResourceBundle() {
+        return mResourceBundle;
     }
 
-    public static CompilerChef createChef(ResourceBundle resourceBundle, JavaFileWriter fileWriter) {
-        CompilerChef chef = new CompilerChef();
-        chef.mResourceBundle = resourceBundle;
-        chef.mFileWriter = fileWriter;
-        chef.mAppPackage = resourceBundle.getAppPackage();
-        return chef;
-    }
-
-    public void exportResourceBundle(OutputStream outputStream) {
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(outputStream);
-            oos.writeObject(mResourceBundle);
-        } catch (IOException e) {
-            IOUtils.closeQuietly(oos);
-        }
-    }
-
-    public boolean processResources()
-            throws ParserConfigurationException, SAXException, XPathExpressionException,
-            IOException {
-        if (mResourceBundle != null) {
-            return false; // already processed
-        }
-        mResourceBundle = new ResourceBundle();
-        mResourceBundle.setAppPackage(mAppPackage);
-        mLayoutFileParser = new LayoutFileParser();
-        int layoutId = 0;
-        for (File resFolder : Iterables.filter(mResourceFolders, fileExists)) {
-            for (File layoutFolder : resFolder.listFiles(layoutFolderFilter)) {
-                for (File xmlFile : layoutFolder.listFiles(xmlFileFilter)) {
-                    final ResourceBundle.LayoutFileBundle bundle = mLayoutFileParser
-                            .parseXml(xmlFile, mAppPackage, layoutId);
-                    if (bundle != null && !bundle.isEmpty()) {
-                        mResourceBundle.addLayoutBundle(bundle, layoutId);
-                        layoutId ++;
-                    }
-                }
-            }
-        }
-        mResourceBundle.validateMultiResLayouts();
-        return true;
-    }
-    
     public void ensureDataBinder() {
         if (mDataBinder == null) {
             mDataBinder = new DataBinder(mResourceBundle);
             mDataBinder.setFileWriter(mFileWriter);
         }
     }
-    
+
     public boolean hasAnythingToGenerate() {
-        L.d("checking if we have anything to genreate. bundle size: %s",
+        L.d("checking if we have anything to generate. bundle size: %s",
                 mResourceBundle == null ? -1 : mResourceBundle.getLayoutBundles().size());
         return mResourceBundle != null && mResourceBundle.getLayoutBundles().size() > 0;
     }
@@ -147,30 +71,9 @@ public class CompilerChef {
         ensureDataBinder();
         mDataBinder.writerBinderInterfaces();
     }
-    
+
     public void writeViewBinders() {
         ensureDataBinder();
         mDataBinder.writeBinders();
     }
-
-    private final Predicate<File> fileExists = new Predicate<File>() {
-        @Override
-        public boolean apply(File input) {
-            return input.exists() && input.canRead();
-        }
-    };
-
-    private final FilenameFilter layoutFolderFilter = new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String name) {
-            return name.startsWith("layout");
-        }
-    };
-
-    private final FilenameFilter xmlFileFilter =  new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String name) {
-            return name.toLowerCase().endsWith(".xml");
-        }
-    };
 }
