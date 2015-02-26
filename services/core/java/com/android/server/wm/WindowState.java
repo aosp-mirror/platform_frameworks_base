@@ -16,21 +16,21 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static com.android.server.wm.WindowManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerService.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerService.DEBUG_POWER;
 import static com.android.server.wm.WindowManagerService.DEBUG_RESIZE;
 import static com.android.server.wm.WindowManagerService.DEBUG_VISIBILITY;
-import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
 import android.os.Debug;
@@ -519,9 +519,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         TaskStack stack = mAppToken != null ? getStack() : null;
         if (stack != null && !stack.isFullscreen()) {
             stack.getBounds(mContainingFrame);
-            if (stack.mUnderStatusBar) {
-                mContainingFrame.top = pf.top;
+            final WindowState imeWin = mService.mInputMethodWindow;
+            if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this
+                    && mContainingFrame.bottom > cf.bottom) {
+                // IME is up and obscuring this window. Adjust the window position so it is visible.
+                mContainingFrame.top -= mContainingFrame.bottom - cf.bottom;
             }
+            // Make sure the containing frame is within the content frame so we don't layout
+            // resized window under screen decorations.
+            mContainingFrame.intersect(cf);
             mDisplayFrame.set(mContainingFrame);
         } else {
             mContainingFrame.set(pf);
