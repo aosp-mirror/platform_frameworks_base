@@ -177,6 +177,7 @@ public class ServiceMonitor {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
@@ -196,13 +197,14 @@ public class ServiceMonitor {
                 + " extras=" + bundleToString(intent.getExtras()));
         if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
             mHandler.sendEmptyMessage(MSG_START_SERVICE);
-        } else if (Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())) {
-            PackageManager pm = mContext.getPackageManager();
-            boolean serviceEnabled =
-                    pm.getApplicationEnabledSetting(mServiceName.getPackageName())
-                        != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        } else if (Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
+                || Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+            final PackageManager pm = mContext.getPackageManager();
+            final boolean serviceEnabled = isPackageAvailable()
+                    && pm.getApplicationEnabledSetting(mServiceName.getPackageName())
+                            != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
                     && pm.getComponentEnabledSetting(mServiceName)
-                        != PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+                            != PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
             if (mBound && !serviceEnabled) {
                 stopService();
                 scheduleCheckBound();
@@ -288,5 +290,16 @@ public class ServiceMonitor {
         final String setting = component == null ? null : component.flattenToShortString();
         Settings.Secure.putStringForUser(mContext.getContentResolver(),
                 mSettingKey, setting, UserHandle.USER_CURRENT);
+    }
+
+    public boolean isPackageAvailable() {
+        final ComponentName component = getComponent();
+        if (component == null) return false;
+        try {
+            return mContext.getPackageManager().isPackageAvailable(component.getPackageName());
+        } catch (RuntimeException e) {
+            Log.w(mTag, "Error checking package availability", e);
+            return false;
+        }
     }
 }
