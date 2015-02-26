@@ -58,7 +58,7 @@ public class RotateDrawable extends DrawableWrapper {
     private RotateState mState;
 
     /**
-     * Create a new rotating drawable with an empty state.
+     * Creates a new rotating drawable with no wrapped drawable.
      */
     public RotateDrawable() {
         this(new RotateState(null), null);
