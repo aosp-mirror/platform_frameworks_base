@@ -6564,6 +6564,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Provide original WindowInsets that are dispatched to the view hierarchy. The insets are
+     * only available if the view is attached.
+     *
+     * @return WindowInsets from the top of the view hierarchy or null if View is detached
+     */
+    public WindowInsets getRootWindowInsets() {
+        if (mAttachInfo != null) {
+            return mAttachInfo.mViewRootImpl.getWindowInsets(false /* forceConstruct */);
+        }
+        return null;
+    }
+
+    /**
      * @hide Compute the insets that should be consumed by this view and the ones
      * that should propagate to those under it.
      */
