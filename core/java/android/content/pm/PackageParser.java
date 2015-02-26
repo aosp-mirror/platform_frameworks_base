@@ -4405,6 +4405,13 @@ public class PackageParser {
             return false;
         }
 
+        /**
+         * @hide
+         */
+        public boolean isForwardLocked() {
+            return applicationInfo.isForwardLocked();
+        }
+
         public String toString() {
             return "Package{"
                 + Integer.toHexString(System.identityHashCode(this))
