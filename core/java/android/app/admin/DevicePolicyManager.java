@@ -68,7 +68,7 @@ import java.util.List;
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
  * registered with the system as a
- * <a href={@docRoot}guide/topics/admin/device-admin.html">device administrator</a>. Additionally,
+ * <a href="{@docRoot}guide/topics/admin/device-admin.html">device administrator</a>. Additionally,
  * a device administrator may be registered as either a profile or device owner. A given method is
  * accessible to all device administrators unless the documentation for that method specifies that
  * it is restricted to either device or profile owners.
@@ -3307,7 +3307,8 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      *
      * @see Activity#startLockTask()
-     * @see DeviceAdminReceiver#onLockTaskModeChanged(Context, Intent, boolean, String)
+     * @see DeviceAdminReceiver#onLockTaskModeEntering(Context, Intent, String)
+     * @see DeviceAdminReceiver#onLockTaskModeExiting(Context, Intent)
      * @see UserManager#DISALLOW_CREATE_WINDOWS
      */
     public void setLockTaskPackages(ComponentName admin, String[] packages)
