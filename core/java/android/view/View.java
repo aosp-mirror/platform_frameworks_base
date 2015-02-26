@@ -12978,7 +12978,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
-            imm.focusIn(this);
+            if (imm != null) {
+                imm.focusIn(this);
+            }
         }
     }
 
