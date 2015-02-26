@@ -93,10 +93,6 @@ public class TaskStack {
     // stack bounds once the stack is no longer forced to fullscreen.
     final private Rect mPreForceFullscreenBounds;
 
-    // When true this stack is at the top of the screen and should be layed out to extend under
-    // the status bar.
-    boolean mUnderStatusBar;
-
     // Device rotation as of the last time {@link #mBounds} was set.
     int mRotation;
 
@@ -106,7 +102,6 @@ public class TaskStack {
         mOverrideConfig = Configuration.EMPTY;
         mForceFullscreen = false;
         mPreForceFullscreenBounds = new Rect();
-        mUnderStatusBar = true;
         // TODO: remove bounds from log, they are always 0.
         EventLog.writeEvent(EventLogTags.WM_STACK_CREATED, stackId, mBounds.left, mBounds.top,
                 mBounds.right, mBounds.bottom);
@@ -165,7 +160,6 @@ public class TaskStack {
         mDimLayer.setBounds(bounds);
         mAnimationBackgroundSurface.setBounds(bounds);
         mBounds.set(bounds);
-        mUnderStatusBar = (mBounds.top == 0);
         mRotation = rotation;
         updateOverrideConfiguration();
         return true;
