@@ -188,6 +188,10 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz UNUSED,
             break;
         }
 
+        if (log_msg.id() != LOG_ID_EVENTS) {
+            continue;
+        }
+
         int32_t tag = * (int32_t *) log_msg.msg();
 
         int found = 0;
