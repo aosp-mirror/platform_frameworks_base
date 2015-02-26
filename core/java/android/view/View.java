@@ -10047,6 +10047,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return The measured width of this view as a bit mask.
      */
+    @ViewDebug.ExportedProperty(category = "measurement", flagMapping = {
+            @ViewDebug.FlagToString(mask = MEASURED_STATE_MASK, equals = MEASURED_STATE_TOO_SMALL,
+                    name = "MEASURED_STATE_TOO_SMALL"),
+    })
     public final int getMeasuredWidthAndState() {
         return mMeasuredWidth;
     }
@@ -10071,6 +10075,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @return The measured width of this view as a bit mask.
      */
+    @ViewDebug.ExportedProperty(category = "measurement", flagMapping = {
+            @ViewDebug.FlagToString(mask = MEASURED_STATE_MASK, equals = MEASURED_STATE_TOO_SMALL,
+                    name = "MEASURED_STATE_TOO_SMALL"),
+    })
     public final int getMeasuredHeightAndState() {
         return mMeasuredHeight;
     }

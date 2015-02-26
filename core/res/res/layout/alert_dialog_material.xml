@@ -22,34 +22,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout android:id="@+id/topPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout android:id="@+id/title_template"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical|start"
-            android:paddingStart="?attr/dialogPreferredPadding"
-            android:paddingEnd="?attr/dialogPreferredPadding"
-            android:paddingTop="@dimen/dialog_padding_top_material">
-            <ImageView android:id="@+id/icon"
-                android:layout_width="32dip"
-                android:layout_height="32dip"
-                android:layout_marginEnd="8dip"
-                android:scaleType="fitCenter"
-                android:src="@null" />
-            <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
-                style="?attr/windowTitleStyle"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="viewStart" />
-        </LinearLayout>
-        <!-- If the client uses a customTitle, it will be added here. -->
-    </LinearLayout>
+    <include layout="@layout/alert_dialog_title_material" />
 
     <FrameLayout android:id="@+id/contentPanel"
         android:layout_width="match_parent"

@@ -103,46 +103,4 @@
     <color name="group_button_dialog_pressed_holo_light">#ffffffff</color>
     <color name="group_button_dialog_focused_holo_light">#4699cc00</color>
 
-    <!-- Time picker -->
-    <eat-comment />
-
-    <color name="timepicker_default_background_holo_light">@color/white</color>
-    <color name="timepicker_default_background_holo_dark">#ff303030</color>
-
-    <color name="timepicker_default_text_color_holo_light">#8c8c8c</color>
-    <color name="timepicker_default_text_color_holo_dark">@color/white</color>
-
-    <color name="timepicker_default_ampm_selected_background_color_holo_light">@color/holo_blue_light</color>
-    <color name="timepicker_default_ampm_selected_background_color_holo_dark">@color/holo_blue_light</color>
-
-    <color name="timepicker_default_ampm_unselected_background_color_holo_light">@color/white</color>
-    <color name="timepicker_default_ampm_unselected_background_color_holo_dark">@color/transparent</color>
-
-    <!-- DatePicker colors -->
-    <eat-comment />
-
-    <color name="datepicker_default_header_selector_background_holo_light">@android:color/white</color>
-    <color name="datepicker_default_header_selector_background_holo_dark">#ff303030</color>
-
-    <color name="datepicker_default_header_dayofweek_background_color_holo_light">#999999</color>
-    <color name="datepicker_default_header_dayofweek_background_color_holo_dark">@android:color/white</color>
-
-    <color name="datepicker_default_normal_text_color_holo_light">#ff999999</color>
-    <color name="datepicker_default_normal_text_color_holo_dark">@android:color/white</color>
-
-    <color name="datepicker_default_disabled_text_color_holo_light">#80999999</color>
-    <color name="datepicker_default_disabled_text_color_holo_dark">#80999999</color>
-
-    <color name="datepicker_default_selected_text_color_holo_light">#33b5e5</color>
-    <color name="datepicker_default_selected_text_color_holo_dark">#33b5e5</color>
-
-    <color name="datepicker_default_pressed_text_color_holo_light">#0099cc</color>
-    <color name="datepicker_default_pressed_text_color_holo_dark">#0099cc</color>
-
-    <color name="datepicker_default_circle_background_color_holo_light">@android:color/holo_blue_light</color>
-    <color name="datepicker_default_circle_background_color_holo_dark">@android:color/holo_blue_light</color>
-
-    <color name="datepicker_default_view_animator_color_holo_light">#f2f2f2</color>
-    <color name="datepicker_default_view_animator_color_holo_dark">#ff303030</color>
-
 </resources>

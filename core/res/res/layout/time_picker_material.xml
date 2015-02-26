@@ -22,7 +22,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
     <include
-        layout="@layout/time_header_label"
+        layout="@layout/time_picker_header_material"
         android:layout_width="match_parent"
         android:layout_height="@dimen/timepicker_header_height"
         android:layout_gravity="center" />
@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/timepicker_radial_picker_dimen"
         android:layout_gravity="center"
-        android:layout_marginTop="?attr/dialogPreferredPadding"
-        android:layout_marginStart="?attr/dialogPreferredPadding"
-        android:layout_marginEnd="?attr/dialogPreferredPadding" />
+        android:layout_marginTop="@dimen/timepicker_radial_picker_top_margin"
+        android:layout_marginStart="@dimen/timepicker_radial_picker_horizontal_margin"
+        android:layout_marginEnd="@dimen/timepicker_radial_picker_horizontal_margin" />
 </LinearLayout>

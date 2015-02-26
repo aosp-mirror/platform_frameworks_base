@@ -37,7 +37,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="PreferenceFragment.Material">
-        <item name="layout">@android:layout/preference_list_fragment_material</item>
+        <item name="layout">@layout/preference_list_fragment_material</item>
         <item name="paddingStart">@dimen/preference_fragment_padding_side_material</item>
         <item name="paddingEnd">@dimen/preference_fragment_padding_side_material</item>
     </style>
@@ -72,7 +72,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Preference.Material.SeekBarPreference">
-        <item name="layout">@android:layout/preference_widget_seekbar_material</item>
+        <item name="layout">@layout/preference_widget_seekbar_material</item>
     </style>
 
     <style name="Preference.Material.PreferenceScreen"/>
@@ -379,14 +379,12 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.TimePicker.TimeLabel" parent="TextAppearance.Material">
         <item name="textSize">@dimen/timepicker_time_label_size</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">@color/time_picker_header_text_material</item>
     </style>
 
-    <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material">
+    <style name="TextAppearance.Material.TimePicker.AmPmLabel" parent="TextAppearance.Material.Button">
         <item name="textSize">@dimen/timepicker_ampm_label_size</item>
-        <item name="textAllCaps">true</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
-        <item name="textStyle">bold</item>
+        <item name="textColor">@color/time_picker_header_text_material</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DayOfWeekLabel" parent="TextAppearance.Material">
@@ -397,19 +395,19 @@ please see styles_device_defaults.xml.
 
     <style name="TextAppearance.Material.DatePicker.MonthLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">@color/date_picker_header_text_material</item>
         <item name="textSize">@dimen/datepicker_selected_date_month_size</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.DayOfMonthLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">@color/date_picker_header_text_material</item>
         <item name="textSize">@dimen/datepicker_selected_date_day_size</item>
     </style>
 
     <style name="TextAppearance.Material.DatePicker.YearLabel" parent="TextAppearance.Material">
         <item name="includeFontPadding">false</item>
-        <item name="textColor">?attr/textColorSecondaryInverse</item>
+        <item name="textColor">@color/date_picker_header_text_material</item>
         <item name="textSize">@dimen/datepicker_selected_date_year_size</item>
     </style>
 
@@ -642,36 +640,32 @@ please see styles_device_defaults.xml.
         <item name="virtualButtonPressedDrawable">?attr/selectableItemBackground</item>
     </style>
 
-    <style name="Widget.Material.TimePicker" parent="Widget.TimePicker">
+    <style name="Widget.Material.TimePicker">
         <item name="timePickerMode">clock</item>
-        <item name="legacyLayout">@layout/time_picker_legacy_holo</item>
+        <item name="legacyLayout">@layout/time_picker_legacy_material</item>
         <!-- Attributes for new-style TimePicker. -->
-        <item name="internalLayout">@layout/time_picker_holo</item>
+        <item name="internalLayout">@layout/time_picker_material</item>
         <item name="headerTimeTextAppearance">@style/TextAppearance.Material.TimePicker.TimeLabel</item>
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
-        <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
         <item name="headerBackground">@drawable/time_picker_header_material</item>
         <item name="numbersTextColor">?attr/textColorPrimaryActivated</item>
         <item name="numbersInnerTextColor">?attr/textColorSecondaryActivated</item>
         <item name="numbersBackgroundColor">#10ffffff</item>
         <item name="numbersSelectorColor">?attr/colorControlActivated</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
-        <item name="amPmBackgroundColor">@color/transparent</item>
-        <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
     </style>
 
-    <style name="Widget.Material.DatePicker" parent="Widget.DatePicker">
+    <style name="Widget.Material.DatePicker">
         <item name="datePickerMode">calendar</item>
         <item name="legacyLayout">@layout/date_picker_legacy_holo</item>
+        <item name="calendarViewShown">true</item>
         <!-- Attributes for new-style DatePicker. -->
         <item name="internalLayout">@layout/date_picker_holo</item>
-        <item name="calendarViewShown">true</item>
         <item name="dayOfWeekBackground">#10000000</item>
         <item name="dayOfWeekTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfWeekLabel</item>
         <item name="headerMonthTextAppearance">@style/TextAppearance.Material.DatePicker.MonthLabel</item>
         <item name="headerDayOfMonthTextAppearance">@style/TextAppearance.Material.DatePicker.DayOfMonthLabel</item>
         <item name="headerYearTextAppearance">@style/TextAppearance.Material.DatePicker.YearLabel</item>
-        <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
         <item name="headerBackground">?attr/colorAccent</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
         <item name="yearListSelectorColor">?attr/colorControlActivated</item>

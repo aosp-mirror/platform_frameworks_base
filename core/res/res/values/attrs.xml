@@ -4471,10 +4471,6 @@
         <attr name="headerYearTextAppearance" format="reference" />
         <!-- The background for the date selector. -->
         <attr name="headerBackground" />
-        <!-- @hide The selected text color for the date selector. Used as a
-             backup if the text appearance does not explicitly have a color
-             set for the selected state. -->
-        <attr name="headerSelectedTextColor" />
         <!-- The list year's text appearance in the list. -->
         <attr name="yearListItemTextAppearance" format="reference" />
         <!-- The list year's selected circle color in the list. -->
@@ -4774,10 +4770,6 @@
         <attr name="headerAmPmTextAppearance" format="reference" />
         <!-- The text appearance for the time header. -->
         <attr name="headerTimeTextAppearance" format="reference" />
-        <!-- @hide The text color for selected time header of the TimePicker.
-             This will override the value from the text appearance if it does
-             not explicitly have a color set for the selected state. -->
-        <attr name="headerSelectedTextColor" format="color" />
         <!-- The background for the header containing the currently selected time. -->
         <attr name="headerBackground" />
         <!-- The color for the hours/minutes numbers. -->
@@ -4790,10 +4782,6 @@
         <attr name="amPmTextColor" format="color" />
         <!-- The background color state list for the AM/PM selectors. -->
         <attr name="amPmBackgroundColor" format="color" />
-        <!-- @hide The background color for the AM/PM selectors of the
-             TimePicker when selected. Used if the background color does not
-             explicitly have a color set for the selected state. -->
-        <attr name="amPmSelectedBackgroundColor" format="color" />
         <!-- The color for the hours/minutes selector. -->
         <attr name="numbersSelectorColor" format="color" />
         <!-- Defines the look of the widget. Prior to the L release, the only choice was

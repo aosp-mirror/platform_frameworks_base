@@ -154,34 +154,23 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         dateLayout.setBackground(a.getDrawable(R.styleable.DatePicker_headerBackground));
 
-        final int headerSelectedTextColor = a.getColor(
-                R.styleable.DatePicker_headerSelectedTextColor, defaultHighlightColor);
         final int monthTextAppearanceResId = a.getResourceId(
                 R.styleable.DatePicker_headerMonthTextAppearance, 0);
         if (monthTextAppearanceResId != 0) {
             mHeaderMonthTextView.setTextAppearance(context, monthTextAppearanceResId);
         }
-        mHeaderMonthTextView.setTextColor(ColorStateList.addFirstIfMissing(
-                mHeaderMonthTextView.getTextColors(), R.attr.state_selected,
-                headerSelectedTextColor));
 
         final int dayOfMonthTextAppearanceResId = a.getResourceId(
                 R.styleable.DatePicker_headerDayOfMonthTextAppearance, 0);
         if (dayOfMonthTextAppearanceResId != 0) {
             mHeaderDayOfMonthTextView.setTextAppearance(context, dayOfMonthTextAppearanceResId);
         }
-        mHeaderDayOfMonthTextView.setTextColor(ColorStateList.addFirstIfMissing(
-                mHeaderDayOfMonthTextView.getTextColors(), R.attr.state_selected,
-                headerSelectedTextColor));
 
         final int headerYearTextAppearanceResId = a.getResourceId(
                 R.styleable.DatePicker_headerYearTextAppearance, 0);
         if (headerYearTextAppearanceResId != 0) {
             mHeaderYearTextView.setTextAppearance(context, headerYearTextAppearanceResId);
         }
-        mHeaderYearTextView.setTextColor(ColorStateList.addFirstIfMissing(
-                mHeaderYearTextView.getTextColors(), R.attr.state_selected,
-                headerSelectedTextColor));
 
         mDayPickerView = new DayPickerView(mContext);
         mDayPickerView.setFirstDayOfWeek(mFirstDayOfWeek);

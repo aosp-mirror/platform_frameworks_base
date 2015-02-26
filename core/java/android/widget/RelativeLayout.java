@@ -1358,6 +1358,7 @@ public class RelativeLayout extends ViewGroup {
          *        {@link android.widget.RelativeLayout RelativeLayout}, such as
          *        ALIGN_WITH_PARENT_LEFT.
          * @see #addRule(int, int)
+         * @see #getRule(int)
          */
         public void addRule(int verb) {
             mRules[verb] = TRUE;
@@ -1378,6 +1379,7 @@ public class RelativeLayout extends ViewGroup {
          *        for true or 0 for false).  For verbs that don't refer to another sibling
          *        (for example, ALIGN_WITH_PARENT_BOTTOM) just use -1.
          * @see #addRule(int)
+         * @see #getRule(int)
          */
         public void addRule(int verb, int anchor) {
             mRules[verb] = anchor;
@@ -1393,11 +1395,28 @@ public class RelativeLayout extends ViewGroup {
          *         ALIGN_WITH_PARENT_LEFT.
          * @see #addRule(int)
          * @see #addRule(int, int)
+         * @see #getRule(int)
          */
         public void removeRule(int verb) {
             mRules[verb] = 0;
             mInitialRules[verb] = 0;
             mRulesChanged = true;
+        }
+
+        /**
+         * Returns the layout rule associated with a specific verb.
+         *
+         * @param verb one of the verbs defined by {@link RelativeLayout}, such
+         *             as ALIGN_WITH_PARENT_LEFT
+         * @return the id of another view to use as an anchor, a boolean value
+         *         (represented as {@link RelativeLayout#TRUE} for true
+         *         or 0 for false), or -1 for verbs that don't refer to another
+         *         sibling (for example, ALIGN_WITH_PARENT_BOTTOM)
+         * @see #addRule(int)
+         * @see #addRule(int, int)
+         */
+        public int getRule(int verb) {
+            return mRules[verb];
         }
 
         private boolean hasRelativeRules() {
