@@ -107,14 +107,6 @@ void Caches::initExtensions() {
         startMark = startMarkNull;
         endMark = endMarkNull;
     }
-
-    if (mExtensions.hasDebugLabel() && (drawDeferDisabled || drawReorderDisabled)) {
-        setLabel = glLabelObjectEXT;
-        getLabel = glGetObjectLabelEXT;
-    } else {
-        setLabel = setLabelNull;
-        getLabel = getLabelNull;
-    }
 }
 
 void Caches::initConstraints() {

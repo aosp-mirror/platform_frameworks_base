@@ -104,6 +104,14 @@ ifdef HWUI_COMPILE_FOR_PERF
     LOCAL_CFLAGS += -fno-omit-frame-pointer -marm -mapcs
 endif
 
+ifeq (true, $(HWUI_NULL_GPU))
+    LOCAL_SRC_FILES += \
+        tests/nullegl.cpp \
+        tests/nullgles.cpp
+
+    LOCAL_CFLAGS += -DHWUI_NULL_GPU
+endif
+
 # Defaults for ATRACE_TAG and LOG_TAG for libhwui
 LOCAL_CFLAGS += -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\"
 

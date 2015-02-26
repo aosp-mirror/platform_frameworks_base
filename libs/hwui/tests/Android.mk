@@ -25,6 +25,8 @@ LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuitest
 LOCAL_MODULE_STEM_64 := hwuitest64
 
+HWUI_NULL_GPU := false
+
 include $(LOCAL_PATH)/Android.common.mk
 
 LOCAL_SRC_FILES += \

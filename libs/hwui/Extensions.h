@@ -40,7 +40,6 @@ public:
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
     inline bool hasDiscardFramebuffer() const { return mHasDiscardFramebuffer; }
     inline bool hasDebugMarker() const { return mHasDebugMarker; }
-    inline bool hasDebugLabel() const { return mHasDebugLabel; }
     inline bool hasTiledRendering() const { return mHasTiledRendering; }
     inline bool has1BitStencil() const { return mHas1BitStencil; }
     inline bool has4BitStencil() const { return mHas4BitStencil; }
@@ -68,7 +67,6 @@ private:
     bool mHasFramebufferFetch;
     bool mHasDiscardFramebuffer;
     bool mHasDebugMarker;
-    bool mHasDebugLabel;
     bool mHasTiledRendering;
     bool mHas1BitStencil;
     bool mHas4BitStencil;
