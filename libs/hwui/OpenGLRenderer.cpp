@@ -2185,26 +2185,43 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     mDirty = true;
 }
 
-void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
-         float srcLeft, float srcTop, float srcRight, float srcBottom,
-         float dstLeft, float dstTop, float dstRight, float dstBottom,
-         const SkPaint* paint) {
-    if (quickRejectSetupScissor(dstLeft, dstTop, dstRight, dstBottom)) {
+void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, const SkPaint* paint) {
+    if (quickRejectSetupScissor(dst)) {
         return;
     }
 
-    mCaches.textureState().activateTexture(0);
     Texture* texture = getTexture(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
 
+    if (USE_GLOPS) {
+        Rect uv(fmax(0.0f, src.left / texture->width),
+                fmax(0.0f, src.top / texture->height),
+                fmin(1.0f, src.right / texture->width),
+                fmin(1.0f, src.bottom / texture->height));
+
+        bool isAlpha8Texture = bitmap->colorType() == kAlpha_8_SkColorType;
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshTexturedUvQuad(texture->uvMapper, uv)
+                .setFillTexturePaint(*texture, isAlpha8Texture, paint, currentSnapshot()->alpha)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewMapUnitToRectSnap(dst)
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
+    mCaches.textureState().activateTexture(0);
+
     const float width = texture->width;
     const float height = texture->height;
 
-    float u1 = fmax(0.0f, srcLeft / width);
-    float v1 = fmax(0.0f, srcTop / height);
-    float u2 = fmin(1.0f, srcRight / width);
-    float v2 = fmin(1.0f, srcBottom / height);
+    float u1 = fmax(0.0f, src.left / width);
+    float v1 = fmax(0.0f, src.top / height);
+    float u2 = fmin(1.0f, src.right / width);
+    float v2 = fmin(1.0f, src.bottom / height);
 
     getMapper(texture).map(u1, v1, u2, v2);
 
@@ -2213,25 +2230,21 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
 
-    float scaleX = (dstRight - dstLeft) / (srcRight - srcLeft);
-    float scaleY = (dstBottom - dstTop) / (srcBottom - srcTop);
+    float scaleX = (dst.right - dst.left) / (src.right - src.left);
+    float scaleY = (dst.bottom - dst.top) / (src.bottom - src.top);
 
     bool scaled = scaleX != 1.0f || scaleY != 1.0f;
-    // Apply a scale transform on the canvas only when a shader is in use
-    // Skia handles the ratio between the dst and src rects as a scale factor
-    // when a shader is set
-    bool useScaleTransform = getShader(paint) && scaled;
     bool ignoreTransform = false;
 
-    if (CC_LIKELY(currentTransform()->isPureTranslate() && !useScaleTransform)) {
-        float x = (int) floorf(dstLeft + currentTransform()->getTranslateX() + 0.5f);
-        float y = (int) floorf(dstTop + currentTransform()->getTranslateY() + 0.5f);
+    if (CC_LIKELY(currentTransform()->isPureTranslate())) {
+        float x = (int) floorf(dst.left + currentTransform()->getTranslateX() + 0.5f);
+        float y = (int) floorf(dst.top + currentTransform()->getTranslateY() + 0.5f);
 
-        dstRight = x + (dstRight - dstLeft);
-        dstBottom = y + (dstBottom - dstTop);
+        dst.right = x + (dst.right - dst.left);
+        dst.bottom = y + (dst.bottom - dst.top);
 
-        dstLeft = x;
-        dstTop = y;
+        dst.left = x;
+        dst.top = y;
 
         texture->setFilter(scaled ? PaintUtils::getFilter(paint) : GL_NEAREST, true);
         ignoreTransform = true;
@@ -2239,32 +2252,16 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap,
         texture->setFilter(PaintUtils::getFilter(paint), true);
     }
 
-    if (CC_UNLIKELY(useScaleTransform)) {
-        save(SkCanvas::kMatrix_SaveFlag);
-        translate(dstLeft, dstTop);
-        scale(scaleX, scaleY);
-
-        dstLeft = 0.0f;
-        dstTop = 0.0f;
-
-        dstRight = srcRight - srcLeft;
-        dstBottom = srcBottom - srcTop;
-    }
-
     if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlpha8TextureMesh(dstLeft, dstTop, dstRight, dstBottom,
+        drawAlpha8TextureMesh(dst.left, dst.top, dst.right, dst.bottom,
                 texture->id, paint,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, kUnitQuadCount, ignoreTransform);
     } else {
-        drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom,
+        drawTextureMesh(dst.left, dst.top, dst.right, dst.bottom,
                 texture->id, paint, texture->blend,
                 &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, kUnitQuadCount, false, ignoreTransform);
-    }
-
-    if (CC_UNLIKELY(useScaleTransform)) {
-        restore();
     }
 
     resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);

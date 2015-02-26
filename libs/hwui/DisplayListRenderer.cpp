@@ -258,7 +258,8 @@ void DisplayListRenderer::drawBitmap(const SkBitmap& bitmap, float srcLeft, floa
         float srcRight, float srcBottom, float dstLeft, float dstTop,
         float dstRight, float dstBottom, const SkPaint* paint) {
     if (srcLeft == 0 && srcTop == 0
-            && srcRight == bitmap.width() && srcBottom == bitmap.height()
+            && srcRight == bitmap.width()
+            && srcBottom == bitmap.height()
             && (srcBottom - srcTop == dstBottom - dstTop)
             && (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
@@ -268,6 +269,30 @@ void DisplayListRenderer::drawBitmap(const SkBitmap& bitmap, float srcLeft, floa
         restore();
     } else {
         paint = refPaint(paint);
+
+        if (paint && paint->getShader()) {
+            float scaleX = (dstRight - dstLeft) / (srcRight - srcLeft);
+            float scaleY = (dstBottom - dstTop) / (srcBottom - srcTop);
+            if (!MathUtils::areEqual(scaleX, 1.0f) || !MathUtils::areEqual(scaleY, 1.0f)) {
+                // Apply the scale transform on the canvas, so that the shader
+                // effectively calculates positions relative to src rect space
+
+                save(SkCanvas::kMatrix_SaveFlag);
+                translate(dstLeft, dstTop);
+                scale(scaleX, scaleY);
+
+                dstLeft = 0.0f;
+                dstTop = 0.0f;
+                dstRight = srcRight - srcLeft;
+                dstBottom = srcBottom - srcTop;
+
+                addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(&bitmap),
+                        srcLeft, srcTop, srcRight, srcBottom,
+                        dstLeft, dstTop, dstRight, dstBottom, paint));
+                restore();
+                return;
+            }
+        }
 
         addDrawOp(new (alloc()) DrawBitmapRectOp(refBitmap(&bitmap),
                 srcLeft, srcTop, srcRight, srcBottom,
