@@ -1104,6 +1104,58 @@ public class ServiceState implements Parcelable {
                 || radioTechnology == RIL_RADIO_TECHNOLOGY_EHRPD;
     }
 
+    /** @hide */
+    public static boolean hasCdma(int radioTechnologyBitmask) {
+        int cdmaBitmask = (RIL_RADIO_TECHNOLOGY_IS95A
+                | RIL_RADIO_TECHNOLOGY_IS95B
+                | RIL_RADIO_TECHNOLOGY_1xRTT
+                | RIL_RADIO_TECHNOLOGY_EVDO_0
+                | RIL_RADIO_TECHNOLOGY_EVDO_A
+                | RIL_RADIO_TECHNOLOGY_EVDO_B
+                | RIL_RADIO_TECHNOLOGY_EHRPD);
+
+        return ((radioTechnologyBitmask & cdmaBitmask) != 0);
+    }
+
+    /** @hide */
+    public static boolean bitmaskHasTech(int bearerBitmask, int radioTech) {
+        if (bearerBitmask == 0) {
+            return true;
+        } else if (radioTech >= 1) {
+            return ((bearerBitmask & (1 << (radioTech - 1))) != 0);
+        }
+        return false;
+    }
+
+    /** @hide */
+    public static int getBitmaskForTech(int radioTech) {
+        if (radioTech >= 1) {
+            return (1 << (radioTech - 1));
+        }
+        return 0;
+    }
+
+    /** @hide */
+    public static int getBitmaskFromString(String bearerList) {
+        String[] bearers = bearerList.split("\\|");
+        int bearerBitmask = 0;
+        for (String bearer : bearers) {
+            int bearerInt = 0;
+            try {
+                bearerInt = Integer.parseInt(bearer.trim());
+            } catch (NumberFormatException nfe) {
+                return 0;
+            }
+
+            if (bearerInt == 0) {
+                return 0;
+            }
+
+            bearerBitmask |= getBitmaskForTech(bearerInt);
+        }
+        return bearerBitmask;
+    }
+
     /**
      * Returns a merged ServiceState consisting of the base SS with voice settings from the
      * voice SS. The voice SS is only used if it is IN_SERVICE (otherwise the base SS is returned).
