@@ -2,42 +2,50 @@ page.title=Draw 9-patch
 page.tags=NinePatch
 @jd:body
 
-<p>The Draw 9-patch tool allows you to easily create a 
-   {@link android.graphics.NinePatch} graphic using a WYSIWYG editor.</p>
-<p>For an introduction to Nine-patch graphics and how they work, please read 
-the section about Nine-patch in the 
-<a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">2D Graphics</a>
+<p>The Draw 9-patch tool is a WYSIWYG editor that allows you to create bitmap images that
+automatically resize to accommodate the contents of the view and the size of the screen. Selected
+parts of the image are scaled horizontally or vertically based indicators drawn within the image. </p>
+<p>For an introduction to NinePatch graphics and how they work, please read
+the section about NinePatch Drawables in the
+<a href="{@docRoot}guide/topics/graphics/2d-graphics.html#nine-patch">Canvas and Drawables</a>
 document.</p>
 
 <img src="{@docRoot}images/draw9patch-norm.png" style="float:right" alt="" height="300" width="341"
 />
 
-<p>Here's a quick guide to create a Nine-patch graphic using the Draw 9-patch tool.
-You'll need the PNG image with which you'd like to create a NinePatch.</p>
+<p>Here's a quick guide to create a NinePatch graphic using the Draw 9-patch tool.
+You'll need the PNG image with which you'd like to create a NinePatch image.</p>
 
 <ol>
-  <li>From a terminal, launch the <code>draw9patch</code> application from your SDK 
-    <code>/tools</code> directory.
+  <li>From a terminal, run the <code>draw9patch</code> command from your SDK
+    <code>sdk/tools</code> directory to launch the Draw 9-patch tool. 
     </li>
-  <li>Drag your PNG image into the Draw 9-patch window 
+  <li>Drag your PNG image into the Draw 9-patch window
     (or <strong>File</strong> > <strong>Open 9-patch...</strong> to locate the file).
     Your workspace will now open.
     <p>The left pane is your drawing area, in which you can edit the lines for the
-     stretchable patches and content area. The right 
+     stretchable patches and content area. The right
      pane is the preview area, where you can preview your graphic when stretched.</p>
     </li>
-  <li>Click within the 1-pixel perimeter to draw the lines that define the stretchable 
-    patches and (optional) content area. Right-click (or hold Shift and click, on Mac) to erase 
+  <li>Click within the 1-pixel perimeter to draw the lines that define the stretchable
+    patches and (optional) content area. Right-click (or hold Shift and click, on Mac) to erase
     previously drawn lines.
     </li>
   <li>When done, select <strong>File</strong> > <strong>Save 9-patch...</strong>
     <p>Your image will be saved with the <code>.9.png</code> file name.</p>
     </li>
 </ol>
-    <p class="note"><strong>Note:</strong> A normal PNG file (<code>*.png</code>) will be 
-     loaded with an empty one-pixel border added around the image, in which you can draw 
+
+   <p>To make sure that your NinePatch graphics scale down properly, verify that any
+   stretchable regions are at least 2x2 pixels in size.
+   Otherwise, they may disappear when scaled down. Also, provide one pixel of extra safe space in
+   the graphics before and after stretchable regions to avoid interpolation during scaling that may
+   cause the color at the boundaries to change. </p>
+
+    <p class="note"><strong>Note:</strong> A normal PNG file (<code>*.png</code>) will be
+     loaded with an empty one-pixel border added around the image, in which you can draw
      the stretchable patches and content area.
-     A previously saved 9-patch file (<code>*.9.png</code>) will be loaded as-is, 
+     A previously saved NinePatch file (<code>*.9.png</code>) will be loaded as-is,
      with no drawing area added, because it already exists.</p>
 
 <img src="{@docRoot}images/draw9patch-bad.png" style="float:right;clear:both" alt="" height="300" width="341"
