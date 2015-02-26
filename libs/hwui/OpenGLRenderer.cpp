@@ -1234,7 +1234,7 @@ void OpenGLRenderer::clearLayerRegions() {
             aBuilder.setMeshIndexedQuads(&mesh[0], quadCount)
                     .setFillClear()
                     .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
-                    .setModelViewOffsetRect(0, 0, currentSnapshot()->getClipRect())
+                    .setModelViewOffsetRect(0, 0, Rect(currentSnapshot()->getClipRect()))
                     .setRoundRectClipState(currentSnapshot()->roundRectClipState)
                     .build();
             renderGlop(glop);
@@ -2077,17 +2077,14 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
         return;
     }
 
-    // TODO: use quickReject on bounds from vertices
-    mRenderState.scissor().setEnabled(true);
-
     float left = FLT_MAX;
     float top = FLT_MAX;
     float right = FLT_MIN;
     float bottom = FLT_MIN;
 
-    const uint32_t count = meshWidth * meshHeight * 6;
+    const uint32_t elementCount = meshWidth * meshHeight * 6;
 
-    std::unique_ptr<ColorTextureVertex[]> mesh(new ColorTextureVertex[count]);
+    std::unique_ptr<ColorTextureVertex[]> mesh(new ColorTextureVertex[elementCount]);
     ColorTextureVertex* vertex = &mesh[0];
 
     std::unique_ptr<int[]> tempColors;
@@ -2098,7 +2095,6 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
         colors = tempColors.get();
     }
 
-    mCaches.textureState().activateTexture(0);
     Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     const UvMapper& mapper(getMapper(texture));
 
@@ -2149,6 +2145,25 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     }
     const AutoTexture autoCleanup(texture);
 
+    if (USE_GLOPS) {
+        /*
+         * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
+         * shader in that case to mimic the behavior in SkiaCanvas::drawBitmapMesh.
+         */
+        bool isAlpha8Texture = false;
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshColoredTexturedMesh(mesh.get(), elementCount)
+                .setFillTexturePaint(*texture, isAlpha8Texture, paint, currentSnapshot()->alpha)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
+    mCaches.textureState().activateTexture(0);
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(PaintUtils::getFilter(paint), true);
 
@@ -2156,12 +2171,10 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
+
+    dirtyLayer(left, top, right, bottom, *currentTransform());
+
     float a = alpha / 255.0f;
-
-    if (hasLayer()) {
-        dirtyLayer(left, top, right, bottom, *currentTransform());
-    }
-
     setupDraw();
     setupDrawWithTextureAndColor();
     setupDrawColor(a, a, a, a);
@@ -2175,7 +2188,7 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     setupDrawColorFilterUniforms(getColorFilter(paint));
     setupDrawMesh(&mesh[0].x, &mesh[0].u, &mesh[0].r);
 
-    glDrawArrays(GL_TRIANGLES, 0, count);
+    glDrawArrays(GL_TRIANGLES, 0, elementCount);
 
     int slot = mCaches.program().getAttrib("colors");
     if (slot >= 0) {

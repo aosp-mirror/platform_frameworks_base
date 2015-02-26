@@ -61,15 +61,14 @@ GlopBuilder::GlopBuilder(RenderState& renderState, Caches& caches, Glop* outGlop
 GlopBuilder& GlopBuilder::setMeshUnitQuad() {
     TRIGGER_STAGE(kMeshStage);
 
-    mOutGlop->mesh.vertexFlags = kNone_Attrib;
     mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
-    mOutGlop->mesh.vertexBufferObject = mRenderState.meshState().getUnitQuadVBO();
-    mOutGlop->mesh.vertices = nullptr;
-    mOutGlop->mesh.indexBufferObject = 0;
-    mOutGlop->mesh.indices = nullptr;
+    mOutGlop->mesh.indices = { 0, nullptr };
+    mOutGlop->mesh.vertices = {
+            mRenderState.meshState().getUnitQuadVBO(),
+            VertexAttribFlags::kNone,
+            nullptr, nullptr, nullptr,
+            kTextureVertexStride };
     mOutGlop->mesh.elementCount = 4;
-    mOutGlop->mesh.stride = kTextureVertexStride;
-    mOutGlop->mesh.texCoordOffset = nullptr;
     return *this;
 }
 
@@ -81,70 +80,76 @@ GlopBuilder& GlopBuilder::setMeshTexturedUnitQuad(const UvMapper* uvMapper) {
 
     TRIGGER_STAGE(kMeshStage);
 
-    mOutGlop->mesh.vertexFlags = kTextureCoord_Attrib;
     mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
-    mOutGlop->mesh.vertexBufferObject = mRenderState.meshState().getUnitQuadVBO();
-    mOutGlop->mesh.vertices = nullptr;
-    mOutGlop->mesh.texCoordOffset = (GLvoid*) kMeshTextureOffset;
-    mOutGlop->mesh.indexBufferObject = 0;
-    mOutGlop->mesh.indices = nullptr;
+    mOutGlop->mesh.indices = { 0, nullptr };
+    mOutGlop->mesh.vertices = {
+            mRenderState.meshState().getUnitQuadVBO(),
+            VertexAttribFlags::kTextureCoord,
+            nullptr, (const void*) kMeshTextureOffset, nullptr,
+            kTextureVertexStride };
     mOutGlop->mesh.elementCount = 4;
-    mOutGlop->mesh.stride = kTextureVertexStride;
-    mDescription.hasTexture = true;
     return *this;
 }
 
 GlopBuilder& GlopBuilder::setMeshTexturedUvQuad(const UvMapper* uvMapper, Rect uvs) {
     TRIGGER_STAGE(kMeshStage);
 
-    mOutGlop->mesh.vertexFlags = kTextureCoord_Attrib;
-    mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
-
     if (CC_UNLIKELY(uvMapper)) {
         uvMapper->map(uvs);
     }
     setUnitQuadTextureCoords(uvs, &mOutGlop->mesh.mappedVertices[0]);
 
-    mOutGlop->mesh.vertexBufferObject = 0;
-    mOutGlop->mesh.vertices = &mOutGlop->mesh.mappedVertices[0].x;
-    mOutGlop->mesh.texCoordOffset = &mOutGlop->mesh.mappedVertices[0].u;
-    mOutGlop->mesh.indexBufferObject = 0;
-    mOutGlop->mesh.indices = nullptr;
+    const TextureVertex* textureVertex = mOutGlop->mesh.mappedVertices;
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
+    mOutGlop->mesh.indices = { 0, nullptr };
+    mOutGlop->mesh.vertices = {
+            0,
+            VertexAttribFlags::kTextureCoord,
+            &textureVertex[0].x, &textureVertex[0].u, nullptr,
+            kTextureVertexStride };
     mOutGlop->mesh.elementCount = 4;
-    mOutGlop->mesh.stride = kTextureVertexStride;
-    mDescription.hasTexture = true;
     return *this;
 }
 
-GlopBuilder& GlopBuilder::setMeshIndexedQuads(void* vertexData, int quadCount) {
+GlopBuilder& GlopBuilder::setMeshIndexedQuads(Vertex* vertexData, int quadCount) {
     TRIGGER_STAGE(kMeshStage);
 
-    mOutGlop->mesh.vertexFlags = kNone_Attrib;
     mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
-    mOutGlop->mesh.vertexBufferObject = 0;
-    mOutGlop->mesh.vertices = vertexData;
-    mOutGlop->mesh.indexBufferObject = mRenderState.meshState().getQuadListIBO();
-    mOutGlop->mesh.indices = nullptr;
-    mOutGlop->mesh.texCoordOffset = nullptr;
+    mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
+    mOutGlop->mesh.vertices = {
+            0,
+            VertexAttribFlags::kNone,
+            vertexData, nullptr, nullptr,
+            kVertexStride };
     mOutGlop->mesh.elementCount = 6 * quadCount;
-    mOutGlop->mesh.stride = kVertexStride;
-
     return *this;
 }
 
 GlopBuilder& GlopBuilder::setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount) {
     TRIGGER_STAGE(kMeshStage);
 
-    mOutGlop->mesh.vertexFlags = kTextureCoord_Attrib;
     mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
-    mOutGlop->mesh.vertexBufferObject = 0;
-    mOutGlop->mesh.vertices = &vertexData[0].x;
-    mOutGlop->mesh.indexBufferObject = mRenderState.meshState().getQuadListIBO();
-    mOutGlop->mesh.indices = nullptr;
-    mOutGlop->mesh.texCoordOffset = &vertexData[0].u;
+    mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
+    mOutGlop->mesh.vertices = {
+            0,
+            VertexAttribFlags::kTextureCoord,
+            &vertexData[0].x, &vertexData[0].u, nullptr,
+            kTextureVertexStride };
     mOutGlop->mesh.elementCount = elementCount;
-    mOutGlop->mesh.stride = kTextureVertexStride;
-    mDescription.hasTexture = true;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount) {
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
+    mOutGlop->mesh.indices = { 0, nullptr };
+    mOutGlop->mesh.vertices = {
+            0,
+            static_cast<VertexAttribFlags>(VertexAttribFlags::kTextureCoord | VertexAttribFlags::kColor),
+            &vertexData[0].x, &vertexData[0].u, &vertexData[0].r,
+            kColorTextureVertexStride };
+    mOutGlop->mesh.elementCount = elementCount;
     return *this;
 }
 
@@ -155,18 +160,17 @@ GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer, 
 
     bool alphaVertex = flags & VertexBuffer::kAlpha;
     bool indices = flags & VertexBuffer::kIndices;
-    mOutGlop->mesh.vertexFlags = alphaVertex ? kAlpha_Attrib : kNone_Attrib;
-    mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
-    mOutGlop->mesh.vertexBufferObject = 0;
-    mOutGlop->mesh.vertices = vertexBuffer.getBuffer();
-    mOutGlop->mesh.indexBufferObject = 0;
-    mOutGlop->mesh.indices = vertexBuffer.getIndices();
-    mOutGlop->mesh.texCoordOffset = nullptr;
-    mOutGlop->mesh.elementCount = indices
-            ? vertexBuffer.getIndexCount() : vertexBuffer.getVertexCount();
-    mOutGlop->mesh.stride = alphaVertex ? kAlphaVertexStride : kVertexStride;
 
-    mDescription.hasVertexAlpha = alphaVertex;
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLE_STRIP;
+    mOutGlop->mesh.indices = { 0, vertexBuffer.getIndices() };
+    mOutGlop->mesh.vertices = {
+            0,
+            alphaVertex ? VertexAttribFlags::kAlpha : VertexAttribFlags::kNone,
+            vertexBuffer.getBuffer(), nullptr, nullptr,
+            alphaVertex ? kAlphaVertexStride : kVertexStride };
+    mOutGlop->mesh.elementCount = indices
+                ? vertexBuffer.getIndexCount() : vertexBuffer.getVertexCount();
+
     mDescription.useShadowAlphaInterp = shadowInterp;
     return *this;
 }
@@ -197,7 +201,7 @@ void GlopBuilder::setFill(int color, float alphaScale, SkXfermode::Mode mode,
 
     mOutGlop->blend = { GL_ZERO, GL_ZERO };
     if (mOutGlop->fill.color.a < 1.0f
-            || (mOutGlop->mesh.vertexFlags & kAlpha_Attrib)
+            || (mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha)
             || (mOutGlop->fill.texture.texture && mOutGlop->fill.texture.texture->blend)
             || mOutGlop->roundRectClipState
             || PaintUtils::isBlendedShader(shader)
@@ -288,7 +292,7 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, bool isAlphaMask
 
         const bool SWAP_SRC_DST = false;
         if (alphaScale < 1.0f
-                || (mOutGlop->mesh.vertexFlags & kAlpha_Attrib)
+                || (mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha)
                 || texture.blend
                 || mOutGlop->roundRectClipState) {
             Blend::getFactors(SkXfermode::kSrcOver_Mode, SWAP_SRC_DST,
@@ -489,19 +493,24 @@ GlopBuilder& GlopBuilder::setRoundRectClipState(const RoundRectClipState* roundR
 void verify(const ProgramDescription& description, const Glop& glop) {
     bool hasTexture = glop.fill.texture.texture != nullptr;
     LOG_ALWAYS_FATAL_IF(description.hasTexture != hasTexture);
-    LOG_ALWAYS_FATAL_IF((glop.mesh.vertexFlags & kTextureCoord_Attrib) != hasTexture);
+    LOG_ALWAYS_FATAL_IF((glop.mesh.vertices.flags & VertexAttribFlags::kTextureCoord) != hasTexture);
+
+    if ((glop.mesh.vertices.flags & VertexAttribFlags::kAlpha) && glop.mesh.vertices.bufferObject) {
+        LOG_ALWAYS_FATAL("VBO and alpha attributes are not currently compatible");
+    }
 }
 
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
 
+    mDescription.hasTexture = static_cast<int>(mOutGlop->mesh.vertices.flags & VertexAttribFlags::kTextureCoord);
+    mDescription.hasColors = static_cast<int>(mOutGlop->mesh.vertices.flags & VertexAttribFlags::kColor);
+    mDescription.hasVertexAlpha = static_cast<int>(mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha);
+
     // serialize shader info into ShaderData
     GLuint textureUnit = mOutGlop->fill.texture.texture ? 1 : 0;
     SkiaShader::store(mCaches, mShader, mOutGlop->transform.modelView,
             &textureUnit, &mDescription, &(mOutGlop->fill.skiaShaderData));
-
-    mOutGlop->fill.program = mCaches.programCache.get(mDescription);
-    mOutGlop->transform.canvas.mapRect(mOutGlop->bounds);
 
     // duplicates ProgramCache's definition of color uniform presence
     const bool singleColor = !mDescription.hasTexture
@@ -511,6 +520,10 @@ void GlopBuilder::build() {
     mOutGlop->fill.colorEnabled = mDescription.modulate || singleColor;
 
     verify(mDescription, *mOutGlop);
+
+    // Final step: populate program and map bounds into render target space
+    mOutGlop->fill.program = mCaches.programCache.get(mDescription);
+    mOutGlop->transform.canvas.mapRect(mOutGlop->bounds);
 }
 
 } /* namespace uirenderer */
