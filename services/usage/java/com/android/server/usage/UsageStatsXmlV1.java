@@ -191,7 +191,7 @@ final class UsageStatsXmlV1 {
             statsOut.events.clear();
         }
 
-        statsOut.endTime = XmlUtils.readLongAttribute(parser, END_TIME_ATTR);
+        statsOut.endTime = statsOut.beginTime + XmlUtils.readLongAttribute(parser, END_TIME_ATTR);
 
         int eventCode;
         int outerDepth = parser.getDepth();
