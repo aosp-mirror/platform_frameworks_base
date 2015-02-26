@@ -145,6 +145,7 @@
 
     <style name="TextAppearance.QS.DetailButton">
         <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
+        <item name="android:textColor">@color/qs_detail_button</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:gravity">center</item>
