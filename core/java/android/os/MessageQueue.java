@@ -52,54 +52,7 @@ public final class MessageQueue {
     private native static void nativeDestroy(long ptr);
     private native static void nativePollOnce(long ptr, int timeoutMillis);
     private native static void nativeWake(long ptr);
-    private native static boolean nativeIsIdling(long ptr);
-
-    /**
-     * Callback interface for discovering when a thread is going to block
-     * waiting for more messages.
-     */
-    public static interface IdleHandler {
-        /**
-         * Called when the message queue has run out of messages and will now
-         * wait for more.  Return true to keep your idle handler active, false
-         * to have it removed.  This may be called if there are still messages
-         * pending in the queue, but they are all scheduled to be dispatched
-         * after the current time.
-         */
-        boolean queueIdle();
-    }
-
-    /**
-     * Add a new {@link IdleHandler} to this message queue.  This may be
-     * removed automatically for you by returning false from
-     * {@link IdleHandler#queueIdle IdleHandler.queueIdle()} when it is
-     * invoked, or explicitly removing it with {@link #removeIdleHandler}.
-     * 
-     * <p>This method is safe to call from any thread.
-     * 
-     * @param handler The IdleHandler to be added.
-     */
-    public void addIdleHandler(IdleHandler handler) {
-        if (handler == null) {
-            throw new NullPointerException("Can't add a null IdleHandler");
-        }
-        synchronized (this) {
-            mIdleHandlers.add(handler);
-        }
-    }
-
-    /**
-     * Remove an {@link IdleHandler} from the queue that was previously added
-     * with {@link #addIdleHandler}.  If the given object is not currently
-     * in the idle list, nothing is done.
-     * 
-     * @param handler The IdleHandler to be removed.
-     */
-    public void removeIdleHandler(IdleHandler handler) {
-        synchronized (this) {
-            mIdleHandlers.remove(handler);
-        }
-    }
+    private native static boolean nativeIsPolling(long ptr);
 
     MessageQueue(boolean quitAllowed) {
         mQuitAllowed = quitAllowed;
@@ -122,6 +75,77 @@ public final class MessageQueue {
             nativeDestroy(mPtr);
             mPtr = 0;
         }
+    }
+
+    /**
+     * Returns true if the looper has no pending messages which are due to be processed.
+     *
+     * <p>This method is safe to call from any thread.
+     *
+     * @return True if the looper is idle.
+     */
+    public boolean isIdle() {
+        synchronized (this) {
+            final long now = SystemClock.uptimeMillis();
+            return mMessages == null || now < mMessages.when;
+        }
+    }
+
+    /**
+     * Add a new {@link IdleHandler} to this message queue.  This may be
+     * removed automatically for you by returning false from
+     * {@link IdleHandler#queueIdle IdleHandler.queueIdle()} when it is
+     * invoked, or explicitly removing it with {@link #removeIdleHandler}.
+     *
+     * <p>This method is safe to call from any thread.
+     *
+     * @param handler The IdleHandler to be added.
+     */
+    public void addIdleHandler(IdleHandler handler) {
+        if (handler == null) {
+            throw new NullPointerException("Can't add a null IdleHandler");
+        }
+        synchronized (this) {
+            mIdleHandlers.add(handler);
+        }
+    }
+
+    /**
+     * Remove an {@link IdleHandler} from the queue that was previously added
+     * with {@link #addIdleHandler}.  If the given object is not currently
+     * in the idle list, nothing is done.
+     *
+     * <p>This method is safe to call from any thread.
+     *
+     * @param handler The IdleHandler to be removed.
+     */
+    public void removeIdleHandler(IdleHandler handler) {
+        synchronized (this) {
+            mIdleHandlers.remove(handler);
+        }
+    }
+
+    /**
+     * Returns whether this looper's thread is currently polling for more work to do.
+     * This is a good signal that the loop is still alive rather than being stuck
+     * handling a callback.  Note that this method is intrinsically racy, since the
+     * state of the loop can change before you get the result back.
+     *
+     * <p>This method is safe to call from any thread.
+     *
+     * @return True if the looper is currently polling for events.
+     * @hide
+     */
+    public boolean isPolling() {
+        synchronized (this) {
+            return isPollingLocked();
+        }
+    }
+
+    private boolean isPollingLocked() {
+        // If the loop is quitting then it must not be idling.
+        // We can assume mPtr != 0 when mQuitting is false.
+        return !mQuitting && nativeIsPolling(mPtr);
     }
 
     Message next() {
@@ -400,18 +424,6 @@ public final class MessageQueue {
         }
     }
 
-    boolean isIdling() {
-        synchronized (this) {
-            return isIdlingLocked();
-        }
-    }
-
-    private boolean isIdlingLocked() {
-        // If the loop is quitting then it must not be idling.
-        // We can assume mPtr != 0 when mQuitting is false.
-        return !mQuitting && nativeIsIdling(mPtr);
-     }
-
     void removeMessages(Handler h, int what, Object object) {
         if (h == null) {
             return;
@@ -559,8 +571,23 @@ public final class MessageQueue {
                 pw.println(prefix + "Message " + n + ": " + msg.toString(now));
                 n++;
             }
-            pw.println(prefix + "(Total messages: " + n + ", idling=" + isIdlingLocked()
+            pw.println(prefix + "(Total messages: " + n + ", polling=" + isPollingLocked()
                     + ", quitting=" + mQuitting + ")");
         }
+    }
+
+    /**
+     * Callback interface for discovering when a thread is going to block
+     * waiting for more messages.
+     */
+    public static interface IdleHandler {
+        /**
+         * Called when the message queue has run out of messages and will now
+         * wait for more.  Return true to keep your idle handler active, false
+         * to have it removed.  This may be called if there are still messages
+         * pending in the queue, but they are all scheduled to be dispatched
+         * after the current time.
+         */
+        boolean queueIdle();
     }
 }

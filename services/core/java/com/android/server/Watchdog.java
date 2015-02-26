@@ -106,8 +106,8 @@ public class Watchdog extends Thread {
         }
 
         public void scheduleCheckLocked() {
-            if (mMonitors.size() == 0 && mHandler.getLooper().isIdling()) {
-                // If the target looper is or just recently was idling, then
+            if (mMonitors.size() == 0 && mHandler.getLooper().getQueue().isPolling()) {
+                // If the target looper has recently been polling, then
                 // there is no reason to enqueue our checker on it since that
                 // is as good as it not being deadlocked.  This avoid having
                 // to do a context switch to check the thread.  Note that we

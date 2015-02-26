@@ -50,6 +50,16 @@ import android.util.Printer;
   *  }</pre>
   */
 public final class Looper {
+    /*
+     * API Implementation Note:
+     *
+     * This class contains the code required to set up and manage an event loop
+     * based on MessageQueue.  APIs that affect the state of the queue should be
+     * defined on MessageQueue or Handler rather than on Looper itself.  For example,
+     * idle handlers and sync barriers are defined on the queue whereas preparing the
+     * thread, looping and quitting are defined on the looper.
+     */
+
     private static final String TAG = "Looper";
 
     // sThreadLocal.get() will return null unless you've called prepare().
@@ -284,16 +294,6 @@ public final class Looper {
     /** @hide */
     public MessageQueue getQueue() {
         return mQueue;
-    }
-
-    /**
-     * Return whether this looper's thread is currently idle, waiting for new work
-     * to do.  This is intrinsically racy, since its state can change before you get
-     * the result back.
-     * @hide
-     */
-    public boolean isIdling() {
-        return mQueue.isIdling();
     }
 
     public void dump(Printer pw, String prefix) {

@@ -96,15 +96,15 @@ public class RequestHandlerThread extends HandlerThread {
     // Blocks until thread is idling
     public void waitUntilIdle() {
         Handler handler = waitAndGetHandler();
-        Looper looper = handler.getLooper();
-        if (looper.isIdling()) {
+        MessageQueue queue = handler.getLooper().getQueue();
+        if (queue.isIdle()) {
             return;
         }
         mIdle.close();
-        looper.getQueue().addIdleHandler(mIdleHandler);
+        queue.addIdleHandler(mIdleHandler);
         // Ensure that the idle handler gets run even if the looper already went idle
         handler.sendEmptyMessage(MSG_POKE_IDLE_HANDLER);
-        if (looper.isIdling()) {
+        if (queue.isIdle()) {
             return;
         }
         mIdle.block();

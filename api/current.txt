@@ -22369,6 +22369,7 @@ package android.os {
 
   public final class MessageQueue {
     method public void addIdleHandler(android.os.MessageQueue.IdleHandler);
+    method public boolean isIdle();
     method public void removeIdleHandler(android.os.MessageQueue.IdleHandler);
   }
 

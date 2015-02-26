@@ -143,9 +143,9 @@ static void android_os_MessageQueue_nativeWake(JNIEnv* env, jclass clazz, jlong 
     return nativeMessageQueue->wake();
 }
 
-static jboolean android_os_MessageQueue_nativeIsIdling(JNIEnv* env, jclass clazz, jlong ptr) {
+static jboolean android_os_MessageQueue_nativeIsPolling(JNIEnv* env, jclass clazz, jlong ptr) {
     NativeMessageQueue* nativeMessageQueue = reinterpret_cast<NativeMessageQueue*>(ptr);
-    return nativeMessageQueue->getLooper()->isIdling();
+    return nativeMessageQueue->getLooper()->isPolling();
 }
 
 // ----------------------------------------------------------------------------
@@ -156,7 +156,7 @@ static JNINativeMethod gMessageQueueMethods[] = {
     { "nativeDestroy", "(J)V", (void*)android_os_MessageQueue_nativeDestroy },
     { "nativePollOnce", "(JI)V", (void*)android_os_MessageQueue_nativePollOnce },
     { "nativeWake", "(J)V", (void*)android_os_MessageQueue_nativeWake },
-    { "nativeIsIdling", "(J)Z", (void*)android_os_MessageQueue_nativeIsIdling }
+    { "nativeIsPolling", "(J)Z", (void*)android_os_MessageQueue_nativeIsPolling }
 };
 
 int register_android_os_MessageQueue(JNIEnv* env) {
