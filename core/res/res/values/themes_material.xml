@@ -174,14 +174,14 @@ please see themes_device_defaults.xml.
         <item name="windowSharedElementExitTransition">@transition/move</item>
 
         <!-- Dialog attributes -->
-        <item name="dialogTheme">@style/Theme.Material.Dialog</item>
+        <item name="dialogTheme">@style/ThemeOverlay.Material.Dialog</item>
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_material</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_material</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_material</item>
         <item name="dialogPreferredPadding">@dimen/dialog_padding_material</item>
 
         <!-- AlertDialog attributes -->
-        <item name="alertDialogTheme">@style/Theme.Material.Dialog.Alert</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material.Dialog</item>
         <item name="alertDialogStyle">@style/AlertDialog.Material</item>
         <item name="alertDialogCenterButtons">false</item>
         <item name="alertDialogIcon">@drawable/ic_dialog_alert_material</item>
@@ -529,14 +529,14 @@ please see themes_device_defaults.xml.
         <item name="windowActivityTransitions">true</item>
 
         <!-- Dialog attributes -->
-        <item name="dialogTheme">@style/Theme.Material.Light.Dialog</item>
+        <item name="dialogTheme">@style/ThemeOverlay.Material.Dialog</item>
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_material</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_material</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_material</item>
         <item name="dialogPreferredPadding">@dimen/dialog_padding_material</item>
 
         <!-- AlertDialog attributes -->
-        <item name="alertDialogTheme">@style/Theme.Material.Light.Dialog.Alert</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Material.Dialog</item>
         <item name="alertDialogStyle">@style/AlertDialog.Material.Light</item>
         <item name="alertDialogCenterButtons">false</item>
         <item name="alertDialogIcon">@drawable/ic_dialog_alert_material</item>
@@ -695,7 +695,7 @@ please see themes_device_defaults.xml.
 
         <item name="dividerVertical">?attr/listDivider</item>
         <item name="dividerHorizontal">?attr/listDivider</item>
-        <item name="buttonBarStyle">@style/Widget.Material.Light.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Material.Light.ButtonBar.AlertDialog</item>
         <item name="buttonBarButtonStyle">@style/Widget.Material.Light.Button.ButtonBar.AlertDialog</item>
         <item name="segmentedButtonStyle">@style/Widget.Material.Light.SegmentedButton</item>
 
@@ -839,7 +839,7 @@ please see themes_device_defaults.xml.
          secondary text color, with the primary text color. -->
     <style name="ThemeOverlay.Material.ActionBar">
         <item name="colorControlNormal">?attr/textColorPrimary</item>
-        <item name="searchViewStyle">@style/Widget.Material.Light.SearchView.ActionBar</item>
+        <item name="searchViewStyle">@style/Widget.Material.SearchView.ActionBar</item>
     </style>
 
     <!-- Theme overlay that replaces colors with their dark versions and replaces the normal
@@ -848,6 +848,34 @@ please see themes_device_defaults.xml.
     <style name="ThemeOverlay.Material.Dark.ActionBar">
         <item name="colorControlNormal">?attr/textColorPrimary</item>
         <item name="searchViewStyle">@style/Widget.Material.SearchView.ActionBar</item>
+    </style>
+
+    <!-- Theme overlay that overrides window properties to display as a dialog. -->
+    <style name="ThemeOverlay.Material.Dialog">
+        <item name="colorBackground">@color/background_floating_material_light</item>
+        <item name="colorBackgroundCacheHint">@null</item>
+
+        <item name="windowFrame">@null</item>
+        <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
+        <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
+        <item name="windowBackground">@drawable/dialog_background_material</item>
+        <item name="windowElevation">@dimen/floating_window_z</item>
+        <item name="windowIsFloating">true</item>
+        <item name="windowContentOverlay">@null</item>
+        <item name="windowAnimationStyle">@style/Animation.Material.Dialog</item>
+        <item name="windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="windowCloseOnTouchOutside">@bool/config_closeDialogWhenTouchOutside</item>
+
+        <item name="listPreferredItemPaddingLeft">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingRight">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingStart">?attr/dialogPreferredPadding</item>
+        <item name="listPreferredItemPaddingEnd">?attr/dialogPreferredPadding</item>
+
+        <item name="listDivider">@null</item>
+
+        <item name="preferencePanelStyle">@style/PreferencePanel.Dialog</item>
     </style>
 
     <!-- Variant of the material (dark) theme with no action bar. -->
@@ -1033,12 +1061,6 @@ please see themes_device_defaults.xml.
 
         <item name="colorBackgroundCacheHint">@null</item>
 
-        <item name="buttonBarStyle">@style/Widget.Material.ButtonBar.AlertDialog</item>
-        <item name="borderlessButtonStyle">@style/Widget.Material.Button.Borderless</item>
-
-        <item name="textAppearance">@style/TextAppearance.Material</item>
-        <item name="textAppearanceInverse">@style/TextAppearance.Material.Inverse</item>
-
         <item name="listPreferredItemPaddingLeft">24dip</item>
         <item name="listPreferredItemPaddingRight">24dip</item>
         <item name="listPreferredItemPaddingStart">24dip</item>
@@ -1150,12 +1172,6 @@ please see themes_device_defaults.xml.
 
         <item name="colorBackgroundCacheHint">@null</item>
 
-        <item name="buttonBarStyle">@style/Widget.Material.Light.ButtonBar.AlertDialog</item>
-        <item name="borderlessButtonStyle">@style/Widget.Material.Light.Button.Borderless</item>
-
-        <item name="textAppearance">@style/TextAppearance.Material</item>
-        <item name="textAppearanceInverse">@style/TextAppearance.Material.Inverse</item>
-
         <item name="listPreferredItemPaddingLeft">24dip</item>
         <item name="listPreferredItemPaddingRight">24dip</item>
         <item name="listPreferredItemPaddingStart">24dip</item>
@@ -1254,8 +1270,6 @@ please see themes_device_defaults.xml.
         <item name="colorPrimaryDark">@color/material_blue_grey_950</item>
         <item name="colorAccent">@color/material_deep_teal_500</item>
 
-        <item name="dialogTheme">@style/Theme.Material.Settings.Dialog</item>
-        <item name="alertDialogTheme">@style/Theme.Material.Settings.Dialog.Alert</item>
         <item name="presentationTheme">@style/Theme.Material.Settings.Dialog.Presentation</item>
         <item name="searchDialogTheme">@style/Theme.Material.Settings.SearchBar</item>
         <item name="panelMenuListTheme">@style/Theme.Material.Settings.CompactMenu</item>

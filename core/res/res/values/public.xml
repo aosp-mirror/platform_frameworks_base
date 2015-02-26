@@ -2634,6 +2634,7 @@
   <public type="style" name="Theme.Material.DayNight.NoActionBar.TranslucentDecor" />
   <public type="style" name="Theme.Material.DayNight.Panel" />
   <public type="style" name="Theme.Material.Light.LightStatusBar" />
+  <public type="style" name="ThemeOverlay.Material.Dialog" />
 
   <!-- Context menu ID for the "Undo" menu item to undo the last text edit operation. -->
   <public type="id" name="undo" />
