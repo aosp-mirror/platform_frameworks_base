@@ -112,8 +112,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mTempDate = getCalendarForLocale(mMaxDate, locale);
         mCurrentDate = getCalendarForLocale(mCurrentDate, locale);
 
-        mMinDate.set(DEFAULT_START_YEAR, 1, 1);
-        mMaxDate.set(DEFAULT_END_YEAR, 12, 31);
+        mMinDate.set(DEFAULT_START_YEAR, Calendar.JANUARY, 1);
+        mMaxDate.set(DEFAULT_END_YEAR, Calendar.DECEMBER, 31);
 
         final Resources res = mDelegator.getResources();
         final TypedArray a = mContext.obtainStyledAttributes(attrs,
