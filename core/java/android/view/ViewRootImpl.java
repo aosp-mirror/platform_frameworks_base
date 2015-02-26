@@ -1049,7 +1049,7 @@ public final class ViewRootImpl implements ViewParent,
     void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
-            mTraversalBarrier = mHandler.getLooper().postSyncBarrier();
+            mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
             if (!mUnbufferedInputDispatch) {
@@ -1063,7 +1063,7 @@ public final class ViewRootImpl implements ViewParent,
     void unscheduleTraversals() {
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
-            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
+            mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);
             mChoreographer.removeCallbacks(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
         }
@@ -1072,7 +1072,7 @@ public final class ViewRootImpl implements ViewParent,
     void doTraversal() {
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
-            mHandler.getLooper().removeSyncBarrier(mTraversalBarrier);
+            mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);
 
             if (mProfile) {
                 Debug.startMethodTracing("ViewAncestor");

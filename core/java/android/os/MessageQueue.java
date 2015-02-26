@@ -275,7 +275,34 @@ public final class MessageQueue {
         }
     }
 
-    int enqueueSyncBarrier(long when) {
+    /**
+     * Posts a synchronization barrier to the Looper's message queue.
+     *
+     * Message processing occurs as usual until the message queue encounters the
+     * synchronization barrier that has been posted.  When the barrier is encountered,
+     * later synchronous messages in the queue are stalled (prevented from being executed)
+     * until the barrier is released by calling {@link #removeSyncBarrier} and specifying
+     * the token that identifies the synchronization barrier.
+     *
+     * This method is used to immediately postpone execution of all subsequently posted
+     * synchronous messages until a condition is met that releases the barrier.
+     * Asynchronous messages (see {@link Message#isAsynchronous} are exempt from the barrier
+     * and continue to be processed as usual.
+     *
+     * This call must be always matched by a call to {@link #removeSyncBarrier} with
+     * the same token to ensure that the message queue resumes normal operation.
+     * Otherwise the application will probably hang!
+     *
+     * @return A token that uniquely identifies the barrier.  This token must be
+     * passed to {@link #removeSyncBarrier} to release the barrier.
+     *
+     * @hide
+     */
+    public int postSyncBarrier() {
+        return postSyncBarrier(SystemClock.uptimeMillis());
+    }
+
+    private int postSyncBarrier(long when) {
         // Enqueue a new sync barrier token.
         // We don't need to wake the queue because the purpose of a barrier is to stall it.
         synchronized (this) {
@@ -304,7 +331,17 @@ public final class MessageQueue {
         }
     }
 
-    void removeSyncBarrier(int token) {
+    /**
+     * Removes a synchronization barrier.
+     *
+     * @param token The synchronization barrier token that was returned by
+     * {@link #postSyncBarrier}.
+     *
+     * @throws IllegalStateException if the barrier was not found.
+     *
+     * @hide
+     */
+    public void removeSyncBarrier(int token) {
         // Remove a sync barrier token from the queue.
         // If the queue is no longer stalled by a barrier then wake it.
         synchronized (this) {
