@@ -508,6 +508,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
     int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    int mLastKeyguardForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 
     int mLayoutSeq = 0;
 
@@ -3714,43 +3715,70 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public int getOrientationFromWindowsLocked() {
-        if (mDisplayFrozen || mOpeningApps.size() > 0 || mClosingApps.size() > 0) {
-            // If the display is frozen, some activities may be in the middle
-            // of restarting, and thus have removed their old window.  If the
-            // window has the flag to hide the lock screen, then the lock screen
-            // can re-appear and inflict its own orientation on us.  Keep the
-            // orientation stable until this all settles down.
-            return mLastWindowForcedOrientation;
+    public int getOrientationLocked() {
+        if (mDisplayFrozen) {
+            if (mLastWindowForcedOrientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Display is frozen, return "
+                        + mLastWindowForcedOrientation);
+                // If the display is frozen, some activities may be in the middle
+                // of restarting, and thus have removed their old window.  If the
+                // window has the flag to hide the lock screen, then the lock screen
+                // can re-appear and inflict its own orientation on us.  Keep the
+                // orientation stable until this all settles down.
+                return mLastWindowForcedOrientation;
+            }
+        } else {
+            // TODO(multidisplay): Change to the correct display.
+            final WindowList windows = getDefaultWindowListLocked();
+            int pos = windows.size() - 1;
+            while (pos >= 0) {
+                WindowState win = windows.get(pos);
+                pos--;
+                if (win.mAppToken != null) {
+                    // We hit an application window. so the orientation will be determined by the
+                    // app window. No point in continuing further.
+                    break;
+                }
+                if (!win.isVisibleLw() || !win.mPolicyVisibilityAfterAnim) {
+                    continue;
+                }
+                int req = win.mAttrs.screenOrientation;
+                if((req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) ||
+                        (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND)){
+                    continue;
+                }
+
+                if (DEBUG_ORIENTATION) Slog.v(TAG, win + " forcing orientation to " + req);
+                if (mPolicy.isKeyguardHostWindow(win.mAttrs)) {
+                    mLastKeyguardForcedOrientation = req;
+                }
+                return (mLastWindowForcedOrientation = req);
+            }
+            mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+            if (mPolicy.isKeyguardLocked()) {
+                // The screen is locked and no top system window is requesting an orientation.
+                // Return either the orientation of the show-when-locked app (if there is any) or
+                // the orientation of the keyguard. No point in searching from the rest of apps.
+                WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
+                AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
+                        null : winShowWhenLocked.mAppToken;
+                if (appShowWhenLocked != null) {
+                    int req = appShowWhenLocked.requestedOrientation;
+                    if (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                        req = mLastKeyguardForcedOrientation;
+                    }
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + appShowWhenLocked
+                            + " -- show when locked, return " + req);
+                    return req;
+                }
+                if (DEBUG_ORIENTATION) Slog.v(TAG,
+                        "No one is requesting an orientation when the screen is locked");
+                return mLastKeyguardForcedOrientation;
+            }
         }
 
-        // TODO(multidisplay): Change to the correct display.
-        final WindowList windows = getDefaultWindowListLocked();
-        int pos = windows.size() - 1;
-        while (pos >= 0) {
-            WindowState win = windows.get(pos);
-            pos--;
-            if (win.mAppToken != null) {
-                // We hit an application window. so the orientation will be determined by the
-                // app window. No point in continuing further.
-                return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            }
-            if (!win.isVisibleLw() || !win.mPolicyVisibilityAfterAnim) {
-                continue;
-            }
-            int req = win.mAttrs.screenOrientation;
-            if((req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) ||
-                    (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND)){
-                continue;
-            }
-
-            if (DEBUG_ORIENTATION) Slog.v(TAG, win + " forcing orientation to " + req);
-            return (mLastWindowForcedOrientation=req);
-        }
-        return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    public int getOrientationFromAppTokensLocked() {
+        // Top system windows are not requesting an orientation. Start searching from apps.
         int lastOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         boolean findingBehind = false;
         boolean lastFullscreen = false;
@@ -3822,8 +3850,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
             }
         }
-        if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation");
-        return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation, return "
+                + mForcedAppOrientation);
+        // The next app has not been requested to be visible, so we keep the current orientation
+        // to prevent freezing/unfreezing the display too early.
+        return mForcedAppOrientation;
     }
 
     @Override
@@ -3903,11 +3934,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean updateOrientationFromAppTokensLocked(boolean inTransaction) {
         long ident = Binder.clearCallingIdentity();
         try {
-            int req = getOrientationFromWindowsLocked();
-            if (req == ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
-                req = getOrientationFromAppTokensLocked();
-            }
-
+            int req = getOrientationLocked();
             if (req != mForcedAppOrientation) {
                 mForcedAppOrientation = req;
                 //send a message to Policy indicating orientation change to take
