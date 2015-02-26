@@ -37,8 +37,6 @@ import android.provider.ContactsContract.RawContacts;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * Widget used to show an image with the standard QuickContact badge
@@ -52,6 +50,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     private QueryHandler mQueryHandler;
     private Drawable mDefaultAvatar;
     private Bundle mExtras = null;
+    private String mPrioritizedMimeType;
 
     protected String[] mExcludeMimes = null;
 
@@ -124,6 +123,15 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
     /** This call has no effect anymore, as there is only one QuickContact mode */
     @SuppressWarnings("unused")
     public void setMode(int size) {
+    }
+
+    /**
+     * Set which mimetype should be prioritized in the QuickContacts UI. For example, passing the
+     * value {@link Email#CONTENT_ITEM_TYPE} can cause emails to be displayed more prominently in
+     * QuickContacts.
+     */
+    public void setPrioritizedMimeType(String prioritizedMimeType) {
+        mPrioritizedMimeType = prioritizedMimeType;
     }
 
     @Override
@@ -287,7 +295,7 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
         final Bundle extras = (mExtras == null) ? new Bundle() : mExtras;
         if (mContactUri != null) {
             QuickContact.showQuickContact(getContext(), QuickContactBadge.this, mContactUri,
-                    QuickContact.MODE_LARGE, mExcludeMimes);
+                    mExcludeMimes, mPrioritizedMimeType);
         } else if (mContactEmail != null && mQueryHandler != null) {
             extras.putString(EXTRA_URI_CONTENT, mContactEmail);
             mQueryHandler.startQuery(TOKEN_EMAIL_LOOKUP_AND_TRIGGER, extras,
@@ -370,10 +378,10 @@ public class QuickContactBadge extends ImageView implements OnClickListener {
             mContactUri = lookupUri;
             onContactUriChanged();
 
-            if (trigger && lookupUri != null) {
+            if (trigger && mContactUri != null) {
                 // Found contact, so trigger QuickContact
-                QuickContact.showQuickContact(getContext(), QuickContactBadge.this, lookupUri,
-                        QuickContact.MODE_LARGE, mExcludeMimes);
+                QuickContact.showQuickContact(getContext(), QuickContactBadge.this, mContactUri,
+                        mExcludeMimes, mPrioritizedMimeType);
             } else if (createUri != null) {
                 // Prompt user to add this person to contacts
                 final Intent intent = new Intent(Intents.SHOW_OR_CREATE_CONTACT, createUri);
