@@ -77,6 +77,12 @@ public class TelecomManager {
             "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
 
     /**
+     * The {@link android.content.Intent} action used to show the call accessibility settings page.
+     */
+    public static final String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS =
+            "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
+
+    /**
      * The {@link android.content.Intent} action used to show the call settings page.
      */
     public static final String ACTION_SHOW_CALL_SETTINGS =
