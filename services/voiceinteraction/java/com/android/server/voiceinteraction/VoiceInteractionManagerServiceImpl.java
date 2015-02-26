@@ -26,7 +26,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -35,20 +34,17 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionService;
 import android.service.voice.IVoiceInteractionSession;
-import android.service.voice.IVoiceInteractionSessionService;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionServiceInfo;
 import android.util.Slog;
 import android.view.IWindowManager;
-import android.view.WindowManager;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.os.IResultReceiver;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-class VoiceInteractionManagerServiceImpl {
+class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
 
     final boolean mValid;
@@ -65,7 +61,7 @@ class VoiceInteractionManagerServiceImpl {
     boolean mBound = false;
     IVoiceInteractionService mService;
 
-    SessionConnection mActiveSession;
+    VoiceInteractionSessionConnection mActiveSession;
 
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -98,124 +94,6 @@ class VoiceInteractionManagerServiceImpl {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             mService = null;
-        }
-    };
-
-    final class SessionConnection implements ServiceConnection {
-        final IBinder mToken = new Binder();
-        final Bundle mArgs;
-        final int mFlags;
-        boolean mBound;
-        IVoiceInteractionSessionService mService;
-        IVoiceInteractionSession mSession;
-        IVoiceInteractor mInteractor;
-        boolean mHaveAssistData;
-        Bundle mAssistData;
-
-        final IResultReceiver mAssistReceiver = new IResultReceiver.Stub() {
-            @Override
-            public void send(int resultCode, Bundle resultData) throws RemoteException {
-                synchronized (mLock) {
-                    mHaveAssistData = true;
-                    mAssistData = resultData;
-                    if (mSession != null) {
-                        try {
-                            mSession.handleAssist(resultData);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                }
-            }
-        };
-
-        SessionConnection(Bundle args, int flags) {
-            mArgs = args;
-            mFlags = flags;
-            Intent serviceIntent = new Intent(VoiceInteractionService.SERVICE_INTERFACE);
-            serviceIntent.setComponent(mSessionComponentName);
-            mBound = mContext.bindServiceAsUser(serviceIntent, this,
-                    Context.BIND_AUTO_CREATE, new UserHandle(mUser));
-            if (mBound) {
-                try {
-                    mIWindowManager.addWindowToken(mToken,
-                            WindowManager.LayoutParams.TYPE_VOICE_INTERACTION);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed adding window token", e);
-                }
-                if ((flags&VoiceInteractionService.START_WITH_ASSIST) != 0) {
-                    try {
-                        mAm.requestAssistContextExtras(0, mAssistReceiver);
-                    } catch (RemoteException e) {
-                    }
-                } else {
-                    mHaveAssistData = true;
-                }
-            } else {
-                Slog.w(TAG, "Failed binding to voice interaction session service " + mComponent);
-            }
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            synchronized (mLock) {
-                mService = IVoiceInteractionSessionService.Stub.asInterface(service);
-                if (mActiveSession == this) {
-                    try {
-                        mService.newSession(mToken, mArgs, mFlags);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failed adding window token", e);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-        }
-
-        public void cancel() {
-            if (mBound) {
-                if (mSession != null) {
-                    try {
-                        mSession.destroy();
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Voice interation session already dead");
-                    }
-                }
-                if (mSession != null) {
-                    try {
-                        mAm.finishVoiceTask(mSession);
-                    } catch (RemoteException e) {
-                    }
-                }
-                mContext.unbindService(this);
-                try {
-                    mIWindowManager.removeWindowToken(mToken);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed removing window token", e);
-                }
-                mBound = false;
-                mService = null;
-                mSession = null;
-                mInteractor = null;
-            }
-        }
-
-        public void dump(String prefix, PrintWriter pw) {
-            pw.print(prefix); pw.print("mToken="); pw.println(mToken);
-            pw.print(prefix); pw.print("mArgs="); pw.println(mArgs);
-            pw.print(prefix); pw.print("mFlags=0x"); pw.println(Integer.toHexString(mFlags));
-            pw.print(prefix); pw.print("mBound="); pw.println(mBound);
-            if (mBound) {
-                pw.print(prefix); pw.print("mService="); pw.println(mService);
-                pw.print(prefix); pw.print("mSession="); pw.println(mSession);
-                pw.print(prefix); pw.print("mInteractor="); pw.println(mInteractor);
-            }
-            pw.print(prefix); pw.print("mHaveAssistData="); pw.println(mHaveAssistData);
-            if (mHaveAssistData) {
-                pw.print(prefix); pw.print("mAssistData="); pw.println(mAssistData);
-            }
         }
     };
 
@@ -256,12 +134,16 @@ class VoiceInteractionManagerServiceImpl {
         mContext.registerReceiver(mBroadcastReceiver, filter, null, handler);
     }
 
-    public void startSessionLocked(int callingPid, int callingUid, Bundle args, int flags) {
-        if (mActiveSession != null) {
-            mActiveSession.cancel();
-            mActiveSession = null;
+    public boolean showSessionLocked(int callingPid, int callingUid, Bundle args, int flags) {
+        if (mActiveSession == null) {
+            mActiveSession = new VoiceInteractionSessionConnection(mLock, mSessionComponentName,
+                    mUser, mContext, this, callingPid, callingUid);
         }
-        mActiveSession = new SessionConnection(args, flags);
+        return mActiveSession.showLocked(args, flags);
+    }
+
+    public boolean hideSessionLocked(int callingPid, int callingUid) {
+        return mActiveSession.hideLocked();
     }
 
     public boolean deliverNewSessionLocked(int callingPid, int callingUid, IBinder token,
@@ -270,14 +152,7 @@ class VoiceInteractionManagerServiceImpl {
             Slog.w(TAG, "deliverNewSession does not match active session");
             return false;
         }
-        mActiveSession.mSession = session;
-        mActiveSession.mInteractor = interactor;
-        if (mActiveSession.mHaveAssistData) {
-            try {
-                session.handleAssist(mActiveSession.mAssistData);
-            } catch (RemoteException e) {
-            }
-        }
+        mActiveSession.deliverNewSessionLocked(session, interactor);
         return true;
     }
 
@@ -365,6 +240,13 @@ class VoiceInteractionManagerServiceImpl {
             mService.soundModelsChanged();
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while calling soundModelsChanged", e);
+        }
+    }
+
+    @Override
+    public void sessionConnectionGone(VoiceInteractionSessionConnection connection) {
+        synchronized (mLock) {
+            finishLocked(connection.mCallingPid, connection.mCallingUid, connection.mToken);
         }
     }
 }

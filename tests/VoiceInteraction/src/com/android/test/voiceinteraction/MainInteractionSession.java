@@ -49,6 +49,7 @@ public class MainInteractionSession extends VoiceInteractionSession
     static final int STATE_COMMAND = 3;
     static final int STATE_ABORT_VOICE = 4;
     static final int STATE_COMPLETE_VOICE = 5;
+    static final int STATE_DONE=6;
 
     int mState = STATE_IDLE;
     Request mPendingRequest;
@@ -60,12 +61,26 @@ public class MainInteractionSession extends VoiceInteractionSession
     @Override
     public void onCreate(Bundle args, int startFlags) {
         super.onCreate(args);
-        showWindow();
+    }
+
+    @Override
+    public void onShow(Bundle args, int showFlags) {
+        super.onShow(args, showFlags);
+        mState = STATE_IDLE;
         mStartIntent = args.getParcelable("intent");
         Bundle assist = args.getBundle("assist");
-        if (assist != null) {
-            parseAssistData(assist);
+        parseAssistData(assist);
+        updateState();
+    }
+
+    @Override
+    public void onHide() {
+        super.onHide();
+        if (mAssistVisualizer != null) {
+            mAssistVisualizer.clearAssistData();
         }
+        mState = STATE_DONE;
+        updateState();
     }
 
     @Override
@@ -86,7 +101,6 @@ public class MainInteractionSession extends VoiceInteractionSession
         mCompleteButton.setOnClickListener(this);
         mAbortButton = (Button)mContentView.findViewById(R.id.abort);
         mAbortButton.setOnClickListener(this);
-        updateState();
         return mContentView;
     }
 
@@ -100,13 +114,19 @@ public class MainInteractionSession extends VoiceInteractionSession
     }
 
     void parseAssistData(Bundle assistBundle) {
-        Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
-        if (assistContext != null) {
-            mAssistData = AssistData.getAssistData(assistContext);
-            mAssistData.dump();
-            if (mAssistVisualizer != null) {
-                mAssistVisualizer.setAssistData(mAssistData);
+        if (assistBundle != null) {
+            Bundle assistContext = assistBundle.getBundle(Intent.EXTRA_ASSIST_CONTEXT);
+            if (assistContext != null) {
+                mAssistData = AssistData.getAssistData(assistContext);
+                mAssistData.dump();
+                if (mAssistVisualizer != null) {
+                    mAssistVisualizer.setAssistData(mAssistData);
+                }
+                return;
             }
+        }
+        if (mAssistVisualizer != null) {
+            mAssistVisualizer.clearAssistData();
         }
     }
 
@@ -114,9 +134,15 @@ public class MainInteractionSession extends VoiceInteractionSession
         if (mState == STATE_IDLE) {
             mTopContent.setVisibility(View.VISIBLE);
             mBottomContent.setVisibility(View.GONE);
+            mAssistVisualizer.setVisibility(View.VISIBLE);
+        } else if (mState == STATE_DONE) {
+            mTopContent.setVisibility(View.GONE);
+            mBottomContent.setVisibility(View.GONE);
+            mAssistVisualizer.setVisibility(View.GONE);
         } else {
             mTopContent.setVisibility(View.GONE);
             mBottomContent.setVisibility(View.VISIBLE);
+            mAssistVisualizer.setVisibility(View.GONE);
         }
         mStartButton.setEnabled(mState == STATE_IDLE);
         mConfirmButton.setEnabled(mState == STATE_CONFIRM || mState == STATE_COMMAND);
@@ -136,18 +162,12 @@ public class MainInteractionSession extends VoiceInteractionSession
                 mPendingRequest.sendCommandResult(true, null);
             }
             mPendingRequest = null;
-            mState = STATE_IDLE;
-            updateState();
         } else if (v == mAbortButton) {
             mPendingRequest.sendAbortVoiceResult(null);
             mPendingRequest = null;
-            mState = STATE_IDLE;
-            updateState();
         } else if (v== mCompleteButton) {
             mPendingRequest.sendCompleteVoiceResult(null);
             mPendingRequest = null;
-            mState = STATE_IDLE;
-            updateState();
         }
     }
 

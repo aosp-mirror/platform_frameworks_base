@@ -57,6 +57,11 @@ public class AssistVisualizer extends View {
         }
     }
 
+    public void clearAssistData() {
+        mAssistData = null;
+        mTextRects.clear();
+    }
+
     void buildTextRects(AssistData.ViewNode root, int parentLeft, int parentTop) {
         if (root.getVisibility() != View.VISIBLE) {
             return;
