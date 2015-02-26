@@ -602,6 +602,11 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public int checkSelfPermission(String permission) {
+       return mBase.checkSelfPermission(permission);
+    }
+
+    @Override
     public void enforcePermission(
             String permission, int pid, int uid, String message) {
         mBase.enforcePermission(permission, pid, uid, message);

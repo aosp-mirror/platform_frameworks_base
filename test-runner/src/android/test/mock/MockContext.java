@@ -506,6 +506,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public int checkSelfPermission(String permission) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void enforcePermission(
             String permission, int pid, int uid, String message) {
         throw new UnsupportedOperationException();

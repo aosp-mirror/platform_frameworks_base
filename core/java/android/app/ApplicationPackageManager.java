@@ -81,7 +81,6 @@ import java.util.List;
 /*package*/
 final class ApplicationPackageManager extends PackageManager {
     private static final String TAG = "ApplicationPackageManager";
-    private final static boolean DEBUG = false;
     private final static boolean DEBUG_ICONS = false;
 
     // Default flags to use with PackageManager when no flags are given.
@@ -186,8 +185,8 @@ final class ApplicationPackageManager extends PackageManager {
     public int[] getPackageGids(String packageName)
             throws NameNotFoundException {
         try {
-            int[] gids = mPM.getPackageGids(packageName);
-            if (gids == null || gids.length > 0) {
+            int[] gids = mPM.getPackageGids(packageName, mContext.getUserId());
+            if (gids != null) {
                 return gids;
             }
         } catch (RemoteException e) {
@@ -398,7 +397,7 @@ final class ApplicationPackageManager extends PackageManager {
     @Override
     public int checkPermission(String permName, String pkgName) {
         try {
-            return mPM.checkPermission(permName, pkgName);
+            return mPM.checkPermission(permName, pkgName, mContext.getUserId());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
@@ -432,18 +431,18 @@ final class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public void grantPermission(String packageName, String permissionName) {
+    public void grantPermission(String packageName, String permissionName, UserHandle user) {
         try {
-            mPM.grantPermission(packageName, permissionName);
+            mPM.grantPermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }
     }
 
     @Override
-    public void revokePermission(String packageName, String permissionName) {
+    public void revokePermission(String packageName, String permissionName, UserHandle user) {
         try {
-            mPM.revokePermission(packageName, permissionName);
+            mPM.revokePermission(packageName, permissionName, user.getIdentifier());
         } catch (RemoteException e) {
             throw new RuntimeException("Package manager has died", e);
         }

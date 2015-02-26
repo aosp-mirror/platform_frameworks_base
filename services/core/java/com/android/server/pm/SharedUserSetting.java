@@ -21,7 +21,7 @@ import android.util.ArraySet;
 /**
  * Settings data for a particular shared user ID we know about.
  */
-final class SharedUserSetting extends GrantedPermissions {
+final class SharedUserSetting extends SettingBase {
     final String name;
 
     int userId;

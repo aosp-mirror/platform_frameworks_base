@@ -17,6 +17,7 @@
 package android.app;
 
 import android.animation.Animator;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.content.ComponentCallbacks2;
@@ -1092,13 +1093,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         if (mActivity == null) {
             throw new IllegalStateException("Fragment " + this + " not attached to Activity");
         }
-        if (options != null) {
-            mActivity.startActivityFromFragment(this, intent, requestCode, options);
-        } else {
-            // Note we want to go through this call for compatibility with
-            // applications that may have overridden the method.
-            mActivity.startActivityFromFragment(this, intent, requestCode, options);
-        }
+        mActivity.startActivityFromFragment(this, intent, requestCode, options);
     }
 
     /**
@@ -1116,6 +1111,98 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
      *               (various data can be attached to Intent "extras").
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }
+
+    /**
+     * Requests permissions to be granted to this application. These permissions
+     * must be requested in your manifest, they should not be granted to your app,
+     * and they should have protection level {@link android.content.pm.PermissionInfo
+     * #PROTECTION_DANGEROUS dangerous}, regardless whether they are declared by
+     * the platform or a third-party app.
+     * <p>
+     * Normal permissions {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL}
+     * are granted at install time if requested in the manifest. Signature permissions
+     * {@link android.content.pm.PermissionInfo#PROTECTION_SIGNATURE} are granted at
+     * install time if requested in the manifest and the signature of your app matches
+     * the signature of the app declaring the permissions.
+     * </p>
+     * <p>
+     * If your app does not have the requested permissions the user will be presented
+     * with UI for accepting them. After the user has accepted or rejected the
+     * requested permissions you will receive a callback on {@link
+     * #onRequestPermissionsResult(int, String[], int[])} reporting whether the
+     * permissions were granted or not.
+     * </p>
+     * <p>
+     * Note that requesting a permission does not guarantee it will be granted and
+     * your app should be able to run without having this permission.
+     * </p>
+     * <p>
+     * This method may start an activity allowing the user to choose which permissions
+     * to grant and which to reject. Hence, you should be prepared that your activity
+     * may be paused and resumed. Further, granting some permissions may require
+     * a restart of you application. In such a case, the system will recreate the
+     * activity stack before delivering the result to {@link
+     * #onRequestPermissionsResult(int, String[], int[])}.
+     * </p>
+     * <p>
+     * When checking whether you have a permission you should use {@link
+     * android.content.Context#checkSelfPermission(String)}.
+     * </p>
+     * <p>
+     * A sample permissions request looks like this:
+     * </p>
+     * <code><pre><p>
+     * private void showContacts() {
+     *     if (getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS)
+     *             != PackageManager.PERMISSION_GRANTED) {
+     *         requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+     *                 PERMISSIONS_REQUEST_READ_CONTACTS);
+     *     } else {
+     *         doShowContacts();
+     *     }
+     * }
+     *
+     * {@literal @}Override
+     * public void onRequestPermissionsResult(int requestCode, String[] permissions,
+     *         int[] grantResults) {
+     *     if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS
+     *             && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+     *         doShowContacts();
+     *     }
+     * }
+     * </code></pre></p>
+     *
+     * @param permissions The requested permissions.
+     * @param requestCode Application specific request code to match with a result
+     *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
+     *
+     * @see #onRequestPermissionsResult(int, String[], int[])
+     * @see android.content.Context#checkSelfPermission(String)
+     */
+    public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        if (mActivity == null) {
+            throw new IllegalStateException("Fragment " + this + " not attached to Activity");
+        }
+        Intent intent = mActivity.getPackageManager().buildRequestPermissionsIntent(permissions);
+        mActivity.startActivityFromFragment(this, intent, requestCode, null);
+    }
+
+    /**
+     * Callback for the result from requesting permissions. This method
+     * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     *
+     * @param requestCode The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
+     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     *
+     * @see #requestPermissions(String[], int)
+     */
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        /* callback - do nothing */
     }
 
     /**

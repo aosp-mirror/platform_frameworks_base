@@ -3514,6 +3514,7 @@ package android.app {
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method public void onProvideAssistContent(android.app.AssistContent);
     method public void onProvideAssistData(android.os.Bundle);
+    method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
     method public void onRestoreInstanceState(android.os.Bundle, android.os.PersistableBundle);
@@ -3544,6 +3545,7 @@ package android.app {
     method public boolean releaseInstance();
     method public final deprecated void removeDialog(int);
     method public void reportFullyDrawn();
+    method public final void requestPermissions(java.lang.String[], int);
     method public boolean requestVisibleBehind(boolean);
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
@@ -4405,6 +4407,7 @@ package android.app {
     method public void onOptionsMenuClosed(android.view.Menu);
     method public void onPause();
     method public void onPrepareOptionsMenu(android.view.Menu);
+    method public void onRequestPermissionsResult(int, java.lang.String[], int[]);
     method public void onResume();
     method public void onSaveInstanceState(android.os.Bundle);
     method public void onStart();
@@ -4413,6 +4416,7 @@ package android.app {
     method public void onViewCreated(android.view.View, android.os.Bundle);
     method public void onViewStateRestored(android.os.Bundle);
     method public void registerForContextMenu(android.view.View);
+    method public final void requestPermissions(java.lang.String[], int);
     method public void setAllowEnterTransitionOverlap(boolean);
     method public void setAllowReturnTransitionOverlap(boolean);
     method public void setArguments(android.os.Bundle);
@@ -7615,6 +7619,7 @@ package android.content {
     method public abstract int checkCallingPermission(java.lang.String);
     method public abstract int checkCallingUriPermission(android.net.Uri, int);
     method public abstract int checkPermission(java.lang.String, int, int);
+    method public abstract int checkSelfPermission(java.lang.String);
     method public abstract int checkUriPermission(android.net.Uri, int, int, int);
     method public abstract int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public abstract deprecated void clearWallpaper() throws java.io.IOException;
@@ -7798,6 +7803,7 @@ package android.content {
     method public int checkCallingPermission(java.lang.String);
     method public int checkCallingUriPermission(android.net.Uri, int);
     method public int checkPermission(java.lang.String, int, int);
+    method public int checkSelfPermission(java.lang.String);
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public deprecated void clearWallpaper() throws java.io.IOException;
@@ -9078,7 +9084,6 @@ package android.content.pm {
     field public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1; // 0x1
     field public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2; // 0x2
     field public static final int REQUESTED_PERMISSION_GRANTED = 2; // 0x2
-    field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
     field public int baseRevisionCode;
@@ -9278,6 +9283,7 @@ package android.content.pm {
     method public abstract android.graphics.drawable.Drawable getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle);
     method public abstract java.lang.CharSequence getUserBadgedLabel(java.lang.CharSequence, android.os.UserHandle);
     method public abstract android.content.res.XmlResourceParser getXml(java.lang.String, int, android.content.pm.ApplicationInfo);
+    method public abstract void grantPermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract boolean hasSystemFeature(java.lang.String);
     method public abstract boolean isSafeMode();
     method public abstract java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceivers(android.content.Intent, int);
@@ -9293,16 +9299,20 @@ package android.content.pm {
     method public abstract android.content.pm.ResolveInfo resolveActivity(android.content.Intent, int);
     method public abstract android.content.pm.ProviderInfo resolveContentProvider(java.lang.String, int);
     method public abstract android.content.pm.ResolveInfo resolveService(android.content.Intent, int);
+    method public abstract void revokePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract void setApplicationEnabledSetting(java.lang.String, int, int);
     method public abstract void setComponentEnabledSetting(android.content.ComponentName, int, int);
     method public abstract void setInstallerPackageName(java.lang.String, java.lang.String);
     method public abstract void verifyPendingInstall(int, int);
+    field public static final java.lang.String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0; // 0x0
     field public static final int COMPONENT_ENABLED_STATE_DISABLED = 2; // 0x2
     field public static final int COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED = 4; // 0x4
     field public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3; // 0x3
     field public static final int COMPONENT_ENABLED_STATE_ENABLED = 1; // 0x1
     field public static final int DONT_KILL_APP = 1; // 0x1
+    field public static final java.lang.String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
+    field public static final java.lang.String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
     field public static final java.lang.String EXTRA_VERIFICATION_ID = "android.content.pm.extra.VERIFICATION_ID";
     field public static final java.lang.String EXTRA_VERIFICATION_RESULT = "android.content.pm.extra.VERIFICATION_RESULT";
     field public static final java.lang.String FEATURE_APP_WIDGETS = "android.software.app_widgets";
@@ -32551,6 +32561,7 @@ package android.test.mock {
     method public int checkCallingPermission(java.lang.String);
     method public int checkCallingUriPermission(android.net.Uri, int);
     method public int checkPermission(java.lang.String, int, int);
+    method public int checkSelfPermission(java.lang.String);
     method public int checkUriPermission(android.net.Uri, int, int, int);
     method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public void clearWallpaper();

@@ -19,27 +19,26 @@ package com.android.server.pm;
 import android.content.pm.ApplicationInfo;
 import android.util.ArraySet;
 
-class GrantedPermissions {
+abstract class SettingBase {
     int pkgFlags;
     int pkgPrivateFlags;
 
-    ArraySet<String> grantedPermissions = new ArraySet<String>();
+    private final PermissionsState mPermissionsState;
 
-    int[] gids;
-
-    GrantedPermissions(int pkgFlags, int pkgPrivateFlags) {
+    SettingBase(int pkgFlags, int pkgPrivateFlags) {
         setFlags(pkgFlags);
         setPrivateFlags(pkgPrivateFlags);
+        mPermissionsState = new PermissionsState();
     }
 
-    @SuppressWarnings("unchecked")
-    GrantedPermissions(GrantedPermissions base) {
+    SettingBase(SettingBase base) {
         pkgFlags = base.pkgFlags;
-        grantedPermissions = new ArraySet<>(base.grantedPermissions);
+        pkgPrivateFlags = base.pkgPrivateFlags;
+        mPermissionsState = new PermissionsState(base.mPermissionsState);
+    }
 
-        if (base.gids != null) {
-            gids = base.gids.clone();
-        }
+    public PermissionsState getPermissionsState() {
+        return mPermissionsState;
     }
 
     void setFlags(int pkgFlags) {

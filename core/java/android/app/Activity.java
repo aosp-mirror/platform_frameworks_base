@@ -3726,6 +3726,95 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Requests permissions to be granted to this application. These permissions
+     * must be requested in your manifest, they should not be granted to your app,
+     * and they should have protection level {@link android.content.pm.PermissionInfo
+     * #PROTECTION_DANGEROUS dangerous}, regardless whether they are declared by
+     * the platform or a third-party app.
+     * <p>
+     * Normal permissions {@link android.content.pm.PermissionInfo#PROTECTION_NORMAL}
+     * are granted at install time if requested in the manifest. Signature permissions
+     * {@link android.content.pm.PermissionInfo#PROTECTION_SIGNATURE} are granted at
+     * install time if requested in the manifest and the signature of your app matches
+     * the signature of the app declaring the permissions.
+     * </p>
+     * <p>
+     * If your app does not have the requested permissions the user will be presented
+     * with UI for accepting them. After the user has accepted or rejected the
+     * requested permissions you will receive a callback on {@link
+     * #onRequestPermissionsResult(int, String[], int[])} reporting whether the
+     * permissions were granted or not.
+     * </p>
+     * <p>
+     * Note that requesting a permission does not guarantee it will be granted and
+     * your app should be able to run without having this permission.
+     * </p>
+     * <p>
+     * This method may start an activity allowing the user to choose which permissions
+     * to grant and which to reject. Hence, you should be prepared that your activity
+     * may be paused and resumed. Further, granting some permissions may require
+     * a restart of you application. In such a case, the system will recreate the
+     * activity stack before delivering the result to {@link
+     * #onRequestPermissionsResult(int, String[], int[])}.
+     * </p>
+     * <p>
+     * When checking whether you have a permission you should use {@link
+     * #checkSelfPermission(String)}.
+     * </p>
+     * <p>
+     * A sample permissions request looks like this:
+     * </p>
+     * <code><pre><p>
+     * private void showContacts() {
+     *     if (checkSelfPermission(Manifest.permission.READ_CONTACTS)
+     *             != PackageManager.PERMISSION_GRANTED) {
+     *         requestPermissions(new String[]{Manifest.permission.READ_CONTACTS},
+     *                 PERMISSIONS_REQUEST_READ_CONTACTS);
+     *     } else {
+     *         doShowContacts();
+     *     }
+     * }
+     *
+     * {@literal @}Override
+     * public void onRequestPermissionsResult(int requestCode, String[] permissions,
+     *         int[] grantResults) {
+     *     if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS
+     *             && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+     *         showContacts();
+     *     }
+     * }
+     * </code></pre></p>
+     *
+     * @param permissions The requested permissions.
+     * @param requestCode Application specific request code to match with a result
+     *    reported to {@link #onRequestPermissionsResult(int, String[], int[])}.
+     *
+     * @see #onRequestPermissionsResult(int, String[], int[])
+     * @see #checkSelfPermission(String)
+     */
+    public final void requestPermissions(@NonNull String[] permissions, int requestCode) {
+        Intent intent = getPackageManager().buildRequestPermissionsIntent(permissions);
+        startActivityForResult(intent, requestCode);
+    }
+
+    /**
+     * Callback for the result from requesting permissions. This method
+     * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     *
+     * @param requestCode The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either {@link android.content.pm.PackageManager#PERMISSION_GRANTED}
+     *     or {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     *
+     * @see #requestPermissions(String[], int)
+     */
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
+        /* callback - no nothing */
+    }
+
+    /**
      * Same as calling {@link #startActivityForResult(Intent, int, Bundle)}
      * with no options.
      *
@@ -6269,11 +6358,19 @@ public class Activity extends ContextThemeWrapper
             + ", resCode=" + resultCode + ", data=" + data);
         mFragments.noteStateNotSaved();
         if (who == null) {
-            onActivityResult(requestCode, resultCode, data);
+            if (isRequestPermissionResult(data)) {
+                dispatchRequestPermissionsResult(requestCode, data);
+            } else {
+                onActivityResult(requestCode, resultCode, data);
+            }
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {
-                frag.onActivityResult(requestCode, resultCode, data);
+                if (isRequestPermissionResult(data)) {
+                    dispatchRequestPermissionsResultToFragment(requestCode, data, frag);
+                } else {
+                    frag.onActivityResult(requestCode, resultCode, data);
+                }
             }
         }
     }
@@ -6342,5 +6439,27 @@ public class Activity extends ContextThemeWrapper
          * @see Activity#convertToTranslucent(TranslucentConversionListener, ActivityOptions)
          */
         public void onTranslucentConversionComplete(boolean drawComplete);
+    }
+
+    private void dispatchRequestPermissionsResult(int requestCode, Intent data) {
+        String[] permissions = data.getStringArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES);
+        final int[] grantResults = data.getIntArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS);
+        onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void dispatchRequestPermissionsResultToFragment(int requestCode, Intent data,
+            Fragment fragement) {
+        String[] permissions = data.getStringArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_NAMES);
+        final int[] grantResults = data.getIntArrayExtra(
+                PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS);
+        fragement.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private static boolean isRequestPermissionResult(Intent intent) {
+        return intent != null
+                && PackageManager.ACTION_REQUEST_PERMISSIONS.equals(intent.getAction());
     }
 }

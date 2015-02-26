@@ -44,6 +44,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
+import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
 import java.lang.annotation.Retention;
@@ -1663,21 +1664,46 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
 
     /**
-     * The action used to request that the user approve a permission request
-     * from the application.
+     * The action used to request that the user approve a grant permissions
+     * request from the application.
      *
      * @hide
      */
-    public static final String ACTION_REQUEST_PERMISSION
-            = "android.content.pm.action.REQUEST_PERMISSION";
+    @SystemApi
+    public static final String ACTION_REQUEST_PERMISSIONS =
+            "android.content.pm.action.REQUEST_PERMISSIONS";
 
     /**
-     * Extra field name for the list of permissions, which the user must approve.
+     * The component name handling runtime permission grants.
      *
      * @hide
      */
-    public static final String EXTRA_REQUEST_PERMISSION_PERMISSION_LIST
-            = "android.content.pm.extra.PERMISSION_LIST";
+    public static final String GRANT_PERMISSIONS_PACKAGE_NAME =
+            "com.android.packageinstaller";
+
+    /**
+     * The names of the requested permissions.
+     * <p>
+     * <strong>Type:</strong> String[]
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUEST_PERMISSIONS_NAMES =
+            "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
+
+    /**
+     * The results from the permissions request.
+     * <p>
+     * <strong>Type:</strong> int[] of #PermissionResult
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS
+            = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
 
     /**
      * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
@@ -2184,51 +2210,70 @@ public abstract class PackageManager {
     public abstract void removePermission(String name);
 
     /**
-     * Returns an {@link Intent} suitable for passing to {@code startActivityForResult}
-     * which prompts the user to grant {@code permissions} to this application.
-     * @hide
+     * Grant a runtime permission to an application which the application does not
+     * already have. The permission must have been requested by the application.
+     * If the application is not allowed to hold the permission, a {@link
+     * java.lang.SecurityException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * android.permission.GRANT_REVOKE_PERMISSIONS and if the user id is
+     * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
+     * </p>
      *
-     * @throws NullPointerException if {@code permissions} is {@code null}.
-     * @throws IllegalArgumentException if {@code permissions} contains {@code null}.
+     * @param packageName The package to which to grant the permission.
+     * @param permissionName The permission name to grant.
+     * @param user The user for which to grant the permission.
+     *
+     * @see #revokePermission(String, String, android.os.UserHandle)
+     *
+     * @hide
      */
-    public Intent buildPermissionRequestIntent(String... permissions) {
-        if (permissions == null) {
-            throw new NullPointerException("permissions cannot be null");
-        }
-        for (String permission : permissions) {
-            if (permission == null) {
-                throw new IllegalArgumentException("permissions cannot contain null");
-            }
-        }
+    @SystemApi
+    public abstract void grantPermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull UserHandle user);
 
-        Intent i = new Intent(ACTION_REQUEST_PERMISSION);
-        i.putExtra(EXTRA_REQUEST_PERMISSION_PERMISSION_LIST, permissions);
-        i.setPackage("com.android.packageinstaller");
-        return i;
+    /**
+     * Revoke a runtime permission that was previously granted by {@link
+     * #grantPermission(String, String, android.os.UserHandle)}. The permission
+     * must have been requested by and granted to the application. If the
+     * application is not allowed to hold the permission, a {@link
+     * java.lang.SecurityException} is thrown.
+     * <p>
+     * <strong>Note: </strong>Using this API requires holding
+     * android.permission.GRANT_REVOKE_PERMISSIONS and if the user id is
+     * not the current user android.permission.INTERACT_ACROSS_USERS_FULL.
+     * </p>
+     *
+     * @param packageName The package from which to revoke the permission.
+     * @param permissionName The permission name to revoke.
+     * @param user The user for which to revoke the permission.
+     *
+     * @see #grantPermission(String, String, android.os.UserHandle)
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract void revokePermission(@NonNull String packageName,
+            @NonNull String permissionName, @NonNull UserHandle user);
+
+    /**
+     * Returns an {@link android.content.Intent} suitable for passing to
+     * {@link android.app.Activity#startActivityForResult(android.content.Intent, int)}
+     * which prompts the user to grant permissions to this application.
+     *
+     * @throws NullPointerException if {@code permissions} is {@code null} or empty.
+     *
+     * @hide
+     */
+    public Intent buildRequestPermissionsIntent(@NonNull String[] permissions) {
+        if (ArrayUtils.isEmpty(permissions)) {
+           throw new NullPointerException("permission cannot be null or empty");
+        }
+        Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
+        intent.putExtra(EXTRA_REQUEST_PERMISSIONS_NAMES, permissions);
+        intent.setPackage(GRANT_PERMISSIONS_PACKAGE_NAME);
+        return intent;
     }
-
-    /**
-     * Grant a permission to an application which the application does not
-     * already have.  The permission must have been requested by the application,
-     * but as an optional permission.  If the application is not allowed to
-     * hold the permission, a SecurityException is thrown.
-     * @hide
-     *
-     * @param packageName The name of the package that the permission will be
-     * granted to.
-     * @param permissionName The name of the permission.
-     */
-    public abstract void grantPermission(String packageName, String permissionName);
-
-    /**
-     * Revoke a permission that was previously granted by {@link #grantPermission}.
-     * @hide
-     *
-     * @param packageName The name of the package that the permission will be
-     * granted to.
-     * @param permissionName The name of the permission.
-     */
-    public abstract void revokePermission(String packageName, String permissionName);
 
     /**
      * Compare the signatures of two packages to determine if the same

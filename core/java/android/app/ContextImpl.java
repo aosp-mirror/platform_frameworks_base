@@ -1323,6 +1323,15 @@ class ContextImpl extends Context {
                 Binder.getCallingUid());
     }
 
+    @Override
+    public int checkSelfPermission(String permission) {
+        if (permission == null) {
+            throw new IllegalArgumentException("permission is null");
+        }
+
+        return checkPermission(permission, Process.myPid(), Process.myUid());
+    }
+
     private void enforce(
             String permission, int resultOfCheck,
             boolean selfToo, int uid, String message) {

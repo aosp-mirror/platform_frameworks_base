@@ -29,7 +29,7 @@ import java.io.File;
 /**
  * Settings base class for pending and resolved classes.
  */
-class PackageSettingBase extends GrantedPermissions {
+abstract class PackageSettingBase extends SettingBase {
     /**
      * Indicates the state of installation. Used by PackageManager to figure out
      * incomplete installations. Say a package is being installed (the state is
@@ -93,7 +93,6 @@ class PackageSettingBase extends GrantedPermissions {
     PackageSignatures signatures = new PackageSignatures();
 
     boolean permissionsFixed;
-    boolean haveGids;
 
     PackageKeySetData keySetData = new PackageKeySetData();
 
@@ -147,7 +146,6 @@ class PackageSettingBase extends GrantedPermissions {
         signatures = new PackageSignatures(base.signatures);
 
         permissionsFixed = base.permissionsFixed;
-        haveGids = base.haveGids;
         userState.clear();
         for (int i=0; i<base.userState.size(); i++) {
             userState.put(base.userState.keyAt(i),
@@ -160,7 +158,6 @@ class PackageSettingBase extends GrantedPermissions {
         installerPackageName = base.installerPackageName;
 
         keySetData = new PackageKeySetData(base.keySetData);
-
     }
 
     void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
@@ -201,9 +198,7 @@ class PackageSettingBase extends GrantedPermissions {
      * Make a shallow copy of this package settings.
      */
     public void copyFrom(PackageSettingBase base) {
-        grantedPermissions = base.grantedPermissions;
-        gids = base.gids;
-
+        getPermissionsState().copyFrom(base.getPermissionsState());
         primaryCpuAbiString = base.primaryCpuAbiString;
         secondaryCpuAbiString = base.secondaryCpuAbiString;
         cpuAbiOverrideString = base.cpuAbiOverrideString;
@@ -212,7 +207,6 @@ class PackageSettingBase extends GrantedPermissions {
         lastUpdateTime = base.lastUpdateTime;
         signatures = base.signatures;
         permissionsFixed = base.permissionsFixed;
-        haveGids = base.haveGids;
         userState.clear();
         for (int i=0; i<base.userState.size(); i++) {
             userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
