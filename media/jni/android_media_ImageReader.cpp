@@ -95,6 +95,9 @@ public:
     void setBufferFormat(int format) { mFormat = format; }
     int getBufferFormat() { return mFormat; }
 
+    void setBufferDataspace(android_dataspace dataSpace) { mDataSpace = dataSpace; }
+    android_dataspace getBufferDataspace() { return mDataSpace; }
+
     void setBufferWidth(int width) { mWidth = width; }
     int getBufferWidth() { return mWidth; }
 
@@ -111,6 +114,7 @@ private:
     jobject mWeakThiz;
     jclass mClazz;
     int mFormat;
+    android_dataspace mDataSpace;
     int mWidth;
     int mHeight;
 };
@@ -261,29 +265,6 @@ static void Image_setBuffer(JNIEnv* env, jobject thiz,
         const CpuConsumer::LockedBuffer* buffer)
 {
     env->SetLongField(thiz, gSurfaceImageClassInfo.mLockedBuffer, reinterpret_cast<jlong>(buffer));
-}
-
-// Some formats like JPEG defined with different values between android.graphics.ImageFormat and
-// graphics.h, need convert to the one defined in graphics.h here.
-static int Image_getPixelFormat(JNIEnv* env, int format)
-{
-    int jpegFormat;
-    jfieldID fid;
-
-    ALOGV("%s: format = 0x%x", __FUNCTION__, format);
-
-    jclass imageFormatClazz = env->FindClass("android/graphics/ImageFormat");
-    ALOG_ASSERT(imageFormatClazz != NULL);
-
-    fid = env->GetStaticFieldID(imageFormatClazz, "JPEG", "I");
-    jpegFormat = env->GetStaticIntField(imageFormatClazz, fid);
-
-    // Translate the JPEG to BLOB for camera purpose.
-    if (format == jpegFormat) {
-        format = HAL_PIXEL_FORMAT_BLOB;
-    }
-
-    return format;
 }
 
 static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer, bool usingRGBAOverride)
@@ -483,7 +464,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
 }
 
 static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* buffer, int idx,
-        int32_t readerFormat)
+        int32_t halReaderFormat)
 {
     ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
     ALOG_ASSERT((idx < IMAGE_READER_MAX_NUM_PLANES) && (idx >= 0), "Index is out of range:%d", idx);
@@ -493,7 +474,7 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
 
     int32_t fmt = buffer->flexFormat;
 
-    fmt = applyFormatOverrides(fmt, readerFormat);
+    fmt = applyFormatOverrides(fmt, halReaderFormat);
 
     switch (fmt) {
         case HAL_PIXEL_FORMAT_YCbCr_420_888:
@@ -543,7 +524,7 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
 }
 
 static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buffer, int idx,
-        int32_t readerFormat)
+        int32_t halReaderFormat)
 {
     ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
     ALOG_ASSERT((idx < IMAGE_READER_MAX_NUM_PLANES) && (idx >= 0));
@@ -553,7 +534,7 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
 
     int32_t fmt = buffer->flexFormat;
 
-    fmt = applyFormatOverrides(fmt, readerFormat);
+    fmt = applyFormatOverrides(fmt, halReaderFormat);
 
     switch (fmt) {
         case HAL_PIXEL_FORMAT_YCbCr_420_888:
@@ -682,11 +663,16 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
 {
     status_t res;
     int nativeFormat;
+    android_dataspace nativeDataspace;
 
     ALOGV("%s: width:%d, height: %d, format: 0x%x, maxImages:%d",
           __FUNCTION__, width, height, format, maxImages);
 
-    nativeFormat = Image_getPixelFormat(env, format);
+    PublicFormat publicFormat = static_cast<PublicFormat>(format);
+    nativeFormat = android_view_Surface_mapPublicFormatToHalFormat(
+        publicFormat);
+    nativeDataspace = android_view_Surface_mapPublicFormatToHalDataspace(
+        publicFormat);
 
     sp<IGraphicBufferProducer> gbProducer;
     sp<IGraphicBufferConsumer> gbConsumer;
@@ -710,10 +696,11 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     consumer->setFrameAvailableListener(ctx);
     ImageReader_setNativeContext(env, thiz, ctx);
     ctx->setBufferFormat(nativeFormat);
+    ctx->setBufferDataspace(nativeDataspace);
     ctx->setBufferWidth(width);
     ctx->setBufferHeight(height);
 
-    // Set the width/height/format to the CpuConsumer
+    // Set the width/height/format/dataspace to the CpuConsumer
     res = consumer->setDefaultBufferSize(width, height);
     if (res != OK) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -725,6 +712,12 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
         jniThrowException(env, "java/lang/IllegalStateException",
                           "Failed to set CpuConsumer buffer format");
     }
+    res = consumer->setDefaultBufferDataSpace(nativeDataspace);
+    if (res != OK) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to set CpuConsumer buffer dataSpace");
+    }
+
 }
 
 static void ImageReader_close(JNIEnv* env, jobject thiz)
@@ -884,6 +877,8 @@ static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
 static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx, int readerFormat)
 {
     int rowStride, pixelStride;
+    PublicFormat publicReaderFormat = static_cast<PublicFormat>(readerFormat);
+
     ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
 
     CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
@@ -893,10 +888,11 @@ static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx, int 
         jniThrowException(env, "java/lang/IllegalStateException", "Image was released");
     }
 
-    readerFormat = Image_getPixelFormat(env, readerFormat);
+    int halReaderFormat = android_view_Surface_mapPublicFormatToHalFormat(
+        publicReaderFormat);
 
-    rowStride = Image_imageGetRowStride(env, buffer, idx, readerFormat);
-    pixelStride = Image_imageGetPixelStride(env, buffer, idx, readerFormat);
+    rowStride = Image_imageGetRowStride(env, buffer, idx, halReaderFormat);
+    pixelStride = Image_imageGetPixelStride(env, buffer, idx, halReaderFormat);
 
     jobject surfPlaneObj = env->NewObject(gSurfacePlaneClassInfo.clazz,
             gSurfacePlaneClassInfo.ctor, thiz, idx, rowStride, pixelStride);
@@ -909,6 +905,7 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx, int reade
     uint8_t *base = NULL;
     uint32_t size = 0;
     jobject byteBuffer;
+    PublicFormat readerPublicFormat = static_cast<PublicFormat>(readerFormat);
 
     ALOGV("%s: buffer index: %d", __FUNCTION__, idx);
 
@@ -918,10 +915,11 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx, int reade
         jniThrowException(env, "java/lang/IllegalStateException", "Image was released");
     }
 
-    readerFormat = Image_getPixelFormat(env, readerFormat);
+    int readerHalFormat = android_view_Surface_mapPublicFormatToHalFormat(
+            readerPublicFormat);
 
     // Create byteBuffer from native buffer
-    Image_getLockedBufferInfo(env, buffer, idx, &base, &size, readerFormat);
+    Image_getLockedBufferInfo(env, buffer, idx, &base, &size, readerHalFormat);
 
     if (size > static_cast<uint32_t>(INT32_MAX)) {
         // Byte buffer have 'int capacity', so check the range

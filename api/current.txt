@@ -10973,6 +10973,8 @@ package android.graphics {
   public class ImageFormat {
     ctor public ImageFormat();
     method public static int getBitsPerPixel(int);
+    field public static final int DEPTH16 = 1144402265; // 0x44363159
+    field public static final int DEPTH_POINT_CLOUD = 257; // 0x101
     field public static final int JPEG = 256; // 0x100
     field public static final int NV16 = 16; // 0x10
     field public static final int NV21 = 17; // 0x11
