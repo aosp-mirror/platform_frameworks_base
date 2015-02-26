@@ -736,50 +736,47 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     public void notifySignalStrengthForSubscriber(int subId, SignalStrength signalStrength) {
+        log("notifySignalStrengthForSubscriber: subId=" + subId
+                + " signalStrength=" + signalStrength);
         if (!checkNotifyPermission("notifySignalStrength()")) {
+            log("notifySignalStrengthForSubscriber: permission check failure");
             return;
         }
-        if (VDBG) {
-            log("notifySignalStrengthForSubscriber: subId=" + subId
-                + " signalStrength=" + signalStrength);
-            toStringLogSSC("notifySignalStrengthForSubscriber");
-        }
+        toStringLogSSC("notifySignalStrengthForSubscriber");
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
             if (validatePhoneId(phoneId)) {
-                if (VDBG) log("notifySignalStrengthForSubscriber: valid phoneId=" + phoneId);
+                log("notifySignalStrengthForSubscriber: valid phoneId=" + phoneId);
                 mSignalStrength[phoneId] = signalStrength;
                 for (Record r : mRecords) {
-                    if (VDBG) {
-                        log("notifySignalStrengthForSubscriber: r=" + r + " subId=" + subId
-                                + " phoneId=" + phoneId + " ss=" + signalStrength);
-                    }
+                    log("notifySignalStrengthForSubscriber: r=" + r + " subId=" + subId
+                            + " phoneId=" + phoneId + " ss=" + signalStrength);
                     if (r.matchPhoneStateListenerEvent(
                                 PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) &&
                             idMatch(r.subId, subId, phoneId)) {
                         try {
-                            if (DBG) {
-                                log("notifySignalStrengthForSubscriber: callback.onSsS r=" + r
-                                        + " subId=" + subId + " phoneId=" + phoneId
-                                        + " ss=" + signalStrength);
-                            }
+                            log("notifySignalStrengthForSubscriber: callback.onSsS r=" + r
+                                    + " subId=" + subId + " phoneId=" + phoneId
+                                    + " ss=" + signalStrength);
                             r.callback.onSignalStrengthsChanged(new SignalStrength(signalStrength));
                         } catch (RemoteException ex) {
+                            log("notifySignalStrengthForSubscriber: Exception while calling callback!!");
                             mRemoveList.add(r.binder);
                         }
+                    } else {
+                        log("notifySignalStrengthForSubscriber: no match for LISTEN_SIGNAL_STRENGTHS");
                     }
                     if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_SIGNAL_STRENGTH) &&
                             idMatch(r.subId, subId, phoneId)){
                         try {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
                             int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
-                            if (DBG) {
-                                log("notifySignalStrengthForSubscriber: callback.onSS r=" + r
-                                        + " subId=" + subId + " phoneId=" + phoneId
-                                        + " gsmSS=" + gsmSignalStrength + " ss=" + ss);
-                            }
+                            log("notifySignalStrengthForSubscriber: callback.onSS r=" + r
+                                    + " subId=" + subId + " phoneId=" + phoneId
+                                    + " gsmSS=" + gsmSignalStrength + " ss=" + ss);
                             r.callback.onSignalStrengthChanged(ss);
                         } catch (RemoteException ex) {
+                            log("notifySignalStrengthForSubscriber: Exception in deprecated LISTEN_SIGNAL_STRENGTH");
                             mRemoveList.add(r.binder);
                         }
                     }
@@ -787,6 +784,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             } else {
                 log("notifySignalStrengthForSubscriber: invalid phoneId=" + phoneId);
             }
+            log("notifySignalStrengthForSubscriber: done with all records");
             handleRemoveListLocked();
         }
         broadcastSignalStrengthChanged(signalStrength, subId);
