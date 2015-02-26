@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Zadajte svoje heslo na šifrovanie zariadenia nižšie. Bude tiež použité na šifrovanie archívu zálohy."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Zadajte heslo, ktoré sa použije pri šifrovaní údajov úplnej zálohy. Ak pole ponecháte prázdne, použije sa vaše aktuálne heslo zálohy:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Ak chcete šifrovať údaje úplnej zálohy, zadajte heslo nižšie:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Pretože je vaše zariadenie šifrované, musíte zašifrovať aj svoju zálohu. Zadajte heslo nižšie:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Ak sú údaje obnovenia šifrované, zadajte heslo nižšie:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Vytváranie zálohy..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Zálohovanie bolo dokončené"</string>
