@@ -324,7 +324,8 @@ public class VolumeUI extends SystemUI {
                             .setContentTitle(mContext.getString(
                                     R.string.volumeui_notification_title, getAppLabel(component)))
                             .setContentText(mContext.getString(R.string.volumeui_notification_text))
-                            .setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent, 0))
+                            .setContentIntent(PendingIntent.getBroadcast(mContext, 0, intent,
+                                    PendingIntent.FLAG_UPDATE_CURRENT))
                             .setPriority(Notification.PRIORITY_MIN)
                             .setVisibility(Notification.VISIBILITY_PUBLIC)
                             .setColor(mContext.getResources().getColor(
