@@ -41,12 +41,13 @@ class Texture;
  * Position is always enabled by MeshState, these other attributes
  * are enabled/disabled dynamically based on mesh content.
  */
-enum VertexAttribFlags {
-    kNone_Attrib = 0,
-    kTextureCoord_Attrib = 1 << 0,
-    kColor_Attrib = 1 << 1,
-    kAlpha_Attrib = 1 << 2,
+enum class VertexAttribFlags {
+    kNone = 0,
+    kTextureCoord = 1 << 0,
+    kColor = 1 << 1,
+    kAlpha = 1 << 2,
 };
+MAKE_FLAGS_ENUM(VertexAttribFlags)
 
 /**
  * Structure containing all data required to issue an OpenGL draw
@@ -63,22 +64,28 @@ enum VertexAttribFlags {
  */
 // TODO: PREVENT_COPY_AND_ASSIGN(...) or similar
 struct Glop {
-    /*
-     * Stores mesh - vertex and index data.
-     *
-     * buffer objects and void*s are mutually exclusive
-     * indices are optional, currently only GL_UNSIGNED_SHORT supported
-     */
     struct Mesh {
-        VertexAttribFlags vertexFlags;
         GLuint primitiveMode; // GL_TRIANGLES and GL_TRIANGLE_STRIP supported
-        GLuint vertexBufferObject;
-        GLuint indexBufferObject;
-        const void* vertices;
-        const void* indices;
-        GLvoid* texCoordOffset;
+
+        // buffer object and void* are mutually exclusive.
+        // Only GL_UNSIGNED_SHORT supported.
+        struct Indices {
+            GLuint bufferObject;
+            const void* indices;
+        } indices;
+
+        // buffer object and void*s are mutually exclusive.
+        // TODO: enforce mutual exclusion with restricted setters and/or unions
+        struct Vertices {
+            GLuint bufferObject;
+            VertexAttribFlags flags;
+            const void* position;
+            const void* texCoord;
+            const void* color;
+            GLsizei stride;
+        } vertices;
+
         int elementCount;
-        GLsizei stride;
         TextureVertex mappedVertices[4];
     } mesh;
 

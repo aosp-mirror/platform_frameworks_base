@@ -41,6 +41,12 @@
         } \
         inline int operator&(int lhs, enumType rhs) { \
             return lhs & static_cast<int>(rhs); \
+        } \
+        inline int operator&(enumType lhs, int rhs) { \
+            return static_cast<int>(lhs) & rhs; \
+        } \
+        inline int operator&(enumType lhs, enumType rhs) { \
+            return static_cast<int>(lhs) & static_cast<int>(rhs); \
         }
 
 #endif /* MACROS_H */

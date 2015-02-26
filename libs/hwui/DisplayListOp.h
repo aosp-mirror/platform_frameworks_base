@@ -1399,8 +1399,11 @@ class DrawRenderNodeOp : public DrawBoundedOp {
     friend class DisplayListData; // grant DisplayListData access to info of child
 public:
     DrawRenderNodeOp(RenderNode* renderNode, int flags, const mat4& transformFromParent)
-            : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr),
-            mRenderNode(renderNode), mFlags(flags), mTransformFromParent(transformFromParent) {}
+            : DrawBoundedOp(0, 0, renderNode->getWidth(), renderNode->getHeight(), nullptr)
+            , mRenderNode(renderNode)
+            , mFlags(flags)
+            , mTransformFromParent(transformFromParent)
+            , mSkipInOrderDraw(false) {}
 
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) override {

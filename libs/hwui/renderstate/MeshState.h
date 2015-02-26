@@ -42,6 +42,7 @@ const TextureVertex kUnitQuadVertices[] = {
 const GLsizei kVertexStride = sizeof(Vertex);
 const GLsizei kAlphaVertexStride = sizeof(AlphaVertex);
 const GLsizei kTextureVertexStride = sizeof(TextureVertex);
+const GLsizei kColorTextureVertexStride = sizeof(ColorTextureVertex);
 
 const GLsizei kMeshTextureOffset = 2 * sizeof(float);
 const GLsizei kVertexAlphaOffset = 2 * sizeof(float);
