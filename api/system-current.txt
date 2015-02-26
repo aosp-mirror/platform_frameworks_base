@@ -30203,6 +30203,15 @@ package android.system {
     field public static final int STDERR_FILENO;
     field public static final int STDIN_FILENO;
     field public static final int STDOUT_FILENO;
+    field public static final int ST_MANDLOCK;
+    field public static final int ST_NOATIME;
+    field public static final int ST_NODEV;
+    field public static final int ST_NODIRATIME;
+    field public static final int ST_NOEXEC;
+    field public static final int ST_NOSUID;
+    field public static final int ST_RDONLY;
+    field public static final int ST_RELATIME;
+    field public static final int ST_SYNCHRONOUS;
     field public static final int S_IFBLK;
     field public static final int S_IFCHR;
     field public static final int S_IFDIR;
