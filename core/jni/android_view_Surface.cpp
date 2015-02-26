@@ -129,6 +129,100 @@ jobject android_view_Surface_createFromIGraphicBufferProducer(JNIEnv* env,
     return surfaceObj;
 }
 
+int android_view_Surface_mapPublicFormatToHalFormat(PublicFormat f) {
+
+    switch(f) {
+        case JPEG:
+        case DEPTH_POINT_CLOUD:
+            return HAL_PIXEL_FORMAT_BLOB;
+        case DEPTH16:
+            return HAL_PIXEL_FORMAT_Y16;
+        case RAW_SENSOR:
+            return HAL_PIXEL_FORMAT_RAW16;
+        default:
+            // Most formats map 1:1
+            return static_cast<int>(f);
+    }
+}
+
+android_dataspace android_view_Surface_mapPublicFormatToHalDataspace(
+        PublicFormat f) {
+    switch(f) {
+        case JPEG:
+            return HAL_DATASPACE_JFIF;
+        case DEPTH_POINT_CLOUD:
+        case DEPTH16:
+            return HAL_DATASPACE_DEPTH;
+        case RAW_SENSOR:
+        case RAW10:
+            return HAL_DATASPACE_ARBITRARY;
+        case YUV_420_888:
+        case NV21:
+        case YV12:
+            return HAL_DATASPACE_JFIF;
+        default:
+            // Most formats map to UNKNOWN
+            return HAL_DATASPACE_UNKNOWN;
+    }
+}
+
+PublicFormat android_view_Surface_mapHalFormatDataspaceToPublicFormat(
+        int format, android_dataspace dataSpace) {
+    switch(format) {
+        case HAL_PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+        case HAL_PIXEL_FORMAT_RGB_888:
+        case HAL_PIXEL_FORMAT_RGB_565:
+        case HAL_PIXEL_FORMAT_Y8:
+        case HAL_PIXEL_FORMAT_RAW10:
+        case HAL_PIXEL_FORMAT_YCbCr_420_888:
+        case HAL_PIXEL_FORMAT_YV12:
+            // Enums overlap in both name and value
+            return static_cast<PublicFormat>(format);
+        case HAL_PIXEL_FORMAT_RAW16:
+            // Name differs, though value is the same
+            return RAW_SENSOR;
+        case HAL_PIXEL_FORMAT_YCbCr_422_SP:
+            // Name differs, though the value is the same
+            return NV16;
+        case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+            // Name differs, though the value is the same
+            return NV21;
+        case HAL_PIXEL_FORMAT_YCbCr_422_I:
+            // Name differs, though the value is the same
+            return YUY2;
+        case HAL_PIXEL_FORMAT_Y16:
+            // Dataspace-dependent
+            switch (dataSpace) {
+                case HAL_DATASPACE_DEPTH:
+                    return DEPTH16;
+                default:
+                    // Assume non-depth Y16 is just Y16.
+                    return Y16;
+            }
+            break;
+        case HAL_PIXEL_FORMAT_BLOB:
+            // Dataspace-dependent
+            switch (dataSpace) {
+                case HAL_DATASPACE_DEPTH:
+                    return DEPTH_POINT_CLOUD;
+                case HAL_DATASPACE_JFIF:
+                    return JPEG;
+                default:
+                    // Assume otherwise-marked blobs are also JPEG
+                    return JPEG;
+            }
+            break;
+        case HAL_PIXEL_FORMAT_BGRA_8888:
+        case HAL_PIXEL_FORMAT_RAW_OPAQUE:
+        case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+            // Not defined in public API
+            return UNKNOWN;
+
+        default:
+            return UNKNOWN;
+    }
+}
 // ----------------------------------------------------------------------------
 
 static inline bool isSurfaceValid(const sp<Surface>& sur) {

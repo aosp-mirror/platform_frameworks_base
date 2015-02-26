@@ -356,6 +356,38 @@ public class ImageFormat {
     public static final int RAW10 = 0x25;
 
     /**
+     * Android dense depth image format.
+     *
+     * Each pixel is 16 bits, representing a depth ranging measurement from
+     * a depth camera or similar sensor.
+     *
+     * <p>This format assumes
+     * <ul>
+     * <li>an even width</li>
+     * <li>an even height</li>
+     * <li>a horizontal stride multiple of 16 pixels</li>
+     * </ul>
+     * </p>
+     *
+     * <pre> y_size = stride * height </pre>
+     *
+     * When produced by a camera, the units are millimeters.
+     */
+    public static final int DEPTH16 = 0x44363159;
+
+    /**
+     * Android sparse depth point cloud format.
+     *
+     * <p>A variable-length list of 3D points, with each point represented
+     * by a triple of floats.</p>
+     *
+     * <p>The number of points is {@code (size of the buffer in bytes) / 12}.
+     *
+     * The coordinate system and units depend on the source of the point cloud data.
+     */
+    public static final int DEPTH_POINT_CLOUD = 0x101;
+
+    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
      *
@@ -376,6 +408,7 @@ public class ImageFormat {
             case Y8:
                 return 8;
             case Y16:
+            case DEPTH16:
                 return 16;
             case NV21:
                 return 12;
@@ -412,6 +445,8 @@ public class ImageFormat {
             case YUV_420_888:
             case RAW_SENSOR:
             case RAW10:
+            case DEPTH16:
+            case DEPTH_POINT_CLOUD:
                 return true;
         }
 
