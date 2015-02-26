@@ -4597,6 +4597,15 @@ public final class ContactsContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "data");
 
         /**
+        * The content:// style URI for this table in managed profile, which requests a directory
+        * of data rows matching the selection criteria.
+        *
+        * @hide
+        */
+        static final Uri ENTERPRISE_CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "data_enterprise");
+
+        /**
          * A boolean parameter for {@link Data#CONTENT_URI}.
          * This specifies whether or not the returned data items should be filtered to show
          * data items belonging to visible contacts only.
@@ -5746,6 +5755,20 @@ public final class ContactsContract {
              */
             public static final Uri CONTENT_URI = Uri.withAppendedPath(Data.CONTENT_URI,
                     "phones");
+
+            /**
+            * URI used for getting all contacts from primary and managed profile.
+            *
+            * It supports the same semantics as {@link #CONTENT_URI} and returns the same
+            * columns.  If the device has no corp profile that is linked to the current profile, it
+            * behaves in the exact same way as {@link #CONTENT_URI}.  If there is a corp profile
+            * linked to the current profile, it will merge corp profile and current profile's
+            * results and return
+            *
+            * @hide
+            */
+            public static final Uri ENTERPRISE_CONTENT_URI =
+                    Uri.withAppendedPath(Data.ENTERPRISE_CONTENT_URI, "phones");
 
             /**
              * The content:// style URL for phone lookup using a filter. The filter returns
