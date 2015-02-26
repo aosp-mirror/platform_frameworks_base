@@ -112,12 +112,12 @@ public class VolumeUI extends SystemUI {
 
     private void setVolumeController(boolean register) {
         if (register) {
-            if (LOGD) Log.d(TAG, "Registering volume controller");
+            if (LOGD) Log.d(TAG, "Registering default volume controller");
             mAudioManager.setVolumeController(mVolumeController);
             mMediaSessionManager.setRemoteVolumeController(mRemoteVolumeController);
             DndTile.setVisible(mContext, false);
         } else {
-            if (LOGD) Log.d(TAG, "Unregistering volume controller");
+            if (LOGD) Log.d(TAG, "Unregistering default volume controller");
             mAudioManager.setVolumeController(null);
             mMediaSessionManager.setRemoteVolumeController(null);
         }
@@ -260,11 +260,16 @@ public class VolumeUI extends SystemUI {
             if (LOGD) Log.d(TAG, "onNoService");
             setVolumeController(true);
             mRestorationNotification.hide();
+            if (!mVolumeControllerService.isPackageAvailable()) {
+                mVolumeControllerService.setComponent(null);
+            }
         }
 
         @Override
         public long onServiceStartAttempt() {
             if (LOGD) Log.d(TAG, "onServiceStartAttempt");
+            // poke the setting to update the uid
+            mVolumeControllerService.setComponent(mVolumeControllerService.getComponent());
             setVolumeController(false);
             mVolumeController.dismissNow();
             mRestorationNotification.show();
