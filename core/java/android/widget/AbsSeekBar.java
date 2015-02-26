@@ -403,23 +403,26 @@ public abstract class AbsSeekBar extends ProgressBar {
     }
 
     private void updateThumbAndTrackPos(int w, int h) {
+        final int paddedHeight = h - mPaddingTop - mPaddingBottom;
         final Drawable track = getCurrentDrawable();
         final Drawable thumb = mThumb;
 
         // The max height does not incorporate padding, whereas the height
         // parameter does.
-        final int trackHeight = Math.min(mMaxHeight, h - mPaddingTop - mPaddingBottom);
+        final int trackHeight = Math.min(mMaxHeight, paddedHeight);
         final int thumbHeight = thumb == null ? 0 : thumb.getIntrinsicHeight();
 
         // Apply offset to whichever item is taller.
         final int trackOffset;
         final int thumbOffset;
         if (thumbHeight > trackHeight) {
-            trackOffset = (thumbHeight - trackHeight) / 2;
-            thumbOffset = 0;
+            final int offsetHeight = (paddedHeight - thumbHeight) / 2;
+            trackOffset = offsetHeight + (thumbHeight - trackHeight) / 2;
+            thumbOffset = offsetHeight + 0;
         } else {
-            trackOffset = 0;
-            thumbOffset = (trackHeight - thumbHeight) / 2;
+            final int offsetHeight = (paddedHeight - trackHeight) / 2;
+            trackOffset = offsetHeight + 0;
+            thumbOffset = offsetHeight + (trackHeight - thumbHeight) / 2;
         }
 
         if (track != null) {
