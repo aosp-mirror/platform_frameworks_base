@@ -8069,6 +8069,14 @@ public final class ContactsContract {
         public static final String EXTRA_MODE = "android.provider.extra.MODE";
 
         /**
+         * Extra used to specify which mimetype should be prioritized in the QuickContacts UI.
+         * For example, passing the value {@link CommonDataKinds.Phone#CONTENT_ITEM_TYPE} can
+         * cause phone numbers to be displayed more prominently in QuickContacts.
+         */
+        public static final String EXTRA_PRIORITIZED_MIMETYPE
+                = "android.provider.extra.PRIORITIZED_MIMETYPE";
+
+        /**
          * Extra used to indicate a list of specific MIME-types to exclude and not display in the
          * QuickContacts dialog. Stored as a {@link String} array.
          */
@@ -8203,6 +8211,80 @@ public final class ContactsContract {
                 String[] excludeMimes) {
             Intent intent = composeQuickContactsIntent(context, target, lookupUri, mode,
                     excludeMimes);
+            startActivityWithErrorToast(context, intent);
+        }
+
+        /**
+         * Trigger a dialog that lists the various methods of interacting with
+         * the requested {@link Contacts} entry. This may be based on available
+         * {@link ContactsContract.Data} rows under that contact, and may also
+         * include social status and presence details.
+         *
+         * @param context The parent {@link Context} that may be used as the
+         *            parent for this dialog.
+         * @param target Specific {@link View} from your layout that this dialog
+         *            should be centered around. In particular, if the dialog
+         *            has a "callout" arrow, it will be pointed and centered
+         *            around this {@link View}.
+         * @param lookupUri A
+         *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
+         *            {@link Uri} that describes a specific contact to feature
+         *            in this dialog.
+         * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
+         *            to exclude when showing this dialog. For example, when
+         *            already viewing the contact details card, this can be used
+         *            to omit the details entry from the dialog.
+         * @param prioritizedMimeType This mimetype should be prioritized in the QuickContacts UI.
+         *             For example, passing the value
+         *             {@link CommonDataKinds.Phone#CONTENT_ITEM_TYPE} can cause phone numbers to be
+         *             displayed more prominently in QuickContacts.
+         */
+        public static void showQuickContact(Context context, View target, Uri lookupUri,
+                String[] excludeMimes, String prioritizedMimeType) {
+            // Use MODE_LARGE instead of accepting mode as a parameter. The different mode
+            // values defined in ContactsContract only affect very old implementations
+            // of QuickContacts.
+            Intent intent = composeQuickContactsIntent(context, target, lookupUri, MODE_LARGE,
+                    excludeMimes);
+            intent.putExtra(EXTRA_PRIORITIZED_MIMETYPE, prioritizedMimeType);
+            startActivityWithErrorToast(context, intent);
+        }
+
+        /**
+         * Trigger a dialog that lists the various methods of interacting with
+         * the requested {@link Contacts} entry. This may be based on available
+         * {@link ContactsContract.Data} rows under that contact, and may also
+         * include social status and presence details.
+         *
+         * @param context The parent {@link Context} that may be used as the
+         *            parent for this dialog.
+         * @param target Specific {@link Rect} that this dialog should be
+         *            centered around, in screen coordinates. In particular, if
+         *            the dialog has a "callout" arrow, it will be pointed and
+         *            centered around this {@link Rect}. If you are running at a
+         *            non-native density, you need to manually adjust using
+         *            {@link DisplayMetrics#density} before calling.
+         * @param lookupUri A
+         *            {@link ContactsContract.Contacts#CONTENT_LOOKUP_URI} style
+         *            {@link Uri} that describes a specific contact to feature
+         *            in this dialog.
+         * @param excludeMimes Optional list of {@link Data#MIMETYPE} MIME-types
+         *            to exclude when showing this dialog. For example, when
+         *            already viewing the contact details card, this can be used
+         *            to omit the details entry from the dialog.
+         * @param prioritizedMimeType This mimetype should be prioritized in the QuickContacts UI.
+         *             For example, passing the value
+         *             {@link CommonDataKinds.Phone#CONTENT_ITEM_TYPE} can cause phone numbers to be
+         *             displayed more prominently in QuickContacts.
+         */
+        public static void showQuickContact(Context context, Rect target, Uri lookupUri,
+                String[] excludeMimes, String prioritizedMimeType) {
+            // Use MODE_LARGE instead of accepting mode as a parameter. The different mode
+            // values defined in ContactsContract only affect very old implementations
+            // of QuickContacts.
+            Intent intent = composeQuickContactsIntent(context, target, lookupUri, MODE_LARGE,
+                    excludeMimes);
+            intent.putExtra(EXTRA_PRIORITIZED_MIMETYPE, prioritizedMimeType);
             startActivityWithErrorToast(context, intent);
         }
 

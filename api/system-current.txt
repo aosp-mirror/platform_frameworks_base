@@ -26648,9 +26648,12 @@ package android.provider {
     ctor public ContactsContract.QuickContact();
     method public static void showQuickContact(android.content.Context, android.view.View, android.net.Uri, int, java.lang.String[]);
     method public static void showQuickContact(android.content.Context, android.graphics.Rect, android.net.Uri, int, java.lang.String[]);
+    method public static void showQuickContact(android.content.Context, android.view.View, android.net.Uri, java.lang.String[], java.lang.String);
+    method public static void showQuickContact(android.content.Context, android.graphics.Rect, android.net.Uri, java.lang.String[], java.lang.String);
     field public static final java.lang.String ACTION_QUICK_CONTACT = "android.provider.action.QUICK_CONTACT";
     field public static final java.lang.String EXTRA_EXCLUDE_MIMES = "android.provider.extra.EXCLUDE_MIMES";
     field public static final java.lang.String EXTRA_MODE = "android.provider.extra.MODE";
+    field public static final java.lang.String EXTRA_PRIORITIZED_MIMETYPE = "android.provider.extra.PRIORITIZED_MIMETYPE";
     field public static final int MODE_LARGE = 3; // 0x3
     field public static final int MODE_MEDIUM = 2; // 0x2
     field public static final int MODE_SMALL = 1; // 0x1
@@ -41206,6 +41209,7 @@ package android.widget {
     method public void setImageToDefault();
     method public void setMode(int);
     method public void setOverlay(android.graphics.drawable.Drawable);
+    method public void setPrioritizedMimeType(java.lang.String);
     field protected java.lang.String[] mExcludeMimes;
   }
 
