@@ -1235,24 +1235,6 @@ public class ProgressBar extends View {
         }
     }
 
-    private void setDrawableTint(int id, ColorStateList tint, Mode tintMode, boolean fallback) {
-        Drawable layer = null;
-
-        // We expect a layer drawable, so try to find the target ID.
-        final Drawable d = mCurrentDrawable;
-        if (d instanceof LayerDrawable) {
-            layer = ((LayerDrawable) d).findDrawableByLayerId(id);
-        }
-
-        if (fallback && layer == null) {
-            layer = d;
-        }
-
-        layer.mutate();
-        layer.setTintList(tint);
-        layer.setTintMode(tintMode);
-    }
-
     private synchronized void doRefreshProgress(int id, int progress, boolean fromUser,
             boolean callBackToApp) {
         float scale = mMax > 0 ? (float) progress / (float) mMax : 0;
