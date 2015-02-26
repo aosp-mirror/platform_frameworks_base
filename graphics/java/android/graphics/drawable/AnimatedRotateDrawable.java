@@ -37,38 +37,47 @@ import com.android.internal.R;
 /**
  * @hide
  */
-public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable, Animatable {
+public class AnimatedRotateDrawable extends DrawableWrapper implements Animatable {
     private AnimatedRotateState mState;
 
     private float mCurrentDegrees;
     private float mIncrement;
+
+    /** Whether this drawable is currently animating. */
     private boolean mRunning;
 
+    /**
+     * Creates a new animated rotating drawable with no wrapped drawable.
+     */
     public AnimatedRotateDrawable() {
         this(new AnimatedRotateState(null), null);
     }
 
     @Override
     public void draw(Canvas canvas) {
-        int saveCount = canvas.save();
+        final Drawable drawable = getDrawable();
+        final Rect bounds = drawable.getBounds();
+        final int w = bounds.right - bounds.left;
+        final int h = bounds.bottom - bounds.top;
 
         final AnimatedRotateState st = mState;
-        final Drawable drawable = st.mDrawable;
-        final Rect bounds = drawable.getBounds();
+        final float px = st.mPivotXRel ? (w * st.mPivotX) : st.mPivotX;
+        final float py = st.mPivotYRel ? (h * st.mPivotY) : st.mPivotY;
 
-        int w = bounds.right - bounds.left;
-        int h = bounds.bottom - bounds.top;
-
-        float px = st.mPivotXRel ? (w * st.mPivotX) : st.mPivotX;
-        float py = st.mPivotYRel ? (h * st.mPivotY) : st.mPivotY;
-
+        final int saveCount = canvas.save();
         canvas.rotate(mCurrentDegrees, px + bounds.left, py + bounds.top);
-
         drawable.draw(canvas);
-
         canvas.restoreToCount(saveCount);
     }
 
+    /**
+     * Starts the rotation animation.
+     * <p>
+     * The animation will run until {@link #stop()} is called. Calling this
+     * method while the animation is already running has no effect.
+     *
+     * @see #stop()
+     */
     @Override
     public void start() {
         if (!mRunning) {
@@ -77,10 +86,15 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
         }
     }
 
+    /**
+     * Stops the rotation animation.
+     *
+     * @see #start()
+     */
     @Override
     public void stop() {
         mRunning = false;
-        unscheduleSelf(this);
+        unscheduleSelf(mNextFrame);
     }
 
     @Override
@@ -89,20 +103,8 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
     }
 
     private void nextFrame() {
-        unscheduleSelf(this);
-        scheduleSelf(this, SystemClock.uptimeMillis() + mState.mFrameDuration);
-    }
-
-    @Override
-    public void run() {
-        // TODO: This should be computed in draw(Canvas), based on the amount
-        // of time since the last frame drawn
-        mCurrentDegrees += mIncrement;
-        if (mCurrentDegrees > (360.0f - mIncrement)) {
-            mCurrentDegrees = 0.0f;
-        }
-        invalidateSelf();
-        nextFrame();
+        unscheduleSelf(mNextFrame);
+        scheduleSelf(mNextFrame, SystemClock.uptimeMillis() + mState.mFrameDuration);
     }
 
     @Override
@@ -114,7 +116,7 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
                 nextFrame();
             }
         } else {
-            unscheduleSelf(this);
+            unscheduleSelf(mNextFrame);
         }
         return changed;
     }
@@ -208,20 +210,12 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
     }
 
     static final class AnimatedRotateState extends DrawableWrapper.DrawableWrapperState {
-        Drawable mDrawable;
-        int[] mThemeAttrs;
-
-        int mChangingConfigurations;
-
         boolean mPivotXRel = false;
         float mPivotX = 0;
         boolean mPivotYRel = false;
         float mPivotY = 0;
         int mFrameDuration = 150;
         int mFramesCount = 12;
-
-        private boolean mCanConstantState;
-        private boolean mCheckedConstantState;
 
         public AnimatedRotateState(AnimatedRotateState orig) {
             super(orig);
@@ -240,26 +234,6 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
         public Drawable newDrawable(Resources res) {
             return new AnimatedRotateDrawable(this, res);
         }
-
-        @Override
-        public boolean canApplyTheme() {
-            return mThemeAttrs != null || (mDrawable != null && mDrawable.canApplyTheme())
-                    || super.canApplyTheme();
-        }
-
-        @Override
-        public int getChangingConfigurations() {
-            return mChangingConfigurations;
-        }
-
-        public boolean canConstantState() {
-            if (!mCheckedConstantState) {
-                mCanConstantState = mDrawable.getConstantState() != null;
-                mCheckedConstantState = true;
-            }
-
-            return mCanConstantState;
-        }
     }
 
     private AnimatedRotateDrawable(AnimatedRotateState state, Resources res) {
@@ -276,7 +250,7 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
 
         // Force the wrapped drawable to use filtering and AA, if applicable,
         // so that it looks smooth when rotated.
-        final Drawable drawable = state.mDrawable;
+        final Drawable drawable = getDrawable();
         if (drawable != null) {
             drawable.setFilterBitmap(true);
             if (drawable instanceof BitmapDrawable) {
@@ -284,4 +258,18 @@ public class AnimatedRotateDrawable extends DrawableWrapper implements Runnable,
             }
         }
     }
+
+    private final Runnable mNextFrame = new Runnable() {
+        @Override
+        public void run() {
+            // TODO: This should be computed in draw(Canvas), based on the amount
+            // of time since the last frame drawn
+            mCurrentDegrees += mIncrement;
+            if (mCurrentDegrees > (360.0f - mIncrement)) {
+                mCurrentDegrees = 0.0f;
+            }
+            invalidateSelf();
+            nextFrame();
+        }
+    };
 }
