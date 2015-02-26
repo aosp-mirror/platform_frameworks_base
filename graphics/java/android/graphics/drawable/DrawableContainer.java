@@ -685,7 +685,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
-            mRes = res;
+            mRes = res != null ? res : orig != null ? orig.mRes : null;
 
             if (orig != null) {
                 mChangingConfigurations = orig.mChangingConfigurations;
