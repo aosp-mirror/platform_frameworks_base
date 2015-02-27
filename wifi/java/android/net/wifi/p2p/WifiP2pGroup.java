@@ -146,7 +146,6 @@ public class WifiP2pGroup implements Parcelable {
                 }
 
                 if (nameValue[0].equals("persistent")) {
-                    mOwner = new WifiP2pDevice(sa);
                     mNetId = Integer.parseInt(nameValue[1]);
                     continue;
                 }
