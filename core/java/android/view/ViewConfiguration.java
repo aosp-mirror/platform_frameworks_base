@@ -47,12 +47,6 @@ public class ViewConfiguration {
     private static final int SCROLL_BAR_DEFAULT_DELAY = 300;
 
     /**
-     * Default delay before the scrollbars fade in milliseconds for the first
-     * time they are shown to the user.
-     */
-    private static final int SCROLL_BAR_DEFAULT_INITIAL_DELAY = 1500;
-
-    /**
      * Defines the length of the fading edges in dips
      */
     private static final int FADING_EDGE_LENGTH = 12;
@@ -401,20 +395,10 @@ public class ViewConfiguration {
     }
 
     /**
-     * @return Default delay in milliseconds before the scrollbars fade out
-     *         after they have been awoken.
+     * @return Default delay before the scrollbars fade in milliseconds
      */
     public static int getScrollDefaultDelay() {
         return SCROLL_BAR_DEFAULT_DELAY;
-    }
-
-    /**
-     * @return Default delay in milliseconds before the scrollbars fade out
-     *         after they are initially shown to the user.
-     * @hide Pending cleanup of ViewConfiguration values.
-     */
-    public static int getScrollDefaultInitialDelay() {
-        return SCROLL_BAR_DEFAULT_INITIAL_DELAY;
     }
 
     /**
