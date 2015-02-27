@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"VPN இணைப்பை உருவாக்க <xliff:g id="APP">%s</xliff:g> முயற்சிக்கிறது."</string>
-    <string name="warning" msgid="5470743576660160079">"தொடர்வதன்மூலம், எல்லா நெட்வொர்க் ட்ராஃபிக்கையும் இடைமறிக்க பயன்பாட்டிற்கு அனுமதியளிக்கிறீர்கள். "<b>"நீங்கள் பயன்பாட்டை நம்பினால் ஒழிய இதை ஒப்புக்கொள்ள வேண்டாம்."</b>" இல்லையெனில், தீங்குவிளைவிக்கும் மென்பொருள் மூலம் உங்களின் தரவை திருட வாய்ப்பளிக்கிறீர்கள்."</string>
-    <string name="accept" msgid="2889226408765810173">"இந்தப் பயன்பாட்டை நம்புகிறேன்."</string>
+    <string name="prompt" msgid="3183836924226407828">"இணைப்புக் கோரிக்கை"</string>
+    <string name="warning" msgid="809658604548412033">"VPN இணைப்பை அமைக்க <xliff:g id="APP">%s</xliff:g> விழைகிறது அதன்மூலம் இது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கும் அனுமதியைப் பெறும். நம்பகமான மூலத்தை மட்டுமே ஏற்கவும். VPN இயக்கத்தில் உள்ளபோது திரையில் மேல் பகுதியில் &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; தோன்றும்."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN இணைக்கப்பட்டது"</string>
     <string name="configure" msgid="4905518375574791375">"உள்ளமை"</string>
     <string name="disconnect" msgid="971412338304200056">"தொடர்பைத் துண்டி"</string>

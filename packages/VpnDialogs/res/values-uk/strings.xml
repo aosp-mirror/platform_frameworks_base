@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"Спроб створити з’єднання з мережею VPN: <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="warning" msgid="5470743576660160079">"Продовжуючи, ви дозволяєте цій програмі перехоплювати весь трафік мережі. "<b>"НЕ погоджуйтеся, якщо ви не довіряєте цій програмі."</b>" Інакше є небезпека пошкодження ваших даних шкідливим програмним забезпеченням."</string>
-    <string name="accept" msgid="2889226408765810173">"Я довіряю цій програмі."</string>
+    <string name="prompt" msgid="3183836924226407828">"Запит на під’єднання"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> хоче під’єднатися до мережі VPN, щоб контролювати мережевий трафік. Дозволяйте, якщо довіряєте джерелу. Коли мережа VPN активна, угорі екрана відображається значок &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
     <string name="legacy_title" msgid="192936250066580964">"Мережу VPN під’єднано"</string>
     <string name="configure" msgid="4905518375574791375">"Налаштувати"</string>
     <string name="disconnect" msgid="971412338304200056">"Від’єднати"</string>

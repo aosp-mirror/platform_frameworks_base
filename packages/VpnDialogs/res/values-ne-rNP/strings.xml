@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> एउटा VPN जडान सिर्जना गर्ने प्रयासहरू।"</string>
-    <string name="warning" msgid="5470743576660160079">"अगाडी बढेर, तपाईँले यस अनुप्रयोगलाई सबै नेटवर्कको ट्राफिक अवरोध गर्न अनुमति दिनु हुँदैछ। "<b>"तपाईँलाई अनुप्रयोगको विश्वास नलागेसम्म यसलाई स्वीकार नगर्नुहोस्।"</b>" अन्यथा, तपाईँ आफ्नो डेटा खराब सफ्टवेरद्वारा जोखिममा पर्नु हुनेछ।"</string>
-    <string name="accept" msgid="2889226408765810173">"म यस अनुप्रयोगलाई विश्वास गर्छु।"</string>
+    <string name="prompt" msgid="3183836924226407828">"जडान अनुरोध"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ले नेटवर्क यातायात अनुगमन गर्न अनुमति दिने VPN जडान स्थापना गर्न चाहन्छ। तपाईँले स्रोत भरोसा छ भने मात्र स्वीकार गर्नुहोस्। &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; जब VPN सक्रिय हुन्छ आफ्नो स्क्रिनको माथि देखा पर्छन्।"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN जोडिएको छ"</string>
     <string name="configure" msgid="4905518375574791375">"कन्फिगर गर्नुहोस्"</string>
     <string name="disconnect" msgid="971412338304200056">"विच्छेदन गर्नुहोस्"</string>

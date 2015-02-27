@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> прави опит за създаване на връзка с VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"С продължаването си давате на приложението разрешение да прехваща целия трафик от мрежата. "<b>"НЕ приемайте, ако нямате доверие на приложението."</b>" В противен случай съществува риск от компрометиране на данните ви от злонамерен софтуер."</string>
-    <string name="accept" msgid="2889226408765810173">"Имам доверие на това приложение."</string>
+    <string name="prompt" msgid="3183836924226407828">"Заявка за свързване"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> иска да настрои връзка с виртуална частна мрежа (VPN), за да може да наблюдава мрежовия трафик. Приемете само ако източникът е надежден. Иконата &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; се показва в долната част на екрана при активирана VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN е свързана"</string>
     <string name="configure" msgid="4905518375574791375">"Конфигуриране"</string>
     <string name="disconnect" msgid="971412338304200056">"Изключване"</string>
