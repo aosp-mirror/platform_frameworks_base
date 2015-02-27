@@ -131,6 +131,7 @@ public class Editor {
     private final UndoManager mUndoManager = new UndoManager();
     private UndoOwner mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
     final InputFilter mUndoInputFilter = new UndoInputFilter(this);
+    boolean mAllowUndo = true;
 
     // Cursor Controllers.
     InsertionPointCursorController mInsertionPointCursorController;
@@ -243,20 +244,26 @@ public class Editor {
 
     boolean canUndo() {
         UndoOwner[] owners = { mUndoOwner };
-        return mUndoManager.countUndos(owners) > 0;
+        return mAllowUndo && mUndoManager.countUndos(owners) > 0;
     }
 
     boolean canRedo() {
         UndoOwner[] owners = { mUndoOwner };
-        return mUndoManager.countRedos(owners) > 0;
+        return mAllowUndo && mUndoManager.countRedos(owners) > 0;
     }
 
     void undo() {
+        if (!mAllowUndo) {
+            return;
+        }
         UndoOwner[] owners = { mUndoOwner };
         mUndoManager.undo(owners, 1);  // Undo 1 action.
     }
 
     void redo() {
+        if (!mAllowUndo) {
+            return;
+        }
         UndoOwner[] owners = { mUndoOwner };
         mUndoManager.redo(owners, 1);  // Redo 1 action.
     }
@@ -4223,6 +4230,12 @@ public class Editor {
                 Log.d(TAG, "filter: source=" + source + " (" + start + "-" + end + ") " +
                         "dest=" + dest + " (" + dstart + "-" + dend + ")");
             }
+
+            if (!mEditor.mAllowUndo) {
+                if (DEBUG_UNDO) Log.d(TAG, "filter: undo is disabled");
+                return null;
+            }
+
             final UndoManager um = mEditor.mUndoManager;
             if (um.isInUndo()) {
                 if (DEBUG_UNDO) Log.d(TAG, "filter: skipping, currently performing undo/redo");

@@ -368,6 +368,7 @@ package android {
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
     field public static final int allowSingleTap = 16843353; // 0x1010259
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
+    field public static final int allowUndo = 16844006; // 0x10104e6
     field public static final int alpha = 16843551; // 0x101031f
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3
     field public static final int alwaysDrawnWithCache = 16842991; // 0x10100ef
