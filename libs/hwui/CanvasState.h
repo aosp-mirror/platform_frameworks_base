@@ -51,7 +51,7 @@ public:
      * Allows subclasses to control what value is stored in snapshot's
      * fbo field in * initializeSaveStack.
      */
-    virtual GLuint onGetTargetFbo() const = 0;
+    virtual GLuint getTargetFbo() const = 0;
 
 }; // class CanvasStateClient
 

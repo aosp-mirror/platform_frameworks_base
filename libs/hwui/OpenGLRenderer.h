@@ -426,7 +426,7 @@ public:
 
     virtual void onViewportInitialized() override;
     virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override;
-    virtual GLuint onGetTargetFbo() const override { return 0; }
+    virtual GLuint getTargetFbo() const override { return 0; }
 
     SkPath* allocPathForFrame() {
         std::unique_ptr<SkPath> path(new SkPath());
@@ -569,7 +569,7 @@ protected:
     RenderState& mRenderState;
 
 private:
-    void renderGlop(const Glop& glop);
+    void renderGlop(const Glop& glop, bool clearLayer = true);
 
     /**
      * Discards the content of the framebuffer if supported by the driver.

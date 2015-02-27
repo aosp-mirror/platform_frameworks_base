@@ -131,7 +131,7 @@ public:
 // ----------------------------------------------------------------------------
     virtual void onViewportInitialized() override { }
     virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override { }
-    virtual GLuint onGetTargetFbo() const override { return -1; }
+    virtual GLuint getTargetFbo() const override { return -1; }
 
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas interface

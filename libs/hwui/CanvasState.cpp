@@ -43,7 +43,7 @@ void CanvasState::initializeSaveStack(float clipLeft, float clipTop,
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSnapshot->setClip(clipLeft, clipTop, clipRight, clipBottom);
-    mSnapshot->fbo = mCanvas.onGetTargetFbo();
+    mSnapshot->fbo = mCanvas.getTargetFbo();
     mSnapshot->setRelativeLightCenter(lightCenter);
     mSaveCount = 1;
 }
