@@ -57,11 +57,19 @@ public:
     GlopBuilder& setFillClear();
     GlopBuilder& setFillLayer(Texture& texture, const SkColorFilter* colorFilter,
             float alpha, SkXfermode::Mode mode);
+    GlopBuilder& setFillTextureLayer(Layer& layer, float alpha);
 
     GlopBuilder& setTransform(const Matrix4& ortho, const Matrix4& transform, bool fudgingOffset);
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
+    GlopBuilder& setModelViewMapUnitToRectOptionalSnap(bool snap, const Rect destination) {
+        if (snap) {
+            return setModelViewMapUnitToRectSnap(destination);
+        } else {
+            return setModelViewMapUnitToRect(destination);
+        }
+    }
     GlopBuilder& setModelViewOffsetRect(float offsetX, float offsetY, const Rect source);
     GlopBuilder& setModelViewOffsetRectSnap(float offsetX, float offsetY, const Rect source);
 

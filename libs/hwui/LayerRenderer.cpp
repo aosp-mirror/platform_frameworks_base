@@ -356,8 +356,9 @@ void LayerRenderer::flushLayer(RenderState& renderState, Layer* layer) {
 
 bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* bitmap) {
     Caches& caches = Caches::getInstance();
-    if (layer && bitmap->width() <= caches.maxTextureSize &&
-            bitmap->height() <= caches.maxTextureSize) {
+    if (layer
+            && bitmap->width() <= caches.maxTextureSize
+            && bitmap->height() <= caches.maxTextureSize) {
 
         GLuint fbo = caches.fboCache.get();
         if (!fbo) {
