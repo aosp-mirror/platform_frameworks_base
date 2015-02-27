@@ -4,6 +4,6 @@
     <string name="app_name">CaptivePortalLogin</string>
     <string name="action_use_network">Use this network as is</string>
     <string name="action_do_not_use_network">Do not use this network</string>
-    <string name="action_bar_label">Sign-in to network</string>
+    <string name="action_bar_label">Sign in to network</string>
 
 </resources>

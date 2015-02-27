@@ -3822,10 +3822,10 @@
     </plurals>
 
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
-    <string name="wifi_available_sign_in">Sign into Wi-Fi network</string>
+    <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
     <!-- A notification is shown when a captive portal network is detected.  This is the notification's title. -->
-    <string name="network_available_sign_in">Sign into network</string>
+    <string name="network_available_sign_in">Sign in to network</string>
 
     <!-- A notification is shown when a captive portal network is detected.  This is the notification's message. -->
     <string name="network_available_sign_in_detailed"><xliff:g id="network_ssid">%1$s</xliff:g></string>
