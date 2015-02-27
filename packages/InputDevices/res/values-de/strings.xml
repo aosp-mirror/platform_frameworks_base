@@ -3,7 +3,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Eingabegeräte"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android-Tastatur"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Englisch (Großbritannien)"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Englisch (Vereinigtes Königreich)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Englisch (USA)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Englisch (USA), international"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Englisch (USA), Colemak"</string>
