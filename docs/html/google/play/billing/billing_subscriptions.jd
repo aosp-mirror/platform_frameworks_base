@@ -1,4 +1,4 @@
-page.title=In-App Subscriptions
+page.title=In-app Subscriptions
 parent.title=In-app Billing
 parent.link=index.html
 page.metaDescription=Subscriptions let you sell content or features in your app with automated, recurring billing.
@@ -21,6 +21,11 @@ meta.tags="monetization, inappbilling, subscriptions"
         Developer API</a>.</li>
     <li>Users purchase your subscriptions from inside your apps, rather than
         directly from Google Play.</li>
+    <li>Users can renew their subscriptions while a current subscription is
+        active.</li>
+    <li>Users can upgrade or downgrade a subscription in the middle of a
+        subscription period. The old subscription's cost is pro-rated, and the
+        unused portion is applied to the replacement subscription.</li>
     <li>You can defer billing for a particular user's subscription, to manage
         accounts or offer rewards.</li>
   </ul>
@@ -206,6 +211,65 @@ app to notify your backend servers of subscription purchases, tokens, and any
 billing errors that may occur. Your backend servers can use the server-side API 
 to query and update your records and follow up with customers directly, if needed.</p>
 
+<h3 id="manual-renewal">Manual Renewal</h3>
+
+<p>With version 5 of the In-app Billing API, users can renew a subscription
+during its active period even if the subscription is not set to
+automatically renew. If the user purchases a subscription while the subscription
+is active, it is extended by the appropriate period at the current rate.</p>
+
+<p>For example, Achilles has a subscription to the <em>Modern Hoplite</em> app.
+His subscription is currently due to expire on August 1. On July 10, he
+purchases a 3-month subscription at the current rate. Those three months are
+added to his existing subscription, so the subscription now expires on November
+1.</p>
+
+<p>It is up to the app to convey this with an appropriate UI. For example, if a
+user does not have an active subscription, the app might have a
+<strong>buy</strong> button, but if the user has a subscription the button might
+say <strong>renew</strong>.</p>
+
+<h3 id="upgrade">Subscription Upgrade/Downgrade</h3>
+
+<p>
+  With version 5 of the In-app Billing API, users can upgrade or downgrade a
+  subscription during its active period. When the user does this, the active
+  subscription is canceled and a new subscription is created. The unused
+  balance of the old subscription is applied on a pro-rated basis to the new
+  subscription. The first billing period for the new subscription begins after
+  that balance is used up. (The new subscription does not need to have a period
+  of the same length as the old one.)
+</p>
+
+<p>For example, Samwise has a subscription to online content from the
+<em>Country Gardener</em> app. He currently has a monthly subscription to the
+Tier 1
+version of the content (which has text-only content). This subscription costs
+him £2/month, and renews on the first of the month. On April
+15, he chooses to upgrade to the Tier 2 subscription (which includes video
+updates), costing £3/month. His Tier 1 subscription is immediately ended.
+Since he paid for a full month (April 1-30), but only used half of it, half of a
+month's subscription (£1) is applied to his new subscription. However, since
+that new subscription costs £3/month, the £1 credit balance only pays for ten
+days. So Samwise's credit pays for his subscription from April 15-25. On April
+26, he is charged £3 for his new subscription, and another £3 on the 26th of
+each month following.</p>
+
+<p class="note">
+  <strong>Note:</strong> The new subscription's billing date depends on when
+  the subscriber's pro-rated credit runs out, so the subscriber cannot upgrade
+  or downgrade to a seasonal subscription, which has fixed and predetermined
+  beginning and end dates.
+</p>
+
+<p>When a user upgrades or downgrades a subscription, your app calls
+<a href="{@docRoot}google/play/billing/billing_reference.html#upgrade-getBuyIntentToReplaceSkus">
+<code>getBuyIntentToReplaceSkus()</code></a>.
+This method is passed the new SKU the user wants to buy, and all
+the old SKUs that are superseded by it. The remaining portions of the old SKUs
+are used to pay for the new subscription, and billing begins when this credit
+is used up.</p>
+
 <h3 id="deferred-billing">Deferred Billing</h3>
 
 <p>Using the
@@ -316,7 +380,7 @@ canceling subscriptions from inside the purchasing app.</p>
 
 <p>When the user cancels a subscription, Google Play does not offer a refund for
 the current billing cycle. Instead, it allows the user to have access to the
-cancelled subscription until the end of the current billing cycle, at which time
+canceled subscription until the end of the current billing cycle, at which time
 it terminates the subscription. For example, if a user purchases a monthly
 subscription and cancels it on the 15th day of the cycle, Google Play will
 consider the subscription valid until the end of the 30th day (or other day,
@@ -357,12 +421,12 @@ Orders</strong> page in the Play Store, or by contacting you directly.</p>
 <p>If you receive requests for refunds, you can use the
 <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google Play
 Developer API</a> or the Merchant Center to cancel the subscription, verify that it
-is already cancelled, or refund the user's payment without cancelling it. You
+is already canceled, or refund the user's payment without canceling it. You
 can also use the
 <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Google
 Play Developer API</a> to <em>refund and revoke</em> a
 user's subscription. If you refund and revoke a subscription, the user's
-subscription is immediately cancelled, and the user's most recent subscription
+subscription is immediately canceled, and the user's most recent subscription
 payment is refunded. (If you want to refund more than the most recent payment,
 you can process additional refunds through the Merchant Center.)</p>
 
@@ -423,7 +487,7 @@ approach to purchase verification accounts for the offline use-case.</p>
     <li>Remotely query the validity of a specific subscription at any time</li>
     <li>Cancel a subscription</li>
     <li>Defer a subscription's next billing date</li>
-    <li>Refund a subscription payment without cancelling the subscription</li>
+    <li>Refund a subscription payment without canceling the subscription</li>
     <li>Refund and revoke a subscription</li>
   </ul>
 
