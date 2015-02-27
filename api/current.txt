@@ -21,6 +21,7 @@ package android {
     field public static final java.lang.String BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final java.lang.String BIND_CARRIER_MESSAGING_SERVICE = "android.permission.BIND_CARRIER_MESSAGING_SERVICE";
+    field public static final java.lang.String BIND_CHOOSER_TARGET_SERVICE = "android.permission.BIND_CHOOSER_TARGET_SERVICE";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_DREAM_SERVICE = "android.permission.BIND_DREAM_SERVICE";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
@@ -27456,6 +27457,30 @@ package android.service.carrier {
     method public java.util.List<byte[]> getPdus();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.carrier.MessagePdu> CREATOR;
+  }
+
+}
+
+package android.service.chooser {
+
+  public final class ChooserTarget implements android.os.Parcelable {
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.app.PendingIntent);
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.IntentSender);
+    method public int describeContents();
+    method public android.graphics.Bitmap getIcon();
+    method public android.content.IntentSender getIntentSender();
+    method public float getScore();
+    method public java.lang.CharSequence getTitle();
+    method public boolean sendIntent(android.content.Context, android.content.Intent);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.chooser.ChooserTarget> CREATOR;
+  }
+
+  public abstract class ChooserTargetService extends android.app.Service {
+    ctor public ChooserTargetService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.service.chooser.ChooserTarget> onGetChooserTargets(android.content.ComponentName, android.content.IntentFilter);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.chooser.ChooserTargetService";
   }
 
 }

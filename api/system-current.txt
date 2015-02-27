@@ -29,6 +29,7 @@ package android {
     field public static final java.lang.String BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final java.lang.String BIND_CARRIER_MESSAGING_SERVICE = "android.permission.BIND_CARRIER_MESSAGING_SERVICE";
+    field public static final java.lang.String BIND_CHOOSER_TARGET_SERVICE = "android.permission.BIND_CHOOSER_TARGET_SERVICE";
     field public static final java.lang.String BIND_CONDITION_PROVIDER_SERVICE = "android.permission.BIND_CONDITION_PROVIDER_SERVICE";
     field public static final java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
@@ -29061,6 +29062,30 @@ package android.service.carrier {
 
 }
 
+package android.service.chooser {
+
+  public final class ChooserTarget implements android.os.Parcelable {
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.app.PendingIntent);
+    ctor public ChooserTarget(java.lang.CharSequence, android.graphics.Bitmap, float, android.content.IntentSender);
+    method public int describeContents();
+    method public android.graphics.Bitmap getIcon();
+    method public android.content.IntentSender getIntentSender();
+    method public float getScore();
+    method public java.lang.CharSequence getTitle();
+    method public boolean sendIntent(android.content.Context, android.content.Intent);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.chooser.ChooserTarget> CREATOR;
+  }
+
+  public abstract class ChooserTargetService extends android.app.Service {
+    ctor public ChooserTargetService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.service.chooser.ChooserTarget> onGetChooserTargets(android.content.ComponentName, android.content.IntentFilter);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.chooser.ChooserTargetService";
+  }
+
+}
+
 package android.service.dreams {
 
   public class DreamService extends android.app.Service implements android.view.Window.Callback {
@@ -30906,8 +30931,8 @@ package android.telecom {
     method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
-    field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
     field public static final java.lang.String ACTION_PHONE_ACCOUNT_REGISTERED = "android.telecom.action.PHONE_ACCOUNT_REGISTERED";
+    field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecom.action.SHOW_CALL_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_RESPOND_VIA_SMS_SETTINGS = "android.telecom.action.SHOW_RESPOND_VIA_SMS_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
