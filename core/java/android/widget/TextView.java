@@ -1055,6 +1055,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 inputType = a.getInt(attr, EditorInfo.TYPE_NULL);
                 break;
 
+            case com.android.internal.R.styleable.TextView_allowUndo:
+                createEditorIfNeeded();
+                mEditor.mAllowUndo = a.getBoolean(attr, true);
+                break;
+
             case com.android.internal.R.styleable.TextView_imeOptions:
                 createEditorIfNeeded();
                 mEditor.createInputContentTypeIfNeeded();

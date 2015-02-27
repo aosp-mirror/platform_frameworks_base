@@ -4215,6 +4215,8 @@
             <enum name="marquee_forever" value="-1" />
         </attr>
         <attr name="inputType" />
+        <!-- Whether undo should be allowed for editable text. Defaults to true. -->
+        <attr name="allowUndo" format="boolean" />
         <attr name="imeOptions" />
         <!-- An addition content type description to supply to the input
              method attached to the text view, which is private to the

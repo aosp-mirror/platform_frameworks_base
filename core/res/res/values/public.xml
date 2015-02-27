@@ -2649,5 +2649,8 @@
   <public type="id" name="undo" />
   <!-- Context menu ID for the "Redo" menu item to redo the last text edit operation. -->
   <public type="id" name="redo" />
- 
+
+  <!-- TextView attribute to control undo behavior. -->
+  <public type="attr" name="allowUndo" />
+
 </resources>
