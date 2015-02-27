@@ -11,9 +11,29 @@ page.title=In-app Billing Version Notes
 <p>At run time, your app can query the Google Play Store app to determine what version of the API it supports and what features are available. </p>
 
 <ul>
-<li>If you are using in-app  billing version 3, the version information is not directly returned the Google Play. Instead, you can check if Google Play supports the version of the In-app Billing API that you are using by sending a {@code isBillingSupported} request.</li>
+
+<li>If you are using in-app billing version 3 or later, the version information
+is not directly returned by Google Play. Instead, you can check if Google Play
+supports the version of the In-app Billing API that you are using by sending an
+{@code isBillingSupported} request.</li>
+
 <li>If the In-app Billing API version that you are using is earlier than version 3, the version information is returned in the <code>API_VERSION</code> key of the Bundle object passed in the {@code sendBillingRequest} method. For more information, see <a href="{@docRoot}google/play/billing/v2/billing_reference.html#billing-interface-v2">In-app Billing Service Interface</a>.</li>
 </ul>
+
+<h3 id="version_5">In-app Billing version 5</h3>
+<p><em>February 2015</em></p>
+<ul>
+<li>A user can manually extend an existing subscription. The subscription
+is extended by the appropriate amount of time.</li>
+<li>A user can upgrade or downgrade a subscription while it is active. The
+old subscription is canceled, and the unused portion is applied on a pro-rata
+basis to the new subscription.</li>
+</ul>
+
+<h3 id="version_4">In-app Billing version 4</h3>
+
+<p>Version 4 of the In-app Billing API did not introduce any public
+functionality.</p>
 
 <h3 id="version_3">In-app Billing version 3</h3>
 <p><em>February 2013</em></p>
