@@ -94,8 +94,10 @@ struct Glop {
 
         struct TextureData {
             Texture* texture;
+            GLenum target;
             GLenum filter;
             GLenum clamp;
+            Matrix4* textureTransform;
         } texture;
 
         bool colorEnabled;

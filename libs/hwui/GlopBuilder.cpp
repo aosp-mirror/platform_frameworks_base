@@ -274,7 +274,8 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, bool isAlphaMask
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
-    mOutGlop->fill.texture = { &texture, PaintUtils::getFilter(paint), GL_CLAMP_TO_EDGE };
+    mOutGlop->fill.texture = { &texture,
+            GL_TEXTURE_2D, PaintUtils::getFilter(paint), GL_CLAMP_TO_EDGE, nullptr };
 
     if (paint) {
         int color = paint->getColor();
@@ -315,7 +316,7 @@ GlopBuilder& GlopBuilder::setFillPaint(const SkPaint& paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM };
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     setFill(paint.getColor(), alphaScale, PaintUtils::getXfermode(paint.getXfermode()),
             paint.getShader(), paint.getColorFilter());
@@ -329,7 +330,7 @@ GlopBuilder& GlopBuilder::setFillPathTexturePaint(PathTexture& texture,
     REQUIRE_STAGES(kMeshStage);
 
     //specify invalid filter/clamp, since these are always static for PathTextures
-    mOutGlop->fill.texture = { &texture, GL_INVALID_ENUM, GL_INVALID_ENUM };
+    mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     setFill(paint.getColor(), alphaScale, PaintUtils::getXfermode(paint.getXfermode()),
             paint.getShader(), paint.getColorFilter());
@@ -345,7 +346,7 @@ GlopBuilder& GlopBuilder::setFillShadowTexturePaint(ShadowTexture& texture, int 
     REQUIRE_STAGES(kMeshStage);
 
     //specify invalid filter/clamp, since these are always static for ShadowTextures
-    mOutGlop->fill.texture = { &texture, GL_INVALID_ENUM, GL_INVALID_ENUM };
+    mOutGlop->fill.texture = { &texture, GL_TEXTURE_2D, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
 
     const int ALPHA_BITMASK = SK_ColorBLACK;
     const int COLOR_BITMASK = ~ALPHA_BITMASK;
@@ -366,7 +367,7 @@ GlopBuilder& GlopBuilder::setFillBlack() {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM };
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     setFill(SK_ColorBLACK, 1.0f, SkXfermode::kSrcOver_Mode, nullptr, nullptr);
     return *this;
 }
@@ -375,7 +376,7 @@ GlopBuilder& GlopBuilder::setFillClear() {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
-    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM };
+    mOutGlop->fill.texture = { nullptr, GL_INVALID_ENUM, GL_INVALID_ENUM, GL_INVALID_ENUM, nullptr };
     setFill(SK_ColorBLACK, 1.0f, SkXfermode::kClear_Mode, nullptr, nullptr);
     return *this;
 }
@@ -385,12 +386,28 @@ GlopBuilder& GlopBuilder::setFillLayer(Texture& texture, const SkColorFilter* co
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
-    mOutGlop->fill.texture = { &texture, GL_LINEAR, GL_CLAMP_TO_EDGE };
+    mOutGlop->fill.texture = { &texture,
+            GL_TEXTURE_2D, GL_LINEAR, GL_CLAMP_TO_EDGE, nullptr };
     mOutGlop->fill.color = { alpha, alpha, alpha, alpha };
 
     setFill(SK_ColorWHITE, alpha, mode, nullptr, colorFilter);
 
     mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setFillTextureLayer(Layer& layer, float alpha) {
+    TRIGGER_STAGE(kFillStage);
+    REQUIRE_STAGES(kMeshStage);
+
+    mOutGlop->fill.texture = { &(layer.getTexture()),
+            layer.getRenderTarget(), GL_LINEAR, GL_CLAMP_TO_EDGE, &layer.getTexTransform() };
+    mOutGlop->fill.color = { alpha, alpha, alpha, alpha };
+
+    setFill(SK_ColorWHITE, alpha, layer.getMode(), nullptr, layer.getColorFilter());
+
+    mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
+    mDescription.hasTextureTransform = true;
     return *this;
 }
 
@@ -492,20 +509,27 @@ GlopBuilder& GlopBuilder::setRoundRectClipState(const RoundRectClipState* roundR
 
 void verify(const ProgramDescription& description, const Glop& glop) {
     bool hasTexture = glop.fill.texture.texture != nullptr;
-    LOG_ALWAYS_FATAL_IF(description.hasTexture != hasTexture);
+    LOG_ALWAYS_FATAL_IF(description.hasTexture && description.hasExternalTexture);
+    LOG_ALWAYS_FATAL_IF((description.hasTexture || description.hasExternalTexture )!= hasTexture);
     LOG_ALWAYS_FATAL_IF((glop.mesh.vertices.flags & VertexAttribFlags::kTextureCoord) != hasTexture);
 
     if ((glop.mesh.vertices.flags & VertexAttribFlags::kAlpha) && glop.mesh.vertices.bufferObject) {
         LOG_ALWAYS_FATAL("VBO and alpha attributes are not currently compatible");
     }
+
+    if (description.hasTextureTransform != (glop.fill.texture.textureTransform != nullptr)) {
+        LOG_ALWAYS_FATAL("Texture transform incorrectly specified");
+    }
 }
 
 void GlopBuilder::build() {
     REQUIRE_STAGES(kAllStages);
-
-    mDescription.hasTexture = static_cast<int>(mOutGlop->mesh.vertices.flags & VertexAttribFlags::kTextureCoord);
-    mDescription.hasColors = static_cast<int>(mOutGlop->mesh.vertices.flags & VertexAttribFlags::kColor);
-    mDescription.hasVertexAlpha = static_cast<int>(mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha);
+    if (mOutGlop->mesh.vertices.flags & VertexAttribFlags::kTextureCoord) {
+        mDescription.hasTexture = mOutGlop->fill.texture.target == GL_TEXTURE_2D;
+        mDescription.hasExternalTexture = mOutGlop->fill.texture.target == GL_TEXTURE_EXTERNAL_OES;
+    }
+    mDescription.hasColors = mOutGlop->mesh.vertices.flags & VertexAttribFlags::kColor;
+    mDescription.hasVertexAlpha = mOutGlop->mesh.vertices.flags & VertexAttribFlags::kAlpha;
 
     // serialize shader info into ShaderData
     GLuint textureUnit = mOutGlop->fill.texture.texture ? 1 : 0;

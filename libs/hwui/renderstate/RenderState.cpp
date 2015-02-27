@@ -260,19 +260,25 @@ void RenderState::render(const Glop& glop) {
     meshState().bindIndicesBufferInternal(indices.bufferObject);
 
     if (vertices.flags & VertexAttribFlags::kTextureCoord) {
-        // fill.texture always takes slot 0, shader samplers increment from there
+        const Glop::Fill::TextureData& texture = fill.texture;
+        // texture always takes slot 0, shader samplers increment from there
         mCaches->textureState().activateTexture(0);
 
-        if (fill.texture.clamp != GL_INVALID_ENUM) {
-            fill.texture.texture->setWrap(fill.texture.clamp, true);
+        if (texture.clamp != GL_INVALID_ENUM) {
+            texture.texture->setWrap(texture.clamp, true);
         }
-        if (fill.texture.filter != GL_INVALID_ENUM) {
-            fill.texture.texture->setFilter(fill.texture.filter, true);
+        if (texture.filter != GL_INVALID_ENUM) {
+            texture.texture->setFilter(texture.filter, true);
         }
 
-        mCaches->textureState().bindTexture(fill.texture.texture->id);
+        mCaches->textureState().bindTexture(texture.target, texture.texture->id);
         meshState().enableTexCoordsVertexArray();
         meshState().bindTexCoordsVertexPointer(force, vertices.texCoord, vertices.stride);
+
+        if (texture.textureTransform) {
+            glUniformMatrix4fv(fill.program->getUniform("mainTextureTransform"), 1,
+                    GL_FALSE, &texture.textureTransform->data[0]);
+        }
     } else {
         meshState().disableTexCoordsVertexArray();
     }

@@ -846,8 +846,21 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
 }
 
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
-    float alpha = getLayerAlpha(layer);
+    if (USE_GLOPS) {
+        bool snap = !layer->getForceFilter()
+                && layer->getWidth() == (uint32_t) rect.getWidth()
+                && layer->getHeight() == (uint32_t) rect.getHeight();
+        Glop glop;
+        GlopBuilder aBuilder(mRenderState, mCaches, &glop);
+        aBuilder.setMeshTexturedUvQuad(nullptr, Rect(0, 1, 1, 0)) // TODO: simplify with VBO
+                .setFillTextureLayer(*layer, getLayerAlpha(layer))
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewMapUnitToRectOptionalSnap(snap, rect)
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+    }
 
+    float alpha = getLayerAlpha(layer);
     setupDraw();
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
         setupDrawWithTexture();
@@ -866,10 +879,10 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     } else {
         setupDrawExternalTexture(layer->getTextureId());
     }
-    if (currentTransform()->isPureTranslate() &&
-            !layer->getForceFilter() &&
-            layer->getWidth() == (uint32_t) rect.getWidth() &&
-            layer->getHeight() == (uint32_t) rect.getHeight()) {
+    if (currentTransform()->isPureTranslate()
+            && !layer->getForceFilter()
+            && layer->getWidth() == (uint32_t) rect.getWidth()
+            && layer->getHeight() == (uint32_t) rect.getHeight()) {
         const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
         const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
 
