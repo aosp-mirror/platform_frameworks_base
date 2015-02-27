@@ -30,6 +30,12 @@
     <string name="menu_share" msgid="3075149983979628146">"Compartir"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Eliminar"</string>
     <string name="menu_select" msgid="8711270657353563424">"Selecciona \"<xliff:g id="DIRECTORY">^1</xliff:g>\""</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"Mostrar almac. interno"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"Mostrar tarjeta SD"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"Ocultar almac. interno"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"Ocultar tarjeta SD"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"Mostrar tamaño archivo"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"Ocultar tamaño archivo"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"Seleccionado: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="sort_name" msgid="9183560467917256779">"Por nombre"</string>
     <string name="sort_date" msgid="586080032956151448">"Por fecha de modificación"</string>
@@ -45,9 +51,6 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"Accesos directos"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Dispositivos"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"Más aplicaciones"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"Mostrar dispositivos avanzados"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"Mostrar tamaño del archivo"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"Mostrar tamaño del dispositivo"</string>
     <string name="empty" msgid="7858882803708117596">"Sin elementos"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Error al abrir el archivo"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"No es posible eliminar algunos documentos"</string>
