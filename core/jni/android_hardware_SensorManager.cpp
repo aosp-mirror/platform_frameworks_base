@@ -18,6 +18,8 @@
 
 #include <map>
 
+#include <ScopedUtfChars.h>
+
 #include <utils/Log.h>
 #include <utils/Looper.h>
 
@@ -98,6 +100,9 @@ public:
     bool operator()(const String8* string1, const String8* string2) const {
         if (string1 == NULL) {
             return string2 != NULL;
+        }
+        if (string2 == NULL) {
+            return false;
         }
         return string1->compare(*string2) < 0;
     }
@@ -264,9 +269,12 @@ private:
     }
 };
 
-static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ, jobject msgQ, jfloatArray scratch) {
+static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject eventQ, jobject msgQ,
+        jfloatArray scratch, jstring packageName) {
     SensorManager& mgr(SensorManager::getInstance());
-    sp<SensorEventQueue> queue(mgr.createEventQueue());
+    ScopedUtfChars packageUtf(env, packageName);
+    String8 clientName(packageUtf.c_str());
+    sp<SensorEventQueue> queue(mgr.createEventQueue(clientName));
 
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, msgQ);
     if (messageQueue == NULL) {
@@ -280,10 +288,11 @@ static jlong nativeInitSensorEventQueue(JNIEnv *env, jclass clazz, jobject event
 }
 
 static jint nativeEnableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle, jint rate_us,
-                               jint maxBatchReportLatency, jint reservedFlags) {
+                               jint maxBatchReportLatency) {
     sp<Receiver> receiver(reinterpret_cast<Receiver *>(eventQ));
+
     return receiver->getSensorEventQueue()->enableSensor(handle, rate_us, maxBatchReportLatency,
-                                                         reservedFlags);
+                                                         0);
 }
 
 static jint nativeDisableSensor(JNIEnv *env, jclass clazz, jlong eventQ, jint handle) {
@@ -316,11 +325,11 @@ static JNINativeMethod gSystemSensorManagerMethods[] = {
 
 static JNINativeMethod gBaseEventQueueMethods[] = {
     {"nativeInitBaseEventQueue",
-            "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[F)J",
-            (void*)nativeInitSensorEventQueue },
+     "(Landroid/hardware/SystemSensorManager$BaseEventQueue;Landroid/os/MessageQueue;[FLjava/lang/String;)J",
+     (void*)nativeInitSensorEventQueue },
 
     {"nativeEnableSensor",
-            "(JIIII)I",
+            "(JIII)I",
             (void*)nativeEnableSensor },
 
     {"nativeDisableSensor",
