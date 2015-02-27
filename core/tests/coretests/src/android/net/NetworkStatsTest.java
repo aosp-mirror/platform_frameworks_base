@@ -320,6 +320,73 @@ public class NetworkStatsTest extends TestCase {
         red.combineAllValues(blue);
     }
 
+    public void testMigrateTun() throws Exception {
+        final int tunUid = 10030;
+        final String tunIface = "tun0";
+        final String underlyingIface = "wlan0";
+        final int testTag1 = 8888;
+        NetworkStats delta = new NetworkStats(TEST_START, 17)
+            .addValues(tunIface, 10100, SET_DEFAULT, TAG_NONE, 39605L, 46L, 12259L, 55L, 0L)
+            .addValues(tunIface, 10100, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L)
+            .addValues(tunIface, 10120, SET_DEFAULT, TAG_NONE, 72667L, 197L, 43909L, 241L, 0L)
+            .addValues(tunIface, 10120, SET_FOREGROUND, TAG_NONE, 9297L, 17L, 4128L, 21L, 0L)
+            // VPN package also uses some traffic through unprotected network.
+            .addValues(tunIface, tunUid, SET_DEFAULT, TAG_NONE, 4983L, 10L, 1801L, 12L, 0L)
+            .addValues(tunIface, tunUid, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L)
+            // Tag entries
+            .addValues(tunIface, 10120, SET_DEFAULT, testTag1, 21691L, 41L, 13820L, 51L, 0L)
+            .addValues(tunIface, 10120, SET_FOREGROUND, testTag1, 1281L, 2L, 665L, 2L, 0L)
+            // Irrelevant entries
+            .addValues(TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, 1685L, 5L, 2070L, 6L, 0L)
+            // Underlying Iface entries
+            .addValues(underlyingIface, 10100, SET_DEFAULT, TAG_NONE, 5178L, 8L, 2139L, 11L, 0L)
+            .addValues(underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L)
+            .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, 149873L, 287L,
+                    59217L /* smaller than sum(tun0) */, 299L /* smaller than sum(tun0) */, 0L)
+            .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
+
+        assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
+        assertEquals(17, delta.size());
+
+        // tunIface and TEST_IFACE entries are not changed.
+        assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE,
+                39605L, 46L, 12259L, 55L, 0L);
+        assertValues(delta, 1, tunIface, 10100, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
+        assertValues(delta, 2, tunIface, 10120, SET_DEFAULT, TAG_NONE,
+                72667L, 197L, 43909L, 241L, 0L);
+        assertValues(delta, 3, tunIface, 10120, SET_FOREGROUND, TAG_NONE,
+                9297L, 17L, 4128L, 21L, 0L);
+        assertValues(delta, 4, tunIface, tunUid, SET_DEFAULT, TAG_NONE,
+                4983L, 10L, 1801L, 12L, 0L);
+        assertValues(delta, 5, tunIface, tunUid, SET_FOREGROUND, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
+        assertValues(delta, 6, tunIface, 10120, SET_DEFAULT, testTag1,
+                21691L, 41L, 13820L, 51L, 0L);
+        assertValues(delta, 7, tunIface, 10120, SET_FOREGROUND, testTag1, 1281L, 2L, 665L, 2L, 0L);
+        assertValues(delta, 8, TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, 1685L, 5L, 2070L, 6L, 0L);
+
+        // Existing underlying Iface entries are updated
+        assertValues(delta, 9, underlyingIface, 10100, SET_DEFAULT, TAG_NONE,
+                44783L, 54L, 13829L, 60L, 0L);
+        assertValues(delta, 10, underlyingIface, 10100, SET_FOREGROUND, TAG_NONE,
+                0L, 0L, 0L, 0L, 0L);
+
+        // VPN underlying Iface entries are updated
+        assertValues(delta, 11, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE,
+                28304L, 27L, 1719L, 12L, 0L);
+        assertValues(delta, 12, underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE,
+                0L, 0L, 0L, 0L, 0L);
+
+        // New entries are added for new application's underlying Iface traffic
+        assertValues(delta, 13, underlyingIface, 10120, SET_DEFAULT, TAG_NONE,
+                72667L, 197L, 41872l, 219L, 0L);
+        assertValues(delta, 14, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE,
+                9297L, 17L, 3936, 19L, 0L);
+        assertValues(delta, 15, underlyingIface, 10120, SET_DEFAULT, testTag1,
+                21691L, 41L, 13179L, 46L, 0L);
+        assertValues(delta, 16, underlyingIface, 10120, SET_FOREGROUND, testTag1,
+                1281L, 2L, 634L, 1L, 0L);
+    }
+
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
         final NetworkStats.Entry entry = stats.getValues(index, null);

@@ -19,6 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -42,6 +43,7 @@ import java.util.Objects;
  * @hide
  */
 public class NetworkStats implements Parcelable {
+    private static final String TAG = "NetworkStats";
     /** {@link #iface} value when interface details unavailable. */
     public static final String IFACE_ALL = null;
     /** {@link #uid} value when UID details unavailable. */
@@ -782,5 +784,163 @@ public class NetworkStats implements Parcelable {
     public interface NonMonotonicObserver<C> {
         public void foundNonMonotonic(
                 NetworkStats left, int leftIndex, NetworkStats right, int rightIndex, C cookie);
+    }
+
+    /**
+     * VPN accounting. Move some VPN's underlying traffic to other UIDs that use tun0 iface.
+     *
+     * This method should only be called on delta NetworkStats. Do not call this method on a
+     * snapshot {@link NetworkStats} object because the tunUid and/or the underlyingIface may
+     * change over time.
+     *
+     * This method performs adjustments for one active VPN package and one VPN iface at a time.
+     *
+     * It is possible for the VPN software to use multiple underlying networks. This method
+     * only migrates traffic for the primary underlying network.
+     *
+     * @param tunUid uid of the VPN application
+     * @param tunIface iface of the vpn tunnel
+     * @param underlyingIface the primary underlying network iface used by the VPN application
+     * @return true if it successfully adjusts the accounting for VPN, false otherwise
+     */
+    public boolean migrateTun(int tunUid, String tunIface, String underlyingIface) {
+        Entry tunIfaceTotal = new Entry();
+        Entry underlyingIfaceTotal = new Entry();
+
+        tunAdjustmentInit(tunUid, tunIface, underlyingIface, tunIfaceTotal, underlyingIfaceTotal);
+
+        // If tunIface < underlyingIface, it leaves the overhead traffic in the VPN app.
+        // If tunIface > underlyingIface, the VPN app doesn't get credit for data compression.
+        // Negative stats should be avoided.
+        Entry pool = tunGetPool(tunIfaceTotal, underlyingIfaceTotal);
+        if (pool.isEmpty()) {
+            return true;
+        }
+        Entry moved = addTrafficToApplications(tunIface,  underlyingIface, tunIfaceTotal, pool);
+        deductTrafficFromVpnApp(tunUid, underlyingIface, moved);
+
+        if (!moved.isEmpty()) {
+            Slog.wtf(TAG, "Failed to deduct underlying network traffic from VPN package. Moved="
+                    + moved);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Initializes the data used by the migrateTun() method.
+     *
+     * This is the first pass iteration which does the following work:
+     * (1) Adds up all the traffic through tun0.
+     * (2) Adds up all the traffic through the tunUid's underlyingIface
+     *     (both foreground and background).
+     */
+    private void tunAdjustmentInit(int tunUid, String tunIface, String underlyingIface,
+            Entry tunIfaceTotal, Entry underlyingIfaceTotal) {
+        Entry recycle = new Entry();
+        for (int i = 0; i < size; i++) {
+            getValues(i, recycle);
+            if (recycle.uid == UID_ALL) {
+                throw new IllegalStateException(
+                        "Cannot adjust VPN accounting on an iface aggregated NetworkStats.");
+            }
+
+            if (recycle.uid == tunUid && recycle.tag == TAG_NONE
+                    && Objects.equals(underlyingIface, recycle.iface)) {
+                underlyingIfaceTotal.add(recycle);
+            }
+
+            if (recycle.tag == TAG_NONE && Objects.equals(tunIface, recycle.iface)) {
+                // Add up all tunIface traffic.
+                tunIfaceTotal.add(recycle);
+            }
+        }
+    }
+
+    private static Entry tunGetPool(Entry tunIfaceTotal, Entry underlyingIfaceTotal) {
+        Entry pool = new Entry();
+        pool.rxBytes = Math.min(tunIfaceTotal.rxBytes, underlyingIfaceTotal.rxBytes);
+        pool.rxPackets = Math.min(tunIfaceTotal.rxPackets, underlyingIfaceTotal.rxPackets);
+        pool.txBytes = Math.min(tunIfaceTotal.txBytes, underlyingIfaceTotal.txBytes);
+        pool.txPackets = Math.min(tunIfaceTotal.txPackets, underlyingIfaceTotal.txPackets);
+        pool.operations = Math.min(tunIfaceTotal.operations, underlyingIfaceTotal.operations);
+        return pool;
+    }
+
+    private Entry addTrafficToApplications(String tunIface, String underlyingIface,
+            Entry tunIfaceTotal, Entry pool) {
+        Entry moved = new Entry();
+        Entry tmpEntry = new Entry();
+        tmpEntry.iface = underlyingIface;
+        for (int i = 0; i < size; i++) {
+            if (Objects.equals(iface[i], tunIface)) {
+                if (tunIfaceTotal.rxBytes > 0) {
+                    tmpEntry.rxBytes = pool.rxBytes * rxBytes[i] / tunIfaceTotal.rxBytes;
+                } else {
+                    tmpEntry.rxBytes = 0;
+                }
+                if (tunIfaceTotal.rxPackets > 0) {
+                    tmpEntry.rxPackets = pool.rxPackets * rxPackets[i] / tunIfaceTotal.rxPackets;
+                } else {
+                    tmpEntry.rxPackets = 0;
+                }
+                if (tunIfaceTotal.txBytes > 0) {
+                    tmpEntry.txBytes = pool.txBytes * txBytes[i] / tunIfaceTotal.txBytes;
+                } else {
+                    tmpEntry.txBytes = 0;
+                }
+                if (tunIfaceTotal.txPackets > 0) {
+                    tmpEntry.txPackets = pool.txPackets * txPackets[i] / tunIfaceTotal.txPackets;
+                } else {
+                    tmpEntry.txPackets = 0;
+                }
+                if (tunIfaceTotal.operations > 0) {
+                    tmpEntry.operations =
+                            pool.operations * operations[i] / tunIfaceTotal.operations;
+                } else {
+                    tmpEntry.operations = 0;
+                }
+                tmpEntry.uid = uid[i];
+                tmpEntry.tag = tag[i];
+                tmpEntry.set = set[i];
+                combineValues(tmpEntry);
+                if (tag[i] == TAG_NONE) {
+                    moved.add(tmpEntry);
+                }
+            }
+        }
+        return moved;
+    }
+
+    private void deductTrafficFromVpnApp(int tunUid, String underlyingIface, Entry moved) {
+        // Caveat: if the vpn software uses tag, the total tagged traffic may be greater than
+        // the TAG_NONE traffic.
+        int idxVpnBackground = findIndex(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE);
+        if (idxVpnBackground != -1) {
+            tunSubtract(idxVpnBackground, this, moved);
+        }
+
+        int idxVpnForeground = findIndex(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE);
+        if (idxVpnForeground != -1) {
+            tunSubtract(idxVpnForeground, this, moved);
+        }
+    }
+
+    private static void tunSubtract(int i, NetworkStats left, Entry right) {
+        long rxBytes = Math.min(left.rxBytes[i], right.rxBytes);
+        left.rxBytes[i] -= rxBytes;
+        right.rxBytes -= rxBytes;
+
+        long rxPackets = Math.min(left.rxPackets[i], right.rxPackets);
+        left.rxPackets[i] -= rxPackets;
+        right.rxPackets -= rxPackets;
+
+        long txBytes = Math.min(left.txBytes[i], right.txBytes);
+        left.txBytes[i] -= txBytes;
+        right.txBytes -= txBytes;
+
+        long txPackets = Math.min(left.txPackets[i], right.txPackets);
+        left.txPackets[i] -= txPackets;
+        right.txPackets -= txPackets;
     }
 }
