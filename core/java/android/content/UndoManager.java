@@ -105,8 +105,7 @@ public class UndoManager {
             return owner;
         }
 
-        owner = new UndoOwner(tag);
-        owner.mManager = this;
+        owner = new UndoOwner(tag, this);
         owner.mData = data;
         mOwners.put(tag, owner);
         return owner;
@@ -116,7 +115,6 @@ public class UndoManager {
         // XXX need to figure out how to prune.
         if (false) {
             mOwners.remove(owner.mTag);
-            owner.mManager = null;
         }
     }
 
@@ -202,7 +200,7 @@ public class UndoManager {
         UndoOwner owner = mStateOwners[idx];
         if (owner == null) {
             String tag = in.readString();
-            owner = new UndoOwner(tag);
+            owner = new UndoOwner(tag, this);
             mStateOwners[idx] = owner;
             mOwners.put(tag, owner);
         }
