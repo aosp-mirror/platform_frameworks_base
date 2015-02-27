@@ -3235,6 +3235,8 @@ public class Editor {
             mContainer.setSplitTouchEnabled(true);
             mContainer.setClippingEnabled(false);
             mContainer.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+            mContainer.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+            mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
             mContainer.setContentView(this);
 
             mDrawableLtr = drawableLtr;
