@@ -25,8 +25,8 @@ page.tags="inapp, billing, iap"
 implementation:</p>
 
 <ul>
-<li>Test purchases, which let test account users make real purchase your published in-app items,
-but without any actual charges to the user accounts.</li>
+<li>Test purchases, which let license-test users purchase your published in-app
+    items, but without any actual charges to their accounts.</li>
 <li>Static billing responses from Google Play, for testing in early development</p>
 </ul>
 
@@ -43,14 +43,13 @@ Devices</a>.</p>
 
 <p>When your In-app Billing implementation is ready, you can test purchasing of your in-app SKUs in two ways:</p>
 
-<ul>
-<li><strong>Test purchases</strong>, which let your selected license test users
-purchase your in-app products before the app is published, but without any
-resulting charges to the user, and </li>
+<ul> <li><strong>Test purchases</strong>, which let your selected license-test
+users purchase your in-app products without any resulting charges to the user.
+Test purchases can be used in alpha/beta releases or in published apps. </li>
 <li><strong>Real purchases</strong>, which let regular users make real purchases
 of your in-app products with actual charges to the user’s payment instruments.
-In this case, you can use Google Play’s alpha and beta release groups to manage
-the users who can make “live” purchases using your implementation.  </li>
+You can use Google Play’s alpha and beta release groups to manage
+the users who can make live purchases using your implementation.  </li>
 </ul>
 
 <p>The sections below provide more detail about how to use these approaches for
@@ -61,15 +60,20 @@ testing and validation. </p>
 <p>Test purchases offer a secure, convenient way to enable larger-scale testing
 of your In-app Billing implementation during development or in preparation for
 launch. They let authorized user accounts make purchases of your in-app products
-through Google Play while the app is still unpublished, without incurring any
-actual charges to the user accounts.</p>
+through Google Play without incurring any actual charges to the user
+accounts.</p>
 
-<p>Once authorized with testing access, those users can side-load your app and
-test the full merchandising, purchase, and fulfillment flow for your products.
+<p>Once authorized for testing access, those users can make purchases without
+being charged.
 Test purchases are real orders and Google Play processes them in the same way as
 other orders. When purchases are complete, Google Play prevents the orders from
 going to financial processing, ensuring that there are no actual charges to user
 accounts, and automatically canceling the completed orders after 14 days. </p>
+
+<p class="note">
+  <strong>Note:</strong> Test subscription purchases recur daily, regardless of
+  the product's subscription period.
+</p>
 
 <h4 id="setup">Setting up test purchases</h4>
 
@@ -91,14 +95,13 @@ href="#billing-testing-test">Setting Up for Test Purchases</a>.</p>
 
 <p>Once you’ve added the users as license tester accounts and saved the change,
 within 15 minutes those users can begin making test purchases of your in-app
-products. You can then distribute your app to your testers and provide a means
-of getting feedback. </p>
+products.</p>
 
 <p class="note"><strong>Note</strong>: To make test purchases, the license test
 account must be on the user’s Android device. If the device has more than one
 account, the purchase will be made with the account that downloaded the app. If
 none of the accounts has downloaded the app, the purchase is made with the first
-account.Users can confirm the account that is making a purchase by expanding the
+account. Users can confirm the account that is making a purchase by expanding the
 purchase dialog.</p>
 
 <h4 id="tp-account">Test purchases and developer account</h4>
@@ -114,13 +117,13 @@ as a normal item with an actual price. However, Google Play marks test purchases
 with a notice across the center of the purchase dialog, for easy identification.
 </p>
 
-<h4 id="cancelling">Cancelling completed test purchases</h4>
+<h4 id="cancelling">Canceling completed test purchases</h4>
 <p>Google Play accumulates completed test purchases for each user but does not
 pass them on  to financial processing. Over time, it automatically clears out
-the purchases by cancelling them. </p>
+the purchases by canceling them. </p>
 
 <p>In some cases, you might want to manually cancel a test purchase to continue
-testing. For cancelling purchases, you have these options:</p>
+testing. For canceling purchases, you have these options:</p>
 
 <ul>
 <li>Wait for the transactions to expire&mdash;Google Play clears completed test
@@ -128,13 +131,6 @@ purchases 14 days after their purchase date. </li>
 <li>Cancel purchases manually&mdash;you can go to the Google Wallet Merchant
 Center, look up the transaction, and then cancel it. You can find transactions
 by looking up their order numbers.</li>
-</ul>
-
-<h4 id="requirements">Requirements for using test purchases</h4>
-<p>If you plan to use test purchases, please note the requirements and limitations below: </p>
-<ul>
-<li>Test purchases is only supported for license test accounts when the app is using the In-app Billing v3 API.</li>
-<li>Test purchases are only supported for in-app products, not for in-app subscriptions.</li>
 </ul>
 
 <h3 id="transations">Testing with real transactions</h3>
@@ -276,8 +272,8 @@ you buy items from yourself. If you have not set up test accounts before, see <a
 href="{@docRoot}google/play/billing/billing_admin.html#billing-testing-setup">Setting up test
 accounts</a>.</p>
 
-<p>Also, a test account can purchase an item in your product list only if the item is published. The
-application does not need to be published, but the item does need to be published.</p>
+<p>A test account can purchase an item in your product list only if the
+item is published.</p>
 
 <p>To test your In-app Billing implementation with actual purchases, follow these steps:</p>
 
