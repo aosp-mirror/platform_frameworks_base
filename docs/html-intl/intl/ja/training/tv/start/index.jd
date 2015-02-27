@@ -1,5 +1,7 @@
-page.title=TV アプリのビルド
+page.title=Android TV アプリ開発
 page.tags=tv, leanback
+page.metaDescription=Android TV 対応アプリ開発の手順が日本語化。
+page.image=design/tv/images/atv-home.jpg
 startpage=true
 
 @jd:body
