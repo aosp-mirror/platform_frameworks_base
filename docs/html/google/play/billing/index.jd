@@ -14,6 +14,16 @@ and features, and more. You can use In-app Billing to sell products as</p>
 <div class="sidebox">
   <h2><strong>New in In-App Billing</strong></h2>
   <ul>
+  <li><strong>Subscription Upgrade/Downgrade</strong>&mdash;A user can
+    subscribe to a higher or lower tier of subscription while their current
+    subscription is active. The old subscription is canceled, and the unused
+    portion is applied on a pro-rated basis to the new subscription.</li>
+  <li><strong>Manual Subscription Renewal</strong>&mdash;A user can purchase
+    a subscription at the current rate while their existing subscription is
+    still active. The existing subscription is extended by the appropriate
+    period.</li>
+  <li><strong>IAB Sandbox</strong>&mdash;The In-app Billing Sandbox now supports
+    testing subscription purchases.</li>
   <li><strong>IAB v2 shutdown</strong>&mdash;In-app Billing v2 API is deprecated and will be shut down in January 2015. If your app is still using In-app Billing v2, please migrate to the v3 API as soon as possible.</li>
   <li><strong>Seasonal subscriptions</strong>&mdash;You can now set up a
     recurring <a href="billing_subscriptions.html#user-billing">seasonal
@@ -35,7 +45,6 @@ and features, and more. You can use In-app Billing to sell products as</p>
     subscription ends
     immediately, and his or her most recent subscription payment is
     refunded.</li>
-  <li><strong>In-app Billing Version 3</strong>&mdash;The <a href="{@docRoot}google/play/billing/api.html">latest version</a> of In-app Billing features a synchronous API that is easier to implement and lets you manage in-app products and subscriptions more effectively.</li>
  </ul>
 </div>
 </div>
