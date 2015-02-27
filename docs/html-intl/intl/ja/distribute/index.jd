@@ -1,0 +1,16 @@
+page.title=Google Play でアプリを配信する
+page.viewport_width=970
+section.landing=true
+header.hide=1
+nonavpage=true
+page.metaDescription=Google Play は最もよく利用されている Android アプリストアです。クラウドと同期された強力な基盤により、ユーザーは簡単に あなたのアプリを見つけてダウンロードできます。
+
+@jd:body
+
+  <div class="resource-widget resource-flow-layout col-16"
+    style="margin-top:20px"
+    data-query="collection:launch/static/ja"
+    data-sortOrder=""
+    data-cardSizes="6x6,6x6,6x2x3,12x6,6x6,6x2x3,6x6,6x6,12x6,6x6"
+    data-maxResults="24"></div>
+
