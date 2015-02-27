@@ -73,7 +73,7 @@ public class Config {
 
     public static String getTime(int platformVersion) {
         if (platformVersion == 0) {
-            return "5:00";
+            return "5:10";
         }
         if (platformVersion < GINGERBREAD) {
             return "2:20";
@@ -87,8 +87,11 @@ public class Config {
         if (platformVersion < KITKAT) {
             return "4:30";
         }
-        if (platformVersion <= KITKAT_WATCH) {
+        if (platformVersion < LOLLIPOP) {
             return "4:40";
+        }
+        if (platformVersion < LOLLIPOP_MR1) {
+            return "5:00";
         }
         // Should never happen.
         return "4:04";
