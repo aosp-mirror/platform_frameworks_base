@@ -2835,6 +2835,18 @@
         android:label="@string/permlab_access_keyguard_secure_storage"
         android:description="@string/permdesc_access_keyguard_secure_storage" />
 
+    <!-- Allows managing (adding, removing) fingerprint templates. Reserved for the system. @hide -->
+    <permission android:name="android.permission.MANAGE_FINGERPRINT"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_manageFingerprint"
+        android:description="@string/permdesc_manageFingerprint" />
+
+    <!-- Allows an app to use fingerprint hardware. -->
+    <permission android:name="android.permission.USE_FINGERPRINT"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_useFingerprint"
+        android:description="@string/permdesc_useFingerprint" />
+
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.CONTROL_KEYGUARD"
