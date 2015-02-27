@@ -56,6 +56,25 @@ var RESOURCE_COLLECTIONS = {
       "distribute/googleplay/developer-console.html"
     ]
   },
+  "launch/static/ja": {
+    "title": "",
+    "resources": [
+      "https://www.youtube.com/watch?v=xelYnWcYkuE",
+      "https://www.youtube.com/playlist?list=PLCOC_kP3nqGIHEgwm9mybvA04Vn4Cg9nn",
+      "http://googledevjp.blogspot.jp/2014/12/android-wear.html",
+      "http://googledevjp.blogspot.jp/2014/12/android-studio-10.html",
+      "http://googledevjp.blogspot.jp/2014/12/google-play-65.html",
+      "intl/ja/distribute/googleplay/developer-console.html#alpha-beta",
+      "intl/ja/distribute/googleplay/guide.html",
+      "intl/ja/distribute/essentials/quality/core.html",
+      "http://support.google.com/googleplay/android-developer/answer/4430948?hl=ja",
+      "intl/ja/support.html",
+      "intl/ja/distribute/essentials/quality/wear.html",
+      "intl/ja/training/tv/start/index.html",
+      "http://googleforwork-japan.blogspot.jp/2014/12/gcp-google-cloud-platform-rpg-gcp.html",
+      "intl/ja/distribute/monetize/ads.html"
+    ]
+  },
   "distribute/gp/gplanding": {
     "resources": [
       "distribute/googleplay/about.html",
