@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Desblokeatzeko eremua tolestu da."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> widgeta."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Erabiltzaile-hautatzailea"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Egoera"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Multimedia-kontrolak"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Widgetak berrantolatzen hasi da."</string>
@@ -67,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Pasahitzaren bidez desblokeatzea."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Eredua marrazteko eremua."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Hatza lerratzeko eremua."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN kodearen eremua"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM txartelaren PIN kodearen eremua"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM txartelaren PUK kodearen eremua"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Aurreko pistara joateko botoia"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Hurrengo pistara joateko botoia"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pausatzeko botoia"</string>
@@ -79,6 +81,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Abiaraztea bertan behera utzi da"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Ezabatzeko, jaregin <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"Ez da <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ezabatuko."</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Hurrengo alarmak ordu honetan joko du: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -107,9 +110,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Saiatu berriro <xliff:g id="NUMBER">%d</xliff:g> segundo barru."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Marraztu eredua"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Idatzi SIMaren PIN kodea"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Idatzi \"<xliff:g id="CARRIER">%1$s</xliff:g>\" operadorearen SIM txartelaren PIN kodea"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Idatzi PINa"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Idatzi pasahitza"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIMa desgaitu egin da. Jarraitzeko, idatzi PUK kodea. Xehetasunak lortzeko, jarri operadorearekin harremanetan."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM txartela desgaitu egin da. Jarraitzeko, idatzi PUK kodea. Xehetasunak jakiteko, jarri operadorearekin harremanetan."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Idatzi erabili nahi duzun PIN kodea"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Berretsi erabili nahi duzun PIN kodea"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM txartela desblokeatzen…"</string>
@@ -128,13 +133,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PINa oker idatzi duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%d</xliff:g> segundo barru."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Pasahitza oker idatzi duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%d</xliff:g> segundo barru."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%d</xliff:g> segundo barru."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tableta desblokeatzen saiatu zara <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> saiakera okerren ondoren, jatorrizko ezarpen lehenetsiak berrezarriko dira tabletan eta erabiltzaile-datu guztiak galduko dira."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Telefonoa desblokeatzen saiatu zara <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> saiakera okerren ondoren, jatorrizko ezarpen lehenetsiak berrezarriko dira telefonoan eta erabiltzaile-datu guztiak galduko dira."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tableta desblokeatzen saiatu zara <xliff:g id="NUMBER">%d</xliff:g> aldiz. Jatorrizko ezarpen lehenetsiak berrezarriko dira."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefonoa desblokeatzen saiatu zara <xliff:g id="NUMBER">%d</xliff:g> aldiz. Jatorrizko ezarpen lehenetsiak berrezarriko dira."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"<xliff:g id="NUMBER_0">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz huts egiten baduzu, tableta berrezarri egingo da eta, ondorioz, datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"<xliff:g id="NUMBER_0">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz huts egiten baduzu, telefonoa berrezarri egingo da eta, ondorioz, datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Tableta berrezarri egingo da eta, ondorioz, datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Telefonoa berrezarri egingo da eta, ondorioz, datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"<xliff:g id="NUMBER_0">%d</xliff:g> aldiz saiatu zara tableta desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz huts egiten baduzu, erabiltzailea kendu egingo da eta, ondorioz, erabiltzailearen datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"<xliff:g id="NUMBER_0">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz huts egiten baduzu, erabiltzailea kendu egingo da eta, ondorioz, erabiltzailearen datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara tableta desblokeatzen, baina huts egin duzu denetan. Erabiltzailea kendu egingo da eta, ondorioz, erabiltzailearen datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Erabiltzailea kendu egingo da eta, ondorioz, erabiltzailearen datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"<xliff:g id="NUMBER_0">%d</xliff:g> aldiz saiatu zara tableta desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz huts egiten baduzu, laneko profila kendu egingo da eta, ondorioz, profileko datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"<xliff:g id="NUMBER_0">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz huts egiten baduzu, laneko profila kendu egingo da eta, ondorioz, profileko datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara tableta desblokeatzen, baina huts egin duzu denetan. Laneko profila kendu egingo da eta, ondorioz, profileko datu guztiak ezabatuko dira."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"<xliff:g id="NUMBER">%d</xliff:g> aldiz saiatu zara telefonoa desblokeatzen, baina huts egin duzu denetan. Laneko profila kendu egingo da eta, ondorioz, profileko datu guztiak ezabatuko dira."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz oker marrazten baduzu, tableta posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%d</xliff:g> segundo barru."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%d</xliff:g> aldiz. Beste <xliff:g id="NUMBER_1">%d</xliff:g> aldiz oker marrazten baduzu, telefonoa posta-kontu baten bidez desblokeatzeko eskatuko dizugu.\n\n Saiatu berriro <xliff:g id="NUMBER_2">%d</xliff:g> segundo barru."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Kendu"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM txartelaren PIN kodea okerra da. Gailua desblokeatzeko, jarri operadorearekin harremanetan."</string>
   <plurals name="kg_password_wrong_pin_code">

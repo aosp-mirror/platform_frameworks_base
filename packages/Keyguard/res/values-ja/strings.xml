@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"ロック解除エリアを縮小しました。"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>ウィジェットです。"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"ユーザー切り替え"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"ステータス"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"カメラ"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"メディアコントロール"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"ウィジェットの並べ替えを開始しました。"</string>
@@ -67,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"パスワードロックを解除します。"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"パターンエリアです。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"スライドエリアです。"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PINエリア"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PINエリア"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUKエリア"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"前のトラックボタン"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"次のトラックボタン"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"一時停止ボタン"</string>
@@ -79,6 +81,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"起動をキャンセルしました"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"削除するには<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>をドロップしてください。"</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>は削除されません。"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"次のアラームは<xliff:g id="ALARM">%1$s</xliff:g>に設定されました"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -107,9 +110,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"パターンを入力"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PINを入力"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"「<xliff:g id="CARRIER">%1$s</xliff:g>」のSIM PINを入力します"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PINを入力"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"パスワードを入力"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIMが無効になりました。続行するにはPUKコードを入力してください。詳しくは携帯通信会社にお問い合わせください。"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM「<xliff:g id="CARRIER">%1$s</xliff:g>」は現在無効になっています。処理を続行するにはPUKコードを入力します。詳しくは携帯通信会社にお問い合わせください。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"希望のPINコードを入力してください"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"希望のPINコードを確認してください"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIMカードのロック解除中…"</string>
@@ -128,13 +133,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PINの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"パスワードの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。\n\n<xliff:g id="NUMBER_1">%d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、タブレットは出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"携帯端末のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、端末は出荷時設定にリセットされ、ユーザーのデータはすべて失われます。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"タブレットのロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。タブレットは出荷時設定にリセットされます。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"携帯端末のロック解除を<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。端末は出荷時設定にリセットされます。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、このタブレットはリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"携帯電話のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、この携帯電話はリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。このタブレットはリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"携帯電話のロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。この携帯電話はリセットされ、データがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"携帯電話のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"携帯電話のロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。このユーザーは削除され、ユーザーのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"タブレットのロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、ワークプロフィールが削除され、プロフィールのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"携帯電話のロック解除に<xliff:g id="NUMBER_0">%d</xliff:g>回失敗しました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回失敗すると、ワークプロフィールが削除され、プロフィールのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"タブレットのロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。ワークプロフィールが削除され、プロフィールのデータがすべて削除されます。"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"携帯電話のロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。ワークプロフィールが削除され、プロフィールのデータがすべて削除されます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
   <plurals name="kg_password_wrong_pin_code">

@@ -54,7 +54,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Бөгөттөн чыгаруу аймагы жыйрылды."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> виджети."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Колдонуучуну тандагыч"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Абал"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Камера"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Медиа башкаруу"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Виджет иреттөө башталды."</string>
@@ -68,6 +67,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Сырсөз менен ачуу."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Үлгү аймагы."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Жылмыштыруу аймагы."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN аймагы"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN аймагы"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK аймагы"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Мурунку трек баскычы"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Кийинки трек баскычы"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Тыныгуу баскычы"</string>
@@ -80,6 +82,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Жүргүзүү токтотулду"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> жок кылыш үчүн, түшүрүңүз."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> жок кылынбайт."</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Кийинки ойготкуч саат <xliff:g id="ALARM">%1$s</xliff:g> коюлган"</string>
     <!-- no translation found for password_keyboard_label_symbol_key (992280756256536042) -->
     <skip />
     <!-- no translation found for password_keyboard_label_alpha_key (8001096175167485649) -->
@@ -111,9 +114,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Бөгөттөн чыгаруу сүрөтүн тартыңыз"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM-картанын PIN\'ин киргизиңиз"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" үчүн SIM PIN киргизиңиз"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN\'ди киргизиңиз"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Сырсөз киргизиңиз"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-карта азыр жарактан чыкты. Улантыш үчүн, PUK-кодду киргизиңиз. Көбүрөөк маалымат үчүн операторуңузга кайрылыңыз."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"Эми SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" өчүрүлдү. Улантуу үчүн PUK кодун киргизиңиз. Анын чоо-жайын билүү үчүн операторго кайрылыңыз."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Сиз каалаган PIN-кодду териңиз"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Сиз каалаган PIN-кодду ырастаңыз"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-карта бөгөттөн чыгарылууда…"</string>
@@ -132,13 +137,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Сиз PIN-кодуңузду <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Сиз сырсөзүңүздү <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес тердиңиз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундадан кийин кайталаңыз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес көрсөттүңүз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундадан кийин кайталаңыз."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Сиз планшетиңизди <xliff:g id="NUMBER_0">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, планшет баштапкы абалына кайтарылат жана бардык берилиштериңиз жок кылынат."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Сиз телефонуңузду <xliff:g id="NUMBER_0">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, телефон баштапкы абалына кайтарылат жана бардык берилиштериңиз жок кылынат."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Сиз планшетиңизди <xliff:g id="NUMBER">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Планшет баштапкы абалына кайтарылат."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Сиз телефонуңузду <xliff:g id="NUMBER">%d</xliff:g> жолу ийгиликсиз бөгөттөн чыгаруу аракетин кылдыңыз. Телефон баштапкы абалына кайтарылат."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Планшеттин кулпусун ачууда <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> жолу туура эмес аракет кылсаңыз, бул планшет баштапкы абалга келтирилип, андагы бардык дайындар жок болот."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Телефондун кулпусун ачууда <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> жолу туура эмес аракет кылсаңыз, бул телефон баштапкы абалга келтирилип, андагы бардык дайындар жок болот."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Планшеттин кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Бул планшет баштапкы абалга келтирилип, андагы бардык дайындар жок болот."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Телефондун кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Бул телефон баштапкы абалга келтирилип, андагы бардык дайындар жок болот."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Планшеттин кулпусун ачууда <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> жолу туура эмес аракет кылсаңыз, бул колдонуучу чыгарылып салынып, колдонуучунун бардык дайындары жок болот."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Телефондун кулпусун ачууда <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> жолу туура эмес аракет кылсаңыз, бул колдонуучу чыгарылып салынып, колдонуучунун бардык дайындары жок болот."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Планшеттин кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Бул колдонуучу чыгарылып салынып, колдонуучунун бардык дайындары жок болот."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Телефондун кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Бул колдонуучу чыгарылып салынып, колдонуучунун бардык дайындары жок болот."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Планшетиңиздин кулпусун ачууда <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> жолу туура эмес аракет кылсаңыз, жумуш профилиңиз чыгарылып салынып, профилдин бардык дайындары жок болот."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Телефондун кулпусун ачууда <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> жолу туура эмес аракет кылсаңыз, жумуш профилиңиз чыгарылып салынып, профилдин бардык дайындары жок болот."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Планшеттин кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Жумуш профили чыгарылып салынып, андагы бардык дайындар жок болот."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Телефондун кулпусун ачууда <xliff:g id="NUMBER">%d</xliff:g> жолу туура эмес аракет кылдыңыз. Жумуш профили чыгарылып салынып, андагы бардык дайындар жок болот."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, планшетиңизди эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Сиз бөгөттөн чыгаруу үлгүсүн <xliff:g id="NUMBER_0">%d</xliff:g> жолу туура эмес көрсөттүңүз. Дагы <xliff:g id="NUMBER_1">%d</xliff:g> ийгиликсиз аракеттен кийин, телефонуңузду эмейл эсебиңиз аркылуу бөгөттөн чыгаруу талап кылынат.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундадан кийин кайра аракеттениңиз."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып салуу"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-карта PIN-коду туура эмес. Эми түзмөктү бөгөттөн чыгарыш үчүн операторуңузга кайрылышыңыз керек."</string>
   <plurals name="kg_password_wrong_pin_code">

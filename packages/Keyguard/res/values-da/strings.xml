@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Oplåsningsområdet er skjult."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget til <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Brugervælger"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"Status"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Mediekontrolelementer"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Omrokering af widgets er påbegyndt."</string>
@@ -67,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Lås op med adgangskode."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Mønsterområde."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Strygeområde."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Område for pinkoden"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Område for pinkoden til simkortet"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Område for PUK-koden til simkortet"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Knap til forrige nummer"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Knap til næste nummer"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pause-knap"</string>
@@ -79,6 +81,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Starten blev annulleret"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Slip <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> for at slette."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> slettes ikke."</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Næste alarm er indstillet til <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -107,9 +110,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Prøv igen om <xliff:g id="NUMBER">%d</xliff:g> sekunder."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Tegn dit mønster"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Indtast pinkode til SIM"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Indtast SIM-pinkoden for \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Indtast pinkode"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Angiv adgangskode"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortet er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobiloperatøren for at få flere oplysninger."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM-kortet fra \"<xliff:g id="CARRIER">%1$s</xliff:g>\" er nu deaktiveret. Indtast PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Indtast den ønskede pinkode"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Bekræft den ønskede pinkode"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-kortet låses op…"</string>
@@ -128,13 +133,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Du har indtastet en forkert pinkode <xliff:g id="NUMBER_0">%d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Du har indtastet din adgangskode forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Du har forsøgt at låse tabletten op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg nulstilles tabletten til fabriksindstillingerne, og alle brugerdata mistes."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg, nulstilles telefonen til fabriksindstillingerne, og alle brugerdata mistes."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Du har forsøgt at låse tabletten op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Tabletten nulstilles til fabriksindstillingerne."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Du har forsøgt at låse telefonen op forkert <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles til fabriksindstillingerne."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Du har forsøgt at låse tabletten forkert op <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%d</xliff:g> mislykkede forsøg nulstilles denne tablet, hvilket vil slette alle dens data."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Du har forsøgt at låse telefonen forkert op <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%d</xliff:g> mislykkede forsøg nulstilles denne telefon, hvilket vil slette alle dens data."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Du har forsøgt at låse tabletten forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Tabletten nulstilles, hvilket vil slette alle dens data."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Du har forsøgt at låse telefonen forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Telefonen nulstilles, hvilket vil slette alle dens data."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Du har forsøgt at låse tabletten forkert op <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%d</xliff:g> mislykkede forsøg fjernes denne bruger, hvilket vil slette alle brugerdata."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Du har forsøgt at låse telefonen forkert op <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%d</xliff:g> mislykkede forsøg fjernes denne bruger, hvilket vil slette alle brugerdata."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Du har forsøgt at låse tabletten forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Brugeren fjernes, hvilket vil slette alle brugerdata."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Du har forsøgt at låse telefonen forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Brugeren fjernes, hvilket vil slette alle brugerdata."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Du har forsøgt at låse tabletten forkert op <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%d</xliff:g> mislykkede forsøg fjernes arbejdsprofilen, hvilket vil slette alle profildata."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Du har forsøgt at låse telefonen forkert op <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter endnu <xliff:g id="NUMBER_1">%d</xliff:g> mislykkede forsøg fjernes arbejdsprofilen, hvilket vil slette alle profildata."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Du har forsøgt at låse tabletten forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Arbejdsprofilen fjernes, hvilket vil slette alle profildata."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Du har forsøgt at låse telefonen forkert op <xliff:g id="NUMBER">%d</xliff:g> gange. Arbejdsprofilen fjernes, hvilket vil slette alle profildata."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg vil du blive bedt om at låse din tablet op ved hjælp af en e-mailkonto\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en e-mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%d</xliff:g> sekunder."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjern"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Forkert pinkode til SIM-kort. Du skal nu kontakte dit mobilselskab for at låse din enhed op."</string>
   <plurals name="kg_password_wrong_pin_code">

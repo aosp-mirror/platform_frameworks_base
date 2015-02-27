@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"ຫຍໍ້ພື້ນທີ່ປົດລັອກແລ້ວ."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ວິດເຈັດ."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"ໂຕເລືອກຂອງຜູ່ໃຊ້"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"ສະຖານະ"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"ກ້ອງ"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"ການຄວບຄຸມສື່"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"ການຈັດຮຽງວິເຈັດໃໝ່ເລີ່ມຕົ້ນແລ້ວ."</string>
@@ -67,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ການປົດລັອກດ້ວຍລະຫັດຜ່ານ."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ພື້ນທີ່ຮູບແບບ."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ເລື່ອນພື້ນທີ່."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"ພື້ນ​ທີ່ PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"ພື້ນ​ທີ່ PIN ຂອງ SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"ພື້ນ​ທີ່ PUK ຂອງ SIM"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"ປຸ່ມເພງກ່ອນໜ້າ"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"ປຸ່ມເພງຕໍ່ໄປ"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"ປຸ່ມຢຸດຊົ່ວຄາວ"</string>
@@ -79,6 +81,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"ການເປີດໃຊ້ຖືກຍົກເລີກ"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"ວາງ <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ເພື່ອລຶບ."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ຈະບໍ່ຖືກລຶບອອກ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"​ໂມງ​ປຸກ​ຕໍ່​ໄປ​ຖືກ​ຕັ້ງ​ໄວ້​ເວ​ລາ <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -107,9 +110,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"ໃສ່ລະຫັດ PIN ຂອງຊິມ"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"ປ້ອນ SIM PIN ສຳ​ລັບ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ເຂົ້າ​ໄປ"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ໃສ່ລະຫັດ PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"ໃສ່ລະຫັດຜ່ານ"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"ຊິມຖືກປິດການນຳໃຊ້ແລ້ວ. ປ້ອນລະຫັດ PUK ເພື່ອດຳເນີນການຕໍ່. ຕິດຕໍ່ຜູ່ໃຫ້ບໍລິການສຳລັບລາຍລະອຽດ."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"ດຽວ​ນີ້ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" SIM ປິດ​ໃຊ້​ງານ. ປ້ອນ​ລະ​ຫັດ PUK ເພື່ອ​ສືບ​ຕໍ່. ຕິດ​ຕໍ່​ບໍ​ລິ​ສັດ​ໃຫ້​ບໍ​ລິ​ການ ເພື່ອ​ຂໍ​ລາຍ​ລະ​ອຽດ."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"ໃສ່ລະຫັດ PIN ທີ່ຕ້ອງການ."</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"ຢືນຢັນລະຫັດ PIN ທີ່ຕ້ອງການ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ປົດລັອກ SIM card..."</string>
@@ -128,13 +133,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"ທ່ານພິມລະຫັດ PIN​ ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"ທ່ານພິມລະຫັດຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ສຳເລັດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ແທັບເລັດຂອງທ່ານຈະຖືກຕັ້ງ ໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານຄືນໃໝ່ ແລະຂໍ້ມູນຜູ່ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ສຳເລັດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ໂທລະສັບຂອງທ່ານຈະຖືກຕັ້ງ ໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານຄືນໃໝ່ ແລະຂໍ້ມູນຜູ່ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ສຳເລັດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ແທັບເລັດຈະຖືກຕັ້ງໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ໂທລະສັບຈະຖືກຣີເຊັດເປັນຄ່າຈາກໂຮງງານ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ແທັບ​ເລັດ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%d</xliff:g> ຄັ້ງ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ, ແທັບ​ເລັດ​ນີ້​ຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ໃໝ່, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ຂອງ​ມັນ."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ໂທ​ລະ​ສັບ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%d</xliff:g> ຄັ້ງ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ, ໂທ​ລະ​ສັບ​ນີ້​ຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ໃໝ່, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນຂອງ​ມັນ."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ແທັບ​ເລັດ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ແທັບ​ເລັດ​ນີ້​ຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ໃໝ່, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ຂອງ​ມັນ."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ໂທ​ລະ​ສັບ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ໂທ​ລະ​ສັບ​ນີ້​ຈະ​ຖືກ​ຕັ້ງ​ຄ່າ​ໃໝ່, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ຂອງ​ມັນ."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ແທັບ​ເລັດ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%d</xliff:g> ຄັ້ງ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ, ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ໂທ​ລະ​ສັບ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%d</xliff:g> ຄັ້ງ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ, ຜູ້​ໃຊ້​ນີ້ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ແທັບ​ເລັດ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ໂທ​ລະ​ສັບ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ແທັບ​ເລັດ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%d</xliff:g> ຄັ້ງ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ, ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ໂປ​ຣ​ໄຟ​ລ໌."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ໂທ​ລະ​ສັບ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER_0">%d</xliff:g> ຄັ້ງ. ຫຼັງ​ຈາກ​ລອງ​ບໍ່​ສຳ​ເລັດ​ອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ຄັ້ງ, ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ໂປ​ຣ​ໄຟ​ລ໌."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ແທັບ​ເລັດ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ໂປ​ຣ​ໄຟ​ລ໌."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"ທ່ານ​ພະ​ຍາ​ຍາມ​ປົດ​ລ​ັອກ​ໂທ​ລະ​ສັບ​ບໍ່​ຖືກ​ຕ້ອງ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ. ໂປ​ຣ​ໄຟ​ລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຈະ​ຖືກ​ເອົາ​ອອກ​ໄປ, ເຊິ່ງ​ຈະ​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ໂປ​ຣ​ໄຟ​ລ໌."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກແທັບເລັດຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບໂດຍໃຊ້ອີເມວຂອງທ່ານ.\n\n ກະລຸນາລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ລຶບອອກ"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ລະຫັດ PIN ຂອງ SIM ບໍ່ຖືກຕ້ອງທ່ານຕ້ອງຕິດຕໍ່ຫາຜູ່ໃຫ້ບໍລິການ ເພື່ອປົດລັອກອຸປະກອນຂອງທ່ານ."</string>
   <plurals name="kg_password_wrong_pin_code">

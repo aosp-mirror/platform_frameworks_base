@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"განბლოკვის სივრცე ჩაკეცილია."</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ვიჯეტი."</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"მომხმარებლის ამომრჩეველი"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"სტატუსი"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"კამერა"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"მედიის მართვის ელემენტები"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"დაიწყო ვიჯეტის ხელახლა განლაგება."</string>
@@ -67,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"პაროლის განბლოკვა"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ნიმუშების სივრცე."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"გადასრიალების სივრცე."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN-ის არე"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM-ის PIN-ის არე"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM-ის PUK-ის არე"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"წინა ჩანაწერის ღილაკი"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"შემდეგი ჩანაწერის ღილაკი"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"პაუზის ღილაკი"</string>
@@ -79,6 +81,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"გამოძახება გაუქმდა"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"ჩააგდეთ <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> წასაშლელად."</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> არ წაიშლება."</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"შემდეგი მაღვიძარა დაყენებულია <xliff:g id="ALARM">%1$s</xliff:g>-ზე"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -107,9 +110,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"კიდევ სცადეთ <xliff:g id="NUMBER">%d</xliff:g> წამში."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"დახატეთ თქვენი ნიმუში."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN-ის შეყვანა"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"შეიყვანეთ \"<xliff:g id="CARRIER">%1$s</xliff:g>\" -სათვის SIM-ის PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"შეიყვანეთ PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"პაროლის შეყვანა"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM ამჟამად დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK კოდი. დეტალებისთვის მიმართეთ მობილურ ოპერატორს."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" -ის SIM ახლა გამორთულია. გაგრძელებისათვის, შეიყვანეთ PUK კოდი. დეტალებისათვის მიმართეთ თქვენს პროვაიდერს."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"სასურველი PIN კოდის შეყვანა"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"სასურველი PIN კოდის დადასტურება"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM ბარათის განბლოკვა…"</string>
@@ -128,13 +133,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"თქვენ <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ არასწორად შეიყვანეთ PIN კოდი. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%d</xliff:g> წამში."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"თქვენ <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ არასწორად დაბეჭდეთ თქვენი პაროლი. \n\nხელახლა სცადეთ <xliff:g id="NUMBER_1">%d</xliff:g> წამში."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"თქვენ <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ დახატეთ განბლოკვის ნიმუში. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%d</xliff:g> წამში."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ ტაბლეტზე დაყენდება საწყისი, ქარხნული პარამეტრები და მომხმარებლის ყველა მონაცემი დაიკარგება."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ ტელეფონზე დაყენდება საწყისი, ქარხნული პარამეტრები და მომხმარებლის ყველა მონაცემი დაიკარგება."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g>-ჯერ. ტაბლეტზე დაყენდება საწყისი, ქარხნული პარამეტრები და მომხმარებლის ყველა მონაცემი დაიკარგება."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"თქვენ <xliff:g id="NUMBER">%d</xliff:g>-ჯერ არასწორად სცადეთ ტელეფონის განბლოკვა. ამიტომ ტელეფონზე დადგება საწყისი, ქარხნული პარამეტრები."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ, ეს ტაბლეტი გადაიტვირთება, რაც წაშლის მის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ეს ტელეფონი გადაიტვირთება, რაც წაშლის მის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. ეს ტაბლეტი გადაიტვირთება, რაც წაშლის მის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. ეს ტელეფონი გადაიტვირთება, რაც წაშლის მის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ამოიშლება ეს მომხმარებელი და წაიშლება მომხმარებლის მთლიანი მონაცემი."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ამოიშლება ეს მომხმარებელი და წაიშლება მომხმარებლის მთლიანი მონაცემი."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. ეს მომხმარებელი ამოიშლება, რაც წაშლის მომხმარებლის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. ეს მომხმარებელი ამოიშლება, რაც წაშლის მომხმარებლის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ამოიშლება სამუშაო პროფილი და წაიშლება პროფილის მთლიანი მონაცემი."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი მცდელობის შემდეგ, ამოიშლება სამუშაო პროფილი და წაიშლება მთლიანი პროფილის მონაცემი."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"თქვენ არასწორად სცადეთ ტაბლეტის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. სამუშაო პროფილი ამოიშლება, რაც წაშლის პროფილის მთლიან მონაცემს."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. სამუშაო პროფილი ამოიშლება, რაც წაშლის პროფილის მთლიან მონაცემს."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ მოგთხოვთ ტაბლეტის განბლოკვას ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ, დაგჭირდებათ თქვენი ტელეფონის განბლოკვა ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ამოშლა"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-ის არასწორი PIN კოდი. თქვენ ახლა მოგიწევთ მოწყობილობის განსაბლოკად მიმართოთ ოპერატორს."</string>
   <plurals name="kg_password_wrong_pin_code">

@@ -35,7 +35,7 @@
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"အားသွင်းနေ"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"အားသွင်းကြိုးဖြင့် ဆက်သွယ်ပါ"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="1332288268600329841">"မီနူးကို နှိပ်ခြင်းဖြင့် သော့ဖွင့်ပါ"</string>
-    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ကွန်ယက် သော့ကျနေခြင်း"</string>
+    <string name="keyguard_network_locked_message" msgid="9169717779058037168">"ကွန်ရက် သော့ကျနေခြင်း"</string>
     <string name="keyguard_missing_sim_message_short" msgid="494980561304211931">"ဆင်းမ်ကဒ်မရှိပါ"</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="1445849005909260039">"တက်ဘလက်ထဲတွင်း ဆင်းမ်ကဒ် မရှိပါ"</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="3481110395508637643">"ဖုန်းထဲတွင် ဆင်းမ်ကဒ် မရှိပါ"</string>
@@ -53,7 +53,6 @@
     <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"သောဖွင့်ထားသော နေရာကို ချုံ့လိုက်ခြင်း"</string>
     <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ဝဒ်ဂျက်"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"အသုံးပြုသူ ရွေးချယ်ရာ"</string>
-    <string name="keyguard_accessibility_status" msgid="8008264603935930611">"အခြေအနေ"</string>
     <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"ကင်မရာ"</string>
     <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"မီဒီယာ ထိန်းချုပ်မှုများ"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"ဝဒ်ဂျက်များ နေရာစီခြင်း စတင်ပါပြီ"</string>
@@ -67,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"စကားဝှက်ဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ပုံစံနေရာ"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ဘေးတိုက်ပွတ်ဆွဲရန် နေရာ"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN နေရာ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN နေရာ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK နေရာ"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"ပြီးခဲ့သော အပုဒ်အတွက် ခလုတ်"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"နောက်တစ်ပုဒ် ခလုတ်"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"ခဏရပ်ရန် ခလုတ်"</string>
@@ -79,6 +81,7 @@
     <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"ဖွင့်တာကို ပယ်ဖျက်ပါ"</string>
     <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ကို ဖျက်ပစ်ရန် ချ လိုက်ပါ"</string>
     <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ကို ဖျက်ပစ်မည် မဟုတ်ပါ"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"<xliff:g id="ALARM">%1$s</xliff:g> အတွက် နောက် သတိပေးရန် သတ်မှတ်ချက်"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
     <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
@@ -107,9 +110,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်ကြိုးစားပါ"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"သင့်ရဲ့ သော့ဖွင့်သော ပုံစံကို ဆွဲပါ"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"ဆင်းမ်ကဒ် ပင် နံပါတ် ရိုက်ထည့်ပါ"</string>
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" အတွက် ဆင်းမ် ပင်နံပါတ် ရိုက်ထည့်ပါ။"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ပင်နံပါတ် ရိုက်ထည့်ပါ"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"လျို့ဝှက်နံပါတ် ရိုက်ထည့်ပါ"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ ဆက်လက် လုပ်ဆောင်ရန် ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ်ကို ရိုက်ထည့်ပါ။ ပိုမိုသိချင်လျင် ဖုန်းဝန်ဆောင်မှု ပေးသောဌာန အားဆက်သွယ်နိုင်ပါသည်။"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"ဆင်းမ် \"<xliff:g id="CARRIER">%1$s</xliff:g>\" သည် ယခု အလုပ်မလုပ်တော့ပါ။ ဆက်လက်သွားရန် PUK ကုဒ် ရိုက်ထည့်ပါ၊။အသေးစိတ်သိရရန် ဖုန်းဝန်ဆောင်မှုလုပ်ငန်းအား ဆက်သွယ်ပါ။"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"လိုချင်သော ပင်နံပါတ်ကို ရိုက်ထည့်ပါ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"လိုချင်သော ပင်နံပါတ်ကို အတည်ပြုရန်"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ဆင်းမ်ကဒ် ကို သော့ဖွင့်နေပါသည်"</string>
@@ -128,13 +133,20 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"သင် ပင် နံပါတ်ကို အမှားကို <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ရိုက်ထည့်ပြီးပါပြီ။ \n\n<xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့် အကြာတွင် ပြန်လည်ကြိုးစားပါ"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"သင်သည် စကားဝှက်ကို  <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် မှားရိုက်ပြီးပါပြီ။ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အကြာ ပြန်လည်ကြိုးစားပါ"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"သင် ပုံစံဆွဲ သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ်မြောက် မအောင်မြင်ပါ။ \n\n<xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"သင့်တက်ဘလက်အား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER_0">%d</xliff:g>  ကြိုးစားပြီးပါပြီ။ နောက်ထပ်  <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မအောင်မြင်ပါက၊ တက်ဘလက်က စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားမည်ဖြစ်ပြီး ဒေတာအားလုံး ဆုံးရှုံးသွားပါမည်။"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"သင့်ဖုန်းအား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိုးစားပြီးပါပြီ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မအောင်မြင်ပါက၊ ဖုန်းက စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားမည်ဖြစ်ပြီး ဒေတာအားလုံး ဆုံးရှုံးသွားပါမည်။"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"သင့်တက်ဘလက် အား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER">%d</xliff:g> ကြိုးစားပြီးပါပြီ။ တက်ဘလက်က စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားပါတော့မည်။"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"သင့်ဖုန်းအား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER">%d</xliff:g>  ကြိုးစားပြီးပါပြီ။ ဖုန်းက စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားပါတော့မည်။"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"တက်ဘလက်အား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် ကြိုးစားပြီးနောက် မအောင်မြင်ပါက၊ ဤတက်ဘလက်အား အစမှပြန်စဖွင့်မည်ဖြစ်ပြီး၊ ၎င်း၏ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် ကြိုးစားပြီးနောက် မအောင်မြင်ပါက၊ ဤဖုန်းအား အစမှပြန်စဖွင့်မည်ဖြစ်ပြီး၊ ၎င်း၏ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"တက်ဘလက်အား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ ဤဖုန်းအား အစမှပြန်စဖွင့်မည်ဖြစ်ပြီး၊ ၎င်း၏ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ ဤဖုန်းအား အစမှပြန်စဖွင့်မည်ဖြစ်ပြီး၊ ၎င်း၏ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"တက်ဘလက်အား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် ကြိုးစားပြီးနောက် မအောင်မြင်ပါက၊ ဤအသုံးပြုသူအား ဖယ်ထုတ်ခြင်းခံရမည်ဖြစ်ပြီး၊ အသုံးပြုသူဒေတာအားလုံး ပျက်သွားပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် ကြိုးစားပြီးနောက် မအောင်မြင်ပါက၊ ဤအသုံးပြုသူအား ဖယ်ထုတ်ခြင်းခံရမည်ဖြစ်ပြီး၊ အသုံးပြုသူဒေတာအားလုံး ပျက်သွားပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"တက်ဘလက်အား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ ဤအသုံးပြုသူအား ဖယ်ထုတ်မည်ဖြစ်ပြီး၊ အသုံးပြုသူဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ ဤအသုံးပြုသူအား ဖယ်ထုတ်မည်ဖြစ်ပြီး၊ အသုံးပြုသူဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"တက်ဘလက်အား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် ကြိုးစားပြီးနောက် မအောင်မြင်ပါက၊ သင့် အလုပ်ပရိုဖိုင်အား ဖယ်ထုတ်ခြင်းခံရမည်ဖြစ်ပြီး၊ ပရိုဖိုင်ဒေတာအားလုံး ပျက်သွားပါမည်။"</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ <xliff:g id="NUMBER_1">%d</xliff:g> ကြိမ် ကြိုးစားပြီးနောက် မအောင်မြင်ပါက၊ သင့် အလုပ်ပရိုဖိုင်အား ဖယ်ထုတ်ခြင်းခံရမည်ဖြစ်ပြီး၊ ပရိုဖိုင်ဒေတာအားလုံး ပျက်သွားပါမည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"တက်ဘလက်အား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ အလုပ်ပရိုဖိုင် ဖယ်ထုတ်ခံရမည်ဖြစ်ပြီး၊ ပရိုဖိုင်ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ အလုပ်ပရိုဖိုင် ဖယ်ထုတ်ခံရမည်ဖြစ်ပြီး၊ ပရိုဖိုင်ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို  <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။  နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်တက်ဘလက်အား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်ဖုန်းအား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ဖယ်ရှားရန်"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ဆင်းကဒ် လျှို့ဝှက် အမှတ် မှားယွင်းပါသည်, ဖုန်းလိုင်းဌာနကို ဆက်သွယ်ရမည် ဖြစ်ပါတယ်"</string>
   <plurals name="kg_password_wrong_pin_code">
