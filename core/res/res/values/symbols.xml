@@ -1975,10 +1975,8 @@
 
   <java-symbol type="attr" name="nestedScrollingEnabled" />
 
-  <java-symbol type="style" name="TextAppearance.Holo.TimePicker.TimeLabel" />
-
-  <java-symbol type="layout" name="time_picker_holo" />
-  <java-symbol type="layout" name="time_header_label" />
+  <java-symbol type="layout" name="time_picker_material" />
+  <java-symbol type="layout" name="time_picker_header_material" />
   <java-symbol type="layout" name="year_label_text_view" />
   <java-symbol type="layout" name="date_picker_holo" />
 
@@ -2045,22 +2043,6 @@
   <java-symbol type="dimen" name="datepicker_year_label_height" />
   <java-symbol type="dimen" name="datepicker_year_picker_padding_top" />
 
-  <java-symbol type="color" name="timepicker_default_text_color_holo_light" />
-  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_holo_light" />
-  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_holo_light" />
-
-  <java-symbol type="color" name="datepicker_default_normal_text_color_holo_light" />
-  <java-symbol type="color" name="datepicker_default_disabled_text_color_holo_light" />
-  <java-symbol type="color" name="datepicker_default_circle_background_color_holo_light" />
-  <java-symbol type="color" name="datepicker_default_header_dayofweek_background_color_holo_light" />
-  <java-symbol type="color" name="datepicker_default_header_selector_background_holo_light" />
-
-  <java-symbol type="color" name="datepicker_default_normal_text_color_material_light" />
-  <java-symbol type="color" name="datepicker_default_disabled_text_color_material_light" />
-  <java-symbol type="color" name="datepicker_default_circle_background_color_material_light" />
-  <java-symbol type="color" name="datepicker_default_header_dayofweek_background_color_material_light" />
-  <java-symbol type="color" name="datepicker_default_header_selector_background_material_light" />
-
   <java-symbol type="array" name="config_clockTickVibePattern" />
   <java-symbol type="array" name="config_calendarDateVibePattern" />
 
@@ -2106,8 +2088,6 @@
   <java-symbol type="attr" name="ambientShadowAlpha" />
   <java-symbol type="attr" name="spotShadowAlpha" />
   <java-symbol type="array" name="config_cdma_home_system" />
-  <java-symbol type="attr" name="headerSelectedTextColor" />
-  <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
   <java-symbol type="bool" name="config_sms_decode_gsm_8bit_data" />
   <java-symbol type="dimen" name="text_size_small_material" />
   <java-symbol type="attr" name="checkMarkGravity" />
@@ -2169,4 +2149,5 @@
 
   <java-symbol type="integer" name="config_screen_magnification_multi_tap_adjustment" />
   <java-symbol type="dimen" name="config_screen_magnification_scaling_threshold" />
+  <java-symbol type="dimen" name="timepicker_selector_stroke"/>
 </resources>

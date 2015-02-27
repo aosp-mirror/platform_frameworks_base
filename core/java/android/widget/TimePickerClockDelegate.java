@@ -132,19 +132,19 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         mPmText = amPmStrings[1];
 
         final int layoutResourceId = a.getResourceId(R.styleable.TimePicker_internalLayout,
-                R.layout.time_picker_holo);
+                R.layout.time_picker_material);
         final View mainView = inflater.inflate(layoutResourceId, delegator);
 
         mHeaderView = mainView.findViewById(R.id.time_header);
         mHeaderView.setBackground(a.getDrawable(R.styleable.TimePicker_headerBackground));
 
         // Set up hour/minute labels.
-        mHourView = (TextView) mHeaderView.findViewById(R.id.hours);
+        mHourView = (TextView) mainView.findViewById(R.id.hours);
         mHourView.setOnClickListener(mClickListener);
         mHourView.setAccessibilityDelegate(
                 new ClickActionDelegate(context, R.string.select_hours));
-        mSeparatorView = (TextView) mHeaderView.findViewById(R.id.separator);
-        mMinuteView = (TextView) mHeaderView.findViewById(R.id.minutes);
+        mSeparatorView = (TextView) mainView.findViewById(R.id.separator);
+        mMinuteView = (TextView) mainView.findViewById(R.id.minutes);
         mMinuteView.setOnClickListener(mClickListener);
         mMinuteView.setAccessibilityDelegate(
                 new ClickActionDelegate(context, R.string.select_minutes));
@@ -162,17 +162,8 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         mHourView.setMinWidth(computeStableWidth(mHourView, 24));
         mMinuteView.setMinWidth(computeStableWidth(mMinuteView, 60));
 
-        // TODO: This can be removed once we support themed color state lists.
-        final int headerSelectedTextColor = a.getColor(
-                R.styleable.TimePicker_headerSelectedTextColor,
-                res.getColor(R.color.timepicker_default_selector_color_material));
-        mHourView.setTextColor(ColorStateList.addFirstIfMissing(mHourView.getTextColors(),
-                R.attr.state_selected, headerSelectedTextColor));
-        mMinuteView.setTextColor(ColorStateList.addFirstIfMissing(mMinuteView.getTextColors(),
-                R.attr.state_selected, headerSelectedTextColor));
-
         // Set up AM/PM labels.
-        mAmPmLayout = mHeaderView.findViewById(R.id.ampm_layout);
+        mAmPmLayout = mainView.findViewById(R.id.ampm_layout);
         mAmLabel = (CheckedTextView) mAmPmLayout.findViewById(R.id.am_label);
         mAmLabel.setText(amPmStrings[0]);
         mAmLabel.setOnClickListener(mClickListener);
@@ -304,12 +295,15 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
 
             final RelativeLayout.LayoutParams params =
                     (RelativeLayout.LayoutParams) mAmPmLayout.getLayoutParams();
-            if (isAmPmAtStart) {
-                params.removeRule(RelativeLayout.RIGHT_OF);
-                params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
-            } else {
-                params.removeRule(RelativeLayout.LEFT_OF);
-                params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
+            if (params.getRule(RelativeLayout.RIGHT_OF) != 0 ||
+                    params.getRule(RelativeLayout.LEFT_OF) != 0) {
+                if (isAmPmAtStart) {
+                    params.removeRule(RelativeLayout.RIGHT_OF);
+                    params.addRule(RelativeLayout.LEFT_OF, mHourView.getId());
+                } else {
+                    params.removeRule(RelativeLayout.LEFT_OF);
+                    params.addRule(RelativeLayout.RIGHT_OF, mMinuteView.getId());
+                }
             }
 
             mAmPmLayout.setLayoutParams(params);
@@ -613,11 +607,11 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private void updateAmPmLabelStates(int amOrPm) {
         final boolean isAm = amOrPm == AM;
         mAmLabel.setChecked(isAm);
-        mAmLabel.setAlpha(isAm ? 1 : mDisabledAlpha);
+        mAmLabel.setSelected(isAm);
 
         final boolean isPm = amOrPm == PM;
         mPmLabel.setChecked(isPm);
-        mPmLabel.setAlpha(isPm ? 1 : mDisabledAlpha);
+        mPmLabel.setSelected(isPm);
     }
 
     /**

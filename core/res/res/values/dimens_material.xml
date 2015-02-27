@@ -117,4 +117,47 @@
 
     <dimen name="scrubber_track_height_material">2dp</dimen>
     <dimen name="progress_bar_height_material">4dp</dimen>
+
+    <!-- Material time picker dimensions. -->
+    <!-- Text size for the time picker header HH:MM label. This value is large
+         enough that we don't need to use scaled pixels, dp is fine. -->
+    <dimen name="timepicker_time_label_size">60dp</dimen>
+    <dimen name="timepicker_ampm_label_size">16sp</dimen>
+    <dimen name="timepicker_ampm_horizontal_padding">16dp</dimen>
+    <dimen name="timepicker_am_top_padding">4dp</dimen>
+    <dimen name="timepicker_pm_top_padding">4dp</dimen>
+    <dimen name="timepicker_separator_padding">2dp</dimen>
+    <dimen name="timepicker_header_height">96dp</dimen>
+    <dimen name="timepicker_radial_picker_dimen">296dp</dimen>
+    <dimen name="timepicker_radial_picker_top_margin">16dp</dimen>
+    <dimen name="timepicker_radial_picker_horizontal_margin">16dp</dimen>
+
+    <!-- Used by RadialTimePicker in clock-style TimePicker. -->
+    <dimen name="timepicker_selector_radius">20dp</dimen>
+    <dimen name="timepicker_selector_stroke">2dp</dimen>
+    <dimen name="timepicker_center_dot_radius">3dp</dimen>
+    <dimen name="timepicker_selector_dot_radius">3dp</dimen>
+    <dimen name="timepicker_text_inset_normal">22dp</dimen>
+    <dimen name="timepicker_text_inset_inner">58dp</dimen>
+    <dimen name="timepicker_text_size_normal">16sp</dimen>
+    <dimen name="timepicker_text_size_inner">12sp</dimen>
+
+    <!-- Material date picker dimensions. -->
+    <dimen name="datepicker_year_picker_padding_top">8dp</dimen>
+    <dimen name="datepicker_year_label_height">64dp</dimen>
+    <dimen name="datepicker_year_label_text_size">22dp</dimen>
+    <dimen name="datepicker_component_width">260dp</dimen>
+    <dimen name="datepicker_dialog_width">520dp</dimen>
+    <dimen name="datepicker_selected_date_day_size">88dp</dimen>
+    <dimen name="datepicker_selected_date_month_size">24dp</dimen>
+    <dimen name="datepicker_selected_date_year_size">24dp</dimen>
+    <dimen name="datepicker_header_height">30dp</dimen>
+    <dimen name="datepicker_header_text_size">14dp</dimen>
+
+    <!-- Used by Material-style SimpleMonthView -->
+    <dimen name="datepicker_day_number_size">12sp</dimen>
+    <dimen name="datepicker_month_label_size">14sp</dimen>
+    <dimen name="datepicker_month_day_label_text_size">12sp</dimen>
+    <dimen name="datepicker_month_list_item_header_height">48dp</dimen>
+    <dimen name="datepicker_view_animator_height">226dp</dimen>
 </resources>

@@ -462,46 +462,6 @@ public class ColorStateList implements Parcelable {
         return mColors;
     }
 
-    /**
-     * If the color state list does not already have an entry matching the
-     * specified state, prepends a state set and color pair to a color state
-     * list.
-     * <p>
-     * This is a workaround used in TimePicker and DatePicker until we can
-     * add support for theme attributes in ColorStateList.
-     *
-     * @param colorStateList the source color state list
-     * @param state the state to prepend
-     * @param color the color to use for the given state
-     * @return a new color state list, or the source color state list if there
-     *         was already a matching state set
-     *
-     * @hide Remove when we can support theme attributes.
-     */
-    public static ColorStateList addFirstIfMissing(
-            ColorStateList colorStateList, int state, int color) {
-        final int[][] inputStates = colorStateList.getStates();
-        for (int i = 0; i < inputStates.length; i++) {
-            final int[] inputState = inputStates[i];
-            for (int j = 0; j < inputState.length; j++) {
-                if (inputState[j] == state) {
-                    return colorStateList;
-                }
-            }
-        }
-
-        final int[][] outputStates = new int[inputStates.length + 1][];
-        System.arraycopy(inputStates, 0, outputStates, 1, inputStates.length);
-        outputStates[0] = new int[] { state };
-
-        final int[] inputColors = colorStateList.getColors();
-        final int[] outputColors = new int[inputColors.length + 1];
-        System.arraycopy(inputColors, 0, outputColors, 1, inputColors.length);
-        outputColors[0] = color;
-
-        return new ColorStateList(outputStates, outputColors);
-    }
-
     @Override
     public String toString() {
         return "ColorStateList{" +

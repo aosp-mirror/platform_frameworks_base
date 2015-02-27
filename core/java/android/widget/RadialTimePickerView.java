@@ -157,6 +157,7 @@ public class RadialTimePickerView extends View {
     private boolean mIsOnInnerCircle;
 
     private int mSelectorRadius;
+    private int mSelectorStroke;
     private int mSelectorDotRadius;
     private int mCenterDotRadius;
 
@@ -377,6 +378,7 @@ public class RadialTimePickerView extends View {
         mPaintBackground.setAntiAlias(true);
 
         mSelectorRadius = res.getDimensionPixelSize(R.dimen.timepicker_selector_radius);
+        mSelectorStroke = res.getDimensionPixelSize(R.dimen.timepicker_selector_stroke);
         mSelectorDotRadius = res.getDimensionPixelSize(R.dimen.timepicker_selector_dot_radius);
         mCenterDotRadius = res.getDimensionPixelSize(R.dimen.timepicker_center_dot_radius);
 
@@ -772,6 +774,7 @@ public class RadialTimePickerView extends View {
         alpha = (int) (mAlphaSelector[index % 2][SELECTOR_LINE].getValue() * alphaMod + 0.5f);
         paint = mPaintSelector[index % 2][SELECTOR_LINE];
         paint.setColor(color);
+        paint.setStrokeWidth(mSelectorStroke);
         paint.setAlpha(getMultipliedAlpha(color, alpha));
         canvas.drawLine(mXCenter, mYCenter, pointX, pointY, paint);
     }
