@@ -208,7 +208,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
         mLocalDeviceAddresses = initLocalDeviceAddresses();
         launchDeviceDiscovery();
-        startQueuedActions();
     }
 
 
