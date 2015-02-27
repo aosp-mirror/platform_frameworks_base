@@ -12,6 +12,7 @@ parent.link=index.html
     <ol>
       <li><a href="#getSkuDetails">getSkuDetails()</a></li>
       <li><a href="#getBuyIntent">getBuyIntent()</a></li>
+      <li><a href="#upgrade-getBuyIntentToReplaceSkus">getBuyIntentToReplaceSkus()</a></li>
       <li><a href="#getPurchases">getPurchases()</a></li>
     </ol>
     </li>
@@ -107,8 +108,8 @@ parent.link=index.html
   </tr>
   <tr>
     <td>{@code type}</td>
-    <td>Value must be “inapp” for an in-app product or "subs" for
-subscriptions.</td>
+    <td>Value must be <code>“inapp”</code> for an in-app product or
+      <code>"subs"</code> for subscriptions.</td>
   </tr>
   <tr>
     <td>{@code price}</td>
@@ -140,7 +141,17 @@ does not include tax.</td>
 </p>
 
 <h3 id="getBuyIntent">The getBuyIntent() method</h3>
-<p>This method returns a response code integer mapped to the {@code RESPONSE_CODE} key, and a {@code PendingIntent} to launch the puchase flow for the in-app item mapped to the {@code BUY_INTENT} key. When it receives the {@code PendingIntent}, Google Play sends a response {@code Intent} with the data for that purchase order.  The data that is returned in the response {@code Intent} is summarized in table 3.</p>
+<p>
+  This method returns a response code integer mapped to the {@code
+  RESPONSE_CODE} key, and a {@link android.app.PendingIntent} to launch the
+  purchase flow for the in-app item mapped to the {@code BUY_INTENT} key, as
+  described in <a href=
+  "{@docRoot}google/play/billing/billing_integrate.html#purchase">Purchasing an
+  Item</a>. When it receives the {@link android.app.PendingIntent}, Google Play
+  sends a response {@code Intent} with the data for that purchase order. The
+  data that is returned in the response {@code Intent} is summarized in table
+  3.
+</p>
 
 <p class="table-caption" id="purchase-pendingintent-response-table">
 <strong>Table 3.</strong>  Response data from an In-app Billing Version 3 purchase request.</p>
@@ -151,7 +162,7 @@ does not include tax.</td>
   </tr>
   <tr>
     <td>{@code RESPONSE_CODE}</td>
-    <td>0 if the purchase was success, error otherwise.</td>
+    <td>Value is <code>0</code> if the purchase was success, error otherwise.</td>
   </tr>
   <tr>
     <td>{@code INAPP_PURCHASE_DATA}</td>
@@ -176,9 +187,22 @@ RSASSA-PKCS1-v1_5 scheme.</td>
     <th scope="col">Field</th>
     <th scope="col">Description</th>
   </tr>
+    <tr>
+    <td>{@code autoRenewing}</td>
+    <td>Indicates whether the subscription renews automatically. If
+      <code>true</code>, the subscription is active, and will
+      automatically renew on the next billing date. If <code>false</code>,
+      indicates that the user has canceled the subscription. The user has
+      access to subscription content until the next billing date and will
+      lose access at that time unless they re-enable automatic renewal
+      (or manually renew, as described in
+      <a href="{@docRoot}google/play/billing/billing_subscriptions.html#manual-renewal">Manual
+      Renewal</a>).</td>
+  </tr>
   <tr>
     <td>{@code orderId}</td>
-    <td>A unique order identifier for the transaction. This corresponds to the Google Wallet Order ID.</td>
+    <td>A unique order identifier for the transaction. This identifier
+      corresponds to the Google Wallet Order ID.</td>
   </tr>
   <tr>
     <td>{@code packageName}</td>
@@ -194,7 +218,8 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
   <tr>
     <td>{@code purchaseState}</td>
-    <td>The purchase state of the order. Possible values are 0 (purchased), 1 (canceled), or 2 (refunded).</td>
+    <td>The purchase state of the order. Possible values are <code>0</code>
+      (purchased), <code>1</code> (canceled), or <code>2</code> (refunded).</td>
   </tr>
   <tr>
     <td>{@code developerPayload}</td>
@@ -202,20 +227,48 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
   <tr>
     <td>{@code purchaseToken}</td>
-    <td>A token that uniquely identifies a purchase for a given item and user
-    pair. This token may be up to 1,000 characters long.
-    Pass this entire token to other methods, such as when you consume the
-    purchase (as described in
-<a href="{@docRoot}training/in-app-billing/purchase-iab-products.html#Consume">Consume
-    a Purchase</a>). Do not abbreviate or truncate this token.</td>
+    <td>A token that uniquely identifies a purchase for a given item and user pair. </td>
   </tr>
 </table>
 </p>
 
-<h3 id="getPurchases">The getPurchases() method</h3>
-<p>This method returns the current un-consumed products owned by the user. Table 5 lists the response data that is returned in the {@code Bundle}.</p>
-<p class="table-caption" id="getpurchases-response-table">
-<strong>Table 5.</strong> Response data from a {@code getPurchases} request.</p>
+<h3 id="upgrade-getBuyIntentToReplaceSkus">The getBuyIntentToReplaceSkus()
+  method</h3>
+
+<p>This method is used to upgrade or downgrade a subscription purchase. The method
+is similar to <a href="#getBuyIntent"><code>getBuyIntent()</code></a>, except
+that it takes a list of already-purchased SKUs that are to be
+replaced with the SKU being purchased. When the user completes the purchase,
+Google Play cancels the old SKUs and credits the user with the unused value of
+their subscription time on a pro-rated basis. Google Play applies this credit
+to the new subscription, and does not begin billing the user for the new
+subscription until after the credit is used up.</p>
+
+<p>This method was added with version 5 of the in-app billing API. To verify
+that the method is reported, send an <code>isBillingSupported</code> AIDL
+request.</p>
+
+<p class="note"><strong>Note:</strong> You can only use this method for
+subscription purchases. If the passed <code>type</code> parameter is anything
+other than <code>"subs"</code>, the method returns
+<a href="#billing-codes"><code>BILLING_RESPONSE_RESULT_DEVELOPER_ERROR</code></a>.
+Furthermore, the passed SKUs may not include SKUs for seasonal
+subscriptions.</p>
+
+<p>
+  This method returns a response code integer mapped to the {@code
+  RESPONSE_CODE} key, and a {@link android.app.PendingIntent} to launch the
+  purchase flow for the in-app subscription mapped to the {@code BUY_INTENT}
+  key, as described in <a href=
+  "{@docRoot}google/play/billing/billing_integrate.html#purchase">Purchasing an
+  Item</a>. When it receives the {@link android.app.PendingIntent}, Google Play
+  sends a response {@code Intent} with the data for that purchase order. The
+  data that is returned in the response {@code Intent} is summarized in table
+  5.
+</p>
+
+<p class="table-caption" id="upgrade-purchase-pendingintent-response-table">
+<strong>Table 5.</strong> Response data from an In-app Billing Version 5 purchase request.</p>
 <table>
   <tr>
     <th scope="col">Key</th>
@@ -223,7 +276,39 @@ RSASSA-PKCS1-v1_5 scheme.</td>
   </tr>
   <tr>
     <td>{@code RESPONSE_CODE}</td>
-    <td>0 if the request was successful, error otherwise.</td>
+    <td>Value is <code>0</code> if the purchase succeeds. If the purchase fails, contains an error
+      code.</td>
+  </tr>
+  <tr>
+    <td>{@code INAPP_PURCHASE_DATA}</td>
+    <td>
+       A String in JSON format that contains details about the purchase order.
+       See <a href="#purchase-data-table">table 4</a> for a description of the JSON fields.
+    </td>
+  </tr>
+  <tr>
+    <td>{@code INAPP_DATA_SIGNATURE}</td>
+    <td>String containing the signature of the purchase data that the developer
+      signed with their private key. The data signature uses the
+      RSASSA-PKCS1-v1_5 scheme.</td>
+  </tr>
+</table>
+</p>
+
+</p>
+
+<h3 id="getPurchases">The getPurchases() method</h3>
+<p>This method returns the current un-consumed products owned by the user. Table 5 lists the response data that is returned in the {@code Bundle}.</p>
+<p class="table-caption" id="getpurchases-response-table">
+<strong>Table 6.</strong> Response data from a {@code getPurchases} request.</p>
+<table>
+  <tr>
+    <th scope="col">Key</th>
+    <th scope="col">Description</th>
+  </tr>
+  <tr>
+    <td>{@code RESPONSE_CODE}</td>
+    <td>Value is <code>0</code> if the request was successful, error otherwise.</td>
   </tr>
   <tr>
     <td>{@code INAPP_PURCHASE_ITEM_LIST}</td>
