@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.alsa;
+package com.android.internal.alsa;
 
 import android.util.Slog;
 import java.io.BufferedReader;

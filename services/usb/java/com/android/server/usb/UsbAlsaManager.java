@@ -16,8 +16,6 @@
 
 package com.android.server.usb;
 
-import android.alsa.AlsaCardsParser;
-import android.alsa.AlsaDevicesParser;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -37,6 +35,8 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.alsa.AlsaCardsParser;
+import com.android.internal.alsa.AlsaDevicesParser;
 import com.android.server.audio.AudioService;
 
 import libcore.io.IoUtils;
