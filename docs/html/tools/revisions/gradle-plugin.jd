@@ -36,10 +36,79 @@ plugin you are using, check the version declaration in the project-level
 <p>For a summary of known issues in Android Plugin for Gradle, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.1.2</a> <em>(February 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+    <ul>
+      <li>Normalized path when creating a mockable JAR for unit testing. </li>
+      <li>Fixed the <code>archivesBaseName</code> setting in the <code>build.gradle</code> file. </li>
+      <li>Fixed the unresolved placeholder failure in manifest merger when building a library
+      test application.</li>
+    </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
+      alt=""/>Android Plugin for Gradle, Revision 1.1.1</a> <em>(February 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Gradle 2.2.1 or higher.</li>
+        <li>Build Tools 21.1.1 or higher.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+    <ul>
+      <li>Modified build variants so only variants that package a
+      <a href="{@docRoot}training/wearables/apps/index.html">Wear</a> app trigger Wear-specific
+      build tasks. </li>
+      <li>Changed dependency related issues to fail at build time rather than at debug time.
+      This behavior allows you to run diagnostic diagnostic tasks (such as 'dependencies') to help
+      resolve the conflict. </li>
+      <li>Fixed the <code>android.getBootClasspath()</code> method to return a value. </li>
+    </ul>
+    </dd>
+  </div>
+</div>
+
+
+
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Plugin for Gradle, Revision 1.1.0</a> <em>(February 2015)</em>
   </p>
 
@@ -185,11 +254,11 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <p>The Android Plugin for Gradle version is specified in the
 <strong>File &gt; Project Structure</strong> menu or the project-level
 <code>build.gradle</code> file. The plugin version applies to all modules built in that
-Android Studio project. This example updates the Android Plugin for Gradle to version 1.1:
+Android Studio project. This example updates the Android Plugin for Gradle to version 1.1.0:
 <pre>
 ...
      dependencies {
-         classpath 'com.android.tools.build:gradle:1.1'
+         classpath 'com.android.tools.build:gradle:1.1.0'
      }
 ...
 </pre>
@@ -197,8 +266,7 @@ Android Studio project. This example updates the Android Plugin for Gradle to ve
 
 <p class="caution"><strong>Caution:</strong> You should not use dynamic dependencies (+) in
 version numbers. Using this feature can cause unexpected version updates and difficulty
-resolving version differences.
-</p>
+resolving version differences. </p>
 
 <p>If you're building with Gradle but using not Android Studio, the build process downloads the
 latest Android Plugin for Gradle plugin when it runs. </p>
