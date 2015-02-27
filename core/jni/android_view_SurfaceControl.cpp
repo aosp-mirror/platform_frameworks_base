@@ -150,7 +150,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     switch (screenshot->getFormat()) {
         case PIXEL_FORMAT_RGBX_8888: {
             screenshotInfo.fColorType = kRGBA_8888_SkColorType;
-            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            screenshotInfo.fAlphaType = kOpaque_SkAlphaType;
             break;
         }
         case PIXEL_FORMAT_RGBA_8888: {
@@ -160,7 +160,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
         }
         case PIXEL_FORMAT_RGB_565: {
             screenshotInfo.fColorType = kRGB_565_SkColorType;
-            screenshotInfo.fAlphaType = kIgnore_SkAlphaType;
+            screenshotInfo.fAlphaType = kOpaque_SkAlphaType;
             break;
         }
         default: {

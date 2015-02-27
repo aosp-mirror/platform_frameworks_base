@@ -88,12 +88,15 @@ static inline SkImageInfo convertPixelFormat(const ANativeWindow_Buffer& buffer)
         case WINDOW_FORMAT_RGBX_8888:
             info.fColorType = kN32_SkColorType;
             info.fAlphaType = kOpaque_SkAlphaType;
+            break;
         case WINDOW_FORMAT_RGB_565:
             info.fColorType = kRGB_565_SkColorType;
             info.fAlphaType = kOpaque_SkAlphaType;
+            break;
         default:
             info.fColorType = kUnknown_SkColorType;
-            info.fAlphaType = kIgnore_SkAlphaType;
+            // switch to kUnknown_SkAlphaType when its in skia
+            info.fAlphaType = kOpaque_SkAlphaType;
             break;
     }
     return info;
