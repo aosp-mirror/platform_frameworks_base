@@ -106,6 +106,15 @@ types of screen shapes, which is useful for testing.</p>
   <li>Follow the app's instructions to pair your handheld with your wearable.
   This allows you to test out synced handheld notifications, if you're building them.</li>
   <li>Leave the Android Wear app open on your phone.</li>
+  <li>Enable adb debugging on the Android Wear device.</li>
+  <ol>
+    <li>Go to <strong>Settings > About</strong>.</li>
+    <li>Tap <strong>Build number</strong> seven times.</li>
+    <li>Swipe right to return to the Settings menu.</li>
+    <li>Go to <strong>Developer options</strong> at the bottom of the screen.
+    </li>
+    <li>Tap <strong>ADB Debugging</strong> to enable adb.</li>
+  </ol>
   <li>Connect the wearable to your machine through USB, so you can install apps directly to it
   as you develop. A message appears on both the wearable and the Android Wear app prompting you to allow debugging.</li>
   <p class="note"><strong>Note:</strong> If you can not connect your wearable to your machine via USB,
