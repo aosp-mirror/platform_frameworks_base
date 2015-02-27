@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> พยายามจะสร้างการเชื่อมต่อ VPN"</string>
-    <string name="warning" msgid="5470743576660160079">"การดำเนินการต่อหมายถึงคุณอนุญาตให้แอปพลิเคชันเข้าขัดจังหวะการเข้าใช้งานเครือข่ายทั้งหมด "<b>"อย่ายอมรับหากคุณไม่วางใจแอปพลิเคชัน"</b>" มิฉะนั้น คุณอาจเสี่ยงต่อการถูกขโมยข้อมูลจากซอฟต์แวร์ที่เป็นอันตรายได้"</string>
-    <string name="accept" msgid="2889226408765810173">"ฉันวางใจแอปพลิเคชันนี้"</string>
+    <string name="prompt" msgid="3183836924226407828">"ขอการเชื่อมต่อ"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ต้องการติดตั้งการเชื่อมต่อ VPN เพื่อให้แอปสามารถตรวจสอบการเข้าใช้งานเครือข่าย โปรดยอมรับหากคุณเชื่อถือแหล่งที่มานี้เท่านั้น &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; จะปรากฏที่ด้านบนหน้าจอเมื่อมีการใช้งาน VPN อยู่"</string>
     <string name="legacy_title" msgid="192936250066580964">"เชื่อมต่อ VPN แล้ว"</string>
     <string name="configure" msgid="4905518375574791375">"กำหนดค่า"</string>
     <string name="disconnect" msgid="971412338304200056">"ยกเลิกการเชื่อมต่อ"</string>

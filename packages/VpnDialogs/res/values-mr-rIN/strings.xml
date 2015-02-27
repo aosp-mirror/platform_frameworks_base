@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> VPN कनेक्‍शन तयार करण्‍याचा प्रयत्न करतो."</string>
-    <string name="warning" msgid="5470743576660160079">"पुढे सुरु ठेवून, आपण अनुप्रयोगाला सर्व नेटवर्क रहदारी खंडित करण्‍याची परवानगी देता."<b>"आपला अनुप्रयोगावर विश्‍वास नसल्‍यास स्‍वीकार करू नका."</b>" अन्‍यथा, आपण दुर्भावनापूर्ण सॉफ्‍टवेअरद्वारे आपल्‍या डेटाची तडजोड झाल्‍याची जोखीम चालवाल."</string>
-    <string name="accept" msgid="2889226408765810173">"माझा या अनुप्रयोगावर विश्वास आहे."</string>
+    <string name="prompt" msgid="3183836924226407828">"कनेक्‍शन विनंती"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> नेटवर्क रहदारीचे परीक्षण करण्‍यासाठी त्यास अनुमती देणारे VPN कनेक्‍शन सेट करू इच्‍छितो. आपल्याला स्त्रोत विश्वसनीय वाटत असेल तरच स्वीकार करा. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; VPN सक्रिय असताना आपल्‍या स्क्रीनच्या शीर्षावर दिसते."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN कनेक्‍ट केले"</string>
     <string name="configure" msgid="4905518375574791375">"कॉन्फिगर करा"</string>
     <string name="disconnect" msgid="971412338304200056">"‍डिस्कनेक्ट करा"</string>

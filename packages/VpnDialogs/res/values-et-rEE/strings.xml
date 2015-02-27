@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"Rakenduse <xliff:g id="APP">%s</xliff:g> katsed luua VPN-ühendust."</string>
-    <string name="warning" msgid="5470743576660160079">"Jätkates annate rakendusele loa jälgida kogu võrguliiklust. "<b>"ÄRGE nõustuge, kui te seda rakendust ei usalda."</b>" Vastasel juhul on oht, et pahavara võib kahjustada teie andmeid."</string>
-    <string name="accept" msgid="2889226408765810173">"Usaldan seda rakendust."</string>
+    <string name="prompt" msgid="3183836924226407828">"Ühendamise taotlus"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> tahab seadistada VPN-i ühenduse, mis võimaldab jälgida võrguliiklust. Nõustuge ainult siis, kui usaldate seda allikat. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; kuvatakse ekraani ülaservas, kui VPN on aktiivne."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN on ühendatud"</string>
     <string name="configure" msgid="4905518375574791375">"Seadistamine"</string>
     <string name="disconnect" msgid="971412338304200056">"Katkesta ühendus"</string>
