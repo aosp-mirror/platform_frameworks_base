@@ -43,7 +43,7 @@ Android Studio, as denoted by revision number. </p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>Android Studio v1.1</a> <em>(February 2015)</em>
+      alt=""/>Android Studio v1.1.0</a> <em>(February 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
