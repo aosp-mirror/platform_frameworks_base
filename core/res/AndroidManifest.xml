@@ -208,6 +208,7 @@
     <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTABLE" />
     <protected-broadcast android:name="android.intent.action.MEDIA_EJECT" />
 
+    <protected-broadcast android:name="android.net.conn.CAPTIVE_PORTAL" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
     <protected-broadcast android:name="android.net.conn.DATA_ACTIVITY_CHANGE" />

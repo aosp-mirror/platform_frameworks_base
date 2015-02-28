@@ -87,17 +87,6 @@ public class NetworkMonitor extends StateMachine {
     private static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
             "android.permission.ACCESS_NETWORK_CONDITIONS";
 
-    // Keep these in sync with CaptivePortalLoginActivity.java.
-    // Intent broadcast from CaptivePortalLogin indicating sign-in is complete.
-    // Extras:
-    //     EXTRA_TEXT       = netId
-    //     LOGGED_IN_RESULT = one of the CAPTIVE_PORTAL_APP_RETURN_* values below.
-    //     RESPONSE_TOKEN   = data fragment from launching Intent
-    private static final String ACTION_CAPTIVE_PORTAL_LOGGED_IN =
-            "android.net.netmon.captive_portal_logged_in";
-    private static final String LOGGED_IN_RESULT = "result";
-    private static final String RESPONSE_TOKEN = "response_token";
-
     // After a network has been tested this result can be sent with EVENT_NETWORK_TESTED.
     // The network should be used as a default internet connection.  It was found to be:
     // 1. a functioning network providing internet access, or
@@ -170,11 +159,12 @@ public class NetworkMonitor extends StateMachine {
 
     /**
      * Message to self indicating captive portal app finished.
-     * arg1 = one of: CAPTIVE_PORTAL_APP_RETURN_APPEASED,
+     * arg1 = one of: CAPTIVE_PORTAL_APP_RETURN_DISMISSED,
      *                CAPTIVE_PORTAL_APP_RETURN_UNWANTED,
      *                CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS
+     * obj = mCaptivePortalLoggedInResponseToken as String
      */
-    private static final int CMD_CAPTIVE_PORTAL_APP_FINISHED = BASE + 9;
+    public static final int CMD_CAPTIVE_PORTAL_APP_FINISHED = BASE + 9;
 
     /**
      * Request ConnectivityService display provisioning notification.
@@ -185,26 +175,11 @@ public class NetworkMonitor extends StateMachine {
     public static final int EVENT_PROVISIONING_NOTIFICATION = BASE + 10;
 
     /**
-     * Message to self indicating sign-in app bypassed captive portal.
+     * Message to self indicating sign-in app should be launched.
+     * Sent by mLaunchCaptivePortalAppBroadcastReceiver when the
+     * user touches the sign in notification.
      */
-    private static final int EVENT_APP_BYPASSED_CAPTIVE_PORTAL = BASE + 11;
-
-    /**
-     * Message to self indicating no sign-in app responded.
-     */
-    private static final int EVENT_NO_APP_RESPONSE = BASE + 12;
-
-    /**
-     * Message to self indicating sign-in app indicates sign-in is not possible.
-     */
-    private static final int EVENT_APP_INDICATES_SIGN_IN_IMPOSSIBLE = BASE + 13;
-
-    /**
-     * Return codes from captive portal sign-in app.
-     */
-    public static final int CAPTIVE_PORTAL_APP_RETURN_APPEASED = 0;
-    public static final int CAPTIVE_PORTAL_APP_RETURN_UNWANTED = 1;
-    public static final int CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS = 2;
+    private static final int CMD_LAUNCH_CAPTIVE_PORTAL_APP = BASE + 11;
 
     private static final String LINGER_DELAY_PROPERTY = "persist.netmon.linger";
     // Default to 30s linger time-out.
@@ -259,7 +234,7 @@ public class NetworkMonitor extends StateMachine {
     private final State mCaptivePortalState = new CaptivePortalState();
     private final State mLingeringState = new LingeringState();
 
-    private CaptivePortalLoggedInBroadcastReceiver mCaptivePortalLoggedInBroadcastReceiver = null;
+    private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
     private String mCaptivePortalLoggedInResponseToken = null;
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
@@ -323,9 +298,9 @@ public class NetworkMonitor extends StateMachine {
                     return HANDLED;
                 case CMD_NETWORK_DISCONNECTED:
                     if (DBG) log("Disconnected - quitting");
-                    if (mCaptivePortalLoggedInBroadcastReceiver != null) {
-                        mContext.unregisterReceiver(mCaptivePortalLoggedInBroadcastReceiver);
-                        mCaptivePortalLoggedInBroadcastReceiver = null;
+                    if (mLaunchCaptivePortalAppBroadcastReceiver != null) {
+                        mContext.unregisterReceiver(mLaunchCaptivePortalAppBroadcastReceiver);
+                        mLaunchCaptivePortalAppBroadcastReceiver = null;
                     }
                     quit();
                     return HANDLED;
@@ -336,14 +311,21 @@ public class NetworkMonitor extends StateMachine {
                     transitionTo(mEvaluatingState);
                     return HANDLED;
                 case CMD_CAPTIVE_PORTAL_APP_FINISHED:
-                    // Previous token was broadcast, come up with a new one.
+                    if (!mCaptivePortalLoggedInResponseToken.equals((String)message.obj))
+                        return HANDLED;
+                    // Previous token was sent out, come up with a new one.
                     mCaptivePortalLoggedInResponseToken = String.valueOf(new Random().nextLong());
                     switch (message.arg1) {
-                        case CAPTIVE_PORTAL_APP_RETURN_APPEASED:
-                        case CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS:
+                        case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_DISMISSED:
+                            sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */,
+                                    0 /* INITIAL_ATTEMPTS */);
+                            break;
+                        case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS:
+                            // TODO: Distinguish this from a network that actually validates.
+                            // Displaying the "!" on the system UI icon may still be a good idea.
                             transitionTo(mValidatedState);
                             break;
-                        case CAPTIVE_PORTAL_APP_RETURN_UNWANTED:
+                        case ConnectivityManager.CAPTIVE_PORTAL_APP_RETURN_UNWANTED:
                             mUserDoesNotWant = true;
                             // TODO: Should teardown network.
                             transitionTo(mOfflineState);
@@ -420,6 +402,25 @@ public class NetworkMonitor extends StateMachine {
     // Being in the MaybeNotifyState State indicates the user may have been notified that sign-in
     // is required.  This State takes care to clear the notification upon exit from the State.
     private class MaybeNotifyState extends State {
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log(getName() + message.toString());
+            switch (message.what) {
+                case CMD_LAUNCH_CAPTIVE_PORTAL_APP:
+                    final Intent intent = new Intent(
+                            ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN);
+                    intent.putExtra(ConnectivityManager.EXTRA_NETWORK, mNetworkAgentInfo.network);
+                    intent.putExtra(ConnectivityManager.EXTRA_CAPTIVE_PORTAL_TOKEN,
+                            mCaptivePortalLoggedInResponseToken);
+                    intent.setFlags(
+                            Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                    return HANDLED;
+                default:
+                    return NOT_HANDLED;
+            }
+        }
+
         @Override
         public void exit() {
             Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 0,
@@ -516,7 +517,9 @@ public class NetworkMonitor extends StateMachine {
             mContext.registerReceiver(this, new IntentFilter(mAction));
         }
         public PendingIntent getPendingIntent() {
-            return PendingIntent.getBroadcast(mContext, 0, new Intent(mAction), 0);
+            final Intent intent = new Intent(mAction);
+            intent.setPackage(mContext.getPackageName());
+            return PendingIntent.getBroadcast(mContext, 0, intent, 0);
         }
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -524,48 +527,29 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    private class CaptivePortalLoggedInBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Integer.parseInt(intent.getStringExtra(Intent.EXTRA_TEXT)) ==
-                    mNetworkAgentInfo.network.netId &&
-                    mCaptivePortalLoggedInResponseToken.equals(
-                            intent.getStringExtra(RESPONSE_TOKEN))) {
-                sendMessage(obtainMessage(CMD_CAPTIVE_PORTAL_APP_FINISHED,
-                        Integer.parseInt(intent.getStringExtra(LOGGED_IN_RESULT)), 0));
-            }
-        }
-    }
-
     // Being in the CaptivePortalState State indicates a captive portal was detected and the user
     // has been shown a notification to sign-in.
     private class CaptivePortalState extends State {
+        private static final String ACTION_LAUNCH_CAPTIVE_PORTAL_APP =
+                "android.net.netmon.launchCaptivePortalApp";
+
         @Override
         public void enter() {
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
-
-            // Assemble Intent to launch captive portal sign-in app.
-            final Intent intent = new Intent(Intent.ACTION_SEND);
-            // Intent cannot use extras because PendingIntent.getActivity will merge matching
-            // Intents erasing extras.  Use data instead of extras to encode NetID.
-            intent.setData(Uri.fromParts("netid", Integer.toString(mNetworkAgentInfo.network.netId),
-                    mCaptivePortalLoggedInResponseToken));
-            intent.setComponent(new ComponentName("com.android.captiveportallogin",
-                    "com.android.captiveportallogin.CaptivePortalLoginActivity"));
-            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            if (mCaptivePortalLoggedInBroadcastReceiver == null) {
+            // Create a CustomIntentReceiver that sends us a
+            // CMD_LAUNCH_CAPTIVE_PORTAL_APP message when the user
+            // touches the notification.
+            if (mLaunchCaptivePortalAppBroadcastReceiver == null) {
                 // Wait for result.
-                mCaptivePortalLoggedInBroadcastReceiver =
-                        new CaptivePortalLoggedInBroadcastReceiver();
-                final IntentFilter filter = new IntentFilter(ACTION_CAPTIVE_PORTAL_LOGGED_IN);
-                mContext.registerReceiver(mCaptivePortalLoggedInBroadcastReceiver, filter);
+                mLaunchCaptivePortalAppBroadcastReceiver = new CustomIntentReceiver(
+                        ACTION_LAUNCH_CAPTIVE_PORTAL_APP, new Random().nextInt(),
+                        CMD_LAUNCH_CAPTIVE_PORTAL_APP);
             }
-            // Initiate notification to sign-in.
+            // Display the sign in notification.
             Message message = obtainMessage(EVENT_PROVISIONING_NOTIFICATION, 1,
                     mNetworkAgentInfo.network.netId,
-                    PendingIntent.getActivity(mContext, 0, intent, 0));
+                    mLaunchCaptivePortalAppBroadcastReceiver.getPendingIntent());
             mConnectivityServiceHandler.sendMessage(message);
         }
 
