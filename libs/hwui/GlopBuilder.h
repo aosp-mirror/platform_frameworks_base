@@ -33,6 +33,13 @@ class Texture;
 class VertexBuffer;
 struct Glop;
 
+enum class TextureFillFlags {
+    kNone = 0,
+    kIsAlphaMaskTexture = 1 << 0,
+    kForceFilter = 1 << 1,
+};
+MAKE_FLAGS_ENUM(TextureFillFlags);
+
 class GlopBuilder {
     PREVENT_COPY_AND_ASSIGN(GlopBuilder);
 public:
@@ -43,11 +50,12 @@ public:
     GlopBuilder& setMeshTexturedUvQuad(const UvMapper* uvMapper, const Rect uvs);
     GlopBuilder& setMeshVertexBuffer(const VertexBuffer& vertexBuffer, bool shadowInterp);
     GlopBuilder& setMeshIndexedQuads(Vertex* vertexData, int quadCount);
-    GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount);
+    GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: use indexed quads
+    GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
 
     GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
-    GlopBuilder& setFillTexturePaint(Texture& texture, bool isAlphaMaskTexture,
+    GlopBuilder& setFillTexturePaint(Texture& texture, int textureFillFlags,
             const SkPaint* paint, float alphaScale);
     GlopBuilder& setFillPathTexturePaint(PathTexture& texture,
             const SkPaint& paint, float alphaScale);
@@ -63,7 +71,7 @@ public:
 
     GlopBuilder& setModelViewMapUnitToRect(const Rect destination);
     GlopBuilder& setModelViewMapUnitToRectSnap(const Rect destination);
-    GlopBuilder& setModelViewMapUnitToRectOptionalSnap(bool snap, const Rect destination) {
+    GlopBuilder& setModelViewMapUnitToRectOptionalSnap(bool snap, const Rect& destination) {
         if (snap) {
             return setModelViewMapUnitToRectSnap(destination);
         } else {
@@ -72,6 +80,14 @@ public:
     }
     GlopBuilder& setModelViewOffsetRect(float offsetX, float offsetY, const Rect source);
     GlopBuilder& setModelViewOffsetRectSnap(float offsetX, float offsetY, const Rect source);
+    GlopBuilder& setModelViewOffsetRectOptionalSnap(bool snap,
+            float offsetX, float offsetY, const Rect& source) {
+        if (snap) {
+            return setModelViewOffsetRectSnap(offsetX, offsetY, source);
+        } else {
+            return setModelViewOffsetRect(offsetX, offsetY, source);
+        }
+    }
 
     GlopBuilder& setRoundRectClipState(const RoundRectClipState* roundRectClipState);
 

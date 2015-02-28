@@ -139,6 +139,20 @@ GlopBuilder& GlopBuilder::setMeshTexturedIndexedQuads(TextureVertex* vertexData,
     return *this;
 }
 
+GlopBuilder& GlopBuilder::setMeshTexturedMesh(TextureVertex* vertexData, int elementCount) {
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
+    mOutGlop->mesh.indices = { 0, nullptr };
+    mOutGlop->mesh.vertices = {
+            0,
+            VertexAttribFlags::kTextureCoord,
+            &vertexData[0].x, &vertexData[0].u, nullptr,
+            kTextureVertexStride };
+    mOutGlop->mesh.elementCount = elementCount;
+    return *this;
+}
+
 GlopBuilder& GlopBuilder::setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount) {
     TRIGGER_STAGE(kMeshStage);
 
@@ -269,19 +283,21 @@ void GlopBuilder::setFill(int color, float alphaScale, SkXfermode::Mode mode,
     }
 }
 
-GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, bool isAlphaMaskTexture,
+GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, int textureFillFlags,
         const SkPaint* paint, float alphaScale) {
     TRIGGER_STAGE(kFillStage);
     REQUIRE_STAGES(kMeshStage);
 
+    GLenum filter = (textureFillFlags & TextureFillFlags::kForceFilter)
+            ? GL_LINEAR : PaintUtils::getFilter(paint);
     mOutGlop->fill.texture = { &texture,
-            GL_TEXTURE_2D, PaintUtils::getFilter(paint), GL_CLAMP_TO_EDGE, nullptr };
+            GL_TEXTURE_2D, filter, GL_CLAMP_TO_EDGE, nullptr };
 
     if (paint) {
         int color = paint->getColor();
         SkShader* shader = paint->getShader();
 
-        if (!isAlphaMaskTexture) {
+        if (!(textureFillFlags & TextureFillFlags::kIsAlphaMaskTexture)) {
             // Texture defines color, so disable shaders, and reset all non-alpha color channels
             color |= 0x00FFFFFF;
             shader = nullptr;
@@ -303,9 +319,9 @@ GlopBuilder& GlopBuilder::setFillTexturePaint(Texture& texture, bool isAlphaMask
         }
     }
 
-    mDescription.hasAlpha8Texture = isAlphaMaskTexture;
-    if (isAlphaMaskTexture) {
+    if (textureFillFlags & TextureFillFlags::kIsAlphaMaskTexture) {
         mDescription.modulate = mOutGlop->fill.color.isNotBlack();
+        mDescription.hasAlpha8Texture = true;
     } else {
         mDescription.modulate = mOutGlop->fill.color.a < 1.0f;
     }

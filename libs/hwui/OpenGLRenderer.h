@@ -206,8 +206,6 @@ public:
             const float* vertices, const int* colors, const SkPaint* paint);
     void drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
             TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint);
-    void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
-            float left, float top, float right, float bottom, const SkPaint* paint);
     void drawPatch(const SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
             float left, float top, float right, float bottom, const SkPaint* paint);
     void drawColor(int color, SkXfermode::Mode mode);
