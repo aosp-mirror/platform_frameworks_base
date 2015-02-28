@@ -21,17 +21,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Handler;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.provider.Settings;
 import android.widget.TextView;
 import android.widget.RemoteViews.RemoteView;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 

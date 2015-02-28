@@ -16,10 +16,8 @@
 
 package android.telephony;
 
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.net.LinkProperties;
 

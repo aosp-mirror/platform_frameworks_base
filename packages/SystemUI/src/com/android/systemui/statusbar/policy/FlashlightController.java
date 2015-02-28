@@ -28,7 +28,6 @@ import android.hardware.camera2.CaptureRequest;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;

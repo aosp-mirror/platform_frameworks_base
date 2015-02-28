@@ -18,7 +18,6 @@ package com.android.server.job.controllers;
 
 import android.content.Context;
 
-import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
 
 import java.io.PrintWriter;

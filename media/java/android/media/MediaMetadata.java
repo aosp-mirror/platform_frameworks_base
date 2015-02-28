@@ -30,7 +30,6 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 /**

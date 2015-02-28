@@ -18,13 +18,8 @@ package com.android.vpndialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.net.IConnectivityManager;
-import android.net.VpnService;
 import android.os.ServiceManager;
 import android.text.Html;
 import android.text.Html.ImageGetter;
@@ -35,8 +30,6 @@ import android.widget.TextView;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.net.VpnConfig;
-
-import java.util.List;
 
 public class ConfirmDialog extends AlertActivity
         implements DialogInterface.OnClickListener, ImageGetter {

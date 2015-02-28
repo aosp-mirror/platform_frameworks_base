@@ -25,7 +25,6 @@ import android.media.AudioRecord;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;

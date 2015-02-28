@@ -27,9 +27,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 
-import static android.hardware.camera2.impl.CameraMetadataNative.*;
-import static android.hardware.camera2.marshal.MarshalHelpers.*;
-
 /**
  * Marshal {@link Range} to/from any native type
  */

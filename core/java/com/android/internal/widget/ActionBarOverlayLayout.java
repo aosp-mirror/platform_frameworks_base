@@ -32,7 +32,6 @@ import android.util.IntProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.SparseArray;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;

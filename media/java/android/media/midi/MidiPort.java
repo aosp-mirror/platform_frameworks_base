@@ -16,8 +16,6 @@
 
 package android.media.midi;
 
-import android.util.Log;
-
 import java.io.Closeable;
 
 /**

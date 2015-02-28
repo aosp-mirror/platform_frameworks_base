@@ -19,8 +19,6 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.view.View;
 
-import com.android.internal.R;
-
 /**
  * Wraps the actual notification content view; used to implement behaviors which are different for
  * the individual templates and custom views.

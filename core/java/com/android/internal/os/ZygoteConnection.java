@@ -30,7 +30,6 @@ import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
-import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 import java.io.BufferedReader;
 import java.io.DataInputStream;

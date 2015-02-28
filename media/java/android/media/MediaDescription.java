@@ -1,22 +1,11 @@
 package android.media;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ContentResolver;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Size;
 
 /**
  * A simple set of metadata for a media item suitable for display. This can be

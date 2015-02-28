@@ -18,7 +18,6 @@ package android.content;
 
 import android.content.ContentProvider;
 import android.net.Uri;
-import android.os.UserHandle;
 import android.os.Parcelable;
 import android.os.Parcel;
 

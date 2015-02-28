@@ -22,8 +22,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
-
 import java.util.List;
 
 /**

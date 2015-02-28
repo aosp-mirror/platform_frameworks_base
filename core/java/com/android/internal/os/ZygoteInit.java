@@ -24,8 +24,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.net.LocalServerSocket;
 import android.opengl.EGL14;
-import android.os.Build;
-import android.os.Debug;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -36,7 +34,6 @@ import android.system.OsConstants;
 import android.system.StructPollfd;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Slog;
 import android.webkit.WebViewFactory;
 
 import dalvik.system.DexFile;
@@ -54,7 +51,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 /**

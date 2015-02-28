@@ -25,9 +25,6 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-import static android.hardware.camera2.impl.CameraMetadataNative.*;
-import static android.hardware.camera2.marshal.MarshalHelpers.*;
-
 /**
  * Marshal any array {@code T}.
  *

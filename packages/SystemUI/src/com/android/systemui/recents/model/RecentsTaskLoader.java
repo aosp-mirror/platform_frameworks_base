@@ -33,7 +33,6 @@ import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 
-import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 

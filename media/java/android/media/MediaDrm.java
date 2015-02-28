@@ -21,8 +21,6 @@ import java.util.UUID;
 import java.util.HashMap;
 import java.util.List;
 import android.annotation.SystemApi;
-import android.os.Binder;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;

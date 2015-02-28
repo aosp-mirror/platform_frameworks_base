@@ -15,7 +15,6 @@
  */
 package com.android.keyguard;
 
-import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
 import android.media.AudioManager;

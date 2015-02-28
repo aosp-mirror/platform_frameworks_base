@@ -18,7 +18,6 @@ package android.app;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.transition.Transition;
-import android.util.ArrayMap;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;

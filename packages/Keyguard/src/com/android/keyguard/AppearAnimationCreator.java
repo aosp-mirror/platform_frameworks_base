@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.animation.Animator;
 import android.view.animation.Interpolator;
 
 /**

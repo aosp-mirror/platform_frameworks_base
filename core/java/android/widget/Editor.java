@@ -23,8 +23,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputFilter;
-import android.text.SpannableString;
-
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.view.menu.MenuBuilder;

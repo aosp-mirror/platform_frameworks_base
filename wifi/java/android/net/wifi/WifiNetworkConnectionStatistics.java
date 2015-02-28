@@ -21,8 +21,6 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.HashMap;
-
 /**
  * Connection Statistics For a WiFi Network.
  * @hide

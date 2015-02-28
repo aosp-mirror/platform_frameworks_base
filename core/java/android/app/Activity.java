@@ -34,8 +34,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.app.ToolbarActionBar;
 
-import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentCallbacks2;

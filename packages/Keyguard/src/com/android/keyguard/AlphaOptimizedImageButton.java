@@ -19,7 +19,6 @@ package com.android.keyguard;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 
 /**
  * A frame layout which does not have overlapping renderings commands and therefore does not need a

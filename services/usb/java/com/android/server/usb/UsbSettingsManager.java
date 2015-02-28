@@ -27,7 +27,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;

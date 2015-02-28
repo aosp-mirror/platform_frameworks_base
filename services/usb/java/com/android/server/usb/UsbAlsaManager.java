@@ -17,7 +17,6 @@
 package com.android.server.usb;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -27,11 +26,9 @@ import android.media.IAudioService;
 import android.media.midi.MidiDeviceInfo;
 import android.os.FileObserver;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 

@@ -22,8 +22,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
-import javax.net.ssl.SSLParameters;
-import javax.net.ssl.SSLSocket;
 import javax.net.ssl.X509TrustManager;
 
 /**

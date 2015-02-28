@@ -51,7 +51,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

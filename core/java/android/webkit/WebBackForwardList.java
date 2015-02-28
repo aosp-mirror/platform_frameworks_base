@@ -16,7 +16,6 @@
 
 package android.webkit;
 
-import android.annotation.SystemApi;
 import java.io.Serializable;
 
 /**

@@ -17,9 +17,6 @@
 package com.android.documentsui;
 
 import android.content.Context;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 

@@ -19,7 +19,6 @@ package com.android.server.updates;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Base64;

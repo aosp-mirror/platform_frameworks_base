@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.graphics.PorterDuff;
 import com.android.internal.R;
 
-import android.annotation.DrawableRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;

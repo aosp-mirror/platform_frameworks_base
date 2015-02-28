@@ -24,15 +24,12 @@ import android.util.Size;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static android.media.Utils.intersectSortedDistinctRanges;
 import static android.media.Utils.sortDistinctRanges;
-import static com.android.internal.util.Preconditions.checkArgumentPositive;
-import static com.android.internal.util.Preconditions.checkNotNull;
 
 /**
  * Provides information about a given media codec available on the device. You can

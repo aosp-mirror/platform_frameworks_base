@@ -17,7 +17,6 @@
 package android.net.wifi.passpoint;
 
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.ScanResult;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.security.Credentials;
@@ -25,7 +24,6 @@ import android.util.Log;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
 
 
 /** @hide */

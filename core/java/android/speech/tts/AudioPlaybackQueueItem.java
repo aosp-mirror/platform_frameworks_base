@@ -17,7 +17,6 @@ package android.speech.tts;
 
 import android.content.Context;
 import android.media.AudioSystem;
-import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.ConditionVariable;

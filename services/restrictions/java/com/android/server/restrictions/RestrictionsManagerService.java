@@ -16,35 +16,20 @@
 
 package com.android.server.restrictions;
 
-import android.Manifest;
-import android.accounts.IAccountAuthenticator;
 import android.app.AppGlobals;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.admin.IDevicePolicyManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.pm.ServiceInfo;
-import android.content.pm.UserInfo;
-import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.PersistableBundle;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;

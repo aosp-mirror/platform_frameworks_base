@@ -55,8 +55,6 @@ import java.io.PrintWriter;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
-import java.util.Vector;
 
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";

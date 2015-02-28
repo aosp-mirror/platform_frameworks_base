@@ -17,10 +17,6 @@
 package android.hardware.camera2.legacy;
 
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.impl.CameraMetadataNative;
-import android.util.Log;
-import android.view.Surface;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

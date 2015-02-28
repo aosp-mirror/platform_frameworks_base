@@ -17,7 +17,6 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.IAccessibilityServiceConnection;
-import android.graphics.Point;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;

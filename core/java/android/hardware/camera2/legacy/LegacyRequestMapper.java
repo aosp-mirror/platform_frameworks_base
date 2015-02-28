@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.android.internal.util.Preconditions.*;
 import static android.hardware.camera2.CaptureRequest.*;
 
 /**

@@ -19,8 +19,6 @@ package com.android.server.storage;
 import com.android.server.EventLogTags;
 import com.android.server.SystemService;
 import com.android.server.pm.InstructionSets;
-import com.android.server.pm.PackageManagerService;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;

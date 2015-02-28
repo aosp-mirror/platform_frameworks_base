@@ -22,7 +22,6 @@ import android.media.AudioManager;
 import android.media.IRemoteControlClient;
 import android.media.IRemoteVolumeObserver;
 import android.media.RemoteControlClient;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;

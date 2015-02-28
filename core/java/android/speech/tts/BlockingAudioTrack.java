@@ -2,7 +2,6 @@
 
 package android.speech.tts;
 
-import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.speech.tts.TextToSpeechService.AudioOutputParams;

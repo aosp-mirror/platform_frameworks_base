@@ -25,7 +25,6 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.util.Slog;
 import android.view.Display;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;

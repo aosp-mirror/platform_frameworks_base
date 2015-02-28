@@ -19,8 +19,6 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Defines a request for a network, made through {@link NetworkRequest.Builder} and used
  * to request a network via {@link ConnectivityManager#requestNetwork} or listen for changes

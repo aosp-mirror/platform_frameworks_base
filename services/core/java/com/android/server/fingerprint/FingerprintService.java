@@ -16,18 +16,12 @@
 
 package com.android.server.fingerprint;
 
-import android.app.Service;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.MessageQueue;
-import android.os.PowerManager;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.service.fingerprint.FingerprintManager;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -40,11 +34,7 @@ import android.service.fingerprint.IFingerprintServiceReceiver;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * A service to manage multiple clients that want to access the fingerprint HAL API.

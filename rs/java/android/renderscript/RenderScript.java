@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
-import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
 import android.os.SystemProperties;

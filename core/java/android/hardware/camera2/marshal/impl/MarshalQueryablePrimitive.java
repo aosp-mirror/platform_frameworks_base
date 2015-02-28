@@ -23,8 +23,6 @@ import android.util.Rational;
 
 import static android.hardware.camera2.impl.CameraMetadataNative.*;
 import static android.hardware.camera2.marshal.MarshalHelpers.*;
-import static com.android.internal.util.Preconditions.*;
-
 import java.nio.ByteBuffer;
 
 /**

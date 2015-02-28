@@ -22,16 +22,13 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import java.net.Inet4Address;
 
 import android.content.Context;
-import android.net.IConnectivityManager;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.util.Slog;

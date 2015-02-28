@@ -16,13 +16,11 @@
 
 package com.android.server.location;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import java.io.IOException;

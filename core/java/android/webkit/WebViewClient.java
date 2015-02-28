@@ -23,8 +23,6 @@ import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.ViewRootImpl;
 
-import java.security.Principal;
-
 public class WebViewClient {
 
     /**

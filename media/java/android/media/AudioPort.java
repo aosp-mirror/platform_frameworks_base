@@ -15,7 +15,6 @@
  */
 
 package android.media;
-import android.util.Slog;
 
 /**
  * An audio port is a node of the audio framework or hardware that can be connected to or

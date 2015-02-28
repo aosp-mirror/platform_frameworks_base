@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 
 import com.android.internal.util.XmlUtils;

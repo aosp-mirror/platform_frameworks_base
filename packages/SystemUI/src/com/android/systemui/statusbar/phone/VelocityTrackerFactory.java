@@ -20,8 +20,6 @@ import android.content.Context;
 
 import com.android.systemui.R;
 
-import static android.util.Pools.SynchronizedPool;
-
 /**
  * A class to generate {@link VelocityTrackerInterface}, depending on the configuration.
  */

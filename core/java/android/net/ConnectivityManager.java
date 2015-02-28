@@ -25,7 +25,6 @@ import android.content.Intent;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -38,7 +37,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 

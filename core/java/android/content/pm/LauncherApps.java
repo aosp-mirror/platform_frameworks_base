@@ -16,7 +16,6 @@
 
 package android.content.pm;
 
-import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;

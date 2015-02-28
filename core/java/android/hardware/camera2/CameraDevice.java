@@ -17,7 +17,6 @@
 package android.hardware.camera2;
 
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.graphics.ImageFormat;
 import android.os.Handler;
 import android.view.Surface;
 

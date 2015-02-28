@@ -17,8 +17,6 @@
 package com.android.server.hdmi;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
-import android.util.Slog;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 

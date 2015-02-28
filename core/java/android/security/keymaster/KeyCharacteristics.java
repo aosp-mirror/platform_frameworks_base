@@ -19,8 +19,6 @@ package android.security.keymaster;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
-
 /**
  * @hide
  */

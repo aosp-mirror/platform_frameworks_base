@@ -21,10 +21,8 @@ import static javax.microedition.khronos.egl.EGL10.*;
 
 import android.app.ActivityManager;
 import android.app.WallpaperManager;
-import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;

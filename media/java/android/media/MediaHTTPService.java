@@ -16,9 +16,7 @@
 
 package android.media;
 
-import android.os.Binder;
 import android.os.IBinder;
-import android.util.Log;
 
 /** @hide */
 public class MediaHTTPService extends IMediaHTTPService.Stub {

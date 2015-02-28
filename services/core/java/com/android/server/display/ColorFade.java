@@ -25,7 +25,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.display.DisplayManagerInternal;
@@ -47,7 +46,6 @@ import android.view.SurfaceSession;
 import libcore.io.Streams;
 
 import com.android.server.LocalServices;
-import com.android.internal.R;
 
 /**
  * <p>

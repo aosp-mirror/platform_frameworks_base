@@ -17,9 +17,6 @@
 package android.bluetooth.le;
 
 import android.annotation.SystemApi;
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import java.util.List;
 
 /**

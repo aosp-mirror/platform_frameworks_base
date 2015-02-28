@@ -26,8 +26,6 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
-import com.android.systemui.statusbar.phone.NotificationPanelView;
-
 /**
  * Helper to invert the colors of views and fade between the states.
  */

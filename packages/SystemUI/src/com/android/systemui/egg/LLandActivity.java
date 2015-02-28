@@ -18,7 +18,6 @@ package com.android.systemui.egg;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.android.systemui.R;

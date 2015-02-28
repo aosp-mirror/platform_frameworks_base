@@ -22,8 +22,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.hardware.Camera.Area;
-import android.hardware.camera2.legacy.ParameterUtils.MeteringData;
-import android.hardware.camera2.legacy.ParameterUtils.ZoomData;
 import android.hardware.camera2.params.Face;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.utils.ListUtils;

@@ -16,8 +16,6 @@
 
 package com.android.internal.telephony;
 
-import android.content.Intent;
-
 /**
  * The intents that the telephony services broadcast.
  *

@@ -18,7 +18,6 @@ package android.webkit;
 
 import android.net.Uri;
 
-import java.io.InputStream;
 import java.util.Map;
 
 /**

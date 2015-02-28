@@ -20,12 +20,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-
 /**
  * This class is used for sending and receiving data to and from an MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.

@@ -16,7 +16,6 @@
 
 package android.printservice;
 
-import android.R;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;

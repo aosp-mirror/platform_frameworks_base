@@ -47,7 +47,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Drawable.ConstantState;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.AttributeSet;

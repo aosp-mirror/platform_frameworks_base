@@ -16,12 +16,8 @@
 
 package android.media.audiopolicy;
 
-import android.media.AudioAttributes;
 import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.audiopolicy.AudioMixingRule.AttributeMatchCriterion;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;

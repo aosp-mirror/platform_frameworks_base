@@ -25,9 +25,6 @@ import android.util.Log;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
-import static android.hardware.camera2.impl.CameraMetadataNative.*;
-import static android.hardware.camera2.marshal.MarshalHelpers.*;
-
 /**
  * Marshal any {@code T extends Parcelable} to/from any native type
  *

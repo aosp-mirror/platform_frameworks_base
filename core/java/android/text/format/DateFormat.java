@@ -23,8 +23,6 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 
-import com.android.internal.R;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;

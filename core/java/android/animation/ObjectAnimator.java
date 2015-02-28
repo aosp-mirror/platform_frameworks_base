@@ -24,7 +24,6 @@ import android.util.Log;
 import android.util.Property;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 /**
  * This subclass of {@link ValueAnimator} provides support for animating properties on target objects.

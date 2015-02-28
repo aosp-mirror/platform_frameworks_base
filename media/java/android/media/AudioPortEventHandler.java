@@ -19,8 +19,6 @@ package android.media;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.lang.ref.WeakReference;
 

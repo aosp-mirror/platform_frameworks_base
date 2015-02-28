@@ -19,7 +19,6 @@ package com.android.server.display;
 import com.android.server.lights.Light;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;

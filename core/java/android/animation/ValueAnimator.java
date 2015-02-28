@@ -16,8 +16,6 @@
 
 package android.animation;
 
-import android.content.res.ConfigurationBoundResourceCache;
-import android.os.Debug;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;

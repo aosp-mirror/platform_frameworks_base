@@ -17,7 +17,6 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.util.AttributeSet;
