@@ -1169,7 +1169,7 @@ void OpenGLRenderer::drawRegionRects(const SkRegion& region, const SkPaint& pain
 }
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
-        const float right, const float bottom, const mat4 transform) {
+        const float right, const float bottom, const Matrix4& transform) {
     if (hasLayer()) {
         Rect bounds(left, top, right, bottom);
         transform.mapRect(bounds);
@@ -2805,16 +2805,11 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
 
     TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
     if (fontRenderer.renderPosText(paint, &clip, text, 0, bytesCount, count, x, y,
-            positions, hasActiveLayer ? &bounds : nullptr, &functor)) {
-        if (hasActiveLayer) {
-            if (!pureTranslate) {
-                currentTransform()->mapRect(bounds);
-            }
-            dirtyLayerUnchecked(bounds, getRegion());
-        }
+            positions, hasLayer() ? &bounds : nullptr, &functor)) {
+        dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
+        mDirty = true;
     }
 
-    mDirty = true;
 }
 
 bool OpenGLRenderer::findBestFontTransform(const mat4& transform, SkMatrix* outMatrix) const {
@@ -3011,13 +3006,9 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
 
     if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
             hOffset, vOffset, hasActiveLayer ? &bounds : nullptr, &functor)) {
-        if (hasActiveLayer) {
-            currentTransform()->mapRect(bounds);
-            dirtyLayerUnchecked(bounds, getRegion());
-        }
+        dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
+        mDirty = true;
     }
-
-    mDirty = true;
 }
 
 void OpenGLRenderer::drawPath(const SkPath* path, const SkPaint* paint) {
@@ -3109,10 +3100,8 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
                             x + layer->layer.getWidth(), y + layer->layer.getHeight());
                 }
 
-
                 TextureVertex* mesh = &layer->mesh[0];
                 GLsizei elementsCount = layer->meshElementCount;
-
 
                 while (elementsCount > 0) {
                     GLsizei drawCount = MathUtils::min(elementsCount, (GLsizei) kMaxNumberOfQuads * 6);

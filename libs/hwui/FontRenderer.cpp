@@ -24,6 +24,7 @@
 #include "Rect.h"
 #include "renderstate/RenderState.h"
 #include "utils/Blur.h"
+#include "utils/MathUtils.h"
 #include "utils/Timing.h"
 
 #include <SkGlyph.h>
@@ -47,7 +48,6 @@ namespace uirenderer {
 // TextSetupFunctor
 ///////////////////////////////////////////////////////////////////////////////
 status_t TextSetupFunctor::setup(GLenum glyphFormat) {
-
     renderer->setupDraw();
     renderer->setupDrawTextGamma(paint);
     renderer->setupDrawDirtyRegionsDisabled();
@@ -94,19 +94,22 @@ status_t TextSetupFunctor::setup(GLenum glyphFormat) {
 
 static bool sLogFontRendererCreate = true;
 
-FontRenderer::FontRenderer() :
-        mActiveFonts(LruCache<Font::FontDescription, Font*>::kUnlimitedCapacity) {
+FontRenderer::FontRenderer()
+        : mGammaTable(nullptr)
+        , mCurrentFont(nullptr)
+        , mActiveFonts(LruCache<Font::FontDescription, Font*>::kUnlimitedCapacity)
+        , mCurrentCacheTexture(nullptr)
+        , mUploadTexture(false)
+        , mFunctor(nullptr)
+        , mClip(nullptr)
+        , mBounds(nullptr)
+        , mDrawn(false)
+        , mInitialized(false)
+        , mLinearFiltering(false) {
 
     if (sLogFontRendererCreate) {
         INIT_LOGD("Creating FontRenderer");
     }
-
-    mGammaTable = nullptr;
-    mInitialized = false;
-
-    mCurrentCacheTexture = nullptr;
-
-    mLinearFiltering = false;
 
     mSmallCacheWidth = DEFAULT_TEXT_SMALL_CACHE_WIDTH;
     mSmallCacheHeight = DEFAULT_TEXT_SMALL_CACHE_HEIGHT;
@@ -131,10 +134,11 @@ FontRenderer::FontRenderer() :
     }
 
     uint32_t maxTextureSize = (uint32_t) Caches::getInstance().maxTextureSize;
-    mSmallCacheWidth = mSmallCacheWidth > maxTextureSize ? maxTextureSize : mSmallCacheWidth;
-    mSmallCacheHeight = mSmallCacheHeight > maxTextureSize ? maxTextureSize : mSmallCacheHeight;
-    mLargeCacheWidth = mLargeCacheWidth > maxTextureSize ? maxTextureSize : mLargeCacheWidth;
-    mLargeCacheHeight = mLargeCacheHeight > maxTextureSize ? maxTextureSize : mLargeCacheHeight;
+
+    mSmallCacheWidth = MathUtils::min(mSmallCacheWidth, maxTextureSize);
+    mSmallCacheHeight = MathUtils::min(mSmallCacheHeight, maxTextureSize);
+    mLargeCacheWidth = MathUtils::min(mLargeCacheWidth, maxTextureSize);
+    mLargeCacheHeight = MathUtils::min(mLargeCacheHeight, maxTextureSize);
 
     if (sLogFontRendererCreate) {
         INIT_LOGD("  Text cache sizes, in pixels: %i x %i, %i x %i, %i x %i, %i x %i",
@@ -493,22 +497,19 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
         CacheTexture* texture = cacheTextures[i];
         if (texture->canDraw()) {
             if (first) {
-                if (mFunctor) {
-                    mFunctor->setup(texture->getFormat());
-                }
+                mFunctor->setup(texture->getFormat());
 
                 checkTextureUpdate();
                 renderState.meshState().bindQuadIndicesBuffer();
 
-                if (!mDrawn) {
-                    // If returns true, a VBO was bound and we must
-                    // rebind our vertex attrib pointers even if
-                    // they have the same values as the current pointers
-                    forceRebind = renderState.meshState().unbindMeshBuffer();
-                }
+                // If returns true, a VBO was bound and we must
+                // rebind our vertex attrib pointers even if
+                // they have the same values as the current pointers
+                forceRebind = renderState.meshState().unbindMeshBuffer();
 
                 caches.textureState().activateTexture(0);
                 first = false;
+                mDrawn = true;
             }
 
             caches.textureState().bindTexture(texture->getTextureId());
@@ -531,8 +532,6 @@ void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
 void FontRenderer::issueDrawCommand() {
     issueDrawCommand(mACacheTextures);
     issueDrawCommand(mRGBACacheTextures);
-
-    mDrawn = true;
 }
 
 void FontRenderer::appendMeshQuadNoClip(float x1, float y1, float u1, float v1,

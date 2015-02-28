@@ -677,7 +677,7 @@ private:
      * are transformed with the supplied matrix.
      */
     void dirtyLayer(const float left, const float top,
-            const float right, const float bottom, const mat4 transform);
+            const float right, const float bottom, const Matrix4& transform);
 
     /**
      * Mark the layer as dirty at the specified coordinates.
