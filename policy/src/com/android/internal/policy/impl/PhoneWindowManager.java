@@ -536,6 +536,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mAllowTheaterModeWakeFromLidSwitch;
     private boolean mAllowTheaterModeWakeFromWakeGesture;
 
+    // Whether to support long press from power button in non-interactive mode
+    private boolean mSupportLongPressPowerWhenNonInteractive;
+
     // Whether to go to sleep entering theater mode from power button
     private boolean mGoToSleepOnButtonPressTheaterMode;
 
@@ -887,12 +890,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             } else {
                 wakeUpFromPowerKey(event.getDownTime());
-                final int maxCount = getMaxMultiPressPowerCount();
 
-                if (maxCount <= 1) {
-                    mPowerKeyHandled = true;
-                } else {
+                if (mSupportLongPressPowerWhenNonInteractive && hasLongPressOnPowerBehavior()) {
+                    Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessageDelayed(msg,
+                            ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
                     mBeganFromNonInteractive = true;
+                } else {
+                    final int maxCount = getMaxMultiPressPowerCount();
+
+                    if (maxCount <= 1) {
+                        mPowerKeyHandled = true;
+                    } else {
+                        mBeganFromNonInteractive = true;
+                    }
                 }
             }
         }
@@ -1261,6 +1273,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mGoToSleepOnButtonPressTheaterMode = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_goToSleepOnButtonPressTheaterMode);
+
+        mSupportLongPressPowerWhenNonInteractive = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_supportLongPressPowerWhenNonInteractive);
 
         mShortPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnPowerBehavior);
