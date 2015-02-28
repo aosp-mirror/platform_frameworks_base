@@ -93,7 +93,7 @@ bool LayerRenderer::finish() {
     return retval;
 }
 
-GLuint LayerRenderer::onGetTargetFbo() const {
+GLuint LayerRenderer::getTargetFbo() const {
     return mLayer->getFbo();
 }
 
