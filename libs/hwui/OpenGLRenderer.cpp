@@ -2845,8 +2845,6 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     const Rect& clip(pureTranslate ? writableSnapshot()->getClipRect() : writableSnapshot()->getLocalClip());
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-    const bool hasActiveLayer = hasLayer();
-
     TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
     if (fontRenderer.renderPosText(paint, &clip, text, 0, bytesCount, count, x, y,
             positions, hasLayer() ? &bounds : nullptr, &functor)) {
@@ -3046,10 +3044,8 @@ void OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int count,
     const Rect* clip = &writableSnapshot()->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
-    const bool hasActiveLayer = hasLayer();
-
     if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
-            hOffset, vOffset, hasActiveLayer ? &bounds : nullptr, &functor)) {
+            hOffset, vOffset, hasLayer() ? &bounds : nullptr, &functor)) {
         dirtyLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, *currentTransform());
         mDirty = true;
     }
