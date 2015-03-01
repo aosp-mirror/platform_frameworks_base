@@ -19,6 +19,7 @@ package android.content;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 
+import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
@@ -364,7 +365,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public Bundle call(String callingPkg, String method, String arg, Bundle extras) {
+        public Bundle call(
+                String callingPkg, String method, @Nullable String arg, @Nullable Bundle extras) {
             final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.call(method, arg, extras);
@@ -1742,7 +1744,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return provider-defined return value.  May be {@code null}, which is also
      *   the default for providers which don't implement any call methods.
      */
-    public Bundle call(String method, String arg, Bundle extras) {
+    public Bundle call(String method, @Nullable String arg, @Nullable Bundle extras) {
         return null;
     }
 

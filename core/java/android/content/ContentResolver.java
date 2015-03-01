@@ -17,6 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
+import android.annotation.Nullable;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -1357,7 +1358,8 @@ public abstract class ContentResolver {
      * @throws NullPointerException if uri or method is null
      * @throws IllegalArgumentException if uri is not known
      */
-    public final Bundle call(Uri uri, String method, String arg, Bundle extras) {
+    public final Bundle call(
+            Uri uri, String method, @Nullable String arg, @Nullable Bundle extras) {
         if (uri == null) {
             throw new NullPointerException("uri == null");
         }
