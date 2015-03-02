@@ -488,6 +488,23 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public void reportEvent(String packageName, int userId, int eventType) {
+            if (packageName == null) {
+                Slog.w(TAG, "Event reported without a package name");
+                return;
+            }
+
+            UsageEvents.Event event = new UsageEvents.Event();
+            event.mPackage = packageName;
+
+            // This will later be converted to system time.
+            event.mTimeStamp = SystemClock.elapsedRealtime();
+
+            event.mEventType = eventType;
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+        }
+
+        @Override
         public void reportConfigurationChange(Configuration config, int userId) {
             if (config == null) {
                 Slog.w(TAG, "Configuration event reported with a null config");

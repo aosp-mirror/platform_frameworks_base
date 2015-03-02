@@ -166,6 +166,9 @@ public class UsageLogActivity extends ListActivity implements Runnable {
                 case UsageEvents.Event.CONFIGURATION_CHANGE:
                     return "Config change";
 
+                case UsageEvents.Event.INTERACTION:
+                    return "Interaction";
+
                 default:
                     return "Unknown: " + eventType;
             }

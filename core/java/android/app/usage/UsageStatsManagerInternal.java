@@ -37,6 +37,16 @@ public abstract class UsageStatsManagerInternal {
     public abstract void reportEvent(ComponentName component, int userId, int eventType);
 
     /**
+     * Reports an event to the UsageStatsManager.
+     *
+     * @param packageName The package for which this event occurred.
+     * @param userId The user id to which the component belongs to.
+     * @param eventType The event that occurred. Valid values can be found at
+     * {@link UsageEvents}
+     */
+    public abstract void reportEvent(String packageName, int userId, int eventType);
+
+    /**
      * Reports a configuration change to the UsageStatsManager.
      *
      * @param config The new device configuration.

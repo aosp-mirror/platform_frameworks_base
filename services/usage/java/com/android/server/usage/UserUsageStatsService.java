@@ -570,6 +570,8 @@ class UserUsageStatsService {
                 return "CONTINUE_PREVIOUS_DAY";
             case UsageEvents.Event.CONFIGURATION_CHANGE:
                 return "CONFIGURATION_CHANGE";
+            case UsageEvents.Event.INTERACTION:
+                return "INTERACTION";
             default:
                 return "UNKNOWN";
         }
