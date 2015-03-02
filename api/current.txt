@@ -5783,6 +5783,7 @@ package android.app.usage {
     method public java.lang.String getPackageName();
     method public long getTimeStamp();
     field public static final int CONFIGURATION_CHANGE = 5; // 0x5
+    field public static final int INTERACTION = 6; // 0x6
     field public static final int MOVE_TO_BACKGROUND = 2; // 0x2
     field public static final int MOVE_TO_FOREGROUND = 1; // 0x1
     field public static final int NONE = 0; // 0x0
