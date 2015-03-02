@@ -4844,17 +4844,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Start an action mode.
+     * Start an action mode with the default type {@link ActionMode#TYPE_PRIMARY}.
      *
      * @param callback Callback that will control the lifecycle of the action mode
      * @return The new action mode if it is started, null otherwise
      *
      * @see ActionMode
+     * @see #startActionMode(android.view.ActionMode.Callback, int)
      */
     public ActionMode startActionMode(ActionMode.Callback callback) {
+        return startActionMode(callback, ActionMode.TYPE_PRIMARY);
+    }
+
+    /**
+     * Start an action mode with the given type.
+     *
+     * @param callback Callback that will control the lifecycle of the action mode
+     * @param type One of {@link ActionMode#TYPE_PRIMARY} or {@link ActionMode#TYPE_FLOATING}.
+     * @return The new action mode if it is started, null otherwise
+     *
+     * @see ActionMode
+     */
+    public ActionMode startActionMode(ActionMode.Callback callback, int type) {
         ViewParent parent = getParent();
         if (parent == null) return null;
-        return parent.startActionModeForChild(this, callback);
+        try {
+            return parent.startActionModeForChild(this, callback, type);
+        } catch (AbstractMethodError ame) {
+            // Older implementations of custom views might not implement this.
+            return parent.startActionModeForChild(this, callback);
+        }
     }
 
     /**

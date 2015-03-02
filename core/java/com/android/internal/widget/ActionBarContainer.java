@@ -256,6 +256,15 @@ public class ActionBarContainer extends FrameLayout {
         return null;
     }
 
+    @Override
+    public ActionMode startActionModeForChild(
+            View child, ActionMode.Callback callback, int type) {
+        if (type != ActionMode.TYPE_PRIMARY) {
+            return super.startActionModeForChild(child, callback, type);
+        }
+        return null;
+    }
+
     private static boolean isCollapsed(View view) {
         return view == null || view.getVisibility() == GONE || view.getMeasuredHeight() == 0;
     }

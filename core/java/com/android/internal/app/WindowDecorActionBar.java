@@ -493,21 +493,15 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     public ActionMode startActionMode(ActionMode.Callback callback) {
-        return new ActionModeWrapper(mContext, callback, new ActionModeProviderImpl());
-    }
-    
-    private class ActionModeProviderImpl implements ActionModeWrapper.ActionModeProvider {
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
 
-        @Override
-        public ActionMode createActionMode(Callback callback, MenuBuilder menuBuilder) {
-            if (mActionMode != null) {
-                mActionMode.finish();
-            }
-
-            mOverlayLayout.setHideOnContentScrollEnabled(false);
-            mContextView.killMode();
-            ActionModeImpl mode = new ActionModeImpl(
-                    mContextView.getContext(), callback, menuBuilder);
+        mOverlayLayout.setHideOnContentScrollEnabled(false);
+        mContextView.killMode();
+        ActionModeImpl mode = new ActionModeImpl(mContextView.getContext(), callback);
+        if (mode.dispatchOnCreate()) {
+            mode.invalidate();
             mContextView.initForMode(mode);
             animateToMode(true);
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
@@ -523,6 +517,7 @@ public class WindowDecorActionBar extends ActionBar implements
             mActionMode = mode;
             return mode;
         }
+        return null;
     }
 
     private void configureTab(Tab tab, int position) {
@@ -951,13 +946,11 @@ public class WindowDecorActionBar extends ActionBar implements
         private WeakReference<View> mCustomView;
 
         public ActionModeImpl(
-                Context context, ActionMode.Callback callback, MenuBuilder menuBuilder) {
+                Context context, ActionMode.Callback callback) {
             mActionModeContext = context;
             mCallback = callback;
-            mMenu = menuBuilder == null 
-                    ? new MenuBuilder(context)
-                        .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                    : menuBuilder;
+            mMenu = new MenuBuilder(context)
+                        .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             mMenu.setCallback(this);
         }
 
@@ -1014,6 +1007,15 @@ public class WindowDecorActionBar extends ActionBar implements
             mMenu.stopDispatchingItemsChanged();
             try {
                 mCallback.onPrepareActionMode(this, mMenu);
+            } finally {
+                mMenu.startDispatchingItemsChanged();
+            }
+        }
+
+        public boolean dispatchOnCreate() {
+            mMenu.stopDispatchingItemsChanged();
+            try {
+                return mCallback.onCreateActionMode(this, mMenu);
             } finally {
                 mMenu.startDispatchingItemsChanged();
             }

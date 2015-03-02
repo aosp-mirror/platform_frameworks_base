@@ -639,6 +639,12 @@ public class SearchDialog extends Dialog {
         public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
             return null;
         }
+
+        @Override
+        public ActionMode startActionModeForChild(
+                View child, ActionMode.Callback callback, int type) {
+            return null;
+        }
     }
 
     private boolean isEmpty(AutoCompleteTextView actv) {

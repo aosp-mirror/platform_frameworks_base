@@ -344,6 +344,13 @@ public class DreamService extends Service implements Window.Callback {
 
     /** {@inheritDoc} */
     @Override
+    public ActionMode onWindowStartingActionMode(
+            android.view.ActionMode.Callback callback, int type) {
+        return null;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public void onActionModeStarted(ActionMode mode) {
     }
 

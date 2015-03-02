@@ -369,6 +369,26 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     static final int FLAG_TOUCHSCREEN_BLOCKS_FOCUS = 0x4000000;
 
     /**
+     * When true, indicates that a call to startActionModeForChild was made with the type parameter
+     * and should not be ignored. This helps in backwards compatibility with the existing method
+     * without a type.
+     *
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback)
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback, int)
+     */
+    private static final int FLAG_START_ACTION_MODE_FOR_CHILD_IS_TYPED = 0x8000000;
+
+    /**
+     * When true, indicates that a call to startActionModeForChild was made without the type
+     * parameter. This helps in backwards compatibility with the existing method
+     * without a type.
+     *
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback)
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback, int)
+     */
+    private static final int FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED = 0x10000000;
+
+    /**
      * Indicates which types of drawing caches are to be kept in memory.
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -478,6 +498,60 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * for null.
      */
     private int mNestedScrollAxes;
+
+    /**
+     * Empty ActionMode used as a sentinel in recursive entries to startActionModeForChild.
+     *
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback)
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback, int)
+     */
+    private static final ActionMode SENTINEL_ACTION_MODE = new ActionMode() {
+        @Override
+        public void setTitle(CharSequence title) {}
+
+        @Override
+        public void setTitle(int resId) {}
+
+        @Override
+        public void setSubtitle(CharSequence subtitle) {}
+
+        @Override
+        public void setSubtitle(int resId) {}
+
+        @Override
+        public void setCustomView(View view) {}
+
+        @Override
+        public void invalidate() {}
+
+        @Override
+        public void finish() {}
+
+        @Override
+        public Menu getMenu() {
+            return null;
+        }
+
+        @Override
+        public CharSequence getTitle() {
+            return null;
+        }
+
+        @Override
+        public CharSequence getSubtitle() {
+            return null;
+        }
+
+        @Override
+        public View getCustomView() {
+            return null;
+        }
+
+        @Override
+        public MenuInflater getMenuInflater() {
+            return null;
+        }
+    };
 
     public ViewGroup(Context context) {
         this(context, null);
@@ -694,8 +768,49 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * {@inheritDoc}
      */
+    @Override
     public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback) {
-        return mParent != null ? mParent.startActionModeForChild(originalView, callback) : null;
+        if ((mGroupFlags & FLAG_START_ACTION_MODE_FOR_CHILD_IS_TYPED) == 0) {
+            // This is the original call.
+            try {
+                mGroupFlags |= FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED;
+                return startActionModeForChild(originalView, callback, ActionMode.TYPE_PRIMARY);
+            } finally {
+                mGroupFlags &= ~FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED;
+            }
+        } else {
+            // We are being called from the new method with type.
+            return SENTINEL_ACTION_MODE;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActionMode startActionModeForChild(
+            View originalView, ActionMode.Callback callback, int type) {
+        if ((mGroupFlags & FLAG_START_ACTION_MODE_FOR_CHILD_IS_NOT_TYPED) == 0) {
+            ActionMode mode;
+            try {
+                mGroupFlags |= FLAG_START_ACTION_MODE_FOR_CHILD_IS_TYPED;
+                mode = startActionModeForChild(originalView, callback);
+            } finally {
+                mGroupFlags &= ~FLAG_START_ACTION_MODE_FOR_CHILD_IS_TYPED;
+            }
+            if (mode != SENTINEL_ACTION_MODE) {
+                return mode;
+            }
+        }
+        if (mParent != null) {
+            try {
+                return mParent.startActionModeForChild(originalView, callback, type);
+            } catch (AbstractMethodError ame) {
+                // Custom view parents might not implement this method.
+                return mParent.startActionModeForChild(originalView, callback);
+            }
+        }
+        return null;
     }
 
     /**

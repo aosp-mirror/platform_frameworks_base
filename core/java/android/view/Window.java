@@ -416,13 +416,28 @@ public abstract class Window {
          * Called when an action mode is being started for this window. Gives the
          * callback an opportunity to handle the action mode in its own unique and
          * beautiful way. If this method returns null the system can choose a way
-         * to present the mode or choose not to start the mode at all.
+         * to present the mode or choose not to start the mode at all. This is equivalent
+         * to {@link #onWindowStartingActionMode(android.view.ActionMode.Callback, int)}
+         * with type {@link ActionMode#TYPE_PRIMARY}.
          *
          * @param callback Callback to control the lifecycle of this action mode
          * @return The ActionMode that was started, or null if the system should present it
          */
         @Nullable
         public ActionMode onWindowStartingActionMode(ActionMode.Callback callback);
+
+        /**
+         * Called when an action mode is being started for this window. Gives the
+         * callback an opportunity to handle the action mode in its own unique and
+         * beautiful way. If this method returns null the system can choose a way
+         * to present the mode or choose not to start the mode at all.
+         *
+         * @param callback Callback to control the lifecycle of this action mode
+         * @param type One of {@link ActionMode#TYPE_PRIMARY} or {@link ActionMode#TYPE_FLOATING}.
+         * @return The ActionMode that was started, or null if the system should present it
+         */
+        @Nullable
+        public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type);
 
         /**
          * Called when an action mode has been started. The appropriate mode callback

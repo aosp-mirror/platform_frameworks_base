@@ -28,7 +28,6 @@ import android.app.SearchManager;
 import android.os.UserHandle;
 
 import com.android.internal.R;
-import com.android.internal.view.ActionModeWrapper;
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -76,7 +75,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.ActionMode.Callback;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -2676,44 +2674,47 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         @Override
+        public ActionMode startActionModeForChild(
+                View child, ActionMode.Callback callback, int type) {
+            // originalView can be used here to be sure that we don't obscure
+            // relevant content with the context mode UI.
+            return startActionMode(callback, type);
+        }
+
+        @Override
         public ActionMode startActionMode(ActionMode.Callback callback) {
+            return startActionMode(callback, ActionMode.TYPE_PRIMARY);
+        }
+
+        @Override
+        public ActionMode startActionMode(ActionMode.Callback callback, int type) {
             if (mActionMode != null) {
                 mActionMode.finish();
                 mActionMode = null;
             }
-
             ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
-            ActionModeWrapper mode = null;
-            ActionMode callbackMode = null;
+            ActionMode mode = null;
             if (getCallback() != null && !isDestroyed()) {
                 try {
-                    callbackMode =
-                            getCallback().onWindowStartingActionMode(wrappedCallback);
-                    if (callbackMode != null && callbackMode instanceof ActionModeWrapper) {
-                        // If we get an ActionModeWrapper back, we handle its lifecycle.
-                        mode = (ActionModeWrapper) callbackMode;
-                        callbackMode = null;
-                    }
+                    mode = getCallback().onWindowStartingActionMode(wrappedCallback, type);
                 } catch (AbstractMethodError ame) {
                     // Older apps might not implement this callback method.
                 }
             }
-            if (callbackMode != null) {
-                mActionMode = callbackMode;
+            if (mode != null) {
+                mActionMode = mode;
             } else {
-                if (mode == null) {
-                    mode = new ActionModeWrapper(
-                            mContext, wrappedCallback, new StandaloneActionModeProvider());
-                }
-                if (mActionModeView != null) {
-                    mActionModeView.killMode();
-                }
-                if (callback.onCreateActionMode(mode, mode.getMenu())) {
-                    mode.lockType();
-                    mActionMode = mode.getWrappedActionMode();
-                    mActionMode.invalidate();
-                } else {
-                    mActionMode = null;
+                if (type == ActionMode.TYPE_PRIMARY) {
+                    if (mActionModeView != null) {
+                        mActionModeView.killMode();
+                    }
+                    mode = createStandaloneActionMode(wrappedCallback);
+                    if (mode != null && callback.onCreateActionMode(mode, mode.getMenu())) {
+                        mActionMode = mode;
+                        mActionMode.invalidate();
+                    } else {
+                        mActionMode = null;
+                    }
                 }
             }
             if (mActionMode != null && getCallback() != null && !isDestroyed()) {
@@ -3209,80 +3210,70 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             updateColorViewTranslations();
         }
 
-        /**
-         * Encapsulates the view creation for {@link StandaloneActionMode}.
-         */
-        private class StandaloneActionModeProvider
-                implements ActionModeWrapper.ActionModeProvider {
+        private ActionMode createStandaloneActionMode(ActionMode.Callback callback) {
+            if (mActionModeView == null) {
+                if (isFloating()) {
+                    // Use the action bar theme.
+                    final TypedValue outValue = new TypedValue();
+                    final Theme baseTheme = mContext.getTheme();
+                    baseTheme.resolveAttribute(R.attr.actionBarTheme, outValue, true);
 
-            @Override
-            public ActionMode createActionMode(android.view.ActionMode.Callback callback,
-                    MenuBuilder menuBuilder) {
-                if (mActionModeView == null) {
-                    if (isFloating()) {
-                        // Use the action bar theme.
-                        final TypedValue outValue = new TypedValue();
-                        final Theme baseTheme = mContext.getTheme();
-                        baseTheme.resolveAttribute(R.attr.actionBarTheme, outValue, true);
+                    final Context actionBarContext;
+                    if (outValue.resourceId != 0) {
+                        final Theme actionBarTheme = mContext.getResources().newTheme();
+                        actionBarTheme.setTo(baseTheme);
+                        actionBarTheme.applyStyle(outValue.resourceId, true);
 
-                        final Context actionBarContext;
-                        if (outValue.resourceId != 0) {
-                            final Theme actionBarTheme = mContext.getResources().newTheme();
-                            actionBarTheme.setTo(baseTheme);
-                            actionBarTheme.applyStyle(outValue.resourceId, true);
-
-                            actionBarContext = new ContextThemeWrapper(mContext, 0);
-                            actionBarContext.getTheme().setTo(actionBarTheme);
-                        } else {
-                            actionBarContext = mContext;
-                        }
-
-                        mActionModeView = new ActionBarContextView(actionBarContext);
-                        mActionModePopup = new PopupWindow(actionBarContext, null,
-                                R.attr.actionModePopupWindowStyle);
-                        mActionModePopup.setWindowLayoutType(
-                                WindowManager.LayoutParams.TYPE_APPLICATION);
-                        mActionModePopup.setContentView(mActionModeView);
-                        mActionModePopup.setWidth(MATCH_PARENT);
-
-                        actionBarContext.getTheme().resolveAttribute(
-                                R.attr.actionBarSize, outValue, true);
-                        final int height = TypedValue.complexToDimensionPixelSize(outValue.data,
-                                actionBarContext.getResources().getDisplayMetrics());
-                        mActionModeView.setContentHeight(height);
-                        mActionModePopup.setHeight(WRAP_CONTENT);
-                        mShowActionModePopup = new Runnable() {
-                            public void run() {
-                                mActionModePopup.showAtLocation(
-                                        mActionModeView.getApplicationWindowToken(),
-                                        Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
-                            }
-                        };
+                        actionBarContext = new ContextThemeWrapper(mContext, 0);
+                        actionBarContext.getTheme().setTo(actionBarTheme);
                     } else {
-                        ViewStub stub = (ViewStub) findViewById(
-                                R.id.action_mode_bar_stub);
-                        if (stub != null) {
-                            mActionModeView = (ActionBarContextView) stub.inflate();
-                        }
+                        actionBarContext = mContext;
                     }
-                }
-                if (mActionModeView != null) {
-                    ActionMode mode = new StandaloneActionMode(
-                            mActionModeView.getContext(), mActionModeView,
-                            callback, mActionModePopup == null, menuBuilder);
-                    mActionModeView.killMode();
-                    mActionModeView.initForMode(mode);
-                    mActionModeView.setVisibility(View.VISIBLE);
-                    if (mActionModePopup != null) {
-                        post(mShowActionModePopup);
-                    }
-                    mActionModeView.sendAccessibilityEvent(
-                            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
-                    return mode;
-                }
-                return null;
-            }
 
+                    mActionModeView = new ActionBarContextView(actionBarContext);
+                    mActionModePopup = new PopupWindow(actionBarContext, null,
+                            R.attr.actionModePopupWindowStyle);
+                    mActionModePopup.setWindowLayoutType(
+                            WindowManager.LayoutParams.TYPE_APPLICATION);
+                    mActionModePopup.setContentView(mActionModeView);
+                    mActionModePopup.setWidth(MATCH_PARENT);
+
+                    actionBarContext.getTheme().resolveAttribute(
+                            R.attr.actionBarSize, outValue, true);
+                    final int height = TypedValue.complexToDimensionPixelSize(outValue.data,
+                            actionBarContext.getResources().getDisplayMetrics());
+                    mActionModeView.setContentHeight(height);
+                    mActionModePopup.setHeight(WRAP_CONTENT);
+                    mShowActionModePopup = new Runnable() {
+                        public void run() {
+                            mActionModePopup.showAtLocation(
+                                    mActionModeView.getApplicationWindowToken(),
+                                    Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
+                        }
+                    };
+                } else {
+                    ViewStub stub = (ViewStub) findViewById(
+                            R.id.action_mode_bar_stub);
+                    if (stub != null) {
+                        mActionModeView = (ActionBarContextView) stub.inflate();
+                    }
+                }
+            }
+            if (mActionModeView != null) {
+                ActionMode mode = new StandaloneActionMode(
+                        mActionModeView.getContext(), mActionModeView,
+                        callback, mActionModePopup == null);
+                mActionModeView.killMode();
+                mActionModeView.initForMode(mode);
+                mActionModeView.setVisibility(View.VISIBLE);
+                if (mActionModePopup != null) {
+                    post(mShowActionModePopup);
+                }
+                mActionModeView.sendAccessibilityEvent(
+                        AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                return mode;
+            }
+            return null;
         }
 
         /**

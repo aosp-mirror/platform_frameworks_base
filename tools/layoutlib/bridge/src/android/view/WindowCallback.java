@@ -120,6 +120,11 @@ public class WindowCallback implements Window.Callback {
     }
 
     @Override
+    public ActionMode onWindowStartingActionMode(Callback callback, int type) {
+        return null;
+    }
+
+    @Override
     public void onActionModeStarted(ActionMode mode) {
 
     }

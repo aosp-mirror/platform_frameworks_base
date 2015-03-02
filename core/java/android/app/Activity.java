@@ -787,6 +787,7 @@ public class Activity extends ContextThemeWrapper
     private boolean mChangeCanvasToTranslucent;
 
     private boolean mTitleReady = false;
+    private int mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
 
     private int mDefaultKeyMode = DEFAULT_KEYS_DISABLE;
     private SpannableStringBuilder mDefaultKeySsb = null;
@@ -5681,16 +5682,30 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Start an action mode.
+     * Start an action mode of the default type {@link ActionMode#TYPE_PRIMARY}.
      *
-     * @param callback Callback that will manage lifecycle events for this context mode
-     * @return The ContextMode that was started, or null if it was canceled
+     * @param callback Callback that will manage lifecycle events for this action mode
+     * @return The ActionMode that was started, or null if it was canceled
      *
      * @see ActionMode
      */
     @Nullable
     public ActionMode startActionMode(ActionMode.Callback callback) {
         return mWindow.getDecorView().startActionMode(callback);
+    }
+
+    /**
+     * Start an action mode of the given type.
+     *
+     * @param callback Callback that will manage lifecycle events for this action mode
+     * @param type One of {@link ActionMode#TYPE_PRIMARY} or {@link ActionMode#TYPE_FLOATING}.
+     * @return The ActionMode that was started, or null if it was canceled
+     *
+     * @see ActionMode
+     */
+    @Nullable
+    public ActionMode startActionMode(ActionMode.Callback callback, int type) {
+        return mWindow.getDecorView().startActionMode(callback, type);
     }
 
     /**
@@ -5707,11 +5722,28 @@ public class Activity extends ContextThemeWrapper
     @Nullable
     @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
-        initWindowDecorActionBar();
-        if (mActionBar != null) {
-            return mActionBar.startActionMode(callback);
+        // Only Primary ActionModes are represented in the ActionBar.
+        if (mActionModeTypeStarting == ActionMode.TYPE_PRIMARY) {
+            initWindowDecorActionBar();
+            if (mActionBar != null) {
+                return mActionBar.startActionMode(callback);
+            }
         }
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Nullable
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+        try {
+            mActionModeTypeStarting = type;
+            return onWindowStartingActionMode(callback);
+        } finally {
+            mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
+        }
     }
 
     /**

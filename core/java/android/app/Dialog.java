@@ -121,6 +121,8 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private ActionMode mActionMode;
 
+    private int mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
+
     private final Runnable mDismissAction = new Runnable() {
         public void run() {
             dismissDialog();
@@ -973,13 +975,13 @@ public class Dialog implements DialogInterface, Window.Callback,
     public boolean onContextItemSelected(MenuItem item) {
         return false;
     }
-    
+
     /**
      * @see Activity#onContextMenuClosed(Menu)
      */
     public void onContextMenuClosed(Menu menu) {
     }
-    
+
     /**
      * This hook is called when the user signals the desire to start a search.
      */
@@ -998,11 +1000,28 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
-        if (mActionBar != null) {
+        if (mActionBar != null && mActionModeTypeStarting == ActionMode.TYPE_PRIMARY) {
             return mActionBar.startActionMode(callback);
         }
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+        try {
+            mActionModeTypeStarting = type;
+            return onWindowStartingActionMode(callback);
+        } finally {
+            mActionModeTypeStarting = ActionMode.TYPE_PRIMARY;
+        }
     }
 
     /**

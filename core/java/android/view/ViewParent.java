@@ -190,7 +190,8 @@ public interface ViewParent {
     public void createContextMenu(ContextMenu menu);
 
     /**
-     * Start an action mode for the specified view.
+     * Start an action mode for the specified view with the default type
+     * {@link ActionMode#TYPE_PRIMARY}.
      *
      * <p>In most cases, a subclass does not need to override this. However, if the
      * subclass is added directly to the window manager (for example,
@@ -200,8 +201,26 @@ public interface ViewParent {
      * @param originalView The source view where the action mode was first invoked
      * @param callback The callback that will handle lifecycle events for the action mode
      * @return The new action mode if it was started, null otherwise
+     *
+     * @see #startActionModeForChild(View, android.view.ActionMode.Callback, int)
      */
     public ActionMode startActionModeForChild(View originalView, ActionMode.Callback callback);
+
+    /**
+     * Start an action mode of a specific type for the specified view.
+     *
+     * <p>In most cases, a subclass does not need to override this. However, if the
+     * subclass is added directly to the window manager (for example,
+     * {@link ViewManager#addView(View, android.view.ViewGroup.LayoutParams)})
+     * then it should override this and start the action mode.</p>
+     *
+     * @param originalView The source view where the action mode was first invoked
+     * @param callback The callback that will handle lifecycle events for the action mode
+     * @param type One of {@link ActionMode#TYPE_PRIMARY} or {@link ActionMode#TYPE_FLOATING}.
+     * @return The new action mode if it was started, null otherwise
+     */
+    public ActionMode startActionModeForChild(
+            View originalView, ActionMode.Callback callback, int type);
 
     /**
      * This method is called on the parent when a child's drawable state
@@ -210,7 +229,7 @@ public interface ViewParent {
      * @param child The child whose drawable state has changed.
      */
     public void childDrawableStateChanged(View child);
-    
+
     /**
      * Called when a child does not want this parent and its ancestors to
      * intercept touch events with
