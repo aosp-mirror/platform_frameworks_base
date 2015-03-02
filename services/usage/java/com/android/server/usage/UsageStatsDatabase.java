@@ -378,26 +378,27 @@ class UsageStatsDatabase {
                 }
             }
 
-            try {
-                IntervalStats stats = new IntervalStats();
-                ArrayList<T> results = new ArrayList<>();
-                for (int i = startIndex; i <= endIndex; i++) {
-                    final AtomicFile f = intervalStats.valueAt(i);
+            final IntervalStats stats = new IntervalStats();
+            final ArrayList<T> results = new ArrayList<>();
+            for (int i = startIndex; i <= endIndex; i++) {
+                final AtomicFile f = intervalStats.valueAt(i);
 
-                    if (DEBUG) {
-                        Slog.d(TAG, "Reading stat file " + f.getBaseFile().getAbsolutePath());
-                    }
+                if (DEBUG) {
+                    Slog.d(TAG, "Reading stat file " + f.getBaseFile().getAbsolutePath());
+                }
 
+                try {
                     UsageStatsXml.read(f, stats);
                     if (beginTime < stats.endTime) {
                         combiner.combine(stats, false, results);
                     }
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to read usage stats file", e);
+                    // We continue so that we return results that are not
+                    // corrupt.
                 }
-                return results;
-            } catch (IOException e) {
-                Slog.e(TAG, "Failed to read usage stats file", e);
-                return null;
             }
+            return results;
         }
     }
 
@@ -450,6 +451,10 @@ class UsageStatsDatabase {
             mCal.addDays(-7);
             pruneFilesOlderThan(mIntervalDirs[UsageStatsManager.INTERVAL_DAILY],
                     mCal.getTimeInMillis());
+
+            // We must re-index our file list or we will be trying to read
+            // deleted files.
+            indexFilesLocked();
         }
     }
 
