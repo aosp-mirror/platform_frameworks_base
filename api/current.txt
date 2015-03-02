@@ -25876,6 +25876,8 @@ package android.provider {
     field public static final int NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING = 2; // 0x2
     field public static final int NOTIFICATION_CHANNEL_STATE_NO_CONNECTION = 1; // 0x1
     field public static final int NOTIFICATION_CHANNEL_STATE_OK = 0; // 0x0
+    field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "phone_account_component_name";
+    field public static final java.lang.String PHONE_ACCOUNT_ID = "phone_account_id";
     field public static final java.lang.String SETTINGS_URI = "settings_uri";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
     field public static final java.lang.String VOICEMAIL_ACCESS_URI = "voicemail_access_uri";

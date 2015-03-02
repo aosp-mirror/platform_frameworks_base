@@ -222,10 +222,27 @@ public class VoicemailContract {
         private Status() {
         }
         /**
-         * The package name of the voicemail source. There can only be a one entry per source.
+         * The package name of the voicemail source. There can only be a one entry per account
+         * per source.
          * <P>Type: TEXT</P>
          */
         public static final String SOURCE_PACKAGE = SOURCE_PACKAGE_FIELD;
+
+        // Note: Multiple entries may exist for a single source if they are differentiated by the
+        // PHONE_ACCOUNT_* fields.
+
+        /**
+         * The component name of the account in string form.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_COMPONENT_NAME = "phone_account_component_name";
+
+        /**
+         * The identifier of a account that is unique to a specified component.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHONE_ACCOUNT_ID = "phone_account_id";
+
         /**
          * The URI to call to invoke source specific voicemail settings screen. On a user request
          * to setup voicemail an intent with action VIEW with this URI will be fired by the system.
