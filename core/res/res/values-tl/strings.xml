@@ -936,7 +936,7 @@
     <string name="relationTypeManager" msgid="6365677861610137895">"Manager"</string>
     <string name="relationTypeMother" msgid="4578571352962758304">"Ina"</string>
     <string name="relationTypeParent" msgid="4755635567562925226">"Magulang"</string>
-    <string name="relationTypePartner" msgid="7266490285120262781">"Kasosyo"</string>
+    <string name="relationTypePartner" msgid="7266490285120262781">"Partner"</string>
     <string name="relationTypeReferredBy" msgid="101573059844135524">"Ni-refer ni"</string>
     <string name="relationTypeRelative" msgid="1799819930085610271">"Kamag-anak"</string>
     <string name="relationTypeSister" msgid="1735983554479076481">"Kapatid na Babae"</string>

@@ -700,7 +700,7 @@
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Pozwala aplikacji na zmianę ustawień użycia danych w tle."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"wyświetlanie połączeń Wi-Fi"</string>
     <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Pozwala aplikacji na dostęp do informacji o połączeniach Wi-Fi – np. na sprawdzenie, czy obsługa Wi-Fi jest włączona, oraz odczytanie nazw podłączonych urządzeń Wi-Fi."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"łączenie się i rozłączanie z siecią Wi-Fi"</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"łączenie się i rozłączanie z siecią Wi‑Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Pozwala aplikacji na nawiązywanie i kończenie połączeń z punktami dostępowymi Wi-Fi oraz na zmienianie konfiguracji sieci Wi-Fi w urządzeniu."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"zezwolenie na odbiór grupowych połączeń Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Pozwala aplikacji na odbieranie pakietów wysyłanych przez sieć Wi-Fi do wszystkich urządzeń, a nie tylko do Twojego tabletu, przy użyciu adresów połączeń grupowych. Powoduje większe zapotrzebowanie na energię niż w trybie innym niż grupowy."</string>
