@@ -32,6 +32,9 @@ import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.app.ActivityThread;
+import android.os.SystemProperties;
+import android.os.Binder;
 import android.util.Log;
 import android.util.Pair;
 
@@ -118,6 +121,9 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
+     * {@link #STATE_BLE_TURNING_ON},
+     * {@link #STATE_BLE_ON},
+     * {@link #STATE_BLE_TURNING_OFF},
      */
     public static final String EXTRA_STATE =
             "android.bluetooth.adapter.extra.STATE";
@@ -128,6 +134,9 @@ public final class BluetoothAdapter {
      * {@link #STATE_TURNING_ON},
      * {@link #STATE_ON},
      * {@link #STATE_TURNING_OFF},
+     * {@link #STATE_BLE_TURNING_ON},
+     * {@link #STATE_BLE_ON},
+     * {@link #STATE_BLE_TURNING_OFF},
      */
     public static final String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.adapter.extra.PREVIOUS_STATE";
@@ -151,6 +160,24 @@ public final class BluetoothAdapter {
      * should immediately attempt graceful disconnection of any remote links.
      */
     public static final int STATE_TURNING_OFF = 13;
+
+    /**
+     * Indicates the local Bluetooth adapter is turning Bluetooth LE mode on.
+     * @hide
+     */
+    public static final int STATE_BLE_TURNING_ON = 14;
+
+    /**
+     * Indicates the local Bluetooth adapter is in LE only mode.
+     * @hide
+     */
+    public static final int STATE_BLE_ON = 15;
+
+    /**
+     * Indicates the local Bluetooth adapter is turning off LE only mode.
+     * @hide
+     */
+    public static final int STATE_BLE_TURNING_OFF = 16;
 
     /**
      * Activity Action: Show a system activity that requests discoverable mode.
@@ -363,6 +390,39 @@ public final class BluetoothAdapter {
     public static final String EXTRA_PREVIOUS_CONNECTION_STATE =
           "android.bluetooth.adapter.extra.PREVIOUS_CONNECTION_STATE";
 
+    /**
+     * Broadcast Action: The Bluetooth adapter state has changed in LE only mode.
+     * @hide
+     */
+    public static final String ACTION_BLE_STATE_CHANGED =
+        "anrdoid.bluetooth.adapter.action.BLE_STATE_CHANGED";
+
+    /**
+     * Broadcast Action: The notifys Bluetooth ACL connected event. This will be
+     * by BLE Always on enabled application to know the ACL_CONNECTED event
+     * when Bluetooth state in STATE_BLE_ON. This denotes GATT connection
+     * as Bluetooth LE is the only feature available in STATE_BLE_ON
+     *
+     * This is counterpart of {@link BluetoothDevice#ACTION_ACL_CONNECTED} which
+     * works in Bluetooth state STATE_ON
+     * @hide
+     */
+    public static final String ACTION_BLE_ACL_CONNECTED =
+        "android.bluetooth.adapter.action.BLE_ACL_CONNECTED";
+
+    /**
+     * Broadcast Action: The notifys Bluetooth ACL connected event. This will be
+     * by BLE Always on enabled application to know the ACL_DISCONNECTED event
+     * when Bluetooth state in STATE_BLE_ON. This denotes GATT disconnection as Bluetooth
+     * LE is the only feature available in STATE_BLE_ON
+     *
+     * This is counterpart of {@link BluetoothDevice#ACTION_ACL_DISCONNECTED} which
+     * works in Bluetooth state STATE_ON
+     * @hide
+     */
+    public static final String ACTION_BLE_ACL_DISCONNECTED =
+        "android.bluetooth.adapter.action.BLE_ACL_DISCONNECTED";
+
     /** The profile is in disconnected state */
     public static final int STATE_DISCONNECTED  = 0;
     /** The profile is in connecting state */
@@ -374,6 +434,7 @@ public final class BluetoothAdapter {
 
     /** @hide */
     public static final String BLUETOOTH_MANAGER_SERVICE = "bluetooth_manager";
+    private final IBinder mToken;
 
 
     /** When creating a ServerSocket using listenUsingRfcommOn() or
@@ -444,6 +505,7 @@ public final class BluetoothAdapter {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         mManagerService = managerService;
         mLeScanClients = new HashMap<LeScanCallback, ScanCallback>();
+        mToken = new Binder();
     }
 
     /**
@@ -490,11 +552,9 @@ public final class BluetoothAdapter {
      * on this device before calling this method.
      */
     public BluetoothLeAdvertiser getBluetoothLeAdvertiser() {
-        if (getState() != STATE_ON) {
-            return null;
-        }
+        if (!getLeAccess()) return null;
         if (!isMultipleAdvertisementSupported() && !isPeripheralModeSupported()) {
-            Log.e(TAG, "bluetooth le advertising not supported");
+            Log.e(TAG, "Bluetooth LE advertising not supported");
             return null;
         }
         synchronized(mLock) {
@@ -509,9 +569,7 @@ public final class BluetoothAdapter {
      * Returns a {@link BluetoothLeScanner} object for Bluetooth LE scan operations.
      */
     public BluetoothLeScanner getBluetoothLeScanner() {
-        if (getState() != STATE_ON) {
-            return null;
-        }
+        if (!getLeAccess()) return null;
         synchronized(mLock) {
             if (sBluetoothLeScanner == null) {
                 sBluetoothLeScanner = new BluetoothLeScanner(mManagerService);
@@ -529,12 +587,183 @@ public final class BluetoothAdapter {
      * @return true if the local adapter is turned on
      */
     public boolean isEnabled() {
-
         try {
             synchronized(mManagerCallback) {
                 if (mService != null) return mService.isEnabled();
             }
         } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Return true if Bluetooth LE(Always BLE On feature) is currently
+     * enabled and ready for use
+     * <p>This returns true if current state is either STATE_ON or STATE_BLE_ON
+     *
+     * @return true if the local Bluetooth LE adapter is turned on
+     * @hide
+     */
+     public boolean isLeEnabled() {
+        final int state = getLeState();
+        if (state == BluetoothAdapter.STATE_ON) {
+            if (DBG) Log.d (TAG, "STATE_ON");
+        } else if (state == BluetoothAdapter.STATE_BLE_ON) {
+            if (DBG) Log.d (TAG, "STATE_BLE_ON");
+        } else {
+            if (DBG) Log.d (TAG, "STATE_OFF");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Performs action based on user action to turn BT ON
+     * or OFF if BT is in BLE_ON state
+     */
+    private void notifyUserAction(boolean enable) {
+        if (mService == null) {
+            Log.e(TAG, "mService is null");
+            return;
+        }
+
+        try {
+            if (enable) {
+                mService.onLeServiceUp(); //NA:TODO implementation pending
+            } else {
+                mService.onBrEdrDown(); //NA:TODO implementation pending
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+    }
+
+    /**
+     * Returns true if LE only mode is enabled, that is apps
+     * have authorization to turn only BT ON and the calling
+     * app has privilage to do so
+     */
+    private boolean isLEAlwaysOnEnabled() {
+        boolean ret = false;
+        if (SystemProperties.getBoolean("ro.bluetooth.blealwayson", true) == true) {
+            Log.v(TAG, "LE always on mode is enabled");
+            // TODO: System API authorization check
+            ret = true;
+        } else {
+            Log.v(TAG, "LE always on mode is disabled");
+            ret = false;
+        }
+        return ret;
+    }
+
+    /**
+     * Turns off Bluetooth LE which was earlier turned on by calling EnableBLE().
+     *
+     * <p> If the internal Adapter state is STATE_BLE_ON, this would trigger the transition
+     * to STATE_OFF and completely shut-down Bluetooth
+     *
+     * <p> If the Adapter state is STATE_ON, This would unregister the existance of
+     * special Bluetooth LE application and hence the further turning off of Bluetooth
+     * from UI would ensure the complete turn-off of Bluetooth rather than staying back
+     * BLE only state
+     *
+     * <p>This is an asynchronous call: it will return immediately, and
+     * clients should listen for {@link #ACTION_BLE_STATE_CHANGED}
+     * to be notified of subsequent adapter state changes If this call returns
+     * true, then the adapter state will immediately transition from {@link
+     * #STATE_ON} to {@link #STATE_TURNING_OFF}, and some time
+     * later transition to either {@link #STATE_BLE_ON} or {@link
+     * #STATE_OFF} based on the existance of the further Always BLE ON enabled applications
+     * If this call returns false then there was an
+     * immediate problem that will prevent the QAdapter from being turned off -
+     * such as the QAadapter already being turned off.
+     *
+     * @return true to indicate success, or false on
+     *         immediate error
+     * @hide
+     */
+    public boolean disableBLE() {
+        if (isLEAlwaysOnEnabled() != true) return false;
+
+        int state = getLeState();
+        if (state == BluetoothAdapter.STATE_ON) {
+            if (DBG) Log.d (TAG, "STATE_ON: shouldn't disable");
+            try {
+                mManagerService.updateBleAppCount(mToken, false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "", e);
+            }
+            return true;
+
+        } else if (state == BluetoothAdapter.STATE_BLE_ON) {
+            if (DBG) Log.d (TAG, "STATE_BLE_ON");
+            int bleAppCnt = 0;
+            try {
+                bleAppCnt = mManagerService.updateBleAppCount(mToken, false);
+            } catch (RemoteException e) {
+                Log.e(TAG, "", e);
+            }
+            if (bleAppCnt == 0) {
+                // Disable only if there are no other clients
+                notifyUserAction(false);
+            }
+            return true;
+        }
+
+        if (DBG) Log.d (TAG, "STATE_OFF: Already disabled");
+        return false;
+    }
+
+    /**
+     * Special Applications who want to only turn on Bluetooth Low Energy (BLE) would
+     * EnableBLE, EnableBLE brings-up Bluetooth so that application can access
+     * only LE related feature (Bluetooth GATT layers interfaces using the respective class)
+     * EnableBLE in turn registers the existance of a special App which wants to
+     * turn on Bluetooth Low enrgy part without making it visible at the settings UI
+     * as Bluetooth ON.
+     * <p>Invoking EnableBLE when Bluetooth is already in ON state, would just registers
+     * the existance of special Application and doesn't do anything to current BT state.
+     * when user turn OFF Bluetooth from UI, if there is an existance of special app, Bluetooth
+     * would stay in BLE_ON state so that LE features are still acessible to the special
+     * Applications.
+     *
+     * <p>This is an asynchronous call: it will return immediately, and
+     * clients should listen for {@link #ACTION_BLE_STATE_CHANGED}
+     * to be notified of subsequent adapter state changes. If this call returns
+     * true, then the adapter state will immediately transition from {@link
+     * #STATE_OFF} to {@link #STATE_BLE_TURNING_ON}, and some time
+     * later transition to either {@link #STATE_OFF} or {@link
+     * #STATE_BLE_ON}. If this call returns false then there was an
+     * immediate problem that will prevent the adapter from being turned on -
+     * such as Airplane mode, or the adapter is already turned on.
+     * (@link #ACTION_BLE_STATE_CHANGED) returns the Bluetooth Adapter's various
+     * states, It includes all the classic Bluetooth Adapter states along with
+     * internal BLE only states
+     *
+     * @return true to indicate Bluetooth LE start-up has begun, or false on
+     *         immediate error
+     * @hide
+     */
+    public boolean enableBLE() {
+        if (isLEAlwaysOnEnabled() != true) return false;
+
+        if (isLeEnabled() == true) {
+            if (DBG) Log.d(TAG, "enableBLE(): BT is already enabled..!");
+            try {
+                mManagerService.updateBleAppCount(mToken, true);
+            } catch (RemoteException e) {
+                Log.e(TAG, "", e);
+            }
+            return true;
+        }
+
+        try {
+            if (DBG) Log.d(TAG, "Calling enableBLE");
+            mManagerService.updateBleAppCount(mToken, true);
+            return mManagerService.enable();
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+
         return false;
     }
 
@@ -556,6 +785,13 @@ public final class BluetoothAdapter {
                 {
                     int state=  mService.getState();
                     if (VDBG) Log.d(TAG, "" + hashCode() + ": getState(). Returning " + state);
+                    //consider all internal states as OFF
+                    if (state == BluetoothAdapter.STATE_BLE_ON
+                        || state == BluetoothAdapter.STATE_BLE_TURNING_ON
+                        || state == BluetoothAdapter.STATE_BLE_TURNING_OFF) {
+                        if (VDBG) Log.d(TAG, "Consider internal state as OFF");
+                        state = BluetoothAdapter.STATE_OFF;
+                    }
                     return state;
                 }
                 // TODO(BT) there might be a small gap during STATE_TURNING_ON that
@@ -564,6 +800,49 @@ public final class BluetoothAdapter {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
         if (DBG) Log.d(TAG, "" + hashCode() + ": getState() :  mService = null. Returning STATE_OFF");
         return STATE_OFF;
+    }
+
+    /**
+     * Get the current state of the local Bluetooth adapter
+     * <p>This returns current internal state of Adapter including LE ON/OFF
+     *
+     * <p>Possible return values are
+     * {@link #STATE_OFF},
+     * {@link #STATE_BLE_TURNING_ON},
+     * {@link #STATE_BLE_ON},
+     * {@link #STATE_TURNING_ON},
+     * {@link #STATE_ON},
+     * {@link #STATE_TURNING_OFF},
+     * {@link #STATE_BLE_TURNING_OFF}.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     *
+     * @return current state of Bluetooth adapter
+     * @hide
+     */
+    public int getLeState() {
+        try {
+            synchronized(mManagerCallback) {
+                if (mService != null)
+                {
+                    int state=  mService.getState();
+                    if (VDBG) Log.d(TAG,"getLeState() returning " + state);
+                    return state;
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+        return BluetoothAdapter.STATE_OFF;
+    }
+
+    boolean getLeAccess() {
+        if(getLeState() == STATE_ON)
+            return true;
+
+        else if (getLeState() == STATE_BLE_ON)
+            return true; // TODO: FILTER SYSTEM APPS HERE <--
+
+        return false;
     }
 
     /**
@@ -594,9 +873,22 @@ public final class BluetoothAdapter {
      *         immediate error
      */
     public boolean enable() {
+        int state = STATE_OFF;
         if (isEnabled() == true){
             if (DBG) Log.d(TAG, "enable(): BT is already enabled..!");
             return true;
+        }
+        //Use service interface to get the exact state
+        if (mService != null) {
+            try {
+               state = mService.getState();
+            } catch (RemoteException e) {Log.e(TAG, "", e);}
+        }
+
+        if (state == BluetoothAdapter.STATE_BLE_ON) {
+                Log.e(TAG, "BT is in BLE_ON State");
+                notifyUserAction(true);
+                return true;
         }
         try {
             return mManagerService.enable();
@@ -1557,6 +1849,10 @@ public final class BluetoothAdapter {
                         }
                     }
                 }
+            }
+
+            public void onBrEdrDown() {
+                if (VDBG) Log.i(TAG, "on QBrEdrDown: ");
             }
     };
 

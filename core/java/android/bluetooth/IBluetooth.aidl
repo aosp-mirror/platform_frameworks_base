@@ -102,4 +102,6 @@ interface IBluetooth
 
     // for dumpsys support
     String dump();
+    void onLeServiceUp();
+    void onBrEdrDown();
 }

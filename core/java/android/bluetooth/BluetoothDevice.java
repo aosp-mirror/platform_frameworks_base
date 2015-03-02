@@ -606,7 +606,9 @@ public final class BluetoothDevice implements Parcelable {
         public void onBluetoothServiceUp(IBluetooth bluetoothService)
                 throws RemoteException {
             synchronized (BluetoothDevice.class) {
-                sService = bluetoothService;
+                if (sService == null) {
+                    sService = bluetoothService;
+                }
             }
         }
 
@@ -615,6 +617,11 @@ public final class BluetoothDevice implements Parcelable {
             synchronized (BluetoothDevice.class) {
                 sService = null;
             }
+        }
+
+        public void onBrEdrDown()
+        {
+            if (DBG) Log.d(TAG, "onBrEdrDown: reached BLE ON state");
         }
     };
     /**
@@ -1030,7 +1037,7 @@ public final class BluetoothDevice implements Parcelable {
      *         or null on error
      */
      public ParcelUuid[] getUuids() {
-         if (sService == null) {
+         if (sService == null || isBluetoothEnabled() == false) {
             Log.e(TAG, "BT not enabled. Cannot get remote device Uuids");
              return null;
          }
@@ -1057,7 +1064,7 @@ public final class BluetoothDevice implements Parcelable {
       */
      public boolean fetchUuidsWithSdp() {
         IBluetooth service = sService;
-        if (service == null) {
+        if (service == null || isBluetoothEnabled() == false) {
             Log.e(TAG, "BT not enabled. Cannot fetchUuidsWithSdp");
             return false;
         }
@@ -1098,16 +1105,6 @@ public final class BluetoothDevice implements Parcelable {
          } catch (RemoteException e) {Log.e(TAG, "", e);}
          return false;
      }
-
-    /** @hide */
-    public int getServiceChannel(ParcelUuid uuid) {
-        //TODO(BT)
-        /*
-         try {
-             return sService.getRemoteServiceChannel(this, uuid);
-         } catch (RemoteException e) {Log.e(TAG, "", e);}*/
-         return BluetoothDevice.ERROR;
-    }
 
     /**
      * Set the pin during pairing when the pairing method is {@link #PAIRING_VARIANT_PIN}
@@ -1186,6 +1183,15 @@ public final class BluetoothDevice implements Parcelable {
         } catch (RemoteException e) {Log.e(TAG, "", e);}*/
         return false;
     }
+
+     boolean isBluetoothEnabled() {
+         boolean ret = false;
+         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+         if (adapter != null && adapter.isEnabled() == true) {
+             ret = true;
+         }
+         return ret;
+     }
 
     /**
      * Requires {@link android.Manifest.permission#BLUETOOTH}.
@@ -1289,6 +1295,10 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createRfcommSocket(int channel) throws IOException {
+        if (isBluetoothEnabled() == false) {
+            Log.e(TAG, "Bluetooth is not enabled");
+            throw new IOException();
+        }
         return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, channel,
                 null);
     }
@@ -1355,6 +1365,11 @@ public final class BluetoothDevice implements Parcelable {
      *                     insufficient permissions
      */
     public BluetoothSocket createRfcommSocketToServiceRecord(UUID uuid) throws IOException {
+        if (isBluetoothEnabled() == false) {
+            Log.e(TAG, "Bluetooth is not enabled");
+            throw new IOException();
+        }
+
         return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
                 new ParcelUuid(uuid));
     }
@@ -1388,6 +1403,10 @@ public final class BluetoothDevice implements Parcelable {
      *                     insufficient permissions
      */
     public BluetoothSocket createInsecureRfcommSocketToServiceRecord(UUID uuid) throws IOException {
+        if (isBluetoothEnabled() == false) {
+            Log.e(TAG, "Bluetooth is not enabled");
+            throw new IOException();
+        }
         return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, -1,
                 new ParcelUuid(uuid));
     }
@@ -1407,6 +1426,11 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createInsecureRfcommSocket(int port) throws IOException {
+
+        if (isBluetoothEnabled() == false) {
+            Log.e(TAG, "Bluetooth is not enabled");
+            throw new IOException();
+        }
         return new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, false, false, this, port,
                 null);
     }
@@ -1422,6 +1446,11 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public BluetoothSocket createScoSocket() throws IOException {
+
+        if (isBluetoothEnabled() == false) {
+            Log.e(TAG, "Bluetooth is not enabled");
+            throw new IOException();
+        }
         return new BluetoothSocket(BluetoothSocket.TYPE_SCO, -1, true, true, this, -1, null);
     }
 
