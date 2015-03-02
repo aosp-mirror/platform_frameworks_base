@@ -178,11 +178,21 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
+            ResourceValue resourceValue = value.getSecond();
             try {
-                return ResourceHelper.getColor(value.getSecond().getValue());
+                return ResourceHelper.getColor(resourceValue.getValue());
             } catch (NumberFormatException e) {
-                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e,
-                        null /*data*/);
+                // Check if the value passed is a file. If it is, mostly likely, user is referencing
+                // a color state list from a place where they should reference only a pure color.
+                String message;
+                if (new File(resourceValue.getValue()).isFile()) {
+                    String resource = (resourceValue.isFramework() ? "@android:" : "@") + "color/"
+                      + resourceValue.getName();
+                    message = "Hexadecimal color expected, found Color State List for " + resource;
+                } else {
+                    message = e.getMessage();
+                }
+                Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, message, e, null);
                 return 0;
             }
         }
