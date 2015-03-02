@@ -578,13 +578,13 @@
     <string name="permdesc_camera" msgid="8497216524735535009">"Antaa sovelluksen ottaa kuvia ja kuvata videoita kameralla. Sovellus voi käyttää kameraa milloin tahansa ilman lupaasi."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"poista lähetyksen merkkivalo käytöstä, kun kameraa käytetään"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Antaa valmiiksi asennetun järjestelmäsovelluksen poistaa käytöstä kameran käytössäolon merkkivalon."</string>
-    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"poista tablet-laite käytöstä lopullisesti"</string>
+    <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"poista tabletti käytöstä lopullisesti"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"Poista televisio pysyvästi käytöstä"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"poista puhelin käytöstä pysyvästi"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Antaa sovelluksen poistaa koko tablet-laitteen käytöstä lopullisesti. Tämä on hyvin vaarallista."</string>
     <string name="permdesc_brick" product="tv" msgid="7070924544316356349">"Antaa sovelluksen poistaa koko television pysyvästi käytöstä. Tämä on hyvin vaarallista."</string>
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Antaa sovelluksen poistaa koko puhelimen käytöstä lopullisesti. Tämä on hyvin vaarallista."</string>
-    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"pakota tablet-laite käynnistymään uudelleen"</string>
+    <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"pakota tabletti käynnistymään uudelleen"</string>
     <string name="permlab_reboot" product="tv" msgid="2112102119558886236">"Pakota television uudelleenkäynnistys"</string>
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"pakota puhelin käynnistymään uudelleen"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Antaa sovelluksen pakottaa tablet-laitteen käynnistymään uudelleen."</string>
@@ -648,7 +648,7 @@
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Antaa sovelluksen käyttää tablet-laitteen infrapunalähetintä."</string>
     <string name="permdesc_transmitIr" product="tv" msgid="3926790828514867101">"Antaa sovelluksen käyttää television infrapunalähetintä."</string>
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Antaa sovelluksen käyttää puhelimen infrapunalähetintä."</string>
-    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"käynnistä tai sammuta tablet-laite"</string>
+    <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"käynnistä tai sammuta tabletti"</string>
     <string name="permlab_devicePower" product="tv" msgid="7579718349658943416">"Sammuta ja käynnistä televisio"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sammutta tai käynnistä puhelin"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Antaa sovelluksen sammuttaa tai käynnistää tablet-laitteen."</string>

@@ -71,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"Идентификация звонящего абонента"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Идентификатор подключенной линии"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ограничение идентификатора подключенной линии"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызова"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызовов"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Параллельный вызов"</string>
     <string name="BaMmi" msgid="455193067926770581">"Запрет вызовов"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Смена пароля"</string>
@@ -840,30 +840,30 @@
     <item msgid="1735177144948329370">"Домашний факс"</item>
     <item msgid="603878674477207394">"Пейджер"</item>
     <item msgid="1650824275177931637">"Другой"</item>
-    <item msgid="9192514806975898961">"Создать свой ярлык"</item>
+    <item msgid="9192514806975898961">"Новый тип"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Личный"</item>
     <item msgid="7084237356602625604">"Рабочий"</item>
     <item msgid="1112044410659011023">"Другой"</item>
-    <item msgid="2374913952870110618">"Создать свой ярлык"</item>
+    <item msgid="2374913952870110618">"Новый тип"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Домашний"</item>
     <item msgid="5629153956045109251">"Рабочий"</item>
     <item msgid="4966604264500343469">"Другой"</item>
-    <item msgid="4932682847595299369">"Создать свой ярлык"</item>
+    <item msgid="4932682847595299369">"Новый тип"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Домашний"</item>
     <item msgid="1359644565647383708">"Рабочий"</item>
     <item msgid="7868549401053615677">"Другое"</item>
-    <item msgid="3145118944639869809">"Создать свой ярлык"</item>
+    <item msgid="3145118944639869809">"Новый тип"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Рабочий"</item>
     <item msgid="4378074129049520373">"Другое"</item>
-    <item msgid="3455047468583965104">"Создать свой ярлык"</item>
+    <item msgid="3455047468583965104">"Новый тип"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -875,7 +875,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Создать свой ярлык"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Новый тип"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Домашний"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобильный"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Рабочий"</string>
@@ -900,20 +900,20 @@
     <string name="eventTypeBirthday" msgid="2813379844211390740">"День рождения"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Юбилей"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Другой"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Создать свой ярлык"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Новый тип"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Личный"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Рабочий"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Другой"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобильный"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Создать свой ярлык"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Новый тип"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Домашний"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Рабочий"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Другой"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Создать свой ярлык"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Новый тип"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Домашний"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Рабочий"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Другой"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Создать свой ярлык"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Новый тип"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -925,7 +925,7 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Работа"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Другое"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Создать свой ярлык"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Новый тип"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Особый"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Секретарь"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Брат"</string>
@@ -1266,8 +1266,8 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Открыть с помощью приложения \"%1$s\""</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактировать с помощью приложения \"%1$s\""</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью приложения:"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Предоставлять доступ с помощью приложения \"%1$s\""</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью:"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Поделиться через %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Выберите главное приложение"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Назначьте приложение \"%1$s\" главным"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>

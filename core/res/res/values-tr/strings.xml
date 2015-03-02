@@ -288,7 +288,7 @@
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana Ekrana ekleme izni verir."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"kısayolların yüklemesini kaldırma"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana Ekrandan kaldırma izni verir."</string>
-    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendir"</string>
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendirme"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Uygulamaya, giden bir çağrının numarası çevrilirken çağrıyı farklı bir numaraya yönlendirme ya da tamamen kapatma seçeneğiyle birlikte numarayı görme izni verir."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"kısa mesajları al (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Uygulamaya SMS iletilerini alma ve işleme izni verir. Bu izin, uygulamanın cihazınıza gönderilen iletileri takip edip size göstermeden silebileceği anlamına gelir."</string>
@@ -892,8 +892,8 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Telsiz"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Yeri Cep Telefonu"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Yeri Çağrı Cihazı"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Cep Telefonu"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Çağrı Cihazı"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Yardımcı"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Özel"</string>

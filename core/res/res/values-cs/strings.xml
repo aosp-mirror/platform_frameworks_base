@@ -1842,7 +1842,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokud v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí pozastavení"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Dokud neskončí výpadek"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Dokud neskončí pozastavení"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Jednu minutu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d min (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
