@@ -1,7 +1,7 @@
 fullpage=true
 page.viewport_width=970
 excludeFromSuggestions=true
-page.metaDescription=Android 开发人员的官方网站。为应用开发人员以及设计师提供 Android SDK 和文档。
+page.metaDescription=Android 개발자 공식 사이트 앱 개발자 및 디자이너에게 Android SDK 및 문서를 제공합니다.
 page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3f61-WpRguHq-aNjtF7xJjMTSi79as" />
 
 @jd:body
@@ -18,8 +18,8 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
             <div class="col-10"><img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="510" style="margin:20px 30px 0 30px"></div>
             <div class="col-5" style=" margin-top:70px ">
             <h3 stye="font-weight:300;">Android 5.0 Lollipop</h3>
-            <p>Android 5.0 更新将为您的应用增添各种新功能，例如锁定屏幕通知、全新的相机 API、OpenGL ES 3.1、全新的 Material Design 界面等等。</p>
-            <a href="{@docRoot}about/versions/lollipop.html" class="landing-button landing-primary">了解详情</a>
+            <p>Android 5.0 업데이트는 사용자 앱에 잠금화면상의 알림, 완전히 새로운 카메라 API, OpenGL ES 3.1, 신규 머티리얼 디자인(Material Design) 인터페이스 등 다양하고 새로운 기능을 추가합니다.</p>
+            <a href="{@docRoot}about/versions/lollipop.html" class="landing-button landing-primary">자세히 알아보기</a>
             </div>
           </div>
           </div>
@@ -36,10 +36,10 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
 <div class="actions-bar" style="margin-top:20px">
   <div class="wrap">
     <div class="actions">
-      <div><a href="{@docRoot}sdk/index.html">获得 SDK</a></div>
-      <div><a href="{@docRoot}samples/index.html">浏览示例</a></div>
-      <div><a href="//www.youtube.com/user/androiddevelopers">观看视频</a></div>
-      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">管理您的应用</a></div>
+      <div><a href="{@docRoot}sdk/index.html">SDK 받기</a></div>
+      <div><a href="{@docRoot}samples/index.html">샘플 둘러보기</a></div>
+      <div><a href="//www.youtube.com/user/androiddevelopers">비디오 시청</a></div>
+      <div><a href="{@docRoot}distribute/googleplay/developer-console.html">앱 관리</a></div>
     </div><!-- end .actions -->
   </div><!-- end .wrap -->
 </div><!-- end .actions-bar -->
@@ -51,10 +51,10 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
     <div class="wrap">
       <div class="landing-section-header">
 
-            <div class="landing-h1" style="margin-top:0px">专为多屏幕时代而设</div>
+            <div class="landing-h1" style="margin-top:0px">멀티스크린 월드에 맞게 만들기</div>
         <div class="landing-subhead" style="margin-top: 20px;">
-          Android 在全球各地的数亿台手持设备上运行， <br>
-          如今更支持下列激动人心的新设备和配置。
+          Android는 전 세계 수억 개의 휴대 기기에서 구동되고 있으며, <br>
+          이제 이 흥미진진하고 새로운 폼팩터를 지원합니다.
         </div>
       </div>
       <div class="landing-body" style="margin-top: 50px;">
@@ -62,29 +62,29 @@ page.customHeadTag=<meta name="google-site-verification" content="sa-bIAI6GKvct3
           <div class="col-3-wide">
               <img src="{@docRoot}images/home/wear-wordmark.png"> <img src="{@docRoot}images/home/wear.png">
               <p class="landing-small">
-                让您的用户即便在途中亦能随时随地获得所需的信息。
+                사용자가 필요로 할 때 언제든지 실시간으로 정보를 제공합니다.
             </p>
             <p class="landing-small">
-              <a href="{@docRoot}wear/index.html">了解关于 Android Wear 的信息</a>
+              <a href="{@docRoot}wear/index.html">Android Wear에 대해 알아보세요</a>
             </p>
           </div>
           <div class="col-3-wide">
               <img src="{@docRoot}images/home/tv-wordmark.png"> <img src="{@docRoot}images/home/tv.png">
               <p class="landing-small">
-                将您的应用搬上大屏幕，使您的内容栩栩如生。
+                대형 스크린에 적합한 앱과 컨텐츠를 구성하세요.
               </p>
             <p class="landing-small">
-              <a href="{@docRoot}tv/index.html">了解关于 Android TV 的信息</a>
+              <a href="{@docRoot}tv/index.html">Android TV에 대해 알아보세요</a>
 
             </p>
           </div>
           <div class="col-3-wide">
               <img src="{@docRoot}images/home/auto-wordmark.png"> <img src="{@docRoot}images/home/auto.png">
               <p class="landing-small">
-                将您的音乐应用扩展至车载娱乐系统。
+                음악 앱을 자동차 엔터테인먼트 시스템에 적용해보세요.
              </p>
             <p class="landing-small">
-              <a href="{@docRoot}auto/index.html">了解关于 Android Auto 的信息</a>
+              <a href="{@docRoot}auto/index.html">Android Auto에 대해 알아보세요</a>
             </p>
           </div>
         </div>
