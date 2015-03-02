@@ -96,6 +96,8 @@
 
 
 
+
+
 <html>
 <head>
 
@@ -111,7 +113,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=5" rel="stylesheet" type="text/css">
 
 
 
@@ -412,6 +414,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li><a href="/distribute/users/index.html">Get Users</a></li>
                 <li><a href="/distribute/engage/index.html">Engage &amp; Retain</a></li>
                 <li><a href="/distribute/monetize/index.html">Monetize</a></li>
+                <li><a href="/distribute/analyze/index.html">Analyze</a></li>
                 <li><a href="/distribute/tools/index.html">Tools &amp; Reference</a></li>
                 <li><a href="/distribute/stories/index.html">Developer Stories</a></li>
               </ul>
@@ -593,14 +596,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <li class="nav-section">
-    <div class="nav-section-header"><a href="/google/play/billing/index.html">
+    <div class="nav-section-header"><a href="/google/play/billing/index.html" zh-cn-lang="应用内结算">
       <span class="en">Google Play In-app Billing</span></a>
     </div>
     <ul>
-      <li><a href="/google/play/billing/billing_overview.html">
+      <li><a href="/google/play/billing/billing_overview.html" zh-cn-lang="应用内结算概述">
               <span class="en">Overview</span></a>
       </li>
-      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html">
+      <li class="nav-section"><div class="nav-section-header"><a href="/google/play/billing/api.html" zh-cn-lang="应用内结算 API">
               <span class="en">Version 3 API</span></a></div>
               <ul>
               <li><a href="/google/play/billing/billing_integrate.html">
@@ -623,13 +626,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <li><a href="/google/play/billing/billing_subscriptions.html">
               <span class="en">Subscriptions</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_best_practices.html">
+      <li><a href="/google/play/billing/billing_best_practices.html" zh-cn-lang="安全性和设计">
               <span class="en">Security and Design</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_testing.html">
+      <li><a href="/google/play/billing/billing_testing.html" zh-cn-lang="测试应用内结算">
               <span class="en">Testing In-app Billing</span></a>
       </li>
-      <li><a href="/google/play/billing/billing_admin.html">
+      <li><a href="/google/play/billing/billing_admin.html" zh-cn-lang="管理应用内结算">
               <span class="en">Administering In-app Billing</span></a>
       </li>
       <li><a href="/google/play/billing/versions.html">
@@ -663,21 +666,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
               <span class="en">HTTP</span></a></li>
               </ul>
         </li>
+        <li><a href="/google/gcm/server-ref.html">
+            <span class="en">Server Reference</span></a>
+        </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
         </li>
-        <li><a href="/google/gcm/adv.html">
-            <span class="en">Advanced Topics</span></a>
-        </li>
         <li><a href="/google/gcm/c2dm.html">
             <span class="en">Migration</span></a>
-        </li>
-        <li id="gcm-tree-list" class="nav-section">
-          <div class="nav-section-header">
-            <a href="/reference/gcm-packages.html">
-              <span class="en">Reference</span>
-            </a>
-          <div>
         </li>
       </ul>
   </li>
@@ -891,12 +887,18 @@ Summary:
               >
           
             
+              <a href="/reference/com/google/android/gms/nearby/connection/ConnectionsStatusCodes.html">ConnectionsStatusCodes</a>,
+
               <a href="/reference/com/google/android/gms/drive/DriveStatusCodes.html">DriveStatusCodes</a>,
             
               <a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html">FitnessStatusCodes</a>,
             
               <a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a>,
             
+              <a href="/reference/com/google/android/gms/location/LocationSettingsStatusCodes.html">LocationSettingsStatusCodes</a>,
+
+              <a href="/reference/com/google/android/gms/location/places/PlacesStatusCodes.html">PlacesStatusCodes</a>,
+
               <a href="/reference/com/google/android/gms/wearable/WearableStatusCodes.html">WearableStatusCodes</a>
             
           
@@ -908,6 +910,17 @@ Summary:
   <table class="jd-sumtable-expando">
     
       <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/nearby/connection/ConnectionsStatusCodes.html">ConnectionsStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          Status codes for nearby connections results.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveStatusCodes.html">DriveStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Drive specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>.&nbsp;
@@ -918,7 +931,7 @@ Summary:
       </tr>
       
     
-      <tr class=" api apilevel-" >
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html">FitnessStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Google Fit specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
@@ -930,7 +943,7 @@ Summary:
       </tr>
       
     
-      <tr class="alt-color api apilevel-" >
+      <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Geofence specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
@@ -942,7 +955,31 @@ Summary:
       </tr>
       
     
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationSettingsStatusCodes.html">LocationSettingsStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          Location settings specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
+&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
       <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/places/PlacesStatusCodes.html">PlacesStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          Places API specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
+&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/WearableStatusCodes.html">WearableStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Error codes for wearable API failures.&nbsp;
@@ -1112,7 +1149,7 @@ Summary:
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#RESOLUTION_REQUIRED">RESOLUTION_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">
-          Completing the connection requires some form of resolution.
+          Completing the operation requires some form of resolution.
           
     
 
@@ -1886,10 +1923,10 @@ From class
     
 
       
-  <div class="jd-tagdata jd-tagdescr"><p>Completing the connection requires some form of resolution.  A resolution will be available
+  <div class="jd-tagdata jd-tagdescr"><p>Completing the operation requires some form of resolution.  A resolution will be available
  to be started with <code><a href="/reference/com/google/android/gms/common/api/Status.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code>. If the result
- returned is <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, then further attempts to connect should either
- complete or continue on to the next issue that needs to be resolved.
+ returned is <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, then further attempts should either complete or
+ continue on to the next issue that needs to be resolved.
 </p></div>
 
     
