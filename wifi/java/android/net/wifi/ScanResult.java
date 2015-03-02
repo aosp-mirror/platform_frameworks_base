@@ -55,10 +55,54 @@ public class ScanResult implements Parcelable {
      */
     public int level;
     /**
-     * The frequency in MHz of the channel over which the client is communicating
+     * The primary 20 MHz frequency (in MHz) of the channel over which the client is communicating
      * with the access point.
      */
     public int frequency;
+
+   /**
+    * AP Channel bandwidth is 20 MHZ
+    */
+    public static final int CHANNEL_WIDTH_20MHZ = 0;
+   /**
+    * AP Channel bandwidth is 40 MHZ
+    */
+    public static final int CHANNEL_WIDTH_40MHZ = 1;
+   /**
+    * AP Channel bandwidth is 80 MHZ
+    */
+    public static final int CHANNEL_WIDTH_80MHZ = 2;
+   /**
+    * AP Channel bandwidth is 160 MHZ
+    */
+    public static final int CHANNEL_WIDTH_160MHZ = 3;
+   /**
+    * AP Channel bandwidth is 160 MHZ, but 80MHZ + 80MHZ
+    */
+    public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4;
+
+   /**
+    * AP Channel bandwidth
+    */
+    public int channelWidth;
+
+    /**
+     * Not used if the AP bandwidth is 20 MHz
+     * If the AP use 40, 80 or 160 MHz, this is the center frequency
+     * if the AP use 80 + 80 MHz, this is the center frequency of the first segment
+     */
+    public int centerFreq0;
+
+    /**
+     * Only used if the AP bandwidth is 80 + 80 MHz
+     * if the AP use 80 + 80 MHz, this is the center frequency of the second segment
+     */
+    public int centerFreq1;
+
+    /**
+     * Whether the AP support 802.11mc Responder
+     */
+   public boolean is80211McRTTResponder;
 
     /**
      * timestamp in microseconds (since boot) when
@@ -244,6 +288,10 @@ public class ScanResult implements Parcelable {
         this.timestamp = tsf;
         this.distanceCm = UNSPECIFIED;
         this.distanceSdCm = UNSPECIFIED;
+        this.channelWidth = UNSPECIFIED;
+        this.centerFreq0 = UNSPECIFIED;
+        this.centerFreq1 = UNSPECIFIED;
+        this.is80211McRTTResponder = false;
     }
 
     /** {@hide} */
@@ -258,6 +306,29 @@ public class ScanResult implements Parcelable {
         this.timestamp = tsf;
         this.distanceCm = distCm;
         this.distanceSdCm = distSdCm;
+        this.channelWidth = UNSPECIFIED;
+        this.centerFreq0 = UNSPECIFIED;
+        this.centerFreq1 = UNSPECIFIED;
+        this.is80211McRTTResponder = false;
+    }
+
+    /** {@hide} */
+    public ScanResult(WifiSsid wifiSsid, String BSSID, String caps, int level, int frequency,
+            long tsf, int distCm, int distSdCm, int channelWidth, int centerFreq0, int centerFreq1,
+            boolean is80211McRTTResponder) {
+        this.wifiSsid = wifiSsid;
+        this.SSID = (wifiSsid != null) ? wifiSsid.toString() : WifiSsid.NONE;
+        this.BSSID = BSSID;
+        this.capabilities = caps;
+        this.level = level;
+        this.frequency = frequency;
+        this.timestamp = tsf;
+        this.distanceCm = distCm;
+        this.distanceSdCm = distSdCm;
+        this.channelWidth = channelWidth;
+        this.centerFreq0 = centerFreq0;
+        this.centerFreq1 = centerFreq1;
+        this.is80211McRTTResponder = is80211McRTTResponder;
     }
 
     /** copy constructor {@hide} */
@@ -269,6 +340,10 @@ public class ScanResult implements Parcelable {
             capabilities = source.capabilities;
             level = source.level;
             frequency = source.frequency;
+            channelWidth = source.channelWidth;
+            centerFreq0 = source.centerFreq0;
+            centerFreq1 = source.centerFreq1;
+            is80211McRTTResponder = source.is80211McRTTResponder;
             timestamp = source.timestamp;
             distanceCm = source.distanceCm;
             distanceSdCm = source.distanceSdCm;
@@ -317,6 +392,11 @@ public class ScanResult implements Parcelable {
         if (autoJoinStatus != 0) {
             sb.append(", status: ").append(autoJoinStatus);
         }
+        sb.append(", ChannelBandwidth: ").append(channelWidth);
+        sb.append(", centerFreq0: ").append(centerFreq0);
+        sb.append(", centerFreq1: ").append(centerFreq1);
+        sb.append(", 80211mcResponder: ").append(is80211McRTTResponder?
+                "is supported":"is not supported");
         return sb.toString();
     }
 
@@ -340,6 +420,10 @@ public class ScanResult implements Parcelable {
         dest.writeLong(timestamp);
         dest.writeInt(distanceCm);
         dest.writeInt(distanceSdCm);
+        dest.writeInt(channelWidth);
+        dest.writeInt(centerFreq0);
+        dest.writeInt(centerFreq1);
+        dest.writeInt(is80211McRTTResponder ? 1 : 0);
         dest.writeLong(seen);
         dest.writeInt(autoJoinStatus);
         dest.writeInt(untrusted ? 1 : 0);
@@ -381,7 +465,11 @@ public class ScanResult implements Parcelable {
                     in.readInt(),
                     in.readLong(),
                     in.readInt(),
-                    in.readInt()
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt() == 1
                 );
                 sr.seen = in.readLong();
                 sr.autoJoinStatus = in.readInt();
