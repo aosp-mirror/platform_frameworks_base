@@ -2458,7 +2458,7 @@
     <!-- Description of policy access to set global proxy -->
     <string name="policydesc_setGlobalProxy">Set the device global proxy
     to be used while policy is enabled. Only the device owner can set the global proxy.</string>
-    <!-- Title of policy access to enforce password expiration [CHAR LIMIT=30]-->
+    <!-- Title of policy access to enforce password expiration [CHAR LIMIT=50]-->
     <string name="policylab_expirePassword">Set screen lock password expiration</string>
     <!-- Description of policy access to enforce password expiration [CHAR LIMIT=110]-->
     <string name="policydesc_expirePassword">Change how frequently the screen lock password, PIN, or pattern must be changed.</string>
