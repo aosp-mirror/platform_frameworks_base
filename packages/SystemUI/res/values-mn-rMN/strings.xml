@@ -174,6 +174,11 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Нислэгийн горим идэвхтэй."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Нислэгийн горимыг унтраасан."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Нислэгийн горимыг асаасан."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Бүү саад болно уу.Зөвхөн чухал зүйлст."</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"Бүү саад болно уу. Аливаа саад учруулахгүй байна уу."</string>
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Бүү саад бол."</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Идэвхгүй болгох үйлдэлд бүү саад бол."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"Идэвхжүүлэх үйлдэлд бүү саад бол."</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"Блютүүт идэвхгүй."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"Блютүүт идэвхтэй."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"Блютүүтийг холбож байна."</string>
@@ -222,6 +227,9 @@
     <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Этернет"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Нислэгийн горим"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Бүү саад бол"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Зөвхөн чухал зүйлс"</string>
+    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"Аливаа саад байхгүй байх"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Блютүүт"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Блютүүт (<xliff:g id="NUMBER">%d</xliff:g> төхөөрөмж)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Блютүүт унтраалттай"</string>
