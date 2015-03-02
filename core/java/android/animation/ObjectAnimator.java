@@ -16,6 +16,7 @@
 
 package android.animation;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Path;
@@ -861,6 +862,7 @@ public final class ObjectAnimator extends ValueAnimator {
      *  <p>Overriders of this method should call the superclass method to cause
      *  internal mechanisms to be set up correctly.</p>
      */
+    @CallSuper
     @Override
     void initAnimation() {
         if (!mInitialized) {
@@ -961,6 +963,7 @@ public final class ObjectAnimator extends ValueAnimator {
      *
      * @param fraction The elapsed fraction of the animation.
      */
+    @CallSuper
     @Override
     void animateValue(float fraction) {
         final Object target = getTarget();

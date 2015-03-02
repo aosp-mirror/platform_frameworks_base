@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
@@ -1010,6 +1011,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Note that if you override this method you should always call through
      * to the superclass implementation by calling super.onActionModeStarted(mode).
      */
+    @CallSuper
     public void onActionModeStarted(ActionMode mode) {
         mActionMode = mode;
     }
@@ -1020,6 +1022,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * Note that if you override this method you should always call through
      * to the superclass implementation by calling super.onActionModeFinished(mode).
      */
+    @CallSuper
     public void onActionModeFinished(ActionMode mode) {
         if (mode == mActionMode) {
             mActionMode = null;

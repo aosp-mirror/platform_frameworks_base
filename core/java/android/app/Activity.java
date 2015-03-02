@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
@@ -921,6 +922,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onRestoreInstanceState
      * @see #onPostCreate
      */
+    @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
         if (mLastNonConfigurationInstances != null) {
@@ -1122,6 +1124,7 @@ public class Activity extends ContextThemeWrapper
      *     recently supplied in {@link #onSaveInstanceState}.  <b><i>Note: Otherwise it is null.</i></b>
      * @see #onCreate
      */
+    @CallSuper
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         if (!isChild()) {
             mTitleReady = true;
@@ -1159,6 +1162,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onStop
      * @see #onResume
      */
+    @CallSuper
     protected void onStart() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStart " + this);
         mCalled = true;
@@ -1196,6 +1200,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onStart
      * @see #onResume
      */
+    @CallSuper
     protected void onRestart() {
         mCalled = true;
     }
@@ -1220,6 +1225,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onPostResume
      * @see #onPause
      */
+    @CallSuper
     protected void onResume() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
@@ -1239,6 +1245,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #onResume
      */
+    @CallSuper
     protected void onPostResume() {
         final Window win = getWindow();
         if (win != null) win.makeActive();
@@ -1464,6 +1471,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onSaveInstanceState
      * @see #onStop
      */
+    @CallSuper
     protected void onPause() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onPause " + this);
         getApplication().dispatchActivityPaused(this);
@@ -1570,6 +1578,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onSaveInstanceState
      * @see #onDestroy
      */
+    @CallSuper
     protected void onStop() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
@@ -1607,6 +1616,7 @@ public class Activity extends ContextThemeWrapper
      * @see #finish
      * @see #isFinishing
      */
+    @CallSuper
     protected void onDestroy() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onDestroy " + this);
         mCalled = true;
@@ -5587,6 +5597,7 @@ public class Activity extends ContextThemeWrapper
      * @see #requestVisibleBehind(boolean)
      * @see #onBackgroundVisibleBehindChanged(boolean)
      */
+    @CallSuper
     public void onVisibleBehindCanceled() {
         mCalled = true;
     }
@@ -5709,6 +5720,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The new action mode.
      */
+    @CallSuper
     @Override
     public void onActionModeStarted(ActionMode mode) {
     }
@@ -5719,6 +5731,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The action mode that just finished.
      */
+    @CallSuper
     @Override
     public void onActionModeFinished(ActionMode mode) {
     }

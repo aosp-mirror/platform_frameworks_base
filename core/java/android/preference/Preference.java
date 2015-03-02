@@ -16,6 +16,7 @@
 
 package android.preference;
 
+import android.annotation.CallSuper;
 import com.android.internal.util.CharSequences;
 
 import android.annotation.DrawableRes;
@@ -508,6 +509,7 @@ public class Preference implements Comparable<Preference> {
      * @return The View that displays this Preference.
      * @see #onBindView(View)
      */
+    @CallSuper
     protected View onCreateView(ViewGroup parent) {
         final LayoutInflater layoutInflater =
             (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -537,6 +539,7 @@ public class Preference implements Comparable<Preference> {
      * @param view The View that shows this Preference.
      * @see #onCreateView(ViewGroup)
      */
+    @CallSuper
     protected void onBindView(View view) {
         final TextView titleView = (TextView) view.findViewById(com.android.internal.R.id.title);
         if (titleView != null) {
@@ -1356,6 +1359,7 @@ public class Preference implements Comparable<Preference> {
      * should remove any references to this Preference that you know about. Make
      * sure to call through to the superclass implementation.
      */
+    @CallSuper
     protected void onPrepareForRemoval() {
         unregisterDependency();
     }

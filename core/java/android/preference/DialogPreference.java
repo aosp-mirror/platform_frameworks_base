@@ -17,6 +17,7 @@
 package android.preference;
 
 
+import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
 import android.app.AlertDialog;
@@ -360,6 +361,7 @@ public abstract class DialogPreference extends Preference implements
      * 
      * @param view The content View of the dialog, if it is custom.
      */
+    @CallSuper
     protected void onBindDialogView(View view) {
         View dialogMessageView = view.findViewById(com.android.internal.R.id.message);
         

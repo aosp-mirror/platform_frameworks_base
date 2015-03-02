@@ -28,6 +28,7 @@ import static android.provider.DocumentsContract.getSearchDocumentsQuery;
 import static android.provider.DocumentsContract.getTreeDocumentId;
 import static android.provider.DocumentsContract.isTreeUri;
 
+import android.annotation.CallSuper;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -541,6 +542,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      *
      * @see DocumentsContract#buildDocumentUriUsingTree(Uri, String)
      */
+    @CallSuper
     @Override
     public Uri canonicalize(Uri uri) {
         final Context context = getContext();
@@ -616,6 +618,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * call the superclass. If the superclass returns {@code null}, the subclass
      * may implement custom behavior.
      */
+    @CallSuper
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if (!method.startsWith("android:")) {
