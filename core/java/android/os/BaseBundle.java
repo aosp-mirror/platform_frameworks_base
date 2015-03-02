@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -63,7 +64,7 @@ public class BaseBundle {
      * inside of the Bundle.
      * @param capacity Initial size of the ArrayMap.
      */
-    BaseBundle(ClassLoader loader, int capacity) {
+    BaseBundle(@Nullable ClassLoader loader, int capacity) {
         mMap = capacity > 0 ?
                 new ArrayMap<String, Object>(capacity) : new ArrayMap<String, Object>();
         mClassLoader = loader == null ? getClass().getClassLoader() : loader;
@@ -276,6 +277,7 @@ public class BaseBundle {
      * @param key a String key
      * @return an Object, or null
      */
+    @Nullable
     public Object get(String key) {
         unparcel();
         return mMap.get(key);
@@ -327,9 +329,9 @@ public class BaseBundle {
      * any existing value for the given key.  Either key or value may be null.
      *
      * @param key a String, or null
-     * @param value a Boolean, or null
+     * @param value a boolean
      */
-    public void putBoolean(String key, boolean value) {
+    public void putBoolean(@Nullable String key, boolean value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -341,7 +343,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a byte
      */
-    void putByte(String key, byte value) {
+    void putByte(@Nullable String key, byte value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -351,9 +353,9 @@ public class BaseBundle {
      * any existing value for the given key.
      *
      * @param key a String, or null
-     * @param value a char, or null
+     * @param value a char
      */
-    void putChar(String key, char value) {
+    void putChar(@Nullable String key, char value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -365,7 +367,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a short
      */
-    void putShort(String key, short value) {
+    void putShort(@Nullable String key, short value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -375,9 +377,9 @@ public class BaseBundle {
      * any existing value for the given key.
      *
      * @param key a String, or null
-     * @param value an int, or null
+     * @param value an int
      */
-    public void putInt(String key, int value) {
+    public void putInt(@Nullable String key, int value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -389,7 +391,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a long
      */
-    public void putLong(String key, long value) {
+    public void putLong(@Nullable String key, long value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -401,7 +403,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a float
      */
-    void putFloat(String key, float value) {
+    void putFloat(@Nullable String key, float value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -413,7 +415,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a double
      */
-    public void putDouble(String key, double value) {
+    public void putDouble(@Nullable String key, double value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -425,7 +427,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a String, or null
      */
-    public void putString(String key, String value) {
+    public void putString(@Nullable String key, @Nullable String value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -437,7 +439,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a CharSequence, or null
      */
-    void putCharSequence(String key, CharSequence value) {
+    void putCharSequence(@Nullable String key, @Nullable CharSequence value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -449,7 +451,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value an ArrayList<Integer> object, or null
      */
-    void putIntegerArrayList(String key, ArrayList<Integer> value) {
+    void putIntegerArrayList(@Nullable String key, @Nullable ArrayList<Integer> value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -461,7 +463,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value an ArrayList<String> object, or null
      */
-    void putStringArrayList(String key, ArrayList<String> value) {
+    void putStringArrayList(@Nullable String key, @Nullable ArrayList<String> value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -473,7 +475,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value an ArrayList<CharSequence> object, or null
      */
-    void putCharSequenceArrayList(String key, ArrayList<CharSequence> value) {
+    void putCharSequenceArrayList(@Nullable String key, @Nullable ArrayList<CharSequence> value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -485,7 +487,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a Serializable object, or null
      */
-    void putSerializable(String key, Serializable value) {
+    void putSerializable(@Nullable String key, @Nullable Serializable value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -497,7 +499,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a boolean array object, or null
      */
-    public void putBooleanArray(String key, boolean[] value) {
+    public void putBooleanArray(@Nullable String key, @Nullable boolean[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -509,7 +511,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a byte array object, or null
      */
-    void putByteArray(String key, byte[] value) {
+    void putByteArray(@Nullable String key, @Nullable byte[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -521,7 +523,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a short array object, or null
      */
-    void putShortArray(String key, short[] value) {
+    void putShortArray(@Nullable String key, @Nullable short[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -533,7 +535,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a char array object, or null
      */
-    void putCharArray(String key, char[] value) {
+    void putCharArray(@Nullable String key, @Nullable char[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -545,7 +547,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value an int array object, or null
      */
-    public void putIntArray(String key, int[] value) {
+    public void putIntArray(@Nullable String key, @Nullable int[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -557,7 +559,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a long array object, or null
      */
-    public void putLongArray(String key, long[] value) {
+    public void putLongArray(@Nullable String key, @Nullable long[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -569,7 +571,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a float array object, or null
      */
-    void putFloatArray(String key, float[] value) {
+    void putFloatArray(@Nullable String key, @Nullable float[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -581,7 +583,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a double array object, or null
      */
-    public void putDoubleArray(String key, double[] value) {
+    public void putDoubleArray(@Nullable String key, @Nullable double[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -593,7 +595,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a String array object, or null
      */
-    public void putStringArray(String key, String[] value) {
+    public void putStringArray(@Nullable String key, @Nullable String[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -605,7 +607,7 @@ public class BaseBundle {
      * @param key a String, or null
      * @param value a CharSequence array object, or null
      */
-    void putCharSequenceArray(String key, CharSequence[] value) {
+    void putCharSequenceArray(@Nullable String key, @Nullable CharSequence[] value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -914,7 +916,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a String value, or null
      */
-    public String getString(String key) {
+    @Nullable
+    public String getString(@Nullable String key) {
         unparcel();
         final Object o = mMap.get(key);
         try {
@@ -936,7 +939,7 @@ public class BaseBundle {
      * @return the String value associated with the given key, or defaultValue
      *     if no valid String object is currently mapped to that key.
      */
-    public String getString(String key, String defaultValue) {
+    public String getString(@Nullable String key, String defaultValue) {
         final String s = getString(key);
         return (s == null) ? defaultValue : s;
     }
@@ -949,7 +952,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a CharSequence value, or null
      */
-    CharSequence getCharSequence(String key) {
+    @Nullable
+    CharSequence getCharSequence(@Nullable String key) {
         unparcel();
         final Object o = mMap.get(key);
         try {
@@ -971,7 +975,7 @@ public class BaseBundle {
      * @return the CharSequence value associated with the given key, or defaultValue
      *     if no valid CharSequence object is currently mapped to that key.
      */
-    CharSequence getCharSequence(String key, CharSequence defaultValue) {
+    CharSequence getCharSequence(@Nullable String key, CharSequence defaultValue) {
         final CharSequence cs = getCharSequence(key);
         return (cs == null) ? defaultValue : cs;
     }
@@ -984,7 +988,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a Serializable value, or null
      */
-    Serializable getSerializable(String key) {
+    @Nullable
+    Serializable getSerializable(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1006,7 +1011,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return an ArrayList<String> value, or null
      */
-    ArrayList<Integer> getIntegerArrayList(String key) {
+    @Nullable
+    ArrayList<Integer> getIntegerArrayList(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1028,7 +1034,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return an ArrayList<String> value, or null
      */
-    ArrayList<String> getStringArrayList(String key) {
+    @Nullable
+    ArrayList<String> getStringArrayList(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1050,7 +1057,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return an ArrayList<CharSequence> value, or null
      */
-    ArrayList<CharSequence> getCharSequenceArrayList(String key) {
+    @Nullable
+    ArrayList<CharSequence> getCharSequenceArrayList(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1072,7 +1080,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a boolean[] value, or null
      */
-    public boolean[] getBooleanArray(String key) {
+    @Nullable
+    public boolean[] getBooleanArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1094,7 +1103,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a byte[] value, or null
      */
-    byte[] getByteArray(String key) {
+    @Nullable
+    byte[] getByteArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1116,7 +1126,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a short[] value, or null
      */
-    short[] getShortArray(String key) {
+    @Nullable
+    short[] getShortArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1138,7 +1149,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a char[] value, or null
      */
-    char[] getCharArray(String key) {
+    @Nullable
+    char[] getCharArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1160,7 +1172,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return an int[] value, or null
      */
-    public int[] getIntArray(String key) {
+    @Nullable
+    public int[] getIntArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1182,7 +1195,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a long[] value, or null
      */
-    public long[] getLongArray(String key) {
+    @Nullable
+    public long[] getLongArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1204,7 +1218,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a float[] value, or null
      */
-    float[] getFloatArray(String key) {
+    @Nullable
+    float[] getFloatArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1226,7 +1241,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a double[] value, or null
      */
-    public double[] getDoubleArray(String key) {
+    @Nullable
+    public double[] getDoubleArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1248,7 +1264,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a String[] value, or null
      */
-    public String[] getStringArray(String key) {
+    @Nullable
+    public String[] getStringArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -1270,7 +1287,8 @@ public class BaseBundle {
      * @param key a String, or null
      * @return a CharSequence[] value, or null
      */
-    CharSequence[] getCharSequenceArray(String key) {
+    @Nullable
+    CharSequence[] getCharSequenceArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
