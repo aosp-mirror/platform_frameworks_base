@@ -178,6 +178,16 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飞行模式开启。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飞行模式已关闭。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飞行模式已开启。"</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (1448402297221249355) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_none_on (5910777408232088752) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_off (2371832603753738581) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_changed_off (898107593453022935) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_dnd_changed_on (4483780856613561039) -->
+    <skip />
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"蓝牙关闭。"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"蓝牙开启。"</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"蓝牙连接中。"</string>
@@ -226,6 +236,12 @@
     <string name="start_dreams" msgid="7219575858348719790">"互动屏保"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"有线网络"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"飞行模式"</string>
+    <!-- no translation found for quick_settings_dnd_label (8735855737575028208) -->
+    <skip />
+    <!-- no translation found for quick_settings_dnd_priority_label (483232950670692036) -->
+    <skip />
+    <!-- no translation found for quick_settings_dnd_none_label (7309935569360609114) -->
+    <skip />
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"蓝牙"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"蓝牙（<xliff:g id="NUMBER">%d</xliff:g> 台设备）"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"蓝牙：关闭"</string>
