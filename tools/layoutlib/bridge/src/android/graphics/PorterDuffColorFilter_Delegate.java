@@ -103,7 +103,7 @@ public class PorterDuffColorFilter_Delegate extends ColorFilter_Delegate {
     // For filtering the colors, the src image should contain the "color" only for pixel values
     // which are not transparent in the target image. But, we are using a simple rectangular image
     // completely filled with color. Hence some Composite rules do not apply as intended. However,
-    // in such cases, they can usually be mapped to some other mode, which produces an
+    // in such cases, they can usually be mapped to some other mode, which produces an approximately
     // equivalent result.
     private Mode getCompatibleMode(Mode mode) {
         Mode m = mode;
