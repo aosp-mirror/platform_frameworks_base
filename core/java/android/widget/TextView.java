@@ -8818,6 +8818,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     static final int ID_COPY = android.R.id.copy;
     static final int ID_PASTE = android.R.id.paste;
     static final int ID_PASTE_AS_PLAIN_TEXT = android.R.id.pasteAsPlainText;
+    static final int ID_REPLACE = android.R.id.replaceText;
 
     /**
      * Called when a context menu option for the text view is selected.  Currently

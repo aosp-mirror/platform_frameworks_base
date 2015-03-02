@@ -2645,6 +2645,8 @@
   <public type="id" name="pasteAsPlainText" />
   <public type="id" name="undo" />
   <public type="id" name="redo" />
+  <public type="id" name="replaceText" />
+
   <public type="attr" name="allowUndo" />
 
   <public type="attr" name="colorBackgroundFloating" />

@@ -2969,6 +2969,12 @@ public class Editor {
                                 MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
             }
 
+            if (mTextView.isSuggestionsEnabled() && isCursorInsideSuggestionSpan()) {
+                menu.add(0, TextView.ID_REPLACE, 0, com.android.internal.R.string.replace).
+                        setShowAsAction(
+                                MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+            }
+
             styledAttributes.recycle();
 
             if (mCustomSelectionActionModeCallback != null) {
@@ -3000,6 +3006,10 @@ public class Editor {
                  mCustomSelectionActionModeCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
+            if (item.getItemId() == TextView.ID_REPLACE) {
+                onReplace();
+                return true;
+            }
             return mTextView.onTextContextMenuItem(item.getItemId());
         }
 
@@ -3026,6 +3036,13 @@ public class Editor {
 
             mSelectionActionMode = null;
         }
+    }
+
+    private void onReplace() {
+        int middle = (mTextView.getSelectionStart() + mTextView.getSelectionEnd()) / 2;
+        stopSelectionActionMode();
+        Selection.setSelection((Spannable) mTextView.getText(), middle);
+        showSuggestions();
     }
 
     private class ActionPopupWindow extends PinnedPopupWindow implements OnClickListener {
@@ -3086,10 +3103,7 @@ public class Editor {
                 mTextView.onTextContextMenuItem(TextView.ID_PASTE);
                 hide();
             } else if (view == mReplaceTextView) {
-                int middle = (mTextView.getSelectionStart() + mTextView.getSelectionEnd()) / 2;
-                stopSelectionActionMode();
-                Selection.setSelection((Spannable) mTextView.getText(), middle);
-                showSuggestions();
+                onReplace();
             }
         }
 

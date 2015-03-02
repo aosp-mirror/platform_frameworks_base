@@ -1724,6 +1724,7 @@ package android {
     field public static final int primary = 16908300; // 0x102000c
     field public static final int progress = 16908301; // 0x102000d
     field public static final int redo = 16908339; // 0x1020033
+    field public static final int replaceText = 16908340; // 0x1020034
     field public static final int secondaryProgress = 16908303; // 0x102000f
     field public static final int selectAll = 16908319; // 0x102001f
     field public static final int selectTextMode = 16908333; // 0x102002d
