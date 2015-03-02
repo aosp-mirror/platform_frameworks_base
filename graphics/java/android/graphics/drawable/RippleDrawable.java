@@ -241,8 +241,8 @@ public class RippleDrawable extends LayerDrawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        super.setColorFilter(cf);
+    public void setColorFilter(ColorFilter colorFilter) {
+        super.setColorFilter(colorFilter);
 
         // TODO: Should we support this?
     }

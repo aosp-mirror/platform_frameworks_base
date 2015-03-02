@@ -628,8 +628,8 @@ public class BitmapDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        mBitmapState.mPaint.setColorFilter(cf);
+    public void setColorFilter(ColorFilter colorFilter) {
+        mBitmapState.mPaint.setColorFilter(colorFilter);
         invalidateSelf();
     }
 

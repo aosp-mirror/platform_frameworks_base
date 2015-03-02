@@ -238,9 +238,9 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
     }
 
     @Override
-    public void setColorFilter(@Nullable ColorFilter cf) {
+    public void setColorFilter(@Nullable ColorFilter colorFilter) {
         if (mDrawable != null) {
-            mDrawable.setColorFilter(cf);
+            mDrawable.setColorFilter(colorFilter);
         }
     }
 

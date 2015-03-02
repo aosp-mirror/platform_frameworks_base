@@ -47,7 +47,7 @@ public class KeyguardPreviewContainer extends FrameLayout {
         }
 
         @Override
-        public void setColorFilter(ColorFilter cf) {
+        public void setColorFilter(ColorFilter colorFilter) {
             // noop
         }
 

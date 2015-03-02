@@ -188,7 +188,7 @@ public class WallpaperManager {
         }
 
         @Override
-        public void setColorFilter(ColorFilter cf) {
+        public void setColorFilter(ColorFilter colorFilter) {
             throw new UnsupportedOperationException("Not supported with this drawable");
         }
 

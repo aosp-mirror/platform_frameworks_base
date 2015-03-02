@@ -339,21 +339,21 @@ public class ScrollBarDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        mColorFilter = cf;
+    public void setColorFilter(ColorFilter colorFilter) {
+        mColorFilter = colorFilter;
         mHasSetColorFilter = true;
 
         if (mVerticalTrack != null) {
-            mVerticalTrack.setColorFilter(cf);
+            mVerticalTrack.setColorFilter(colorFilter);
         }
         if (mVerticalThumb != null) {
-            mVerticalThumb.setColorFilter(cf);
+            mVerticalThumb.setColorFilter(colorFilter);
         }
         if (mHorizontalTrack != null) {
-            mHorizontalTrack.setColorFilter(cf);
+            mHorizontalTrack.setColorFilter(colorFilter);
         }
         if (mHorizontalThumb != null) {
-            mHorizontalThumb.setColorFilter(cf);
+            mHorizontalThumb.setColorFilter(colorFilter);
         }
     }
 
