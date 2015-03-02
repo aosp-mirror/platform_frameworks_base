@@ -132,7 +132,7 @@ public class BluetoothLeUtils {
      *             {@link BluetoothAdapter#STATE_ON}.
      */
     static void checkAdapterStateOn(BluetoothAdapter adapter) {
-        if (adapter == null || adapter.getState() != BluetoothAdapter.STATE_ON) {
+        if (adapter == null || !adapter.isLeEnabled()) {//adapter.getState() != BluetoothAdapter.STATE_ON) {
             throw new IllegalStateException("BT Adapter is not turned ON");
         }
     }
