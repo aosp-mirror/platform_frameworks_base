@@ -160,14 +160,14 @@ public class PopupWindow {
     private final EpicenterCallback mEpicenterCallback = new EpicenterCallback() {
         @Override
         public Rect onGetEpicenter(Transition transition) {
-            final View anchor = mAnchor.get();
+            final View anchor = mAnchor != null ? mAnchor.get() : null;
             final View decor = mDecorView;
             if (anchor == null || decor == null) {
                 return null;
             }
 
             final Rect anchorBounds = mAnchorBounds;
-            final int[] anchorLocation = mAnchor.get().getLocationOnScreen();
+            final int[] anchorLocation = anchor.getLocationOnScreen();
             final int[] popupLocation = mDecorView.getLocationOnScreen();
 
             // Compute the position of the anchor relative to the popup.
@@ -1632,8 +1632,14 @@ public class PopupWindow {
      * view hierarchy, if necessary.
      */
     private void dismissImmediate(View contentView) {
+        if (mDecorView == null || mBackgroundView == null) {
+            throw new RuntimeException("Popup window already dismissed");
+        }
+
         try {
-            mWindowManager.removeViewImmediate(mDecorView);
+            if (mDecorView.isAttachedToWindow()) {
+                mWindowManager.removeViewImmediate(mDecorView);
+            }
         } finally {
             mDecorView.removeView(mBackgroundView);
             mDecorView = null;
