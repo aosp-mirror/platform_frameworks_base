@@ -297,8 +297,8 @@
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные оповещения"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"Нажмите ещё раз, чтобы открыть"</string>
-    <string name="keyguard_unlock" msgid="8043466894212841998">"Для разблокировки проведите пальцем по экрану"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"Чтобы открыть приложение \"Телефон\", пролистните вправо"</string>
+    <string name="keyguard_unlock" msgid="8043466894212841998">"Проведите вверх, чтобы разблокировать"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"Чтобы позвонить, пролистните вправо"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Чтобы включить камеру, пролистните влево"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Не беспокоить"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"Важные"</string>
