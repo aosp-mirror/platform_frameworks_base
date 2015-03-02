@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Size;
 import android.util.SizeF;
@@ -259,7 +260,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a byte
      */
     @Override
-    public void putByte(String key, byte value) {
+    public void putByte(@Nullable String key, byte value) {
         super.putByte(key, value);
     }
 
@@ -268,10 +269,10 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * any existing value for the given key.
      *
      * @param key a String, or null
-     * @param value a char, or null
+     * @param value a char
      */
     @Override
-    public void putChar(String key, char value) {
+    public void putChar(@Nullable String key, char value) {
         super.putChar(key, value);
     }
 
@@ -283,7 +284,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a short
      */
     @Override
-    public void putShort(String key, short value) {
+    public void putShort(@Nullable String key, short value) {
         super.putShort(key, value);
     }
 
@@ -295,7 +296,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a float
      */
     @Override
-    public void putFloat(String key, float value) {
+    public void putFloat(@Nullable String key, float value) {
         super.putFloat(key, value);
     }
 
@@ -307,7 +308,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a CharSequence, or null
      */
     @Override
-    public void putCharSequence(String key, CharSequence value) {
+    public void putCharSequence(@Nullable String key, @Nullable CharSequence value) {
         super.putCharSequence(key, value);
     }
 
@@ -318,7 +319,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value a Parcelable object, or null
      */
-    public void putParcelable(String key, Parcelable value) {
+    public void putParcelable(@Nullable String key, @Nullable Parcelable value) {
         unparcel();
         mMap.put(key, value);
         mFdsKnown = false;
@@ -331,7 +332,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value a Size object, or null
      */
-    public void putSize(String key, Size value) {
+    public void putSize(@Nullable String key, @Nullable Size value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -343,7 +344,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value a SizeF object, or null
      */
-    public void putSizeF(String key, SizeF value) {
+    public void putSizeF(@Nullable String key, @Nullable SizeF value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -356,7 +357,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value an array of Parcelable objects, or null
      */
-    public void putParcelableArray(String key, Parcelable[] value) {
+    public void putParcelableArray(@Nullable String key, @Nullable Parcelable[] value) {
         unparcel();
         mMap.put(key, value);
         mFdsKnown = false;
@@ -370,8 +371,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value an ArrayList of Parcelable objects, or null
      */
-    public void putParcelableArrayList(String key,
-            ArrayList<? extends Parcelable> value) {
+    public void putParcelableArrayList(@Nullable String key,
+            @Nullable ArrayList<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
         mFdsKnown = false;
@@ -392,8 +393,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value a SparseArray of Parcelable objects, or null
      */
-    public void putSparseParcelableArray(String key,
-            SparseArray<? extends Parcelable> value) {
+    public void putSparseParcelableArray(@Nullable String key,
+            @Nullable SparseArray<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
         mFdsKnown = false;
@@ -407,7 +408,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value an ArrayList<Integer> object, or null
      */
     @Override
-    public void putIntegerArrayList(String key, ArrayList<Integer> value) {
+    public void putIntegerArrayList(@Nullable String key, @Nullable ArrayList<Integer> value) {
         super.putIntegerArrayList(key, value);
     }
 
@@ -419,7 +420,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value an ArrayList<String> object, or null
      */
     @Override
-    public void putStringArrayList(String key, ArrayList<String> value) {
+    public void putStringArrayList(@Nullable String key, @Nullable ArrayList<String> value) {
         super.putStringArrayList(key, value);
     }
 
@@ -431,7 +432,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value an ArrayList<CharSequence> object, or null
      */
     @Override
-    public void putCharSequenceArrayList(String key, ArrayList<CharSequence> value) {
+    public void putCharSequenceArrayList(@Nullable String key,
+            @Nullable ArrayList<CharSequence> value) {
         super.putCharSequenceArrayList(key, value);
     }
 
@@ -443,7 +445,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a Serializable object, or null
      */
     @Override
-    public void putSerializable(String key, Serializable value) {
+    public void putSerializable(@Nullable String key, @Nullable Serializable value) {
         super.putSerializable(key, value);
     }
 
@@ -455,7 +457,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a byte array object, or null
      */
     @Override
-    public void putByteArray(String key, byte[] value) {
+    public void putByteArray(@Nullable String key, @Nullable byte[] value) {
         super.putByteArray(key, value);
     }
 
@@ -467,7 +469,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a short array object, or null
      */
     @Override
-    public void putShortArray(String key, short[] value) {
+    public void putShortArray(@Nullable String key, @Nullable short[] value) {
         super.putShortArray(key, value);
     }
 
@@ -479,7 +481,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a char array object, or null
      */
     @Override
-    public void putCharArray(String key, char[] value) {
+    public void putCharArray(@Nullable String key, @Nullable char[] value) {
         super.putCharArray(key, value);
     }
 
@@ -491,7 +493,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a float array object, or null
      */
     @Override
-    public void putFloatArray(String key, float[] value) {
+    public void putFloatArray(@Nullable String key, @Nullable float[] value) {
         super.putFloatArray(key, value);
     }
 
@@ -503,7 +505,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param value a CharSequence array object, or null
      */
     @Override
-    public void putCharSequenceArray(String key, CharSequence[] value) {
+    public void putCharSequenceArray(@Nullable String key, @Nullable CharSequence[] value) {
         super.putCharSequenceArray(key, value);
     }
 
@@ -514,7 +516,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value a Bundle object, or null
      */
-    public void putBundle(String key, Bundle value) {
+    public void putBundle(@Nullable String key, @Nullable Bundle value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -533,7 +535,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @param value an IBinder object, or null
      */
-    public void putBinder(String key, IBinder value) {
+    public void putBinder(@Nullable String key, @Nullable IBinder value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -549,7 +551,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @hide This is the old name of the function.
      */
     @Deprecated
-    public void putIBinder(String key, IBinder value) {
+    public void putIBinder(@Nullable String key, @Nullable IBinder value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -663,7 +665,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a CharSequence value, or null
      */
     @Override
-    public CharSequence getCharSequence(String key) {
+    @Nullable
+    public CharSequence getCharSequence(@Nullable String key) {
         return super.getCharSequence(key);
     }
 
@@ -679,7 +682,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *     if no valid CharSequence object is currently mapped to that key.
      */
     @Override
-    public CharSequence getCharSequence(String key, CharSequence defaultValue) {
+    public CharSequence getCharSequence(@Nullable String key, CharSequence defaultValue) {
         return super.getCharSequence(key, defaultValue);
     }
 
@@ -691,7 +694,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return a Size value, or null
      */
-    public Size getSize(String key) {
+    @Nullable
+    public Size getSize(@Nullable String key) {
         unparcel();
         final Object o = mMap.get(key);
         try {
@@ -710,7 +714,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return a Size value, or null
      */
-    public SizeF getSizeF(String key) {
+    @Nullable
+    public SizeF getSizeF(@Nullable String key) {
         unparcel();
         final Object o = mMap.get(key);
         try {
@@ -729,7 +734,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return a Bundle value, or null
      */
-    public Bundle getBundle(String key) {
+    @Nullable
+    public Bundle getBundle(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -751,7 +757,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return a Parcelable value, or null
      */
-    public <T extends Parcelable> T getParcelable(String key) {
+    @Nullable
+    public <T extends Parcelable> T getParcelable(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -773,7 +780,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return a Parcelable[] value, or null
      */
-    public Parcelable[] getParcelableArray(String key) {
+    @Nullable
+    public Parcelable[] getParcelableArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -795,7 +803,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return an ArrayList<T> value, or null
      */
-    public <T extends Parcelable> ArrayList<T> getParcelableArrayList(String key) {
+    @Nullable
+    public <T extends Parcelable> ArrayList<T> getParcelableArrayList(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -818,7 +827,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      *
      * @return a SparseArray of T values, or null
      */
-    public <T extends Parcelable> SparseArray<T> getSparseParcelableArray(String key) {
+    @Nullable
+    public <T extends Parcelable> SparseArray<T> getSparseParcelableArray(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -841,7 +851,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a Serializable value, or null
      */
     @Override
-    public Serializable getSerializable(String key) {
+    @Nullable
+    public Serializable getSerializable(@Nullable String key) {
         return super.getSerializable(key);
     }
 
@@ -854,7 +865,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return an ArrayList<String> value, or null
      */
     @Override
-    public ArrayList<Integer> getIntegerArrayList(String key) {
+    @Nullable
+    public ArrayList<Integer> getIntegerArrayList(@Nullable String key) {
         return super.getIntegerArrayList(key);
     }
 
@@ -867,7 +879,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return an ArrayList<String> value, or null
      */
     @Override
-    public ArrayList<String> getStringArrayList(String key) {
+    @Nullable
+    public ArrayList<String> getStringArrayList(@Nullable String key) {
         return super.getStringArrayList(key);
     }
 
@@ -880,7 +893,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return an ArrayList<CharSequence> value, or null
      */
     @Override
-    public ArrayList<CharSequence> getCharSequenceArrayList(String key) {
+    @Nullable
+    public ArrayList<CharSequence> getCharSequenceArrayList(@Nullable String key) {
         return super.getCharSequenceArrayList(key);
     }
 
@@ -893,7 +907,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a byte[] value, or null
      */
     @Override
-    public byte[] getByteArray(String key) {
+    @Nullable
+    public byte[] getByteArray(@Nullable String key) {
         return super.getByteArray(key);
     }
 
@@ -906,7 +921,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a short[] value, or null
      */
     @Override
-    public short[] getShortArray(String key) {
+    @Nullable
+    public short[] getShortArray(@Nullable String key) {
         return super.getShortArray(key);
     }
 
@@ -919,7 +935,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a char[] value, or null
      */
     @Override
-    public char[] getCharArray(String key) {
+    @Nullable
+    public char[] getCharArray(@Nullable String key) {
         return super.getCharArray(key);
     }
 
@@ -932,7 +949,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a float[] value, or null
      */
     @Override
-    public float[] getFloatArray(String key) {
+    @Nullable
+    public float[] getFloatArray(@Nullable String key) {
         return super.getFloatArray(key);
     }
 
@@ -945,7 +963,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @return a CharSequence[] value, or null
      */
     @Override
-    public CharSequence[] getCharSequenceArray(String key) {
+    @Nullable
+    public CharSequence[] getCharSequenceArray(@Nullable String key) {
         return super.getCharSequenceArray(key);
     }
 
@@ -957,7 +976,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @param key a String, or null
      * @return an IBinder value, or null
      */
-    public IBinder getBinder(String key) {
+    @Nullable
+    public IBinder getBinder(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
@@ -983,7 +1003,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * @hide This is the old name of the function.
      */
     @Deprecated
-    public IBinder getIBinder(String key) {
+    @Nullable
+    public IBinder getIBinder(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {

@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.Nullable;
 import android.util.ArrayMap;
 import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -135,7 +136,7 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param key a String, or null
      * @param value a Bundle object, or null
      */
-    public void putPersistableBundle(String key, PersistableBundle value) {
+    public void putPersistableBundle(@Nullable String key, @Nullable PersistableBundle value) {
         unparcel();
         mMap.put(key, value);
     }
@@ -148,7 +149,8 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
      * @param key a String, or null
      * @return a Bundle value, or null
      */
-    public PersistableBundle getPersistableBundle(String key) {
+    @Nullable
+    public PersistableBundle getPersistableBundle(@Nullable String key) {
         unparcel();
         Object o = mMap.get(key);
         if (o == null) {
