@@ -17,26 +17,14 @@
 package android.media;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.media.SubtitleTrack.RenderingWidget.OnChangedListener;
-import android.text.Layout.Alignment;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup.LayoutParams;
 import android.view.accessibility.CaptioningManager;
-import android.view.accessibility.CaptioningManager.CaptionStyle;
-import android.view.accessibility.CaptioningManager.CaptioningChangeListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.android.internal.widget.SubtitleView;
 
 import java.io.IOException;
 import java.io.StringReader;

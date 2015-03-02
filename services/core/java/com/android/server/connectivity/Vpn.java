@@ -17,12 +17,8 @@
 package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
-import static android.os.UserHandle.PER_USER_RANGE;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
-import static android.system.OsConstants.AF_INET;
-import static android.system.OsConstants.AF_INET6;
-
 import android.Manifest;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -33,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;

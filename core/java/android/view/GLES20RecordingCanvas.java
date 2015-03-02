@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.util.Pools.SynchronizedPool;
 
 /**

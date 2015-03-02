@@ -19,8 +19,6 @@ package com.android.commands.svc;
 import android.os.ServiceManager;
 import android.os.RemoteException;
 import android.net.wifi.IWifiManager;
-import android.net.IConnectivityManager;
-import android.net.ConnectivityManager;
 import android.content.Context;
 
 public class WifiCommand extends Svc.Command {

@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import android.animation.Animator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.AnimationUtils;

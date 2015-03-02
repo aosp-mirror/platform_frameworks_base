@@ -16,14 +16,11 @@
 
 package com.android.server.pm;
 
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
-
-import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 

@@ -60,8 +60,6 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
-import android.location.GpsMeasurementsEvent;
-import android.location.GpsNavigationMessageEvent;
 import android.location.IGpsMeasurementsListener;
 import android.location.IGpsNavigationMessageListener;
 import android.location.IGpsStatusListener;

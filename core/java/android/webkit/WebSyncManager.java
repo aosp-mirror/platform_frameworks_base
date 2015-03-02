@@ -17,11 +17,6 @@
 package android.webkit;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
-import android.util.Log;
 
 /*
  * @deprecated The WebSyncManager no longer does anything.

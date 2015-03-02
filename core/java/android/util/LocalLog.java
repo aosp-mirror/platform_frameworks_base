@@ -16,8 +16,6 @@
 
 package android.util;
 
-import android.text.format.Time;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Calendar;

@@ -18,8 +18,6 @@ package android.app.job;
 
 import java.util.List;
 
-import android.content.Context;
-
 /**
  * This is an API for scheduling various types of jobs against the framework that will be executed
  * in your application's own process.

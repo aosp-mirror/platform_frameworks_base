@@ -15,7 +15,6 @@
  */
 package android.transition;
 
-import android.graphics.Rect;
 import android.view.ViewGroup;
 
 /**

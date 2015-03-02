@@ -20,7 +20,6 @@ import android.annotation.SystemApi;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
 
 /**
  * Representation of a user on the device.

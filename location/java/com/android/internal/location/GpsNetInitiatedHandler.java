@@ -34,7 +34,6 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.R;

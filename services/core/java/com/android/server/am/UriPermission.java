@@ -19,7 +19,6 @@ package com.android.server.am;
 import android.content.Intent;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.server.am.ActivityManagerService.GrantUri;

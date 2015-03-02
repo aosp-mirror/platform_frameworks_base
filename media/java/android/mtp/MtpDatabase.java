@@ -28,7 +28,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaScanner;
 import android.net.Uri;
 import android.os.BatteryManager;
-import android.os.BatteryStats;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;

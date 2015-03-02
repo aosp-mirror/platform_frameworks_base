@@ -30,8 +30,6 @@ import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
-import android.view.DisplayAdjustments;
-
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 

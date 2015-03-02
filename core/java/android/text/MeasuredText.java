@@ -16,7 +16,6 @@
 
 package android.text;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;

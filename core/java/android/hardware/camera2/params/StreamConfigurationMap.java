@@ -26,7 +26,6 @@ import android.hardware.camera2.legacy.LegacyCameraDevice;
 import android.hardware.camera2.legacy.LegacyMetadataMapper;
 import android.hardware.camera2.legacy.LegacyExceptionUtils.BufferQueueAbandonedException;
 import android.view.Surface;
-import android.util.Log;
 import android.util.Range;
 import android.util.Size;
 

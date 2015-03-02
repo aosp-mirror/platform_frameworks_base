@@ -22,7 +22,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.Gravity;

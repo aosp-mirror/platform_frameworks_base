@@ -17,19 +17,13 @@
 package android.view;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
-import android.graphics.Matrix;
 import android.graphics.NinePatch;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.text.GraphicsOperations;
-import android.text.SpannableString;
-import android.text.SpannedString;
-import android.text.TextUtils;
 
 /**
  * An implementation of Canvas on top of OpenGL ES 2.0.

@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 /**

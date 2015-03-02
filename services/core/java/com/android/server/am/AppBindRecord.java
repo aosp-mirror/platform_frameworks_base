@@ -19,7 +19,6 @@ package com.android.server.am;
 import android.util.ArraySet;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
 
 /**
  * An association between a service and one of its client applications.

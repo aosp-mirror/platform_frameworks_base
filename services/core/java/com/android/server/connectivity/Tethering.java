@@ -40,9 +40,7 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 

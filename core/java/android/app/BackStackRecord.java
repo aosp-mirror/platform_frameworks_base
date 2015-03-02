@@ -25,7 +25,6 @@ import android.text.TextUtils;
 import android.transition.Transition;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
-import android.transition.TransitionUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LogWriter;

@@ -30,8 +30,6 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_ORIENT
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_ACTION_PENDING;
 
 import android.content.Context;
-import android.os.Debug;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;

@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.IContentService;
 import android.content.ISyncStatusObserver;
 import android.content.PeriodicSync;
-import android.content.pm.PackageManager;
 import android.content.SyncAdapterType;
 import android.content.SyncInfo;
 import android.content.SyncRequest;

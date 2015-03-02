@@ -17,7 +17,6 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.os.Binder;
 import android.util.ArraySet;
 import android.util.Base64;
 import android.util.Slog;

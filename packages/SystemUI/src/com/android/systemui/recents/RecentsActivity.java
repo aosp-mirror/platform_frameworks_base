@@ -18,7 +18,6 @@ package com.android.systemui.recents;
 
 import android.app.Activity;
 import android.app.ActivityOptions;
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;

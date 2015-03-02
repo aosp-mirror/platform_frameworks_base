@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;

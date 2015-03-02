@@ -17,8 +17,6 @@ package com.android.internal.widget;
 
 import com.android.internal.R;
 
-import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.widget.ActionMenuPresenter;
 import android.widget.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;

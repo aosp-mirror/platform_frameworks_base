@@ -17,7 +17,6 @@ package android.speech.tts;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;

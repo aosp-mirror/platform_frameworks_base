@@ -23,7 +23,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import static android.system.OsConstants.*;
 
 /**
  * Used for accessing the android common time service's common clock and receiving notifications

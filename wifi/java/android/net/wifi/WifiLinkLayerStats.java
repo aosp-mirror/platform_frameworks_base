@@ -18,12 +18,6 @@ package android.net.wifi;
 
 import android.os.Parcelable;
 import android.os.Parcel;
-import android.text.TextUtils;
-import java.util.HashMap;
-import java.util.Date;
-import java.util.ArrayList;
-
-import java.util.BitSet;
 
 /**
  * A class representing link layer statistics collected over a Wifi Interface.

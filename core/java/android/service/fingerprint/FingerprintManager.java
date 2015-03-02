@@ -17,12 +17,8 @@
 package android.service.fingerprint;
 
 import android.app.ActivityManagerNative;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;

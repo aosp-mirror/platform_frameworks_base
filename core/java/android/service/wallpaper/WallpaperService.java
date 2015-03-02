@@ -64,8 +64,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
-
 /**
  * A wallpaper service is responsible for showing a live wallpaper behind
  * applications that would like to sit on top of it.  This service object

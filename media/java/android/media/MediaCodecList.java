@@ -19,8 +19,6 @@ package android.media;
 import android.util.Log;
 
 import android.media.MediaCodecInfo;
-import android.media.MediaCodecInfo.CodecCapabilities;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 

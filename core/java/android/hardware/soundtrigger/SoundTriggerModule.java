@@ -16,13 +16,10 @@
 
 package android.hardware.soundtrigger;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import java.lang.ref.WeakReference;
-import java.util.UUID;
 
 /**
  * The SoundTriggerModule provides APIs to control sound models and sound detection

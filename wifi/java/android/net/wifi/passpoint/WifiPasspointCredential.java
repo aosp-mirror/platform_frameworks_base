@@ -20,9 +20,7 @@ import android.net.wifi.WifiEnterpriseConfig;
 import android.os.Parcelable;
 import android.os.Parcel;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;

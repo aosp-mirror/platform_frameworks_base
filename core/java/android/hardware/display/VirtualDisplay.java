@@ -15,7 +15,6 @@
  */
 package android.hardware.display;
 
-import android.os.IBinder;
 import android.view.Display;
 import android.view.Surface;
 

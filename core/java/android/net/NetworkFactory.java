@@ -21,12 +21,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
 /**

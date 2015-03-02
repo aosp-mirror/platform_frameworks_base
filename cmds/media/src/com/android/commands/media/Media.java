@@ -24,7 +24,6 @@ import android.media.MediaMetadata;
 import android.media.session.ISessionController;
 import android.media.session.ISessionControllerCallback;
 import android.media.session.ISessionManager;
-import android.media.session.MediaController;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.os.Bundle;

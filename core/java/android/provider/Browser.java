@@ -25,7 +25,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.BrowserContract.Bookmarks;
 import android.provider.BrowserContract.Combined;
 import android.provider.BrowserContract.History;

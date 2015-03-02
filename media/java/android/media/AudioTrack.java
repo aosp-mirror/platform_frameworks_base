@@ -21,9 +21,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
-import java.util.Iterator;
-import java.util.Set;
-
 import android.annotation.IntDef;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;

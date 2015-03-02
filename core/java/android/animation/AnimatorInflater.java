@@ -43,7 +43,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class is used to instantiate animator XML files into Animator objects.

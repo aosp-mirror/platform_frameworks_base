@@ -20,8 +20,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
-
 /**
  * Class for handling the parceling of return values from keymaster crypto operations
  * (begin/update/finish).

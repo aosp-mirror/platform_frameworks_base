@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
 
 import java.io.FileDescriptor;

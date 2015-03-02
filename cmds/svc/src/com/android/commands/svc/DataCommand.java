@@ -18,8 +18,6 @@ package com.android.commands.svc;
 
 import android.os.ServiceManager;
 import android.os.RemoteException;
-import android.net.IConnectivityManager;
-import android.net.ConnectivityManager;
 import android.content.Context;
 import com.android.internal.telephony.ITelephony;
 

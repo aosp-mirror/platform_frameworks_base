@@ -18,7 +18,6 @@ package android.animation;
 
 import android.animation.Keyframe.IntKeyframe;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

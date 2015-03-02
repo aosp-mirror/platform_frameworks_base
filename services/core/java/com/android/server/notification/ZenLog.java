@@ -25,7 +25,6 @@ import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.ZenModeConfig;
-import android.util.ArraySet;
 import android.util.Slog;
 
 import java.io.PrintWriter;

@@ -18,8 +18,6 @@ package android.net.wifi.passpoint;
 
 import android.os.Parcelable;
 import android.os.Parcel;
-import android.util.Log;
-
 import java.util.HashMap;
 
 /**

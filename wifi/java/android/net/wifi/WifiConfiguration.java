@@ -20,14 +20,11 @@ import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
-import android.net.IpConfiguration.IpAssignment;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.annotation.SystemApi;
-
 import java.util.HashMap;
 import java.util.BitSet;
 import java.util.ArrayList;

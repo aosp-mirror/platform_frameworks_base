@@ -23,7 +23,6 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerInternal;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.Interpolator;

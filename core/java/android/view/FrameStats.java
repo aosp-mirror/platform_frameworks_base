@@ -16,9 +16,6 @@
 
 package android.view;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * This is the base class for frame statistics.
  */

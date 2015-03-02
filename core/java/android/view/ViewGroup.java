@@ -53,11 +53,8 @@ import com.android.internal.util.Predicate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 /**

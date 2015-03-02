@@ -17,7 +17,6 @@
 package com.android.server.media;
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -38,11 +37,9 @@ import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
-import android.media.session.MediaSessionManager;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.media.AudioAttributes;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.DeadObjectException;
@@ -61,7 +58,6 @@ import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * This is the system implementation of a Session. Apps will interact with the

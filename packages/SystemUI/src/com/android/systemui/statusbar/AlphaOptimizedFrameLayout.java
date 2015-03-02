@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 /**
  * A frame layout which does not have overlapping renderings commands and therefore does not need a

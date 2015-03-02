@@ -21,9 +21,6 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Map;
 

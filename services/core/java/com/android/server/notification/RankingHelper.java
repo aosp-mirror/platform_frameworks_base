@@ -24,7 +24,6 @@ import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import org.xmlpull.v1.XmlPullParser;

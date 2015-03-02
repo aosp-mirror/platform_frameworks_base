@@ -33,14 +33,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.Window;
 import android.widget.SpinnerAdapter;
-import android.widget.Toolbar;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Map;
 
 /**
  * A primary toolbar within the activity that may display the activity title, application-level

@@ -16,7 +16,6 @@
 
 package android.webkit;
 
-import android.annotation.SystemApi;
 import android.content.Context;
 
 /**

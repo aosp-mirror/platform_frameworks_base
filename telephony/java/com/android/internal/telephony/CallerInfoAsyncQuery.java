@@ -34,7 +34,6 @@ import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
-import android.util.Log;
 
 /**
  * Helper class to make it easier to run asynchronous caller-id lookup queries.

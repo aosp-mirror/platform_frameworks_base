@@ -26,9 +26,7 @@ import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -36,7 +34,6 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

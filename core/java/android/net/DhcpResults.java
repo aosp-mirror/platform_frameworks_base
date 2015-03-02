@@ -17,7 +17,6 @@
 package android.net;
 
 import android.net.NetworkUtils;
-import android.os.Parcelable;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;

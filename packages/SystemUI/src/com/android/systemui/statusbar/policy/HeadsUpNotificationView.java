@@ -25,9 +25,6 @@ import android.graphics.Rect;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.ArrayMap;
-import android.graphics.Outline;
-import android.graphics.Rect;
-import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -50,7 +47,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback,
         ViewTreeObserver.OnComputeInternalInsetsListener {

@@ -26,8 +26,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Vector;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 // package private
 class Utils {
     private static final String TAG = "Utils";

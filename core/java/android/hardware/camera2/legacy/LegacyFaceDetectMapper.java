@@ -33,7 +33,6 @@ import android.util.Size;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static android.hardware.camera2.CaptureRequest.*;

@@ -22,10 +22,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Rect;
-import android.graphics.PorterDuff.Mode;
-import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;

@@ -17,7 +17,6 @@
 package android.app.job;
 
 import android.app.job.IJobCallback;
-import android.app.job.IJobCallback.Stub;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -24,7 +24,6 @@ import android.database.DataSetObserver;
 import android.os.Handler;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 

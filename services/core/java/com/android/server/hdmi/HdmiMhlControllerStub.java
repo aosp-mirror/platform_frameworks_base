@@ -20,7 +20,6 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.util.SparseArray;
 
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
  * A handler class for MHL control command. It converts user's command into MHL command and pass it
