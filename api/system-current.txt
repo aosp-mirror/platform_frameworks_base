@@ -27468,6 +27468,8 @@ package android.provider {
     field public static final int NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING = 2; // 0x2
     field public static final int NOTIFICATION_CHANNEL_STATE_NO_CONNECTION = 1; // 0x1
     field public static final int NOTIFICATION_CHANNEL_STATE_OK = 0; // 0x0
+    field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "phone_account_component_name";
+    field public static final java.lang.String PHONE_ACCOUNT_ID = "phone_account_id";
     field public static final java.lang.String SETTINGS_URI = "settings_uri";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
     field public static final java.lang.String VOICEMAIL_ACCESS_URI = "voicemail_access_uri";
@@ -27475,8 +27477,13 @@ package android.provider {
 
   public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns android.provider.OpenableColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
+    method public static int deleteAll(android.content.Context);
+    method public static android.net.Uri insert(android.content.Context, android.telecom.Voicemail);
+    method public static int insert(android.content.Context, java.util.List<android.telecom.Voicemail>);
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String DELETED = "deleted";
+    field public static final java.lang.String DIRTY = "dirty";
     field public static final java.lang.String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String HAS_CONTENT = "has_content";
@@ -27484,6 +27491,8 @@ package android.provider {
     field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail";
     field public static final java.lang.String MIME_TYPE = "mime_type";
     field public static final java.lang.String NUMBER = "number";
+    field public static final java.lang.String PHONE_ACCOUNT_COMPONENT_NAME = "subscription_component_name";
+    field public static final java.lang.String PHONE_ACCOUNT_ID = "subscription_id";
     field public static final java.lang.String SOURCE_DATA = "source_data";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";
     field public static final java.lang.String TRANSCRIPTION = "transcription";
@@ -29896,6 +29905,22 @@ package android.telecom {
     field public final int supportedRouteMask;
   }
 
+  public class AuthenticatorService extends android.app.Service {
+    ctor public AuthenticatorService();
+    method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+  public class AuthenticatorService.Authenticator extends android.accounts.AbstractAccountAuthenticator {
+    ctor public AuthenticatorService.Authenticator(android.content.Context);
+    method public android.os.Bundle addAccount(android.accounts.AccountAuthenticatorResponse, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle confirmCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle editProperties(android.accounts.AccountAuthenticatorResponse, java.lang.String);
+    method public android.os.Bundle getAuthToken(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
+    method public java.lang.String getAuthTokenLabel(java.lang.String);
+    method public android.os.Bundle hasFeatures(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String[]) throws android.accounts.NetworkErrorException;
+    method public android.os.Bundle updateCredentials(android.accounts.AccountAuthenticatorResponse, android.accounts.Account, java.lang.String, android.os.Bundle) throws android.accounts.NetworkErrorException;
+  }
+
   public final class Call {
     method public void addListener(android.telecom.Call.Listener);
     method public void answer(int);
@@ -30202,10 +30227,14 @@ package android.telecom {
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean hasCapabilities(int);
     method public boolean supportsUriScheme(java.lang.String);
+    method public android.telecom.PhoneAccount.Builder toBuilder();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
+    field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
     field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
     field public static final int NO_HIGHLIGHT_COLOR = 0; // 0x0
     field public static final int NO_ICON_TINT = 0; // 0x0
@@ -30218,7 +30247,9 @@ package android.telecom {
   public static class PhoneAccount.Builder {
     ctor public PhoneAccount.Builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     ctor public PhoneAccount.Builder(android.telecom.PhoneAccount);
+    method public android.telecom.PhoneAccount.Builder addSupportedUriScheme(java.lang.String);
     method public android.telecom.PhoneAccount build();
+    method public android.telecom.PhoneAccount.Builder setAccountHandle(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
     method public android.telecom.PhoneAccount.Builder setHighlightColor(int);
@@ -30234,9 +30265,11 @@ package android.telecom {
 
   public class PhoneAccountHandle implements android.os.Parcelable {
     ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
+    ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String, android.os.UserHandle);
     method public int describeContents();
     method public android.content.ComponentName getComponentName();
     method public java.lang.String getId();
+    method public android.os.UserHandle getUserHandle();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccountHandle> CREATOR;
   }
@@ -30372,12 +30405,86 @@ package android.telecom {
     field public static final java.lang.String EXTRA_OUTGOING_CALL_EXTRAS = "android.telecom.extra.OUTGOING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecom.extra.START_CALL_WITH_SPEAKERPHONE";
+    field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
     field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecom.extra.GATEWAY_ORIGINAL_ADDRESS";
     field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecom.extra.GATEWAY_PROVIDER_PACKAGE";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+  }
+
+  public class VideoProfile implements android.os.Parcelable {
+    ctor public VideoProfile(int);
+    ctor public VideoProfile(int, int);
+    method public int describeContents();
+    method public int getQuality();
+    method public int getVideoState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.VideoProfile> CREATOR;
+    field public static final int QUALITY_DEFAULT = 4; // 0x4
+    field public static final int QUALITY_HIGH = 1; // 0x1
+    field public static final int QUALITY_LOW = 3; // 0x3
+    field public static final int QUALITY_MEDIUM = 2; // 0x2
+  }
+
+  public static class VideoProfile.VideoState {
+    ctor public VideoProfile.VideoState();
+    method public static boolean isAudioOnly(int);
+    method public static boolean isBidirectional(int);
+    method public static boolean isPaused(int);
+    method public static boolean isReceptionEnabled(int);
+    method public static boolean isTransmissionEnabled(int);
+    field public static final int AUDIO_ONLY = 0; // 0x0
+    field public static final int BIDIRECTIONAL = 3; // 0x3
+    field public static final int PAUSED = 4; // 0x4
+    field public static final int RX_ENABLED = 2; // 0x2
+    field public static final int TX_ENABLED = 1; // 0x1
+  }
+
+  public class Voicemail implements android.os.Parcelable {
+    method public static android.telecom.Voicemail.Builder createForInsertion(long, java.lang.String);
+    method public int describeContents();
+    method public long getDuration();
+    method public long getId();
+    method public java.lang.String getNumber();
+    method public java.lang.String getSourceData();
+    method public java.lang.String getSourcePackage();
+    method public long getTimestampMillis();
+    method public android.net.Uri getUri();
+    method public boolean hasContent();
+    method public boolean isRead();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.Voicemail> CREATOR;
+  }
+
+  public static class Voicemail.Builder {
+    method public android.telecom.Voicemail build();
+    method public android.telecom.Voicemail.Builder setDuration(long);
+    method public android.telecom.Voicemail.Builder setHasContent(boolean);
+    method public android.telecom.Voicemail.Builder setId(long);
+    method public android.telecom.Voicemail.Builder setIsRead(boolean);
+    method public android.telecom.Voicemail.Builder setNumber(java.lang.String);
+    method public android.telecom.Voicemail.Builder setSourceData(java.lang.String);
+    method public android.telecom.Voicemail.Builder setSourcePackage(java.lang.String);
+    method public android.telecom.Voicemail.Builder setTimestamp(long);
+    method public android.telecom.Voicemail.Builder setUri(android.net.Uri);
+  }
+
+  public class VvmSyncService extends android.app.Service {
+    ctor public VvmSyncService();
+    method public android.os.IBinder onBind(android.content.Intent);
+  }
+
+  public class VvmSyncService.VvmSyncAdapter extends android.content.AbstractThreadedSyncAdapter {
+    ctor public VvmSyncService.VvmSyncAdapter(android.content.Context, boolean);
+    method protected java.util.List<android.telecom.Voicemail> downloadVoicemails();
+    method public void onPerformSync(android.accounts.Account, android.os.Bundle, java.lang.String, android.content.ContentProviderClient, android.content.SyncResult);
+    method protected void syncToServer();
+    field public static final java.lang.String NEW_VOICEMAIL_DATA = "extra_new_voicemail_data";
+    field public static final java.lang.String SYNC_EXTRA_CODE = "sync_extra_code";
+    field public static final int SYNC_EXTRA_MAILBOX_UPDATE = 2; // 0x2
+    field public static final int SYNC_EXTRA_NEW_VOICEMAIL = 1; // 0x1
   }
 
 }
@@ -30573,6 +30680,7 @@ package android.telephony {
 
   public class PhoneNumberUtils {
     ctor public PhoneNumberUtils();
+    method public static void addPhoneTtsSpan(android.text.Spannable, int, int);
     method public static java.lang.String calledPartyBCDFragmentToString(byte[], int, int);
     method public static java.lang.String calledPartyBCDToString(byte[], int, int);
     method public static boolean compare(java.lang.String, java.lang.String);
@@ -30589,6 +30697,8 @@ package android.telephony {
     method public static java.lang.String formatNumberToE164(java.lang.String, java.lang.String);
     method public static deprecated int getFormatTypeForLocale(java.util.Locale);
     method public static java.lang.String getNumberFromIntent(android.content.Intent, android.content.Context);
+    method public static android.text.style.TtsSpan getPhoneTtsSpan(java.lang.String);
+    method public static java.lang.CharSequence getPhoneTtsSpannable(java.lang.CharSequence);
     method public static java.lang.String getStrippedReversed(java.lang.String);
     method public static final boolean is12Key(char);
     method public static final boolean isDialable(char);
