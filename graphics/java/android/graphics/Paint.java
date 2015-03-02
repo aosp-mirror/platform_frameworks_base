@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.ColorInt;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -777,6 +778,7 @@ public class Paint {
      *
      * @return the paint's color (and alpha).
      */
+    @ColorInt
     public native int getColor();
 
     /**
@@ -787,7 +789,7 @@ public class Paint {
      *
      * @param color The new color (including alpha) to set in the paint.
      */
-    public native void setColor(int color);
+    public native void setColor(@ColorInt int color);
 
     /**
      * Helper to getColor() that just returns the color's alpha value. This is

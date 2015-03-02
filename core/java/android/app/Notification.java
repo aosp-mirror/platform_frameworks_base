@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.SdkConstant;
@@ -338,6 +339,7 @@ public class Notification implements Parcelable
      * @see #FLAG_SHOW_LIGHTS
      * @see #flags
      */
+    @ColorInt
     public int ledARGB;
 
     /**
@@ -520,12 +522,14 @@ public class Notification implements Parcelable
      * {@link #icon} image (stenciled in white) atop a field of this color. Alpha components are
      * ignored.
      */
+    @ColorInt
     public int color = COLOR_DEFAULT;
 
     /**
      * Special value of {@link #color} telling the system not to decorate this notification with
      * any special color but instead use default colors when presenting this notification.
      */
+    @ColorInt
     public static final int COLOR_DEFAULT = 0; // AKA Color.TRANSPARENT
 
     /**
@@ -2388,7 +2392,7 @@ public class Notification implements Parcelable
          * @see Notification#ledOnMS
          * @see Notification#ledOffMS
          */
-        public Builder setLights(int argb, int onMs, int offMs) {
+        public Builder setLights(@ColorInt int argb, int onMs, int offMs) {
             mLedArgb = argb;
             mLedOnMs = onMs;
             mLedOffMs = offMs;
@@ -2712,7 +2716,7 @@ public class Notification implements Parcelable
          *
          * @return The same Builder.
          */
-        public Builder setColor(int argb) {
+        public Builder setColor(@ColorInt int argb) {
             mColor = argb;
             return this;
         }
@@ -5160,7 +5164,7 @@ public class Notification implements Parcelable
          * automotive setting. This method can be used to override the color provided in the
          * notification in such a situation.
          */
-        public CarExtender setColor(int color) {
+        public CarExtender setColor(@ColorInt int color) {
             mColor = color;
             return this;
         }
@@ -5170,6 +5174,7 @@ public class Notification implements Parcelable
          *
          * @see setColor
          */
+        @ColorInt
         public int getColor() {
             return mColor;
         }

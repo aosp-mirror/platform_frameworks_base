@@ -16,6 +16,7 @@
 
 package android.gesture;
 
+import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -204,18 +205,20 @@ public class GestureOverlayView extends FrameLayout {
         mOrientation = orientation;
     }
 
-    public void setGestureColor(int color) {
+    public void setGestureColor(@ColorInt int color) {
         mCertainGestureColor = color;
     }
 
-    public void setUncertainGestureColor(int color) {
+    public void setUncertainGestureColor(@ColorInt int color) {
         mUncertainGestureColor = color;
     }
 
+    @ColorInt
     public int getUncertainGestureColor() {
         return mUncertainGestureColor;
     }
 
+    @ColorInt
     public int getGestureColor() {
         return mCertainGestureColor;
     }

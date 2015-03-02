@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.graphics.*;
 import android.graphics.PorterDuff.Mode;
@@ -62,7 +63,7 @@ public class ColorDrawable extends Drawable {
      *
      * @param color The color to draw.
      */
-    public ColorDrawable(int color) {
+    public ColorDrawable(@ColorInt int color) {
         mColorState = new ColorState();
 
         setColor(color);
@@ -117,6 +118,7 @@ public class ColorDrawable extends Drawable {
      *
      * @return int The color to draw.
      */
+    @ColorInt
     public int getColor() {
         return mColorState.mUseColor;
     }
@@ -128,7 +130,7 @@ public class ColorDrawable extends Drawable {
      *
      * @param color The color to draw.
      */
-    public void setColor(int color) {
+    public void setColor(@ColorInt int color) {
         if (mColorState.mBaseColor != color || mColorState.mUseColor != color) {
             mColorState.mBaseColor = mColorState.mUseColor = color;
             invalidateSelf();

@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.ColorInt;
 import android.content.res.TypedArray;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -292,7 +293,7 @@ public class EdgeEffect {
      *
      * @param color Color in argb
      */
-    public void setColor(int color) {
+    public void setColor(@ColorInt int color) {
         mPaint.setColor(color);
     }
 
@@ -300,6 +301,7 @@ public class EdgeEffect {
      * Return the color of this edge effect in argb.
      * @return The color of this edge effect in argb
      */
+    @ColorInt
     public int getColor() {
         return mPaint.getColor();
     }

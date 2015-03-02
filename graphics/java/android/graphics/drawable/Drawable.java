@@ -16,6 +16,7 @@
 
 package android.graphics.drawable;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.ColorStateList;
@@ -544,7 +545,7 @@ public abstract class Drawable {
      * @see #setTintList(ColorStateList)
      * @see #setTintMode(PorterDuff.Mode)
      */
-    public void setTint(int tintColor) {
+    public void setTint(@ColorInt int tintColor) {
         setTintList(ColorStateList.valueOf(tintColor));
     }
 

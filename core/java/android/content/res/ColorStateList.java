@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources.Theme;
@@ -91,7 +92,7 @@ public class ColorStateList implements Parcelable {
      * Creates a ColorStateList that returns the specified mapping from
      * states to colors.
      */
-    public ColorStateList(int[][] states, int[] colors) {
+    public ColorStateList(int[][] states, @ColorInt int[] colors) {
         mStateSpecs = states;
         mColors = colors;
 
@@ -102,7 +103,7 @@ public class ColorStateList implements Parcelable {
      * @return A ColorStateList containing a single color.
      */
     @NonNull
-    public static ColorStateList valueOf(int color) {
+    public static ColorStateList valueOf(@ColorInt int color) {
         synchronized (sCache) {
             final int index = sCache.indexOfKey(color);
             if (index >= 0) {
@@ -436,6 +437,7 @@ public class ColorStateList implements Parcelable {
      *
      * @return the default color in this {@link ColorStateList}.
      */
+    @ColorInt
     public int getDefaultColor() {
         return mDefaultColor;
     }
