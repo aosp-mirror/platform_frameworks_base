@@ -327,7 +327,7 @@ public class AudioService extends IAudioService.Stub {
      * Map AudioSystem.STREAM_* constants to app ops.  This should be used
      * after mapping through mStreamVolumeAlias.
      */
-    private static final int[] STEAM_VOLUME_OPS = new int[] {
+    private static final int[] STREAM_VOLUME_OPS = new int[] {
         AppOpsManager.OP_AUDIO_VOICE_VOLUME,            // STREAM_VOICE_CALL
         AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_SYSTEM
         AppOpsManager.OP_AUDIO_RING_VOLUME,             // STREAM_RING
@@ -1022,7 +1022,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
+        if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
         }
@@ -1282,7 +1282,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
 
-        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
+        if (mAppOps.noteOp(STREAM_VOLUME_OPS[streamTypeAlias], uid, callingPackage)
                 != AppOpsManager.MODE_ALLOWED) {
             return;
         }
