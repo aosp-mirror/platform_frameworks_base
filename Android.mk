@@ -715,6 +715,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/19.txt 19 \
     -since $(SRC_API_DIR)/20.txt 20 \
     -since $(SRC_API_DIR)/21.txt 21 \
+    -since $(SRC_API_DIR)/22.txt 22 \
 		-werror -hide 111 -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
@@ -751,7 +752,7 @@ sample_groups := -samplegroup Admin \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=4.4
+framework_docs_SDK_VERSION:=5.1
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 
