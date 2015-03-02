@@ -738,6 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏به برنامه اجازه می‎دهد تا با تگهای ارتباط میدان نزدیک (NFC)، کارتها و فایل خوان ارتباط برقرار کند."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"غیرفعال کردن قفل صفحه شما"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"به برنامه امکان می‌دهد قفل کلید و هر گونه امنیت گذرواژه مرتبط را غیرفعال کند. به‌عنوان مثال تلفن هنگام دریافت یک تماس تلفنی ورودی قفل کلید را غیرفعال می‌کند و بعد از پایان تماس، قفل کلید را دوباره فعال می‌کند."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"مدیریت سخت‌افزار اثر انگشت"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"به برنامه امکان می‌دهد روش‌هایی را برای افزودن و حذف الگوهای اثر انگشت جهت استفاده، فعال کند."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"استفاده از سخت‌افزار اثر انگشت"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای احراز هویت استفاده کند"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام‌سازی"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"به برنامه اجازه می‌دهد تنظیمات را برای یک حساب بخواند. به‌عنوان مثال، این ویژگی می‌تواند تعیین کند آیا حساب «افراد» شما با یک حساب همگام‌سازی شده است."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"تغییر وضعیت همگام‌سازی بین فعال و غیرفعال"</string>
@@ -813,29 +817,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"مقید به سرویس پیام‌رسانی شرکت مخابراتی"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"به کنترل‌کننده اجازه می‌دهد که به سطح بالای رابط کاربر سرویس پیام‌رسانی شرکت مخابراتی مقید شود. هرگز نباید برای برنامه‌های عادی مورد نیاز شود."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"‏طول و نویسه‎های مجاز در گذرواژه‌های بازکردن قفل صفحه را کنترل کنید."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"کنترل طول و نوع نویسه‌هایی که در گذرواژه و پین قفل صفحه مجاز است."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‌کند، و اگر دفعات زیادی گذرواژه نادرست وارد شود رایانهٔ لوحی را قفل می‌کند و همه داده‎های رایانهٔ لوحی را پاک می‌کند."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"بر تعداد گذرواژه‌های نادرست تایپ‌شده در زمان باز کردن قفل صفحه نظارت کنید و اگر تعدا زیادی گذرواژه‌های اشتباه تایپ شده است، تلویزیون را قفل کنید یا همه داده‌های تلویزیون را پاک کنید."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"‏تعداد گذرواژه‎های نادرست تایپ شده را هنگام بازکردن قفل صفحه کنترل می‎کند. اگر دفعات زیادی گذرواژه نادرست وارد شود، تلفن را قفل می‌کند یا همه داده‎های تلفن را پاک می‌کند."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"تغییر رمز ورود قفل گشایی صفحه"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"گذرواژه بازگشایی قفل صفحه را تغییر دهید."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، رایانه لوحی را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلویزیون را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"بر تعداد گذرواژه‌های نادرستی که هنگام باز کردن قفل صفحه تایپ شده، نظارت می‌کند، و اگر تعداد گذرواژه‌های تایپ شده نادرست بیش از حد بود، تلفن را قفل می‌کند یا کلیه داده‌های کاربر را پاک می‌کند."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"تغییر قفل صفحه"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"تغییر قفل صفحه."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"قفل کردن صفحه"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"نحوه و زمان قفل شدن صفحه را کنترل کنید."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"پاک کردن تمام داده‌ها"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"با انجام بازنشانی به داده‌های کارخانه، داده‌های رایانهٔ لوحی بدون هشدار پاک می‌شود."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"داده‌های تلویزیون را بدون هشدار با انجام بازنشانی به داده کارخانه پاک کنید."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"با انجام بازنشانی به داده‌های کارخانه، داده‌های تلفن بدون هشدار پاک می‌شود."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"پاک کردن داده‌های کاربر"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"داده‌های این کاربر را در این رایانه لوحی بدون هشدار پاک می‌کند."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"داده‌های این کاربر را در این تلویزیون بدون هشدار پاک می‌کند."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"داده‌های این کاربر را در این تلفن بدون هشدار پاک می‌کند."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"تنظیم پروکسی جهانی دستگاه"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"پروکسی جهانی دستگاه مورد نظر را جهت استفاده هنگام فعال بودن خط مشی تنظیم کنید. فقط اولین سرپرست دستگاه پروکسی جهانی مفید را تنظیم می‌کند."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"تنظیم زمان انقضای رمز ورود قفل صفحه"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"کنترل کنید چند وقت یک بار باید گذرواژه صفحه قفل عوض شود."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"پروکسی کلی دستگاه را برای استفاده هنگام فعال بودن این خط‌مشی تنظیم می‌کند. تنها مالک دستگاه می‌تواند پروکسی کلی را تنظیم کند."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"تنظیم تاریخ انقضای گذرواژه قفل صفحه"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"تغییر تعداد دفعاتی که گذرواژه، پین یا الگوی قفل صفحه باید تغییر کند."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تنظیم رمزگذاری حافظه"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"اطلاعات ذخیره شده برنامه باید رمزگذاری شود."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"غیر فعال کردن دوربین ها"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"جلوگیری از استفاده از همه دوربین‌های دستگاه."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"غیرفعال کردن ویژگی‌‌ها در محافظ کلید"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"از استفاده از برخی ویژگی‌ها در محافظ کلید جلوگیری شود."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"غیرفعال کردن ویژگی‌های قفل صفحه"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"از استفاده از بعضی ویژگی‌های قفل صفحه جلوگیری می‌کند."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"خانه"</item>
     <item msgid="869923650527136615">"تلفن همراه"</item>
@@ -1806,7 +1817,7 @@
       <item quantity="other">‏به مدت %d ساعت</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"تا <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"نامحدود"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"تا وقتی آن را خاموش کنید"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"کوچک کردن"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"تا هشدار بعدی در <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"تا هشدار بعدی"</string>

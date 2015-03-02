@@ -738,6 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Allows the app to communicate with Near Field Communication (NFC) tags, cards and readers."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"disable your screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Allows the app to disable the keylock and any associated password security. For example, the phone disables the keylock when receiving an incoming phone call, then re-enables the keylock when the call is finished."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"manage fingerprint hardware"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Allows the app to invoke methods to add and delete fingerprint templates for use."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"use fingerprint hardware"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Allows the app to use fingerprint hardware for authentication"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"read sync settings"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Allows the app to read the sync settings for an account. For example, this can determine whether the People app is synced with an account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"toggle sync on and off"</string>
@@ -813,29 +817,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bind to a carrier messaging service"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Control the length and the characters allowed in screen-unlock passwords."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Control the length and the characters allowed in screen lock passwords and PINs."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the tablet or erase all the tablet\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the TV or erase all the TV\'s data if too many incorrect passwords are typed."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitor the number of incorrect passwords typed when unlocking the screen and lock the phone or erase all the phone\'s data if too many incorrect passwords are typed."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Change the screen-unlock password"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Change the screen-unlock password."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the tablet or erase all this user\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the TV or erase all this user\'s data if too many incorrect passwords are typed."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitor the number of incorrect passwords typed when unlocking the screen, and lock the phone or erase all this user\'s data if too many incorrect passwords are typed."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Change the screen lock"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Change the screen lock."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lock the screen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Control how and when the screen locks."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Erase all data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Erase the tablet\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Erase the TV\'s data without warning by performing a factory data reset."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Erase the phone\'s data without warning by performing a factory data reset."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Erase user data"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Erase this user\'s data on this tablet without warning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Erase this user\'s data on this TV without warning."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Erase this user\'s data on this phone without warning."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Set the device global proxy"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Set the device\'s global proxy to be used while policy is enabled. Only the first device admin sets the effective global proxy."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Set lock-screen password expiry"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Control how frequently the lock-screen password must be changed."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Set the device global proxy to be used while policy is enabled. Only the device owner can set the global proxy."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Set screen lock password expiry"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Change how frequently the screen lock password, PIN or pattern must be changed."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Set storage encryption"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Require that stored app data be encrypted."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Disable cameras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prevent use of all device cameras."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Disable features in keyguard"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Prevent use of some features in keyguard."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Disable features of screen lock"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Prevent use of some features of screen lock."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -1806,7 +1817,7 @@
       <item quantity="one">For one hour</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Until <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinitely"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Until you turn this off"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Collapse"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Until next alarm at <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Until next alarm"</string>

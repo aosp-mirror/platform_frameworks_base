@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"uw schermvergrendeling uitschakelen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Zo kan de telefoon de toetsenblokkering uitschakelen wanneer er een oproep binnenkomt en de toetsenblokkering weer inschakelen als de oproep is beëindigd."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"synchronisatie-instellingen lezen"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Hiermee kan de app de synchronisatie-instellingen voor een account lezen. Dit kan bijvoorbeeld bepalen of de app Personen wordt gesynchroniseerd met een account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"synchronisatie in- en uitschakelen"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"binden aan de berichtenservice van een provider"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Wachtwoordregels instellen"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"De lengte en het aantal tekens beheren die zijn toegestaan in wachtwoorden en pincodes voor schermvergrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens op de tablet wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens op de tv wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens op de telefoon wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Het wachtwoord voor schermontgrendeling wijzigen"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Het wachtwoord voor schermontgrendeling wijzigen."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tv vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens van deze gebruiker wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"De schermvergrendeling wijzigen"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"De schermvergrendeling wijzigen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Het scherm vergrendelen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheren hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"De gegevens van de tv zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Gebruikersgegevens wissen"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"De gegevens van deze gebruiker op deze tablet zonder waarschuwing wissen."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"De gegevens van deze gebruiker op deze tv zonder waarschuwing wissen."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"De gegevens van deze gebruiker op deze telefoon zonder waarschuwing wissen."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Algemene proxy voor het apparaat instellen"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Stel de algemene proxy voor het apparaat in die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eerste apparaatbeheerder stelt de algemene proxy in."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Verval wachtwoord instellen"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Beheren hoe vaak het wachtwoord voor schermvergrendeling moet worden gewijzigd."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"De algemene proxy voor het apparaat instellen die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eigenaar van het apparaat kan de algemene proxy instellen."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Verlopen van wachtwoord voor schermvergrendeling instellen"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Wijzigen hoe vaak het wachtwoord, de pincode of het patroon voor schermvergrendeling moet worden gewijzigd."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Codering voor opslag instellen"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vereisen dat opgeslagen appgegevens kunnen worden gecodeerd."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Camera\'s uitschakelen"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Het gebruik van alle apparaatcamera\'s voorkomen."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Functies uit in toetsblokk."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Gebruik van bepaalde functies voorkomen in toetsblokkering."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Functies van schermvergrendeling uitschakelen"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Gebruik van bepaalde functies van schermvergrendeling voorkomen."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Thuis"</item>
     <item msgid="869923650527136615">"Mobiel"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Eén uur</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Voor onbepaalde tijd"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Totdat u dit uitschakelt"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Samenvouwen"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Tot het volgende alarm om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Tot het volgende alarm"</string>

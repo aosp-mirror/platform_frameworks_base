@@ -738,6 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ปิดใช้งานการล็อกหน้าจอของคุณ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"อนุญาตให้แอปพลิเคชันปิดใช้งานการล็อกปุ่มกดและการรักษาความปลอดภัยด้วยรหัสผ่านใดๆ ที่เกี่ยวข้อง ตัวอย่างเช่น โทรศัพท์ปิดใช้งานการล็อกปุ่มกดเมื่อรับสายเรียกเข้า จากนั้นจึงเปิดใช้งานการล็อกปุ่มกดใหม่หลังจากวางสาย"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"จัดการฮาร์ดแวร์ลายนิ้วมือ"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"อนุญาตให้แอปเรียกใช้วิธีการเพื่อเพิ่มและลบเทมเพลตลายนิ้วมือสำหรับการใช้งาน"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ใช้ฮาร์ดแวร์ลายนิ้วมือ"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"อนุญาตให้แอปใช้ฮาร์ดแวร์ลายนิ้วมือเพื่อตรวจสอบสิทธิ์"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"อนุญาตให้แอปพลิเคชันอ่านการตั้งค่าการซิงค์ของบัญชี ตัวอย่างเช่น การอนุญาตนี้สามารถระบุได้ว่าแอปพลิเคชัน People ซิงค์กับบัญชีหรือไม่"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"สลับระหว่างเปิดและปิดการซิงค์"</string>
@@ -813,29 +817,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"เชื่อมโยงกับบริการรับส่งข้อความของผู้ให้บริการ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการรับส่งข้อความของผู้ให้บริการ ไม่ควรใช้สำหรับแอปธรรมดาทั่วไป"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ตั้งค่ากฎรหัสผ่าน"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"ควบคุมความยาวและอักขระที่อนุญาตให้ใช้ในรหัสผ่านการปลดล็อกหน้าจอ"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"ควบคุมความยาวและอักขระที่สามารถใช้ในรหัสผ่านของการล็อกหน้าจอและ PIN"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ตรวจสอบความพยายามในการปลดล็อกหน้าจอ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ตรวจสอบจำนวนของรหัสผ่านที่พิมพ์ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดในแท็บเล็ตถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ตรวจสอบจำนวนรหัสผ่านที่ไม่ถูกต้องที่คุณพิมพ์เวลาปลดล็อกหน้าจอ และล็อกทีวีหรือลบข้อมูลของทีวีทั้งหมด หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยครั้งเกินไป"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ตรวจสอบจำนวนการพิมพ์รหัสผ่านที่ไม่ถูกต้องขณะปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดในโทรศัพท์ถ้ามีการพิมพ์รหัสผ่านที่ไม่ถูกต้องมากเกินไป"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"เปลี่ยนรหัสผ่านการปลดล็อกหน้าจอ"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกแท็บเล็ตหรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกทีวีหรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ตรวจสอบจำนวนรหัสผ่านที่พิมพ์ไม่ถูกต้องเวลาปลดล็อกหน้าจอ และล็อกโทรศัพท์หรือลบข้อมูลทั้งหมดของผู้ใช้นี้หากพิมพ์รหัสผ่านไม่ถูกต้องบ่อยเกินไป"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"เปลี่ยนการล็อกหน้าจอ"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"เปลี่ยนการล็อกหน้าจอ"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ล็อกหน้าจอ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ควบคุมว่าหน้าจอจะล็อกอย่างไรและเมื่อใด"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ลบข้อมูลทั้งหมด"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ลบข้อมูลของแท็บเล็ตโดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ลบข้อมูลของทีวีโดยไม่ต้องมีคำเตือนโดยการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ลบข้อมูลของโทรศัพท์โดยไม่มีการเตือน ด้วยการดำเนินการรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ลบข้อมูลผู้ใช้"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ลบข้อมูลของผู้ใช้นี้ในแท็บเล็ตเครื่องนี้โดยไม่มีการเตือน"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ลบข้อมูลของผู้ใช้นี้ในทีวีเครื่องนี้โดยไม่มีการเตือน"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ลบข้อมูลของผู้ใช้นี้ในโทรศัพท์เครื่องนี้โดยไม่มีการเตือน"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะเปิดการใช้งานนโยบาย เฉพาะผู้ดูแลอุปกรณ์คนแรกเท่านั้นที่ตั้งค่าพร็อกซีส่วนกลางที่มีผลบังคับ"</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"ตั้งค่าวันหมดอายุของรหัสผ่านล็อกหน้าจอ"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"ควบคุมความถี่ในการเปลี่ยนรหัสผ่านล็อกหน้าจอ"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ตั้งค่าพร็อกซีส่วนกลางของอุปกรณ์ที่จะใช้ขณะที่เปิดใช้นโยบายอยู่ เฉพาะเจ้าของอุปกรณ์เท่านั้นที่สามารถตั้งค่าพร็อกซีส่วนกลาง"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"ตั้งวันหมดอายุรหัสผ่านล็อกจอ"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"เปลี่ยนความถี่ในการเปลี่ยนรหัสผ่านของการล็อกหน้าจอ, PIN หรือรูปแบบ"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ตั้งค่าการเข้ารหัสที่เก็บข้อมูล"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ข้อมูลของแอปพลิเคชันที่จัดเก็บต้องมีการเข้ารหัส"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ปิดใช้งานกล้องถ่ายรูป"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ป้องกันการใช้กล้องถ่ายรูปของอุปกรณ์ทั้งหมด"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"ปิดใช้งานคุณลักษณะการล็อกปุ่ม"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"ป้องกันการใช้คุณลักษณะบางส่วนในการล็อกปุ่ม"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"ปิดใช้คุณลักษณะการล็อกหน้าจอ"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"ป้องกันการใช้คุณลักษณะบางอย่างของการล็อกหน้าจอ"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"บ้าน"</item>
     <item msgid="869923650527136615">"มือถือ"</item>
@@ -1806,7 +1817,7 @@
       <item quantity="one">ระยะเวลา 1 ชั่วโมง</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"ไม่มีกำหนด"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"จนกว่าคุณจะปิดฟังก์ชันนี้"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ยุบ"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"จนถึงการตั้งปลุกครั้งถัดไปในเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"จนถึงการตั้งปลุกครั้งถัดไป"</string>

@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran qulfini o‘chirib qo‘yish"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx-sh sozlamalarini o‘qish"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ilovaga hisobning sinxronlash sozlamalarini o‘qish uchun ruxsat beradi. Masalan, bu \"Odamlar\" ilovasi hisob bilan sinxronlangan yoki aksini aniqlay oladi."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinx.ni yoqish/o‘chirish"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"aloqa operatorining xabar almashinuv xizmatiga bog‘lanish"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Egasiga aloqa operatorining xabar almashinuv xizmatining yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran qulfini ochish parollariga ruxsat berilgan belgilar va ularning uzunligini boshqarish."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran qulfi paroli va PIN kodlari uchun qo‘yiladigan talablarni (belgilar soni va uzunligi) nazorat qiladi."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekranni qulfdan chiqarish urinishlarini nazorat qilish"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta noto‘g‘ri kiritilsa, planshetni qulflaydi yoki undagi ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Ekranni qulfdan chiqarishda noto‘g‘ri kiritilgan parollarni sonini kuzatib boradi hamda agar parol juda ko‘p marta noto‘g‘ri kiritilsa, televizorni qulflash yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Ekranni qulfini ochishda parolni kiritishga urinishlarni kuzatib boradi va agar parol bir necha marta noto‘g‘ri kiritilsa, telefonni qulflaydi yoki undagi ma’lumotlarni o‘chirib tashlaydi."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Ekranni qulfdan chiqarish parolini o‘zgartirish"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Ekran qulfini ochish parolini o‘zgartirish."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, planshetni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, televizorni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Ekran qulfini ochishda kiritilgan noto‘g‘ri parollar sonini kuzatib boradi va agar parol juda ko‘p marta noto‘g‘ri kiritilsa, telefonni qulflaydi yoki undagi barcha ma’lumotlarni o‘chirib tashlaydi."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekran qulfini o‘zgartirish"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran qulfini o‘zgartiradi."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranni qulflash"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranning qachon va qanday qulflanishini boshqaradi."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Barcha ma’lumotlarni o‘chirish"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Planshet ma’lumotlarini ogohlantirishlarsiz ishlab chiqarilgan holatiga tiklash orqali o‘chirish"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Zavod sozlamalarini qayta tiklash orqali televizordagi ma’lumotlarni ogohlantirishsiz o‘chirib tashlaydi."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Telefon ma’lumotlarini ogohlantirishlarsiz zavod sozlamalarini tiklash orqali o‘chirish"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Foydalanuvchi ma’lumotlarini o‘chirish"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Ushbu planshetdagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Ushbu televizordagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Ushbu telefondagi foydalanuvchi ma’lumotlarini ogohlantirishsiz o‘chirib tashlaydi."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Qurilmaga global proksi o‘rnatish"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Siyosat yoqib qo‘yilganda foydalanish uchun global proksini qurilmaga o‘rnating. Faqat birinchi qurilma administratori samarali global proksini o‘rnatadi."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ekran qulf-sh paroli muddati."</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Ekranni qulflash parolini qancha muddatda almashtirish kerakligini boshqaradi."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Qoida faollashtirilgan vaqtda ishlatiladigan qurilmaning global proksi-serverini o‘rnatadi. Faqat qurilma egasi global proksi-serverini o‘rnatishi mumkin."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Parol muddatini o‘rnatish"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Ekran qulfi paroli, PIN kodi yoki chizmali paroli o‘zgartiriladigan muddatni o‘zgartiradi."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Xotirani kodlashni o‘rnatish"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zaxiralangan ilovalar ma‘lumotlarini kodlashni talab qiladi."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameralarni o‘chirish"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Barcha qurilma kameralaridan foydalanishga yo‘l qo‘ymaydi."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Tugmatagni qulflash xususiyatlarini o‘chirish"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Tugmatagni qulflashda ba’zi xususiyatlardan foydalanishga yo‘l qo‘ymaydi."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Funksiyalarni o‘chirib qo‘yish"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Ekran qulfining ba’zi funksiyalaridan foydalanishni cheklaydi."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Uy"</item>
     <item msgid="869923650527136615">"Mobayl"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Bir soat</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Ushbu vaqtgacha: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Uzluksiz ravishda"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Men o‘chirmaguncha"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Keyingi uyg‘otkich vaqtigacha (<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Keyingi uyg‘otkich vaqtigacha"</string>

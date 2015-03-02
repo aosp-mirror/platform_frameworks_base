@@ -288,7 +288,7 @@
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Uygulamaya, kullanıcı müdahalesi olmadan kısayolları Ana Ekrana ekleme izni verir."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"kısayolların yüklemesini kaldırma"</string>
     <string name="permdesc_uninstall_shortcut" msgid="6745743474265057975">"Uygulamaya, kullanıcının müdahalesi olmadan kısayolları Ana Ekrandan kaldırma izni verir."</string>
-    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendir"</string>
+    <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"giden çağrıları yeniden yönlendirme"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5156385005547315876">"Uygulamaya, giden bir çağrının numarası çevrilirken çağrıyı farklı bir numaraya yönlendirme ya da tamamen kapatma seçeneğiyle birlikte numarayı görme izni verir."</string>
     <string name="permlab_receiveSms" msgid="8673471768947895082">"kısa mesajları al (SMS)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Uygulamaya SMS iletilerini alma ve işleme izni verir. Bu izin, uygulamanın cihazınıza gönderilen iletileri takip edip size göstermeden silebileceği anlamına gelir."</string>
@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Uygulamaya, Near Field Communication (NFC) etiketleri, kartlar ve okuyucular ile iletişim kurma izni verir."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran kilidimi devre dışı bırak"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Uygulamaya, tuş kilidini ve ilişkili tüm şifreli güvenlik önlemlerini devre dışı bırakma izni verir. Örneğin, telefon, çağrı alındığında tuş kilidinin devre dışı bırakır ve sonra, görüşme bittiğinde kilidi yeniden etkinleştirir."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını okuma"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Uygulamaya bir hesaba ait senkronizasyon ayarlarını okuma izni verir. Örneğin, bu izne sahip bir uygulama Kişiler uygulamasının bir hesapla senkronize olup olmadığını belirleyebilir."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"senkronizasyonu açma/kapatma"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"operatör mesajlaşma hizmetine bağlan"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"İzin sahibinin, operatör mesajlaşma hizmetinin üst düzey arayüzüne bağlanmasına olanak verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetleyin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Ekran kilidini açarken yapılan yanlış şifre girme denemelerini izle ve çok fazla sayıda yanlış şifre girme denemesi yapılmışsa tableti kilitle veya tabletteki tüm verileri sil."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip etme ve çok fazla sayıda hatalı şifre girildiğinde TV\'yi kilitleme veya TV\'nin tüm verilerini silme."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Ekran kilidini açarken yapılan yanlış şifre girişi denemelerini izle ve çok sayıda yanlış şifre girişi denemesi yapılmışsa telefonu kilitle veya telefonun tüm verilerini sil."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Ekran kilidini açma şifresini değiştirme"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Ekran kilidini açma şifresini değiştirme."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde tableti kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde TV\'yi kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Ekran kilidi açılırken girilen hatalı şifre sayısını takip edin ve çok fazla sayıda hatalı şifre girildiğinde telefonu kilitleyin veya söz konusu kullanıcının tüm verilerini silin."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Ekran kilidini değiştir"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Ekran kilidini değiştirin."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Ekranı kilitleme"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ekranın nasıl ve ne zaman kilitlendiğini denetleme."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Tüm verileri silme"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek tabletteki verileri uyarıda bulunmadan silme."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Fabrika ayarlarına sıfırlama yoluyla TV\'nin verilerini uyarı vermeksizin silme."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Fabrika verilerine sıfırlama işlemi gerçekleştirerek telefondaki verileri uyarıda bulunmadan silme."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Kullanıcı verilerini sil"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Uyarı yapmadan bu kullanıcının bu tabletteki verilerini silin."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Uyarı yapmadan bu kullanıcının bu TV\'deki verilerini silin."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Uyarı yapmadan bu kullanıcının bu telefondaki verilerini silin."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Cihaz genelinde geçerli proxy\'i ayarla"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Etkin genel proxy\'yi yalnızca ilk cihaz yöneticisi ayarlar."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ekr kilt şifr süre sonu ayarla"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Ekran kilitleme şifresinin hangi sıklıkla değiştirilmesi gerektiğini denetleme."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Politika etkin olduğunda kullanılacak cihaz genelinde geçerli proxy\'yi ayarlayın. Genel proxy\'yi yalnızca cihaz sahibi ayarlayabilir."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Ekran kilidi şifresinin kullanma süresini ayarla"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Ekran kilitleme şifresinin, PIN\'in veya desenin hangi sıklıkla değiştirileceğini ayarlayın."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Deplm şifrelemesini ayarla"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Depolanan uygulama verilerinin şifrelenmiş olmasını zorunlu kılma."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameraları devre dışı bırak"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Tüm cihaz kameralarının kullanımını engelleme."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Keyguard\'daki özellikleri devre dışı bırak"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Keyguard\'daki bazı özelliklerin kullanılmasını önle."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Ekran kilidinin özelliklerini devre dışı bırak"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Ekran kilidinin bazı özelliklerinin kullanılmasını önleyin."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ev"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -896,8 +911,8 @@
     <string name="phoneTypeRadio" msgid="4093738079908667513">"Telsiz"</string>
     <string name="phoneTypeTelex" msgid="3367879952476250512">"Teleks"</string>
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
-    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Yeri Cep Telefonu"</string>
-    <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Yeri Çağrı Cihazı"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"İş Cep Telefonu"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"İş Çağrı Cihazı"</string>
     <string name="phoneTypeAssistant" msgid="5596772636128562884">"Yardımcı"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"Özel"</string>
@@ -1355,7 +1370,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Medya cihazı olarak bağlandı"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Kamera olarak bağlandı"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI cihaz olarak bağlandı"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"MIDI cihazı olarak bağlandı"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Yükleyici olarak bağlandı"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB aksesuarına bağlandı"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"Diğer USB seçenekleri için dokunun."</string>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Bir saat için</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Şu saate kadar: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Süresiz"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Siz bunu kapatana kadar"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Daralt"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> saatindeki bir sonraki alarma kadar"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Bir sonraki alarma kadar"</string>

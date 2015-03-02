@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏ایپ کو Near Field Communication (NFC)‎ ٹیگز، کارڈز اور ریڈرز کے ساتھ مواصلت کرنے کی اجازت دیٹا ہے۔"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"اپنے اسکرین لاک کو غیر فعال کریں"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ایپ کو کلیدی لاک اور کسی بھی متعلقہ پاس ورڈ سیکیورٹی کو غیر فعال کرنے کی اجازت دیتا ہے۔ مثلاً، کوئی آنے والی فون کال موصول ہونے کے وقت فون کلیدی لاک کو غیر فعال کرتا ہے، پھر کال پوری ہوجانے پر کلیدی لاک کو دوبارہ فعال کردیتا ہے۔"</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"مطابقت پذیری کی ترتیبات پڑھیں"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"‏ایپ کو کسی اکاؤنٹ کیلئے مطابقت پذیری کی ترتیبات پڑھنے کی اجازت دیتا ہے۔ مثلا، یہ تعین کرسکتا ہے کہ آیا People ایپ کسی اکاؤنٹ کے ساتھ مطابقت پذیر ہے۔"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"مطابقت پذیری آن اور آف ٹوگل کریں"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ایک کیریئر پیغام رسانی سروس کا پابند بنیں"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"حامل کو ایک کیریئر پیغام رسانی سروس کے اعلی سطحی انٹرفیس کا پابند ہونے کی اجازت دیتی ہے۔ عام ایپس کیلئے کبھی بھی اس کی ضرورت نہیں ہونی چاہیے۔"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"پاس ورڈ کے اصول سیٹ کریں"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"اسکرین غیر مقفل کرنے کے پاس ورڈز میں مجاز طوالت اور حروف کو کنٹرول کریں۔"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"‏اسکرین لاک پاس ورڈز اور PINs میں اجازت یافتہ لمبائی اور حروف کو کنٹرول کریں۔"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"اسکرین غیر مقفل کرنے کی کوششیں مانیٹر کریں"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کیے گئے غلط پاس ورڈز کی تعداد مانیٹر کریں اور ٹیبلیٹ کو مقفل کریں یا اگر کافی زیادہ غلط پاس ورڈز ٹائپ کیے گئے ہیں تو ٹیبلیٹ کا سبھی ڈیٹا صاف کریں۔"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"‏اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو TV کو مقفل کریں یا TV کا سبھی ڈیٹا مٹائیں۔"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کیے گئے غلط پاس ورڈز کی تعداد مانیٹر کریں اور فون کو مقفل کریں یا اگر کافی زیادہ غلط پاس ورڈز ٹائپ کیے گئے ہیں تو فون کا سبھی ڈیٹا صاف کریں۔"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"اسکرین غیر مقفل کرنے کا پاس ورڈ تبدیل کریں"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"اسکرین غیر مقفل کرنے کا پاس ورڈ تبدیل کریں۔"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو ٹیبلٹ کو مقفل کریں یا اس صارف کا سبھی ڈیٹا ہٹائیں۔"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"‏اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو TV کو مقفل کریں یا اس صارف کا سبھی ڈیٹا ہٹائیں۔"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"اسکرین کو غیر مقفل کرتے وقت ٹائپ کردہ غلط پاس ورڈز کی تعداد پر نگاہ رکھیں اور اگر بہت زیادہ غلط پاس ورڈز ٹائپ کیے جاتے ہیں تو فون کو مقفل کریں یا اس صارف کا سبھی ڈیٹا ہٹائیں۔"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"اسکرین لاک تبدیل کریں"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"اسکرین لاک تبدیل کریں۔"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"اسکرین مقفل کریں"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"اسکرین کب اور کس طرح مقفل ہوتا ہے اس کو کنٹرول کریں۔"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"سبھی ڈیٹا صاف کریں"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"فیکٹری ڈیٹا کی دوبارہ ترتیب انجام دے کر وارننگ کے بغیر ٹیبلٹ کا ڈیٹا مٹائیں۔"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"‏ایک فیکٹری ڈیٹا ری سیٹ انجام دے کر انتباہ کے بغیر TV کا ڈیٹا مٹائیں۔"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"فیکٹری ڈیٹا کی دوبارہ ترتیب انجام دے کر وارننگ کے بغیر فون کا ڈیٹا مٹائیں۔"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"صارف کا ڈیٹا ہٹائیں"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"وارننگ کے بغیر اس ٹیبلٹ پر موجود اس صارف کا ڈیٹا ہٹائیں۔"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"‏وارننگ کے بغیر اس TV پر موجود اس صارف کا ڈیٹا ہٹائیں۔"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"وارننگ کے بغیر اس فون پر موجود اس صارف کا ڈیٹا ہٹائیں۔"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"آلہ کی عالمی پراکسی سیٹ کریں"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"پالیسی فعال ہونے پراستعمال کیے جانے کیلئے آلہ کی عالمی پراکسی سیٹ کریں۔ آلے کا صرف پہلا منتظم مؤثر عالمی پراکسی سیٹ کرتا ہے۔"</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"لاک سکرین پاسورڈ مدت سیٹ کریں"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"اسکرین مقفل کرنے کا پاس ورڈ کتنی کثرت سے تبدیل کیا جانا چاہیے اس کو کنٹرول کریں۔"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"پالیسی فعال ہونے پر آلہ کی عالمی پراکسی کو استعمال کیے جانے کیلئے سیٹ کریں۔ صرف آلہ کا مالک ہی عالمی پراکسی سیٹ کر سکتا ہے۔"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"اسکرین لاک پاس ورڈ کی میعاد سیٹ کریں"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"‏تبدیل کریں کہ کتنے وقفہ میں اسکرین لاک پاس ورڈ، PIN یا پیٹرن تبدیل ہونا ضروری ہے۔"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"اسٹوریج کی مرموز کاری سیٹ کریں"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"مطالبہ کریں کہ اسٹور کردہ ایپ کا ڈیٹا مرموز کیا جائے۔"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"کیمروں کو غیر فعال کریں"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"سبھی آلے کے کیمروں کا استعمال روکیں۔"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"کی گارڈ کی خصوصیات غیر فعال کریں"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"کی گارڈ میں کچھ خصوصیات کے استعمال کو روکیں۔"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"اسکرین لاک کی خصوصیات غیر فعال کریں"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"اسکرین لاک کی کچھ خصوصیات کے استعمال سے روکیں۔"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"گھر"</item>
     <item msgid="869923650527136615">"موبائل"</item>
@@ -1355,7 +1370,7 @@
     <string name="dlg_ok" msgid="7376953167039865701">"ٹھیک ہے"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"ایک میڈیا آلہ کے بطور مربوط کر دیا گیا"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"ایک کیمرہ کے بطور مربوط ہے"</string>
-    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏ایک MIDI آلہ کے بطور منسلک کیا گیا"</string>
+    <string name="usb_midi_notification_title" msgid="1399152904227676460">"‏MIDI آلہ کے بطور منسلک"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"ایک انسٹالر کے بطور مربوط ہے"</string>
     <string name="usb_accessory_notification_title" msgid="7848236974087653666">"‏ایک USB لوازم سے مربوط ہے"</string>
     <string name="usb_notification_message" msgid="2290859399983720271">"‏USB کے دوسرے اختیارات کیلئے چھوئیں۔"</string>
@@ -1806,7 +1821,7 @@
       <item quantity="one">ایک گھنٹہ کیلئے</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"غیر متعینہ"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"جب تک آپ اسے آف نہ کر دیں"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"اگلے الارم تک بوقت <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"اگلے الارم تک"</string>

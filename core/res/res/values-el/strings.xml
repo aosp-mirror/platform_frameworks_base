@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Επιτρέπει στην εφαρμογή την επικοινωνία με ετικέτες, κάρτες και αναγνώστες της Επικοινωνίας κοντινού πεδίου (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"απενεργοποίηση κλειδώματος οθόνης"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Επιτρέπει στην εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, το κλείδωμα πληκτρολογίου στο τηλέφωνο απενεργοποιείται όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και ενεργοποιείται ξανά όταν η κλήση τερματιστεί."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ανάγνωση ρυθμίσεων συγχρονισμού"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Επιτρέπει στην εφαρμογή την ανάγνωση των ρυθμίσεων συγχρονισμού για έναν λογαριασμό. Για παράδειγμα, αυτό μπορεί να καθορίσει εάν η εφαρμογή \"Άτομα\" είναι συγχρονισμένη με έναν λογαριασμό."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"εναλλαγή ενεργοποίησης και απενεργοποίησης συγχρονισμού"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"δέσμευση σε υπηρεσία ανταλλαγής μηνυμάτων εταιρείας κινητής τηλεφωνίας"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ανταλλαγής μηνυμάτων εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ελέγξτε την έκταση και τους επιτρεπόμενους χαρακτήρες σε κωδικούς πρόσβασης κλειδώματος οθόνης και PIN."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Παρακολούθηση του αριθμού λανθασμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλείδωμα του tablet ή διαγραφή όλων των δεδομένων του σε περίπτωση πληκτρολόγησης πάρα πολλών εσφαλμένων κωδικών πρόσβασης."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Παρακολούθηση του αριθμού των εσφαλμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλείδωμα της τηλεόρασης ή διαγραφή όλων των δεδομένων της τηλεόρασης, αν έχουν πληκτρολογηθεί πάρα πολλοί εσφαλμένοι κωδικοί πρόσβασης."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Παρακολούθηση του αριθμού λανθασμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλείδωμα του τηλεφώνου ή διαγραφή όλων των δεδομένων του σε περίπτωση πληκτρολόγησης πάρα πολλών εσφαλμένων κωδικών πρόσβασης."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Αλλαγή κωδικού πρόσβασης ξεκλειδώματος οθόνης"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Αλλαγή του κωδικού πρόσβασης ξεκλειδώματος οθόνης."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Παρακολουθήστε τον αριθμό των εσφαλμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλειδώστε το tablet ή διαγράψτε όλα τα δεδομένα του χρήστη, σε περίπτωση εισαγωγής πάρα πολλών εσφαλμένων κωδικών πρόσβασης."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Παρακολουθήστε τον αριθμό των εσφαλμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλειδώστε την τηλεόραση ή διαγράψτε όλα τα δεδομένα του χρήστη, σε περίπτωση εισαγωγής πάρα πολλών εσφαλμένων κωδικών πρόσβασης."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Παρακολουθήστε τον αριθμό των εσφαλμένων κωδικών πρόσβασης που πληκτρολογούνται κατά το ξεκλείδωμα της οθόνης και κλειδώστε το τηλέφωνο ή διαγράψτε όλα τα δεδομένα του χρήστη, σε περίπτωση εισαγωγής πάρα πολλών εσφαλμένων κωδικών πρόσβασης."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Αλλαγή του κλειδώματος οθόνης"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Αλλαγή του κλειδώματος οθόνης"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Κλείδωμα οθόνης"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Έλεγχος του τρόπου και του χρόνου κλειδώματος της οθόνης."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Διαγραφή όλων των δεδομένων"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Διαγραφή των δεδομένων του tablet χωρίς προειδοποίηση με επαναφορά των εργοστασιακών ρυθμίσεων."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Διαγραφή των δεδομένων της τηλεόρασης χωρίς προειδοποίηση με εκτέλεση επαναφοράς εργοστασιακών ρυθμίσεων."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Διαγραφή των δεδομένων του τηλεφώνου χωρίς προειδοποίηση με επαναφορά των εργοστασιακών ρυθμίσεων."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Διαγραφή δεδομένων χρήστη"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Διαγραφή των δεδομένων αυτού του χρήστη σε αυτό το tablet χωρίς προειδοποίηση."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Διαγραφή των δεδομένων αυτού του χρήστη σε αυτήν την τηλεόραση χωρίς προειδοποίηση."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Διαγραφή των δεδομένων αυτού του χρήστη σε αυτό το τηλέφωνο χωρίς προειδοποίηση."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Ρύθμιση του γενικού διακομιστή μεσολάβησης της συσκευής"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Ορίστε τη χρήση του γενικού διακομιστή μεσολάβησης της συσκευής όταν είναι ενεργοποιημένη η πολιτική. Μόνο ο διαχειριστής της πρώτης συσκευής ορίζει τον ισχύοντα γενικό διακομιστή μεσολάβησης."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ορισμός λήξης κωδ. κλειδ. οθ."</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Έλεγχος της συχνότητας αλλαγής του κωδικού πρόσβασης κλειδώματος οθόνης."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Ρυθμίστε τη χρήση του γενικού διακομιστή μεσολάβησης της συσκευής, ενώ η πολιτική είναι ενεργοποιημένη. Μόνο ο κάτοχος της συσκευής μπορεί να ρυθμίσει τον γενικό διακομιστής μεσολάβησης."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Ορίστε λήξη κωδ.πρόσ.κλειδ.οθ."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Αλλάξτε τη συχνότητας αλλαγής του κωδικού πρόσβασης κλειδώματος οθόνης, του PIN ή του μοτίβου."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Ορισμός κρυπτογρ. αποθ. χώρου"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Να απαιτείται η κρυπτογράφηση των αποθηκευμένων δεδομένων εφαρμογής"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Απενεργοποίηση φωτογρ. μηχανών"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Να αποτρέπεται η χρήση των φωτογραφικών μηχανών της συσκευής."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Απενεργοποίηση λειτουργιών στο κλείδωμα πληκτρολογίου"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Αποφυγή της χρήσης ορισμένων λειτουργιών στο κλείδωμα πληκτρολογίου."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Απεν. λειτ.κλειδώματος οθόνης"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Αποφυγή της χρήσης ορισμένων λειτουργιών στο κλείδωμα οθόνης."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Οικία"</item>
     <item msgid="869923650527136615">"Κινητό"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Για μία ώρα</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Επ\' αόριστον"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Μέχρι να το απενεργοποιήσετε"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Σύμπτυξη"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Έως την επόμενη ειδοποίηση στις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Έως την επόμενη ειδοποίηση"</string>

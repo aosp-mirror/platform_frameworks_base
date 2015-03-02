@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ermöglicht der App, die Synchronisierungseinstellungen eines Kontos zu lesen. Beispielsweise kann damit festgestellt werden, ob Kontakte mit einem Konto synchronisiert werden."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Synchronisierung aktivieren oder deaktivieren"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-SMS/MMS-Dienst binden"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-SMS/MMS-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Bildschirms festlegen"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Bildschirms überwachen und Fernseher sperren oder alle Daten auf dem Fernseher löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Bildschirms überwachen und Telefon sperren oder alle Daten auf dem Telefon löschen, wenn zu häufig ein falsches Passwort eingegeben wird."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Passwort zum Entsperren des Bildschirms ändern"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Ändern Sie das Passwort zum Entsperren des Bildschirms."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten dieses Nutzers löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Fernseher sperren oder alle Daten dieses Nutzers löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Smartphone sperren oder alle Daten dieses Nutzers löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Displaysperre ändern"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Displaysperre ändern"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bildschirm sperren"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Legen Sie fest, wie und wann der Bildschirm gesperrt wird."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle Daten löschen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Tablet ohne Warnung löschen"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Fernseher ohne Warnung löschen"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Setzen Sie das Telefon auf die Werkseinstellungen zurück. Dabei werden alle Daten ohne Warnung gelöscht."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Nutzerdaten löschen"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Daten dieses Nutzers auf diesem Tablet ohne vorherige Warnung löschen"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Daten dieses Nutzers auf diesem Fernseher ohne vorherige Warnung löschen"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Daten dieses Nutzers auf diesem Smartphone ohne vorherige Warnung löschen"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Den globalen Proxy des Geräts festlegen"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den bei aktivierter Richtlinie zu verwendenden globalen Proxy des Geräts festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf von Sperr-Passwort festlegen"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Legen Sie fest, wie häufig das Passwort zum Sperren des Bildschirms geändert werden muss."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Bei aktivierter Richtlinie zu verwendenden globalen Geräteproxy festlegen. Nur der Eigentümer des Geräts kann den globalen Proxy festlegen."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Passwortablauf für Sperre festlegen"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Häufigkeit ändern, mit der das Passwort, die PIN oder das Muster für die Displaysperre geändert werden muss"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Speicherverschlüsselung"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Anforderung, dass gespeicherte App-Daten verschlüsselt werden"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kameras deaktivieren"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Nutzung sämtlicher Gerätekameras unterbinden"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Funktionen in Keyguard deaktivieren"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Verhindert in Keyguard die Verwendung einiger Funktionen"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Sperrfunktionen deaktivieren"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Verhindert die Verwendung einiger Funktionen der Displaysperre"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Privat"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Für eine Stunde</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Unbegrenzt"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Bis zur Deaktivierung"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Bis zum nächsten Weckruf um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Bis zum nächsten Weckruf"</string>

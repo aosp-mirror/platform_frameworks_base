@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"NFCタグ、カード、リーダーとの通信をアプリに許可します。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"画面ロックの無効化"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"キーロックとキーロックに関連付けられたパスワードのセキュリティを無効にすることをアプリに許可します。たとえば、かかってきた電話を受ける際にキーロックを無効にし、通話が終了したらキーロックを再度有効にする場合などに使用します。"</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"同期設定の読み取り"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"アカウントの同期設定の読み取りをアプリに許可します。たとえば、連絡帳アプリがアカウントと同期しているかどうかをアプリから特定できるようになります。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"同期のON/OFFの切り替え"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"携帯通信会社のSMSサービスへのバインド"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"画面ロック解除パスワードの長さと使用できる文字を制御します。"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合はタブレットをロックするかタブレットのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"画面のロック解除に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はテレビをロックするかテレビのデータをすべて消去します。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"画面のロック解除に正しくないパスワードを入力した回数を監視し、回数が多すぎる場合は携帯端末をロックするか携帯端末のデータをすべて消去します。"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"画面ロック解除パスワードの変更"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"画面ロック解除パスワードを変更します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はタブレットをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はテレビをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"画面のロック解除の際に入力したパスワードが間違っていた回数を監視し、回数が多すぎる場合はスマートフォンをロックするかこのユーザーのデータをすべて消去します。"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"画面ロックの変更"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"画面ロックを変更します。"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"画面のロック"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"画面をロックする方法とタイミングを制御します。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"すべてのデータを消去"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"警告せずにデータの初期化を実行してタブレット内のデータを消去します。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"警告せずにデータの初期化を実行してテレビ内のデータを消去します。"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"警告せずにデータの初期化を実行して端末内のデータを消去します。"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ユーザーデータの消去"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"このタブレットのこのユーザーのデータを警告なく消去します。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"このテレビのこのユーザーのデータを警告なく消去します。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"このスマートフォンのこのユーザーのデータを警告なく消去します。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"端末のグローバルプロキシを設定"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。有効なグローバルプロキシを設定できるのは最初のデバイス管理者だけです。"</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"解除パスワードの有効期限の設定"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"ロック解除パスワードの変更が必要になる頻度を指定します。"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ポリシーが有効になっている場合は端末のグローバルプロキシが使用されるように設定します。グローバルプロキシを設定できるのは端末の所有者だけです。"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"画面ロックのパスワード有効期限の設定"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"画面ロックのパスワード、PIN、パターンの変更が必要になる頻度を変更します。"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ストレージ暗号化の設定"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"保存したアプリデータが暗号化されるようにします。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"カメラを無効にする"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"すべての端末カメラを使用できないようにします。"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"キーガードの機能を無効にする"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"キーガードの一部の機能の使用を禁止します。"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"画面ロック機能の無効化"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"画面ロックの一部の機能の使用を禁止します。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"自宅"</item>
     <item msgid="869923650527136615">"携帯"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">1時間</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"制限なし"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"ユーザーがOFFにするまで"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"次のアラーム（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）まで"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"次のアラームまで"</string>

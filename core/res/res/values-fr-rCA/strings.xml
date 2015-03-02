@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permet à l\'application de communiquer avec des bornes, des cartes et des lecteurs compatibles avec la technologie NFC (communication en champ proche)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"désactiver le verrouillage de l\'écran"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permet à l\'application de désactiver le verrouillage des touches et toute mesure de sécurité par mot de passe associée. Par exemple, votre téléphone désactive le verrouillage des touches lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lire les paramètres de synchronisation"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permet à l\'application d\'accéder aux paramètres de synchronisation d\'un compte. Par exemple, cette autorisation peut permettre de déterminer si l\'application Contacts est synchronisée avec un compte ou non."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activer ou désactiver la synchronisation"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"s\'associer à un service de messagerie d\'un fournisseur"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de messagerie d\'un fournisseur. Les applications standards ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Choisir le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Gérer le nombre et le type de caractères autorisés dans les mots de passe et les NIP de verrouillage de l\'écran."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouiller la tablette ou effacer toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille le téléviseur ou efface toutes ses données en cas d\'un nombre trop élevé de tentatives."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Contrôler le nombre de mots de passe incorrects saisis pour le déverrouillage de l\'écran, puis verrouille le téléphone ou efface toutes ses données si le nombre maximal de tentatives de saisie du mot de passe est atteint."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Modifier le mot de passe de déverrouillage de l\'écran"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille la tablette ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille le téléviseur ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Surveille le nombre de mots de passe incorrects entrés lors du déverrouillage de l\'écran et verrouille le téléphone ou efface toutes les données de l\'utilisateur en cas d\'un nombre trop élevé de tentatives."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Modifier le verrouillage de l\'écran"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Modifier le verrouillage de l\'écran"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Verrouiller l\'écran"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Gérer le mode et les conditions de verrouillage de l\'écran"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Effacer toutes les données"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Effacer les données de la tablette sans avertissement, en rétablissant la configuration d\'usine"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Effacer les données du téléviseur sans avertissement en effectuant une réinitialisation des paramètres d\'usine."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Effacer les données du téléphone sans avertissement, en rétablissant la configuration d\'usine"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Effacer les données de l\'utilisateur"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Effacer les données de l\'utilisateur sur cette tablette sans avertissement."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Effacer les données de l\'utilisateur sur ce téléviseur sans avertissement."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Effacer les données de l\'utilisateur sur ce téléphone sans avertissement."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Définir le serveur mandataire global du mobile"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Indiquer le serveur mandataire global à utiliser pour ce mobile lorsque les règles sont activées. Seul l\'administrateur principal du mobile peut définir le serveur mandataire global utilisé."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Définir exp. mot passe verr."</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Contrôler la fréquence de modification du mot de passe de verrouillage de l\'écran"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Indiquer le mandataire global à utiliser pour l\'appareil lorsque la politique est activée. Seul le propriétaire de l\'appareil peut définir le mandataire global."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Déf. expir. m. passe verr. écr."</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modifier la fréquence de modification du mot de passe, du NIP ou du motif de verrouillage de l\'écran."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Définir cryptage du stockage"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exiger le chiffrement des données d\'application stockées"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Désactiver les appareils photo"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Empêcher l\'utilisation de tous les appareils photos"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Désact. fonct. si protec. clav."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Empêcher l\'utilisation de certaines fonctionnalités lorsque la protection du clavier est activée"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Désact. fonctions verr. écran"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Empêcher l\'utilisation de certaines fonctionnalités du verrouillage de l\'écran."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="other">Pendant %d heures</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Indéfiniment"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Jusqu\'à la désactivation"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Réduire"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Jusqu\'à la prochaine alarme, à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Jusqu\'à la prochaine alarme"</string>

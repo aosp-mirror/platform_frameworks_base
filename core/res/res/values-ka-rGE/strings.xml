@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"სინქრონიზაციის პარამეტრების წაკითხვა"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"აპს შეეძლება, წაიკითხოს ანგარიშის სინქრონიზაციის პარამეტრები. მაგალითად, მას შეეძლება განსაზღვროს, არის თუ არა People აპი სინქრონიზებული ანგარიშთან."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"სინქრონიზაციის ჩართვა და გამორთვა"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"აკავშირებს შეტყობინების გაცვლის მომსახურებას"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"საშუალებას აძლევს მფლობელს შექმნას შეტყობინების გაცვლის მომსახურების უმახლესი დონის ინტერფეისი. არასდროს იქნება საჭირო ნორმალური აპლიკაციებისათვის."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"პაროლის წესების დაყენება"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"გააკონტროლეთ ეკრანის განბლოკვის პაროლში დაშვებული სიმბოლოები და მისი სიგრძე."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ეკრანის განბლოკვის მცდელობების გაკონტროლება"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ეკრანის განბლოკვისთვის არასწორად აკრეფილი პაროლების რაოდენობის მონიტორინგი. ტაბლეტის დაბლოკვა ან მასზე არსებული ყველა მონაცემის წაშლა ძალიან ბევრჯერ არასწორი პაროლის შეყვანის შემთხვევაში."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ეკრანის განბლოკვის დროს, გააკონტროლეთ არასწორად შეყვანილი პაროლების რაოდენობა და ჩაკეტეთ ტელევიზორი ან წაშალეთ ტელვიზორის ყველა მონაცემები, იმ შემთხვევაში, თუ პაროლის მრავალჯერად, არასწორად შეყვანას ექნება ადგილი."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ეკრანის განბლოკვისთვის არასწორად აკრეფილი პაროლების რაოდენობის მონიტორინგი. ტელეფონის დაბლოკვა ან მასზე არსებული ყველა მონაცემის წაშლა ძალიან ბევრჯერ არასწორი პაროლის შეყვანის შემთხვევაში."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"ეკრანის განბლოკვის პაროლის შეცვლა"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"შეცვალეთ ეკრანის განბლოკვის პაროლი."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტაბლეტის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტელევიზორის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ეკრანის განბლოკვისას არასწორი პაროლების შეყვანილი რაოდენობის მონიტორინგი და ტელეფონის დაბლოკვა ან მრავლალჯერ არასწორი პაროლის შეყვანის შემთხვევაში ამ მომხმარებლის მთელი ინფორმაციის წაშლა."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"ეკრანის დაბლოკვის შეცვლა"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ეკრანის დაბლოკვის შეცვლა"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ეკრანის დაბლოკვა"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"გააკონტროლეთ, როგორ და როდის დაიბლოკოს ეკრანი."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ყველა მონაცემის წაშლა"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ტაბლეტის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ტელევიზორის მონაცემები წაშლილია, ქარხნულ მონაცემებზე დაბრუნების გაფრთხილების გარეშე."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ტელეფონის მონაცემების გაუფრთხილებლად წაშლა, ქარხნული მონაცემების აღდგენით"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"მომხმარებლის მონაცემების წაშლა"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტაბლეტზე."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტელევიზორში."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ამ მომხმარებლის მონაცემების გაუფრთხილებელი წაშლა ამ ტელეფონზე."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"მოწყობილობის გლობალური პროქსის დაყენება"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"დააყენეთ მოწყობილობა გლობალურ პროქსის სერვერის გამოსაყენებლად, როდესაც დებულება გააქტიურებულია. მხოლოდ მოწყობილობის პირველი ადმინი აყენებს ეფექტურ გლობალურ პროქსი სერვერს."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"ეკრანის პაროლის ვადის დაყენება"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"გააკონტროლეთ, თუ რამდენად ხშირად უნდა შეიცვალოს ეკრანის დაბლოკვის პაროლი."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ჩართული პოლიტიკის დროს მოწყობილობის გლობალური პროქსის დაყენება. მხოლოდ მოწყობილობის მფლობელს შეუძლია გლობალური პროქსის დაყენება."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"მითითებული ეკრანის დაბლოკვის პაროლის ვადა"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"შეცვალეთ ეკრანის ბლოკირების პაროლების, PIN-ებისა და მონახაზების შეცვლის სიხშირე."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"მეხსიერების დაშიფრვის დაყენება"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"საჭიროა შენახული აპის მონაცემების დაშიფრვა."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"კამერების გათიშვა"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"მოწყობილობის კამერების გამოყენების აღკვეთა."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"დაბლოკვის ფუნქციების გათიშვა"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"დაბლოკვისას ზოგიერთი ფუნქციის გამოყენების თავიდან აცილება."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"ეკრანის დაბლოკვის მახასიათებლების გამორთვა"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"დაიცავით ეკრანის ბლოკირება გარკვეული მახასიათებლებისაგან."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"სახლი"</item>
     <item msgid="869923650527136615">"მობილური"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">ერთი საათის განმავლობაში</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-მდე"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"სამუდამოდ"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"სანამ ამას გამორთავდეთ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"აკეცვა"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"შემდეგ მაღვიძარამდე <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ში"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"შემდეგ მაღვიძარამდე"</string>

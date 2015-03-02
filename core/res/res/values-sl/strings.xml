@@ -740,6 +740,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogočanje zaklepanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji dovoljuje, da onemogoči zaklep tipkovnice in morebitno povezano varnostno geslo. Telefon na primer onemogoči zaklep tipkovnice pri dohodnem klicu ter vnovič omogoči zaklep, ko je klic končan."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogoča branje nastavitev sinhronizacije za račun. S tem lahko aplikacija na primer ugotovi, ali je aplikacija Ljudje sinhronizirana z računom."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"vklop in izklop sinhronizacije"</string>
@@ -815,29 +823,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"povezovanje z operaterjevo sporočilno storitvijo"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Imetniku omogoča povezovanje z vmesnikom operaterjeve sporočilne storitve najvišje ravni. To naj ne bi bilo nikoli potrebno za navadne aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih in kodah PIN za odklepanje zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"nadzor nad poskusi odklepanja zaslona"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Nadzoruje število nepravilno vnesenih gesel pri odklepanju zaslona in zaklene tablični računalnik ali izbriše vse podatke v njem, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene televizor ali izbriše vse podatke v televizorju, če je vnesenih preveč nepravilnih gesel."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Spremljajte število vnesenih napačnih gesel, s katerimi želite odkleniti zaslon. Če je teh vnosov preveč, zaklenite telefon ali izbrišite vse podatke v njem."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Spreminjanje gesla za odklepanje zaslona"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Sprememba gesla za odklepanje zaslona."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene tablični računalnik ali izbriše vse podatke lastnika, če je vnesenih preveč nepravilnih gesel."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene televizor ali izbriše vse podatke lastnika, če je vnesenih preveč nepravilnih gesel."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Nadzira število vnesenih nepravilnih gesel pri odklepanju zaslona in zaklene telefon ali izbriše vse podatke lastnika, če je vnesenih preveč nepravilnih gesel."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Spreminjanje zaklepanja zaslona"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Spreminjanje zaklepanja zaslona."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Zaklepanje zaslona"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Nadzor nad tem, kako in kdaj se zaklene zaslon."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Brisanje vseh podatkov"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Izbris podatkov v tabličnem računalniku brez opozorila s ponastavitvijo na tovarniške nastavitve"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Brez opozorila izbriše podatke v televizorju, tako da izvede ponastavitev na tovarniške nastavitve."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Izbris podatkov v telefonu brez opozorila s ponastavitvijo na tovarniške nastavitve"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Izbris podatkov uporabnika"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Izbris podatkov uporabnika v tem tabličnem računalniku brez opozorila."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Izbris podatkov uporabnika v tem televizorju brez opozorila."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Izbris podatkov uporabnika v tem telefonu brez opozorila."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavitev globalnega strežnika proxy za napravo"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Nastavite globalni strežnik proxy naprave, ki bo v uporabi, ko je pravilnik omogočen. Samo skrbnik prve naprave lahko nastavi veljaven globalni strežnik proxy."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastavitev poteka gesla za zaklepanje zaslona"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Nadzor nad tem, kako pogosto je treba spremeniti geslo za zaklepanje zaslona."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Nastavitev globalnega strežnika proxy naprave, ki bo v uporabi, ko je pravilnik omogočen. Samo lastnik naprave lahko nastavi globalni strežnik proxy."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Nastavitev poteka gesla za zaklepanje zaslona"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Spreminjanje tega, kako pogosto je treba spremeniti geslo, kodo PIN ali vzorec za zaklepanje zaslona."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavitev šifriranja shrambe"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Shranjeni podatki aplikacije morajo biti šifrirani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogoči fotoaparate"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prepreči uporabo vseh fotoaparatov v napravi."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Onemogočanje funkcij tipkov."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Preprečitev uporabe nekaterih funkcij tipkovnice."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Izklop funkcij zaklep. zaslona"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Preprečitev uporabe nekaterih funkcij zaklepanja zaslona."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Začetna stran"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
@@ -1832,7 +1847,7 @@
       <item quantity="other">%d ur</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Za nedoločen čas"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Dokler tega ne izklopite"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Strni"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Do naslednjega alarma ob <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Do naslednjega alarma"</string>

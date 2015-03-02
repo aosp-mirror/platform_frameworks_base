@@ -542,9 +542,9 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite que la aplicación acceda a otros comandos del proveedor de ubicación. De esta forma, la aplicación podrá interferir en el funcionamiento del GPS o de otras fuentes de ubicación."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"permiso para instalar un proveedor de ubicación"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Permite crear fuentes de ubicación simuladas para hacer pruebas o instalar un nuevo proveedor de ubicación. Este permiso autoriza a la aplicación a sobrescribir la ubicación o el estado proporcionados por otras fuentes de ubicación, como los proveedores de ubicación o GPS."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ubicación precisa (basada en red y GPS)"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"ubicación precisa (basada en redes y GPS)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Permite que la aplicación obtenga tu ubicación precisa mediante el Sistema de posicionamiento global (GPS) o fuentes de ubicación de red, como torres de telefonía y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles para que la aplicación pueda utilizarlos. Las aplicaciones pueden utilizar este permiso para determinar tu ubicación y es posible que el dispositivo consuma más batería."</string>
-    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ubicación aproximada (basada en red)"</string>
+    <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"ubicación aproximada (basada en redes)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Permite que la aplicación obtenga tu ubicación aproximada. Esta ubicación se deriva de los servicios de ubicación que utilizan fuentes de ubicación de red, como torres de telefonía y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles para que la aplicación pueda utilizarlos. Las aplicaciones pueden utilizar este permiso para determinar tu ubicación de forma aproximada."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"acceder a SurfaceFlinger"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que la aplicación use funciones de SurfaceFlinger de nivel inferior."</string>
@@ -690,7 +690,7 @@
     <string name="permdesc_useCredentials" msgid="7984227147403346422">"Permite que la aplicación solicite tokens de autenticación."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ver conexiones de red"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Permite que la aplicación vea información sobre conexiones de red (por ejemplo, qué redes existen y están conectadas)."</string>
-    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acceso completo a red"</string>
+    <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"acceso completo a la red"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Permite que la aplicación cree sockets de red y utilice protocolos de red personalizados. El navegador y otras aplicaciones proporcionan los medios necesarios para el envío de datos a Internet, por lo que no hace falta utilizar este permiso para eso."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"cambiar/interceptar el tráfico y la configuración de red"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Permite que la aplicación modifique los ajustes de red y que intercepte e inspeccione todo el tráfico de red para, por ejemplo, cambiar el proxy y el puerto de cualquier APN. Las aplicaciones malintencionadas pueden controlar, redirigir o modificar los paquetes de red sin el consentimiento del usuario."</string>
@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"inhabilitar el bloqueo de pantalla"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que la aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Por ejemplo, el teléfono puede inhabilitar el bloqueo del teclado cuando se recibe una llamada telefónica y volver a habilitarlo cuando finaliza la llamada."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite que la aplicación consulte la configuración de sincronización de una cuenta. La aplicación puede utilizar este permiso, por ejemplo, para determinar si la aplicación Contactos está sincronizada con una cuenta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activar y desactivar la sincronización"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"enlazar con el servicio de mensajería de un operador"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite enlazar con la interfaz de nivel superior del servicio de mensajería de un operador. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecimiento de reglas de contraseña"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar la longitud y los caracteres permitidos en las contraseñas de bloqueo de pantalla"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controla la longitud y los caracteres permitidos en los PIN y en las contraseñas de bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control de intentos de bloqueo de pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el tablet o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea la TV o borra todos los datos de la TV si se introducen demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Controla el número de contraseñas incorrectas introducidas al desbloquear la pantalla y bloquea el teléfono o elimina todos sus datos si se introducen demasiadas contraseñas incorrectas."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Modificación de contraseña de bloqueo de pantalla"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Modificar la contraseña de bloqueo de pantalla"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el tablet o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea la TV o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Controla el número de contraseñas incorrectas introducidas para desbloquear la pantalla y bloquea el teléfono o borra todos los datos del usuario si se introducen demasiadas contraseñas incorrectas."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Cambiar el bloqueo de pantalla"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Cambia el bloqueo de pantalla."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloqueo de pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borrar los datos del tablet sin avisar restableciendo datos de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Borra los datos de la TV sin advertencia previa restableciendo la TV a los valores predeterminados de fábrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borrar los datos del teléfono sin avisar restableciendo datos de fábrica"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Borrar datos del usuario"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Borra los datos del usuario en este tablet sin avisar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Borra los datos del usuario en esta TV sin avisar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Borra los datos del usuario en este teléfono sin avisar."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir el servidor proxy global"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el primer administrador de dispositivos define el servidor proxy global efectivo."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Definir caducidad bloqueo pantalla"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Controlar la frecuencia con la que se debe cambiar el bloqueo de la pantalla"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Define el servidor proxy global que se debe utilizar mientras la política esté habilitada. Solo el propietario del dispositivo puede definir el proxy global."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Definir caducidad contraseña"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Cambia la frecuencia con la que se debe cambiar el patrón, el PIN o la contraseña del bloqueo de pantalla."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Cifrado del almacenamiento"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Exige que se cifren los datos de la aplicación almacenados."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Inhabilitar cámaras"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Evitar el uso de las cámaras del dispositivo"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Inhabilitar funciones en bloqueo"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Evita el uso de algunas funciones durante el bloqueo."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Desactivar funciones bloqueo"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Evita el uso de algunas funciones del bloqueo de pantalla."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Móvil"</item>
@@ -1332,7 +1347,7 @@
     <string name="perms_new_perm_prefix" msgid="8257740710754301407"><font size="12" fgcolor="#ff33b5e5">"NUEVO:"</font></string>
     <string name="perms_description_app" msgid="5139836143293299417">"Proporcionado por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="no_permissions" msgid="7283357728219338112">"No es necesario ningún permiso"</string>
-    <string name="perm_costs_money" msgid="4902470324142151116">"es posible que se cobre por usar la aplicación."</string>
+    <string name="perm_costs_money" msgid="4902470324142151116">"es posible que esto te cueste dinero"</string>
     <string name="usb_storage_activity_title" msgid="4465055157209648641">"Almacenamiento USB masivo"</string>
     <string name="usb_storage_title" msgid="5901459041398751495">"Conexión por USB"</string>
     <string name="usb_storage_message" product="nosdcard" msgid="3308538094316477839">"Has conectado el dispositivo al ordenador por USB. Toca el siguiente botón si quieres transferir archivos entre el ordenador y el almacenamiento USB del dispositivo."</string>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Durante una hora</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Hasta las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Hasta apagar el dispositivo"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Contraer"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Hasta la próxima alarma a las <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Hasta la próxima alarma"</string>
