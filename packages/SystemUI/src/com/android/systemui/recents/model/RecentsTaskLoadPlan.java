@@ -156,6 +156,7 @@ public class RecentsTaskLoadPlan {
 
             if (!mConfig.multiStackEnabled ||
                     Constants.DebugFlags.App.EnableMultiStackToSingleStack) {
+                firstStackId = 0;
                 ArrayList<Task> stackTasks = stacksTasks.get(firstStackId);
                 if (stackTasks == null) {
                     stackTasks = new ArrayList<Task>();
