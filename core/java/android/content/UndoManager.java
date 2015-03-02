@@ -162,6 +162,7 @@ public class UndoManager {
             owner.mSavedIdx = mNextSavedIdx;
             out.writeInt(owner.mSavedIdx);
             out.writeString(owner.mTag);
+            out.writeInt(owner.mOpCount);
             mNextSavedIdx++;
         }
     }
@@ -200,7 +201,9 @@ public class UndoManager {
         UndoOwner owner = mStateOwners[idx];
         if (owner == null) {
             String tag = in.readString();
+            int opCount = in.readInt();
             owner = new UndoOwner(tag, this);
+            owner.mOpCount = opCount;
             mStateOwners[idx] = owner;
             mOwners.put(tag, owner);
         }

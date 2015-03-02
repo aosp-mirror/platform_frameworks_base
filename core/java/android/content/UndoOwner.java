@@ -61,4 +61,15 @@ public class UndoOwner {
     public Object getData() {
         return mData;
     }
+
+    @Override
+    public String toString() {
+        return "UndoOwner:[mTag=" + mTag +
+                " mManager=" + mManager +
+                " mData=" + mData +
+                " mData=" + mData +
+                " mOpCount=" + mOpCount +
+                " mStateSeq=" + mStateSeq +
+                " mSavedIdx=" + mSavedIdx + "]";
+    }
 }
