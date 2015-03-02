@@ -113,6 +113,10 @@ public class ActionModeWrapper extends ActionMode {
         }
     }
 
+    public ActionMode getWrappedActionMode() {
+        return mActionMode;
+    }
+
     /**
      * Set the current type as final and create the necessary ActionMode. After this call, any
      * changes to the ActionMode type will be ignored.
@@ -165,6 +169,8 @@ public class ActionModeWrapper extends ActionMode {
     public void finish() {
         if (mActionMode != null) {
             mActionMode.finish();
+        } else {
+            mCallback.onDestroyActionMode(this);
         }
     }
 

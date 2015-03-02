@@ -76,6 +76,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.TypedValue;
+import android.view.ActionMode.Callback;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -2678,28 +2679,38 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public ActionMode startActionMode(ActionMode.Callback callback) {
             if (mActionMode != null) {
                 mActionMode.finish();
+                mActionMode = null;
             }
 
-            final ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
-            ActionMode mode = null;
+            ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
+            ActionModeWrapper mode = null;
+            ActionMode callbackMode = null;
             if (getCallback() != null && !isDestroyed()) {
                 try {
-                    mode = getCallback().onWindowStartingActionMode(wrappedCallback);
+                    callbackMode =
+                            getCallback().onWindowStartingActionMode(wrappedCallback);
+                    if (callbackMode != null && callbackMode instanceof ActionModeWrapper) {
+                        // If we get an ActionModeWrapper back, we handle its lifecycle.
+                        mode = (ActionModeWrapper) callbackMode;
+                        callbackMode = null;
+                    }
                 } catch (AbstractMethodError ame) {
                     // Older apps might not implement this callback method.
                 }
             }
-            if (mode != null) {
-                mActionMode = mode;
+            if (callbackMode != null) {
+                mActionMode = callbackMode;
             } else {
+                if (mode == null) {
+                    mode = new ActionModeWrapper(
+                            mContext, wrappedCallback, new StandaloneActionModeProvider());
+                }
                 if (mActionModeView != null) {
                     mActionModeView.killMode();
                 }
-                ActionModeWrapper wrapperMode = new ActionModeWrapper(
-                        mContext, wrappedCallback, new StandaloneActionModeProvider());
-                if (callback.onCreateActionMode(wrapperMode, wrapperMode.getMenu())) {
-                    mActionMode = wrapperMode;
-                    wrapperMode.lockType();
+                if (callback.onCreateActionMode(mode, mode.getMenu())) {
+                    mode.lockType();
+                    mActionMode = mode.getWrappedActionMode();
                     mActionMode.invalidate();
                 } else {
                     mActionMode = null;
@@ -3310,7 +3321,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 if (getCallback() != null && !isDestroyed()) {
                     try {
-                        getCallback().onActionModeFinished(mActionMode);
+                        getCallback().onActionModeFinished(mode);
                     } catch (AbstractMethodError ame) {
                         // Older apps might not implement this callback method.
                     }

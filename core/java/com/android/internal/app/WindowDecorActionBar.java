@@ -20,8 +20,10 @@ import android.animation.ValueAnimator;
 import android.content.res.TypedArray;
 import android.view.ViewParent;
 import android.widget.Toolbar;
+
 import com.android.internal.R;
 import com.android.internal.view.ActionBarPolicy;
+import com.android.internal.view.ActionModeWrapper;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
@@ -46,6 +48,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.ActionMode;
+import android.view.ActionMode.Callback;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -88,20 +91,20 @@ public class WindowDecorActionBar extends ActionBar implements
 
     private TabImpl mSelectedTab;
     private int mSavedTabPosition = INVALID_POSITION;
-    
+
     private boolean mDisplayHomeAsUpSet;
 
-    ActionModeImpl mActionMode;
+    ActionMode mActionMode;
     ActionMode mDeferredDestroyActionMode;
     ActionMode.Callback mDeferredModeDestroyCallback;
-    
+
     private boolean mLastMenuVisibility;
     private ArrayList<OnMenuVisibilityListener> mMenuVisibilityListeners =
             new ArrayList<OnMenuVisibilityListener>();
 
     private static final int CONTEXT_DISPLAY_NORMAL = 0;
     private static final int CONTEXT_DISPLAY_SPLIT = 1;
-    
+
     private static final int INVALID_POSITION = -1;
 
     private int mContextDisplayMode;
@@ -490,15 +493,21 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     public ActionMode startActionMode(ActionMode.Callback callback) {
-        if (mActionMode != null) {
-            mActionMode.finish();
-        }
+        return new ActionModeWrapper(mContext, callback, new ActionModeProviderImpl());
+    }
+    
+    private class ActionModeProviderImpl implements ActionModeWrapper.ActionModeProvider {
 
-        mOverlayLayout.setHideOnContentScrollEnabled(false);
-        mContextView.killMode();
-        ActionModeImpl mode = new ActionModeImpl(mContextView.getContext(), callback);
-        if (mode.dispatchOnCreate()) {
-            mode.invalidate();
+        @Override
+        public ActionMode createActionMode(Callback callback, MenuBuilder menuBuilder) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+            mOverlayLayout.setHideOnContentScrollEnabled(false);
+            mContextView.killMode();
+            ActionModeImpl mode = new ActionModeImpl(
+                    mContextView.getContext(), callback, menuBuilder);
             mContextView.initForMode(mode);
             animateToMode(true);
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
@@ -514,7 +523,6 @@ public class WindowDecorActionBar extends ActionBar implements
             mActionMode = mode;
             return mode;
         }
-        return null;
     }
 
     private void configureTab(Tab tab, int position) {
@@ -942,11 +950,14 @@ public class WindowDecorActionBar extends ActionBar implements
         private ActionMode.Callback mCallback;
         private WeakReference<View> mCustomView;
 
-        public ActionModeImpl(Context context, ActionMode.Callback callback) {
+        public ActionModeImpl(
+                Context context, ActionMode.Callback callback, MenuBuilder menuBuilder) {
             mActionModeContext = context;
             mCallback = callback;
-            mMenu = new MenuBuilder(context)
-                    .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+            mMenu = menuBuilder == null 
+                    ? new MenuBuilder(context)
+                        .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                    : menuBuilder;
             mMenu.setCallback(this);
         }
 
@@ -1003,15 +1014,6 @@ public class WindowDecorActionBar extends ActionBar implements
             mMenu.stopDispatchingItemsChanged();
             try {
                 mCallback.onPrepareActionMode(this, mMenu);
-            } finally {
-                mMenu.startDispatchingItemsChanged();
-            }
-        }
-
-        public boolean dispatchOnCreate() {
-            mMenu.stopDispatchingItemsChanged();
-            try {
-                return mCallback.onCreateActionMode(this, mMenu);
             } finally {
                 mMenu.startDispatchingItemsChanged();
             }
