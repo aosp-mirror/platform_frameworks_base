@@ -270,22 +270,30 @@ public class DynamicLayout extends Layout
         // generate new layout for affected text
 
         StaticLayout reflowed;
+        StaticLayout.Builder b;
 
         synchronized (sLock) {
             reflowed = sStaticLayout;
+            b = sBuilder;
             sStaticLayout = null;
+            sBuilder = null;
         }
 
+        // TODO: make sure reflowed is properly initialized
         if (reflowed == null) {
             reflowed = new StaticLayout(null);
-        } else {
-            reflowed.prepare();
+            b = StaticLayout.Builder.obtain();
         }
 
-        reflowed.generate(text, where, where + after,
-                getPaint(), getWidth(), getTextDirectionHeuristic(), getSpacingMultiplier(),
-                getSpacingAdd(), false,
-                true, mEllipsizedWidth, mEllipsizeAt);
+        b.setText(text, where, where + after)
+                .setPaint(getPaint())
+                .setWidth(getWidth())
+                .setTextDir(getTextDirectionHeuristic())
+                .setSpacingMult(getSpacingMultiplier())
+                .setSpacingAdd(getSpacingAdd())
+                .setEllipsizedWidth(mEllipsizedWidth)
+                .setEllipsize(mEllipsizeAt);
+        reflowed.generate(b, false, true);
         int n = reflowed.getLineCount();
 
         // If the new layout has a blank line at the end, but it is not
@@ -359,9 +367,10 @@ public class DynamicLayout extends Layout
 
         updateBlocks(startline, endline - 1, n);
 
+        b.finish();
         synchronized (sLock) {
             sStaticLayout = reflowed;
-            reflowed.finish();
+            sBuilder = b;
         }
     }
 
@@ -720,7 +729,8 @@ public class DynamicLayout extends Layout
 
     private int mTopPadding, mBottomPadding;
 
-    private static StaticLayout sStaticLayout = new StaticLayout(null);
+    private static StaticLayout sStaticLayout = null;
+    private static StaticLayout.Builder sBuilder = null;
 
     private static final Object[] sLock = new Object[0];
 

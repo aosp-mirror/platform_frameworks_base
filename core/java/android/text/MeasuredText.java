@@ -16,7 +16,6 @@
 
 package android.text;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
@@ -67,19 +66,26 @@ class MeasuredText {
     }
 
     static MeasuredText recycle(MeasuredText mt) {
-        mt.mText = null;
-        if (mt.mLen < 1000) {
-            synchronized(sLock) {
-                for (int i = 0; i < sCached.length; ++i) {
-                    if (sCached[i] == null) {
-                        sCached[i] = mt;
-                        mt.mText = null;
-                        break;
-                    }
+        mt.finish();
+        synchronized(sLock) {
+            for (int i = 0; i < sCached.length; ++i) {
+                if (sCached[i] == null) {
+                    sCached[i] = mt;
+                    mt.mText = null;
+                    break;
                 }
             }
         }
         return null;
+    }
+
+    void finish() {
+        mText = null;
+        if (mLen > 1000) {
+            mWidths = null;
+            mChars = null;
+            mLevels = null;
+        }
     }
 
     void setPos(int pos) {
