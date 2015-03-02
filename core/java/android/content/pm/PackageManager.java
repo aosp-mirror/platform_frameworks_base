@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.annotation.CheckResult;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -2121,6 +2122,7 @@ public abstract class PackageManager {
      * @see #PERMISSION_GRANTED
      * @see #PERMISSION_DENIED
      */
+    @CheckResult
     public abstract int checkPermission(String permName, String pkgName);
 
     /**
@@ -2248,6 +2250,7 @@ public abstract class PackageManager {
      * @see #SIGNATURE_NO_MATCH
      * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
+    @CheckResult
     public abstract int checkSignatures(String pkg1, String pkg2);
 
     /**
@@ -2270,6 +2273,7 @@ public abstract class PackageManager {
      * @see #SIGNATURE_NO_MATCH
      * @see #SIGNATURE_UNKNOWN_PACKAGE
      */
+    @CheckResult
     public abstract int checkSignatures(int uid1, int uid2);
 
     /**
