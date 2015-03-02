@@ -27,6 +27,7 @@ import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -1785,6 +1786,35 @@ public class WebView extends AbsoluteLayout
         checkThread();
         if (TRACE) Log.d(LOGTAG, "removeJavascriptInterface=" + name);
         mProvider.removeJavascriptInterface(name);
+    }
+
+    /**
+     * Creates a message channel to communicate with JS and returns the message
+     * ports that represent the endpoints of this message channel. The HTML5 message
+     * channel functionality is described here:
+     * https://html.spec.whatwg.org/multipage/comms.html#messagechannel
+     *
+     * The returned message channels are entangled and already in started state.
+     *
+     * @return Two message ports that form the message channel.
+     *
+     * @hide unhide when implementation is complete
+     */
+    public WebMessagePort[] createWebMessageChannel() {
+        checkThread();
+        if (TRACE) Log.d(LOGTAG, "createWebMessageChannel");
+        return mProvider.createWebMessageChannel();
+    }
+
+    /**
+     * Post a message to main frame.
+     *
+     * @hide unhide when implementation is complete
+     */
+    public void postMessageToMainFrame(WebMessage message, Uri targetOrigin) {
+        checkThread();
+        if (TRACE) Log.d(LOGTAG, "postMessageToMainFrame. TargetOrigin=" + targetOrigin);
+        mProvider.postMessageToMainFrame(message, targetOrigin);
     }
 
     /**
