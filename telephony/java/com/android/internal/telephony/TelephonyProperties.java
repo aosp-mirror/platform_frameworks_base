@@ -204,9 +204,4 @@ public interface TelephonyProperties
      * Type: string ( default = silent, enable to = prompt )
      */
     static final String PROPERTY_MMS_TRANSACTION = "mms.transaction";
-
-    /**
-     * Set to the sim count.
-     */
-    static final String PROPERTY_SIM_COUNT = "ro.telephony.sim.count";
 }
