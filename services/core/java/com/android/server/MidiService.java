@@ -17,10 +17,18 @@
 package com.android.server;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
+import android.content.res.XmlResourceParser;
+import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceServer;
-import android.media.midi.IMidiListener;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiDeviceInfo;
+import android.media.midi.MidiDeviceService;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -29,12 +37,17 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MidiService extends IMidiManager.Stub {
     private static final String TAG = "MidiService";
@@ -54,6 +67,27 @@ public class MidiService extends IMidiManager.Stub {
     // used for assigning IDs to MIDI devices
     private int mNextDeviceId = 1;
 
+    private final PackageManager mPackageManager;
+
+    // PackageMonitor for listening to package changes
+    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
+        @Override
+        public void onPackageAdded(String packageName, int uid) {
+            addPackageDeviceServers(packageName);
+        }
+
+        @Override
+        public void onPackageModified(String packageName) {
+            removePackageDeviceServers(packageName);
+            addPackageDeviceServers(packageName);
+        }
+
+        @Override
+        public void onPackageRemoved(String packageName, int uid) {
+            removePackageDeviceServers(packageName);
+        }
+    };
+
     private final class Client implements IBinder.DeathRecipient {
         // Binder token for this client
         private final IBinder mToken;
@@ -62,7 +96,8 @@ public class MidiService extends IMidiManager.Stub {
         // This client's PID
         private final int mPid;
         // List of all receivers for this client
-        private final ArrayList<IMidiListener> mListeners = new ArrayList<IMidiListener>();
+        private final ArrayList<IMidiDeviceListener> mListeners
+                = new ArrayList<IMidiDeviceListener>();
 
         public Client(IBinder token) {
             mToken = token;
@@ -74,11 +109,11 @@ public class MidiService extends IMidiManager.Stub {
             return mUid;
         }
 
-        public void addListener(IMidiListener listener) {
+        public void addListener(IMidiDeviceListener listener) {
             mListeners.add(listener);
         }
 
-        public void removeListener(IMidiListener listener) {
+        public void removeListener(IMidiDeviceListener listener) {
             mListeners.remove(listener);
             if (mListeners.size() == 0) {
                 removeClient(mToken);
@@ -91,7 +126,7 @@ public class MidiService extends IMidiManager.Stub {
 
             MidiDeviceInfo deviceInfo = device.getDeviceInfo();
             try {
-                for (IMidiListener listener : mListeners) {
+                for (IMidiDeviceListener listener : mListeners) {
                     listener.onDeviceAdded(deviceInfo);
                 }
             } catch (RemoteException e) {
@@ -105,7 +140,7 @@ public class MidiService extends IMidiManager.Stub {
 
             MidiDeviceInfo deviceInfo = device.getDeviceInfo();
             try {
-                for (IMidiListener listener : mListeners) {
+                for (IMidiDeviceListener listener : mListeners) {
                     listener.onDeviceRemoved(deviceInfo);
                 }
             } catch (RemoteException e) {
@@ -153,16 +188,17 @@ public class MidiService extends IMidiManager.Stub {
     private final class Device implements IBinder.DeathRecipient {
         private final IMidiDeviceServer mServer;
         private final MidiDeviceInfo mDeviceInfo;
-        // UID of device creator
+        // ServiceInfo for the device's MidiDeviceServer implementation (virtual devices only)
+        private final ServiceInfo mServiceInfo;
+        // UID of device implementation
         private final int mUid;
-        // PID of device creator
-        private final int mPid;
 
-        public Device(IMidiDeviceServer server, MidiDeviceInfo deviceInfo) {
+        public Device(IMidiDeviceServer server, MidiDeviceInfo deviceInfo,
+                ServiceInfo serviceInfo, int uid) {
             mServer = server;
             mDeviceInfo = deviceInfo;
-            mUid = Binder.getCallingUid();
-            mPid = Binder.getCallingPid();
+            mServiceInfo = serviceInfo;
+            mUid = uid;
         }
 
         public MidiDeviceInfo getDeviceInfo() {
@@ -173,13 +209,20 @@ public class MidiService extends IMidiManager.Stub {
             return mServer;
         }
 
+        public ServiceInfo getServiceInfo() {
+            return mServiceInfo;
+        }
+
+        public String getPackageName() {
+            return (mServiceInfo == null ? null : mServiceInfo.packageName);
+        }
+
         public boolean isUidAllowed(int uid) {
-            // FIXME
-            return true;
+            return (!mDeviceInfo.isPrivate() || mUid == uid);
         }
 
         public void binderDied() {
-            synchronized (mDevicesByServer) {
+            synchronized (mDevicesByInfo) {
                 removeDeviceLocked(this);
             }
         }
@@ -190,32 +233,59 @@ public class MidiService extends IMidiManager.Stub {
             sb.append(mDeviceInfo);
             sb.append(" UID: ");
             sb.append(mUid);
-            sb.append(" PID: ");
-            sb.append(mPid);
             return sb.toString();
         }
     }
 
     public MidiService(Context context) {
         mContext = context;
-    }
+        mPackageManager = context.getPackageManager();
+        mPackageMonitor.register(context, null, true);
 
-    public void registerListener(IBinder token, IMidiListener listener) {
+        Intent intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
+        List<ResolveInfo> resolveInfos = mPackageManager.queryIntentServices(intent,
+                PackageManager.GET_META_DATA);
+        if (resolveInfos != null) {
+            int count = resolveInfos.size();
+            for (int i = 0; i < count; i++) {
+                ServiceInfo serviceInfo = resolveInfos.get(i).serviceInfo;
+                if (serviceInfo != null) {
+                    addPackageDeviceServer(serviceInfo);
+                }
+            }
+        }
+   }
+
+    @Override
+    public void registerListener(IBinder token, IMidiDeviceListener listener) {
         Client client = getClient(token);
         if (client == null) return;
         client.addListener(listener);
     }
 
-    public void unregisterListener(IBinder token, IMidiListener listener) {
+    @Override
+    public void unregisterListener(IBinder token, IMidiDeviceListener listener) {
         Client client = getClient(token);
         if (client == null) return;
         client.removeListener(listener);
     }
 
     public MidiDeviceInfo[] getDeviceList() {
-        return mDevicesByInfo.keySet().toArray(new MidiDeviceInfo[0]);
+        ArrayList<MidiDeviceInfo> deviceInfos = new ArrayList<MidiDeviceInfo>();
+        int uid = Binder.getCallingUid();
+
+        synchronized (mDevicesByInfo) {
+            for (Device device : mDevicesByInfo.values()) {
+                if (device.isUidAllowed(uid)) {
+                    deviceInfos.add(device.getDeviceInfo());
+                }
+            }
+        }
+
+        return deviceInfos.toArray(new MidiDeviceInfo[0]);
     }
 
+    @Override
     public IMidiDeviceServer openDevice(IBinder token, MidiDeviceInfo deviceInfo) {
         Device device = mDevicesByInfo.get(deviceInfo);
         if (device == null) {
@@ -230,28 +300,64 @@ public class MidiService extends IMidiManager.Stub {
         return device.getDeviceServer();
     }
 
+    @Override
     public MidiDeviceInfo registerDeviceServer(IMidiDeviceServer server, int numInputPorts,
-            int numOutputPorts, Bundle properties, boolean isPrivate, int type) {
+            int numOutputPorts, Bundle properties, int type) {
         if (type != MidiDeviceInfo.TYPE_VIRTUAL && Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create non-virtual devices");
         }
 
-        MidiDeviceInfo deviceInfo;
-        Device device;
+        synchronized (mDevicesByInfo) {
+            return addDeviceLocked(type, numInputPorts, numOutputPorts, properties,
+            server, null, false, -1);
+        }
+    }
 
-        synchronized (mDevicesByServer) {
-            int id = mNextDeviceId++;
-            deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts, properties);
+    @Override
+    public void unregisterDeviceServer(IMidiDeviceServer server) {
+        synchronized (mDevicesByInfo) {
+            Device device = mDevicesByServer.get(server.asBinder());
+            if (device != null) {
+                removeDeviceLocked(device);
+            }
+        }
+    }
+
+    @Override
+    public MidiDeviceInfo getServiceDeviceInfo(String packageName, String className) {
+        synchronized (mDevicesByInfo) {
+            for (Device device : mDevicesByInfo.values()) {
+                 ServiceInfo serviceInfo = device.getServiceInfo();
+                 if (serviceInfo != null &&
+                        packageName.equals(serviceInfo.packageName) &&
+                        className.equals(serviceInfo.name)) {
+                    return device.getDeviceInfo();
+                }
+            }
+            return null;
+        }
+    }
+
+    // synchronize on mDevicesByInfo
+    private MidiDeviceInfo addDeviceLocked(int type, int numInputPorts, int numOutputPorts,
+            Bundle properties, IMidiDeviceServer server, ServiceInfo serviceInfo,
+            boolean isPrivate, int uid) {
+
+        int id = mNextDeviceId++;
+        MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,
+                properties, isPrivate);
+        Device device = new Device(server, deviceInfo, serviceInfo, uid);
+
+        if (server != null) {
             IBinder binder = server.asBinder();
-            device = new Device(server, deviceInfo);
             try {
                 binder.linkToDeath(device, 0);
             } catch (RemoteException e) {
                 return null;
             }
-            mDevicesByInfo.put(deviceInfo, device);
-            mDevicesByServer.put(server.asBinder(), device);
+            mDevicesByServer.put(binder, device);
         }
+        mDevicesByInfo.put(deviceInfo, device);
 
         synchronized (mClients) {
             for (Client c : mClients.values()) {
@@ -262,20 +368,145 @@ public class MidiService extends IMidiManager.Stub {
         return deviceInfo;
     }
 
-    public void unregisterDeviceServer(IMidiDeviceServer server) {
-        synchronized (mDevicesByServer) {
-            removeDeviceLocked(mDevicesByServer.get(server.asBinder()));
-        }
-    }
-
-    // synchronize on mDevicesByServer
+    // synchronize on mDevicesByInfo
     private void removeDeviceLocked(Device device) {
-        if (mDevicesByServer.remove(device.getDeviceServer().asBinder()) != null) {
-            mDevicesByInfo.remove(device.getDeviceInfo());
+        if (mDevicesByInfo.remove(device.getDeviceInfo()) != null) {
+            IMidiDeviceServer server = device.getDeviceServer();
+            if (server != null) {
+                mDevicesByServer.remove(server);
+            }
 
             synchronized (mClients) {
                 for (Client c : mClients.values()) {
                     c.deviceRemoved(device);
+                }
+            }
+        }
+    }
+
+    private void addPackageDeviceServers(String packageName) {
+        PackageInfo info;
+
+        try {
+            info = mPackageManager.getPackageInfo(packageName,
+                    PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "handlePackageUpdate could not find package " + packageName, e);
+            return;
+        }
+
+        ServiceInfo[] services = info.services;
+        if (services == null) return;
+        for (int i = 0; i < services.length; i++) {
+            addPackageDeviceServer(services[i]);
+        }
+    }
+
+    private void addPackageDeviceServer(ServiceInfo serviceInfo) {
+        XmlResourceParser parser = null;
+
+        try {
+            parser = serviceInfo.loadXmlMetaData(mPackageManager,
+                    MidiDeviceService.SERVICE_INTERFACE);
+            if (parser == null) return;
+
+            Bundle properties = null;
+            int numInputPorts = 0;
+            int numOutputPorts = 0;
+            boolean isPrivate = false;
+
+            while (true) {
+                int eventType = parser.next();
+                if (eventType == XmlPullParser.END_DOCUMENT) {
+                    break;
+                } else if (eventType == XmlPullParser.START_TAG) {
+                    String tagName = parser.getName();
+                    if ("device".equals(tagName)) {
+                        if (properties != null) {
+                            Log.w(TAG, "nested <device> elements in metadata for "
+                                + serviceInfo.packageName);
+                            continue;
+                        }
+                        properties = new Bundle();
+                        properties.putParcelable(MidiDeviceInfo.PROPERTY_SERVICE_INFO, serviceInfo);
+                        numInputPorts = 0;
+                        numOutputPorts = 0;
+                        isPrivate = false;
+
+                        int count = parser.getAttributeCount();
+                        for (int i = 0; i < count; i++) {
+                            String name = parser.getAttributeName(i);
+                            String value = parser.getAttributeValue(i);
+                            if ("private".equals(name)) {
+                                isPrivate = "true".equals(value);
+                            } else {
+                                properties.putString(name, value);
+                            }
+                        }
+                    } else if ("input-port".equals(tagName)) {
+                        if (properties == null) {
+                            Log.w(TAG, "<input-port> outside of <device> in metadata for "
+                                + serviceInfo.packageName);
+                            continue;
+                        }
+                        numInputPorts++;
+                        // TODO - add support for port properties
+                    } else if ("output-port".equals(tagName)) {
+                        if (properties == null) {
+                            Log.w(TAG, "<output-port> outside of <device> in metadata for "
+                                + serviceInfo.packageName);
+                            continue;
+                        }
+                        numOutputPorts++;
+                        // TODO - add support for port properties
+                    }
+                } else if (eventType == XmlPullParser.END_TAG) {
+                    String tagName = parser.getName();
+                    if ("device".equals(tagName)) {
+                        if (properties != null) {
+                            if (numInputPorts == 0 && numOutputPorts == 0) {
+                                Log.w(TAG, "<device> with no ports in metadata for "
+                                    + serviceInfo.packageName);
+                                continue;
+                            }
+
+                            int uid = -1;
+                            if (isPrivate) {
+                                try {
+                                    ApplicationInfo appInfo = mPackageManager.getApplicationInfo(
+                                            serviceInfo.packageName, 0);
+                                    uid = appInfo.uid;
+                                } catch (PackageManager.NameNotFoundException e) {
+                                    Log.e(TAG, "could not fetch ApplicationInfo for "
+                                            + serviceInfo.packageName);
+                                    continue;
+                                }
+                            }
+
+                            synchronized (mDevicesByInfo) {
+                                addDeviceLocked(MidiDeviceInfo.TYPE_VIRTUAL,
+                                    numInputPorts, numOutputPorts, properties,
+                                    null, serviceInfo, isPrivate, uid);
+                            }
+                            // setting properties to null signals that we are no longer
+                            // processing a <device>
+                            properties = null;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Unable to load component info " + serviceInfo.toString(), e);
+        } finally {
+            if (parser != null) parser.close();
+        }
+    }
+
+    private void removePackageDeviceServers(String packageName) {
+        synchronized (mDevicesByInfo) {
+            for (Device device : mDevicesByInfo.values()) {
+                if (packageName.equals(device.getPackageName())) {
+                    removeDeviceLocked(device);
                 }
             }
         }

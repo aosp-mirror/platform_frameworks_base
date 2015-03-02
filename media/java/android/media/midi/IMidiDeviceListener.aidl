@@ -19,7 +19,7 @@ package android.media.midi;
 import android.media.midi.MidiDeviceInfo;
 
 /** @hide */
-oneway interface IMidiListener
+oneway interface IMidiDeviceListener
 {
     void onDeviceAdded(in MidiDeviceInfo device);
     void onDeviceRemoved(in MidiDeviceInfo device);

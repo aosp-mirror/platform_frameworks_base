@@ -333,8 +333,8 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
 	media/java/android/media/audiopolicy/IAudioPolicyCallback.aidl \
+	media/java/android/media/midi/IMidiDeviceListener.aidl \
 	media/java/android/media/midi/IMidiDeviceServer.aidl \
-	media/java/android/media/midi/IMidiListener.aidl \
 	media/java/android/media/midi/IMidiManager.aidl \
 	media/java/android/media/projection/IMediaProjection.aidl \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \

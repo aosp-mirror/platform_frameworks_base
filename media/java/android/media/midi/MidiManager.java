@@ -16,7 +16,11 @@
 
 package android.media.midi;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Bundle;
@@ -50,7 +54,7 @@ public class MidiManager {
         new HashMap<DeviceCallback,DeviceListener>();
 
     // Binder stub for receiving device notifications from MidiService
-    private class DeviceListener extends IMidiListener.Stub {
+    private class DeviceListener extends IMidiDeviceListener.Stub {
         private final DeviceCallback mCallback;
         private final Handler mHandler;
 
@@ -89,22 +93,33 @@ public class MidiManager {
     /**
      * Callback class used for clients to receive MIDI device added and removed notifications
      */
-    public static class DeviceCallback {
+    abstract public static class DeviceCallback {
         /**
          * Called to notify when a new MIDI device has been added
          *
          * @param device a {@link MidiDeviceInfo} for the newly added device
          */
-        public void onDeviceAdded(MidiDeviceInfo device) {
-        }
+        abstract public void onDeviceAdded(MidiDeviceInfo device);
 
         /**
          * Called to notify when a MIDI device has been removed
          *
          * @param device a {@link MidiDeviceInfo} for the removed device
          */
-        public void onDeviceRemoved(MidiDeviceInfo device) {
-        }
+        abstract public void onDeviceRemoved(MidiDeviceInfo device);
+    }
+
+    /**
+     * Callback class used for receiving the results of {@link #openDevice}
+     */
+    abstract public static class DeviceOpenCallback {
+        /**
+         * Called to respond to a {@link #openDevice} request
+         *
+         * @param deviceInfo the {@link MidiDeviceInfo} for the device to open
+         * @param device a {@link MidiDevice} for opened device, or null if opening failed
+         */
+        abstract public void onDeviceOpened(MidiDeviceInfo deviceInfo, MidiDevice device);
     }
 
     /**
@@ -164,33 +179,85 @@ public class MidiManager {
         }
     }
 
+    private void sendOpenDeviceResponse(final MidiDeviceInfo deviceInfo, final MidiDevice device,
+            final DeviceOpenCallback callback, Handler handler) {
+        if (handler != null) {
+            handler.post(new Runnable() {
+                    @Override public void run() {
+                        callback.onDeviceOpened(deviceInfo, device);
+                    }
+                });
+        } else {
+            callback.onDeviceOpened(deviceInfo, device);
+        }
+    }
+
     /**
      * Opens a MIDI device for reading and writing.
      *
      * @param deviceInfo a {@link android.media.midi.MidiDeviceInfo} to open
-     * @return a {@link MidiDevice} object for the device
+     * @param callback a {@link #DeviceOpenCallback} to be called to receive the result
+     * @param handler the {@link android.os.Handler Handler} that will be used for delivering
+     *                the result. If handler is null, then the thread used for the
+     *                callback is unspecified.
      */
-    public MidiDevice openDevice(MidiDeviceInfo deviceInfo) {
+    public void openDevice(MidiDeviceInfo deviceInfo, DeviceOpenCallback callback,
+            Handler handler) {
+        MidiDevice device = null;
         try {
             IMidiDeviceServer server = mService.openDevice(mToken, deviceInfo);
             if (server == null) {
-                Log.e(TAG, "could not open device " + deviceInfo);
-                return null;
+                ServiceInfo serviceInfo = (ServiceInfo)deviceInfo.getProperties().getParcelable(
+                        MidiDeviceInfo.PROPERTY_SERVICE_INFO);
+                if (serviceInfo == null) {
+                    Log.e(TAG, "no ServiceInfo for " + deviceInfo);
+                } else {
+                    Intent intent = new Intent(MidiDeviceService.SERVICE_INTERFACE);
+                    intent.setComponent(new ComponentName(serviceInfo.packageName,
+                            serviceInfo.name));
+                    final MidiDeviceInfo deviceInfoF = deviceInfo;
+                    final DeviceOpenCallback callbackF = callback;
+                    final Handler handlerF = handler;
+                    if (mContext.bindService(intent,
+                        new ServiceConnection() {
+                            @Override
+                            public void onServiceConnected(ComponentName name, IBinder binder) {
+                                IMidiDeviceServer server =
+                                        IMidiDeviceServer.Stub.asInterface(binder);
+                                MidiDevice device = new MidiDevice(deviceInfoF, server);
+                                sendOpenDeviceResponse(deviceInfoF, device, callbackF, handlerF);
+                            }
+
+                            @Override
+                            public void onServiceDisconnected(ComponentName name) {
+                                // FIXME - anything to do here?
+                            }
+                        },
+                        Context.BIND_AUTO_CREATE))
+                    {
+                        // return immediately to avoid calling sendOpenDeviceResponse below
+                        return;
+                    } else {
+                        Log.e(TAG, "Unable to bind  service: " + intent);
+                    }
+                }
+            } else {
+                device = new MidiDevice(deviceInfo, server);
             }
-            return new MidiDevice(deviceInfo, server);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openDevice");
         }
-        return null;
+        sendOpenDeviceResponse(deviceInfo, device, callback, handler);
     }
 
     /** @hide */
-    public MidiDeviceServer createDeviceServer(int numInputPorts, int numOutputPorts,
-            Bundle properties, boolean isPrivate, int type) {
+    public MidiDeviceServer createDeviceServer(MidiReceiver[] inputPortReceivers,
+            int numOutputPorts, Bundle properties, int type) {
         try {
-            MidiDeviceServer server = new MidiDeviceServer(mService);
+            MidiDeviceServer server = new MidiDeviceServer(mService, inputPortReceivers,
+                    numOutputPorts);
             MidiDeviceInfo deviceInfo = mService.registerDeviceServer(server.getBinderInterface(),
-                    numInputPorts, numOutputPorts, properties, isPrivate, type);
+                    inputPortReceivers.length, numOutputPorts, properties, type);
             if (deviceInfo == null) {
                 Log.e(TAG, "registerVirtualDevice failed");
                 return null;
@@ -202,21 +269,4 @@ public class MidiManager {
             return null;
         }
     }
-
-    /**
-     * Creates a new MIDI virtual device.
-     *
-     * @param numInputPorts number of input ports for the virtual device
-     * @param numOutputPorts number of output ports for the virtual device
-     * @param properties a {@link android.os.Bundle} containing properties describing the device
-     * @param isPrivate true if this device should only be visible and accessible to apps
-     *                  with the same UID as the caller
-     * @return a {@link MidiDeviceServer} object to locally represent the device
-     */
-    public MidiDeviceServer createDeviceServer(int numInputPorts, int numOutputPorts,
-            Bundle properties, boolean isPrivate) {
-        return createDeviceServer(numInputPorts, numOutputPorts, properties,
-                isPrivate, MidiDeviceInfo.TYPE_VIRTUAL);
-    }
-
 }

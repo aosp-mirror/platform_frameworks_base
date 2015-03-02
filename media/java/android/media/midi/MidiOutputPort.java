@@ -23,7 +23,6 @@ import libcore.io.IoUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * This class is used for receiving data from a port on a MIDI device
@@ -35,11 +34,7 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
     private static final String TAG = "MidiOutputPort";
 
     private final FileInputStream mInputStream;
-
-    // array of receiver lists, indexed by port number
-    private final ArrayList<MidiReceiver> mReceivers = new ArrayList<MidiReceiver>();
-
-    private int mReceiverCount; // total number of receivers for all ports
+    private final MidiDispatcher mDispatcher = new MidiDispatcher();
 
     // This thread reads MIDI events from a socket and distributes them to the list of
     // MidiReceivers attached to this device.
@@ -47,7 +42,6 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
         @Override
         public void run() {
             byte[] buffer = new byte[MAX_PACKET_SIZE];
-            ArrayList<MidiReceiver> deadReceivers = new ArrayList<MidiReceiver>();
 
             try {
                 while (true) {
@@ -55,77 +49,39 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
                     int count = mInputStream.read(buffer);
                     if (count < 0) {
                         break;
+                        // FIXME - inform receivers here?
                     }
 
                     int offset = getMessageOffset(buffer, count);
                     int size = getMessageSize(buffer, count);
                     long timestamp = getMessageTimeStamp(buffer, count);
 
-                    synchronized (mReceivers) {
-                        for (int i = 0; i < mReceivers.size(); i++) {
-                            MidiReceiver receiver = mReceivers.get(i);
-                            try {
-                                receiver.post(buffer, offset, size, timestamp);
-                            } catch (IOException e) {
-                                Log.e(TAG, "post failed");
-                                deadReceivers.add(receiver);
-                            }
-                        }
-                        // remove any receivers that failed
-                        if (deadReceivers.size() > 0) {
-                            for (MidiReceiver receiver: deadReceivers) {
-                                mReceivers.remove(receiver);
-                                mReceiverCount--;
-                            }
-                            deadReceivers.clear();
-                        }
-                        // exit if we have no receivers left
-                        if (mReceiverCount == 0) {
-                            break;
-                        }
-                    }
+                    // dispatch to all our receivers
+                    mDispatcher.post(buffer, offset, size, timestamp);
                 }
             } catch (IOException e) {
-                // report I/O failure
+                // FIXME report I/O failure?
                 Log.e(TAG, "read failed");
             } finally {
                 IoUtils.closeQuietly(mInputStream);
-                onIOException();
             }
         }
     };
 
-  /* package */ MidiOutputPort(ParcelFileDescriptor pfd, int portNumber) {
+   /* package */ MidiOutputPort(ParcelFileDescriptor pfd, int portNumber) {
         super(portNumber);
         mInputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd);
+        mThread.start();
     }
 
-    /**
-     * Connects a {@link MidiReceiver} to the output port to allow receiving
-     * MIDI messages from the port.
-     *
-     * @param receiver the receiver to connect
-     */
+    @Override
     public void connect(MidiReceiver receiver) {
-        synchronized (mReceivers) {
-            mReceivers.add(receiver);
-            if (mReceiverCount++ == 0) {
-                mThread.start();
-            }
-        }
+        mDispatcher.getSender().connect(receiver);
     }
 
-    /**
-     * Disconnects a {@link MidiReceiver} from the output port.
-     *
-     * @param receiver the receiver to connect
-     */
+    @Override
     public void disconnect(MidiReceiver receiver) {
-        synchronized (mReceivers) {
-            if (mReceivers.remove(receiver)) {
-                mReceiverCount--;
-            }
-        }
+        mDispatcher.getSender().disconnect(receiver);
     }
 
     @Override

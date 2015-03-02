@@ -16,21 +16,22 @@
 
 package android.media.midi;
 
+import android.os.IBinder;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.RemoteException;
 import android.system.OsConstants;
 import android.util.Log;
 
+import libcore.io.IoUtils;
+
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
- * This class is used to provide the implemention of MIDI device.
- * Applications may call {@link MidiManager#createDeviceServer}
- * to create an instance of this class to implement a virtual MIDI device.
+ * Internal class used for providing an implementation for a MIDI device.
  *
- * CANDIDATE FOR PUBLIC API
  * @hide
  */
 public final class MidiDeviceServer implements Closeable {
@@ -40,64 +41,36 @@ public final class MidiDeviceServer implements Closeable {
 
     // MidiDeviceInfo for the device implemented by this server
     private MidiDeviceInfo mDeviceInfo;
-    private int mInputPortCount;
-    private int mOutputPortCount;
+    private final int mInputPortCount;
+    private final int mOutputPortCount;
 
-    // output ports for receiving messages from our clients
-    // we can have only one per port number
-    private MidiOutputPort[] mInputPortSenders;
+    // MidiReceivers for receiving data on our input ports
+    private final MidiReceiver[] mInputPortReceivers;
 
-    // receivers attached to our input ports
-    private ArrayList<MidiReceiver>[] mInputPortReceivers;
+    // MidiDispatchers for sending data on our output ports
+    private MidiDispatcher[] mOutputPortDispatchers;
 
-    // input ports for sending messages to our clients
-    // we can have multiple outputs per port number
-    private ArrayList<MidiInputPort>[] mOutputPortReceivers;
-
-    // subclass of MidiInputPort for passing to clients
-    // that notifies us when the connection has failed
-    private class ServerInputPort extends MidiInputPort {
-        ServerInputPort(ParcelFileDescriptor pfd, int portNumber) {
-            super(pfd, portNumber);
-        }
-
-        @Override
-        public void onIOException() {
-            synchronized (mOutputPortReceivers) {
-                mOutputPortReceivers[getPortNumber()].clear();
-            }
-        }
-    }
-
-    // subclass of MidiOutputPort for passing to clients
-    // that notifies us when the connection has failed
-    private class ServerOutputPort extends MidiOutputPort {
-        ServerOutputPort(ParcelFileDescriptor pfd, int portNumber) {
-            super(pfd, portNumber);
-        }
-
-        @Override
-        public void onIOException() {
-            synchronized (mInputPortSenders) {
-                mInputPortSenders[getPortNumber()] = null;
-            }
-        }
-    }
+    // MidiOutputPorts for clients connected to our input ports
+    private final MidiOutputPort[] mInputPortOutputPorts;
 
     // Binder interface stub for receiving connection requests from clients
     private final IMidiDeviceServer mServer = new IMidiDeviceServer.Stub() {
 
         @Override
         public ParcelFileDescriptor openInputPort(int portNumber) {
+            if (mDeviceInfo.isPrivate()) {
+                if (Binder.getCallingUid() != Process.myUid()) {
+                    throw new SecurityException("Can't access private device from different UID");
+                }
+            }
+
             if (portNumber < 0 || portNumber >= mInputPortCount) {
                 Log.e(TAG, "portNumber out of range in openInputPort: " + portNumber);
                 return null;
             }
 
-            ParcelFileDescriptor result = null;
-
-            synchronized (mInputPortSenders) {
-                if (mInputPortSenders[portNumber] != null) {
+            synchronized (mInputPortOutputPorts) {
+                if (mInputPortOutputPorts[portNumber] != null) {
                     Log.d(TAG, "port " + portNumber + " already open");
                     return null;
                 }
@@ -105,47 +78,86 @@ public final class MidiDeviceServer implements Closeable {
                 try {
                     ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
                                                         OsConstants.SOCK_SEQPACKET);
-                    MidiOutputPort newOutputPort = new ServerOutputPort(pair[0], portNumber);
-                    mInputPortSenders[portNumber] = newOutputPort;
-                    result =  pair[1];
+                    final MidiOutputPort outputPort = new MidiOutputPort(pair[0], portNumber);
+                    mInputPortOutputPorts[portNumber] = outputPort;
+                    final int portNumberF = portNumber;
+                    final MidiReceiver inputPortReceviver = mInputPortReceivers[portNumber];
 
-                    ArrayList<MidiReceiver> receivers = mInputPortReceivers[portNumber];
-                    synchronized (receivers) {
-                        for (int i = 0; i < receivers.size(); i++) {
-                            newOutputPort.connect(receivers.get(i));
+                    outputPort.connect(new MidiReceiver() {
+                        @Override
+                        public void post(byte[] msg, int offset, int count, long timestamp)
+                                throws IOException {
+                            try {
+                                inputPortReceviver.post(msg, offset, count, timestamp);
+                            } catch (IOException e) {
+                                IoUtils.closeQuietly(mInputPortOutputPorts[portNumberF]);
+                                mInputPortOutputPorts[portNumberF] = null;
+                                // FIXME also flush the receiver
+                            }
                         }
-                    }
+                    });
+
+                    return pair[1];
                 } catch (IOException e) {
                     Log.e(TAG, "unable to create ParcelFileDescriptors in openInputPort");
                     return null;
                 }
             }
-
-            return result;
         }
 
         @Override
         public ParcelFileDescriptor openOutputPort(int portNumber) {
+            if (mDeviceInfo.isPrivate()) {
+                if (Binder.getCallingUid() != Process.myUid()) {
+                    throw new SecurityException("Can't access private device from different UID");
+                }
+            }
+
             if (portNumber < 0 || portNumber >= mOutputPortCount) {
                 Log.e(TAG, "portNumber out of range in openOutputPort: " + portNumber);
                 return null;
             }
-            synchronized (mOutputPortReceivers) {
-                try {
-                    ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
-                                                        OsConstants.SOCK_SEQPACKET);
-                    mOutputPortReceivers[portNumber].add(new ServerInputPort(pair[0], portNumber));
-                    return pair[1];
-                } catch (IOException e) {
-                    Log.e(TAG, "unable to create ParcelFileDescriptors in openOutputPort");
-                    return null;
-                }
+
+            try {
+                ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
+                                                    OsConstants.SOCK_SEQPACKET);
+                final MidiInputPort inputPort = new MidiInputPort(pair[0], portNumber);
+                final MidiSender sender = mOutputPortDispatchers[portNumber].getSender();
+                sender.connect(new MidiReceiver() {
+                        @Override
+                        public void post(byte[] msg, int offset, int count, long timestamp)
+                                throws IOException {
+                            try {
+                                inputPort.post(msg, offset, count, timestamp);
+                            } catch (IOException e) {
+                                IoUtils.closeQuietly(inputPort);
+                                sender.disconnect(this);
+                                // FIXME also flush the receiver?
+                            }
+                        }
+                    });
+
+                return pair[1];
+            } catch (IOException e) {
+                Log.e(TAG, "unable to create ParcelFileDescriptors in openOutputPort");
+                return null;
             }
         }
     };
 
-    /* package */ MidiDeviceServer(IMidiManager midiManager) {
+    /* package */ MidiDeviceServer(IMidiManager midiManager, MidiReceiver[] inputPortReceivers,
+            int numOutputPorts) {
         mMidiManager = midiManager;
+        mInputPortReceivers = inputPortReceivers;
+        mInputPortCount = inputPortReceivers.length;
+        mOutputPortCount = numOutputPorts;
+
+        mInputPortOutputPorts = new MidiOutputPort[mInputPortCount];
+
+        mOutputPortDispatchers = new MidiDispatcher[numOutputPorts];
+        for (int i = 0; i < numOutputPorts; i++) {
+            mOutputPortDispatchers[i] = new MidiDispatcher();
+        }
     }
 
     /* package */ IMidiDeviceServer getBinderInterface() {
@@ -157,19 +169,6 @@ public final class MidiDeviceServer implements Closeable {
             throw new IllegalStateException("setDeviceInfo should only be called once");
         }
         mDeviceInfo = deviceInfo;
-        mInputPortCount = deviceInfo.getInputPortCount();
-        mOutputPortCount = deviceInfo.getOutputPortCount();
-        mInputPortSenders = new MidiOutputPort[mInputPortCount];
-
-        mInputPortReceivers = new ArrayList[mInputPortCount];
-        for (int i = 0; i < mInputPortCount; i++) {
-            mInputPortReceivers[i] = new ArrayList<MidiReceiver>();
-        }
-
-        mOutputPortReceivers = new ArrayList[mOutputPortCount];
-        for (int i = 0; i < mOutputPortCount; i++) {
-            mOutputPortReceivers[i] = new ArrayList<MidiInputPort>();
-        }
     }
 
     @Override
@@ -183,86 +182,13 @@ public final class MidiDeviceServer implements Closeable {
     }
 
     /**
-     * Returns a {@link MidiDeviceInfo} object, which describes this device.
-     *
-     * @return the {@link MidiDeviceInfo} object
+     * Returns an array of {@link MidiReceiver} for the device's output ports.
+     * Clients can use these receivers to send data out the device's output ports.
+     * @return array of MidiReceivers
      */
-    public MidiDeviceInfo getInfo() {
-        return mDeviceInfo;
-    }
-
-    /**
-     * Called to open a {@link MidiSender} to allow receiving MIDI messages
-     * on the device's input port for the specified port number.
-     *
-     * @param portNumber the number of the input port
-     * @return the {@link MidiSender}
-     */
-    public MidiSender openInputPortSender(int portNumber) {
-        if (portNumber < 0 || portNumber >= mDeviceInfo.getInputPortCount()) {
-            throw new IllegalArgumentException("portNumber " + portNumber + " out of range");
-        }
-        final int portNumberF = portNumber;
-        return new MidiSender() {
-
-            @Override
-            public void connect(MidiReceiver receiver) {
-                // We always synchronize on mInputPortSenders before receivers if we need to
-                // synchronize on both.
-                synchronized (mInputPortSenders) {
-                    ArrayList<MidiReceiver> receivers = mInputPortReceivers[portNumberF];
-                    synchronized (receivers) {
-                        receivers.add(receiver);
-                        MidiOutputPort outputPort = mInputPortSenders[portNumberF];
-                        if (outputPort != null) {
-                            outputPort.connect(receiver);
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void disconnect(MidiReceiver receiver) {
-                // We always synchronize on mInputPortSenders before receivers if we need to
-                // synchronize on both.
-                synchronized (mInputPortSenders) {
-                    ArrayList<MidiReceiver> receivers = mInputPortReceivers[portNumberF];
-                    synchronized (receivers) {
-                        receivers.remove(receiver);
-                        MidiOutputPort outputPort = mInputPortSenders[portNumberF];
-                        if (outputPort != null) {
-                            outputPort.disconnect(receiver);
-                        }
-                    }
-                }
-            }
-        };
-    }
-
-    /**
-     * Called to open a {@link MidiReceiver} to allow sending MIDI messages
-     * on the virtual device's output port for the specified port number.
-     *
-     * @param portNumber the number of the output port
-     * @return the {@link MidiReceiver}
-     */
-    public MidiReceiver openOutputPortReceiver(int portNumber) {
-        if (portNumber < 0 || portNumber >= mDeviceInfo.getOutputPortCount()) {
-            throw new IllegalArgumentException("portNumber " + portNumber + " out of range");
-        }
-        final int portNumberF = portNumber;
-        return new MidiReceiver() {
-
-            @Override
-            public void post(byte[] msg, int offset, int count, long timestamp) throws IOException {
-                ArrayList<MidiInputPort> receivers = mOutputPortReceivers[portNumberF];
-                synchronized (receivers) {
-                    for (int i = 0; i < receivers.size(); i++) {
-                        // FIXME catch errors and remove dead ones
-                        receivers.get(i).post(msg, offset, count, timestamp);
-                    }
-                }
-            }
-        };
+    public MidiReceiver[] getOutputPortReceivers() {
+        MidiReceiver[] receivers = new MidiReceiver[mOutputPortCount];
+        System.arraycopy(mOutputPortDispatchers, 0, receivers, 0, mOutputPortCount);
+        return receivers;
     }
 }
