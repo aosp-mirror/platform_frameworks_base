@@ -740,6 +740,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikácii komunikovať so značkami, kartami a čítačkami s podporou technológie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivácia zámky obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikácii zakázať uzamknutie klávesnice a akékoľvek súvisiace zabezpečenie heslom. Príkladom je zakázanie uzamknutia klávesnice pri prichádzajúcom telefonickom hovore a jeho opätovné povolenie po skončení hovoru."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čítať nastavenia synchronizácie"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikácii čítať nastavenia synchronizácie v účte. Môže napríklad určiť, či je s účtom synchronizovaná aplikácia Ľudia."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"zapnúť alebo vypnúť synchronizáciu"</string>
@@ -815,29 +823,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"viazať sa na službu na odosielanie správ SMS a MMS operátora"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby na odosielanie správ SMS a MMS operátora. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť tablet alebo vymazať všetky údaje tabletu v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite televízor alebo vymažte všetky údaje v ňom."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Sledovať počet nesprávnych hesiel zadaných pri odomykaní obrazovky a zamknúť telefón alebo vymazať všetky údaje v telefóne v prípade príliš veľkého počtu neplatných pokusov o zadanie hesla."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Zmeniť heslo na odomknutie obrazovky"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Zmena hesla na odomknutie obrazovky."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite tablet alebo vymažte všetky údaje tohto používateľa."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite televízor alebo vymažte všetky údaje tohto používateľa."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Sledujte počet nesprávnych hesiel zadaných pri odomykaní obrazovky a v prípade, že ich je zadaných príliš mnoho, uzamknite telefón alebo vymažte všetky údaje tohto používateľa."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Zmeniť zámku obrazovky"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Zmeňte zámku obrazovky."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknúť obrazovku"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Ovládať, ako a kedy sa obrazovka uzamkne."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazanie všetkých údajov"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia tabletu."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Vymažte údaje televízora bez upozornenia obnovením jeho továrenských nastavení."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez predchádzajúceho upozornenia zmazať všetky údaje tým, že sa obnovia továrenské nastavenia telefónu."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Vymazať údaje používateľa"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Vymažte bez upozornenia údaje tohto používateľa na tomto tablete."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Vymažte bez upozornenia údaje tohto používateľa na tomto televízore."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Vymažte bez upozornenia údaje tohto používateľa na tomto telefóne."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastaviť globálny server proxy zariadenia"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globálny server proxy, ktorý sa bude používať po aktivácii pravidiel. Platný globálny server proxy nastavuje iba prvý správca zariadenia."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastaviť vypršanie hesla zámky"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Nastavte, ako často sa musí zmeniť heslo na uzamknutie obrazovky."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Vyberte globálny proxy server, ktorý sa bude používať po aktivácii pravidiel. Nastaviť ho môže iba vlastník zariadenia."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Nastaviť dátum vypršania platnosti zámky obrazovky"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Nastavte, ako často sa musí zmeniť heslo na uzamknutie obrazovky, kód PIN alebo vzor."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastaviť šifrovanie úložiska"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Vyžadovať šifrovanie uložených údajov aplikácií."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Zakázať fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázať používanie všetkých fotoaparátov zariadenia."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Zákaz funkcií pri zámke klávesov"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Zabrániť používaniu niektorých funkcií pri zámke klávesov."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Vypnúť funkcie zámky obrazovky"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Zabráňte používaniu niektorých funkcií zámky obrazovky."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domov"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1832,7 +1847,7 @@
       <item quantity="one">Hodinu</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Natrvalo"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Dokým túto funkciu nevypnete"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zbaliť"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Do ďalšieho budíka o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Do ďalšieho budíka"</string>

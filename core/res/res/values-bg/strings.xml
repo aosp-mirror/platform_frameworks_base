@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"деактивиране на заключването на екрана ви"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Разрешава на приложението да чете настройките за синхронизиране на профил. Например това може да определи дали приложението Хора е синхронизирано с даден профил."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"включване и изключване на синхронизирането"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"свързване с услуга за съобщения от оператор"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Разрешава на притежателя да се свърже към интерфейса от най-високото ниво на услуга за съобщения от оператор. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Задаване на правила за паролата"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролирайте дължината и разрешените знаци за паролите за отключване на екрана."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролира дължината и разрешените знаци за паролите и ПИН кодовете за заключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва таблета или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Наблюдаване на броя на неправилно въведените пароли при отключване на екрана и заключване на телевизора или изтриване на всички данни от него, ако неуспешните опити са твърде много."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва телефона или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Промяна на паролата за отключване на екрана"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Промяна на паролата за отключване на екрана."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва таблета или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва телевизора или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Наблюдава броя на неправилно въведените пароли при отключване на екрана и заключва телефона или изтрива всички данни на този потребител, ако неуспешните опити са твърде много."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Промяна на заключването на екрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Променя заключването на екрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Заключване на екрана"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролирайте как и кога екранът се заключва."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Изтриване на всички данни"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Изтриване на данните в таблета без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Изтриване на данните от телевизора без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Изтриване на данните в телефона без предупреждение чрез възстановяване на фабричните настройки."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Изтриване на потребителските данни"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Изтрива данните на този потребител от таблета без предупреждение."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Изтрива данните на този потребител от телевизора без предупреждение."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Изтрива данните на този потребител от телефона без предупреждение."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Задаване на глобален прокси сървър за устройството"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Задаване на глобалния прокси сървър, който да се използва, когато правилото е активирано. Само първият администратор на устройството задава действителния глобален прокси сървър."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Изтичане на паролата"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Контролирайте колко често трябва да се променя паролата за заключен екран."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Задава глобалния прокси сървър за устройството, който да се използва, когато правилото е активирано. Само собственикът на устройството може да задава такъв сървър."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Задав. на валидност на паролата на закл. на екрана"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Променя колко често трябва да се сменят паролата, ПИН кодът или фигурата за заключване на екрана."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Шифроване за хранилището"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Изисква съхраняваните данни за приложенията да бъдат шифровани."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Деактивиране на камерите"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Предотвратява употребата на камерите на всички устройства."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Функции при защита на клавишите: Деакт."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Предотвратява използването на някои функции при защита на клавишите."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Функции на закл. на екрана: Деакт."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Предотвратява използването на някои функции на заключването на екрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашен"</item>
     <item msgid="869923650527136615">"Мобилен"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">За един час</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"За неопределено време"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Докато не изключите това"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Свиване"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"До следващия будилник в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"До следващия будилник"</string>

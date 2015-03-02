@@ -740,6 +740,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"vypnutí zámku obrazovky"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Telefon například vypne zámek klávesnice při příchozím hovoru a po skončení hovoru jej zase zapne."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Umožňuje aplikaci číst nastavení synchronizace v účtu. Může například určit, zda je s účtem synchronizována aplikace Lidé."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"vypnutí nebo zapnutí synchronizace"</string>
@@ -815,29 +823,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Řídit délku hesel pro odemčení obrazovky a povolené znaky."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Ovládání délky a znaků povolených v heslech a kódech PIN zámku obrazovky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout tablet nebo vymazat z tabletu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Umožňuje monitorovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout televizi nebo vymazat veškerá data v televizi, pokud je zadáno příliš mnoho nesprávných hesel."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Sledovat počet nesprávných hesel zadaných při odemykání obrazovky a uzamknout telefon nebo vymazat z telefonu všechna data, pokud bylo zadáno příliš mnoho nesprávných hesel."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Změnit heslo pro odemknutí obrazovky"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Změnit heslo pro odemknutí obrazovky."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout tablet nebo vymazat veškerá data uživatele."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout televizi nebo vymazat veškerá data uživatele."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorovat počet nesprávných hesel zadaných při odemykání obrazovky, a pokud je zadáno příliš mnoho nesprávných hesel, uzamknout telefon nebo vymazat veškerá data uživatele."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Změnit zámek obrazovky"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Změnit zámek obrazovky."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Uzamknout obrazovku"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Řídit, jak a kdy se obrazovka uzamkne."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Vymazat všechna data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Bez upozornění smazat všechna data tabletu obnovením továrních dat."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Umožňuje provést obnovení továrních dat a bez varování tím vymazat data v televizi."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Bez upozornění smazat všechna data telefonu obnovením továrních dat."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Vymazat data uživatele"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Vymazat data tohoto uživatele v tomto tabletu bez upozornění."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Vymazat data tohoto uživatele v této televizi bez upozornění."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Vymazat data tohoto uživatele v tomto telefonu bez upozornění."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Nastavit globální proxy server zařízení"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Vyberte globální proxy server, který se bude používat, když jsou zásady aktivní. Aktuální globální proxy server nastavuje pouze první správce zařízení."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Nastavit vypršení hesla zámku"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Určuje, jak často je třeba měnit heslo pro uzamčení obrazovky."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Nastaví globální proxy server, který bude používán, když je zásada zapnuta. Globální proxy server může nastavit pouze vlastník zařízení."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Nastavit vypršení hesla zámku obrazovky"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Mění, jak často je potřeba měnit heslo, PIN nebo gesto zámku obrazovky."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavit šifrování úložiště"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Požadovat šifrování uložených dat aplikací."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Vypnout fotoaparáty"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Zakázat používání všech fotoaparátů zařízení."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Zakázat funkce v zámku zařízení"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Zabránit používání některých funkcí v zámku zařízení."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Zakázat funkce zámku obrazovky"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Zabránit použití některých funkcí zámku obrazovky."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domů"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1806,7 +1821,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Před uvolněním požádat o heslo"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokud v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí pozastavení"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Dokud neskončí výpadek"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Dokud neskončí pozastavení"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
       <item quantity="few">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="many">%1$d minuty (do <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1832,7 +1847,7 @@
       <item quantity="one">Jednu hodinu</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Na dobu neurčitou"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Dokud tuto funkci nevypnete"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Do dalšího budíku v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Do příštího budíku"</string>

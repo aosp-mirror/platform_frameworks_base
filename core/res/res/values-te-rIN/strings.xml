@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"సమకాలీకరణ సెట్టింగ్‌లను చదవడం"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఉదాహరణకు, వ్యక్తుల అనువర్తనం ఖాతాతో సమకాలీకరించబడాలా లేదా అనే విషయాన్ని ఇది నిశ్చయించవచ్చు."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"సమకాలీకరణను ఆన్ మరియు ఆఫ్‌కు టోగుల్ చేయడం"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"క్యారియర్ సందేశ సేవకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"క్యారియర్ సందేశ సేవ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"పాస్‌వర్డ్ నియమాలను సెట్ చేయండి"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"స్క్రీన్-అన్‌లాక్ పాస్‌వర్డ్‌ల్లో అనుమతించబడే అక్షరాల  సంఖ్యను మరియు అక్షరాలను నియంత్రించండి."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"స్క్రీన్ లాక్ పాస్‌వర్డ్‌లు మరియు PINల్లో అనుమతించబడిన పొడవు మరియు అక్షరాలను నియంత్రిస్తుంది."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"స్క్రీన్-అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"టైప్ చేసిన చెల్లని పాస్‌వర్డ్‌ల సంఖ్యను పర్యవేక్షిస్తుంది. స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, అనేక సార్లు చెల్లని పాస్‌వర్డ్‌లను టైప్ చేస్తే టాబ్లెట్ లాక్ చేయబడుతుంది లేదా టాబ్లెట్‌లోని మొత్తం డేటా ఎరేజ్ చేయబడుతుంది."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌లను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షించండి మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌లను తప్పుగా టైప్ చేసి ఉంటే టీవీని లాక్ చేయండి లేదా మొత్తం టీవీ డేటాను తీసివేయండి."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"టైప్ చేసిన చెల్లని పాస్‌వర్డ్‌ల సంఖ్యను పర్యవేక్షిస్తుంది. స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, అనేక సార్లు చెల్లని పాస్‌వర్డ్‌లను టైప్ చేస్తే ఫోన్ లాక్ చేయబడుతుంది లేదా ఫోన్‌లోని మొత్తం డేటా ఎరేజ్ చేయబడుతుంది."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"స్క్రీన్-అన్‌లాక్ పాస్‌వర్డ్‌ను మార్చండి"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"స్క్రీన్-అన్‌లాక్ పాస్‌వర్డ్‌ను మార్చండి."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే టాబ్లెట్‌ను లాక్ చేస్తుంది లేదా ఈ వినియోగదారు యొక్క మొత్తం డేటాను తీసివేస్తుంది."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే టీవీని లాక్ చేస్తుంది లేదా ఈ వినియోగదారు యొక్క మొత్తం డేటాను తీసివేస్తుంది."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు పాస్‌వర్డ్‌ను ఎన్నిసార్లు తప్పుగా టైప్ చేశారో పర్యవేక్షిస్తుంది మరియు చాలా ఎక్కువసార్లు పాస్‌వర్డ్‌ను తప్పుగా టైప్ చేసి ఉంటే ఫోన్‌ను లాక్ చేస్తుంది లేదా ఈ వినియోగదారు యొక్క మొత్తం డేటాను తీసివేస్తుంది."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"స్క్రీన్ లాక్‌ని మార్చండి"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"స్క్రీన్ లాక్‌ని మారుస్తుంది."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"స్క్రీన్‌ను లాక్ చేయండి"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"స్క్రీన్‌ను ఎలా మరియు ఎప్పుడు లాక్ చేయాలనే దాన్ని నియంత్రించండి."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"మొత్తం డేటాను ఎరేజ్ చేయండి"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరిక లేకుండానే టీవీ డేటాను తీసివేయండి."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే ఫోన్ డేటాను ఎరేజ్ చేయండి."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"వినియోగదారు డేటాను తీసివేయండి"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"హెచ్చరిక లేకుండానే ఈ టాబ్లెట్‌లో ఈ వినియోగదారు డేటాను తీసివేస్తుంది."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"హెచ్చరిక లేకుండానే ఈ టీవీలో ఈ వినియోగదారు డేటాను తీసివేస్తుంది."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"హెచ్చరిక లేకుండానే ఈ ఫోన్‌లో ఈ వినియోగదారు డేటాను తీసివేస్తుంది."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"పరికరం గ్లోబల్ ప్రాక్సీని సెట్ చేయండి"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"విధానాన్ని ప్రారంభించినప్పుడు ఉపయోగించబడటానికి పరికరం గ్లోబల్ ప్రాక్సీని సెట్ చేయండి. మొదటి పరికర నిర్వాహకులు మాత్రమే ప్రభావవంతమైన గ్లోబల్ ప్రాక్సీని సెట్ చేస్తారు."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"లాక్-స్క్రీన్ పాస్‌వర్డ్ గడువు ముగింపును సెట్ చేయండి"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"లాక్-స్క్రీన్ పాస్‌వర్డ్‌ను తప్పనిసరిగా ఎంత తరచుగా మార్చాలనేదాన్ని నియంత్రించండి."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"విధానాన్ని ప్రారంభించినప్పుడు ఉపయోగించడానికి పరికర గ్లోబల్ ప్రాక్సీని సెట్ చేస్తుంది. పరికర యజమాని మాత్రమే గ్లోబల్ ప్రాక్సీని సెట్ చేయగలరు."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"స్క్రీన్ లాక్ పాస్‌వర్డ్ గడువు ముగింపుని సెట్ చేయండి"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"స్క్రీన్ లాక్ పాస్‌వర్డ్, PIN లేదా నమూనాని తప్పనిసరిగా ఎంత తరచుగా మార్చాలనే దాన్ని మారుస్తుంది."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"నిల్వ గుప్తీకరణను సెట్ చేయండి"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"నిల్వ చేయబడిన అనువర్తన డేటా గుప్తీకరించబడి ఉండటం అవసరం."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"కెమెరాలను నిలిపివేయండి"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"అన్ని పరికర కెమెరాల వినియోగాన్ని నిరోధించండి."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"కీగార్డ్‌లో లక్షణాలను నిలిపివేయండి"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"కీగార్డ్‌లో కొన్ని లక్షణాల వినియోగాన్ని నిరోధించండి."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"స్క్రీన్ లాక్ లక్షణా. నిలిపి."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"స్క్రీన్ లాక్ యొక్క కొన్ని లక్షణాల వినియోగాన్ని నిరోధిస్తుంది."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ఇల్లు"</item>
     <item msgid="869923650527136615">"మొబైల్"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">ఒక గంట పాటు</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"నిరవధికంగా"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"మీరు దీన్ని ఆఫ్ చేసే వరకు"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>కి సెట్ చేసిన తదుపరి అలారం వరకు"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"తదుపరి అలారం వరకు"</string>

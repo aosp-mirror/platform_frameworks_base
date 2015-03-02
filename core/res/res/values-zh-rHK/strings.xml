@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"停用螢幕上鎖"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全措施。例如：手機收到來電時停用按鍵鎖定，通話結束後重新啟用按鍵鎖定。"</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"允許應用程式讀取帳戶的同步設定，例如確定「通訊錄」應用程式是否和某個帳戶保持同步。"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"開啟和關閉同步功能"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"繫結至流動網絡供應商短訊服務"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式繫結至流動網絡供應商短訊服務的頂層介面　(不建議一般應用程式使用)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制螢幕鎖定密碼和 PIN 所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監控螢幕解鎖嘗試次數"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"監視為螢幕解鎖時輸入錯誤密碼的次數；如果輸入錯誤密碼的次數過多，則會鎖定平板電腦或清除平板電腦的所有資料。"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定電視或清除電視中的所有資料。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"監視為螢幕解鎖時輸入錯誤密碼的次數，如果輸入錯誤密碼的次數過多，則會鎖定手機或清除手機的所有資料。"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"更改螢幕解鎖密碼"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"更改螢幕解鎖密碼。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定平板電腦或清除這個使用者的資料。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定電視或清除這個使用者的資料。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"監察螢幕解鎖時錯誤輸入密碼的次數，如果錯誤輸入密碼的次數過多，即鎖定手機或清除這個使用者的資料。"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"變更螢幕鎖定"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"變更螢幕鎖定。"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"鎖定螢幕"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"控制鎖定螢幕的方式和時間。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有資料"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"重設平板電腦為原廠設定，在不提出警告的情況下直接清除平板電腦的資料。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"重設電視為原廠設定，在不提出警告的情況下直接清除電視的資料。"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"重設手機為原廠設定，在不提出警告的情況下直接清除手機的資料。"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"清除使用者資料"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"清除這個使用者在這部平板電腦上的資料而不作警告。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"清除這個使用者在這部電視上的資料而不作警告。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"清除這個使用者在這部手機上的資料而不作警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"設定裝置的全域代理伺服器"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"設定政策啟用時所要使用的裝置全域代理伺服器，只有第一個裝置管理員所設定的全域代理伺服器具有效力。"</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"設定螢幕上鎖密碼到期日"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"控制螢幕上鎖密碼的更改頻率。"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"設定政策啟用時所要使用的裝置全域代理伺服器，只有裝置擁有者可以設定全域代理伺服器。"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"設定螢幕鎖定密碼期限"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"變更螢幕鎖定密碼、PIN 或圖案的更改頻率。"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"設定儲存裝置加密"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"必須為儲存的應用程式資料加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相機"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有裝置相機。"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"停用鍵盤保護框上的功能"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"禁止使用鍵盤保護框上的部分功能。"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"停用螢幕鎖定的功能"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"禁止使用螢幕鎖定的部分功能。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手機"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">需時 1 小時</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"直至您關閉這項設定"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"直到下一個在 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 的鬧鐘"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"直到下一個鬧鐘"</string>

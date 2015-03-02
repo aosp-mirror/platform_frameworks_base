@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"앱이 NFC(근거리 무선 통신) 태그, 카드 및 리더와 통신할 수 있도록 허용합니다."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"화면 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"앱이 키 잠금 및 관련 비밀번호 보안을 사용중지할 수 있도록 허용합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"앱이 계정의 동기화 설정을 읽을 수 있도록 허용합니다. 예를 들어, 계정에서 주소록 앱을 동기화할지 여부를 확인할 수 있습니다."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"동기화 사용 및 사용 중지 전환"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 태블릿에 있는 데이터를 모두 지웁니다."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"화면을 잠금 해제할 때 잘못된 비밀번호를 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많을 때 TV를 잠그거나 TV의 데이터를 모두 삭제합니다."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"화면 잠금해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고, 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 휴대전화에 있는 데이터를 모두 지웁니다."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"화면 잠금해제 비밀번호 변경"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"화면 잠금해제 비밀번호를 변경합니다."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 태블릿을 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 TV를 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"화면 잠금 해제 시 비밀번호를 잘못 입력한 횟수를 모니터링하고 잘못된 비밀번호 입력 횟수가 너무 많은 경우 휴대전화를 잠그거나 이 사용자의 데이터를 모두 삭제합니다."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"화면 잠금 변경"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"화면 잠금을 변경합니다."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"화면 잠금"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"화면을 잠그는 방법과 시기를 제어합니다."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"모든 데이터 삭제"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"초기화를 수행하여 경고 없이 태블릿 데이터를 지웁니다."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"초기화를 수행해서 TV의 데이터를 경고 없이 삭제합니다."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"초기화를 수행하여 경고 없이 휴대전화 데이터를 지웁니다."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"사용자 데이터 삭제"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"이 태블릿에서 사용자의 데이터를 경고 없이 삭제합니다."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"이 TV에서 사용자의 데이터를 경고 없이 삭제합니다."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"이 휴대전화에서 사용자의 데이터를 경고 없이 삭제합니다."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"기기 전체 프록시 설정"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 첫 번째 기기 관리자가 설정한 전체 프록시만 유효합니다."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"화면 잠금 비밀번호 만료 설정"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"화면 잠금 비밀번호 변경 빈도를 설정합니다."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"정책이 사용 설정되어 있는 동안 사용될 기기 전체 프록시를 설정합니다. 기기 소유자만 전체 프록시를 설정할 수 있습니다."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"화면 잠금 비밀번호 만료 설정"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"화면 잠금 비밀번호, PIN 또는 패턴의 변경 빈도를 변경합니다."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"저장소 암호화 설정"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"저장한 애플리케이션 데이터를 암호화해야 합니다."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"카메라 사용 안함"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"모든 기기 카메라의 사용 차단"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"키가드에서 기능 사용중지"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"키가드에서 일부 기능의 사용을 차단합니다."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"화면 잠금 기능 사용 중지"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"일부 화면 잠금 기능의 사용을 차단합니다."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">1시간 동안</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"무제한"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"이 기능을 사용 중지할 때까지"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"다음 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 알람까지"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"다음 알람까지"</string>

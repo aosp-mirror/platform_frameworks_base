@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"appအား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ဖန်သားပြင် သော့ချခြင်းအား မလုပ်နိုင်အောင် ပိတ်ရန်"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"အပလီကေးရှင်းအား သော့ချခြင်းနှင့် သက်ဆိုင်ရာ စကားဝှက်သတ်မှတ်ခြင်းများအား မသုံးနိုင်အောင် ပိတ်ခြင်းကို ခွင့်ပြုရန်။ ဥပမာ ဖုန်းလာလျှင် သော့ပိတ်ခြင်း ပယ်ဖျက်ခြင်း၊ ဖုန်းပြောပြီးလျှင် သော့ကို အလိုအလျောက် ပြန်ပိတ်ခြင်း"</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ထပ်တူပြုအဆင်အပြင်အားဖတ်ခြင်း"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"အပလီကေးရှင်းအား အကောင့်တစ်ခုအတွက် ထပ်တူညီအောင် လုပ်ဆောင်မှု ဆက်တင်အား ကြည့်ခွင့် ပြုပါ။ ဥပမာ People app က အကောင့်တစ်ခုနဲ့ ထပ်တူညီအောင် လုပ်ရန် ဆက်သွယ်ထားမှု ရှိမရှိ သိရှိနိုင်ခြင်း"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ထပ်တူညီအောင် လုပ်ခြင်းအား ပြုနိုင်၊ မပြုနိုင် အပြောင်းအလဲလုပ်ခြင်း"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"စာပို့စာယူ ဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခုအား ပူးပေါင်းခွင့်ပြုရန်"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"စာပို့စာယူဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခု၏ ထိပ်ဆုံးရှိအင်တာဖေ့စ်ဖြင့် ပူးပေါင်းရန် ပိုင်ရှင်အားခွင့်ပြုပါ။ ပုံမှန် app များအတွက် မလိုအပ်ပါ။"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"စကားဝှက်စည်းမျဥ်းကိုသတ်မှတ်ရန်"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"မျက်နှာပြင် သော့ဖွင့်ရန် လိုအပ်သော စကားလုံးအရေအတွက်နှင့် အမျိုးအစားအား ထိန်းချုပ်ရန်"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်များနှင့် PINများရှိ ခွင့်ပြုထားသည့် စာလုံးအရေအတွက်နှင့် အက္ခရာများအား ထိန်းချုပ်ရန်။"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"မော်နီတာမျက်နှာပြင်ဖွင့်ရန် ကြိုးစားခွင့်များ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် တက်ဘလက်ကို သော့ခတ်ရန် သို့မဟုတ် တက်ဘလက် ဒေတာ အားလုံးကို ဖျက်ပစ်ရန်။"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တီဗွီအား သော့ချခြင်း သို့မဟုတ် တီဗွီ၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုရန်။"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် ဖုန်းကို သော့ခတ်ရန် သို့မဟုတ် ဖုန်း ဒေတာ အားလုံးကို ဖျက်ပစ်ရန်။"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"မျက်နှာပြင်ဖွင့်ရန်စကားဝှက်အား ပြောင်းခြင်း"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"မျက်နှာပြင်ဖွင့်ရန်စကားဝှက်အား ပြောင်းခြင်း"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တက်ဘလက်အား သော့ချခြင်း သို့မဟုတ် တက်ဘလက်၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက တီဗွီအား သော့ချခြင်း သို့မဟုတ် တီဗွီ၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ဖန်မျက်နှာပြင်အား သော့ဖွင့်စဉ် လျှို့ဝှက်ကုဒ်အမှားများ ရိုက်သွင်းမှုအား စောင့်ကြည့်ရန်နှင့်၊ လျှို့ဝှက်ကုဒ်အမှားများ များစွာ ရိုက်သွင်းပါက ဖုန်းအား သော့ချခြင်း သို့မဟုတ် ဖုန်း၏ အချက်အလက်များအား ဖျက်ပစ်ခြင်းများ ပြုလုပ်မည်။"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"မျက်နှာပြင်သော့ခတ်ခြင်းအား ပြောင်းမည်"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"မျက်နှာပြင်သော့ခတ်ခြင်းအား ပြောင်းမည်။"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"မျက်နှာပြင်အားသော့ချရန်"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"မည်သည့်အချိန်တွင် ဖန်သားပြင်အား မည်ကဲ့သို့နည်းဖြင် သော့ချရန် ထိန်းချုပ်ခြင်း"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ဒေတာအားလုံးအားဖျက်ခြင်း"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် တက်ဘလက်ရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"စက်ရုံထုတ်အခြေအနေအားပြန်လည်ရယူပါက တီဗွီရှိ အချက်အလက်များအား ကြိုတင်အသိပေးခြင်းမရှိဘဲ ဖျက်ပစ်နိုင်သည်။"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် ဖုန်းရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"အသုံးပြုသူဒေတာကို ဖျက်မည်"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"သတိပေးခြင်းမရှိဘဲ ဤတက်ဘလက်ပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"သတိပေးခြင်းမရှိဘဲ ဤတီဗွီပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"သတိပေးခြင်းမရှိဘဲ ဤဖုန်းပေါ်ရှိ ထိုအသုံးပြုသူ၏ဒေတာအား ဖျက်မည်။"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"တကမာ္ဘလုံးဆိုင်ရာပရော်စီကို သတ်မှတ်ခြင်း"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"မူဝါဒအသုံးပြုခွင့်ရလျှင် စက်ပစ္စည်းတကမ္ဘာလုံးဆိုင်ရာပရော်စီအားသုံးရန် သတ်မှတ်ခြင်း။ ပထမဦးဆုံးသောစက်၏ထိန်းချုပ်သူသာ တကမ္ဘာလုံးဆိုင်ရာပရော်စီသာအားအကျိုးသက်ရောက်စေရန် သတ်မှတ်နိုင်သည်။"</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"စကားဝှက်သက်တမ်းသတ်မှတ်ရန်"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"ဖန်သားပြင်သော့ချခြင်း စကားဝှက် ပြင်ဆင်ခွင့် အကြိမ်ရေအား ထိန်းချုပ်ခြင်း"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ပေါ်လစီအား ဖွင့်ထားချိန်တွင်  တစ်ကမ္ဘာလုံးဆိုင်ရာ ပရောက်စီအား အသုံးပြုရန် ကိရိယာကို သတ်မှတ်မည်။ ကိရိယာ၏ ပိုင်ရှင်သာ ကမ္ဘာလုံးဆိုင်ရာ ပရောက်စီကို သတ်မှတ်နိုင်သည်။"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက် သက်တမ်းကုန်ဆုံးခြင်းကို သတ်မှတ်မည်။"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"မျက်နှာပြင်သော့ခတ်သည့် စကားဝှက်၊ PIN၊ သို့မဟုတ် ပုံစံအား အကြိမ်မည်မျှပြောင်းလဲရမည်ကို ပြောင်းမည်။"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"သိုလှောင်လျို့ဝှက်ခြင်းသတ်မှတ်"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"အပလီကေးရှင်းမှ သိမ်းဆည်းထားသော အရာများအား လျို့ဝှက် အသွင်းပြောင်းရန် လိုအပ်ခြင်း"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ကင်မရာအား ပိတ်ခြင်း"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"စက်မှ ကင်မရာအားလုံး အသုံးပြုမှုအား ကန့်သတ်ရန်"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"keyguardရှိ စွမ်းဆောင်ချက်များရပ်ရန်"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"keyguard မှ တချို့ စွမ်းဆောင်ချက်များအား ကန့်သတ်ရန်"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"မျက်နှာပြင်သော့ခတ်ခြင်း၏ အင်္ဂါရပ်များအား ပိတ်မည်။"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"မျက်နှာပြင်သော့ခတ်ခြင်းမှ အချို့သော အင်္ဂါရပ်များအသုံးပြုခြင်းကို ကာကွယ်ထားသည်။"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ပင်မစာမျက်နှာ"</item>
     <item msgid="869923650527136615">"မိုဘိုင်း"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">တစ်နာရီကြာ</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"အကန့်အသတ်မရှိစွာ"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"သင်က ဒါကို ပိတ်မပစ်သည့် အထိ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ခေါက်ရန်"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"နောက်ထပ် <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ၌နိုးစက်အထိ"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"နောက်ထပ်နိုးစက်အထိ"</string>

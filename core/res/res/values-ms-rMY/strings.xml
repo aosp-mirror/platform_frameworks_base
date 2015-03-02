@@ -738,6 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"lumpuhkan kunci skrin anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Membenarkan apl melumpuhkan kunci kekunci dan sebarang keselamatan kata laluan yang berkaitan. Sebagai contoh, telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"urus perkakasan cap jari"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Membenarkan apl menggunakan kaedah untuk menambahkan dan memadamkan templat cap jari untuk digunakan."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan perkakasan cap jari"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Membenarkan apl menggunakan perkakasan cap jari untuk pengesahan"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"membaca tetapan penyegerakan"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Membenarkan apl membaca tetapan segerak untuk akaun. Sebagai contoh, ini boleh menentukan sama ada apl Orang disegerakkan dengan akaun."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"togol segerak hidup dan mati"</string>
@@ -813,29 +817,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"terikat kepada perkhidmatan pemesejan pembawa"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi perkhidmatan pemesejan pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan  dan PIN kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau bilangan kata laluan yang tersilap ditaip apabila membuka skrin, dan mengunci tablet atau memadam semua data tablet jika terlalu banyak kesilapan menaip kata laluan."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci TV atau padam semua data TV jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau bilangan kata laluan salah yang ditaip semasa membuka skrin, dan mengunci telefon atau memadam semua data telefon jika terlalu banyak kata laluan salah ditaip."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Tukar kata laluan buka kunci skrin"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Tukar kata laluan buka kunci skrin."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci tablet atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci TV atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Pantau bilangan kata laluan tidak betul yang ditaip semasa membuka kunci skrin dan kunci telefon atau padam semua data pengguna ini jika terlalu banyak kata laluan yang tidak betul ditaip."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Tukar kunci skrin"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Tukar kunci skrin."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Kunci skrin"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengawal cara dan bila skrin dikunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Padamkan semua data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Memadamkan data tablet tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Padam data TV tanpa amaran dengan melakukan tetapan semula data kilang."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Memadamkan data telefon tanpa amaran dengan melakukan tetapan semula data kilang."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Padam data pengguna"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Padam data pengguna ini pada tablet ini tanpa amaran."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Padam data pengguna ini pada TV ini tanpa amaran."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Padam data pengguna ini pada telefon ini tanpa amaran."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Tetapkan proksi global peranti"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Menetapkan proksi global peranti untuk digunakan sementara dasar didayakan. Hanya pentadbir peranti pertama boleh menetapkan proksi global dengan berkesan."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Ttpkn tmt tmph k/lln kci skrin"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Kawal kekerapan penukaran kata laluan kunci skrin."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Tetapkan proksi global peranti untuk digunakan sementara dasar didayakan. Hanya pemilik peranti boleh menetapkan proksi global."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Tetapkan tempoh tamat kata laluan kunci skrin"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Tukar kekerapan penukaran kata laluan kunci, PIN atau corak kunci skrin."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Tetapkan penyulitan storan"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Memerlukan data apl yang disimpan itu disulitkan."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Lumpuhkan kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Menghalang penggunaan semua kamera peranti."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Lumpuh ciri pelindung kekunci"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Cegah penggunaan beberapa ciri dalam pelindung kekunci."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Lumpuhkan ciri kunci skrin"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Cegah penggunaan beberapa ciri kunci skrin."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Laman Utama"</item>
     <item msgid="869923650527136615">"Mudah alih"</item>
@@ -1806,7 +1817,7 @@
       <item quantity="one">Selama satu jam</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Sehingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Selama-lamanya"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Sehingga anda matikan"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Runtuhkan"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Sehingga penggera seterusnya pada <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Sehingga penggera seterusnya"</string>

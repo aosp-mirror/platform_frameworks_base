@@ -73,7 +73,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"Идентификация звонящего абонента"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Идентификатор подключенной линии"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ограничение идентификатора подключенной линии"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызова"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Переадресация вызовов"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Параллельный вызов"</string>
     <string name="BaMmi" msgid="455193067926770581">"Запрет вызовов"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Смена пароля"</string>
@@ -740,6 +740,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Приложение сможет обмениваться данными с NFC-метками, картами и устройствами считывания, используя связь малого радиуса действия."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Отключение функции блокировки экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Приложение сможет отключать блокировку экрана и другие функции защиты. Например, блокировка экрана будет отключаться при получении входящего вызова и включаться после завершения разговора."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Просмотр настроек синхронизации"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Приложение сможет просматривать настройки синхронизации аккаунта, например определять, включена ли синхронизация для приложения \"Контакты\"."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"Включение/выключение синхронизации"</string>
@@ -815,29 +823,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"Подключение к службе обмена сообщениями"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Подключение к базовому интерфейсу службы обмена сообщениями, предоставляемой оператором связи. Это разрешение обычно используется только специальными приложениями."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Контролировать длину и символы при вводе пароля и PIN-кода."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует планшетный ПК или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Блокировка телевизора или удаление всех данных на нем при слишком большом количестве неудачных попыток ввести пароль для разблокировки экрана."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Отслеживает попытки ввода пароля при разблокировке экрана и блокирует телефон или удаляет с него все данные, если было сделано слишком много таких попыток."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Изменять пароль для снятия блокировки экрана"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Изменять пароль для снятия блокировки экрана."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать планшет или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать телевизор или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Отслеживать неверно введенные пароли при разблокировке экрана и блокировать телефон или удалять с него все данные, если сделано слишком много неудачных попыток."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Изменить блокировку экрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Изменить блокировку экрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокировать экран"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролировать способ и время блокировки экрана."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Удалить все данные"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Удалять все данные на планшетном ПК без предупреждения путем сброса настроек."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сброс настроек и удаление всех данных на телевизоре без предупреждения."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Удалять все данные на телефоне без предупреждения путем сброса настроек."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Удалить пользовательские данные"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Удалить данные этого пользователя с планшета без предупреждения."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Удалить данные этого пользователя с телевизора без предупреждения."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Удалить данные этого пользователя с телефона без предупреждения."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Глобальный прокси-сервер"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Настройте глобальный прокси-сервер устройства, который будет использоваться при активной политике. Глобальный прокси-сервер должен настроить первый администратор устройства."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Задать срок действия пароля"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Контролировать, как часто менять пароль блокировки экрана."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Настроить глобальный прокси-сервер устройства, который будет использоваться при активной политике. Это может сделать только владелец устройства."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Задать срок действия пароля"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Установить частоту изменения пароля, PIN-кода или графического ключа."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Настроить шифрование хранилища"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Шифровать данные приложений в хранилище."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Отключить камеры"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Запретить использование камер на устройстве."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Отключить функции блокировки"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Запретить использование некоторых функций блокировки клавиатуры."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Отключить функции блокировки экрана"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Запретить использование некоторых функций блокировки экрана."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Домашний"</item>
     <item msgid="869923650527136615">"Мобильный"</item>
@@ -846,30 +861,30 @@
     <item msgid="1735177144948329370">"Домашний факс"</item>
     <item msgid="603878674477207394">"Пейджер"</item>
     <item msgid="1650824275177931637">"Другой"</item>
-    <item msgid="9192514806975898961">"Создать свой ярлык"</item>
+    <item msgid="9192514806975898961">"Новый тип"</item>
   </string-array>
   <string-array name="emailAddressTypes">
     <item msgid="8073994352956129127">"Личный"</item>
     <item msgid="7084237356602625604">"Рабочий"</item>
     <item msgid="1112044410659011023">"Другой"</item>
-    <item msgid="2374913952870110618">"Создать свой ярлык"</item>
+    <item msgid="2374913952870110618">"Новый тип"</item>
   </string-array>
   <string-array name="postalAddressTypes">
     <item msgid="6880257626740047286">"Домашний"</item>
     <item msgid="5629153956045109251">"Рабочий"</item>
     <item msgid="4966604264500343469">"Другой"</item>
-    <item msgid="4932682847595299369">"Создать свой ярлык"</item>
+    <item msgid="4932682847595299369">"Новый тип"</item>
   </string-array>
   <string-array name="imAddressTypes">
     <item msgid="1738585194601476694">"Домашний"</item>
     <item msgid="1359644565647383708">"Рабочий"</item>
     <item msgid="7868549401053615677">"Другое"</item>
-    <item msgid="3145118944639869809">"Создать свой ярлык"</item>
+    <item msgid="3145118944639869809">"Новый тип"</item>
   </string-array>
   <string-array name="organizationTypes">
     <item msgid="7546335612189115615">"Рабочий"</item>
     <item msgid="4378074129049520373">"Другое"</item>
-    <item msgid="3455047468583965104">"Создать свой ярлык"</item>
+    <item msgid="3455047468583965104">"Новый тип"</item>
   </string-array>
   <string-array name="imProtocols">
     <item msgid="8595261363518459565">"AIM"</item>
@@ -881,7 +896,7 @@
     <item msgid="2506857312718630823">"ICQ"</item>
     <item msgid="1648797903785279353">"Jabber"</item>
   </string-array>
-    <string name="phoneTypeCustom" msgid="1644738059053355820">"Создать свой ярлык"</string>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Новый тип"</string>
     <string name="phoneTypeHome" msgid="2570923463033985887">"Домашний"</string>
     <string name="phoneTypeMobile" msgid="6501463557754751037">"Мобильный"</string>
     <string name="phoneTypeWork" msgid="8863939667059911633">"Рабочий"</string>
@@ -906,20 +921,20 @@
     <string name="eventTypeBirthday" msgid="2813379844211390740">"День рождения"</string>
     <string name="eventTypeAnniversary" msgid="3876779744518284000">"Юбилей"</string>
     <string name="eventTypeOther" msgid="7388178939010143077">"Другой"</string>
-    <string name="emailTypeCustom" msgid="8525960257804213846">"Создать свой ярлык"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Новый тип"</string>
     <string name="emailTypeHome" msgid="449227236140433919">"Личный"</string>
     <string name="emailTypeWork" msgid="3548058059601149973">"Рабочий"</string>
     <string name="emailTypeOther" msgid="2923008695272639549">"Другой"</string>
     <string name="emailTypeMobile" msgid="119919005321166205">"Мобильный"</string>
-    <string name="postalTypeCustom" msgid="8903206903060479902">"Создать свой ярлык"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Новый тип"</string>
     <string name="postalTypeHome" msgid="8165756977184483097">"Домашний"</string>
     <string name="postalTypeWork" msgid="5268172772387694495">"Рабочий"</string>
     <string name="postalTypeOther" msgid="2726111966623584341">"Другой"</string>
-    <string name="imTypeCustom" msgid="2074028755527826046">"Создать свой ярлык"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Новый тип"</string>
     <string name="imTypeHome" msgid="6241181032954263892">"Домашний"</string>
     <string name="imTypeWork" msgid="1371489290242433090">"Рабочий"</string>
     <string name="imTypeOther" msgid="5377007495735915478">"Другой"</string>
-    <string name="imProtocolCustom" msgid="6919453836618749992">"Создать свой ярлык"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Новый тип"</string>
     <string name="imProtocolAim" msgid="7050360612368383417">"AIM"</string>
     <string name="imProtocolMsn" msgid="144556545420769442">"Windows Live"</string>
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
@@ -931,7 +946,7 @@
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
     <string name="orgTypeWork" msgid="29268870505363872">"Работа"</string>
     <string name="orgTypeOther" msgid="3951781131570124082">"Другое"</string>
-    <string name="orgTypeCustom" msgid="225523415372088322">"Создать свой ярлык"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Новый тип"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"Особый"</string>
     <string name="relationTypeAssistant" msgid="6274334825195379076">"Секретарь"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"Брат"</string>
@@ -1217,8 +1232,8 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Открыть с помощью приложения \"%1$s\""</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Редактировать с помощью приложения:"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Редактировать с помощью приложения \"%1$s\""</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью приложения:"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Предоставлять доступ с помощью приложения \"%1$s\""</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Поделиться с помощью:"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Поделиться через %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Выберите главное приложение"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Назначьте приложение \"%1$s\" главным"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"По умолчанию для этого действия"</string>
@@ -1832,7 +1847,7 @@
       <item quantity="other">%d часов</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Бессрочно"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Пока я не отключу"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Свернуть"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"До следующего будильника в <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"До следующего будильника"</string>

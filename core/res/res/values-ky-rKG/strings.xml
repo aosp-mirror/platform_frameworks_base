@@ -940,6 +940,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Колдонмого Жакынкы аралыкта байланышуу (NFC) белгилери, карталары жана окугучтары менен байланышуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экранды бөгөттөөнү өчүрүү"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Колдонмого экрандын бөгөттөөчү жана ага байланыштуу сырсөз коргоосун өчүрүү уруксатын берет. Мисалы, чалуу келгенде экрандын бөгөтүн алып салат, чалуу бүткөндө кайрадан орнотот."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
     <skip />
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Колдонмого эсеп менен синхрондошуу тууралоолорун окуганга уруксат берет. Мисалы, Кишилер колдонмосу эсеп менен синхрондошкондугун аныктай алат."</string>
@@ -1025,15 +1033,17 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Кармоочуга оператордун билдирүү кызматынын жогорку деңгээлдеги интерфейсине байланышуу мүмкүнчүлүгүн берет. Кадимки колдонмолорго эч качан талап кылынбашы мүмкүн."</string>
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Экранды бөгөттөн чыгаруу сырсөзүнүн узундугун жана уруксат берилген белгилерди башкаруу."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран кулпусунун сырсөздөрү менен PIN\'дерине уруксат берилген узундук менен белгилерди көзөмөлдөө."</string>
     <!-- no translation found for policylab_watchLogin (914130646942199503) -->
     <skip />
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, планшетти кулпулаңыз же планшеттеги бардык дайындарды тазалап салыңыз."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, сыналгыны кулпулап же бардык сыналгы дайындарын тазалап салуу."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Экрандын кулпусу ачылып жатканда туура эмес терилген сырсөздөрдүн санын текшерип, эгер алардын саны өтө эле көп болсо, телефонду кулпулаңыз же телефондогу бардык дайындарды тазалап салыңыз."</string>
-    <!-- no translation found for policylab_resetPassword (2620077191242688955) -->
-    <skip />
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Экранды бөгөттөн чыгаруу сырсөзүн алмаштыруу."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, планшетти кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, сыналгыны кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экрандын кулпусун ачуу учурунда туура эмес терилген сырсөздөрдү тескөө жана сырсөз өтө көп жолу туура эмес терилген болсо, телефонду кулпулап же бул колдонуучунун бардык дайындарын тазалап салуу."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран кулпусун өзгөртүү"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран кулпусун өзгөртүү."</string>
     <!-- no translation found for policylab_forceLock (2274085384704248431) -->
     <skip />
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экран качан жана кантип бөгөттөлөөрүн башкаруу."</string>
@@ -1042,21 +1052,23 @@
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Баштапкы абалга кайтарууну колдонуп, планшеттин бардык берилиштерин эскертүүсүз тазалоо."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Сыналгынын дайындарын баштапкы абалга кайтарып, алдын-ала эскертпестен өчүрүп салуу."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Баштапкы абалга кайтарууну колдонуп, телефондун бардык берилиштерин эскертүүсүз тазалоо."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Колдонуучунун дайындарын тазалоо"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Бул колдонуучунун ушул планшеттеги дайындарын эскертүүсүз тазалоо."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Бул колдонуучунун ушул сыналгыдагы дайындарын эскертүүсүз тазалоо."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Бул колдонуучунун ушул телефондогу дайындарын эскертүүсүз тазалоо."</string>
     <!-- no translation found for policylab_setGlobalProxy (2784828293747791446) -->
     <skip />
-    <!-- no translation found for policydesc_setGlobalProxy (6387497466660154931) -->
-    <skip />
-    <!-- no translation found for policylab_expirePassword (885279151847254056) -->
-    <skip />
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Бөгөттөөчү көшөгөнүн сырсөзүнүн алмаштырылыш тартибин башкаруу."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Саясат иштетилгенде түзмөктүн глобалдык проксиси колдонулгудай кылып коюңуз. Түзмөк ээси гана глобалдык проксини коё алат."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Экран кулпснн сырсөзнн мөөнөтү"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Экран кулпусунун сырсөзү, PIN же үлгүсү канча убакыт аралыгында өзгөртүлүшү керектигин өзгөртүү."</string>
     <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
     <skip />
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Колдонмонун сакталган берилиштери шифрленишин талап кылуу."</string>
     <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
     <skip />
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Түзмөктүн бардык камераларын колдонууга тыюу салуу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Тергич бөгөттөөсүнүн мүмкүнчүлүктөрүн өчүрүү"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Тергич бөгөттөөсүнүн кээ бир мүмкүнчүлүктөрүн колдонууга тыюу салуу."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Экран кулпснн өзгчлктрн өчүрүү"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Экран кулпусунун айрым өзгөчөлүктөрүн колдонуунун алдын алуу."</string>
     <!-- no translation found for phoneTypes:0 (8901098336658710359) -->
     <!-- no translation found for phoneTypes:1 (869923650527136615) -->
     <!-- no translation found for phoneTypes:2 (7897544654242874543) -->
@@ -2324,7 +2336,7 @@
       <item quantity="one">Бир саатка</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> чейин"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Белгисиз"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Бул өчүрүлгөнгө чейин"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Жыйнап коюу"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Саат <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> боло турган кийинки айгайга чейин"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Кийинки айгайга чейин"</string>

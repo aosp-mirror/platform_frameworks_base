@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lehetővé teszi az alkalmazás számára, hogy NFC (Near Field Communication - kis hatósugarú vezeték nélküli kommunikáció) technológiát használó címkékkel, kártyákkal és leolvasókkal kommunikáljon."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"képernyőzár kikapcsolása"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lehetővé teszi az alkalmazás számára a billentyűzár és bármely kapcsolódó jelszavas védelem kikapcsolását. Például a telefon feloldja a billentyűzárat bejövő hívás esetén, majd újra bekapcsolja azt a hívás végeztével."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lehetővé teszi az alkalmazás számára egy fiók szinkronizálási beállításainak beolvasását. Például ellenőrizheti, hogy a Személyek alkalmazás szinkronizálva van-e egy fiókkal."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"szinkronizálás be-és kikapcsolása"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"kapcsolódás egy üzenetszolgáltatáshoz"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Lehetővé teszi, hogy a tulajdonos kapcsolódjon egy üzenetszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Jelszavakkal kapcsolatos szabályok beállítása"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"A képernyőzár-feloldási jelszavakban engedélyezett karakterek és hosszúság vezérlése."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"A képernyőzár jelszavaiban és PIN kódjaiban engedélyezett karakterek és hosszúság vezérlése."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Képernyőzár-feloldási kísérletek figyelése"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja a táblagépet, vagy törli a táblagép összes adatát."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a tévé zárolása vagy a tévé összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Megfigyeli a képernyő feloldásakor helytelenül beírt jelszavak számát, és túl sok hibásan beírt jelszó esetén lezárja a telefont, vagy törli a telefon összes adatát."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"A képernyőzárat feloldó jelszó módosítása"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"A képernyőzárat feloldó jelszó módosítása."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a táblagép zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a tévé zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"A képernyőzárolás során megadott helytelen jelszavak számának figyelése, és a telefon zárolása vagy a felhasználó összes adatának törlése abban az esetben, ha túl sokszor adtak meg helytelen jelszót."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"A képernyőzár módosítása"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"A képernyőzár módosítása."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"A képernyő zárolása"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"A képernyőzárolás módjának és idejének vezérlése."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Minden adat törlése"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Figyelmeztetés nélkül törli a táblagép adatait, visszaállítva a gyári adatokat."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"A tévé adatainak törlése a gyári alapbeállítások visszaállításával anélkül, hogy figyelmeztetés jelenne meg erről."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Figyelmeztetés nélkül törli a telefon összes adatát, visszaállítva a gyári adatokat."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"A felhasználói adatok törlése"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"A felhasználó összes adatának törlése erről a táblagépről figyelmeztetés nélkül."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"A felhasználó összes adatának törlése erről a tévéről figyelmeztetés nélkül."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"A felhasználó összes adatának törlése erről a telefonról figyelmeztetés nélkül."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Az eszköz globális proxyjának beállítása"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Az eszköz globális proxyja lesz használatban, amíg az irányelv engedélyezve van. Csak az eszköz első rendszergazdája állíthatja be a tényleges globális proxyt."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Képernyőjelszó érvényessége"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Azt vezérli, hogy milyen gyakran kell módosítani a képernyőzár jelszavát."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Az eszköz globális proxyja lesz használatban, amíg a házirend engedélyezve van. A globális proxyt csak az eszköz tulajdonosa állíthatja be."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Zárolási jelszó lejárati ideje"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Annak módosítása, hogy a képernyőzár jelszavát, PIN kódját vagy mintáját milyen gyakran kell megváltoztatni."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Tárhelytitkosítás beállítása"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Megköveteli a tárolt alkalmazásadatok titkosítását."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Kamerák letiltása"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Az összes eszközkamera használatának megakadályozása."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Funkciók letiltása billentyűzár esetén."</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Bizonyos funkciók használatának megakadályozása billentyűzár esetén."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Képernyőzár-funkciók letiltása"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Egyes képernyőzár-funkciók használatának megakadályozása."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Otthoni"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Egy órán át</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Eddig: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Határozatlan ideig"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Amíg ki nem kapcsolja ezt"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Összecsukás"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"A következő ébresztésig ekkor: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"A következő ébresztésig"</string>

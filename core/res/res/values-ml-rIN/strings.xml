@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിച്ചിട്ടുണ്ടോയെന്നത് നിർണ്ണയിക്കാൻ ഇതിനാകും."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"സമന്വയം ഓണാക്കുക, ഓഫാക്കുക ടോഗിൾചെയ്യുക"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"പാസ്‌വേഡ് നിയമങ്ങൾ സജ്ജീകരിക്കുക"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"സ്‌ക്രീൻ-അൺലോക്ക് പാസ്‌വേഡുകളിൽ അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡുകളിലും PIN-കളിലും അനുവദിച്ചിരിക്കുന്ന ദൈർഘ്യവും പ്രതീകങ്ങളും നിയന്ത്രിക്കുക."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"സ്‌ക്രീൻ അൺലോക്ക് ശ്രമങ്ങൾ നിരീക്ഷിക്കുക"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ടാബ്‌ലെറ്റിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് തെറ്റായി നൽകിയിട്ടുണ്ടെങ്കിൽ ടിവി ലോക്കുചെയ്യുകയോ ടിവിയുടെ എല്ലാ വിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"സ്ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുക, വളരെയധികം തെറ്റായ പാസ്‌വ്ഡുകൾ ടൈപ്പുചെയ്‌തിട്ടുണ്ടെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുകയോചെയ്യുക."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"സ്‌ക്രീൻ അൺലോക്ക് പാസ്‌വേഡ് മാറ്റുക"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"സ്‌ക്രീൻ അൺലോക്ക് പാസ്‌വേഡ് മാറ്റുക."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ടാബ്‌ലെറ്റ് ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ടിവി ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"സ്‌ക്രീൻ അൺലോക്കുചെയ്യുമ്പോൾ തെറ്റായി ടൈപ്പുചെയ്‌ത പാസ്‌വേഡുകളുടെ എണ്ണം നിരീക്ഷിക്കുകയും നിരവധി തവണ പാസ്‌വേഡ് ടൈപ്പുചെയ്‌തെങ്കിൽ ഫോൺ ലോക്കുചെയ്യുകയോ ഈ എല്ലാ ഉപയോക്തൃവിവരവും മായ്‌ക്കുകയോ ചെയ്യുക."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"സ്‌ക്രീൻ ലോക്ക് മാറ്റുക"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"സ്‌ക്രീൻ ലോക്ക് മാറ്റുക."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"സ്‌ക്രീൻ ലോക്കുചെയ്യുക"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"സ്‌ക്രീൻ ലോക്കുകൾ എങ്ങനെ വേണമെന്നും എപ്പോൾ വേണമെന്നും എന്നത് നിയന്ത്രിക്കുക"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"എല്ലാ ഡാറ്റയും മായ്ക്കുക"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ടാബ്‌ലെറ്റിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ഒരു ഫാക്‌ടറി വിവരം പുനഃസജ്ജീകരിച്ചുകൊണ്ട് മുന്നറിയിപ്പുകളില്ലാതെ ടിവിയുടെ വിവരം മായ്ക്കുക."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ഒരു ഫാക്‌ടറി ഡാറ്റ പുനഃസജ്ജീകരണം നടപ്പിലാക്കുന്നതിലൂടെ ഫോണിന്റെ ഡാറ്റ മുന്നറിയിപ്പില്ലാതെ മായ്‌ക്കുക."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ഉപയോക്തൃ ഡാറ്റ മായ്‌ക്കുക"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"മുന്നറിയിപ്പൊന്നും നൽകാതെ ഈ ടാബ്‌ലെറ്റിലെ ഈ ഉപയോക്താവിന്റെ ഡാറ്റ മായ്‌ക്കുക."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"മുന്നറിയിപ്പൊന്നും നൽകാതെ ഈ ടിവിയിലെ ഈ ഉപയോക്താവിന്റെ ഡാറ്റ മായ്‌ക്കുക."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"മുന്നറിയിപ്പൊന്നും നൽകാതെ ഈ ഫോണിലെ ഈ ഉപയോക്താവിന്റെ ഡാറ്റ മായ്‌ക്കുക."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ഉപകരണ ഗ്ലോബൽ പ്രോക്‌സി സജ്ജീകരിക്കുക"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"നയം പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുമ്പോൾ ഉപകരണ ഗ്ലോബൽ പ്രോക്സി ഉപയോഗിക്കുന്നത് സജ്ജമാക്കുക. ആദ്യ ഉപകരണ അഡ്‌മിൻ മാത്രമേ ഫലപ്രദമായ ഗ്ലോബൽ പ്രോക്സി സജ്ജമാക്കൂ."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"ലോക്ക്-സ്‌ക്രീൻ പാസ്‌വേഡ് കാലഹരണപ്പെടൽ സജ്ജീകരിക്കുക"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"ലോക്ക്-സ്‌ക്രീൻ പാസ്‌വേഡുകൾ എത്ര ഇടവേളകളിൽ മാറ്റണമെന്ന് നിയന്ത്രിക്കുക"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"നയം പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുമ്പോൾ ഉപകരണ ഗ്ലോബൽ പ്രോക്‌സി ഉപയോഗിക്കുന്നത് സജ്ജമാക്കുക. ഉപകരണ ഉടമയ്‌ക്ക് മാത്രമേ ഗ്ലോബൽ പ്രോക്‌സി സജ്ജമാക്കാനാകൂ."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡ് കാലഹരണപ്പെടൽ സജ്ജമാക്കുക"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"സ്‌ക്രീൻ ലോക്ക് പാസ്‌വേഡ്, PIN അല്ലെങ്കിൽ പാറ്റേൺ എപ്പോഴൊക്കെ മാറ്റണമെന്നത് നിയന്ത്രിക്കുക."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"സംഭരണ എൻക്രിപ്‌ഷൻ സജ്ജീകരിക്കുക"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"സംഭരിച്ച അപ്ലിക്കേഷൻ ഡാറ്റ എൻക്രിപ്റ്റുചെയ്യേണ്ടതുണ്ട്."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ക്യാമറകൾ പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"എല്ലാ ഉപകരണ ക്യാമറകളുടേയും ഉപയോഗം തടയുക."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"കീഗാർഡിലെ സവിശേഷതകൾ പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"കീഗാർഡിലെ ചില സവിശേഷതകളുടെ ഉപയോഗം തടയുക."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"സ്‌ക്രീൻ ലോക്കിന്റെ ഫീച്ചറുകൾ പ്രവർത്തനരഹിതമാക്കുക"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"സ്‌ക്രീൻ ലോക്കിലെ ചില ഫീച്ചറുകളുടെ ഉപയോഗം തടയുക."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"വീട്ടിലെ ഫോൺ"</item>
     <item msgid="869923650527136615">"മൊബൈൽ"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">ഒരു മണിക്കൂർ സമയത്തേക്ക്</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"അവ്യക്തം"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"നിങ്ങൾ ഇത് ഓ‌ഫാക്കും വരെ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ചുരുക്കുക"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-നുള്ള അടുത്ത അലാറം വരെ"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"അടുത്ത അലാറം വരെ"</string>

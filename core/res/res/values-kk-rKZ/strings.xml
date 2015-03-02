@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синх параметрлерін оқу"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Қолданбаға есептік жазба синхрондау параметрлерін оқу мүмкіндігін береді. Мысалы, бұл арқылы People қолданбасының есептік жазбамен сихрондалғаны анықталуы мүмкін."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"синх қосу және өшіру арасында ауысу"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"оператордың хабар алмасу қызметіне байластыру"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Кілтсөз ережелерін тағайындау"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Экранды ашу кілтсөздерінің ұзындығы мен қолдануға болатын таңбаларды басқару."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Экран бекітпесінің құпия сөздерінің және PIN кодтарының ұзындығын және оларда рұқсат етілген таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Экранды ашу әркеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Экран бекітпесін ашу кезінде терілген дұрыс емес құпия сөздердің санын бақылау және тым көп дұрыс емес құпия сөз терілсе, ТД бекіту немесе бүкіл ТД деректерін өшіру."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және телефонды бекіту немесе тым көп қате құпия сөздер терілген болса, телефонның бүкіл деректерін өшіру."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Экранды ашу кілтсөзін өзгерту"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Экранды ашу кілтсөзін өзгерту."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, планшетті бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, теледидарды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Экран бекітпесін ашқанда терілген қате құпия сөздердің санын бақылау және тым көп қате құпия сөздер терілсе, телефонды бекіту немесе осы пайдаланушының барлық деректерін өшіру."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Экран бекітпесін өзгерту"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Экран бекітпесін өзгерту."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Экранды бекіту"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экранның қашан және қалай бекітілетінін басқару."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Зауыттық деректерді қалпына келтіруді орындау арқылы ТД деректерін ескертусіз өшіру."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Телефон дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Пайдаланушы деректерін өшіру"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Осы пайдаланушының осы планшеттегі деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Осы пайдаланушының осы теледидардағы деректерін ескертусіз өшіру."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Осы пайдаланушының осы телефондағы деректерін ескертусіз өшіру."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Құрылғы жаһандық прокси қызметін орнату"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Саясат қосылғанда қолдану үшін құрылғы жаһандық прокси қызметін орнату. Бірінші құрылғы әкімшісі ғана қолданыстағы жаһандық проксиді орнатады."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Экранды бекіту кілт сөзінің жарамдылық мерзімін тағайындау"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Экранды бекіту кілтсөзін өзгерту жиілігін басқару."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Саясат қосулы болғанда пайдаланылатын құрылғының ғаламдық прокси-серверін орнатыңыз. Ғаламдық прокси-серверді тек құрылғы иесі орната алады."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Экран бекітпесі құпия сөзінің мерзімін орнату"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Экран бекітпесінің құпия сөзін, PIN кодын немесе өрнегін өзгерту жиілігін өзгерту."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Жад қорының шрифтін тағайындау"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Сақталған қолданба деректерінің кодталуын қажет етеді."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Камераларды өшіру"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Құрылғыдағы барлық камералар қолданысын бөгеу."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Кілтпернедегі функциялары өшіру"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Кілтпернедегі кейбір функцияларды қолдануды бөгеу."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Экран бекітпесінің мүмкіндіктерін өшіру"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Экран бекітпесінің кейбір мүмкіндіктерін пайдалануды болдырмау."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Үй"</item>
     <item msgid="869923650527136615">"Ұялы тел."</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Бір сағат бойы</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Белгісіз уақыт бойы"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Сіз осыны өшіргенше"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Тасалау"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытындағы келесі дабылға дейін"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Келесі дабылға дейін"</string>

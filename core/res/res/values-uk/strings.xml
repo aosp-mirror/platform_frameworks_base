@@ -740,6 +740,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читати налаштування синхронізації"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозволяє програмі читати налаштування синхронізації для облікового запису, наприклад, визначати, чи програма Люди синхронізується з обліковим записом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"вмикати й вимикати синхронізацію"</string>
@@ -815,29 +823,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"підключатися до служби надсилання повідомлень через оператора"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби надсилання повідомлень через оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устан. правила пароля"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролювати довжину паролів для розблокування екрана та дозволені в них символи."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Укажіть максимальну довжину та кількість символів для паролів розблокування екрана та PIN-кодів."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Відстежув. спроби розблок. екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Відстежувати кількість неправильних паролів, введених під час розблокування екрана, і блокувати планшетний ПК або стирати всі його дані, якщо введено забагато неправильних паролів."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Відстежувати кількість неправильних паролів, введених під час розблокування екрана, і блокувати телевізор або стирати всі його дані, якщо пароль введено неправильно забагато разів."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Відстежувати кількість неправильних паролів, введених під час розблокування екрана, і блокувати  телефон або стирати всі його дані, якщо введено забагато неправильних паролів."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Змінити пароль для розблокув. екрана"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Змінювати пароль для розблокування екрана."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана, і блокуйте планшет або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана, і блокуйте телевізор або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Відстежуйте кількість неправильних паролів, введених під час розблокування екрана, і блокуйте телефон або стирайте всі його дані, якщо пароль введено неправильно забагато разів."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Змінення пароля розблокування екрана"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Змініть пароль розблокування екрана."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Блокувати екран"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролювати, як і коли блокується екран."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Видалити всі дані"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Стирати дані планшетного ПК без попередження, відновлюючи заводські налаштування."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Без попередження стирати дані телевізора, відновлюючи заводські налаштування."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Стирати дані телефону без попередження, відновлюючи заводські налаштування."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Видалення даних користувача"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Видаляйте дані користувача на цьому планшеті без попередження."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Видаляйте дані користувача на цьому телевізорі без попередження."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Видаляйте дані користувача на цьому телефоні без попередження."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Установ. глоб. проксі пристрою"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Устан. використ. глоб. проксі, коли ввімкнено політику. Лише адміністратор першого пристрою встановлює активний глоб. проксі."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Установити термін дії пароля блокування екрана"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Контролювати частоту зміни пароля блокування екрана."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Використовуйте глобальний проксі-сервер пристрою, коли це правило ввімкнено. Налаштувати глобальний проксі-сервер може лише власник пристрою."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Частота змінення пароля"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Укажіть, як часто потрібно змінювати пароль розблокування екрана, PIN-код або ключ."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Установити шифрування носія"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Вимагати шифрування даних збереженої програми."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Вимкнути камери"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Запобігати використанню всіх камер пристрою."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Вимикати функції на клавіатурі"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Запобігає використанню деяких функцій на клавіатурі."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Функції заблокованого екрана"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Забороніть використання деяких функцій, доступних на заблокованому екрані."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Дом."</item>
     <item msgid="869923650527136615">"Мобільний"</item>
@@ -1832,7 +1847,7 @@
       <item quantity="other">%d години</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Без обмежень"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Доки ви не вимкнете"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Згорнути"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"До наступного сигналу о <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"До наступного сигналу"</string>

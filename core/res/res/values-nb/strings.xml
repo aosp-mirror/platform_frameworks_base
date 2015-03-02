@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lar appen kommunisere med etiketter, kort og lesere som benytter NFC-teknologi."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivere skjermlåsen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lar appen lese synkroniseringsinnstillingene for en konto. For eksempel kan den finne ut om Personer-appen er synkronisert med en konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"slå synkronisering av og på"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bind til en operatørmeldingstjeneste"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Tillater at innehaveren binder seg til det øverste nivået av grensesnittet til en operatørtjeneste. Dette skal aldri være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Kontrollér tillatt lengde og tillatte tegn i passord og PIN-koder for opplåsing av skjermen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåk forsøk på opplåsing av skjerm"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Overvåk antall feil passordforsøk ved opplåsing av skjerm, og lås nettbrettet eller slett alle data fra nettbrettet ved for mange feil passordforsøk."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Overvåk antall feilaktige passord som er skrevet inn ved opplåsing av skjermen, og lås TV-en eller slett alle TV-data hvis feil passord skrives inn for mange ganger."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Overvåk antall feil passordforsøk ved opplåsing av skjerm, og lås telefonen eller slett alle data fra telefonen ved for mange feil passordforsøk."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Endre passord for opplåsing av skjerm"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Endre passordet for opplåsing av skjerm."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Overvåk antallet feil passord skrevet inn ved opplåsing av skjermen, og lås nettbrettet eller slett denne brukerens data når for mange feil passord er skrevet inn."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Overvåk antallet feil passord skrevet inn ved opplåsing av skjermen, og lås TV-en eller slett denne brukerens data når for mange feil passord er skrevet inn."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Overvåk antallet feil passord skrevet inn ved opplåsing av skjermen, og lås telefonen eller slett denne brukerens data når for mange feil passord er skrevet inn."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Endre skjermlåsen"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Endre skjermlåsen."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Lås skjermen"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Kontroller hvordan og når skjermen låses."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Slett alle data"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tilbakestill nettbrettets data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Slett TV-ens data uten advarsel ved å tilbakestille til fabrikkstandard."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Tilbakestill telefonens data uten advarsel, ved å tilbakestille til fabrikkstandard."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Slett brukerdataene"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Slett denne brukerens data på dette nettbrettet uten advarsel."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Slett denne brukerens data på denne TV-en uten advarsel."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Slett denne brukerens data på denne telefonen uten advarsel."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Angi enhetens globale mellomtjener"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Angir den globale mellomtjeneren på enheten som skal brukes når regelen er aktivert. Kun den opprinnelige administratoren av enheten kan angi den globale mellomtjeneren."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Angi utløpsdato for skjermlåspassordet"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Velg hvor lenge det skal gå før passordet til skjermlåsen må byttes."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Angi den globale proxy-tjeneren på enheten som skal brukes når regelen er aktivert. Bare eieren av enheten kan angi den globale proxy-tjeneren."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Angi utløpstid for skjermlås"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Endre hvor lenge det skal gå før PIN-koden, passordet eller mønsteret til skjermlåsen må byttes."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Angi lagringskryptering"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Krev at lagrede appdata krypteres."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Deaktiver kameraer"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Hindre bruk av alle kameraer på enheten."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Deaktiv. funksj. i tastelås"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Forhindre bruk av enkelte funksjoner når tastelåsen er på."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Deaktiver skjermlåsfunksjoner"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Forhindre bruk av enkelte skjermlåsfunksjoner."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Hjemmenummer"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">I 1 time</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"På ubestemt tid"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Inntil du slår av funksjonen"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Inntil neste alarm kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Inntil neste alarm"</string>

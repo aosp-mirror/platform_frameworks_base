@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Consente all\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"disattivazione blocco schermo"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Consente all\'applicazione di disattivare il blocco tastiera ed eventuali protezioni tramite password associate. Ad esempio, il telefono disattiva il blocco tastiera quando riceve una telefonata in arrivo e lo riattiva al termine della chiamata."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lettura impostazioni di sincronizz."</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Consente all\'applicazione di leggere le impostazioni di sincronizzazione per un account. Ad esempio, questa autorizzazione può determinare se l\'applicazione Persone è sincronizzata con un account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"attivazione e disattivazione della sincronizzazione"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"associazione a un servizio di messaggi dell\'operatore"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Consente l\'associazione di un servizio di messaggi dell\'operatore all\'interfaccia principale. Non dovrebbe mai essere necessaria per le normali applicazioni."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Impostazione regole password"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlla la lunghezza e i caratteri ammessi nelle password di sblocco dello schermo."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controlla la lunghezza e i caratteri ammessi nelle password e nei PIN del blocco schermo."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Controllo tentativi di sblocco dello schermo"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il tablet o cancella tutti i dati del tablet se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Consente di monitorare il numero di password sbagliate inserite per sbloccare lo schermo, nonché di bloccare la TV e cancellarne tutti i dati se vengono digitate troppe password errate."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il telefono o cancella tutti i dati del telefono se vengono digitate troppe password errate."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Cambia la password di sblocco dello schermo"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Cambia la password di sblocco dello schermo."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il tablet o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca la TV o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitora il numero di password errate digitate durante lo sblocco dello schermo e blocca il telefono o resetta tutti i dati dell\'utente se è stato raggiunto il limite massimo consentito."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Modifica blocco schermo"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Modifica il blocco schermo."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Blocco dello schermo"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlla come e quando si blocca lo schermo."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Cancellazione di tutti i dati"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Cancella i dati del tablet senza preavviso eseguendo un ripristino dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Consente di cancellare i dati della TV senza preavviso eseguendo un ripristino dei dati di fabbrica."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Cancella i dati del telefono senza preavviso eseguendo un ripristino dati di fabbrica."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Resetta i dati dell\'utente"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Resetta i dati dell\'utente sul tablet senza preavviso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Resetta i dati dell\'utente sulla TV senza preavviso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Resetta i dati dell\'utente sul telefono senza preavviso."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Imposta il proxy globale del dispositivo"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale effettivo è impostabile solo dal primo amministratore del dispositivo."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Impostazione scadenza password blocco schermo"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Stabilisci la frequenza di modifica della password di blocco dello schermo."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Imposta il proxy globale del dispositivo in modo da utilizzarlo mentre la norma è attiva. Il proxy globale può essere impostato solo dal proprietario del dispositivo."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Imposta scadenza password blocco schermo"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Cambia la frequenza di modifica di password, PIN o sequenza del blocco schermo."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Impostazione crittografia archivio"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Richiede la crittografia dei dati applicazione memorizzati."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Disattivazione fotocamere"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Impedisci l\'utilizzo di tutte le fotocamere del dispositivo."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Disattiva le funzioni con il blocco tastiera"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Impedisce l\'utilizzo di alcune funzioni con il blocco tastiera."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Disattiva funzioni blocco schermo"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Impedisce l\'utilizzo di alcune funzioni del blocco schermo."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Cellulare"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">Per un\'ora</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Fino alle ore <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Sempre"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Fino alla disattivazione"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Fino alla prossima sveglia alle ore <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Fino alla prossima sveglia"</string>

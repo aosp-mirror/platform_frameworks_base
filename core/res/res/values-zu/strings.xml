@@ -738,6 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ivuela uhlelo lokusebenza ukuthi ixhumane ne-Near Field Communication (NFC) amathegi, amakhadi kanye nezinhlelo zokufunda."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"khubaza ukukhiya kwakho iskrini"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"phatha izingxenyekazi zekhompyutha zezigxivizo zeminwe"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Ivumela uhlelo lokusebenza ukuthi libuyisele izindlela zokungeza nokususa izifanekiso zezigxivizo zeminwe ngokusetshenziswa."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"sebenzisa izingxenyekazi zekhompyutha zezigxivizo zeminwe"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Ivumela uhlelo lokusebenza ukuthi lusebenzise izingxenyekazi zekhompyutha zezigxivizo zeminwe ukuze kuqinisekiswe"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"funda izilungiselelo zokuvumelanisa"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ivumela uhlelo lokusebenza ukufunda izilungiselelo zokuvumelanisa ze-akhawunti. Isibonelo, lokhu kungacacisa ukuthi noma ngabe uhlelo lokusebenza le-People livumelanisiwe ne-akhawunti."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"shintsha phakathi kokuvula kanye nokucisha ukuvumelanisa"</string>
@@ -813,29 +817,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bophezela kusevisi yomlayezo yenkampani yenethiwekhi"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ivumela isibambi ukuhlanganisa isixhumanisi sokubona esiphezulu sesevisi yomlayezo yenkampani yenethiwekhi. Akufanele idingeke kuzinhlelo zokusebenza ezivamile."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi okuvula isikrini"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi wokukhiya isikrini nama-PIN."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Bheka inani lamaphasiwedi angafanele athayishiwe uma kuvulwa iskrini bese kuvalwa ithebhulethi noma kususwe yonke idatha yethebhulethi uma kubhalwe amaphasiwedi amaningi angalungile."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Qaphela inombolo yamaphasiwedi angalungile athayiphiwe uma kuvulwa isikrini, uphinde ukhiye isikrini noma usule yonke idatha ye-TV uma ngabe kuthayiphwa amaphasiwedi amaningi angalungile."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Bheka isibalo samaphasiwedi ngalungile afakiwe uma uvula iskrini bese uvala ucingo noma ususe yonke imininingwane yocingo uma kubhalwe amaphasiwedi amaningi angalungile."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Shintsha iphasiwedi yokuvula isikrini"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Shintsha iphasiwedi yokuvula isikrini"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Qaphela inombolo yamaphasiwedi angalungile athayiphwe uma kuvulwa isikrini, uphinde ukhiye ithebulethi noma usule yonke idatha yalo msebenzisi uma ngabe kuthayiphwe amaphasiwedi amaningi kakhulu angalungile."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Qaphela inombolo yamaphasiwedi angalungile athayiphiwe uma kuvulwa isikrini, uphinde ukhiphe i-TV noma usule yonke idatha yalo msebenzisi uma ngabe kuthayiphwe amaphasiwedi amaningi kakhulu angalungile."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Qaphela inombolo yamaphasiwedi angalungile athayiphiwe uma kuvulwa isikrini, uphinde ukhiye ifoni noma usule yonke idatha yalo msebenzisi uma ngabe kuthayiphwe amaphasiwedi amaningi kakhulu angalungile."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Guqula ukukhiya isikrini"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Guqula ukukhiya isikrini."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Vala isikrini"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Lawula ukuthi isikrini sivala kanjani futhi nini"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Sula yonke idatha"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Sula idatha yethebhulethi ngaphandle kwesaziso, ngokwenza ukusetha kabusha kwemboni."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Sula idatha ye-TV ngaphandle kokuxwayisa ngokwenza ukusetha kabusha kwasekuqaleni kwedatha."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Sula idatha yefoni ngaphandle kwesixwayiso, ngokwenza ukuhlela kabusha idatha yemboni"</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Sula idatha yomsebenzisi"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Sula idatha yalo msebenzisi kule thebulethi ngaphandle kwesexwayiso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Sula idatha yalo msebenzisi kule TV ngaphandle kwesexwayiso."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Sula idatha yalo msebenzisi kule foni ngaphandle kwesexwayiso."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Misa ummelelii jikelele yedivaysi"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Misa iphrokzi jikelele yedivaysi ukusebenzisa ngenkathi inqumbomgomo ivunyelwa. Idivaysi yokuqala kuphela yokuphatha emisa ummeleli jikelele esebenzayo."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Hlela ukuphelelwa isikhathi sokuvala-isikrini."</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Lawula ukuthi iphasiwedi yokuvala isikrini ishintshwa kangaki"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Setha ummeleli womhlaba wonke wedivayisi ozosetshenziswa ngenkathi inqubomgomo inikwe amandla. Ngumnikazi wedivayisi kuphela ongasetha ummeleli womhlaba wonke."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Setha ukuphelelwa yisikhathi kwephasiwedi yokukhiya isikrini"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Guqula ukuthi kumele iphasiwedi yokukhiya isikrini, i-PIN, noma iphethini kumele iguqulwe ngokuvame kangakanani."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setha umbhalo wemfihlo yesitoreji"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Idinga ukuthi idatha yohlelo lokusebenza olugciniwe ibethelwe"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Khubaza amakhamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Vimbela ukusetshenziswa kwamadivaysi wonke wamakhamera"</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Khubaza izici kokhiye abagadile"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Vikela ukusebenza kwezinye izici kokhiye abagadile."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Khubaza izici zokukhiya isikrini"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Vimbela ukusetshenziswa kwezinye izici zokukhiywa kwesikrini."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Ekhaya"</item>
     <item msgid="869923650527136615">"Iselula"</item>
@@ -1806,7 +1817,7 @@
       <item quantity="other">Amahora angu-%d</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Kuze kube ngu-<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Unaphakade"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Uze uvale lokhu"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Goqa"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Kuze kube yi-alamu elandelayo ngo-<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Kuze kube yi-alamu elandelayo"</string>

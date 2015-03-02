@@ -739,6 +739,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite aplicaţiei să comunice cu etichetele, cardurile şi cititoarele NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"dezactivează blocarea ecranului"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite aplicaţiei să dezactiveze blocarea tastelor şi orice modalitate asociată de securizare prin parolă. De exemplu, telefonul dezactivează blocarea tastelor când se primeşte un apel telefonic şi reactivează blocarea tastelor la terminarea apelului."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"citire setări sincronizare"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite aplicaţiei să citească setările de sincronizare ale unui cont. De exemplu, cu această permisiune aplicaţia poate determina dacă aplicaţia Persoane este sincronizată cu un anumit cont."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"activează/dezactivează sincronizarea"</string>
@@ -814,29 +822,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"se conectează la un serviciu de mesagerie oferit de operator"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Permite aplicației să se conecteze la interfața de nivel superior a unui serviciu de mesagerie oferit de operator. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Stabiliţi lungimea şi tipul de caractere permise în parolele pentru deblocarea ecranului."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitorizaţi numărul de parole incorecte introduse la deblocarea ecranului şi blocaţi tableta sau ştergeţi datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitorizaţi numărul de parole incorecte introduse la deblocarea ecranului şi blocaţi telefonul sau ştergeţi toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Editaţi parola de deblocare a ecranului"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Editaţi parola de deblocare a ecranului."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestui utilizator dacă se introduc prea multe parole incorecte."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Modificați blocarea ecranului"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Modificați blocarea ecranului."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Blocaţi ecranul"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Stabiliţi modul şi timpul în care se blochează ecranul."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Ștergere integrală date"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Ștergeţi datele de pe tabletă fără avertisment, efectuând resetarea configurării din fabrică."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Ștergeți datele de pe televizor fără avertisment, prin revenirea la setările din fabrică."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Ștergeţi datele din telefon fără avertisment, efectuând resetarea configurării din fabrică."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Ștergeți datele utilizatorului"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Ștergeți datele acestui utilizator de pe această tabletă fără avertisment."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Ștergeți datele acestui utilizator de pe acest televizor fără avertisment."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Ștergeți datele acestui utilizator de pe acest telefon fără avertisment."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Setaţi serverul proxy global pentru dispozitiv"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Setaţi serverul proxy global pentru dispozitiv care să fie utilizat cât timp politica este activă. Numai primul administrator al dispozitivului poate seta serverul proxy global activ."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Expirare parolă blocare ecran"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Stabiliţi frecvenţa de schimbare a parolei de blocare a ecranului."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Setați serverul proxy global pentru dispozitiv, care să fie utilizat cât timp politica este activă. Numai proprietarul dispozitivului poate seta serverul proxy global."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Setați expirarea parolei pentru blocarea ecranului"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modificați frecvența cu care trebuie să se schimbe parola, codul PIN sau modelul pentru blocarea ecranului."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setaţi criptarea stocării"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicaţiei stocate să fie criptate."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivaţi camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicaţi utilizarea camerelor foto de pe dispozitiv."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Dezactiv. funcții după blocare"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Previne utilizarea unora dintre funcții când tastatura este blocată."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Opriți funcții blocare ecran"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Împiedicați utilizarea unor funcții ale blocării ecranului."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domiciliu"</item>
     <item msgid="869923650527136615">"Mobil"</item>
@@ -1819,7 +1834,7 @@
       <item quantity="one">Timp de o oră</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Nedefinit"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Până la dezactivare"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Restrângeți"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Până la alarma următoare, la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Până la alarma următoare"</string>

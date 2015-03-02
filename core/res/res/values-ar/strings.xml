@@ -742,6 +742,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"‏للسماح للتطبيق بالاتصال بعلامات الاتصال قريب المدى (NFC)، والبطاقات وبرامج القراءة."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"تعطيل قفل الشاشة"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"للسماح للتطبيق بتعطيل تأمين المفاتيح وأي أمان لكلمة مرور مرتبطة. على سبيل المثال، يعطل الهاتف تأمين المفاتيح عند استقبال مكالمة هاتفية واردة، ثم يعيد تمكين تأمين المفاتيح عند انتهاء المكالمة."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"قراءة إعدادات المزامنة"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"للسماح للتطبيق بقراءة الإعدادات المتزامنة لحساب ما. على سبيل المثال، يمكن أن يؤدي هذا إلى تحديد ما إذا تمت مزامنة تطبيق \"الأشخاص\" مع حساب ما."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"التبديل بين تشغيل المزامنة وإيقافها"</string>
@@ -817,29 +825,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"الالتزام بخدمة المراسلة التابعة لمشغل شبكة الجوّال"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"يسمح لحامله بالالتزام بواجهة المستوى العالي لخدمة المراسلة التابعة لمشغل شبكة الجوَّال. ومن المفترض عدم الحاجة إليه مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"يمكنك التحكم في الطول والأحرف المسموح بها في كلمات مرور إلغاء تأمين الشاشة."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"للتحكم في الطول والأحرف المسموح بها في كلمات المرور وأرقام التعريف الشخصي في قفل الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"لمراقبة عدد مرات كتابة كلمات المرور غير الصحيحة عند إلغاء تأمين الشاشة وتأمين الجهاز اللوحي أو مسح جميع بياناته في حالة كتابة الكثير من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"مراقبة عدد كلمات المرور غير الصحيحة التي تتم كتابتها عند إلغاء قفل الشاشة، وقفل التلفزيون أو محو جميع بيانات التلفزيون إذا تمت كتابة عدد كبير من كلمات المرور غير الصحيحة."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بياناته إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"تغيير كلمة مرور إلغاء قفل الشاشة"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"يمكنك تغيير كلمة مرور إلغاء تأمين الشاشة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الجهاز اللوحي ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين التلفزيون ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"يمكنك مراقبة عدد كلمات المرور غير الصحيحة التي تمت كتابتها عند إلغاء تأمين الشاشة، وتأمين الهاتف ومحو جميع بيانات هذا المستخدم إذا تمت كتابة عدد أكبر من اللازم من كلمات المرور غير الصحيحة."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"تغيير قفل الشاشة"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"لتغيير قفل الشاشة."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"تأمين الشاشة"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"يمكنك التحكم في كيفية ووقت تأمين الشاشة."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"مسح جميع البيانات"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"يمكنك محو بيانات الجهاز اللوحي بدون تحذير، وذلك عبر إجراء إعادة الضبط بحسب بيانات المصنع."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"محو بيانات التلفزيون بدون تحذير من خلال إجراء إعادة ضبط البيانات على إعدادات المصنع."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"يمكنك محو بيانات الهاتف بدون تحذير، وذلك عبر إجراء إعادة الضبط بحسب بيانات المصنع."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"محو بيانات المستخدم"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"لمحو بيانات هذا المستخدم على هذا الجهاز اللوحي بدون تحذير."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"لمحو بيانات هذا المستخدم على هذا التلفزيون بدون تحذير."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"لمحو بيانات هذا المستخدم على هذا الهاتف بدون تحذير."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"تعيين الخادم الوكيل العمومي للجهاز"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"تعيين الخادم الوكيل العمومي للجهاز لكي يتم استخدامه أثناء تمكين السياسة. يعين مشرف الجهاز الأول فقط الخادم الوكيل العمومي الفعال."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"ضبط انتهاء كلمة مرور تأمين شاشة"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"يمكنك التحكم في عدد مرات تغيير كلمة مرور تأمين الشاشة."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"لضبط الخادم الوكيل العام في الجهاز على الاستخدام أثناء تمكين السياسة. ولن يمكن لأحد سوى مالك الجهاز ضبط الخادم الوكيل العام."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"تعيين مدة انتهاء صلاحية كلمة مرور قفل الشاشة"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"لتغيير عدد مرات تغيير كلمة المرور ورقم التعريف الشخصي والنمط في قفل الشاشة."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تعيين تشفير التخزين"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"تعطيل الكاميرات"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"تعطيل الميزات في وضع حماية المفاتيح"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"يمكنك منع استخدام بعض الميزات في وضع حماية المفاتيح."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"تعطيل ميزات قفل الشاشة"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"لمنع استخدام بعض ميزات قفل الشاشة."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"المنزل"</item>
     <item msgid="869923650527136615">"الجوال"</item>
@@ -1858,7 +1873,7 @@
       <item quantity="one">لمدة ساعة واحدة</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"حتى <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"إلى أجل غير مسمى"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"لحين تعطيل هذا الإعداد"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"تصغير"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"حتى التنبيه التالي في <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"حتى التنبيه التالي"</string>

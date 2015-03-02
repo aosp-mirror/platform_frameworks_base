@@ -738,6 +738,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕໍ່ສື່ສານກັບປ້າຍກຳກັບ, ບັດ ແລະໂຕອ່ານຂອງການສື່ສານໄລຍະສັ້ນ (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ປິດການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງປຸ່ມລັອກ ແລະລະບົບຄວາມປອດໄພຂອງລະຫັດຜ່ານທີ່ເຊື່ອມໂຍງກັນ. ໂຕຢ່າງ: ໂທລະສັບຈະປິດການເຮັດວຽກຂອງປຸ່ມລັອກເມື່ອມີສາຍໂທເຂົ້າ ຈາກນັ້ນຈຶ່ງເປີດໃຊ້ໄດ້ອີກເມື່ອວາງສາຍແລ້ວ."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ອ່ານການຕັ້ງຄ່າຊິ້ງຂໍ້ມູນ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານການຕັ້ງຄ່າການຊິ້ງຂໍ້ມູນຂອງບັນຊີໄດ້. ຕົວຢ່າງເຊັ່ນ: ມັນຈະສາມາດກວດສອບໄດ້ແອັບຯ People ຖືກຊິ້ງຂໍ້ມູນກັບບັນຊີໃດນຶ່ງແລ້ວຫຼືຍັງ."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ສະລັບການເປີດ ແລະປິດການຊິ້ງຂໍ້ມູນ"</string>
@@ -813,29 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ຜູກ​ພັນ​ກັບ​ການ​ບໍ​ລິ​ການ​ສົ່ງ​ຂໍ້​ຄວາມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ອະນຸຍາດໃຫ້ຜູ້ຖືຜູກ​ພັນ​ກັບຕົວ​ປະ​ສານລະດັບສູງສຸດຂອງບໍລິການສົ່ງ​ຂໍ້​ຄວາມ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ. ບໍ່ຈຳເປັນສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"ຄວບຄຸມຄວາມຍາວຂອງໂຕອັກສອນທີ່ສາມາດໃຊ້ກັບລະຫັດປົດລັອກໜ້າຈໍ"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"ຄວບຄຸມຄວາມຍາວ ແລະຕົວອັກສອນທີ່ອະ​ນຸ​ຍາດ​ໃຫ້​ຢູ່​ໃນລະ​ຫັດລັອກໜ້າຈໍ ແລະ PIN."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກແທັບເລັດ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງແທັບເລັດ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະພາບຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນ​ຂອງໂທລະພາບຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກໂທລະສັບ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງໂປລະສັບ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"ປ່ຽນລະຫັດລັອກໜ້າຈໍ"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"ປ່ຽນລະຫັດປົດລັອກໜ້າຈໍ"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກແທັບ​ເລັດ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະພາບ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ຕິດ​ຕາມ​ຈຳ​ນວນ​ຂອງ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ທີ່​ພິມ​ໄປ​ແລ້ວ ເມື່ອ​ປົດ​ລັອກ​ໜ້າ​ຈໍ, ແລະ​ລັອກໂທລະສັບ ຫຼື​ລຶບ​ທຸກ​ຂໍ້​ມູນຜູ້​ໃຊ້​ນີ້ ຖ້າ​ໄດ້​ພິມ​ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​ເຂົ້າ​ໄປ​ຫຼາຍ​ອັນ​ເກີນ​ໄປ."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"ປ່ຽນ​ລັອກ​ໜ້າ​ຈໍ."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"ລັອກໜ້າຈໍ"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ຄວບຄຸມວ່າໜ້າຈໍຄວນຈະຖືກລັອກເມື່ອໃດ ແລະແນວໃດ"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ລຶບຂໍ້ມູນທັງໝົດ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ລຶບຂໍ້ມູນຂອງແທັບເລັດໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"ລຶບ​ຂໍ້​ມູນ​ຂອງໂທລະພາບໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ ດ້ວຍ​ການ​ເຮັດ​ການ​ຕັ້ງ​ຄ່າ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ໃໝ່."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ລຶບຂໍ້ມູນຂອງໂທລະສັບໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"ລຶບ​ຂໍ້​ມູນ​ຜູ້​ໃຊ້"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ລຶບ​ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ທັດ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ລຶບ​ອຸ​ປະ​ກອນ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ທັດ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ລຶບ​ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຢູ່​ໃນ​ໂທ​ລະ​ສັບ​ນີ້​ໂດຍ​ບໍ່​ມີ​ການ​ເຕືອນ."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ປ່ຽນ proxy ຮວມຂອງອຸປະກອນ"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ຕັ້ງໃຫ້ພຣັອກຊີສ່ວນກາງຂອງອຸປະກອນ ທີ່ຈະໃຊ້ໃນຂະນະທີ່ເປີດນຳໃຊ້ນະໂຍບາຍ. ສະເເພາະຜູ່ເບິ່ງແຍງອຸປະກອນຄົນທຳອິດເທົ່ານັ້ນ ທີ່ຈະຕັ້ງຄ່າພຣັອກຊີສ່ວນກາງທີ່ມີຜົນນຳໃຊ້ໄດ້."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"ຕັ້ງວັນໝົດກຳນົດຂອງລະຫັດລັອກໜ້າຈໍ"</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"ຄວບຄຸມຄວາມຖີ່ໃນການປ່ຽນລະຫັດໜ້າຈໍລັອກ."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"ຕັ້ງໃຫ້ພຣັອກຊີສ່ວນກາງຂອງອຸປະກອນ ທີ່ຈະໃຊ້ໃນຂະນະທີ່ເປີດນຳໃຊ້ນະໂຍບາຍ. ພຽງ​ແຕ່​ເຈົ້າ​ຂອງ​ອຸ​ປະ​ກອນ​ເທົ່າ​ນັ້ນ​ສາ​ມາດ​ຕັ້ງ​ພ​ຣັອກ​ຊີ​ທົ່ວ​ໄປ​ໄດ້."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"ຕັ້ງ​ຄ່າ​ການ​ໝົດ​ອາ​ຍຸ​ລະ​ຫັດ​ຜ່ານ​ລັອກ​ໜ້າ​ຈໍ"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"ປ່ຽນ​ວ່າ​ຈະ​ໃຫ້ລະ​ຫັດ​ຜ່ານ​ລັອກ​ໜ້າ​ຈໍ, PIN, ຫຼື​ຮູບ​ແບບ​ຕ້ອງ​ມີ​ການ​ປ່ຽນ​ແປງ​ເລື້ອຍ​ປານ​ໃດ."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ຕັ້ງຄ່າການເຂົ້າລະຫັດທີ່ເກັບຂໍ້ມູນ"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"ຮຽກຮ້ອງໃຫ້ມີການເຂົ້າລະຫັດຂໍ້ມູນທີ່ຈັດເກັບໃນແອັບຯ"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ປິດການໃຊ້ກ້ອງ"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"ຫ້າມການໃຊ້ກ້ອງຈາກທຸກອຸປະກອນ."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"ປິດການນຳໃຊ້ການລັອກປຸ່ມ"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"ປ້ອງກັນການໃຊ້ຄວາມສາມາດບາງສ່ວນໃນການລັອກປຸ່ມ."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"ປິດ​ໃຊ້​ງານ​ຄຸນ​ສົມ​ບັດ​ຂອງ​ລັອກ​ໜ້າ​ຈໍ"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"ປ້ອງກັນການໃຊ້ຄຸນ​ສົມ​ບັດບາງສ່ວນຂອງ​ລັອກ​ໜ້າ​ຈໍ."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"ເຮືອນ"</item>
     <item msgid="869923650527136615">"ມືຖື"</item>
@@ -1806,7 +1821,7 @@
       <item quantity="one">ເປັນ​ເວລາໜຶ່ງ​ຊົ່ວ​ໂມງ</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"ຢ່າງ​ບໍ່​ມີ​ກຳນົດ"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"ຈົນກວ່າ​ທ່ານ​ຈະ​ປິດ​"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"​ຈົນ​ກວ່າ​ໂມງ​ປຸກ​ຄັ້ງ​ຕໍ່​ໄປ​ໃນ​ເວ​ລາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"​ຈົນ​ກວ່າ​ໂມງ​ປຸກ​ຄັ້ງຕໍ່​ໄປ"</string>

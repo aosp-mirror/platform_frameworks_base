@@ -739,6 +739,14 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Aplikaciji omogućuje komunikaciju s oznakama, karticama i čitačima komunikacije kratkog dometa (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogućavanje zaključavanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji omogućuje onemogućavanje zaključavanja tipkovnice i svih pripadajućih sigurnosnih zaporki. Na primjer, telefon onemogućuje zaključavanje tipkovnice kod primanja dolaznog telefonskog poziva, nakon kojeg se zaključavanje tipkovnice ponovo omogućuje."</string>
+    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
+    <skip />
+    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
+    <skip />
+    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
+    <skip />
+    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
+    <skip />
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čitanje postavki sinkronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogućuje čitanje postavki sinkronizacije za račun. Time se, primjerice, može utvrditi je li aplikacija Osobe sinkronizirana s računom."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"uključivanje/isključivanje sinkronizacije"</string>
@@ -814,29 +822,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"povezivanje s uslugom mobilnog operatera za slanje poruka"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Omogućuje nositelju povezivanje sa sučeljem najviše razine usluge mobilnog operatera za slanje poruka. Ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
-    <string name="policydesc_limitPassword" msgid="3252114203919510394">"Upravljajte duljinom zaporki za otključavanje zaslona i dopuštenim znakovima u tim zaporkama."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Upravlja duljinom i znakovima koji su dopušteni u zaporkama i PIN-ovima zaključavanja zaslona."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Nadziri broj netočnih zaporki unesenih pri otključavanju zaslona i zaključaj tabletno računalo ili izbriši sve podatke na njemu ako je uneseno previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava televizor ili briše sve njegove podatke ako se unese previše netočnih zaporki."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Nadzire broj netočno unesenih zaporki pri otključavanju zaslona i zaključava telefon ili briše sve podatke na telefonu ako je uneseno previše netočnih zaporki."</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Promijeni zaporku za otključavanje zaslona"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Promijenite zaporku za otključavanje zaslona."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava tablet ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava televizor ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Prati broj netočnih zaporki unesenih prilikom otključavanja zaslona i zaključava telefon ili briše sve podatke korisnika ako se unese previše netočnih zaporki."</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"Promijeni zaključavanje zaslona"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mijenja zaključavanje zaslona."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Zaključaj zaslon"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Upravljanje načinom i vremenom zaključavanja zaslona"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Izbriši sve podatke"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Vraćanjem u tvorničko stanje izbriši podatke tabletnog računala bez upozorenja."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Briše podatke televizora bez upozorenja vraćanjem na tvorničko stanje."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Vraćanjem na tvorničko stanje izbrišite podatke telefona bez upozorenja."</string>
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Izbriši podatke korisnika"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Briše podatke korisnika na ovom tabletu bez upozorenja."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Briše podatke korisnika na ovom televizoru bez upozorenja."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Briše podatke korisnika na ovom telefonu bez upozorenja."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"postavi globalni proxy uređaja"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Postavi globalni proxy uređaja za upotrebu dok su pravila omogućena. Samo prvi administrator uređaja postavlja djelotvoran globalni proxy."</string>
-    <string name="policylab_expirePassword" msgid="885279151847254056">"Post. istek zap. zaklj. zasl."</string>
-    <string name="policydesc_expirePassword" msgid="1729725226314691591">"Upravljajte učestalošću promjena zaporke za zaključavanje zaslona."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Postavlja globalni proxy za uređaj koji će se upotrebljavati dok je pravilo omogućeno. Samo vlasnik uređaja može postaviti globalni proxy."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Postavi rok zaporke zaklj. zaslona"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Mijenja učestalost obaveznog mijenjanja zaporke, PIN-a ili uzorka zaključavanja zaslona."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Postavi enkripciju za pohranu"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Zahtijevajte da pohranjeni podaci aplikacije budu šifrirani."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogući fotoaparate"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Spriječite upotrebu svih kamera uređaja."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="266329104542638802">"Onemogući zaštitu tipkovnice"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3467082272186534614">"Sprječava se upotreba nekih značajki u zaštitnom zaključavanju tipkovnice."</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"Onemogući znač. zaklj. zaslona"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"Sprječava upotrebu nekih značajki zaključavanja zaslona."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Početna"</item>
     <item msgid="869923650527136615">"Mobilni"</item>
@@ -1819,7 +1834,7 @@
       <item quantity="other">%d sati</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_forever" msgid="4316804956488785559">"Neodređeno"</string>
+    <string name="zen_mode_forever" msgid="7420011936770086993">"Dok ne isključite"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sažmi"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Do sljedećeg alarma u <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Do sljedećeg alarma"</string>
