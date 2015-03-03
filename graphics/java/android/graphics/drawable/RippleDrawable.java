@@ -564,7 +564,9 @@ public class RippleDrawable extends LayerDrawable {
                 x = mHotspotBounds.exactCenterX();
                 y = mHotspotBounds.exactCenterY();
             }
-            mRipple = new RippleForeground(this, mHotspotBounds, x, y);
+
+            final boolean isBounded = !isProjected();
+            mRipple = new RippleForeground(this, mHotspotBounds, x, y, isBounded);
         }
 
         mRipple.setup(mState.mMaxRadius, mDensity);
