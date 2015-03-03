@@ -29,6 +29,7 @@
 #include <list>
 #include <algorithm>
 
+
 namespace android {
 
 struct JLineBreaksID {
@@ -40,6 +41,53 @@ struct JLineBreaksID {
 static jclass gLineBreaks_class;
 static JLineBreaksID gLineBreaks_fieldID;
 
+class Builder {
+    public:
+        ~Builder() {
+            utext_close(&mUText);
+            delete mBreakIterator;
+        }
+
+        void setLocale(const Locale& locale) {
+            delete mBreakIterator;
+            UErrorCode status = U_ZERO_ERROR;
+            mBreakIterator = BreakIterator::createLineInstance(locale, status);
+            // TODO: check status
+        }
+
+        void resize(size_t size) {
+            mTextBuf.resize(size);
+        }
+
+        uint16_t* buffer() {
+            return mTextBuf.data();
+        }
+
+        // set text to current contents of buffer
+        void setText() {
+            UErrorCode status = U_ZERO_ERROR;
+            utext_openUChars(&mUText, mTextBuf.data(), mTextBuf.size(), &status);
+            mBreakIterator->setText(&mUText, status);
+        }
+
+        void finish() {
+            if (mTextBuf.size() > MAX_TEXT_BUF_RETAIN) {
+                mTextBuf.clear();
+                mTextBuf.shrink_to_fit();
+            }
+        }
+
+        BreakIterator* breakIterator() const {
+            return mBreakIterator;
+        }
+
+    private:
+        const size_t MAX_TEXT_BUF_RETAIN = 32678;
+        BreakIterator* mBreakIterator = nullptr;
+        UText mUText = UTEXT_INITIALIZER;
+        std::vector<uint16_t>mTextBuf;
+};
+
 static const int CHAR_SPACE = 0x20;
 static const int CHAR_TAB = 0x09;
 static const int CHAR_NEWLINE = 0x0a;
@@ -50,7 +98,7 @@ class TabStops {
         // specified stops must be a sorted array (allowed to be null)
         TabStops(JNIEnv* env, jintArray stops, jint defaultTabWidth) :
             mStops(env), mTabWidth(defaultTabWidth) {
-                if (stops != NULL) {
+                if (stops != nullptr) {
                     mStops.reset(stops);
                     mNumStops = mStops.size();
                 } else {
@@ -430,37 +478,6 @@ class GreedyLineBreaker : public LineBreaker {
         }
 };
 
-class ScopedBreakIterator {
-    public:
-        ScopedBreakIterator(JNIEnv* env, BreakIterator* breakIterator, const jchar* inputText,
-                            jint length) : mBreakIterator(breakIterator), mChars(inputText) {
-            UErrorCode status = U_ZERO_ERROR;
-            mUText = utext_openUChars(NULL, mChars, length, &status);
-            if (mUText == NULL) {
-                return;
-            }
-
-            mBreakIterator->setText(mUText, status);
-        }
-
-        inline BreakIterator* operator->() {
-            return mBreakIterator;
-        }
-
-        ~ScopedBreakIterator() {
-            utext_close(mUText);
-            delete mBreakIterator;
-        }
-    private:
-        BreakIterator* mBreakIterator;
-        const jchar* mChars;
-        UText* mUText;
-
-        // disable copying and assignment
-        ScopedBreakIterator(const ScopedBreakIterator&);
-        void operator=(const ScopedBreakIterator&);
-};
-
 static jint recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
                         jfloatArray recycleWidths, jbooleanArray recycleFlags,
                         jint recycleLength, const std::vector<jint>& breaks,
@@ -526,7 +543,7 @@ void computePrimitives(const jchar* textArr, const jfloat* widthsArr, jint lengt
     primitives->push_back(p);
 }
 
-static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
+static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
                                jcharArray inputText, jfloatArray widths, jint length,
                                jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
                                jintArray variableTabStops, jint defaultTabStop, jboolean optimize,
@@ -535,29 +552,24 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
                                jint recycleLength) {
     std::vector<int> breaks;
 
-    ScopedCharArrayRO textScopedArr(env, inputText);
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    b->resize(length);
+    env->GetCharArrayRegion(inputText, 0, length, b->buffer());
+    b->setText();
+
+    // TODO: this array access is pretty inefficient, but we'll replace it anyway
     ScopedFloatArrayRO widthsScopedArr(env, widths);
 
-    ScopedIcuLocale icuLocale(env, javaLocaleName);
-    if (icuLocale.valid()) {
-        UErrorCode status = U_ZERO_ERROR;
-        BreakIterator* it = BreakIterator::createLineInstance(icuLocale.locale(), status);
-        if (!U_SUCCESS(status) || it == NULL) {
-            if (it) {
-                delete it;
-            }
-        } else {
-            ScopedBreakIterator breakIterator(env, it, textScopedArr.get(), length);
-            int loc = breakIterator->first();
-            while ((loc = breakIterator->next()) != BreakIterator::DONE) {
-                breaks.push_back(loc);
-            }
-        }
+    BreakIterator* breakIterator = b->breakIterator();
+    int loc = breakIterator->first();
+    while ((loc = breakIterator->next()) != BreakIterator::DONE) {
+        breaks.push_back(loc);
     }
 
+    // TODO: all these allocations can be moved into the builder
     std::vector<Primitive> primitives;
     TabStops tabStops(env, variableTabStops, defaultTabStop);
-    computePrimitives(textScopedArr.get(), widthsScopedArr.get(), length, breaks, tabStops, &primitives);
+    computePrimitives(b->buffer(), widthsScopedArr.get(), length, breaks, tabStops, &primitives);
 
     LineWidth lineWidth(firstWidth, firstWidthLineLimit, restWidth);
     std::vector<int> computedBreaks;
@@ -571,13 +583,41 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
         GreedyLineBreaker breaker(primitives, lineWidth);
         breaker.computeBreaks(&computedBreaks, &computedWidths, &computedFlags);
     }
+    b->finish();
 
     return recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleFlags, recycleLength,
             computedBreaks, computedWidths, computedFlags);
 }
 
+static jlong nNewBuilder(JNIEnv*, jclass) {
+    return reinterpret_cast<jlong>(new Builder);
+}
+
+static void nFreeBuilder(JNIEnv*, jclass, jlong nativePtr) {
+    delete reinterpret_cast<Builder*>(nativePtr);
+}
+
+static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    b->finish();
+}
+
+static void nBuilderSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName) {
+    ScopedIcuLocale icuLocale(env, javaLocaleName);
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+
+    if (icuLocale.valid()) {
+        b->setLocale(icuLocale.locale());
+    }
+}
+
 static JNINativeMethod gMethods[] = {
-    {"nComputeLineBreaks", "(Ljava/lang/String;[C[FIFIF[IIZLandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I", (void*) nComputeLineBreaks}
+    {"nNewBuilder", "()J", (void*) nNewBuilder},
+    {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
+    {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
+    {"nBuilderSetLocale", "(JLjava/lang/String;)V", (void*) nBuilderSetLocale},
+    {"nComputeLineBreaks", "(J[C[FIFIF[IIZLandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I",
+        (void*) nComputeLineBreaks}
 };
 
 int register_android_text_StaticLayout(JNIEnv* env)
