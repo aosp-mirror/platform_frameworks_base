@@ -116,9 +116,6 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
 
         layer = new Layer(Layer::kType_DisplayList, renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
-        layer->setEmpty(true);
-        layer->setFbo(0);
-
         layer->generateTexture();
         layer->bindTexture();
         layer->setFilter(GL_NEAREST);

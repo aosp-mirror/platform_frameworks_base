@@ -39,7 +39,7 @@ struct TextureVertex;
 
 class Patch {
 public:
-    Patch();
+    Patch() {}
 
     /**
      * Returns the size of this patch's mesh in bytes.
@@ -47,13 +47,14 @@ public:
     uint32_t getSize() const;
 
     std::unique_ptr<TextureVertex[]> vertices;
-    uint32_t verticesCount;
-    uint32_t indexCount;
-    bool hasEmptyQuads;
+    uint32_t verticesCount = 0;
+    uint32_t indexCount = 0;
+    bool hasEmptyQuads = false;
     Vector<Rect> quads;
 
-    GLintptr offset;
-    GLintptr textureOffset;
+    Rect bounds;
+    GLintptr offset = 0;
+    GLintptr textureOffset = 0;
 
     TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
             float width, float height, const Res_png_9patch* patch);
@@ -67,7 +68,7 @@ private:
     void generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, float y2,
             float u1, float v1, float u2, float v2, uint32_t& quadCount);
 
-    const uint32_t* mColors;
+    const uint32_t* mColors = nullptr;
     UvMapper mUvMapper;
 }; // struct Patch
 

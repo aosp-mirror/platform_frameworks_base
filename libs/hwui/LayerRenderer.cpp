@@ -275,9 +275,6 @@ Layer* LayerRenderer::createTextureLayer(RenderState& renderState) {
 
     Layer* layer = new Layer(Layer::kType_Texture, renderState, 0, 0);
     layer->setCacheable(false);
-    layer->setEmpty(true);
-    layer->setFbo(0);
-    layer->setAlpha(255, SkXfermode::kSrcOver_Mode);
     layer->layer.set(0.0f, 0.0f, 0.0f, 0.0f);
     layer->texCoords.set(0.0f, 1.0f, 1.0f, 0.0f);
     layer->region.clear();

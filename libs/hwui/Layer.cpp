@@ -37,7 +37,7 @@
 namespace android {
 namespace uirenderer {
 
-Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight)
+Layer::Layer(Type layerType, RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight)
         : state(kState_Uncached)
         , caches(Caches::getInstance())
         , renderState(renderState)
@@ -46,24 +46,9 @@ Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
-    mesh = nullptr;
-    meshElementCount = 0;
-    cacheable = true;
-    dirty = false;
     renderTarget = GL_TEXTURE_2D;
     texture.width = layerWidth;
     texture.height = layerHeight;
-    colorFilter = nullptr;
-    deferredUpdateScheduled = false;
-    renderNode = nullptr;
-    fbo = 0;
-    stencil = nullptr;
-    debugDrawUpdate = false;
-    hasDrawnSinceUpdate = false;
-    forceFilter = false;
-    convexMask = nullptr;
-    rendererLightPosDirty = true;
-    wasBuildLayered = false;
     renderState.registerLayer(this);
 }
 
