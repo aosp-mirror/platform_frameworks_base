@@ -125,8 +125,6 @@ public class VolumePanel extends Handler implements DemoMode {
     private static final int MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED = 15;
     private static final int MSG_INTERNAL_RINGER_MODE_CHANGED = 16;
 
-    // Pseudo stream type for master volume
-    private static final int STREAM_MASTER = -100;
     // Pseudo stream type for remote volume
     private static final int STREAM_REMOTE_MUSIC = -200;
 
@@ -153,10 +151,6 @@ public class VolumePanel extends Handler implements DemoMode {
     private int mLastRingerMode = AudioManager.RINGER_MODE_NORMAL;
     private int mLastRingerProgress = 0;
     private int mDemoIcon;
-
-    // True if we want to play tones on the system stream when the master stream is specified.
-    private final boolean mPlayMasterStreamTones;
-
 
     /** Volume panel content view */
     private final View mView;
@@ -213,12 +207,6 @@ public class VolumePanel extends Handler implements DemoMode {
                 com.android.systemui.R.drawable.ic_ringer_audible,
                 com.android.systemui.R.drawable.ic_ringer_mute,
                 true),
-        // for now, use media resources for master volume
-        MasterStream(STREAM_MASTER,
-                R.string.volume_icon_description_media, //FIXME should have its own description
-                IC_AUDIO_VOL,
-                IC_AUDIO_VOL_MUTE,
-                false),
         RemoteStream(STREAM_REMOTE_MUSIC,
                 R.string.volume_icon_description_media, //FIXME should have its own description
                 com.android.systemui.R.drawable.ic_audio_remote,
@@ -249,7 +237,6 @@ public class VolumePanel extends Handler implements DemoMode {
         StreamResources.MediaStream,
         StreamResources.NotificationStream,
         StreamResources.AlarmStream,
-        StreamResources.MasterStream,
         StreamResources.RemoteStream
     };
 
@@ -371,15 +358,6 @@ public class VolumePanel extends Handler implements DemoMode {
         mSecondaryIconTransition = new SecondaryIconTransition();
         mIconPulser = new IconPulser(context);
 
-        // For now, only show master volume if master volume is supported
-        final Resources res = context.getResources();
-        final boolean useMasterVolume = res.getBoolean(R.bool.config_useMasterVolume);
-        if (useMasterVolume) {
-            for (int i = 0; i < STREAMS.length; i++) {
-                StreamResources streamRes = STREAMS[i];
-                streamRes.show = (streamRes.streamType == STREAM_MASTER);
-            }
-        }
         if (LOGD) Log.d(mTag, "new VolumePanel");
 
         mDisabledAlpha = 0.5f;
@@ -419,6 +397,7 @@ public class VolumePanel extends Handler implements DemoMode {
 
         mDialog.create();
 
+        final Resources res = context.getResources();
         window.setAttributes(getDialogLayoutParams(window, res));
 
         updateWidth();
@@ -447,15 +426,11 @@ public class VolumePanel extends Handler implements DemoMode {
         mHasVibrator = mVibrator != null && mVibrator.hasVibrator();
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
 
-        if (mZenController != null && !useMasterVolume) {
+        if (mZenController != null) {
             mZenModeAvailable = mZenController.isZenAvailable();
             mNotificationEffectsSuppressor = mZenController.getEffectsSuppressor();
             mZenController.addCallback(mZenCallback);
         }
-
-        final boolean masterVolumeOnly = res.getBoolean(R.bool.config_useMasterVolume);
-        final boolean masterVolumeKeySounds = res.getBoolean(R.bool.config_useVolumeKeySounds);
-        mPlayMasterStreamTones = masterVolumeOnly && masterVolumeKeySounds;
 
         registerReceiver();
     }
@@ -489,7 +464,6 @@ public class VolumePanel extends Handler implements DemoMode {
         pw.print("  mDisabledAlpha="); pw.println(mDisabledAlpha);
         pw.print("  mLastRingerMode="); pw.println(mLastRingerMode);
         pw.print("  mLastRingerProgress="); pw.println(mLastRingerProgress);
-        pw.print("  mPlayMasterStreamTones="); pw.println(mPlayMasterStreamTones);
         pw.print("  isShowing()="); pw.println(isShowing());
         pw.print("  mCallback="); pw.println(mCallback);
         pw.print("  sConfirmSafeVolumeDialog=");
@@ -576,9 +550,7 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     private boolean isMuted(int streamType) {
-        if (streamType == STREAM_MASTER) {
-            return mAudioManager.isMasterMute();
-        } else if (streamType == STREAM_REMOTE_MUSIC) {
+        if (streamType == STREAM_REMOTE_MUSIC) {
             // TODO do we need to support a distinct mute property for remote?
             return false;
         } else {
@@ -587,9 +559,7 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     private int getStreamMaxVolume(int streamType) {
-        if (streamType == STREAM_MASTER) {
-            return mAudioManager.getMasterMaxVolume();
-        } else if (streamType == STREAM_REMOTE_MUSIC) {
+        if (streamType == STREAM_REMOTE_MUSIC) {
             if (mStreamControls != null) {
                 StreamControl sc = mStreamControls.get(streamType);
                 if (sc != null && sc.controller != null) {
@@ -604,9 +574,7 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     private int getStreamVolume(int streamType) {
-        if (streamType == STREAM_MASTER) {
-            return mAudioManager.getLastAudibleMasterVolume();
-        } else if (streamType == STREAM_REMOTE_MUSIC) {
+        if (streamType == STREAM_REMOTE_MUSIC) {
             if (mStreamControls != null) {
                 StreamControl sc = mStreamControls.get(streamType);
                 if (sc != null && sc.controller != null) {
@@ -628,11 +596,7 @@ public class VolumePanel extends Handler implements DemoMode {
                 Log.w(mTag, "Adjusting remote volume without a controller!");
             }
         } else if (getStreamVolume(sc.streamType) != index) {
-            if (sc.streamType == STREAM_MASTER) {
-                mAudioManager.setMasterVolume(index, flags);
-            } else {
-                mAudioManager.setStreamVolume(sc.streamType, index, flags);
-            }
+            mAudioManager.setStreamVolume(sc.streamType, index, flags);
         }
     }
 
@@ -833,7 +797,7 @@ public class VolumePanel extends Handler implements DemoMode {
             sc.icon.setAlpha(mDisabledAlpha);
             sc.icon.setClickable(false);
         } else if (fixedVolume ||
-                (sc.streamType != mAudioManager.getMasterStreamType() && !isRinger && muted) ||
+                (sc.streamType != mAudioManager.getUiSoundsStreamType() && !isRinger && muted) ||
                 (sSafetyWarning != null)) {
             sc.seekbarView.setEnabled(false);
         } else {
@@ -977,10 +941,6 @@ public class VolumePanel extends Handler implements DemoMode {
         obtainMessage(MSG_REMOTE_VOLUME_UPDATE_IF_SHOWN).sendToTarget();
     }
 
-    public void postMasterVolumeChanged(int flags) {
-        postVolumeChanged(STREAM_MASTER, flags);
-    }
-
     public void postMuteChanged(int streamType, int flags) {
         if (hasMessages(MSG_VOLUME_CHANGED)) return;
         synchronized (this) {
@@ -990,10 +950,6 @@ public class VolumePanel extends Handler implements DemoMode {
         }
         removeMessages(MSG_FREE_RESOURCES);
         obtainMessage(MSG_MUTE_CHANGED, streamType, flags).sendToTarget();
-    }
-
-    public void postMasterMuteChanged(int flags) {
-        postMuteChanged(STREAM_MASTER, flags);
     }
 
     public void postDisplaySafeVolumeWarning(int flags) {
@@ -1192,9 +1148,7 @@ public class VolumePanel extends Handler implements DemoMode {
         if (!isShowing()) {
             int stream = (streamType == STREAM_REMOTE_MUSIC) ? -1 : streamType;
             // when the stream is for remote playback, use -1 to reset the stream type evaluation
-            if (stream != STREAM_MASTER) {
-                mAudioManager.forceVolumeControlStream(stream);
-            }
+            mAudioManager.forceVolumeControlStream(stream);
             mDialog.show();
             if (mCallback != null) {
                 mCallback.onVisible(true);
@@ -1360,16 +1314,6 @@ public class VolumePanel extends Handler implements DemoMode {
      * Lock on this VolumePanel instance as long as you use the returned ToneGenerator.
      */
     private ToneGenerator getOrCreateToneGenerator(int streamType) {
-        if (streamType == STREAM_MASTER) {
-            // For devices that use the master volume setting only but still want to
-            // play a volume-changed tone, direct the master volume pseudostream to
-            // the system stream's tone generator.
-            if (mPlayMasterStreamTones) {
-                streamType = AudioManager.STREAM_SYSTEM;
-            } else {
-                return null;
-            }
-        }
         synchronized (this) {
             if (mToneGenerators[streamType] == null) {
                 try {

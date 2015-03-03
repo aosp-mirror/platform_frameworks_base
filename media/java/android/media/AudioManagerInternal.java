@@ -36,9 +36,6 @@ public abstract class AudioManagerInternal {
     public abstract void setStreamVolumeForUid(int streamType, int direction, int flags,
             String callingPackage, int uid);
 
-    public abstract void adjustMasterVolumeForUid(int steps, int flags, String callingPackage,
-            int uid);
-
     public abstract void setRingerModeDelegate(RingerModeDelegate delegate);
 
     public abstract int getRingerModeInternal();

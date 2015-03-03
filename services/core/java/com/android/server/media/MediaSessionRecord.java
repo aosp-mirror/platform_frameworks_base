@@ -90,14 +90,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final SessionStub mSession;
     private final SessionCb mSessionCb;
     private final MediaSessionService mService;
-    private final boolean mUseMasterVolume;
 
     private final Object mLock = new Object();
     private final ArrayList<ISessionControllerCallback> mControllerCallbacks =
             new ArrayList<ISessionControllerCallback>();
 
     private long mFlags;
-    private IMediaRouter mMediaRouter;
     private PendingIntent mMediaButtonReceiver;
     private PendingIntent mLaunchIntent;
 
@@ -141,8 +139,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mAudioManager = (AudioManager) service.getContext().getSystemService(Context.AUDIO_SERVICE);
         mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
         mAudioAttrs = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build();
-        mUseMasterVolume = service.getContext().getResources().getBoolean(
-                com.android.internal.R.bool.config_useMasterVolume);
     }
 
     /**
@@ -247,13 +243,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
-            if (mUseMasterVolume) {
-                // If this device only uses master volume and playback is local
-                // just adjust the master volume and return.
-                mAudioManagerInternal.adjustMasterVolumeForUid(direction, flags, packageName,
-                        uid);
-                return;
-            }
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
             if (useSuggested) {
                 if (AudioSystem.isStreamActive(stream, 0)) {
@@ -729,7 +718,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
         @Override
         public void setMediaRouter(IMediaRouter router) {
-            mMediaRouter = router;
             mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 
