@@ -3718,6 +3718,34 @@ public class TelephonyManager {
     }
 
     /**
+     * Whether the device supports configuring the DTMF tone length.
+     *
+     * @return {@code true} if the DTMF tone length can be changed, and {@code false} otherwise.
+     */
+    public boolean canChangeDtmfToneLength() {
+        try {
+            return getITelephony().canChangeDtmfToneLength();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#canChangeDtmfToneLength", e);
+        }
+        return false;
+    }
+
+    /**
+     * Whether the device is a world phone.
+     *
+     * @return {@code true} if the device is a world phone, and {@code false} otherwise.
+     */
+    public boolean isWorldPhone() {
+        try {
+            return getITelephony().isWorldPhone();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isWorldPhone", e);
+        }
+        return false;
+    }
+
+    /**
      * This function retrieves value for setting "name+subId", and if that is not found
      * retrieves value for setting "name", and if that is not found uses def as default
      *

@@ -31393,6 +31393,7 @@ package android.telephony {
   public class TelephonyManager {
     method public void answerRingingCall();
     method public void call(java.lang.String, java.lang.String);
+    method public boolean canChangeDtmfToneLength();
     method public int checkCarrierPrivilegesForPackage(java.lang.String);
     method public void dial(java.lang.String);
     method public boolean disableDataConnectivity();
@@ -31452,6 +31453,7 @@ package android.telephony {
     method public boolean isSmsCapable();
     method public boolean isVideoCallingEnabled();
     method public boolean isVoiceCapable();
+    method public boolean isWorldPhone();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public boolean needsOtaServiceProvisioning();
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
