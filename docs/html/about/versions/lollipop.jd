@@ -55,6 +55,11 @@ about Android 5.0 for consumers at
 <a href="http://www.android.com/versions/lollipop-5-0/"
 >www.android.com</a>.</p>
 
+<p class="note">
+  <strong>Note:</strong> The Android 5.1 Lollipop MR1 update is available with additional features
+  and fixes. For more information, see the
+  <a href="{@docRoot}about/versions/android-5.1.html">Android 5.1 API Overview</a>.
+</p>
 
 
 <h2 id="Material">Material design</h2>

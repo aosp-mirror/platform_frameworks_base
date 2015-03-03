@@ -16,6 +16,7 @@
               es-lang="Lollipop">
       <span class="en">Lollipop</span></a></div>
       <ul>
+        <li><a href="<?cs var:toroot ?>about/versions/android-5.1.html">Android 5.1 APIs</a></li>
         <li><a href="<?cs var:toroot ?>about/versions/android-5.0.html"
               zh-tw-lang="Android 5.0 API"
               zh-cn-lang="Android 5.0 API"
