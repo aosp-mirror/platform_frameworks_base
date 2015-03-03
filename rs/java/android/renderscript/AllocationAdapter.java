@@ -72,17 +72,19 @@ public class AllocationAdapter extends Allocation {
     private void updateOffsets() {
         int a1 = 0, a2 = 0, a3 = 0, a4 = 0;
 
-        if (mSelectedArray.length > 0) {
-            a1 = mSelectedArray[0];
-        }
-        if (mSelectedArray.length > 1) {
-            a2 = mSelectedArray[2];
-        }
-        if (mSelectedArray.length > 2) {
-            a3 = mSelectedArray[2];
-        }
-        if (mSelectedArray.length > 3) {
-            a4 = mSelectedArray[3];
+        if (mSelectedArray != null) {
+            if (mSelectedArray.length > 0) {
+                a1 = mSelectedArray[0];
+            }
+            if (mSelectedArray.length > 1) {
+                a2 = mSelectedArray[2];
+            }
+            if (mSelectedArray.length > 2) {
+                a3 = mSelectedArray[2];
+            }
+            if (mSelectedArray.length > 3) {
+                a4 = mSelectedArray[3];
+            }
         }
         mRS.nAllocationAdapterOffset(getID(mRS), mSelectedX, mSelectedY, mSelectedZ,
                                      mSelectedLOD, mSelectedFace.mID, a1, a2, a3, a4);
