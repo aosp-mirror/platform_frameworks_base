@@ -83,6 +83,32 @@ public class WebViewClient {
     }
 
     /**
+     * Notify the host application that the page commit is visible.
+     *
+     * <p>This is the earliest point at which we can guarantee that the contents of the previously
+     * loaded page will not longer be drawn in the next {@link WebView#onDraw}. The next draw will
+     * render the {@link WebView#setBackgroundColor background color} of the WebView or some of the
+     * contents from the committed page already. This callback may be useful when reusing
+     * {@link WebView}s to ensure that no stale content is shown. This method is only called for
+     * the main frame.</p>
+     *
+     * <p>This method is called when the state of the DOM at the point at which the
+     * body of the HTTP response (commonly the string of html) had started loading will be visible.
+     * If you set a background color for the page in the HTTP response body this will most likely
+     * be visible and perhaps some other elements. At that point no other resources had usually
+     * been loaded, so you can expect images for example to not be visible. If you want
+     * a finer level of granularity consider calling {@link WebView#insertVisualStateCallback}
+     * directly.</p>
+     *
+     * <p>Please note that all the conditions and recommendations presented in
+     * {@link WebView#insertVisualStateCallback} also apply to this API.<p>
+     *
+     * @param url the url of the committed page
+     */
+    public void onPageCommitVisible(WebView view, String url) {
+    }
+
+    /**
      * Notify the host application of a resource request and allow the
      * application to return the data.  If the return value is null, the WebView
      * will continue to load the resource as usual.  Otherwise, the return

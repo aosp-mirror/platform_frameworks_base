@@ -39876,6 +39876,7 @@ package android.webkit {
     method public void goBack();
     method public void goBackOrForward(int);
     method public void goForward();
+    method public void insertVisualStateCallback(long, android.webkit.WebView.VisualStateCallback);
     method public void invokeZoomPicker();
     method public boolean isPrivateBrowsingEnabled();
     method public void loadData(java.lang.String, java.lang.String, java.lang.String);
@@ -39980,6 +39981,11 @@ package android.webkit {
     method public void super_setLayoutParams(android.view.ViewGroup.LayoutParams);
   }
 
+  public static abstract class WebView.VisualStateCallback {
+    ctor public WebView.VisualStateCallback();
+    method public abstract void onComplete(long);
+  }
+
   public class WebView.WebViewTransport {
     ctor public WebView.WebViewTransport();
     method public synchronized android.webkit.WebView getWebView();
@@ -39991,6 +39997,7 @@ package android.webkit {
     method public void doUpdateVisitedHistory(android.webkit.WebView, java.lang.String, boolean);
     method public void onFormResubmission(android.webkit.WebView, android.os.Message, android.os.Message);
     method public void onLoadResource(android.webkit.WebView, java.lang.String);
+    method public void onPageCommitVisible(android.webkit.WebView, java.lang.String);
     method public void onPageFinished(android.webkit.WebView, java.lang.String);
     method public void onPageStarted(android.webkit.WebView, java.lang.String, android.graphics.Bitmap);
     method public void onReceivedClientCertRequest(android.webkit.WebView, android.webkit.ClientCertRequest);
@@ -40137,6 +40144,7 @@ package android.webkit {
     method public abstract void goBackOrForward(int);
     method public abstract void goForward();
     method public abstract void init(java.util.Map<java.lang.String, java.lang.Object>, boolean);
+    method public abstract void insertVisualStateCallback(long, android.webkit.WebView.VisualStateCallback);
     method public abstract void invokeZoomPicker();
     method public abstract boolean isPaused();
     method public abstract boolean isPrivateBrowsingEnabled();
