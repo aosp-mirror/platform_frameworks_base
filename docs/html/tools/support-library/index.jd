@@ -62,6 +62,108 @@ page.title=Support Library
 <div class="toggle-content opened">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 22</a> <em>(March 2015)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Updated the {@link android.support.v4.content.res.ResourcesCompat#getDrawable
+            getDrawable()} method to return a drawable object for a specified specific resource ID,
+            screen density, and theme.
+          </li>
+          <li>Added the {@link android.support.v4.view.ViewCompat#setImportantForAccessibility
+            setImportantForAccessibility()} method so you can indicate if a view should trigger
+            accessibility events.
+          </li>
+          <li>Added the {@link android.support.v4.widget.DrawerLayout#getStatusBarBackgroundDrawable
+            getStatusBarBackgroundDrawable()} method so you can get the status bar background
+            drawable.
+          </li>
+          <li>Added methods to the
+            {@link android.support.v4.app.NotificationCompat.CarExtender.UnreadConversation}
+            class so Android Auto messaging apps can retrieve additional notification data.
+          </li>
+          <li>Added the {@link android.support.v4.widget.SwipeRefreshLayout#getProgressCircleDiameter
+            getProgressCircleDiameter()} method to return the diameter of a circle layout.
+          </li>
+          <li>Changed the default {@link android.support.v4.widget.DrawerLayout DrawerLayout}
+            status bar color to {@link android.R.attr#colorPrimaryDark}.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the spinner style
+            {@link android.support.v7.appcompat.R.style#Base_Widget_AppCompat_Spinner_Underlined}.</li>
+          <li>Added tinted widgets styles with
+            {@link android.support.v7.appcompat.R.style#Widget_AppCompat_AutoCompleteTextView},
+            {@link android.widget.MultiAutoCompleteTextView},
+            {@link android.support.v7.appcompat.R.style#TextAppearance_AppCompat_Button}, and
+            {@link android.support.v7.appcompat.R.style#Base_Widget_AppCompat_RatingBar}.</li>
+        </ul>
+      </dd>
+
+      <dt>Changes for <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v17.leanback.widget.ListRowPresenter#getRecycledPoolSize
+            getRecycledPoolSize()} and
+            {@link android.support.v17.leanback.widget.ListRowPresenter#setRecycledPoolSize
+            setRecycledPoolSize()} methods to allow customized recycled pool sizes.</li>
+          <li>Added the {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT} attribute to the
+            layout width setting to support wrapped content for title icons.</li>
+          <li>Defined {@link android.support.v17.leanback.R.transition} in XML to
+            improve transition updates.  </li>
+          <li>Enabled support for right to left layouts.</li>
+          <li>Added the play and pause media key events support to the
+            {@link android.support.v17.leanback.app.PlaybackOverlayFragment} class.</li>
+          <li>Added enter and return transitions to the
+            {@link android.support.v17.leanback.app.BrowseFragment} class and the
+            {@link android.support.v17.leanback.app.DetailsFragment} class.</li>
+          <li>Added the {@link android.support.v17.leanback.widget.ArrayObjectAdapter#replace
+            replace()} method to replace items in an object’s adapter array. </li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-mediarouter">v7 mediarouter library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Updated Google Cast icons to use the
+            <a href="{@docRoot}training/material/index.html">material design</a> style.</li>
+          <li>Updated all the icons used in the {@link android.media.MediaRouter} dialogs to use the
+            <a href="{@docRoot}training/material/index.html">material design</a> style.</li>
+        </ul>
+      </dd>
+
+
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.RecyclerView.ViewHolder#getLayoutPosition
+            getlayoutPosition()}
+            and {@link android.support.v7.widget.RecyclerView.ViewHolder#getAdapterPosition
+            getadapterPosition()} methods to the {@link android.support.v7.widget.RecyclerView}
+            class.</li>
+          <li>Deprecated the <code>classgetChildPosition()</code> and
+            <code>findViewHolderForPosition()</code> methods in the
+            {@link android.support.v7.widget.RecyclerView} class. </li>
+          <li>Deprecated the <code>getPosition()</code> method in the
+            {@link android.support.v7.widget.RecyclerView.ViewHolder} class. </li>
+          <li>Deprecated the <code>getViewPosition()</code> method in the
+            {@link android.support.v7.widget.RecyclerView.LayoutParams} class. </li>
+        </ul>
+      </dd>
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 21.0.3</a> <em>(December 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
@@ -203,7 +305,7 @@ page.title=Support Library
           <li>Updated common user interface widgets to allow tinting via theme
               attributes when running on pre-Android 5.0 devices</li>
           <li>Added {@link android.support.v7.widget.SwitchCompat}, a backport
-              of the {@link android.widget.Switch} widget that was added in 
+              of the {@link android.widget.Switch} widget that was added in
               Android 4.0 (API level 14).</li>
         </ul>
       </dd>
