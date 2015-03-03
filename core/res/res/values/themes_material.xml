@@ -42,8 +42,8 @@ please see themes_device_defaults.xml.
          with trailing _dark or _light specifiers if they are not shared between both light and
          dark versions of the theme. -->
     <style name="Theme.Material">
-        <item name="colorForeground">@color/bright_foreground_material_dark</item>
-        <item name="colorForegroundInverse">@color/bright_foreground_material_light</item>
+        <item name="colorForeground">@color/foreground_material_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_material_light</item>
         <item name="colorBackground">@color/background_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
         <item name="disabledAlpha">@dimen/disabled_alpha_material_dark</item>
@@ -395,8 +395,8 @@ please see themes_device_defaults.xml.
 
     <!-- Material theme (light version). -->
     <style name="Theme.Material.Light" parent="Theme.Light">
-        <item name="colorForeground">@color/bright_foreground_material_light</item>
-        <item name="colorForegroundInverse">@color/bright_foreground_material_dark</item>
+        <item name="colorForeground">@color/foreground_material_light</item>
+        <item name="colorForegroundInverse">@color/foreground_material_dark</item>
         <item name="colorBackground">@color/background_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
         <item name="disabledAlpha">@dimen/disabled_alpha_material_light</item>
@@ -767,8 +767,8 @@ please see themes_device_defaults.xml.
     <!-- Theme overlay that replaces colors with their light versions but preserves
          the value of colorAccent, colorPrimary and its variants. -->
     <style name="ThemeOverlay.Material.Light">
-        <item name="colorForeground">@color/bright_foreground_material_light</item>
-        <item name="colorForegroundInverse">@color/bright_foreground_material_dark</item>
+        <item name="colorForeground">@color/foreground_material_light</item>
+        <item name="colorForegroundInverse">@color/foreground_material_dark</item>
         <item name="colorBackground">@color/background_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
 
@@ -803,8 +803,8 @@ please see themes_device_defaults.xml.
     <!-- Theme overlay that replaces colors with their dark versions but preserves
          the value of colorAccent, colorPrimary and its variants. -->
     <style name="ThemeOverlay.Material.Dark">
-        <item name="colorForeground">@color/bright_foreground_material_dark</item>
-        <item name="colorForegroundInverse">@color/bright_foreground_material_light</item>
+        <item name="colorForeground">@color/foreground_material_dark</item>
+        <item name="colorForegroundInverse">@color/foreground_material_light</item>
         <item name="colorBackground">@color/background_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
 

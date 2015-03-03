@@ -17,20 +17,15 @@
 <!-- Colors specific to Material themes. -->
 <resources>
     <color name="background_material_dark">#ff303030</color>
-    <color name="background_material_light">#ffeeeeee</color>
+    <color name="background_material_light">#fffafafa</color>
     <color name="background_floating_material_dark">#ff424242</color>
-    <color name="background_floating_material_light">#ffeeeeee</color>
+    <color name="background_floating_material_light">#ffffffff</color>
 
     <color name="primary_material_dark">#ff212121</color>
-    <color name="primary_material_light">#ffefefef</color>
+    <color name="primary_material_light">#fff5f5f5</color>
     <color name="primary_dark_material_dark">#ff000000</color>
     <color name="primary_dark_material_light">#ff757575</color>
     <color name="primary_dark_material_light_light_status_bar">#ffe0e0e0</color>
-
-    <!-- 26% white (foreground) -->
-    <color name="ripple_material_dark">#42ffffff</color>
-    <!-- 12% black (foreground) -->
-    <color name="ripple_material_light">#1f000000</color>
 
     <color name="accent_material_light">@color/material_deep_teal_500</color>
     <color name="accent_material_dark">@color/material_deep_teal_200</color>
@@ -43,22 +38,8 @@
     <color name="switch_thumb_disabled_material_dark">#ff616161</color>
     <color name="switch_thumb_disabled_material_light">#ffbdbdbd</color>
 
-    <color name="bright_foreground_material_dark">@color/white</color>
-    <color name="bright_foreground_material_light">@color/black</color>
-    <!-- 50% white (foreground) -->
-    <color name="bright_foreground_disabled_material_dark">#80ffffff</color>
-    <!-- 50% black (foreground) -->
-    <color name="bright_foreground_disabled_material_light">#80000000</color>
-    <color name="bright_foreground_inverse_material_dark">@color/bright_foreground_material_light</color>
-    <color name="bright_foreground_inverse_material_light">@color/bright_foreground_material_dark</color>
-
-    <color name="dim_foreground_material_dark">#ffbebebe</color>
-    <color name="dim_foreground_material_light">#ff323232</color>
-    <color name="dim_foreground_disabled_material_dark">#80bebebe</color>
-    <color name="dim_foreground_disabled_material_light">#80323232</color>
-
-    <color name="hint_foreground_material_dark">@color/bright_foreground_disabled_material_dark</color>
-    <color name="hint_foreground_material_light">@color/bright_foreground_disabled_material_light</color>
+    <color name="foreground_material_dark">@color/white</color>
+    <color name="foreground_material_light">@color/black</color>
 
     <color name="link_text_material_dark">@color/material_deep_teal_200</color>
     <color name="link_text_material_light">@color/material_deep_teal_500</color>
@@ -71,6 +52,9 @@
 
     <color name="primary_text_default_material_dark">#ffffffff</color>
     <color name="secondary_text_default_material_dark">#b3ffffff</color>
+
+    <item name="hint_alpha_material_dark" format="float" type="dimen">0.50</item>
+    <item name="hint_alpha_material_light" format="float" type="dimen">0.54</item>
 
     <item name="disabled_alpha_material_light" format="float" type="dimen">0.26</item>
     <item name="disabled_alpha_material_dark" format="float" type="dimen">0.30</item>
