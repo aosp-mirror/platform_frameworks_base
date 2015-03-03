@@ -72,7 +72,7 @@ public:
     };
     State state; // public for logging/debugging purposes
 
-    Layer(Type type, RenderState& renderState, const uint32_t layerWidth, const uint32_t layerHeight);
+    Layer(Type type, RenderState& renderState, uint32_t layerWidth, uint32_t layerHeight);
     ~Layer();
 
     static uint32_t computeIdealWidth(uint32_t layerWidth);
@@ -324,19 +324,19 @@ public:
     /**
      * If the layer can be rendered as a mesh, this is non-null.
      */
-    TextureVertex* mesh;
-    GLsizei meshElementCount;
+    TextureVertex* mesh = nullptr;
+    GLsizei meshElementCount = 0;
 
     /**
      * Used for deferred updates.
      */
-    bool deferredUpdateScheduled;
+    bool deferredUpdateScheduled = false;
     std::unique_ptr<OpenGLRenderer> renderer;
     sp<RenderNode> renderNode;
     Rect dirtyRect;
-    bool debugDrawUpdate;
-    bool hasDrawnSinceUpdate;
-    bool wasBuildLayered;
+    bool debugDrawUpdate = false;
+    bool hasDrawnSinceUpdate = false;
+    bool wasBuildLayered = false;
 
 private:
     void requireRenderer();
@@ -350,17 +350,17 @@ private:
      * Name of the FBO used to render the layer. If the name is 0
      * this layer is not backed by an FBO, but a simple texture.
      */
-    GLuint fbo;
+    GLuint fbo = 0;
 
     /**
      * The render buffer used as the stencil buffer.
      */
-    RenderBuffer* stencil;
+    RenderBuffer* stencil = nullptr;
 
     /**
      * Indicates whether this layer has been used already.
      */
-    bool empty;
+    bool empty = true;
 
     /**
      * The texture backing this layer.
@@ -370,7 +370,7 @@ private:
     /**
      * If set to true (by default), the layer can be reused.
      */
-    bool cacheable;
+    bool cacheable = true;
 
     /**
      * Denotes whether the layer is a DisplayList, or Texture layer.
@@ -381,32 +381,32 @@ private:
      * When set to true, this layer is dirty and should be cleared
      * before any rendering occurs.
      */
-    bool dirty;
+    bool dirty = false;
 
     /**
      * Indicates the render target.
      */
-    GLenum renderTarget;
+    GLenum renderTarget = GL_TEXTURE_2D;
 
     /**
      * Color filter used to draw this layer. Optional.
      */
-    SkColorFilter* colorFilter;
+    SkColorFilter* colorFilter = nullptr;
 
     /**
      * Indicates raster data backing the layer is scaled, requiring filtration.
      */
-    bool forceFilter;
+    bool forceFilter = false;
 
     /**
      * Opacity of the layer.
      */
-    int alpha;
+    int alpha = 255;
 
     /**
      * Blending mode of the layer.
      */
-    SkXfermode::Mode mode;
+    SkXfermode::Mode mode = SkXfermode::kSrcOver_Mode;
 
     /**
      * Optional texture coordinates transform.
@@ -422,7 +422,7 @@ private:
      * Cached transform of layer in window, updated only on creation / resize
      */
     mat4 cachedInvTransformInWindow;
-    bool rendererLightPosDirty;
+    bool rendererLightPosDirty = true;
 
     /**
      * Used to defer display lists when the layer is updated with a
@@ -435,7 +435,7 @@ private:
      *
      * Data not owned/managed by layer object.
      */
-    const SkPath* convexMask;
+    const SkPath* convexMask = nullptr;
 
 }; // struct Layer
 
