@@ -23,4 +23,6 @@ interface ICameraServiceListener
      * Keep up-to-date with frameworks/av/include/camera/ICameraServiceListener.h
      */
     void onStatusChanged(int status, int cameraId);
+
+    void onTorchStatusChanged(int status, String cameraId);
 }

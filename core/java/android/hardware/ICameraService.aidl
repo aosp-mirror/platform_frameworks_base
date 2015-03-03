@@ -81,4 +81,6 @@ interface ICameraService
                     int clientUid,
                     // Container for an ICamera object
                     out BinderHolder device);
+
+    int setTorchMode(String CameraId, boolean enabled, IBinder clientBinder);
 }
