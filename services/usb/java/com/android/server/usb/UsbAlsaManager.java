@@ -73,8 +73,6 @@ public final class UsbAlsaManager {
 
     private UsbAudioDevice mAccessoryAudioDevice = null;
 
-    private UsbAudioDevice mSelectedAudioDevice = null;
-
     // UsbMidiDevice for USB peripheral mode (gadget) device
     private UsbMidiDevice mPeripheralMidiDevice = null;
 
@@ -186,6 +184,10 @@ public final class UsbAlsaManager {
                 int device = (audioDevice == mAccessoryAudioDevice ?
                         AudioSystem.DEVICE_OUT_USB_ACCESSORY :
                         AudioSystem.DEVICE_OUT_USB_DEVICE);
+                if (DEBUG) {
+                    Slog.i(TAG, "pre-call device:0x" + Integer.toHexString(device) +
+                            " addr:" + address + " name:" + audioDevice.mDeviceName);
+                }
                 mAudioService.setWiredDeviceConnectionState(
                         device, state, address, audioDevice.mDeviceName);
             }
@@ -282,23 +284,13 @@ public final class UsbAlsaManager {
     /*
      * Select the default device of the specified card.
      */
-    /* package */ boolean selectAudioCard(int card) {
+    /* package */ UsbAudioDevice selectAudioCard(int card) {
         if (DEBUG) {
             Slog.d(TAG, "selectAudioCard() card:" + card);
         }
         if (!mCardsParser.isCardUsb(card)) {
             // Don't. AudioPolicyManager has logic for falling back to internal devices.
-            return false;
-        }
-
-        if (mSelectedAudioDevice != null) {
-            if (mSelectedAudioDevice.mCard == card) {
-                // Nothing to do here.
-                return false;
-            }
-            // "disconnect" the AudioPolicyManager from the previously selected device.
-            notifyDeviceState(mSelectedAudioDevice, false);
-            mSelectedAudioDevice = null;
+            return null;
         }
 
         mDevicesParser.scan();
@@ -314,30 +306,30 @@ public final class UsbAlsaManager {
 
         // Playback device file needed/present?
         if (hasPlayback && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_PLAYBACK) == null)) {
-            return false;
+            return null;
         }
 
         // Capture device file needed/present?
         if (hasCapture && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_CAPTURE) == null)) {
-            return false;
+            return null;
         }
 
         if (DEBUG) {
             Slog.d(TAG, "usb: hasPlayback:" + hasPlayback + " hasCapture:" + hasCapture);
         }
 
-        mSelectedAudioDevice =
+        UsbAudioDevice audioDevice =
                 new UsbAudioDevice(card, device, hasPlayback, hasCapture, deviceClass);
-        mSelectedAudioDevice.mDeviceName = mCardsParser.getCardRecordFor(card).mCardName;
-        mSelectedAudioDevice.mDeviceDescription =
-                mCardsParser.getCardRecordFor(card).mCardDescription;
+        AlsaCardsParser.AlsaCardRecord cardRecord = mCardsParser.getCardRecordFor(card);
+        audioDevice.mDeviceName = cardRecord.mCardName;
+        audioDevice.mDeviceDescription = cardRecord.mCardDescription;
 
-        notifyDeviceState(mSelectedAudioDevice, true);
+        notifyDeviceState(audioDevice, true);
 
-        return true;
+        return audioDevice;
     }
 
-    /* package */ boolean selectDefaultDevice() {
+    /* package */ UsbAudioDevice selectDefaultDevice() {
         if (DEBUG) {
             Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
         }
@@ -347,7 +339,8 @@ public final class UsbAlsaManager {
 
     /* package */ void usbDeviceAdded(UsbDevice usbDevice) {
        if (DEBUG) {
-          Slog.d(TAG, "usbDeviceAdded(): " + usbDevice);
+          Slog.d(TAG, "deviceAdded(): " + usbDevice.getManufacturerName() +
+                  "nm:" + usbDevice.getProductName());
         }
 
         // Is there an audio interface in there?
@@ -384,8 +377,10 @@ public final class UsbAlsaManager {
         // If the default isn't a USB device, let the existing "select internal mechanism"
         // handle the selection.
         if (mCardsParser.isCardUsb(addedCard)) {
-            selectAudioCard(addedCard);
-            mAudioDevices.put(usbDevice, mSelectedAudioDevice);
+            UsbAudioDevice audioDevice = selectAudioCard(addedCard);
+            if (audioDevice != null) {
+                mAudioDevices.put(usbDevice, audioDevice);
+            }
 
             // look for MIDI devices
 
@@ -420,14 +415,14 @@ public final class UsbAlsaManager {
 
     /* package */ void usbDeviceRemoved(UsbDevice usbDevice) {
         if (DEBUG) {
-          Slog.d(TAG, "deviceRemoved(): " + usbDevice);
+          Slog.d(TAG, "deviceRemoved(): " + usbDevice.getManufacturerName() +
+                  " " + usbDevice.getProductName());
         }
 
         UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
                 notifyDeviceState(audioDevice, false);
-                mSelectedAudioDevice = null;
 
                 // if there any external devices left, select one of them
                 selectDefaultDevice();

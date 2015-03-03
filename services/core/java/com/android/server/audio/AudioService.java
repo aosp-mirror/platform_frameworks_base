@@ -141,6 +141,9 @@ public class AudioService extends IAudioService.Stub {
     /** debug calls to media session apis */
     private static final boolean DEBUG_SESSIONS = Log.isLoggable(TAG + ".SESSIONS", Log.DEBUG);
 
+    /** debug calls to devices APIs */
+    protected static final boolean DEBUG_DEVICES = Log.isLoggable(TAG + ".DEVICES", Log.DEBUG);
+
     /** Allow volume changes to set ringer mode to silent? */
     private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = false;
 
@@ -376,7 +379,32 @@ public class AudioService extends IAudioService.Stub {
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
 
     // Devices currently connected
-    private final HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
+    // Use makeDeviceListKey() to make a unique key for this list.
+    private class DeviceListSpec {
+        int mDeviceType;
+        String mDeviceName;
+        String mDeviceAddress;
+
+        public DeviceListSpec(int deviceType, String deviceName, String deviceAddress) {
+            mDeviceType = deviceType;
+            mDeviceName = deviceName;
+            mDeviceAddress = deviceAddress;
+        }
+
+        public String toString() {
+            return "[type:0x" + Integer.toHexString(mDeviceType) + " name:" + mDeviceName
+                    + " address:" + mDeviceAddress + "]";
+        }
+    }
+
+    // Generate a unique key for the mConnectedDevices List by composing the device "type"
+    // and the "address" associated with a specific instance of that device type
+    private String makeDeviceListKey(int device, String deviceAddress) {
+        return "0x" + Integer.toHexString(device) + ":" + deviceAddress;
+    }
+
+    private final HashMap<String, DeviceListSpec> mConnectedDevices =
+            new HashMap<String, DeviceListSpec>();
 
     // Forced device usage for communications
     private int mForcedUseForComm;
@@ -519,6 +547,8 @@ public class AudioService extends IAudioService.Stub {
     public static String makeAlsaAddressString(int card, int device) {
         return "card=" + card + ";device=" + device + ";";
     }
+
+    private final String DEVICE_NAME_A2DP = "a2dp-device";
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -2767,14 +2797,17 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         public void onServiceDisconnected(int profile) {
-            switch(profile) {
+            switch (profile) {
             case BluetoothProfile.A2DP:
                 synchronized (mConnectedDevices) {
                     synchronized (mA2dpAvrcpLock) {
-                        mA2dp = null;
-                        if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
-                            makeA2dpDeviceUnavailableNow(
-                                    mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                        // Disconnect ALL DEVICE_OUT_BLUETOOTH_A2DP devices
+                        for(Map.Entry<String, DeviceListSpec> entry
+                                : mConnectedDevices.entrySet()) {
+                            DeviceListSpec deviceSpec = entry.getValue();
+                            if (deviceSpec.mDeviceType == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                                makeA2dpDeviceUnavailableNow(deviceSpec.mDeviceAddress);
+                            }
                         }
                     }
                 }
@@ -2782,9 +2815,13 @@ public class AudioService extends IAudioService.Stub {
 
             case BluetoothProfile.A2DP_SINK:
                 synchronized (mConnectedDevices) {
-                    if (mConnectedDevices.containsKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP)) {
-                        makeA2dpSrcUnavailable(
-                                mConnectedDevices.get(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP));
+                    // Disconnect ALL DEVICE_IN_BLUETOOTH_A2DP devices
+                    for(Map.Entry<String, DeviceListSpec> entry
+                            : mConnectedDevices.entrySet()) {
+                        DeviceListSpec deviceSpec = entry.getValue();
+                        if (deviceSpec.mDeviceType == AudioSystem.DEVICE_IN_BLUETOOTH_A2DP) {
+                            makeA2dpSrcUnavailable(deviceSpec.mDeviceAddress);
+                        }
                     }
                 }
                 break;
@@ -3272,6 +3309,10 @@ public class AudioService extends IAudioService.Stub {
     public void setWiredDeviceConnectionState(int type, int state, String address,
             String name) {
         synchronized (mConnectedDevices) {
+            if (DEBUG_DEVICES) {
+                Slog.i(TAG, "setWiredDeviceConnectionState(" + state + " nm: " + name + " addr:"
+                        + address + ")");
+            }
             int delay = checkSendBecomingNoisyIntent(type, state);
             queueMsgUnderWakeLock(mAudioHandler,
                     MSG_SET_WIRED_DEVICE_CONNECTION_STATE,
@@ -4236,13 +4277,13 @@ public class AudioService extends IAudioService.Stub {
                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
         setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_AVAILABLE,
-                address,
-                "a2dp-device");
+                AudioSystem.DEVICE_STATE_AVAILABLE, address, DEVICE_NAME_A2DP);
         // Reset A2DP suspend state each time a new sink is connected
         AudioSystem.setParameters("A2dpSuspended=false");
-        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP),
-                address);
+        mConnectedDevices.put(
+                makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address),
+                new DeviceListSpec(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, DEVICE_NAME_A2DP,
+                                   address));
     }
 
     private void onSendBecomingNoisyIntent() {
@@ -4255,10 +4296,9 @@ public class AudioService extends IAudioService.Stub {
             mAvrcpAbsVolSupported = false;
         }
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                address,
-                "a2dp-device");
-        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, DEVICE_NAME_A2DP);
+        mConnectedDevices.remove(
+                makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         synchronized (mCurAudioRoutes) {
             // Remove A2DP routes as well
             if (mCurAudioRoutes.bluetoothName != null) {
@@ -4275,7 +4315,8 @@ public class AudioService extends IAudioService.Stub {
         // reconnection of the sink.
         AudioSystem.setParameters("A2dpSuspended=true");
         // the device will be made unavailable later, so consider it disconnected right away
-        mConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
+        mConnectedDevices.remove(
+                makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         // send the delayed message to make the device unavailable later
         Message msg = mAudioHandler.obtainMessage(MSG_BTA2DP_DOCK_TIMEOUT, address);
         mAudioHandler.sendMessageDelayed(msg, BTA2DP_DOCK_TIMEOUT_MILLIS);
@@ -4285,20 +4326,19 @@ public class AudioService extends IAudioService.Stub {
     // must be called synchronized on mConnectedDevices
     private void makeA2dpSrcAvailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_AVAILABLE,
-                address,
-                "a2dp-device");
-        mConnectedDevices.put( new Integer(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP),
-                address);
+                AudioSystem.DEVICE_STATE_AVAILABLE, address, DEVICE_NAME_A2DP);
+        mConnectedDevices.put(
+                makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address),
+                new DeviceListSpec(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, DEVICE_NAME_A2DP,
+                                   address));
     }
 
     // must be called synchronized on mConnectedDevices
     private void makeA2dpSrcUnavailable(String address) {
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP,
-                AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                address,
-                "a2dp-device");
-        mConnectedDevices.remove(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP);
+                AudioSystem.DEVICE_STATE_UNAVAILABLE, address, DEVICE_NAME_A2DP);
+        mConnectedDevices.remove(
+                makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
     }
 
     // must be called synchronized on mConnectedDevices
@@ -4325,9 +4365,10 @@ public class AudioService extends IAudioService.Stub {
         }
 
         synchronized (mConnectedDevices) {
-            boolean isConnected =
-                (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
-                 mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP).equals(address));
+            String key = makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                           btDevice.getAddress());
+            DeviceListSpec deviceSpec = mConnectedDevices.get(key);
+            boolean isConnected = deviceSpec != null;
 
             if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                 if (btDevice.isBluetoothDock()) {
@@ -4388,9 +4429,9 @@ public class AudioService extends IAudioService.Stub {
         }
 
         synchronized (mConnectedDevices) {
-                boolean isConnected =
-                (mConnectedDevices.containsKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP) &&
-                 mConnectedDevices.get(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP).equals(address));
+            String key = makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address);
+            DeviceListSpec deviceSpec = mConnectedDevices.get(key);
+            boolean isConnected = deviceSpec != null;
 
             if (isConnected && state != BluetoothProfile.STATE_CONNECTED) {
                 makeA2dpSrcUnavailable(address);
@@ -4413,27 +4454,32 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private boolean handleDeviceConnection(boolean connect, int device, String address, String deviceName) {
-        Slog.i(TAG, "handleDeviceConnection(" + connect +
-                " dev:" + Integer.toHexString(device) +
-                " address:" + address +
-                " name:" + deviceName + ")");
+    private boolean handleDeviceConnection(boolean connect, int device, String address,
+            String deviceName) {
+        if (DEBUG_DEVICES) {
+            Slog.i(TAG, "handleDeviceConnection(" + connect + " dev:" + Integer.toHexString(device)
+                    + " address:" + address + " name:" + deviceName + ")");
+        }
         synchronized (mConnectedDevices) {
-            boolean isConnected = (mConnectedDevices.containsKey(device) &&
-                    (address.isEmpty() || mConnectedDevices.get(device).equals(address)));
-
-            if (isConnected && !connect) {
-                AudioSystem.setDeviceConnectionState(device,
-                                              AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                                              address, deviceName);
-                 mConnectedDevices.remove(device);
-                 return true;
-            } else if (!isConnected && connect) {
-                 AudioSystem.setDeviceConnectionState(device,
-                                                      AudioSystem.DEVICE_STATE_AVAILABLE,
-                                                      address, deviceName);
-                 mConnectedDevices.put(new Integer(device), address);
-                 return true;
+            String deviceKey = makeDeviceListKey(device, address);
+            if (DEBUG_DEVICES) {
+                Slog.i(TAG, "deviceKey:" + deviceKey);
+            }
+            DeviceListSpec deviceSpec = mConnectedDevices.get(deviceKey);
+            boolean isConnected = deviceSpec != null;
+            if (DEBUG_DEVICES) {
+                Slog.i(TAG, "deviceSpec:" + deviceSpec + " is(already)Connected:" + isConnected);
+            }
+            if (connect && !isConnected) {
+                AudioSystem.setDeviceConnectionState(device, AudioSystem.DEVICE_STATE_AVAILABLE,
+                        address, deviceName);
+                mConnectedDevices.put(deviceKey, new DeviceListSpec(device, deviceName, address));
+                return true;
+            } else if (!connect && isConnected) {
+                AudioSystem.setDeviceConnectionState(device, AudioSystem.DEVICE_STATE_UNAVAILABLE,
+                        address, deviceName);
+                mConnectedDevices.remove(deviceKey);
+                return true;
             }
         }
         return false;
@@ -4454,10 +4500,11 @@ public class AudioService extends IAudioService.Stub {
         int delay = 0;
         if ((state == 0) && ((device & mBecomingNoisyIntentDevices) != 0)) {
             int devices = 0;
-            for (int dev : mConnectedDevices.keySet()) {
-                if (((dev & AudioSystem.DEVICE_BIT_IN) == 0) &&
-                        ((dev & mBecomingNoisyIntentDevices) != 0)) {
-                   devices |= dev;
+            for (String key : mConnectedDevices.keySet()) {
+                int dev = mConnectedDevices.get(key).mDeviceType;
+                if (((dev & AudioSystem.DEVICE_BIT_IN) == 0)
+                        && ((dev & mBecomingNoisyIntentDevices) != 0)) {
+                    devices |= dev;
                 }
             }
             if (devices == device) {
@@ -4485,12 +4532,13 @@ public class AudioService extends IAudioService.Stub {
         return delay;
     }
 
-    private void sendDeviceConnectionIntent(int device, int state, String address, String deviceName)
-    {
-        Slog.i(TAG, "sendDeviceConnectionIntent(dev:0x" + Integer.toHexString(device) +
-                " state:0x" + Integer.toHexString(state) +
-                " address:" + address +
-                " name:" + deviceName + ");");
+    private void sendDeviceConnectionIntent(int device, int state, String address,
+            String deviceName) {
+        if (DEBUG_DEVICES) {
+            Slog.i(TAG, "sendDeviceConnectionIntent(dev:0x" + Integer.toHexString(device) +
+                    " state:0x" + Integer.toHexString(state) + " address:" + address +
+                    " name:" + deviceName + ");");
+        }
         Intent intent = new Intent();
 
         intent.putExtra(CONNECT_INTENT_KEY_STATE, state);
@@ -4544,12 +4592,12 @@ public class AudioService extends IAudioService.Stub {
     }
 
     private void onSetWiredDeviceConnectionState(int device, int state, String address,
-            String deviceName)
-    {
-        Slog.i(TAG, "onSetWiredDeviceConnectionState(dev:" + Integer.toHexString(device)
-                + " state:" + Integer.toHexString(state)
-                + " address:" + address
-                + " deviceName:" + deviceName + ");");
+            String deviceName) {
+        if (DEBUG_DEVICES) {
+            Slog.i(TAG, "onSetWiredDeviceConnectionState(dev:" + Integer.toHexString(device) +
+                    " state:" + Integer.toHexString(state) + " address:" + address +
+                    " deviceName:" + deviceName + ");");
+        }
 
         synchronized (mConnectedDevices) {
             if ((state == 0) && ((device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) ||
