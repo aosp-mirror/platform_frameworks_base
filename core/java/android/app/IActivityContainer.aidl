@@ -29,8 +29,6 @@ interface IActivityContainer {
     void setSurface(in Surface surface, int width, int height, int density);
     int startActivity(in Intent intent);
     int startActivityIntentSender(in IIntentSender intentSender);
-    void checkEmbeddedAllowed(in Intent intent);
-    void checkEmbeddedAllowedIntentSender(in IIntentSender intentSender);
     int getDisplayId();
     int getStackId();
     boolean injectEvent(in InputEvent event);
