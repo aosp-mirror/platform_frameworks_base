@@ -21,10 +21,38 @@ Tools you are using, refer to the "Installed Packages" listing in the Android SD
 <p>For a summary of all known issues in SDK Tools, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.1.2</a> <em>(February 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 19 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed boot failures of MIPS system images on Mac OS X.</li>
+        <li>Fixed AVD screen capture issues when using GPU emulation.</li>
+        <li>Fixed memory leaks in emulator system.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.0.2</a> <em>(December 2014)</em>
   </p>
 
@@ -96,7 +124,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dt>General Notes:</dt>
     <dd>
       <ul>
-        <li>Added support for Andriod Studio 1.0 and emulator enhancements.</li>
+        <li>Added support for Android Studio 1.0 and emulator enhancements.</li>
       </ul>
     </dd>
   </div>
