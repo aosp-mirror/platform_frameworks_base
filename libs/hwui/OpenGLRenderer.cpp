@@ -883,8 +883,8 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
             && !layer->getForceFilter()
             && layer->getWidth() == (uint32_t) rect.getWidth()
             && layer->getHeight() == (uint32_t) rect.getHeight()) {
-        const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-        const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
+        const float x = floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+        const float y = floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
 
         layer->setFilter(GL_NEAREST);
         setupDrawModelView(kModelViewMode_TranslateAndScale, false,
@@ -921,8 +921,8 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
         if (simpleTransform) {
             // When we're swapping, the layer is already in screen coordinates
             if (!swap) {
-                x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-                y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
+                x = floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+                y = floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
             }
 
             layer->setFilter(GL_NEAREST, true);
@@ -1076,8 +1076,8 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
     setupDrawColorFilterUniforms(layer->getColorFilter());
     setupDrawTexture(layer->getTextureId());
     if (currentTransform()->isPureTranslate()) {
-        const float x = (int) floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
-        const float y = (int) floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
+        const float x = floorf(rect.left + currentTransform()->getTranslateX() + 0.5f);
+        const float y = floorf(rect.top + currentTransform()->getTranslateY() + 0.5f);
 
         layer->setFilter(GL_NEAREST);
         setupDrawModelView(kModelViewMode_Translate, false,
@@ -2004,8 +2004,8 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, const SkPaint* paint) {
 
     bool ignoreTransform = false;
     if (currentTransform()->isPureTranslate()) {
-        x = (int) floorf(currentTransform()->getTranslateX() + 0.5f);
-        y = (int) floorf(currentTransform()->getTranslateY() + 0.5f);
+        x = floorf(currentTransform()->getTranslateX() + 0.5f);
+        y = floorf(currentTransform()->getTranslateY() + 0.5f);
         ignoreTransform = true;
 
         texture->setFilter(GL_NEAREST, true);
@@ -2028,17 +2028,37 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, const SkPaint* paint) {
 void OpenGLRenderer::drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
         int bitmapCount, TextureVertex* vertices, bool pureTranslate,
         const Rect& bounds, const SkPaint* paint) {
-    mCaches.textureState().activateTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
 
     const AutoTexture autoCleanup(texture);
 
+    if (USE_GLOPS) {
+        // TODO: remove layer dirty in multi-draw callers
+        // TODO: snap doesn't need to touch transform, only texture filter.
+        bool snap = pureTranslate;
+        const float x = floorf(bounds.left + 0.5f);
+        const float y = floorf(bounds.top + 0.5f);
+        int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+                ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
+        Glop glop;
+        GlopBuilder(mRenderState, mCaches, &glop)
+                .setMeshTexturedMesh(vertices, bitmapCount * 6)
+                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                .setModelViewOffsetRectOptionalSnap(snap, x, y, Rect(0, 0, bounds.getWidth(), bounds.getHeight()))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
+    mCaches.textureState().activateTexture(0);
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(pureTranslate ? GL_NEAREST : PaintUtils::getFilter(paint), true);
 
-    const float x = (int) floorf(bounds.left + 0.5f);
-    const float y = (int) floorf(bounds.top + 0.5f);
+    const float x = floorf(bounds.left + 0.5f);
+    const float y = floorf(bounds.top + 0.5f);
     if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
         drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, paint, &vertices[0].x, &vertices[0].u,
@@ -2065,11 +2085,12 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     const AutoTexture autoCleanup(texture);
 
     if (USE_GLOPS) {
-        bool isAlpha8Texture = bitmap->colorType() == kAlpha_8_SkColorType;
+        int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+                ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
         Glop glop;
         GlopBuilder(mRenderState, mCaches, &glop)
                 .setMeshTexturedUnitQuad(texture->uvMapper)
-                .setFillTexturePaint(*texture, isAlpha8Texture, paint, currentSnapshot()->alpha)
+                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
                 .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
                 .setModelViewMapUnitToRectSnap(Rect(0, 0, texture->width, texture->height))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
@@ -2166,11 +2187,10 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
          * TODO: handle alpha_8 textures correctly by applying paint color, but *not*
          * shader in that case to mimic the behavior in SkiaCanvas::drawBitmapMesh.
          */
-        bool isAlpha8Texture = false;
         Glop glop;
         GlopBuilder(mRenderState, mCaches, &glop)
                 .setMeshColoredTexturedMesh(mesh.get(), elementCount)
-                .setFillTexturePaint(*texture, isAlpha8Texture, paint, currentSnapshot()->alpha)
+                .setFillTexturePaint(*texture, static_cast<int>(TextureFillFlags::kNone), paint, currentSnapshot()->alpha)
                 .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
                 .setModelViewOffsetRect(0, 0, Rect(left, top, right, bottom))
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
@@ -2229,11 +2249,12 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
                 fmin(1.0f, src.right / texture->width),
                 fmin(1.0f, src.bottom / texture->height));
 
-        bool isAlpha8Texture = bitmap->colorType() == kAlpha_8_SkColorType;
+        int textureFillFlags = static_cast<int>((bitmap->colorType() == kAlpha_8_SkColorType)
+                ? TextureFillFlags::kIsAlphaMaskTexture : TextureFillFlags::kNone);
         Glop glop;
         GlopBuilder(mRenderState, mCaches, &glop)
                 .setMeshTexturedUvQuad(texture->uvMapper, uv)
-                .setFillTexturePaint(*texture, isAlpha8Texture, paint, currentSnapshot()->alpha)
+                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
                 .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
                 .setModelViewMapUnitToRectSnap(dst)
                 .setRoundRectClipState(currentSnapshot()->roundRectClipState)
@@ -2266,8 +2287,8 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
     bool ignoreTransform = false;
 
     if (CC_LIKELY(currentTransform()->isPureTranslate())) {
-        float x = (int) floorf(dst.left + currentTransform()->getTranslateX() + 0.5f);
-        float y = (int) floorf(dst.top + currentTransform()->getTranslateY() + 0.5f);
+        float x = floorf(dst.left + currentTransform()->getTranslateX() + 0.5f);
+        float y = floorf(dst.top + currentTransform()->getTranslateY() + 0.5f);
 
         dst.right = x + (dst.right - dst.left);
         dst.bottom = y + (dst.bottom - dst.top);
@@ -2298,70 +2319,55 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, Rect src, Rect dst, cons
     mDirty = true;
 }
 
-void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
-        float left, float top, float right, float bottom, const SkPaint* paint) {
-    if (quickRejectSetupScissor(left, top, right, bottom)) {
-        return;
-    }
-
-    AssetAtlas::Entry* entry = mRenderState.assetAtlas().getEntry(bitmap);
-    const Patch* mesh = mCaches.patchCache.get(entry, bitmap->width(), bitmap->height(),
-            right - left, bottom - top, patch);
-
-    drawPatch(bitmap, mesh, entry, left, top, right, bottom, paint);
-}
-
 void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
         AssetAtlas::Entry* entry, float left, float top, float right, float bottom,
         const SkPaint* paint) {
-    if (quickRejectSetupScissor(left, top, right, bottom)) {
+    if (!mesh || !mesh->verticesCount || quickRejectSetupScissor(left, top, right, bottom)) {
         return;
     }
 
-    if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
-        mCaches.textureState().activateTexture(0);
-        Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
-        if (!texture) return;
-        const AutoTexture autoCleanup(texture);
+    mCaches.textureState().activateTexture(0);
+    Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
+    if (!texture) return;
+    const AutoTexture autoCleanup(texture);
 
-        texture->setWrap(GL_CLAMP_TO_EDGE, true);
-        texture->setFilter(GL_LINEAR, true);
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(GL_LINEAR, true);
 
-        const bool pureTranslate = currentTransform()->isPureTranslate();
-        // Mark the current layer dirty where we are going to draw the patch
-        if (hasLayer() && mesh->hasEmptyQuads) {
-            const float offsetX = left + currentTransform()->getTranslateX();
-            const float offsetY = top + currentTransform()->getTranslateY();
-            const size_t count = mesh->quads.size();
-            for (size_t i = 0; i < count; i++) {
-                const Rect& bounds = mesh->quads.itemAt(i);
-                if (CC_LIKELY(pureTranslate)) {
-                    const float x = (int) floorf(bounds.left + offsetX + 0.5f);
-                    const float y = (int) floorf(bounds.top + offsetY + 0.5f);
-                    dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight());
-                } else {
-                    dirtyLayer(left + bounds.left, top + bounds.top,
-                            left + bounds.right, top + bounds.bottom, *currentTransform());
-                }
+    const bool pureTranslate = currentTransform()->isPureTranslate();
+    // Mark the current layer dirty where we are going to draw the patch
+    if (hasLayer() && mesh->hasEmptyQuads) {
+        const float offsetX = left + currentTransform()->getTranslateX();
+        const float offsetY = top + currentTransform()->getTranslateY();
+        const size_t count = mesh->quads.size();
+        for (size_t i = 0; i < count; i++) {
+            const Rect& bounds = mesh->quads.itemAt(i);
+            if (CC_LIKELY(pureTranslate)) {
+                const float x = floorf(bounds.left + offsetX + 0.5f);
+                const float y = floorf(bounds.top + offsetY + 0.5f);
+                dirtyLayer(x, y, x + bounds.getWidth(), y + bounds.getHeight());
+            } else {
+                dirtyLayer(left + bounds.left, top + bounds.top,
+                        left + bounds.right, top + bounds.bottom, *currentTransform());
             }
         }
-
-        bool ignoreTransform = false;
-        if (CC_LIKELY(pureTranslate)) {
-            const float x = (int) floorf(left + currentTransform()->getTranslateX() + 0.5f);
-            const float y = (int) floorf(top + currentTransform()->getTranslateY() + 0.5f);
-
-            right = x + right - left;
-            bottom = y + bottom - top;
-            left = x;
-            top = y;
-            ignoreTransform = true;
-        }
-        drawIndexedTextureMesh(left, top, right, bottom, texture->id, paint,
-                texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
-                GL_TRIANGLES, mesh->indexCount, false, ignoreTransform,
-                mCaches.patchCache.getMeshBuffer(), kModelViewMode_Translate, !mesh->hasEmptyQuads);
     }
+
+    bool ignoreTransform = false;
+    if (CC_LIKELY(pureTranslate)) {
+        const float x = floorf(left + currentTransform()->getTranslateX() + 0.5f);
+        const float y = floorf(top + currentTransform()->getTranslateY() + 0.5f);
+
+        right = x + right - left;
+        bottom = y + bottom - top;
+        left = x;
+        top = y;
+        ignoreTransform = true;
+    }
+    drawIndexedTextureMesh(left, top, right, bottom, texture->id, paint,
+            texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
+            GL_TRIANGLES, mesh->indexCount, false, ignoreTransform,
+            mCaches.patchCache.getMeshBuffer(), kModelViewMode_Translate, !mesh->hasEmptyQuads);
 
     mDirty = true;
 }
@@ -2372,18 +2378,37 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
  * The caller is responsible for properly dirtying the current layer.
  */
 void OpenGLRenderer::drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
-        TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint) {
+        TextureVertex* vertices, uint32_t elementCount, const SkPaint* paint) {
     mCaches.textureState().activateTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
+
+    if (USE_GLOPS) {
+        // TODO: get correct bounds from caller
+        // 9 patches are built for stretching - always filter
+        int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
+        if (bitmap->colorType() == kAlpha_8_SkColorType) {
+            textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
+        }
+        Glop glop;
+        GlopBuilder(mRenderState, mCaches, &glop)
+                .setMeshTexturedIndexedQuads(vertices, elementCount)
+                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), Matrix4::identity(), false)
+                .setModelViewOffsetRect(0, 0, Rect(0, 0, 0, 0))
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
     texture->setFilter(GL_LINEAR, true);
 
     drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, paint,
             texture->blend, &vertices[0].x, &vertices[0].u,
-            GL_TRIANGLES, indexCount, false, true, 0, kModelViewMode_Translate, false);
+            GL_TRIANGLES, elementCount, false, true, 0, kModelViewMode_Translate, false);
 
     mDirty = true;
 }
@@ -2775,8 +2800,8 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     float y = 0.0f;
     const bool pureTranslate = currentTransform()->isPureTranslate();
     if (pureTranslate) {
-        x = (int) floorf(x + currentTransform()->getTranslateX() + 0.5f);
-        y = (int) floorf(y + currentTransform()->getTranslateY() + 0.5f);
+        x = floorf(x + currentTransform()->getTranslateX() + 0.5f);
+        y = floorf(y + currentTransform()->getTranslateY() + 0.5f);
     }
 
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
@@ -2914,8 +2939,8 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     const bool pureTranslate = transform.isPureTranslate();
 
     if (CC_LIKELY(pureTranslate)) {
-        x = (int) floorf(x + transform.getTranslateX() + 0.5f);
-        y = (int) floorf(y + transform.getTranslateY() + 0.5f);
+        x = floorf(x + transform.getTranslateX() + 0.5f);
+        y = floorf(y + transform.getTranslateY() + 0.5f);
     }
 
     int alpha;
@@ -3426,8 +3451,8 @@ void OpenGLRenderer::drawTextureRect(Texture* texture, const SkPaint* paint) {
     }
 
     if (CC_LIKELY(currentTransform()->isPureTranslate())) {
-        const float x = (int) floorf(currentTransform()->getTranslateX() + 0.5f);
-        const float y = (int) floorf(currentTransform()->getTranslateY() + 0.5f);
+        const float x = floorf(currentTransform()->getTranslateX() + 0.5f);
+        const float y = floorf(currentTransform()->getTranslateY() + 0.5f);
 
         texture->setFilter(GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
