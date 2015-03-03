@@ -54,11 +54,35 @@ most recent release and restart the SDK Manager. If you do not, the latest Andro
 packages may not be available for download.</p>
 
 
-<h2 id="5.0">Android 5.0</h2>
+<h2 id="5.1">Android 5.1</h2>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 1</a> <em>(March 2015)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Initial release for Android 5.1 (API level 22).</p>
+    <p>Also see the
+    <a href="{@docRoot}about/versions/android-5.1.html">Android 5.1 APIs overview</a>.</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r22 or higher is required.</li>
+      <li>Android SDK Tools 23.0.5 or higher is required.</li>
+    </ul>
+  </div>
+
+</div>
+
+
+
+<h2 id="5.0">Android 5.0</h2>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2014)</em>
   </p>
 
@@ -94,7 +118,7 @@ class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
 
   <p>The platform includes the following new device definitions for use in creating
   Android Virtual Devices in the <a href="{@docRoot}tools/help/avd-manager.html">AVD Manager</a>:</p>
- 
+
   <ul>
   <li>Nexus 6 (5.96", 1440 x 2560, Normal 560dpi screen) </li>
   <li>Nexus 9 (8.9", 2048 x 1536, X-Large xhdpi screen) </li>
