@@ -53,6 +53,7 @@ public:
     GlopBuilder& setMeshTexturedMesh(TextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshColoredTexturedMesh(ColorTextureVertex* vertexData, int elementCount); // TODO: use indexed quads
     GlopBuilder& setMeshTexturedIndexedQuads(TextureVertex* vertexData, int elementCount); // TODO: take quadCount
+    GlopBuilder& setMeshPatchQuads(const Patch& patch);
 
     GlopBuilder& setFillPaint(const SkPaint& paint, float alphaScale);
     GlopBuilder& setFillTexturePaint(Texture& texture, int textureFillFlags,

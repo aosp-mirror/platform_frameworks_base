@@ -2326,9 +2326,28 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
         return;
     }
 
-    mCaches.textureState().activateTexture(0);
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
+
+    if (USE_GLOPS) {
+        // 9 patches are built for stretching - always filter
+        int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
+        if (bitmap->colorType() == kAlpha_8_SkColorType) {
+            textureFillFlags |= TextureFillFlags::kIsAlphaMaskTexture;
+        }
+        Glop glop;
+        GlopBuilder(mRenderState, mCaches, &glop)
+                .setMeshPatchQuads(*mesh)
+                .setFillTexturePaint(*texture, textureFillFlags, paint, currentSnapshot()->alpha)
+                .setTransform(currentSnapshot()->getOrthoMatrix(), *currentTransform(), false)
+                .setModelViewOffsetRectSnap(left, top, Rect(0, 0, right - left, bottom - top)) // TODO: get minimal bounds from patch
+                .setRoundRectClipState(currentSnapshot()->roundRectClipState)
+                .build();
+        renderGlop(glop);
+        return;
+    }
+
+    mCaches.textureState().activateTexture(0);
     const AutoTexture autoCleanup(texture);
 
     texture->setWrap(GL_CLAMP_TO_EDGE, true);
