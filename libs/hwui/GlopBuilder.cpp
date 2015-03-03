@@ -18,6 +18,7 @@
 #include "Caches.h"
 #include "Glop.h"
 #include "Matrix.h"
+#include "Patch.h"
 #include "renderstate/MeshState.h"
 #include "renderstate/RenderState.h"
 #include "SkiaShader.h"
@@ -186,6 +187,20 @@ GlopBuilder& GlopBuilder::setMeshVertexBuffer(const VertexBuffer& vertexBuffer, 
                 ? vertexBuffer.getIndexCount() : vertexBuffer.getVertexCount();
 
     mDescription.useShadowAlphaInterp = shadowInterp;
+    return *this;
+}
+
+GlopBuilder& GlopBuilder::setMeshPatchQuads(const Patch& patch) {
+    TRIGGER_STAGE(kMeshStage);
+
+    mOutGlop->mesh.primitiveMode = GL_TRIANGLES;
+    mOutGlop->mesh.indices = { mRenderState.meshState().getQuadListIBO(), nullptr };
+    mOutGlop->mesh.vertices = {
+            mCaches.patchCache.getMeshBuffer(),
+            VertexAttribFlags::kTextureCoord,
+            (void*)patch.offset, (void*)patch.textureOffset, nullptr,
+            kTextureVertexStride };
+    mOutGlop->mesh.elementCount = patch.indexCount;
     return *this;
 }
 
