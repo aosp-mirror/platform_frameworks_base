@@ -5347,8 +5347,8 @@ public class AudioService extends IAudioService.Stub {
 
     //==========================================================================================
     // Hdmi Cec system audio mode.
-    // If Hdmi Cec's system audio mode is on, audio service should notify volume change
-    // to HdmiControlService so that audio recevier can handle volume change.
+    // If Hdmi Cec's system audio mode is on, audio service should send the volume change
+    // to HdmiControlService so that the audio receiver can handle it.
     //==========================================================================================
 
     private class MyDisplayStatusCallback implements HdmiPlaybackClient.DisplayStatusCallback {
