@@ -633,6 +633,7 @@ static jint convertAudioPortConfigFromNative(JNIEnv *env,
                                            NULL,
                                            NULL,
                                            NULL,
+                                           NULL,
                                            NULL);
         env->DeleteLocalRef(jHandle);
         if (jAudioPort == NULL) {
