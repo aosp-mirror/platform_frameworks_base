@@ -24,12 +24,12 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 
 public final class SettingsCmd {
-    static final String TAG = "settings";
 
     enum CommandVerb {
         UNSPECIFIED,
@@ -188,7 +188,7 @@ public final class SettingsCmd {
         try {
             Bundle arg = new Bundle();
             arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-            Bundle b = provider.call(null, callGetCommand, key, arg);
+            Bundle b = provider.call(resolveCallingPackage(), callGetCommand, key, arg);
             if (b != null) {
                 result = b.getPairValue();
             }
@@ -213,7 +213,7 @@ public final class SettingsCmd {
             Bundle arg = new Bundle();
             arg.putString(Settings.NameValueTable.VALUE, value);
             arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
-            provider.call(null, callPutCommand, key, arg);
+            provider.call(resolveCallingPackage(), callPutCommand, key, arg);
         } catch (RemoteException e) {
             System.err.println("Can't set key " + key + " in " + table + " for user " + userHandle);
         }
@@ -232,7 +232,7 @@ public final class SettingsCmd {
 
         int num = 0;
         try {
-            num = provider.delete(null, targetUri, null, null);
+            num = provider.delete(resolveCallingPackage(), targetUri, null, null);
         } catch (RemoteException e) {
             System.err.println("Can't clear key " + key + " in " + table + " for user "
                     + userHandle);
@@ -246,5 +246,21 @@ public final class SettingsCmd {
         System.err.println("        settings [--user NUM] delete namespace key");
         System.err.println("\n'namespace' is one of {system, secure, global}, case-insensitive");
         System.err.println("If '--user NUM' is not given, the operations are performed on the owner user.");
+    }
+
+    public static String resolveCallingPackage() {
+        switch (android.os.Process.myUid()) {
+            case Process.ROOT_UID: {
+                return "root";
+            }
+
+            case Process.SHELL_UID: {
+                return "com.android.shell";
+            }
+
+            default: {
+                return null;
+            }
+        }
     }
 }

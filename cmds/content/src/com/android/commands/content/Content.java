@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
@@ -426,6 +427,22 @@ public class Content {
             }
         }
 
+        public static String resolveCallingPackage() {
+            switch (Process.myUid()) {
+                case Process.ROOT_UID: {
+                    return "root";
+                }
+
+                case Process.SHELL_UID: {
+                    return "com.android.shell";
+                }
+
+                default: {
+                    return null;
+                }
+            }
+        }
+
         protected abstract void onExecute(IContentProvider provider) throws Exception;
     }
 
@@ -439,7 +456,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.insert(null, mUri, mContentValues);
+            provider.insert(resolveCallingPackage(), mUri, mContentValues);
         }
     }
 
@@ -453,7 +470,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.delete(null, mUri, mWhere, null);
+            provider.delete(resolveCallingPackage(), mUri, mWhere, null);
         }
     }
 
@@ -532,7 +549,8 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            Cursor cursor = provider.query(null, mUri, mProjection, mWhere, null, mSortOrder, null);
+            Cursor cursor = provider.query(resolveCallingPackage(), mUri, mProjection, mWhere,
+                    null, mSortOrder, null);
             if (cursor == null) {
                 System.out.println("No result found.");
                 return;
@@ -594,7 +612,7 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            provider.update(null, mUri, mContentValues, mWhere, null);
+            provider.update(resolveCallingPackage(), mUri, mContentValues, mWhere, null);
         }
     }
 
