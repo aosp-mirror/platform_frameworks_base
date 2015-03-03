@@ -227,11 +227,16 @@ Versions dashboards page</a>.</p>
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
 
+    <tr><td><a href="{@docRoot}about/versions/android-5.1.html">Android 5.1</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/22/changes.html" title="Diff Report">22</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP_MR1}</td>
+    <td rowspan="2"><a href="{@docRoot}about/versions/lollipop.html">Platform
+Highlights</a></td></tr>
+
     <tr><td><a href="{@docRoot}about/versions/android-5.0.html">Android 5.0</a></td>
     <td><a href="{@docRoot}sdk/api_diff/21/changes.html" title="Diff Report">21</a></td>
     <td>{@link android.os.Build.VERSION_CODES#LOLLIPOP}</td>
-    <td><a href="{@docRoot}about/versions/lollipop.html">Platform
-Highlights</a></td></tr>
+    </tr>
 
     <tr><td style="color:#bbb">Android 4.4W</td>
     <td><a href="{@docRoot}sdk/api_diff/20/changes.html" title="Diff Report">20</a></td>
