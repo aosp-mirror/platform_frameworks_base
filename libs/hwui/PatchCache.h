@@ -160,7 +160,7 @@ private:
     void clearCache();
     void createVertexBuffer();
 
-    void setupMesh(Patch* newMesh, TextureVertex* vertices);
+    void setupMesh(Patch* newMesh);
 
     void remove(Vector<patch_pair_t>& patchesToRemove, Res_png_9patch* patch);
 

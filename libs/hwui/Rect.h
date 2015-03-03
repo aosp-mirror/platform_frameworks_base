@@ -252,6 +252,13 @@ public:
         bottom = fmaxf(bottom, y);
     }
 
+    void expandToCoverRect(float otherLeft, float otherTop, float otherRight, float otherBottom) {
+        left = fminf(left, otherLeft);
+        top = fminf(top, otherTop);
+        right = fmaxf(right, otherRight);
+        bottom = fmaxf(bottom, otherBottom);
+    }
+
     SkRect toSkRect() const {
         return SkRect::MakeLTRB(left, top, right, bottom);
     }

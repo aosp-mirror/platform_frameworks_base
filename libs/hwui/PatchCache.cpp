@@ -162,7 +162,7 @@ void PatchCache::clearGarbage() {
 
         // Release the patch and mark the space in the free list
         Patch* patch = pair.getSecond();
-        BufferBlock* block = new BufferBlock(patch->offset, patch->getSize());
+        BufferBlock* block = new BufferBlock(patch->positionOffset, patch->getSize());
         block->next = mFreeBlocks;
         mFreeBlocks = block;
 
@@ -190,7 +190,7 @@ void PatchCache::createVertexBuffer() {
  * Sets the mesh's offsets and copies its associated vertices into
  * the mesh buffer (VBO).
  */
-void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
+void PatchCache::setupMesh(Patch* newMesh) {
     // This call ensures the VBO exists and that it is bound
     init();
 
@@ -223,9 +223,9 @@ void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
     }
 
     // Copy the 9patch mesh in the VBO
-    newMesh->offset = (GLintptr) (block->offset);
-    newMesh->textureOffset = newMesh->offset + kMeshTextureOffset;
-    glBufferSubData(GL_ARRAY_BUFFER, newMesh->offset, size, vertices);
+    newMesh->positionOffset = (GLintptr) (block->offset);
+    newMesh->textureOffset = newMesh->positionOffset + kMeshTextureOffset;
+    glBufferSubData(GL_ARRAY_BUFFER, newMesh->positionOffset, size, newMesh->vertices.get());
 
     // Remove the block since we've used it entirely
     if (block->size == size) {
@@ -244,6 +244,8 @@ void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
     mSize += size;
 }
 
+static const UvMapper sIdentity;
+
 const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
         const uint32_t bitmapWidth, const uint32_t bitmapHeight,
         const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch) {
@@ -252,20 +254,12 @@ const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
     const Patch* mesh = mCache.get(description);
 
     if (!mesh) {
-        Patch* newMesh = new Patch();
-        TextureVertex* vertices;
+        const UvMapper& mapper = entry ? entry->uvMapper : sIdentity;
+        Patch* newMesh = new Patch(bitmapWidth, bitmapHeight,
+                pixelWidth, pixelHeight, mapper, patch);
 
-        if (entry) {
-            // An atlas entry has a UV mapper
-            vertices = newMesh->createMesh(bitmapWidth, bitmapHeight,
-                    pixelWidth, pixelHeight, entry->uvMapper, patch);
-        } else {
-            vertices = newMesh->createMesh(bitmapWidth, bitmapHeight,
-                    pixelWidth, pixelHeight, patch);
-        }
-
-        if (vertices) {
-            setupMesh(newMesh, vertices);
+        if (newMesh->vertices) {
+            setupMesh(newMesh);
         }
 
 #if DEBUG_PATCHES
@@ -284,7 +278,7 @@ void PatchCache::dumpFreeBlocks(const char* prefix) {
     String8 dump;
     BufferBlock* block = mFreeBlocks;
     while (block) {
-        dump.appendFormat("->(%d, %d)", block->offset, block->size);
+        dump.appendFormat("->(%d, %d)", block->positionOffset, block->size);
         block = block->next;
     }
     ALOGD("%s: Free blocks%s", prefix, dump.string());

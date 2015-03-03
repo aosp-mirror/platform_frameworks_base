@@ -2329,7 +2329,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
 
-    if (false) {
+    if (USE_GLOPS) {
         // 9 patches are built for stretching - always filter
         int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
         if (bitmap->colorType() == kAlpha_8_SkColorType) {
@@ -2384,7 +2384,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
         ignoreTransform = true;
     }
     drawIndexedTextureMesh(left, top, right, bottom, texture->id, paint,
-            texture->blend, (GLvoid*) mesh->offset, (GLvoid*) mesh->textureOffset,
+            texture->blend, (GLvoid*) mesh->positionOffset, (GLvoid*) mesh->textureOffset,
             GL_TRIANGLES, mesh->indexCount, false, ignoreTransform,
             mCaches.patchCache.getMeshBuffer(), kModelViewMode_Translate, !mesh->hasEmptyQuads);
 

@@ -198,7 +198,7 @@ GlopBuilder& GlopBuilder::setMeshPatchQuads(const Patch& patch) {
     mOutGlop->mesh.vertices = {
             mCaches.patchCache.getMeshBuffer(),
             VertexAttribFlags::kTextureCoord,
-            (void*)patch.offset, (void*)patch.textureOffset, nullptr,
+            (void*)patch.positionOffset, (void*)patch.textureOffset, nullptr,
             kTextureVertexStride };
     mOutGlop->mesh.elementCount = patch.indexCount;
     return *this;
@@ -518,6 +518,7 @@ GlopBuilder& GlopBuilder::setModelViewOffsetRectSnap(float offsetX, float offset
     }
 
     mOutGlop->transform.modelView.loadTranslate(offsetX, offsetY, 0.0f);
+    mOutGlop->bounds = source;
     mOutGlop->bounds.translate(offsetX, offsetY);
     return *this;
 }
