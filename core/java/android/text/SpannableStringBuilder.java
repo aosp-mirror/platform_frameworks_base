@@ -1006,28 +1006,43 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
         return new String(buf);
     }
 
+    /**
+     * Returns the depth of TextWatcher callbacks. Returns 0 when the object is not handling
+     * TextWatchers. A return value greater than 1 implies that a TextWatcher caused a change that
+     * recursively triggered a TextWatcher.
+     */
+    public int getTextWatcherDepth() {
+        return mTextWatcherDepth;
+    }
+
     private void sendBeforeTextChanged(TextWatcher[] watchers, int start, int before, int after) {
         int n = watchers.length;
 
+        mTextWatcherDepth++;
         for (int i = 0; i < n; i++) {
             watchers[i].beforeTextChanged(this, start, before, after);
         }
+        mTextWatcherDepth--;
     }
 
     private void sendTextChanged(TextWatcher[] watchers, int start, int before, int after) {
         int n = watchers.length;
 
+        mTextWatcherDepth++;
         for (int i = 0; i < n; i++) {
             watchers[i].onTextChanged(this, start, before, after);
         }
+        mTextWatcherDepth--;
     }
 
     private void sendAfterTextChanged(TextWatcher[] watchers) {
         int n = watchers.length;
 
+        mTextWatcherDepth++;
         for (int i = 0; i < n; i++) {
             watchers[i].afterTextChanged(this);
         }
+        mTextWatcherDepth--;
     }
 
     private void sendSpanAdded(Object what, int start, int end) {
@@ -1523,6 +1538,10 @@ public class SpannableStringBuilder implements CharSequence, GetChars, Spannable
     private int mSpanCount;
     private IdentityHashMap<Object, Integer> mIndexOfSpan;
     private int mLowWaterMark;  // indices below this have not been touched
+
+    // TextWatcher callbacks may trigger changes that trigger more callbacks. This keeps track of
+    // how deep the callbacks go.
+    private int mTextWatcherDepth;
 
     // TODO These value are tightly related to the public SPAN_MARK/POINT values in {@link Spanned}
     private static final int MARK = 1;

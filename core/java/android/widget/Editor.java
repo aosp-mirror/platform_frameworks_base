@@ -236,12 +236,17 @@ public class Editor {
     }
 
     ParcelableParcel saveInstanceState() {
-        // For now there is only undo state.
-        return (ParcelableParcel) mUndoManager.saveInstanceState();
+        ParcelableParcel state = new ParcelableParcel(getClass().getClassLoader());
+        Parcel parcel = state.getParcel();
+        mUndoManager.saveInstanceState(parcel);
+        mUndoInputFilter.saveInstanceState(parcel);
+        return state;
     }
 
     void restoreInstanceState(ParcelableParcel state) {
-        mUndoManager.restoreInstanceState(state);
+        Parcel parcel = state.getParcel();
+        mUndoManager.restoreInstanceState(parcel, state.getClassLoader());
+        mUndoInputFilter.restoreInstanceState(parcel);
         // Re-associate this object as the owner of undo state.
         mUndoOwner = mUndoManager.getOwner(UNDO_OWNER_TAG, this);
     }
@@ -4576,11 +4581,22 @@ public class Editor {
         // Whether the current filter pass is directly caused by an end-user text edit.
         private boolean mIsUserEdit;
 
-        // Whether this is the first pass through the filter for a given end-user text edit.
-        private boolean mFirstFilterPass;
+        // Whether the text field is handling an IME composition. Must be parceled in case the user
+        // rotates the screen during composition.
+        private boolean mHasComposition;
 
         public UndoInputFilter(Editor editor) {
             mEditor = editor;
+        }
+
+        public void saveInstanceState(Parcel parcel) {
+            parcel.writeInt(mIsUserEdit ? 1 : 0);
+            parcel.writeInt(mHasComposition ? 1 : 0);
+        }
+
+        public void restoreInstanceState(Parcel parcel) {
+            mIsUserEdit = parcel.readInt() != 0;
+            mHasComposition = parcel.readInt() != 0;
         }
 
         /**
@@ -4589,7 +4605,6 @@ public class Editor {
         public void beginBatchEdit() {
             if (DEBUG_UNDO) Log.d(TAG, "beginBatchEdit");
             mIsUserEdit = true;
-            mFirstFilterPass = true;
         }
 
         public void endBatchEdit() {
@@ -4610,17 +4625,63 @@ public class Editor {
                 return null;
             }
 
+            // Check for and handle IME composition edits.
+            if (handleCompositionEdit(source, start, end, dstart)) {
+                return null;
+            }
+
+            // Handle keyboard edits.
+            handleKeyboardEdit(source, start, end, dest, dstart, dend);
+            return null;
+        }
+
+        /**
+         * Returns true iff the edit was handled, either because it should be ignored or because
+         * this function created an undo operation for it.
+         */
+        private boolean handleCompositionEdit(CharSequence source, int start, int end, int dstart) {
+            // Ignore edits while the user is composing.
+            if (isComposition(source)) {
+                mHasComposition = true;
+                return true;
+            }
+            final boolean hadComposition = mHasComposition;
+            mHasComposition = false;
+
+            // Check for the transition out of the composing state.
+            if (hadComposition) {
+                // If there was no text the user canceled composition. Ignore the edit.
+                if (start == end) {
+                    return true;
+                }
+
+                // Otherwise the user inserted the composition.
+                String newText = TextUtils.substring(source, start, end);
+                EditOperation edit = new EditOperation(mEditor, false, "", dstart, newText);
+                recordEdit(edit);
+                return true;
+            }
+
+            // This was neither a composition event nor a transition out of composing.
+            return false;
+        }
+
+        private void handleKeyboardEdit(CharSequence source, int start, int end,
+                Spanned dest, int dstart, int dend) {
             // An application may install a TextWatcher to provide additional modifications after
             // the initial input filters run (e.g. a credit card formatter that adds spaces to a
             // string). This results in multiple filter() calls for what the user considers to be
             // a single operation. Always undo the whole set of changes in one step.
-            final boolean forceMerge = !mFirstFilterPass;
-            mFirstFilterPass = false;
+            final boolean forceMerge = isInTextWatcher();
 
             // Build a new operation with all the information from this edit.
-            EditOperation edit = new EditOperation(mEditor, forceMerge,
-                    source, start, end, dest, dstart, dend);
+            String newText = TextUtils.substring(source, start, end);
+            String oldText = TextUtils.substring(dest, dstart, dend);
+            EditOperation edit = new EditOperation(mEditor, forceMerge, oldText, dstart, newText);
+            recordEdit(edit);
+        }
 
+        private void recordEdit(EditOperation edit) {
             // Fetch the last edit operation and attempt to merge in the new edit.
             final UndoManager um = mEditor.mUndoManager;
             um.beginUpdate("Edit text");
@@ -4646,7 +4707,6 @@ public class Editor {
                 um.addOperation(edit, UndoManager.MERGE_MODE_NONE);
             }
             um.endUpdate();
-            return null;  // Text not changed.
         }
 
         private boolean canUndoEdit(CharSequence source, int start, int end,
@@ -4678,6 +4738,23 @@ public class Editor {
 
             return true;
         }
+
+        private boolean isComposition(CharSequence source) {
+            if (!(source instanceof Spannable)) {
+                return false;
+            }
+            // This is a composition edit if the source has a non-zero-length composing span.
+            Spannable text = (Spannable) source;
+            int composeBegin = EditableInputConnection.getComposingSpanStart(text);
+            int composeEnd = EditableInputConnection.getComposingSpanEnd(text);
+            return composeBegin < composeEnd;
+        }
+
+        private boolean isInTextWatcher() {
+            CharSequence text = mEditor.mTextView.getText();
+            return (text instanceof SpannableStringBuilder)
+                    && ((SpannableStringBuilder) text).getTextWatcherDepth() > 0;
+        }
     }
 
     /**
@@ -4699,17 +4776,16 @@ public class Editor {
         private int mNewCursorPos;
 
         /**
-         * Constructs an edit operation from a text input operation that replaces the range
-         * (dstart, dend) of dest with (start, end) of source. See {@link InputFilter#filter}.
-         * If forceMerge is true then always forcibly merge this operation with any previous one.
+         * Constructs an edit operation from a text input operation on editor that replaces the
+         * oldText starting at dstart with newText. If forceMerge is true then always forcibly
+         * merge this operation with any previous one.
          */
-        public EditOperation(Editor editor, boolean forceMerge,
-                CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+        public EditOperation(Editor editor, boolean forceMerge, String oldText, int dstart,
+                String newText) {
             super(editor.mUndoOwner);
             mForceMerge = forceMerge;
-
-            mOldText = dest.subSequence(dstart, dend).toString();
-            mNewText = source.subSequence(start, end).toString();
+            mOldText = oldText;
+            mNewText = newText;
 
             // Determine the type of the edit and store where it occurred. Avoid storing
             // irrevelant data (e.g. mNewTextStart for a delete) because that makes the
@@ -4728,7 +4804,7 @@ public class Editor {
 
             // Store cursor data.
             mOldCursorPos = editor.mTextView.getSelectionStart();
-            mNewCursorPos = dstart + (end - start);
+            mNewCursorPos = dstart + mNewText.length();
         }
 
         public EditOperation(Parcel src, ClassLoader loader) {
