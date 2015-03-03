@@ -208,7 +208,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * requested provisioning. In the device owner case the profile is the primary user.
      * The broadcast will also be limited to the {@link DeviceAdminReceiver} component
      * specified in the original intent or NFC bump that started the provisioning process
-     * (@see DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE).
+     * (see {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE
+     * DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE}).
      *
      * <p>A device admin application which listens to this intent can find out if the device was
      * provisioned for the device owner or profile owner case by calling respectively
@@ -225,8 +226,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Name under which a DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
-     * a device-admin tag.  XXX TO DO: describe syntax.
+     * a device-admin tag.
      */
+    //  TO DO: describe syntax.
     public static final String DEVICE_ADMIN_META_DATA = "android.app.device_admin";
 
     private DevicePolicyManager mManager;

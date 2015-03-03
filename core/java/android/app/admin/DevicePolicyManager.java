@@ -101,14 +101,14 @@ public class DevicePolicyManager {
      * device as a personal and corporate device. The user which provisioning is started from and
      * the managed profile share a launcher.
      *
-     * <p>This intent will typically be sent by a mobile device management application (mdm).
-     * Provisioning adds a managed profile and sets the mdm as the profile owner who has full
-     * control over the profile
+     * <p>This intent will typically be sent by a mobile device management application (MDM).
+     * Provisioning adds a managed profile and sets the MDM as the profile owner who has full
+     * control over the profile.
      *
      * <p>This intent must contain the extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
      *
      * <p> When managed provisioning has completed, an intent of the type
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
      * managed profile.
      *
      * <p> If provisioning fails, the managedProfile is removed so the device returns to its
