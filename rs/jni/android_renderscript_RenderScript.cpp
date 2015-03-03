@@ -1026,22 +1026,24 @@ nAllocationData1D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint off
                    ptr, sizeBytes);
 }
 
-// Copies from the Java array data into the Allocation pointed to by alloc.
 static void
-//    native void rsnAllocationElementData1D(long con, long id, int xoff, int compIdx, byte[] d, int sizeBytes);
-nAllocationElementData1D(JNIEnv *_env, jobject _this, jlong con, jlong alloc, jint offset, jint lod,
-                         jint compIdx, jbyteArray data, jint sizeBytes)
+nAllocationElementData(JNIEnv *_env, jobject _this, jlong con, jlong alloc,
+                       jint xoff, jint yoff, jint zoff,
+                       jint lod, jint compIdx, jbyteArray data, jint sizeBytes)
 {
     jint len = _env->GetArrayLength(data);
     if (kLogApi) {
-        ALOGD("nAllocationElementData1D, con(%p), alloc(%p), offset(%i), comp(%i), len(%i), "
-              "sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, offset, compIdx, len,
+        ALOGD("nAllocationElementData, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), comp(%i), len(%i), "
+              "sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff, compIdx, len,
               sizeBytes);
     }
     jbyte *ptr = _env->GetByteArrayElements(data, nullptr);
-    rsAllocation1DElementData((RsContext)con, (RsAllocation)alloc, offset, lod, ptr, sizeBytes, compIdx);
+    rsAllocationElementData((RsContext)con, (RsAllocation)alloc,
+                            xoff, yoff, zoff,
+                            lod, ptr, sizeBytes, compIdx);
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
+
 
 // Copies from the Java object data into the Allocation pointed to by _alloc.
 static void
@@ -1150,6 +1152,21 @@ nAllocationRead1D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint off
     PER_ARRAY_TYPE(0, rsAllocation1DRead, false, (RsContext)con, alloc, offset, lod, count, ptr, sizeBytes);
 }
 
+// Copies from the Element in the Allocation pointed to by _alloc into the Java array data.
+static void
+nAllocationElementRead(JNIEnv *_env, jobject _this, jlong con, jlong _alloc,
+                       jint xoff, jint yoff, jint zoff,
+                       jint lod, jint compIdx, jobject data, jint sizeBytes, int dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    if (kLogApi) {
+        ALOGD("nAllocationElementRead, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), comp(%i), "
+              "sizeBytes(%i)", (RsContext)con, alloc, xoff, yoff, zoff, compIdx, sizeBytes);
+    }
+    PER_ARRAY_TYPE(0, rsAllocationElementRead, false, (RsContext)con, alloc,
+                   xoff, yoff, zoff, lod, ptr, sizeBytes, compIdx);
+}
+
 // Copies from the Allocation pointed to by _alloc into the Java object data.
 static void
 nAllocationRead2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xoff, jint yoff, jint lod, jint _face,
@@ -1162,6 +1179,20 @@ nAllocationRead2D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xof
               "type(%i)", (RsContext)con, alloc, xoff, yoff, w, h, sizeBytes, dataType);
     }
     PER_ARRAY_TYPE(0, rsAllocation2DRead, false, (RsContext)con, alloc, xoff, yoff, lod, face, w, h,
+                   ptr, sizeBytes, 0);
+}
+// Copies from the Allocation pointed to by _alloc into the Java object data.
+static void
+nAllocationRead3D(JNIEnv *_env, jobject _this, jlong con, jlong _alloc, jint xoff, jint yoff, jint zoff, jint lod,
+                  jint w, jint h, jint d, jobject data, int sizeBytes, int dataType)
+{
+    RsAllocation *alloc = (RsAllocation *)_alloc;
+    if (kLogApi) {
+        ALOGD("nAllocation3DRead, con(%p), alloc(%p), xoff(%i), yoff(%i), zoff(%i), lod(%i), w(%i),"
+              " h(%i), d(%i), sizeBytes(%i)", (RsContext)con, (RsAllocation)alloc, xoff, yoff, zoff,
+              lod, w, h, d, sizeBytes);
+    }
+    PER_ARRAY_TYPE(0, rsAllocation3DRead, false, (RsContext)con, alloc, xoff, yoff, zoff, lod, w, h, d,
                    ptr, sizeBytes, 0);
 }
 
@@ -2184,14 +2215,16 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationIoSend",              "(JJ)V",                                 (void*)nAllocationIoSend },
 {"rsnAllocationIoReceive",           "(JJ)V",                                 (void*)nAllocationIoReceive },
 {"rsnAllocationData1D",              "(JJIIILjava/lang/Object;II)V",          (void*)nAllocationData1D },
-{"rsnAllocationElementData1D",       "(JJIII[BI)V",                           (void*)nAllocationElementData1D },
+{"rsnAllocationElementData",         "(JJIIIII[BI)V",                         (void*)nAllocationElementData },
 {"rsnAllocationData2D",              "(JJIIIIIILjava/lang/Object;II)V",       (void*)nAllocationData2D },
 {"rsnAllocationData2D",              "(JJIIIIIIJIIII)V",                      (void*)nAllocationData2D_alloc },
 {"rsnAllocationData3D",              "(JJIIIIIIILjava/lang/Object;II)V",      (void*)nAllocationData3D },
 {"rsnAllocationData3D",              "(JJIIIIIIIJIIII)V",                     (void*)nAllocationData3D_alloc },
 {"rsnAllocationRead",                "(JJLjava/lang/Object;I)V",              (void*)nAllocationRead },
 {"rsnAllocationRead1D",              "(JJIIILjava/lang/Object;II)V",          (void*)nAllocationRead1D },
+{"rsnAllocationElementRead",         "(JJIIIIILjava/lang/Object;II)V",        (void*)nAllocationElementRead },
 {"rsnAllocationRead2D",              "(JJIIIIIILjava/lang/Object;II)V",       (void*)nAllocationRead2D },
+{"rsnAllocationRead3D",              "(JJIIIIIIILjava/lang/Object;II)V",      (void*)nAllocationRead3D },
 {"rsnAllocationGetType",             "(JJ)J",                                 (void*)nAllocationGetType},
 {"rsnAllocationResize1D",            "(JJI)V",                                (void*)nAllocationResize1D },
 {"rsnAllocationGenerateMipmaps",     "(JJ)V",                                 (void*)nAllocationGenerateMipmaps },
