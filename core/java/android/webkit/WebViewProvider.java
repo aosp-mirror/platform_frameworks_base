@@ -228,10 +228,6 @@ public interface WebViewProvider {
 
     public void removeJavascriptInterface(String interfaceName);
 
-    public WebMessagePort[] createWebMessageChannel();
-
-    public void postMessageToMainFrame(WebMessage message, Uri targetOrigin);
-
     public WebSettings getSettings();
 
     public void setMapTrackballToArrowKeys(boolean setMap);
