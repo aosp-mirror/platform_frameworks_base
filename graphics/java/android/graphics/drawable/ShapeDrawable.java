@@ -299,8 +299,8 @@ public class ShapeDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        mShapeState.mPaint.setColorFilter(cf);
+    public void setColorFilter(ColorFilter colorFilter) {
+        mShapeState.mPaint.setColorFilter(colorFilter);
         invalidateSelf();
     }
 

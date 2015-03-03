@@ -1035,11 +1035,11 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
+    public void setColorFilter(ColorFilter colorFilter) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
         for (int i = 0; i < N; i++) {
-            array[i].mDrawable.setColorFilter(cf);
+            array[i].mDrawable.setColorFilter(colorFilter);
         }
     }
 

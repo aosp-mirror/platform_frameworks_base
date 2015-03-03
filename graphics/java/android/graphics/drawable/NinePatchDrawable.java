@@ -338,12 +338,12 @@ public class NinePatchDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        if (mPaint == null && cf == null) {
+    public void setColorFilter(ColorFilter colorFilter) {
+        if (mPaint == null && colorFilter == null) {
             // Fast common case -- leave at no color filter.
             return;
         }
-        getPaint().setColorFilter(cf);
+        getPaint().setColorFilter(colorFilter);
         invalidateSelf();
     }
 

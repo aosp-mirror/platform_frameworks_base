@@ -16,6 +16,8 @@
 
 package android.graphics;
 
+import android.annotation.NonNull;
+
 /**
  * A color filter that can be used to tint the source pixels using a single
  * color and a specific {@link PorterDuff Porter-Duff composite mode}.
@@ -34,7 +36,7 @@ public class PorterDuffColorFilter extends ColorFilter {
      * @see #setColor(int)
      * @see #setMode(android.graphics.PorterDuff.Mode)
      */
-    public PorterDuffColorFilter(int color, PorterDuff.Mode mode) {
+    public PorterDuffColorFilter(int color, @NonNull PorterDuff.Mode mode) {
         mColor = color;
         mMode = mode;
         update();
@@ -93,7 +95,7 @@ public class PorterDuffColorFilter extends ColorFilter {
      *
      * @hide
      */
-    public void setMode(PorterDuff.Mode mode) {
+    public void setMode(@NonNull PorterDuff.Mode mode) {
         mMode = mode;
         update();
     }

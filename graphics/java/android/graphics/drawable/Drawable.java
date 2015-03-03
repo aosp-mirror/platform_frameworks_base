@@ -17,6 +17,7 @@
 package android.graphics.drawable;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
@@ -477,67 +478,111 @@ public abstract class Drawable {
     }
 
     /**
-     * @hide Consider for future API inclusion
+     * @hide
+     *
+     * Internal-only method for setting xfermode on certain supported drawables.
+     *
+     * Should not be made public since the layers and drawing area with which
+     * Drawables draw is private implementation detail, and not something apps
+     * should rely upon.
      */
     public void setXfermode(Xfermode mode) {
         // Base implementation drops it on the floor for compatibility. Whee!
-        // TODO: For this to be included in the API proper, all framework drawables need impls.
-        // For right now only BitmapDrawable has it.
     }
 
     /**
-     * Specify an optional color filter for the drawable. Pass {@code null} to
-     * remove any existing color filter.
+     * Specify an optional color filter for the drawable.
+     * <p>
+     * If a Drawable has a ColorFilter, each output pixel of the Drawable's
+     * drawing contents will be modified by the color filter before it is
+     * blended onto the render target of a Canvas.
+     * </p>
+     * <p>
+     * Pass {@code null} to remove any existing color filter.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a non-{@code null} color
+     * filter disables {@link #setTintList(ColorStateList) tint}.
+     * </p>
      *
-     * @param cf the color filter to apply, or {@code null} to remove the
+     * @param colorFilter The color filter to apply, or {@code null} to remove the
      *            existing color filter
      */
-    public abstract void setColorFilter(ColorFilter cf);
+    public abstract void setColorFilter(@Nullable ColorFilter colorFilter);
 
     /**
      * Specify a color and Porter-Duff mode to be the color filter for this
      * drawable.
+     * <p>
+     * Convenience for {@link #setColorFilter(ColorFilter)} which constructs a
+     * {@link PorterDuffColorFilter}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter disables
+     * {@link #setTintList(ColorStateList) tint}.
+     * </p>
      */
-    public void setColorFilter(int color, PorterDuff.Mode mode) {
+    public void setColorFilter(int color, @NonNull PorterDuff.Mode mode) {
         setColorFilter(new PorterDuffColorFilter(color, mode));
     }
 
     /**
-     * Specifies a tint for this drawable.
+     * Specifies tint color for this drawable.
      * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
+     * A Drawable's drawing content will be blended together with its tint
+     * before it is drawn to the screen. This functions similarly to
+     * {@link #setColorFilter(int, PorterDuff.Mode)}.
+     * </p>
+     * <p>
+     * To clear the tint, pass {@code null} to
+     * {@link #setTintList(ColorStateList)}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)} or
+     * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
+     * </p>
      *
-     * @param tint Color to use for tinting this drawable
+     * @param tintColor Color to use for tinting this drawable
+     * @see #setTintList(ColorStateList)
      * @see #setTintMode(PorterDuff.Mode)
      */
-    public void setTint(int tint) {
-        setTintList(ColorStateList.valueOf(tint));
+    public void setTint(int tintColor) {
+        setTintList(ColorStateList.valueOf(tintColor));
     }
 
     /**
-     * Specifies a tint for this drawable as a color state list.
+     * Specifies tint color for this drawable as a color state list.
      * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
+     * A Drawable's drawing content will be blended together with its tint
+     * before it is drawn to the screen. This functions similarly to
+     * {@link #setColorFilter(int, PorterDuff.Mode)}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)} or
+     * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
+     * </p>
      *
-     * @param tint Color state list to use for tinting this drawable, or null to
-     *            clear the tint
+     * @param tint Color state list to use for tinting this drawable, or
+     *            {@code null} to clear the tint
+     * @see #setTint(int)
      * @see #setTintMode(PorterDuff.Mode)
      */
-    public void setTintList(ColorStateList tint) {}
+    public void setTintList(@Nullable ColorStateList tint) {}
 
     /**
      * Specifies a tint blending mode for this drawable.
      * <p>
-     * Setting a color filter via {@link #setColorFilter(ColorFilter)} overrides
-     * tint.
+     * Defines how this drawable's tint color should be blended into the drawable
+     * before it is drawn to screen. Default tint mode is {@link PorterDuff.Mode#MULTIPLY}.
+     * </p>
+     * <p class="note"><strong>Note:</strong> Setting a color filter via
+     * {@link #setColorFilter(ColorFilter)} or
+     * {@link #setColorFilter(int, PorterDuff.Mode)} overrides tint.
+     * </p>
      *
-     * @param tintMode Color state list to use for tinting this drawable, or null to
-     *            clear the tint
      * @param tintMode A Porter-Duff blending mode
+     * @see #setTint(int)
+     * @see #setTintList(ColorStateList)
      */
-    public void setTintMode(PorterDuff.Mode tintMode) {}
+    public void setTintMode(@NonNull PorterDuff.Mode tintMode) {}
 
     /**
      * Returns the current color filter, or {@code null} if none set.

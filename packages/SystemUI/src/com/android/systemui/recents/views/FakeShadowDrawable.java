@@ -159,9 +159,9 @@ class FakeShadowDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
-        mCornerShadowPaint.setColorFilter(cf);
-        mEdgeShadowPaint.setColorFilter(cf);
+    public void setColorFilter(ColorFilter colorFilter) {
+        mCornerShadowPaint.setColorFilter(colorFilter);
+        mEdgeShadowPaint.setColorFilter(colorFilter);
     }
 
     @Override

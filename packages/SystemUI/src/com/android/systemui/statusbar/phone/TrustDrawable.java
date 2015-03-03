@@ -120,7 +120,7 @@ public class TrustDrawable extends Drawable {
     }
 
     @Override
-    public void setColorFilter(ColorFilter cf) {
+    public void setColorFilter(ColorFilter colorFilter) {
         throw new UnsupportedOperationException("not implemented");
     }
 

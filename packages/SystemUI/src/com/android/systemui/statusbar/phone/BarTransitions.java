@@ -160,7 +160,7 @@ public class BarTransitions {
         }
 
         @Override
-        public void setColorFilter(ColorFilter cf) {
+        public void setColorFilter(ColorFilter colorFilter) {
             // noop
         }
 
