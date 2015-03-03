@@ -166,6 +166,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final String ATTR_PERMISSION_PROVIDER = "permission-provider";
     private static final String ATTR_SETUP_COMPLETE = "setup-complete";
 
+    private static final String ATTR_DELEGATED_CERT_INSTALLER = "delegated-cert-installer";
+
     private static final Set<String> DEVICE_OWNER_USER_RESTRICTIONS;
     static {
         DEVICE_OWNER_USER_RESTRICTIONS = new HashSet();
@@ -285,6 +287,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final List<String> mLockTaskPackages = new ArrayList<String>();
 
         ComponentName mRestrictionsProvider;
+
+        String mDelegatedCertInstallerPackage;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -948,6 +952,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 syncDeviceCapabilitiesLocked(policy);
                 saveSettingsLocked(policy.mUserHandle);
             }
+
+            if (policy.mDelegatedCertInstallerPackage != null &&
+                    (packageName == null
+                    || packageName.equals(policy.mDelegatedCertInstallerPackage))) {
+                try {
+                    // Check if delegated cert installer package is removed.
+                    if (pm.getPackageInfo(
+                            policy.mDelegatedCertInstallerPackage, 0, userHandle) == null) {
+                        policy.mDelegatedCertInstallerPackage = null;
+                        saveSettingsLocked(policy.mUserHandle);
+                    }
+                } catch (RemoteException e) {
+                    // Shouldn't happen
+                }
+            }
         }
     }
 
@@ -1332,6 +1351,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, ATTR_SETUP_COMPLETE,
                         Boolean.toString(true));
             }
+            if (policy.mDelegatedCertInstallerPackage != null) {
+                out.attribute(null, ATTR_DELEGATED_CERT_INSTALLER,
+                        policy.mDelegatedCertInstallerPackage);
+            }
+
 
             final int N = policy.mAdminList.size();
             for (int i=0; i<N; i++) {
@@ -1439,6 +1463,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (userSetupComplete != null && Boolean.toString(true).equals(userSetupComplete)) {
                 policy.mUserSetupComplete = true;
             }
+            policy.mDelegatedCertInstallerPackage = parser.getAttributeValue(null,
+                    ATTR_DELEGATED_CERT_INSTALLER);
 
             type = parser.next();
             int outerDepth = parser.getDepth();
@@ -2878,10 +2904,31 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void enforceCanManageCaCerts(ComponentName who) {
         if (who == null) {
-            mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
+            if (!isCallerDelegatedCertInstaller()) {
+                mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
+            }
         } else {
             synchronized (this) {
                 getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            }
+        }
+    }
+
+    private boolean isCallerDelegatedCertInstaller() {
+        final int callingUid = Binder.getCallingUid();
+        final int userHandle = UserHandle.getUserId(callingUid);
+        synchronized (this) {
+            final DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mDelegatedCertInstallerPackage == null) {
+                return false;
+            }
+
+            try {
+                int uid = mContext.getPackageManager().getPackageUid(
+                        policy.mDelegatedCertInstallerPackage, userHandle);
+                return uid == callingUid;
+            } catch (NameNotFoundException e) {
+                return false;
             }
         }
     }
@@ -3034,6 +3081,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return null;
             }
         }.execute();
+    }
+
+    @Override
+    public void setCertInstallerPackage(ComponentName who, String installerPackage)
+            throws SecurityException {
+        int userHandle = UserHandle.getCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            DevicePolicyData policy = getUserData(userHandle);
+            policy.mDelegatedCertInstallerPackage = installerPackage;
+            saveSettingsLocked(userHandle);
+        }
+    }
+
+    @Override
+    public String getCertInstallerPackage(ComponentName who) throws SecurityException {
+        int userHandle = UserHandle.getCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            DevicePolicyData policy = getUserData(userHandle);
+            return policy.mDelegatedCertInstallerPackage;
+        }
     }
 
     private void wipeDataLocked(boolean wipeExtRequested, String reason) {

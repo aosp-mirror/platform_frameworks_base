@@ -1941,7 +1941,8 @@ public class DevicePolicyManager {
     /**
      * Installs the given certificate as a user CA.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Use
+     * <code>null</code> if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to install.
      *
      * @return false if the certBuffer cannot be parsed or installation is
@@ -1961,7 +1962,8 @@ public class DevicePolicyManager {
     /**
      * Uninstalls the given certificate from trusted user CAs, if present.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Use
+     * <code>null</code> if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to remove.
      */
     public void uninstallCaCert(ComponentName admin, byte[] certBuffer) {
@@ -1982,7 +1984,8 @@ public class DevicePolicyManager {
      * If a user has installed any certificates by other means than device policy these will be
      * included too.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Use
+     * <code>null</code> if calling from a delegated certificate installer.
      * @return a List of byte[] arrays, each encoding one user CA certificate.
      */
     public List<byte[]> getInstalledCaCerts(ComponentName admin) {
@@ -2009,7 +2012,8 @@ public class DevicePolicyManager {
      * Uninstalls all custom trusted CA certificates from the profile. Certificates installed by
      * means other than device policy will also be removed, except for system CA certificates.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Use
+     * <code>null</code> if calling from a delegated certificate installer.
      */
     public void uninstallAllUserCaCerts(ComponentName admin) {
         if (mService != null) {
@@ -2026,7 +2030,8 @@ public class DevicePolicyManager {
     /**
      * Returns whether this certificate is installed as a trusted CA.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Use
+     * <code>null</code> if calling from a delegated certificate installer.
      * @param certBuffer encoded form of the certificate to look up.
      */
     public boolean hasCaCertInstalled(ComponentName admin, byte[] certBuffer) {
@@ -2080,6 +2085,50 @@ public class DevicePolicyManager {
         final X509Certificate cert = (X509Certificate) certFactory.generateCertificate(
                               new ByteArrayInputStream(certBuffer));
         return new TrustedCertificateStore().getCertificateAlias(cert);
+    }
+
+    /**
+     * Called by a profile owner or device owner to grant access to privileged certificate
+     * manipulation APIs to a third-party CA certificate installer app. Granted APIs include
+     * {@link #getInstalledCaCerts}, {@link #hasCaCertInstalled}, {@link #installCaCert},
+     * {@link #uninstallCaCert} and {@link #uninstallAllUserCaCerts}.
+     * <p>
+     * Delegated certificate installer is a per-user state. The delegated access is persistent until
+     * it is later cleared by calling this method with a null value or uninstallling the certificate
+     * installer.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param installerPackage The package name of the certificate installer which will be given
+     * access. If <code>null</code> is given the current package will be cleared.
+     */
+    public void setCertInstallerPackage(ComponentName who, String installerPackage)
+            throws SecurityException {
+        if (mService != null) {
+            try {
+                mService.setCertInstallerPackage(who, installerPackage);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Called by a profile owner or device owner to retrieve the certificate installer for the
+     * current user. null if none is set.
+     *
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return The package name of the current delegated certificate installer. <code>null</code>
+     * if none is set.
+     */
+    public String getCertInstallerPackage(ComponentName who) throws SecurityException {
+        if (mService != null) {
+            try {
+                return mService.getCertInstallerPackage(who);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return null;
     }
 
     /**
