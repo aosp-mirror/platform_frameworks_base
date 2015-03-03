@@ -157,9 +157,9 @@ import libcore.io.IoUtils;
 public class BackupManagerService {
 
     private static final String TAG = "BackupManagerService";
-    private static final boolean DEBUG = true;
-    private static final boolean MORE_DEBUG = false;
-    private static final boolean DEBUG_SCHEDULING = MORE_DEBUG || true;
+    static final boolean DEBUG = true;
+    static final boolean MORE_DEBUG = false;
+    static final boolean DEBUG_SCHEDULING = MORE_DEBUG || true;
 
     // System-private key used for backing up an app's widget state.  Must
     // begin with U+FFxx by convention (we reserve all keys starting
@@ -194,17 +194,6 @@ public class BackupManagerService {
     static final String SETTINGS_PACKAGE = "com.android.providers.settings";
     static final String SHARED_BACKUP_AGENT_PACKAGE = "com.android.sharedstoragebackup";
     static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
-
-    // How often we perform a backup pass.  Privileged external callers can
-    // trigger an immediate pass.
-    private static final long BACKUP_INTERVAL = AlarmManager.INTERVAL_HOUR;
-
-    // Random variation in backup scheduling time to avoid server load spikes
-    private static final int FUZZ_MILLIS = 5 * 60 * 1000;
-
-    // The amount of time between the initial provisioning of the device and
-    // the first backup pass.
-    private static final long FIRST_BACKUP_INTERVAL = 12 * AlarmManager.INTERVAL_HOUR;
 
     // Retry interval for clear/init when the transport is unavailable
     private static final long TRANSPORT_RETRY_INTERVAL = 1 * AlarmManager.INTERVAL_HOUR;
@@ -299,7 +288,6 @@ public class BackupManagerService {
     volatile boolean mBackupRunning;
     volatile boolean mConnecting;
     volatile long mLastBackupPass;
-    volatile long mNextBackupPass;
 
     // For debugging, we maintain a progress trace of operations during backup
     static final boolean DEBUG_BACKUP_TRACE = true;
@@ -381,7 +369,7 @@ public class BackupManagerService {
                 if (mProvisioned && !wasProvisioned && mEnabled) {
                     // we're now good to go, so start the backup alarms
                     if (MORE_DEBUG) Slog.d(TAG, "Now provisioned, so starting backups");
-                    startBackupAlarmsLocked(FIRST_BACKUP_INTERVAL);
+                    KeyValueBackupJob.schedule(mContext);
                     scheduleNextFullBackupJob();
                 }
             }
@@ -657,7 +645,6 @@ public class BackupManagerService {
             case MSG_RUN_BACKUP:
             {
                 mLastBackupPass = System.currentTimeMillis();
-                mNextBackupPass = mLastBackupPass + BACKUP_INTERVAL;
 
                 IBackupTransport transport = getTransport(mCurrentTransport);
                 if (transport == null) {
@@ -2939,12 +2926,22 @@ public class BackupManagerService {
         void revertAndEndBackup() {
             if (MORE_DEBUG) Slog.i(TAG, "Reverting backup queue - restaging everything");
             addBackupTrace("transport error; reverting");
+
+            // We want to reset the backup schedule based on whatever the transport suggests
+            // by way of retry/backoff time.
+            long delay;
+            try {
+                delay = mTransport.requestBackupTime();
+            } catch (Exception e) {
+                Slog.w(TAG, "Unable to contact transport for recommended backoff");
+                delay = 0;  // use the scheduler's default
+            }
+            KeyValueBackupJob.schedule(mContext, delay);
+
             for (BackupRequest request : mOriginalQueue) {
                 dataChangedImpl(request.packageName);
             }
-            // We also want to reset the backup schedule based on whatever
-            // the transport suggests by way of retry/backoff time.
-            restartBackupAlarm();
+
         }
 
         void agentErrorCleanup() {
@@ -2974,15 +2971,6 @@ public class BackupManagerService {
                 try {  // unbind even on timeout, just in case
                     mActivityManager.unbindBackupAgent(mCurrentPackage.applicationInfo);
                 } catch (RemoteException e) { /* can't happen; activity manager is local */ }
-            }
-        }
-
-        void restartBackupAlarm() {
-            addBackupTrace("setting backup trigger");
-            synchronized (mQueueLock) {
-                try {
-                    startBackupAlarmsLocked(mTransport.requestBackupTime());
-                } catch (RemoteException e) { /* cannot happen */ }
             }
         }
 
@@ -8111,6 +8099,9 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
                 }
             }
         }
+
+        // ...and schedule a backup pass if necessary
+        KeyValueBackupJob.schedule(mContext);
     }
 
     // Note: packageName is currently unused, but may be in the future
@@ -8245,16 +8236,16 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
         if (DEBUG) Slog.v(TAG, "Scheduling immediate backup pass");
         synchronized (mQueueLock) {
-            // Because the alarms we are using can jitter, and we want an *immediate*
-            // backup pass to happen, we restart the timer beginning with "next time,"
-            // then manually fire the backup trigger intent ourselves.
-            startBackupAlarmsLocked(BACKUP_INTERVAL);
+            // Fire the intent that kicks off the whole shebang...
             try {
                 mRunBackupIntent.send();
             } catch (PendingIntent.CanceledException e) {
                 // should never happen
                 Slog.e(TAG, "run-backup intent cancelled!");
             }
+
+            // ...and cancel any pending scheduled job, because we've just superseded it
+            KeyValueBackupJob.cancel(mContext);
         }
     }
 
@@ -8530,13 +8521,13 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             synchronized (mQueueLock) {
                 if (enable && !wasEnabled && mProvisioned) {
                     // if we've just been enabled, start scheduling backup passes
-                    startBackupAlarmsLocked(BACKUP_INTERVAL);
+                    KeyValueBackupJob.schedule(mContext);
                     scheduleNextFullBackupJob();
                 } else if (!enable) {
                     // No longer enabled, so stop running backups
                     if (DEBUG) Slog.i(TAG, "Opting out of backup");
 
-                    mAlarmManager.cancel(mRunBackupIntent);
+                    KeyValueBackupJob.cancel(mContext);
 
                     // This also constitutes an opt-out, so we wipe any data for
                     // this device from the backend.  We start that process with
@@ -8588,19 +8579,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         /*
          * This is now a no-op; provisioning is simply the device's own setup state.
          */
-    }
-
-    private void startBackupAlarmsLocked(long delayBeforeFirstBackup) {
-        // We used to use setInexactRepeating(), but that may be linked to
-        // backups running at :00 more often than not, creating load spikes.
-        // Schedule at an exact time for now, and also add a bit of "fuzz".
-
-        Random random = new Random();
-        long when = System.currentTimeMillis() + delayBeforeFirstBackup +
-                random.nextInt(FUZZ_MILLIS);
-        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, when,
-                BACKUP_INTERVAL + random.nextInt(FUZZ_MILLIS), mRunBackupIntent);
-        mNextBackupPass = when;
     }
 
     // Report whether the backup mechanism is currently enabled
@@ -9308,7 +9286,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             if (mBackupRunning) pw.println("Backup currently running");
             pw.println("Last backup pass started: " + mLastBackupPass
                     + " (now = " + System.currentTimeMillis() + ')');
-            pw.println("  next scheduled: " + mNextBackupPass);
+            pw.println("  next scheduled: " + KeyValueBackupJob.nextScheduled());
 
             pw.println("Available transports:");
             final String[] transports = listAllTransports();
