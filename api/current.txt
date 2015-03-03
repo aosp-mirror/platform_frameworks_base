@@ -36940,6 +36940,7 @@ package android.webkit {
     method public abstract int getMinimumFontSize();
     method public abstract int getMinimumLogicalFontSize();
     method public abstract int getMixedContentMode();
+    method public abstract boolean getOffscreenPreRaster();
     method public abstract deprecated android.webkit.WebSettings.PluginState getPluginState();
     method public abstract java.lang.String getSansSerifFontFamily();
     method public abstract boolean getSaveFormData();
@@ -36986,6 +36987,7 @@ package android.webkit {
     method public abstract void setMinimumLogicalFontSize(int);
     method public abstract void setMixedContentMode(int);
     method public abstract void setNeedInitialFocus(boolean);
+    method public abstract void setOffscreenPreRaster(boolean);
     method public abstract deprecated void setPluginState(android.webkit.WebSettings.PluginState);
     method public abstract deprecated void setRenderPriority(android.webkit.WebSettings.RenderPriority);
     method public abstract void setSansSerifFontFamily(java.lang.String);

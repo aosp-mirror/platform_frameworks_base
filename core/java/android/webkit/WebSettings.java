@@ -1330,4 +1330,25 @@ public abstract class WebSettings {
      */
     @SystemApi
     public abstract boolean getVideoOverlayForEmbeddedEncryptedVideoEnabled();
+
+    /**
+     * Sets whether this WebView should raster tiles when it is
+     * offscreen but attached to a window. Turning this on can avoid
+     * rendering artifacts when animating an offscreen WebView on-screen.
+     * Offscreen WebViews in this mode use more memory. The default value is
+     * false.
+     * Please follow these guidelines to limit memory usage:
+     * - WebView size should be not be larger than the device screen size.
+     * - Limit use of this mode to a small number of WebViews. Use it for
+     *   visible WebViews and WebViews about to be animated to visible.
+     */
+    public abstract void setOffscreenPreRaster(boolean enabled);
+
+    /**
+     * Gets whether this WebView should raster tiles when it is
+     * offscreen but attached to a window.
+     * @return true if this WebView will raster tiles when it is
+     * offscreen but attached to a window.
+     */
+    public abstract boolean getOffscreenPreRaster();
 }

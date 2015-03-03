@@ -30893,8 +30893,8 @@ package android.telecom {
     method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
     field public static final java.lang.String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
     field public static final java.lang.String ACTION_CONNECTION_SERVICE_CONFIGURE = "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
-    field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
     field public static final java.lang.String ACTION_PHONE_ACCOUNT_REGISTERED = "android.telecom.action.PHONE_ACCOUNT_REGISTERED";
+    field public static final java.lang.String ACTION_SHOW_CALL_ACCESSIBILITY_SETTINGS = "android.telecom.action.SHOW_CALL_ACCESSIBILITY_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_CALL_SETTINGS = "android.telecom.action.SHOW_CALL_SETTINGS";
     field public static final java.lang.String ACTION_SHOW_RESPOND_VIA_SMS_SETTINGS = "android.telecom.action.SHOW_RESPOND_VIA_SMS_SETTINGS";
     field public static final char DTMF_CHARACTER_PAUSE = 44; // 0x002c ','
@@ -39165,6 +39165,7 @@ package android.webkit {
     method public abstract int getMinimumLogicalFontSize();
     method public abstract int getMixedContentMode();
     method public abstract deprecated boolean getNavDump();
+    method public abstract boolean getOffscreenPreRaster();
     method public abstract deprecated android.webkit.WebSettings.PluginState getPluginState();
     method public abstract deprecated boolean getPluginsEnabled();
     method public abstract java.lang.String getSansSerifFontFamily();
@@ -39217,6 +39218,7 @@ package android.webkit {
     method public abstract void setMixedContentMode(int);
     method public abstract deprecated void setNavDump(boolean);
     method public abstract void setNeedInitialFocus(boolean);
+    method public abstract void setOffscreenPreRaster(boolean);
     method public abstract deprecated void setPluginState(android.webkit.WebSettings.PluginState);
     method public abstract deprecated void setPluginsEnabled(boolean);
     method public abstract deprecated void setRenderPriority(android.webkit.WebSettings.RenderPriority);
