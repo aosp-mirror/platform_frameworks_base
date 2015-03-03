@@ -76,9 +76,54 @@ public final class WebViewFactory {
     private static boolean sAddressSpaceReserved = false;
     private static PackageInfo sPackageInfo;
 
+    /** @hide */
+    public static String[] getWebViewPackageNames() {
+        return AppGlobals.getInitialApplication().getResources().getStringArray(
+                com.android.internal.R.array.config_webViewPackageNames);
+    }
+
+    // TODO (gsennton) remove when committing webview xts test change
     public static String getWebViewPackageName() {
-        return AppGlobals.getInitialApplication().getString(
-                com.android.internal.R.string.config_webViewPackageName);
+        String[] webViewPackageNames = getWebViewPackageNames();
+        return webViewPackageNames[webViewPackageNames.length-1];
+    }
+
+    /**
+     * Return the package info of the first package in the webview priority list that contains
+     * webview.
+     *
+     * @hide
+     */
+    public static PackageInfo findPreferredWebViewPackage() {
+        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
+
+        for (String packageName : getWebViewPackageNames()) {
+            try {
+                PackageInfo packageInfo = pm.getPackageInfo(packageName,
+                    PackageManager.GET_META_DATA);
+                ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+
+                // If the correct flag is set the package contains webview.
+                if (getWebViewLibrary(applicationInfo) != null) {
+                    return packageInfo;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+            }
+        }
+        throw new AndroidRuntimeException("Could not find a loadable WebView package");
+    }
+
+    private static ApplicationInfo getWebViewApplicationInfo() {
+        if (sPackageInfo == null)
+            return findPreferredWebViewPackage().applicationInfo;
+        else
+            return sPackageInfo.applicationInfo;
+    }
+
+    private static String getWebViewLibrary(ApplicationInfo ai) {
+        if (ai.metaData != null)
+            return ai.metaData.getString("com.android.webview.WebViewLibrary");
+        return null;
     }
 
     public static PackageInfo getLoadedPackageInfo() {
@@ -99,6 +144,11 @@ public final class WebViewFactory {
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
+                // First fetch the package info so we can log the webview package version.
+                sPackageInfo = findPreferredWebViewPackage();
+                Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
+                    sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
+
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.loadNativeLibrary()");
                 loadNativeLibrary();
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
@@ -137,15 +187,10 @@ public final class WebViewFactory {
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
         Application initialApplication = AppGlobals.getInitialApplication();
         try {
-            // First fetch the package info so we can log the webview package version.
-            String packageName = getWebViewPackageName();
-            sPackageInfo = initialApplication.getPackageManager().getPackageInfo(packageName, 0);
-            Log.i(LOGTAG, "Loading " + packageName + " version " + sPackageInfo.versionName +
-                          " (code " + sPackageInfo.versionCode + ")");
-
             // Construct a package context to load the Java code into the current app.
-            Context webViewContext = initialApplication.createPackageContext(packageName,
-                    Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+            Context webViewContext = initialApplication.createPackageContext(
+                sPackageInfo.packageName,
+                Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
             initialApplication.getAssets().addAssetPath(
                     webViewContext.getApplicationInfo().sourceDir);
             ClassLoader clazzLoader = webViewContext.getClassLoader();
@@ -272,10 +317,8 @@ public final class WebViewFactory {
 
     private static String[] getWebViewNativeLibraryPaths()
             throws PackageManager.NameNotFoundException {
-        final String NATIVE_LIB_FILE_NAME = "libwebviewchromium.so";
-
-        PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
-        ApplicationInfo ai = pm.getApplicationInfo(getWebViewPackageName(), 0);
+        ApplicationInfo ai = getWebViewApplicationInfo();
+        final String NATIVE_LIB_FILE_NAME = getWebViewLibrary(ai);
 
         String path32;
         String path64;
