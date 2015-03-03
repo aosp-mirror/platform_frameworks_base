@@ -28445,6 +28445,16 @@ package android.renderscript {
     method public void copy1DRangeFromUnchecked(int, int, short[]);
     method public void copy1DRangeFromUnchecked(int, int, byte[]);
     method public void copy1DRangeFromUnchecked(int, int, float[]);
+    method public void copy1DRangeTo(int, int, java.lang.Object);
+    method public void copy1DRangeTo(int, int, int[]);
+    method public void copy1DRangeTo(int, int, short[]);
+    method public void copy1DRangeTo(int, int, byte[]);
+    method public void copy1DRangeTo(int, int, float[]);
+    method public void copy1DRangeToUnchecked(int, int, java.lang.Object);
+    method public void copy1DRangeToUnchecked(int, int, int[]);
+    method public void copy1DRangeToUnchecked(int, int, short[]);
+    method public void copy1DRangeToUnchecked(int, int, byte[]);
+    method public void copy1DRangeToUnchecked(int, int, float[]);
     method public void copy2DRangeFrom(int, int, int, int, java.lang.Object);
     method public void copy2DRangeFrom(int, int, int, int, byte[]);
     method public void copy2DRangeFrom(int, int, int, int, short[]);
@@ -28452,6 +28462,14 @@ package android.renderscript {
     method public void copy2DRangeFrom(int, int, int, int, float[]);
     method public void copy2DRangeFrom(int, int, int, int, android.renderscript.Allocation, int, int);
     method public void copy2DRangeFrom(int, int, android.graphics.Bitmap);
+    method public void copy2DRangeTo(int, int, int, int, java.lang.Object);
+    method public void copy2DRangeTo(int, int, int, int, byte[]);
+    method public void copy2DRangeTo(int, int, int, int, short[]);
+    method public void copy2DRangeTo(int, int, int, int, int[]);
+    method public void copy2DRangeTo(int, int, int, int, float[]);
+    method public void copy3DRangeFrom(int, int, int, int, int, int, java.lang.Object);
+    method public void copy3DRangeFrom(int, int, int, int, int, int, android.renderscript.Allocation, int, int, int);
+    method public void copy3DRangeTo(int, int, int, int, int, int, java.lang.Object);
     method public void copyFrom(android.renderscript.BaseObj[]);
     method public void copyFrom(java.lang.Object);
     method public void copyFrom(int[]);
@@ -28471,6 +28489,7 @@ package android.renderscript {
     method public void copyTo(short[]);
     method public void copyTo(int[]);
     method public void copyTo(float[]);
+    method public void copyToFieldPacker(int, int, int, int, android.renderscript.FieldPacker);
     method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
     method public static android.renderscript.Allocation createCubemapFromBitmap(android.renderscript.RenderScript, android.graphics.Bitmap);
     method public static android.renderscript.Allocation createCubemapFromCubeFaces(android.renderscript.RenderScript, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.graphics.Bitmap, android.renderscript.Allocation.MipmapControl, int);
@@ -28496,6 +28515,7 @@ package android.renderscript {
     method public deprecated synchronized void resize(int);
     method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
+    method public void setFromFieldPacker(int, int, int, int, android.renderscript.FieldPacker);
     method public void setOnBufferAvailableListener(android.renderscript.Allocation.OnBufferAvailableListener);
     method public void setSurface(android.view.Surface);
     method public void syncAll(int);

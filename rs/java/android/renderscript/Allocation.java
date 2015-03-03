@@ -802,7 +802,7 @@ public class Allocation extends BaseObj {
 
     /**
      * This is only intended to be used by auto-generated code reflected from
-     * the RenderScript script files.
+     * the RenderScript script files and should not be used by developers.
      *
      * @param xoff
      * @param component_number
@@ -813,9 +813,8 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * This is only intended to be used by auto-generated code reflected from
-     * the RenderScript script files.
+     * the RenderScript script files and should not be used by developers.
      *
      * @param xoff
      * @param yoff
@@ -1247,8 +1246,11 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
+     * Copy a rectangular region from the array into the allocation.
+     * The array is assumed to be tightly packed.
      *
+     * The data type of the array is not required to be the same as
+     * the element data type.
      */
     private void copy3DRangeFromUnchecked(int xoff, int yoff, int zoff, int w, int h, int d,
                                           Object array, Element.DataType dt, int arrayLen) {
@@ -1277,7 +1279,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy a rectangular region from the array into the allocation.
      * The array is assumed to be tightly packed.
      *
@@ -1298,7 +1299,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy a rectangular region into the allocation from another
      * allocation.
      *
@@ -1415,7 +1415,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * This is only intended to be used by auto-generated code reflected from
      * the RenderScript script files and should not be used by developers.
      *
@@ -1423,7 +1422,7 @@ public class Allocation extends BaseObj {
      * @param yoff
      * @param zoff
      * @param component_number
-     * @param array
+     * @param fp
      */
     public void copyToFieldPacker(int xoff, int yoff, int zoff, int component_number, FieldPacker fp) {
         mRS.validate();
@@ -1501,7 +1500,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * guarantee that the Allocation is compatible with the input buffer.
      *
@@ -1516,7 +1514,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * guarantee that the Allocation is compatible with the input buffer.
      *
@@ -1529,7 +1526,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * guarantee that the Allocation is compatible with the input buffer.
      *
@@ -1542,7 +1538,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * guarantee that the Allocation is compatible with the input buffer.
      *
@@ -1555,7 +1550,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * guarantee that the Allocation is compatible with the input buffer.
      *
@@ -1569,7 +1563,6 @@ public class Allocation extends BaseObj {
 
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * and will generate exceptions if the Allocation type does not
      * match the component type of the array passed in.
@@ -1585,7 +1578,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * and will generate exceptions if the Allocation type is not a 32 bit
      * integer type.
@@ -1600,7 +1592,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * and will generate exceptions if the Allocation type is not a 16 bit
      * integer type.
@@ -1615,7 +1606,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * and will generate exceptions if the Allocation type is not an 8 bit
      * integer type.
@@ -1630,7 +1620,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy part of this Allocation into an array.  This method does not
      * and will generate exceptions if the Allocation type is not a 32 bit float
      * type.
@@ -1671,7 +1660,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy from a rectangular region in this Allocation into an array.
      *
      * @param xoff X offset of the region to copy in this Allocation
@@ -1687,7 +1675,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy from a rectangular region in this Allocation into an array.
      *
      * @param xoff X offset of the region to copy in this Allocation
@@ -1703,7 +1690,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy from a rectangular region in this Allocation into an array.
      *
      * @param xoff X offset of the region to copy in this Allocation
@@ -1719,7 +1705,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy from a rectangular region in this Allocation into an array.
      *
      * @param xoff X offset of the region to copy in this Allocation
@@ -1735,7 +1720,6 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
      * Copy from a rectangular region in this Allocation into an array.
      *
      * @param xoff X offset of the region to copy in this Allocation
@@ -1752,8 +1736,11 @@ public class Allocation extends BaseObj {
 
 
     /**
-     * @hide
+     * Copy from a rectangular region in this Allocation into an array.
+     * The array is assumed to be tightly packed.
      *
+     * The data type of the array is not required to be the same as
+     * the element data type.
      */
     private void copy3DRangeToUnchecked(int xoff, int yoff, int zoff, int w, int h, int d,
                                         Object array, Element.DataType dt, int arrayLen) {
@@ -1780,8 +1767,7 @@ public class Allocation extends BaseObj {
         Trace.traceEnd(RenderScript.TRACE_TAG);
     }
 
-    /**
-     * @hide
+    /*
      * Copy from a rectangular region in this Allocation into an array.
      *
      * @param xoff X offset of the region to copy in this Allocation
