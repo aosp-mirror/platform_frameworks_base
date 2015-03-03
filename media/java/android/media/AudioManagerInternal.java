@@ -46,10 +46,10 @@ public abstract class AudioManagerInternal {
     public interface RingerModeDelegate {
         /** Called when external ringer mode is evaluated, returns the new internal ringer mode */
         int onSetRingerModeExternal(int ringerModeOld, int ringerModeNew, String caller,
-                int ringerModeInternal);
+                int ringerModeInternal, VolumePolicy policy);
 
         /** Called when internal ringer mode is evaluated, returns the new external ringer mode */
         int onSetRingerModeInternal(int ringerModeOld, int ringerModeNew, String caller,
-                int ringerModeExternal);
+                int ringerModeExternal, VolumePolicy policy);
     }
 }

@@ -31,6 +31,7 @@ import android.database.ContentObserver;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
+import android.media.VolumePolicy;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -334,7 +335,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
 
     @Override  // RingerModeDelegate
     public int onSetRingerModeInternal(int ringerModeOld, int ringerModeNew, String caller,
-            int ringerModeExternal) {
+            int ringerModeExternal, VolumePolicy policy) {
         final boolean isChange = ringerModeOld != ringerModeNew;
 
         int ringerModeExternalOut = ringerModeNew;
@@ -342,7 +343,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         int newZen = -1;
         switch (ringerModeNew) {
             case AudioManager.RINGER_MODE_SILENT:
-                if (isChange) {
+                if (isChange && policy.doNotDisturbWhenSilent) {
                     if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS) {
                         newZen = Global.ZEN_MODE_NO_INTERRUPTIONS;
                     }
@@ -371,7 +372,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
 
     @Override  // RingerModeDelegate
     public int onSetRingerModeExternal(int ringerModeOld, int ringerModeNew, String caller,
-            int ringerModeInternal) {
+            int ringerModeInternal, VolumePolicy policy) {
         int ringerModeInternalOut = ringerModeNew;
         final boolean isChange = ringerModeOld != ringerModeNew;
         final boolean isVibrate = ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE;

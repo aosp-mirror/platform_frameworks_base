@@ -213,7 +213,12 @@ public class PhoneStatusBarPolicy {
             zenDescription = mContext.getString(R.string.zen_important_interruptions);
         }
 
-        if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS &&
+        if (DndTile.isVisible(mContext)
+                && audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
+            volumeVisible = true;
+            volumeIconId = R.drawable.stat_sys_ringer_silent;
+            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
+        } else if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS &&
                 audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;

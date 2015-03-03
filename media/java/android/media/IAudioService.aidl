@@ -29,6 +29,7 @@ import android.media.IRemoteVolumeObserver;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.Rating;
+import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.net.Uri;
@@ -204,9 +205,12 @@ interface IAudioService {
 
     boolean isHdmiSystemAudioSupported();
 
-           String registerAudioPolicy(in AudioPolicyConfig policyConfig,
-                    in IAudioPolicyCallback pcb, boolean hasFocusListener);
+    String registerAudioPolicy(in AudioPolicyConfig policyConfig,
+            in IAudioPolicyCallback pcb, boolean hasFocusListener);
+
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 
-           int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
+    int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
+
+    void setVolumePolicy(in VolumePolicy policy);
 }
