@@ -69,6 +69,7 @@ import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerInternal;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -855,6 +856,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
         ActivityContainer container = (ActivityContainer)iContainer;
         synchronized (mService) {
+            if (container != null && container.mParentActivity != null &&
+                    container.mParentActivity.state != ActivityState.RESUMED) {
+                // Cannot start a child activity if the parent is not resumed.
+                return ActivityManager.START_CANCELED;
+            }
             final int realCallingPid = Binder.getCallingPid();
             final int realCallingUid = Binder.getCallingUid();
             int callingPid;
@@ -3789,18 +3795,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
         @Override
         public final int startActivity(Intent intent) {
             mService.enforceNotIsolatedCaller("ActivityContainer.startActivity");
-            int userId = mService.handleIncomingUser(Binder.getCallingPid(),
+            final int userId = mService.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), mCurrentUser, false,
                     ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
+
             // TODO: Switch to user app stacks here.
-            intent.addFlags(FORCE_NEW_TASK_FLAGS);
             String mimeType = intent.getType();
-            if (mimeType == null && intent.getData() != null
-                    && "content".equals(intent.getData().getScheme())) {
-                mimeType = mService.getProviderMimeType(intent.getData(), userId);
+            final Uri data = intent.getData();
+            if (mimeType == null && data != null && "content".equals(data.getScheme())) {
+                mimeType = mService.getProviderMimeType(data, userId);
             }
-            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, null, null, 0,
-                    0, null, null, null, null, userId, this, null);
+            checkEmbeddedAllowedInner(userId, intent, mimeType);
+
+            intent.addFlags(FORCE_NEW_TASK_FLAGS);
+            return startActivityMayWait(null, -1, null, intent, mimeType, null, null, null, null,
+                    0, 0, null, null, null, null, userId, this, null);
         }
 
         @Override
@@ -3811,43 +3820,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 throw new IllegalArgumentException("Bad PendingIntent object");
             }
 
-            return ((PendingIntentRecord)intentSender).sendInner(0, null, null, null, null, null,
-                    null, 0, FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
-        }
-
-        private void checkEmbeddedAllowedInner(Intent intent, String resolvedType) {
-            int userId = mService.handleIncomingUser(Binder.getCallingPid(),
+            final int userId = mService.handleIncomingUser(Binder.getCallingPid(),
                     Binder.getCallingUid(), mCurrentUser, false,
                     ActivityManagerService.ALLOW_FULL_ONLY, "ActivityContainer", null);
-            if (resolvedType == null) {
-                resolvedType = intent.getType();
-                if (resolvedType == null && intent.getData() != null
-                        && "content".equals(intent.getData().getScheme())) {
-                    resolvedType = mService.getProviderMimeType(intent.getData(), userId);
-                }
-            }
+
+            final PendingIntentRecord pendingIntent = (PendingIntentRecord) intentSender;
+            checkEmbeddedAllowedInner(userId, pendingIntent.key.requestIntent,
+                    pendingIntent.key.requestResolvedType);
+
+            return pendingIntent.sendInner(0, null, null, null, null, null, null, 0,
+                    FORCE_NEW_TASK_FLAGS, FORCE_NEW_TASK_FLAGS, null, this);
+        }
+
+        private void checkEmbeddedAllowedInner(int userId, Intent intent, String resolvedType) {
             ActivityInfo aInfo = resolveActivity(intent, resolvedType, 0, null, userId);
             if (aInfo != null && (aInfo.flags & ActivityInfo.FLAG_ALLOW_EMBEDDED) == 0) {
                 throw new SecurityException(
                         "Attempt to embed activity that has not set allowEmbedded=\"true\"");
             }
-        }
-
-        /** Throw a SecurityException if allowEmbedded is not true */
-        @Override
-        public final void checkEmbeddedAllowed(Intent intent) {
-            checkEmbeddedAllowedInner(intent, null);
-        }
-
-        /** Throw a SecurityException if allowEmbedded is not true */
-        @Override
-        public final void checkEmbeddedAllowedIntentSender(IIntentSender intentSender) {
-            if (!(intentSender instanceof PendingIntentRecord)) {
-                throw new IllegalArgumentException("Bad PendingIntent object");
-            }
-            PendingIntentRecord pendingIntent = (PendingIntentRecord) intentSender;
-            checkEmbeddedAllowedInner(pendingIntent.key.requestIntent,
-                    pendingIntent.key.requestResolvedType);
         }
 
         @Override

@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.app.ActivityManager.START_CANCELED;
+
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.IIntentSender;
@@ -23,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.SurfaceTexture;
 import android.os.IBinder;
+import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -54,10 +57,6 @@ public class ActivityView extends ViewGroup {
     private Surface mSurface;
     private int mLastVisibility;
     private ActivityViewCallback mActivityViewCallback;
-
-    // Only one IIntentSender or Intent may be queued at a time. Most recent one wins.
-    IIntentSender mQueuedPendingIntent;
-    Intent mQueuedIntent;
 
     public ActivityView(Context context) {
         this(context, null);
@@ -167,14 +166,13 @@ public class ActivityView extends ViewGroup {
         if (mActivityContainer == null) {
             throw new IllegalStateException("Attempt to call startActivity after release");
         }
+        if (mSurface == null) {
+            throw new IllegalStateException("Surface not yet created.");
+        }
         if (DEBUG) Log.v(TAG, "startActivity(): intent=" + intent + " " +
                 (isAttachedToDisplay() ? "" : "not") + " attached");
-        if (mSurface != null) {
-            mActivityContainer.startActivity(intent);
-        } else {
-            mActivityContainer.checkEmbeddedAllowed(intent);
-            mQueuedIntent = intent;
-            mQueuedPendingIntent = null;
+        if (mActivityContainer.startActivity(intent) == START_CANCELED) {
+            throw new OperationCanceledException();
         }
     }
 
@@ -182,15 +180,14 @@ public class ActivityView extends ViewGroup {
         if (mActivityContainer == null) {
             throw new IllegalStateException("Attempt to call startActivity after release");
         }
+        if (mSurface == null) {
+            throw new IllegalStateException("Surface not yet created.");
+        }
         if (DEBUG) Log.v(TAG, "startActivityIntentSender(): intentSender=" + intentSender + " " +
                 (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = intentSender.getTarget();
-        if (mSurface != null) {
-            mActivityContainer.startActivityIntentSender(iIntentSender);
-        } else {
-            mActivityContainer.checkEmbeddedAllowedIntentSender(iIntentSender);
-            mQueuedPendingIntent = iIntentSender;
-            mQueuedIntent = null;
+        if (mActivityContainer.startActivityIntentSender(iIntentSender) == START_CANCELED) {
+            throw new OperationCanceledException();
         }
     }
 
@@ -198,15 +195,14 @@ public class ActivityView extends ViewGroup {
         if (mActivityContainer == null) {
             throw new IllegalStateException("Attempt to call startActivity after release");
         }
+        if (mSurface == null) {
+            throw new IllegalStateException("Surface not yet created.");
+        }
         if (DEBUG) Log.v(TAG, "startActivityPendingIntent(): PendingIntent=" + pendingIntent + " "
                 + (isAttachedToDisplay() ? "" : "not") + " attached");
         final IIntentSender iIntentSender = pendingIntent.getTarget();
-        if (mSurface != null) {
-            mActivityContainer.startActivityIntentSender(iIntentSender);
-        } else {
-            mActivityContainer.checkEmbeddedAllowedIntentSender(iIntentSender);
-            mQueuedPendingIntent = iIntentSender;
-            mQueuedIntent = null;
+        if (mActivityContainer.startActivityIntentSender(iIntentSender) == START_CANCELED) {
+            throw new OperationCanceledException();
         }
     }
 
@@ -243,26 +239,24 @@ public class ActivityView extends ViewGroup {
             mSurface = null;
             throw new RuntimeException("ActivityView: Unable to create ActivityContainer. " + e);
         }
-
-        if (DEBUG) Log.v(TAG, "attachToSurfaceWhenReady: " + (mQueuedIntent != null ||
-                mQueuedPendingIntent != null ? "" : "no") + " queued intent");
-        if (mQueuedIntent != null) {
-            mActivityContainer.startActivity(mQueuedIntent);
-            mQueuedIntent = null;
-        } else if (mQueuedPendingIntent != null) {
-            mActivityContainer.startActivityIntentSender(mQueuedPendingIntent);
-            mQueuedPendingIntent = null;
-        }
     }
 
     /**
      * Set the callback to use to report certain state changes.
-     * @param callback The callback to report events to.
+     *
+     * Note: If the surface has been created prior to this call being made, then
+     * ActivityViewCallback.onSurfaceAvailable will be called from within setCallback.
+     *
+     *  @param callback The callback to report events to.
      *
      * @see ActivityViewCallback
      */
     public void setCallback(ActivityViewCallback callback) {
         mActivityViewCallback = callback;
+
+        if (mSurface != null) {
+            mActivityViewCallback.onSurfaceAvailable(this);
+        }
     }
 
     public static abstract class ActivityViewCallback {
@@ -272,6 +266,16 @@ public class ActivityView extends ViewGroup {
          * have at most one callback registered.
          */
         public abstract void onAllActivitiesComplete(ActivityView view);
+        /**
+         * Called when the surface is ready to be drawn to. Calling startActivity prior to this
+         * callback will result in an IllegalStateException.
+         */
+        public abstract void onSurfaceAvailable(ActivityView view);
+        /**
+         * Called when the surface has been removed. Calling startActivity after this callback
+         * will result in an IllegalStateException.
+         */
+        public abstract void onSurfaceDestroyed(ActivityView view);
     }
 
     private class ActivityViewSurfaceTextureListener implements SurfaceTextureListener {
@@ -286,6 +290,9 @@ public class ActivityView extends ViewGroup {
             mWidth = width;
             mHeight = height;
             attachToSurfaceWhenReady();
+            if (mActivityViewCallback != null) {
+                mActivityViewCallback.onSurfaceAvailable(ActivityView.this);
+            }
         }
 
         @Override
@@ -311,6 +318,9 @@ public class ActivityView extends ViewGroup {
                 throw new RuntimeException(
                         "ActivityView: Unable to set surface of ActivityContainer. " + e);
             }
+            if (mActivityViewCallback != null) {
+                mActivityViewCallback.onSurfaceDestroyed(ActivityView.this);
+            }
             return true;
         }
 
@@ -325,7 +335,7 @@ public class ActivityView extends ViewGroup {
         private final WeakReference<ActivityView> mActivityViewWeakReference;
 
         ActivityContainerCallback(ActivityView activityView) {
-            mActivityViewWeakReference = new WeakReference<ActivityView>(activityView);
+            mActivityViewWeakReference = new WeakReference<>(activityView);
         }
 
         @Override
@@ -385,24 +395,6 @@ public class ActivityView extends ViewGroup {
         int startActivityIntentSender(IIntentSender intentSender) {
             try {
                 return mIActivityContainer.startActivityIntentSender(intentSender);
-            } catch (RemoteException e) {
-                throw new RuntimeException(
-                        "ActivityView: Unable to startActivity from IntentSender. " + e);
-            }
-        }
-
-        void checkEmbeddedAllowed(Intent intent) {
-            try {
-                mIActivityContainer.checkEmbeddedAllowed(intent);
-            } catch (RemoteException e) {
-                throw new RuntimeException(
-                        "ActivityView: Unable to startActivity from Intent. " + e);
-            }
-        }
-
-        void checkEmbeddedAllowedIntentSender(IIntentSender intentSender) {
-            try {
-                mIActivityContainer.checkEmbeddedAllowedIntentSender(intentSender);
             } catch (RemoteException e) {
                 throw new RuntimeException(
                         "ActivityView: Unable to startActivity from IntentSender. " + e);
