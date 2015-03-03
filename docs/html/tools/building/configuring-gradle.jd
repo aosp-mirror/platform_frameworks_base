@@ -59,8 +59,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
-            'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -187,8 +186,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), \
-                          'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -197,7 +195,7 @@ android {
 
 <p><code>getDefaultProguardFile('proguard-android.txt')</code> obtains the default ProGuard
 settings from the Android SDK installation. Android Studio adds the module-specific rules file
-<code>proguard-rules.txt</code> at the root of the module, where you can add custom ProGuard
+<code>proguard-rules.pro</code> at the root of the module, where you can add custom ProGuard
 rules.</p>
 
 <h3 id="configureSigning">Configure signing settings</h3>
