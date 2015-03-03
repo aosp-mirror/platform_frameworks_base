@@ -752,14 +752,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batterystats) dump options:");
         pw.println("  [--checkin] [--history] [--history-start] [--unplugged] [--charged] [-c]");
-        pw.println("  [--reset] [--write] [-h] [<package.name>]");
+        pw.println("  [--daily] [--reset] [--write] [--new-daily] [--read-daily] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
         pw.println("  --history: show only history data.");
         pw.println("  --history-start <num>: show only history data starting at given time offset.");
         pw.println("  --unplugged: only output data since last unplugged.");
         pw.println("  --charged: only output data since last charged.");
+        pw.println("  --daily: only output full daily data.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
+        pw.println("  --new-daily: immediately create and write new daily stats record.");
+        pw.println("  --read-daily: read-load last written daily stats.");
         pw.println("  <package.name>: optional name of package to filter output by.");
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
@@ -836,6 +839,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     flags |= BatteryStats.DUMP_UNPLUGGED_ONLY;
                 } else if ("--charged".equals(arg)) {
                     flags |= BatteryStats.DUMP_CHARGED_ONLY;
+                } else if ("--daily".equals(arg)) {
+                    flags |= BatteryStats.DUMP_DAILY_ONLY;
                 } else if ("--reset".equals(arg)) {
                     synchronized (mStats) {
                         mStats.resetAllStatsCmdLocked();
@@ -846,6 +851,18 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     synchronized (mStats) {
                         mStats.writeSyncLocked();
                         pw.println("Battery stats written.");
+                        noOutput = true;
+                    }
+                } else if ("--new-daily".equals(arg)) {
+                    synchronized (mStats) {
+                        mStats.recordDailyStatsLocked();
+                        pw.println("New daily stats written.");
+                        noOutput = true;
+                    }
+                } else if ("--read-daily".equals(arg)) {
+                    synchronized (mStats) {
+                        mStats.readDailyStatsLocked();
+                        pw.println("Last daily stats read.");
                         noOutput = true;
                     }
                 } else if ("--enable".equals(arg) || "enable".equals(arg)) {
