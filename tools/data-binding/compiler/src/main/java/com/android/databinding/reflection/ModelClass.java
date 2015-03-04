@@ -62,4 +62,21 @@ public interface ModelClass {
     ModelMethod[] getMethods(String name, int numParameters);
 
     ModelClass getSuperclass();
+
+    String getCanonicalName();
+
+    /**
+     * Since when this class is available. Important for Binding expressions so that we don't
+     * call non-existing APIs when setting UI.
+     *
+     * @return The SDK_INT where this method was added. If it is not a framework method, should
+     * return 1.
+     */
+    int getMinApi();
+
+    /**
+     * Returns the JNI description of the method which can be used to lookup it in SDK.
+     * @see com.android.databinding.reflection.TypeUtil
+     */
+    String getJniDescription();
 }

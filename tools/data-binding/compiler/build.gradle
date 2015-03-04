@@ -40,6 +40,7 @@ dependencies {
     compile project(":baseLibrary")
     compile project(":grammarBuilder")
     compile project(":xmlGrammar")
+    testCompile "com.android.databinding:library:$version@jar"
 }
 uploadArchives {
     repositories {

@@ -16,15 +16,60 @@
 package com.android.databinding.reflection;
 
 import com.google.common.base.Preconditions;
+import com.android.databinding.reflection.annotation.AnnotationAnalyzer;
+import com.android.databinding.util.L;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.processing.ProcessingEnvironment;
 
 public abstract class ModelAnalyzer {
+
+    public static final String[] LIST_CLASS_NAMES = {
+            "java.util.List",
+            "android.util.SparseArray",
+            "android.util.SparseBooleanArray",
+            "android.util.SparseIntArray",
+            "android.util.SparseLongArray",
+            "android.util.LongSparseArray",
+            "android.support.v4.util.LongSparseArray",
+    };
+
+    public static final String MAP_CLASS_NAME = "java.util.Map";
+
+    public static final String STRING_CLASS_NAME = "java.lang.String";
+
+    public static final String OBJECT_CLASS_NAME = "java.lang.Object";
+
+    static ModelAnalyzer instance;
+
+    public static final String OBSERVABLE_CLASS_NAME = "android.binding.Observable";
+
+    public static final String OBSERVABLE_LIST_CLASS_NAME = "android.binding.ObservableList";
+
+    public static final String OBSERVABLE_MAP_CLASS_NAME = "android.binding.ObservableMap";
+
+    public static final String[] OBSERVABLE_FIELDS = {
+            "com.android.databinding.library.ObservableBoolean",
+            "com.android.databinding.library.ObservableByte",
+            "com.android.databinding.library.ObservableChar",
+            "com.android.databinding.library.ObservableShort",
+            "com.android.databinding.library.ObservableInt",
+            "com.android.databinding.library.ObservableLong",
+            "com.android.databinding.library.ObservableFloat",
+            "com.android.databinding.library.ObservableDouble",
+            "com.android.databinding.library.ObservableField",
+    };
+
+    public static final String I_VIEW_DATA_BINDER
+            = "com.android.databinding.library.IViewDataBinder";
+
     private static ModelAnalyzer sAnalyzer;
+
+    protected void setInstance(ModelAnalyzer analyzer) {
+        sAnalyzer = analyzer;
+    }
 
     public abstract boolean isDataBinder(ModelClass modelClass);
 
@@ -68,27 +113,32 @@ public abstract class ModelAnalyzer {
     }
 
     public static void setProcessingEnvironment(ProcessingEnvironment processingEnvironment) {
+        if (sAnalyzer != null) {
+            throw new IllegalStateException("processing env is already created, you cannot "
+                    + "change class loader after that");
+        }
+        L.d("setting processing env to %s", processingEnvironment);
         AnnotationAnalyzer annotationAnalyzer = new AnnotationAnalyzer(processingEnvironment);
         sAnalyzer = annotationAnalyzer;
     }
 
     public String getDefaultValue(String className) {
-        if("int".equals(className)) {
+        if ("int".equals(className)) {
             return "0";
         }
-        if("short".equals(className)) {
+        if ("short".equals(className)) {
             return "0";
         }
-        if("long".equals(className)) {
+        if ("long".equals(className)) {
             return "0L";
         }
-        if("float".equals(className)) {
+        if ("float".equals(className)) {
             return "0f";
         }
-        if("double".equals(className)) {
+        if ("double".equals(className)) {
             return "0.0";
         }
-        if("boolean".equals(className)) {
+        if ("boolean".equals(className)) {
             return "false";
         }
         if ("char".equals(className)) {
@@ -105,4 +155,6 @@ public abstract class ModelAnalyzer {
     public abstract List<URL> getResources(String name);
 
     public abstract ModelClass findClass(Class classType);
+
+    public abstract TypeUtil createTypeUtil();
 }

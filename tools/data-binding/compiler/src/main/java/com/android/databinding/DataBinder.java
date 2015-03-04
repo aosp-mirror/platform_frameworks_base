@@ -62,6 +62,7 @@ public class DataBinder {
     
     public void writeBinders() {
         for (LayoutBinder layoutBinder : mLayoutBinders) {
+            L.d("writing data binder %s", layoutBinder.getClassName());
             mFileWriter.writeToFile(layoutBinder.getPackage() + "." + layoutBinder.getClassName(),
                     layoutBinder.writeViewBinder());
         }

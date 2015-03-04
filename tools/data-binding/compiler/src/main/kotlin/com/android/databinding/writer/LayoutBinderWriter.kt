@@ -620,7 +620,16 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                         }.joinToString(" || ")
                         }) {") {
                             it.value.forEach { binding ->
-                                tab("${binding.toJavaCode(binding.getTarget().fieldName, binding.getExpr().toCode().generate())};")
+                                tab("// api target ${binding.getMinApi()}")
+                                val bindingCode = binding.toJavaCode(binding.getTarget().fieldName, binding.getExpr().toCode().generate())
+                                if (binding.getMinApi() > 1) {
+                                    tab("if(com.android.databinding.library.DataBinder.getBuildSdkInt() >= ${binding.getMinApi()}) {") {
+                                        tab("$bindingCode;")
+                                    }
+                                    tab("}")
+                                } else {
+                                    tab("$bindingCode;")
+                                }
                             }
                         }
                         tab("}")

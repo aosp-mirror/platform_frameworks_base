@@ -27,6 +27,8 @@ import com.android.databinding.expr.SymbolExpr;
 import com.android.databinding.expr.TernaryExpr;
 import com.android.databinding.reflection.Callable;
 import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.java.JavaAnalyzer;
+import com.android.databinding.reflection.java.JavaClass;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +45,7 @@ public class ExpressionVisitorTest {
 
     @Before
     public void setUp() throws Exception {
-        ModelAnalyzer.initForTests();
+        JavaAnalyzer.initForTests();
     }
 
     private <T extends Expr> T parse(String input, Class<T> klass) {
@@ -57,7 +59,7 @@ public class ExpressionVisitorTest {
         final SymbolExpr res = parse("null", SymbolExpr.class);
         assertEquals(1, mParser.getModel().size());
         assertEquals("null", res.getText());
-        assertSame(res.getResolvedType(), Object.class);
+        assertEquals(new JavaClass(Object.class),res.getResolvedType());
         assertEquals(0, res.getDependencies().size());
     }
 
@@ -69,7 +71,7 @@ public class ExpressionVisitorTest {
 
         @Before
         public void setUp() throws Exception {
-            ModelAnalyzer.initForTests();
+            JavaAnalyzer.initForTests();
         }
 
         @Parameterized.Parameters
@@ -115,7 +117,7 @@ public class ExpressionVisitorTest {
         assertEquals(1, mParser.mModel.size());
         assertEquals("myStr", id.getName());
         id.setUserDefinedType("java.lang.String");
-        assertSame(String.class, id.getResolvedType());
+        assertEquals(new JavaClass(String.class), id.getResolvedType());
     }
 
     @Test
@@ -142,7 +144,7 @@ public class ExpressionVisitorTest {
         assertTrue(parsed.getChild() instanceof IdentifierExpr);
         final IdentifierExpr id = (IdentifierExpr) parsed.getChild();
         id.setUserDefinedType("java.lang.String");
-        assertSame(int.class, parsed.getResolvedType());
+        assertEquals(new JavaClass(int.class), parsed.getResolvedType());
         Callable getter = parsed.getGetter();
         assertEquals(Callable.Type.METHOD, getter.type);
         assertEquals("length", getter.name);
@@ -158,7 +160,7 @@ public class ExpressionVisitorTest {
         assertTrue(parsed.getChild() instanceof IdentifierExpr);
         final IdentifierExpr id = (IdentifierExpr) parsed.getChild();
         id.setUserDefinedType("java.lang.String");
-        assertSame(byte[].class, parsed.getResolvedType());
+        assertEquals(new JavaClass(byte[].class), parsed.getResolvedType());
         Callable getter = parsed.getGetter();
         assertEquals(Callable.Type.METHOD, getter.type);
         assertEquals("getBytes", getter.name);

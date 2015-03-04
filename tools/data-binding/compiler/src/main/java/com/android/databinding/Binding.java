@@ -18,6 +18,7 @@ package com.android.databinding;
 
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.store.SetterStore;
 import com.android.databinding.expr.Expr;
 
@@ -26,7 +27,7 @@ public class Binding {
     private final String mName;
     private final Expr mExpr;
     private final BindingTarget mTarget;
-    private String mJavaCode = null;
+    private SetterStore.SetterCall mSetterCall;
 
     public Binding(BindingTarget target, String name, Expr expr) {
         mTarget = target;
@@ -34,15 +35,31 @@ public class Binding {
         mExpr = expr;
     }
 
+    private SetterStore.SetterCall getSetterCall() {
+        if (mSetterCall == null) {
+            ModelClass viewType = mTarget.getResolvedType();
+            mSetterCall = SetterStore.get(ModelAnalyzer.getInstance()).getSetterCall(mName,
+                    viewType, mExpr.getResolvedType(), mExpr.getModel().getImports());
+        }
+        return mSetterCall;
+    }
+
     public BindingTarget getTarget() {
         return mTarget;
     }
 
     public String toJavaCode(String targetViewName, String expressionCode) {
-        ModelClass viewType = mTarget.getResolvedType();
-        return SetterStore.get(ModelAnalyzer.getInstance()).getSetterCall(mName, viewType,
-                mExpr.getResolvedType(), targetViewName, expressionCode,
-                mExpr.getModel().getImports());
+        return getSetterCall().toJava(targetViewName, expressionCode);
+    }
+
+    /**
+     * The min api level in which this binding should be executed.
+     * <p>
+     * This should be the minimum value among the dependencies of this binding. For now, we only
+     * check the setter.
+     */
+    public int getMinApi() {
+        return getSetterCall().getMinApi();
     }
 
 //    private String resolveJavaCode(ModelAnalyzer modelAnalyzer) {

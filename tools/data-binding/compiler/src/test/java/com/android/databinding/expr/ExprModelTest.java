@@ -19,8 +19,12 @@ package com.android.databinding.expr;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
+import com.android.databinding.MockLayoutBinder;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.LayoutBinder;
+import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.java.JavaAnalyzer;
+import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.util.L;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -31,6 +35,7 @@ import org.junit.Test;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
+import java.io.File;
 import java.util.BitSet;
 import java.util.List;
 
@@ -45,8 +50,8 @@ public class ExprModelTest {
         }
 
         @Override
-        protected Class resolveType(ModelAnalyzer modelAnalyzer) {
-            return Integer.class;
+        protected ModelClass resolveType(ModelAnalyzer modelAnalyzer) {
+            return modelAnalyzer.findClass(Integer.class);
         }
 
         @Override
@@ -77,7 +82,7 @@ public class ExprModelTest {
 
     @Before
     public void setUp() throws Exception {
-        ModelAnalyzer.initForTests();
+        JavaAnalyzer.initForTests();
         mExprModel = new ExprModel();
     }
 
@@ -118,7 +123,7 @@ public class ExprModelTest {
 
     @Test
     public void testShouldRead() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         IdentifierExpr a = lb.addVariable("a", "java.lang.String");
         IdentifierExpr b = lb.addVariable("b", "java.lang.String");
@@ -140,7 +145,7 @@ public class ExprModelTest {
 
     @Test
     public void testTernaryInsideTernary() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         IdentifierExpr cond1 = lb.addVariable("cond1", "boolean");
         IdentifierExpr cond2 = lb.addVariable("cond2", "boolean");
@@ -185,7 +190,7 @@ public class ExprModelTest {
 
     @Test
     public void testRequirementFlags() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         IdentifierExpr a = lb.addVariable("a", "java.lang.String");
         IdentifierExpr b = lb.addVariable("b", "java.lang.String");
@@ -256,7 +261,7 @@ public class ExprModelTest {
 
     @Test
     public void testPostConditionalDependencies() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
 
 
@@ -273,7 +278,7 @@ public class ExprModelTest {
         Expr bcCmp = bcTernary.getPred();
         Expr u1GetCondD = ((TernaryExpr) bcTernary.getIfTrue()).getPred();
         final MathExpr xxPlusU2getCondE = (MathExpr) bcTernary.getIfFalse();
-        Expr u2GetCondE = xxPlusU2getCondE.mRight;
+        Expr u2GetCondE = xxPlusU2getCondE.getRight();
         Expr u1Name = abTernary.getIfTrue();
         Expr u2Name = abTernary.getIfFalse();
         Expr u1LastName = ((TernaryExpr) bcTernary.getIfTrue()).getIfTrue();
@@ -338,7 +343,7 @@ public class ExprModelTest {
 
     @Test
     public void testCircularDependency() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         IdentifierExpr a = lb.addVariable("a", int.class.getCanonicalName());
         IdentifierExpr b = lb.addVariable("b", int.class.getCanonicalName());
@@ -354,7 +359,7 @@ public class ExprModelTest {
 
     @Test
     public void testNestedCircularDependency() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         IdentifierExpr a = lb.addVariable("a", int.class.getCanonicalName());
         IdentifierExpr b = lb.addVariable("b", int.class.getCanonicalName());
@@ -374,7 +379,7 @@ public class ExprModelTest {
 
     @Test
     public void testNoFlagsForNonBindingStatic() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         lb.addVariable("a", int.class.getCanonicalName());
         final MathExpr parsed = parse(lb, "a * (3 + 2)", MathExpr.class);
@@ -386,7 +391,7 @@ public class ExprModelTest {
 
     @Test
     public void testFlagsForBindingStatic() {
-        LayoutBinder lb = new LayoutBinder(null);
+        LayoutBinder lb = new MockLayoutBinder();
         mExprModel = lb.getModel();
         lb.addVariable("a", int.class.getCanonicalName());
         final Expr staticParsed = parse(lb, "3 + 2", MathExpr.class);
@@ -401,7 +406,6 @@ public class ExprModelTest {
 
     @Test
     public void testPartialNeededRead() {
-
         throw new NotImplementedException("create a test that has a variable which can be read for "
                 + "some flags and also may be read for some condition. Try both must match and"
                 + " partial match and none-match in conditionals");

@@ -21,6 +21,7 @@ import com.android.databinding.expr.IdentifierExpr;
 import com.android.databinding.expr.StaticIdentifierExpr;
 import com.android.databinding.reflection.Callable;
 import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.java.JavaClass;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +36,7 @@ public class LayoutBinderTest {
     ExprModel mExprModel;
     @Before
     public void setUp() throws Exception {
-        ModelAnalyzer.initForTests();
-        mLayoutBinder = new LayoutBinder(null);
+        mLayoutBinder = new MockLayoutBinder();
         mExprModel = mLayoutBinder.getModel();
     }
 
@@ -49,7 +49,7 @@ public class LayoutBinderTest {
         assertEquals(value.getClass(), IdentifierExpr.class);
         final IdentifierExpr id = (IdentifierExpr) value;
         assertEquals("test", id.getName());
-        assertEquals(String.class, id.getResolvedType());
+        assertEquals(new JavaClass(String.class), id.getResolvedType());
         assertTrue(id.isDynamic());
     }
 
@@ -62,7 +62,7 @@ public class LayoutBinderTest {
         assertEquals(value.getClass(), StaticIdentifierExpr.class);
         final IdentifierExpr id = (IdentifierExpr) value;
         assertEquals("test", id.getName());
-        assertEquals(String.class, id.getResolvedType());
+        assertEquals(new JavaClass(String.class), id.getResolvedType());
         assertFalse(id.isDynamic());
     }
 

@@ -16,19 +16,48 @@
 
 package com.android.databinding.util;
 
+import com.android.databinding.reflection.annotation.AnnotationAnalyzer;
+import com.android.databinding.reflection.ModelAnalyzer;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
+
+import javax.tools.Diagnostic;
 
 public class L {
 
     public static void d(String msg, Object... args) {
-        System.out.println("[LDEBUG] " + String.format(msg, args));
+        printMessage(Diagnostic.Kind.NOTE, String.format(msg, args));
+    }
+
+    public static void d(Throwable t, String msg, Object... args) {
+        printMessage(Diagnostic.Kind.NOTE,
+                String.format(msg, args) + " " + ExceptionUtils.getStackTrace(t));
     }
 
     public static void e(String msg, Object... args) {
-        System.out.println("[LERROR] " + String.format(msg, args));
+        printMessage(Diagnostic.Kind.ERROR, String.format(msg, args));
     }
+
     public static void e(Throwable t, String msg, Object... args) {
-        System.out
-                .println("[LERROR]" + String.format(msg, args) + " " + ExceptionUtils.getStackTrace(t));
+        printMessage(Diagnostic.Kind.ERROR,
+                String.format(msg, args) + " " + ExceptionUtils.getStackTrace(t));
     }
+
+    private static void printMessage(Diagnostic.Kind kind, String message) {
+        ModelAnalyzer modelAnalyzer = ModelAnalyzer.getInstance();
+        System.out.println("[" + kind.name() + "]: " + message);
+        if (modelAnalyzer instanceof AnnotationAnalyzer) {
+            ((AnnotationAnalyzer) modelAnalyzer).getProcessingEnv().getMessager()
+                    .printMessage(kind, message);
+            if (kind == Diagnostic.Kind.ERROR) {
+                throw new RuntimeException("failure, see logs for details.\n" + message);
+            }
+        } else {
+
+            if (kind == Diagnostic.Kind.ERROR) {
+                throw new RuntimeException(message);
+            }
+        }
+    }
+
 }

@@ -51,6 +51,7 @@ import org.apache.commons.io.IOUtils
 import java.io.FileWriter
 import java.io.ByteArrayOutputStream
 import org.apache.commons.codec.binary.Base64
+import com.android.builder.model.ApiVersion
 
 class DataBinderPlugin : Plugin<Project> {
 
@@ -77,6 +78,8 @@ class DataBinderPlugin : Plugin<Project> {
     var codeGenTargetFolder : File by Delegates.notNull()
 
     var viewBinderSource : File by Delegates.notNull()
+
+    var sdkDir : File by Delegates.notNull()
 
     val viewBinderSourceRoot by Delegates.lazy {
         File(project.getBuildDir(), "databinder")
@@ -118,6 +121,8 @@ class DataBinderPlugin : Plugin<Project> {
 
     fun createXmlProcessor(p: Project): LayoutXmlProcessor {
         val ss = p.getExtensions().getByName("android") as AppExtension
+        sdkDir = ss.getSdkDirectory()
+        val minSdkVersion = ss.getDefaultConfig().getMinSdkVersion()
         androidJar = File(ss.getSdkDirectory().getAbsolutePath() + "/platforms/${ss.getCompileSdkVersion()}/android.jar")
         log("creating parser!")
         log("project build dir:${p.getBuildDir()}")
@@ -128,10 +133,7 @@ class DataBinderPlugin : Plugin<Project> {
         variantData = field.get(appVariant) as ApplicationVariantData
 
 
-        // TODO
         val packageName = variantData.generateRClassTask.getPackageForR()
-                //"com.com.android.databinding.android.databinding.libraryGen"//variantData.getPackageName()
-        //
         val sources = variantData.getJavaSources()
         sources.forEach({
             log("source: ${it}");
@@ -168,7 +170,7 @@ class DataBinderPlugin : Plugin<Project> {
         dexTask.doFirst(MethodClosure(this, "preDexAnalysis"))
         val writerOutBase = codeGenTargetFolder.getAbsolutePath();
         fileWriter = GradleFileWriter(writerOutBase)
-        return LayoutXmlProcessor(packageName, resourceFolders, fileWriter)
+        return LayoutXmlProcessor(packageName, resourceFolders, fileWriter, minSdkVersion.getApiLevel())
     }
 
 
@@ -195,6 +197,6 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     fun generateIntermediateFile(o: Any?) {
-        xmlProcessor.writeIntermediateFile()
+        xmlProcessor.writeIntermediateFile(sdkDir)
     }
 }

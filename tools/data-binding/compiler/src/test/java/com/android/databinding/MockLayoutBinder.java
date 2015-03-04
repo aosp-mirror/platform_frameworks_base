@@ -13,6 +13,12 @@
 
 package com.android.databinding;
 
-public class MockObservableLsit {
+import com.android.databinding.store.ResourceBundle;
 
+public class MockLayoutBinder extends LayoutBinder {
+
+    public MockLayoutBinder() {
+        super(new ResourceBundle("com.test"),
+                new ResourceBundle.LayoutFileBundle("blah.xml", 1, "."));
+    }
 }

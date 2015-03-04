@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.reflection;
+package com.android.databinding.reflection.annotation;
+
+import com.android.databinding.reflection.ModelField;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 
-public class AnnotationField implements ModelField {
+class AnnotationField implements ModelField {
 
     final VariableElement mField;
 
@@ -38,7 +40,7 @@ public class AnnotationField implements ModelField {
     public boolean equals(Object obj) {
         if (obj instanceof AnnotationField) {
             AnnotationField that = (AnnotationField) obj;
-            return mDeclaredClass.equals(that.mDeclaredClass) && AnnotationAnalyzer.instance
+            return mDeclaredClass.equals(that.mDeclaredClass) && AnnotationAnalyzer.get()
                     .getTypeUtils().isSameType(mField.asType(), that.mField.asType());
         } else {
             return false;

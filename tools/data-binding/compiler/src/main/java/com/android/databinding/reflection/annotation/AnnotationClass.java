@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.reflection;
+package com.android.databinding.reflection.annotation;
 
-import com.android.databinding.store.SetterStore;
+import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.ModelMethod;
+import com.android.databinding.reflection.SdkUtil;
+import com.android.databinding.reflection.TypeUtil;
+import com.android.databinding.util.L;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +37,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
-public class AnnotationClass implements ModelClass {
+class AnnotationClass implements ModelClass {
 
     final TypeMirror mTypeMirror;
 
@@ -100,15 +104,13 @@ public class AnnotationClass implements ModelClass {
                 }
             }
             if (foundInterface == null) {
-                printMessage(Diagnostic.Kind.ERROR,
-                        "Detected " + interfaceType + " type for " + mTypeMirror +
+                L.e("Detected " + interfaceType + " type for " + mTypeMirror +
                                 ", but not able to find the implemented interface.");
                 return null;
             }
         }
         if (foundInterface.getKind() != TypeKind.DECLARED) {
-            printMessage(Diagnostic.Kind.ERROR,
-                    "Found " + interfaceType + " type for " + mTypeMirror +
+            L.e("Found " + interfaceType + " type for " + mTypeMirror +
                             ", but it isn't a declared type: " + foundInterface);
             return null;
         }
@@ -286,6 +288,21 @@ public class AnnotationClass implements ModelClass {
     }
 
     @Override
+    public String getCanonicalName() {
+        return getTypeUtils().erasure(mTypeMirror).toString();
+    }
+
+    @Override
+    public int getMinApi() {
+        return SdkUtil.getMinApi(this);
+    }
+
+    @Override
+    public String getJniDescription() {
+        return TypeUtil.getInstance().getDescription(this);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof AnnotationClass) {
             return getTypeUtils().isSameType(mTypeMirror, ((AnnotationClass) obj).mTypeMirror);
@@ -300,31 +317,27 @@ public class AnnotationClass implements ModelClass {
     }
 
     private static Types getTypeUtils() {
-        return AnnotationAnalyzer.instance.processingEnv.getTypeUtils();
+        return AnnotationAnalyzer.get().mProcessingEnv.getTypeUtils();
     }
 
     private static Elements getElementUtils() {
-        return AnnotationAnalyzer.instance.processingEnv.getElementUtils();
+        return AnnotationAnalyzer.get().mProcessingEnv.getElementUtils();
     }
 
     private static AnnotationClass[] getListTypes() {
-        return AnnotationAnalyzer.instance.getListTypes();
+        return AnnotationAnalyzer.get().getListTypes();
     }
 
     private static AnnotationClass getMapType() {
-        return AnnotationAnalyzer.instance.getMapType();
+        return AnnotationAnalyzer.get().getMapType();
     }
 
     private static AnnotationClass getStringType() {
-        return AnnotationAnalyzer.instance.getStringType();
+        return AnnotationAnalyzer.get().getStringType();
     }
 
     private static AnnotationClass getObjectType() {
-        return AnnotationAnalyzer.instance.getObjectType();
-    }
-
-    private static void printMessage(Diagnostic.Kind kind, String message) {
-        AnnotationAnalyzer.instance.printMessage(kind, message);
+        return AnnotationAnalyzer.get().getObjectType();
     }
 
     @Override

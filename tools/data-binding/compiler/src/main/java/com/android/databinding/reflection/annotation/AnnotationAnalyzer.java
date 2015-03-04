@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.databinding.reflection;
+package com.android.databinding.reflection.annotation;
 
 import com.google.common.collect.ImmutableMap;
 
+import com.android.databinding.reflection.Callable;
+import com.android.databinding.reflection.ModelAnalyzer;
+import com.android.databinding.reflection.ModelClass;
+import com.android.databinding.reflection.ModelField;
+import com.android.databinding.reflection.ModelMethod;
+import com.android.databinding.reflection.TypeUtil;
 import com.android.databinding.util.L;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,39 +51,7 @@ import javax.tools.Diagnostic;
 
 public class AnnotationAnalyzer extends ModelAnalyzer {
 
-    public static final String[] LIST_CLASS_NAMES = {
-            "java.util.List",
-            "android.util.SparseArray",
-            "android.util.SparseBooleanArray",
-            "android.util.SparseIntArray",
-            "android.util.SparseLongArray",
-            "android.util.LongSparseArray",
-            "android.support.v4.util.LongSparseArray",
-    };
-
-    public static final String MAP_CLASS_NAME = "java.util.Map";
-
-    public static final String STRING_CLASS_NAME = "java.lang.String";
-
-    public static final String OBJECT_CLASS_NAME = "java.lang.Object";
-
-    static AnnotationAnalyzer instance;
-    private static final String OBSERVABLE_CLASS_NAME = "android.binding.Observable";
-    private static final String OBSERVABLE_LIST_CLASS_NAME = "android.binding.ObservableList";
-    private static final String OBSERVABLE_MAP_CLASS_NAME = "android.binding.ObservableMap";
-    private static final String[] OBSERVABLE_FIELDS = {
-            "com.android.databinding.library.ObservableBoolean",
-            "com.android.databinding.library.ObservableByte",
-            "com.android.databinding.library.ObservableChar",
-            "com.android.databinding.library.ObservableShort",
-            "com.android.databinding.library.ObservableInt",
-            "com.android.databinding.library.ObservableLong",
-            "com.android.databinding.library.ObservableFloat",
-            "com.android.databinding.library.ObservableDouble",
-            "com.android.databinding.library.ObservableField",
-    };
-    private static final String I_VIEW_DATA_BINDER = "com.android.databinding.library.IViewDataBinder";
-    private static final Map<String, TypeKind> PRIMITIVE_TYPES =
+    public static final Map<String, TypeKind> PRIMITIVE_TYPES =
             new ImmutableMap.Builder<String, TypeKind>()
                     .put("boolean", TypeKind.BOOLEAN)
                     .put("byte", TypeKind.BYTE)
@@ -89,7 +63,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
                     .put("double", TypeKind.DOUBLE)
                     .build();
 
-    public final ProcessingEnvironment processingEnv;
+    public final ProcessingEnvironment mProcessingEnv;
 
     private AnnotationClass[] mListTypes;
     private AnnotationClass mMapType;
@@ -102,8 +76,8 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     private AnnotationClass mIViewDataBinderType;
 
     public AnnotationAnalyzer(ProcessingEnvironment processingEnvironment) {
-        processingEnv = processingEnvironment;
-        instance = this;
+        mProcessingEnv = processingEnvironment;
+        setInstance(this);
     }
 
     public AnnotationClass[] getListTypes() {
@@ -118,6 +92,10 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
             }
         }
         return mListTypes;
+    }
+
+    public static AnnotationAnalyzer get() {
+        return (AnnotationAnalyzer) getInstance();
     }
 
     public AnnotationClass getMapType() {
@@ -154,7 +132,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         }
         return mObservableListType;
     }
-    
+
     private AnnotationClass getObservableMapType() {
         if (mObservableMapType == null) {
             mObservableMapType = loadClassErasure(OBSERVABLE_MAP_CLASS_NAME);
@@ -185,7 +163,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     }
 
     private TypeElement findType(String type) {
-        return processingEnv.getElementUtils().getTypeElement(type);
+        return mProcessingEnv.getElementUtils().getTypeElement(type);
     }
 
     @Override
@@ -196,9 +174,9 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     @Override
     public Callable findMethod(ModelClass modelClass, String name,
             List<ModelClass> args, boolean staticAccess) {
-        AnnotationClass clazz = (AnnotationClass)modelClass;
+        AnnotationClass clazz = (AnnotationClass) modelClass;
         // TODO implement properly
-        for (String methodName :  new String[]{"set" + StringUtils.capitalize(name), name}) {
+        for (String methodName : new String[]{"set" + StringUtils.capitalize(name), name}) {
             for (ModelMethod method : clazz.getMethods(methodName, args.size())) {
                 if (method.isStatic() == staticAccess) {
                     ModelClass[] parameters = method.getParameterTypes();
@@ -226,13 +204,14 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
             }
         }
         String message = "cannot find method '" + name + "' in class " + clazz.toJavaCode();
-        printMessage(Diagnostic.Kind.ERROR, message);
-        throw new IllegalArgumentException(message);
+        IllegalArgumentException e = new IllegalArgumentException(message);
+        L.e(e, "cannot find method %s in class %s", name, clazz.toJavaCode());
+        throw e;
     }
 
     @Override
     public boolean isObservable(ModelClass modelClass) {
-        AnnotationClass annotationClass = (AnnotationClass)modelClass;
+        AnnotationClass annotationClass = (AnnotationClass) modelClass;
         return getObservableType().isAssignableFrom(annotationClass) ||
                 getObservableListType().isAssignableFrom(annotationClass) ||
                 getObservableMapType().isAssignableFrom(annotationClass);
@@ -240,8 +219,9 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public boolean isObservableField(ModelClass modelClass) {
-        AnnotationClass annotationClass = (AnnotationClass)modelClass;
-        AnnotationClass erasure = new AnnotationClass(getTypeUtils().erasure(annotationClass.mTypeMirror));
+        AnnotationClass annotationClass = (AnnotationClass) modelClass;
+        AnnotationClass erasure = new AnnotationClass(
+                getTypeUtils().erasure(annotationClass.mTypeMirror));
         for (AnnotationClass observableField : getObservableFieldTypes()) {
             if (observableField.isAssignableFrom(erasure)) {
                 return true;
@@ -264,7 +244,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     @Override
     public Callable findMethodOrField(ModelClass modelClass, String name, boolean staticAccess) {
-        AnnotationClass annotationClass = (AnnotationClass)modelClass;
+        AnnotationClass annotationClass = (AnnotationClass) modelClass;
         for (String methodName :
                 new String[]{"get" + StringUtils.capitalize(name),
                         "is" + StringUtils.capitalize(name), name}) {
@@ -375,13 +355,21 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
             String baseClassName = className.substring(0, templateOpenIndex);
             TypeElement typeElement = getTypeElement(baseClassName, imports);
+            if (typeElement == null) {
+                L.e("cannot find type element for %s", baseClassName);
+                return null;
+            }
 
             ArrayList<String> templateParameters = splitTemplateParameters(paramStr);
             TypeMirror[] typeArgs = new TypeMirror[templateParameters.size()];
             for (int i = 0; i < typeArgs.length; i++) {
                 typeArgs[i] = findClass(templateParameters.get(i), imports).mTypeMirror;
+                if (typeArgs[i] == null) {
+                    L.e("cannot find type argument for %s in %s", templateParameters.get(i),
+                            baseClassName);
+                    return null;
+                }
             }
-
             Types typeUtils = getTypeUtils();
             declaredType = typeUtils.getDeclaredType(typeElement, typeArgs);
         }
@@ -457,8 +445,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
                 urls.add(resources.nextElement());
             }
         } catch (IOException e) {
-            printMessage(Diagnostic.Kind.ERROR, "IOException while getting resources: " +
-                    e.getLocalizedMessage());
+            L.e(e, "IOException while getting resources:");
         }
 
         return urls;
@@ -470,14 +457,19 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
     }
 
     public Types getTypeUtils() {
-        return processingEnv.getTypeUtils();
+        return mProcessingEnv.getTypeUtils();
     }
 
     public Elements getElementUtils() {
-        return processingEnv.getElementUtils();
+        return mProcessingEnv.getElementUtils();
     }
 
-    public void printMessage(Diagnostic.Kind kind, String message) {
-        processingEnv.getMessager().printMessage(kind, message);
+    public ProcessingEnvironment getProcessingEnv() {
+        return mProcessingEnv;
+    }
+
+    @Override
+    public TypeUtil createTypeUtil() {
+        return new AnnotationTypeUtil(this);
     }
 }

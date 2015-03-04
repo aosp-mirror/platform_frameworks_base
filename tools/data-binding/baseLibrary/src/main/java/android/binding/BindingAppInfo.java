@@ -25,4 +25,6 @@ import java.lang.annotation.Target;
 public @interface BindingAppInfo {
     String buildId();
     String applicationPackage();
+    String sdkRoot();
+    int minSdk();
 }

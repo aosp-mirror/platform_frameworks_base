@@ -21,6 +21,7 @@ import com.android.databinding.store.ResourceBundle;
 import com.android.databinding.writer.JavaFileWriter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -48,16 +49,19 @@ public class LayoutXmlProcessor {
     public static final String APPLICATION_INFO_CLASS = "ApplicationBindingInfo";
     private final JavaFileWriter mFileWriter;
     private final ResourceBundle mResourceBundle;
+    private final int mMinSdk;
+
     private boolean mProcessingComplete;
     private boolean mWritten;
     private final String mBuildId = UUID.randomUUID().toString();
     private final List<File> mResourceFolders;
 
     public LayoutXmlProcessor(String applicationPackage, List<File> resourceFolders,
-            JavaFileWriter fileWriter) {
+            JavaFileWriter fileWriter, int minSdk) {
         mFileWriter = fileWriter;
         mResourceBundle = new ResourceBundle(applicationPackage);
         mResourceFolders = resourceFolders;
+        mMinSdk = minSdk;
     }
 
     public boolean processResources()
@@ -84,13 +88,13 @@ public class LayoutXmlProcessor {
         return true;
     }
 
-    public void writeIntermediateFile() throws JAXBException {
+    public void writeIntermediateFile(File sdkDir) throws JAXBException {
         if (mWritten) {
             return;
         }
         JAXBContext context = JAXBContext.newInstance(ResourceBundle.LayoutFileBundle.class);
         Marshaller marshaller = context.createMarshaller();
-        writeAppInfo(marshaller);
+        writeAppInfo(marshaller, sdkDir);
         for (List<ResourceBundle.LayoutFileBundle> layouts : mResourceBundle.getLayoutBundles()
                 .values()) {
             for (ResourceBundle.LayoutFileBundle layout : layouts) {
@@ -124,10 +128,13 @@ public class LayoutXmlProcessor {
         mFileWriter.writeToFile(RESOURCE_BUNDLE_PACKAGE + className, classString);
     }
 
-    private void writeAppInfo(Marshaller marshaller) {
+    private void writeAppInfo(Marshaller marshaller, File sdkDir) {
+        final String sdkPath = StringEscapeUtils.escapeJava(sdkDir.getAbsolutePath());
         String classString = "import android.binding.BindingAppInfo;\n\n" +
-                "@BindingAppInfo(buildId=\"" + mBuildId + "\", applicationPackage=\"" +
-                mResourceBundle.getAppPackage() + "\")\n" +
+                "@BindingAppInfo(buildId=\"" + mBuildId + "\", " +
+                "applicationPackage=\"" + mResourceBundle.getAppPackage() + "\", " +
+                "sdkRoot=\"" + sdkPath + "\", " +
+                "minSdk=" + mMinSdk + ")\n" +
                 "public class " + APPLICATION_INFO_CLASS + " {}\n";
         mFileWriter.writeToFile(RESOURCE_BUNDLE_PACKAGE + APPLICATION_INFO_CLASS, classString);
     }

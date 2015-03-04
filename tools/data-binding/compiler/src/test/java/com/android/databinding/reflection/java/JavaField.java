@@ -11,8 +11,16 @@
  * limitations under the License.
  */
 
-package com.android.databinding;
+package com.android.databinding.reflection.java;
 
-public class MockObservableMap {
+import com.android.databinding.reflection.ModelField;
 
+import java.lang.reflect.Field;
+
+public class JavaField implements ModelField {
+    public final Field mField;
+
+    public JavaField(Field field) {
+        mField = field;
+    }
 }

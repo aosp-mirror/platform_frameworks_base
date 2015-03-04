@@ -15,10 +15,12 @@
  */
 package com.android.databinding.store;
 
-import com.android.databinding.reflection.AnnotationAnalyzer;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.reflection.ModelMethod;
+import com.android.databinding.util.L;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +45,6 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 
@@ -111,13 +112,9 @@ public class SetterStore {
             }
             return new SetterStore(modelAnalyzer, store);
         } catch (IOException e) {
-            printMessage(Diagnostic.Kind.ERROR, "Could not read SetterStore intermediate file: " +
-                    e.getLocalizedMessage());
-            e.printStackTrace();
+            L.e(e, "Could not read SetterStore intermediate file");
         } catch (ClassNotFoundException e) {
-            printMessage(Diagnostic.Kind.ERROR, "Could not read SetterStore intermediate file: " +
-                    e.getLocalizedMessage());
-            e.printStackTrace();
+            L.e(e, "Could not read SetterStore intermediate file");
         }
         return new SetterStore(modelAnalyzer, store);
     }
@@ -255,8 +252,7 @@ public class SetterStore {
         Filer filer = processingEnvironment.getFiler();
         FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT,
                 SetterStore.class.getPackage().getName(), "setter_store.bin");
-        printMessage(Diagnostic.Kind.NOTE, "============= Writing intermediate file: " +
-                resource.getName());
+        L.d("============= Writing intermediate file: %s", resource.getName());
         ObjectOutputStream out = null;
         try {
             out = new ObjectOutputStream(resource.openOutputStream());
@@ -269,17 +265,17 @@ public class SetterStore {
         }
     }
 
-    public String getSetterCall(String attribute, ModelClass viewType,
-            ModelClass valueType, String viewExpression, String valueExpression,
-            Map<String, String> imports) {
+    public SetterCall getSetterCall(String attribute, ModelClass viewType,
+            ModelClass valueType, Map<String, String> imports) {
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
                 attribute = attribute.substring(colon + 1);
             }
         }
+        SetterCall setterCall = null;
         MethodDescription adapter = null;
-        String setterName = null;
+        MethodDescription conversionMethod = null;
         if (viewType != null) {
             HashMap<AccessorKey, MethodDescription> adapters = mStore.adapterMethods.get(attribute);
             ModelMethod bestSetterMethod = getBestSetter(viewType, valueType, attribute, imports);
@@ -288,7 +284,7 @@ public class SetterStore {
             if (bestSetterMethod != null) {
                 bestViewType = bestSetterMethod.getDeclaringClass();
                 bestValueType = bestSetterMethod.getParameterTypes()[0];
-                setterName = bestSetterMethod.getName();
+                setterCall = new ModelMethodSetter(bestSetterMethod);
             }
 
             if (adapters != null) {
@@ -299,8 +295,7 @@ public class SetterStore {
                         if (adapterViewType.isAssignableFrom(viewType)) {
                             try {
                                 ModelClass adapterValueType = mClassAnalyzer
-                                        .findClass(key.valueType,
-                                                imports);
+                                        .findClass(key.valueType, imports);
                                 boolean isBetterView = bestViewType == null ||
                                         bestValueType.isAssignableFrom(adapterValueType);
                                 if (isBetterParameter(valueType, adapterValueType, bestValueType,
@@ -308,35 +303,29 @@ public class SetterStore {
                                     bestViewType = adapterViewType;
                                     bestValueType = adapterValueType;
                                     adapter = adapters.get(key);
+                                    setterCall = new AdapterSetter(adapter);
                                 }
 
                             } catch (Exception e) {
-                                printMessage(Diagnostic.Kind.NOTE,
-                                        "Unknown class: " + key.valueType);
+                                L.e(e, "Unknown class: %s", key.valueType);
                             }
                         }
                     } catch (Exception e) {
-                        printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + key.viewType);
+                        L.e(e, "Unknown class: %s", key.viewType);
                     }
                 }
             }
 
-            MethodDescription conversionMethod = getConversionMethod(valueType, bestValueType,
-                    imports);
-            if (conversionMethod != null) {
-                valueExpression = conversionMethod.type + "." + conversionMethod.method + "(" +
-                        valueExpression + ")";
-            }
+            conversionMethod = getConversionMethod(valueType, bestValueType, imports);
         }
-        if (adapter == null) {
-            if (setterName == null) {
-                setterName = getDefaultSetter(attribute);
-            }
-            return viewExpression + "." + setterName + "(" + valueExpression + ")";
-        } else {
-            return adapter.type + "." + adapter.method + "(" + viewExpression + ", " +
-                    valueExpression + ")";
+        if (setterCall == null) {
+            setterCall = new DummySetter(getDefaultSetter(attribute));
+            // might be an include tag etc. just note it and continue.
+            L.d("Cannot find the setter for attribute " + attribute + ". might be an include file,"
+                    + " moving on.");
         }
+        setterCall.setConverter(conversionMethod);
+        return setterCall;
     }
 
     public boolean isUntaggable(String viewType) {
@@ -345,15 +334,14 @@ public class SetterStore {
 
     private ModelMethod getBestSetter(ModelClass viewType, ModelClass argumentType,
             String attribute, Map<String, String> imports) {
-        String setterName = null;
-
+        List<String> setterCandidates = new ArrayList<>();
         HashMap<String, MethodDescription> renamed = mStore.renamedMethods.get(attribute);
         if (renamed != null) {
             for (String className : renamed.keySet()) {
                 try {
                     ModelClass renamedViewType = mClassAnalyzer.findClass(className, imports);
                     if (renamedViewType.isAssignableFrom(viewType)) {
-                        setterName = renamed.get(className).method;
+                        setterCandidates.add(renamed.get(className).method);
                         break;
                     }
                 } catch (Exception e) {
@@ -361,34 +349,40 @@ public class SetterStore {
                 }
             }
         }
-        if (setterName == null) {
-            setterName = getDefaultSetter(attribute);
-        }
-        ModelMethod[] methods = viewType.getMethods(setterName, 1);
+        setterCandidates.add(getDefaultSetter(attribute));
+        setterCandidates.add(trimAttributeNamespace(attribute));
 
-        ModelClass bestParameterType = null;
         ModelMethod bestMethod = null;
-        List<ModelClass> args = new ArrayList<>();
-        args.add(argumentType);
-        for (ModelMethod method : methods) {
-            ModelClass[] parameterTypes = method.getParameterTypes();
-            if (method.getReturnType(args).isVoid() && !method.isStatic() && method.isPublic()) {
-                ModelClass param = parameterTypes[0];
-                if (isBetterParameter(argumentType, param, bestParameterType, true, imports)) {
-                    bestParameterType = param;
-                    bestMethod = method;
+        for (String name : setterCandidates) {
+            ModelMethod[] methods = viewType.getMethods(name, 1);
+            ModelClass bestParameterType = null;
+
+            List<ModelClass> args = new ArrayList<>();
+            args.add(argumentType);
+            for (ModelMethod method : methods) {
+                ModelClass[] parameterTypes = method.getParameterTypes();
+                if (method.getReturnType(args).isVoid() && !method.isStatic() && method
+                        .isPublic()) {
+                    ModelClass param = parameterTypes[0];
+                    if (isBetterParameter(argumentType, param, bestParameterType, true, imports)) {
+                        bestParameterType = param;
+                        bestMethod = method;
+
+                    }
                 }
             }
         }
         return bestMethod;
+
+    }
+
+    private static String trimAttributeNamespace(String attribute) {
+        final int colonIndex = attribute.indexOf(':');
+        return colonIndex == -1 ? attribute : attribute.substring(colonIndex + 1);
     }
 
     private static String getDefaultSetter(String attribute) {
-        int colonIndex = attribute.indexOf(':');
-        String propertyName;
-        propertyName = Character.toUpperCase(attribute.charAt(colonIndex + 1)) +
-                attribute.substring(colonIndex + 2);
-        return "set" + propertyName;
+        return "set" + StringUtils.capitalize(trimAttributeNamespace(attribute));
     }
 
     private boolean isBetterParameter(ModelClass argument, ModelClass parameter,
@@ -463,12 +457,12 @@ public class SetterStore {
                                     return conversion.get(toClassName);
                                 }
                             } catch (Exception e) {
-                                printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + toClassName);
+                                L.d(e, "Unknown class: %s", toClassName);
                             }
                         }
                     }
                 } catch (Exception e) {
-                    printMessage(Diagnostic.Kind.NOTE, "Unknown class: " + fromClassName);
+                    L.d(e, "Unknown class: %s", fromClassName);
                 }
             }
         }
@@ -549,15 +543,6 @@ public class SetterStore {
         }
     }
 
-    private static void printMessage(Diagnostic.Kind kind, String message) {
-        ModelAnalyzer modelAnalyzer = ModelAnalyzer.getInstance();
-        if (modelAnalyzer instanceof AnnotationAnalyzer) {
-            ((AnnotationAnalyzer) modelAnalyzer).printMessage(kind, message);
-        } else {
-            System.out.println(message);
-        }
-    }
-
     private static class MethodDescription implements Serializable {
 
         private static final long serialVersionUID = 1;
@@ -569,12 +554,14 @@ public class SetterStore {
         public MethodDescription(String type, String method) {
             this.type = type;
             this.method = method;
+            L.d("BINARY created method desc 1 %s %s", type, method );
         }
 
         public MethodDescription(ExecutableElement method) {
             TypeElement enclosingClass = (TypeElement) method.getEnclosingElement();
             this.type = enclosingClass.getQualifiedName().toString();
             this.method = method.getSimpleName().toString();
+            L.d("BINARY created method desc 2 %s %s, %s", type, this.method, method);
         }
 
         @Override
@@ -653,5 +640,86 @@ public class SetterStore {
         public Intermediate upgrade() {
             return this;
         }
+    }
+
+    public static class DummySetter extends SetterCall {
+        private String mMethodName;
+
+        public DummySetter(String methodName) {
+            mMethodName = methodName;
+        }
+
+        @Override
+        public String toJavaInternal(String viewExpression, String valueExpression) {
+            return viewExpression + "." + mMethodName + "(" + valueExpression + ")";
+        }
+
+        @Override
+        public int getMinApi() {
+            return 1;
+        }
+
+
+    }
+
+    public static class AdapterSetter extends SetterCall {
+        final MethodDescription mAdapter;
+
+        public AdapterSetter(MethodDescription adapter) {
+            mAdapter = adapter;
+        }
+
+        @Override
+        public String toJavaInternal(String viewExpression, String valueExpression) {
+            return mAdapter.type + "." + mAdapter.method + "(" + viewExpression + ", " +
+                    valueExpression + ")";
+        }
+
+        @Override
+        public int getMinApi() {
+            return 1;
+        }
+    }
+
+    public static class ModelMethodSetter extends SetterCall {
+        final ModelMethod mModelMethod;
+
+        public ModelMethodSetter(ModelMethod modelMethod) {
+            mModelMethod = modelMethod;
+        }
+
+        @Override
+        public String toJavaInternal(String viewExpression, String valueExpression) {
+            return viewExpression + "." + mModelMethod.getName() + "(" + valueExpression + ")";
+        }
+
+        @Override
+        public int getMinApi() {
+            return mModelMethod.getMinApi();
+        }
+    }
+
+    public static abstract class SetterCall {
+        private MethodDescription mConverter;
+
+        public SetterCall() {
+        }
+
+        public void setConverter(MethodDescription converter) {
+            mConverter = converter;
+        }
+
+        protected abstract String toJavaInternal(String viewExpression, String converted);
+
+        public final String toJava(String viewExpression, String valueExpression) {
+            return toJavaInternal(viewExpression, convertValue(valueExpression));
+        }
+
+        protected String convertValue(String valueExpression) {
+            return mConverter == null ? valueExpression :
+                    mConverter.type + "." + mConverter.method + "(" + valueExpression + ")";
+        }
+
+        abstract public int getMinApi();
     }
 }

@@ -29,4 +29,19 @@ public interface ModelMethod {
     boolean isPublic();
 
     boolean isStatic();
+
+    /**
+     * Since when this method is available. Important for Binding expressions so that we don't
+     * call non-existing APIs when setting UI.
+     *
+     * @return The SDK_INT where this method was added. If it is not a framework method, should
+     * return 1.
+     */
+    int getMinApi();
+
+    /**
+     * Returns the JNI description of the method which can be used to lookup it in SDK.
+     * @see com.android.databinding.reflection.TypeUtil
+     */
+    String getJniDescription();
 }

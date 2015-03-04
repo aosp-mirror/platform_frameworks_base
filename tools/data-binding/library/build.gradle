@@ -69,17 +69,14 @@ dependencies {
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
 
-    if (name.equals("debug")) {
+    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
         return; // Skip debug builds.
     }
-    def suffix = name.capitalize()
-
-//    def sourcesJarTask = project.tasks.create(name: "sourceJar${suffix}", type: Jar) {
-//        classifier = 'sources'
-//        from android.sourceSets.main.java
-//    }
-//
-//    artifacts.add('archives', sourcesJarTask);
+    // @Jar version is needed to run compiler tests
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
 }
 uploadArchives {
     repositories {

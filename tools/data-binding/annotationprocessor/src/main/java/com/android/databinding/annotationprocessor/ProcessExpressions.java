@@ -1,7 +1,25 @@
+/*
+ * Copyright (C) 2015 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.databinding.annotationprocessor;
 
 import com.android.databinding.CompilerChef;
+import com.android.databinding.reflection.SdkUtil;
 import com.android.databinding.store.ResourceBundle;
+import com.android.databinding.util.L;
 import com.android.databinding.writer.AnnotationJavaFileWriter;
 
 import org.apache.commons.codec.binary.Base64;
@@ -11,6 +29,7 @@ import android.binding.BinderBundle;
 import android.binding.BindingAppInfo;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -37,12 +56,12 @@ public class ProcessExpressions extends AbstractProcessor {
 
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         ResourceBundle resourceBundle = null;
-
         for (Element element : roundEnv.getElementsAnnotatedWith(BindingAppInfo.class)) {
             final BindingAppInfo appInfo = element.getAnnotation(BindingAppInfo.class);
             if (appInfo == null) {
                 continue; // It gets confused between BindingAppInfo and BinderBundle
             }
+            SdkUtil.initialize(appInfo.minSdk(), new File(appInfo.sdkRoot()));
             if (element.getKind() != ElementKind.CLASS) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                         "BindingAppInfo associated with wrong type. Should be a class.", element);

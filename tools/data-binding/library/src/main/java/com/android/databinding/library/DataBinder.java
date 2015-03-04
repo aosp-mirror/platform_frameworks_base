@@ -17,6 +17,7 @@
 package com.android.databinding.library;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -29,6 +30,12 @@ import java.util.WeakHashMap;
 public class DataBinder {
 
     static DataBinderMapper sMapper;
+
+    /**
+     * Instead of directly accessing Build.VERSION.SDK_INT, generated code uses this value so that
+     * we can test API dependent behavior.
+     */
+    static int SDK_INT = Build.VERSION.SDK_INT;
 
     private WeakHashMap<View, ViewDataBinder> mDataBinderMap = new WeakHashMap<>();
 
@@ -47,6 +54,10 @@ public class DataBinder {
             throw new RuntimeException(t);
         }
         return sMapper;
+    }
+
+    public static int getBuildSdkInt() {
+        return SDK_INT;
     }
 
     public static int convertToId(String key) {
