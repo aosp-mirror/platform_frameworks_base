@@ -215,7 +215,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * <p>A device admin application which listens to this intent can find out if the device was
      * provisioned for the device owner or profile owner case by calling respectively
      * {@link android.app.admin.DevicePolicyManager#isDeviceOwnerApp} and
-     * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}.
+     * {@link android.app.admin.DevicePolicyManager#isProfileOwnerApp}. You will generally handle
+     * this in {@link DeviceAdminReceiver#onProfileProvisioningComplete}.
      *
      * <p>Input: Nothing.</p>
      * <p>Output: Nothing</p>
@@ -223,6 +224,23 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PROFILE_PROVISIONING_COMPLETE =
             "android.app.action.PROFILE_PROVISIONING_COMPLETE";
+
+    /**
+     * Broadcast Action: This broadcast is sent to indicate that the system is ready for the device
+     * initializer to perform user setup tasks. This is only applicable to devices managed by a
+     * device owner app.
+     *
+     * <p>The broadcast will be limited to the {@link DeviceAdminReceiver} component specified in
+     * the (@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME) field
+     * of the original intent or NFC bump that started the provisioning process. You will generally
+     * handle this in {@link DeviceAdminReceiver#onReadyForUserInitialization}.
+     *
+     * <p>Input: Nothing.</p>
+     * <p>Output: Nothing</p>
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_READY_FOR_USER_INITIALIZATION =
+            "android.app.action.READY_FOR_USER_INITIALIZATION";
 
     /** @hide */
     public static final String ACTION_CHOOSE_PRIVATE_KEY_ALIAS = "android.app.action.CHOOSE_PRIVATE_KEY_ALIAS";
@@ -245,7 +263,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /** @hide */
     public static final String EXTRA_CHOOSE_PRIVATE_KEY_RESPONSE = "android.app.extra.CHOOSE_PRIVATE_KEY_RESPONSE";
 
-   /**
+    /**
      * Name under which a DevicePolicy component publishes information
      * about itself.  This meta-data must reference an XML resource containing
      * a device-admin tag.
@@ -382,26 +400,50 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Called when provisioning of a managed profile or managed device has completed successfully.
      *
-     * <p> As a prerequisit for the execution of this callback the (@link DeviceAdminReceiver} has
+     * <p> As a prerequisite for the execution of this callback the {@link DeviceAdminReceiver} has
      * to declare an intent filter for {@link #ACTION_PROFILE_PROVISIONING_COMPLETE}.
      * Its component must also be specified in the {@link DevicePolicyManager#EXTRA_DEVICE_ADMIN}
      * of the {@link DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE} intent that started the
      * managed provisioning.
      *
-     * <p>When provisioning is complete, the managed profile is hidden until the profile owner
-     * calls {DevicePolicyManager#setProfileEnabled(ComponentName admin)}. Typically a profile
-     * owner will enable the profile when it has finished any additional setup such as adding an
-     * account by using the {@link AccountManager} and calling apis to bring the profile into the
-     * desired state.
+     * <p>When provisioning of a managed profile is complete, the managed profile is hidden until
+     * the profile owner calls {DevicePolicyManager#setProfileEnabled(ComponentName admin)}.
+     * Typically a profile owner will enable the profile when it has finished any additional setup
+     * such as adding an account by using the {@link AccountManager} and calling apis to bring the
+     * profile into the desired state.
      *
      * <p> Note that provisioning completes without waiting for any server interactions, so the
-     * profile owner needs to wait for data to be available if required (e.g android device ids or
+     * profile owner needs to wait for data to be available if required (e.g. android device ids or
      * other data that is set as a result of server interactions).
      *
      * @param context The running context as per {@link #onReceive}.
      * @param intent The received intent as per {@link #onReceive}.
      */
     public void onProfileProvisioningComplete(Context context, Intent intent) {
+    }
+
+    /**
+     * Called during provisioning of a managed device to allow the device initializer to perform
+     * user setup steps. Only device initializers should override this method.
+     *
+     * <p> Called when the DeviceAdminReceiver receives a
+     * {@link #ACTION_READY_FOR_USER_INITIALIZATION} broadcast. As a prerequisite for the execution
+     * of this callback the {@link DeviceAdminReceiver} has
+     * to declare an intent filter for {@link #ACTION_READY_FOR_USER_INITIALIZATION}. Only the
+     * component specified in the
+     * {@link DevicePolicyManager#EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME} field of the
+     * original intent or NFC bump that started the provisioning process will receive this callback.
+     *
+     * <p>It is not assumed that the device initializer is finished when it returns from
+     * this call, as it may do additional setup asynchronously. The device initializer must call
+     * {DevicePolicyManager#setUserEnabled(ComponentName admin)} when it has finished any additional
+     * setup (such as adding an account by using the {@link AccountManager}) in order for the user
+     * to be functional.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     */
+    public void onReadyForUserInitialization(Context context, Intent intent) {
     }
 
     /**
@@ -488,6 +530,8 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onLockTaskModeEntering(context, intent, pkg);
         } else if (ACTION_LOCK_TASK_EXITING.equals(action)) {
             onLockTaskModeExiting(context, intent);
+        } else if (ACTION_READY_FOR_USER_INITIALIZATION.equals(action)) {
+            onReadyForUserInitialization(context, intent);
         }
     }
 }

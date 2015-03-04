@@ -1139,13 +1139,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             boolean ownsProfile = (getProfileOwner(userHandle) != null
                     && getProfileOwner(userHandle).getPackageName()
                         .equals(admin.info.getPackageName()));
+            boolean ownsInitialization = isDeviceInitializer(admin.info.getPackageName())
+                    && !hasUserSetupCompleted(userHandle);
 
             if (reqPolicy == DeviceAdminInfo.USES_POLICY_DEVICE_OWNER) {
-                if (ownsDevice) {
+                if (ownsDevice || (userHandle == UserHandle.USER_OWNER && ownsInitialization)) {
                     return admin;
                 }
             } else if (reqPolicy == DeviceAdminInfo.USES_POLICY_PROFILE_OWNER) {
-                if (ownsDevice || ownsProfile) {
+                if (ownsDevice || ownsProfile || ownsInitialization) {
                     return admin;
                 }
             } else {
@@ -1899,7 +1901,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
             if (admin.getUid() != Binder.getCallingUid()) {
-                // If trying to remove device owner, refuse when the caller is not the owner.
+                // Active device owners must remain active admins.
                 if (isDeviceOwner(adminReceiver.getPackageName())) {
                     return;
                 }
@@ -3866,6 +3868,112 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
+    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer,
+            String ownerName) {
+        if (!mHasFeature) {
+            return false;
+        }
+        if (initializer == null || !DeviceOwner.isInstalled(
+                initializer.getPackageName(), mContext.getPackageManager())) {
+            throw new IllegalArgumentException("Invalid component name " + initializer
+                    + " for device initializer");
+        }
+        synchronized (this) {
+            enforceCanSetDeviceInitializer(who);
+
+            if (mDeviceOwner != null && mDeviceOwner.hasDeviceInitializer()) {
+                throw new IllegalStateException(
+                        "Trying to set device initializer but device initializer is already set.");
+            }
+
+            if (mDeviceOwner == null) {
+                // Device owner state does not exist, create it.
+                mDeviceOwner = DeviceOwner.createWithDeviceInitializer(
+                        initializer.getPackageName(), ownerName);
+                mDeviceOwner.writeOwnerFile();
+                return true;
+            } else {
+                // Device owner already exists, update it.
+                mDeviceOwner.setDeviceInitializer(initializer.getPackageName(), ownerName);
+                mDeviceOwner.writeOwnerFile();
+                return true;
+            }
+        }
+    }
+
+    private void enforceCanSetDeviceInitializer(ComponentName who) {
+        if (who == null) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
+            if (hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+                throw new IllegalStateException(
+                        "Trying to set device initializer but device is already provisioned.");
+            }
+        } else {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+    }
+
+    @Override
+    public boolean isDeviceInitializer(String packageName) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            return mDeviceOwner != null
+                    && mDeviceOwner.hasDeviceInitializer()
+                    && mDeviceOwner.getDeviceInitializerPackageName().equals(packageName);
+        }
+    }
+
+    @Override
+    public String getDeviceInitializer() {
+        if (!mHasFeature) {
+            return null;
+        }
+        synchronized (this) {
+            if (mDeviceOwner != null && mDeviceOwner.hasDeviceInitializer()) {
+                return mDeviceOwner.getDeviceInitializerPackageName();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void clearDeviceInitializer(String packageName) {
+        if (!mHasFeature) {
+            return;
+        }
+        if (packageName == null) {
+            throw new NullPointerException("packageName is null");
+        }
+        try {
+            int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
+            if (uid != Binder.getCallingUid()) {
+                throw new SecurityException(
+                        "clearDeviceInitializer can only be called by the device initializer");
+            }
+        } catch (NameNotFoundException e) {
+            throw new SecurityException(e);
+        }
+        if (!isDeviceInitializer(packageName)) {
+            throw new SecurityException(
+                    "clearDeviceInitializer can only be called by the device initializer");
+        }
+        synchronized (this) {
+            long ident = Binder.clearCallingIdentity();
+            try {
+                if (mDeviceOwner != null) {
+                    mDeviceOwner.clearDeviceInitializer();
+                    mDeviceOwner.writeOwnerFile();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @Override
     public boolean setProfileOwner(ComponentName who, String ownerName, int userHandle) {
         if (!mHasFeature) {
             return false;
@@ -3957,6 +4065,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DevicePolicyData policy = getUserData(userHandle);
         // If policy is null, return true, else check if the setup has completed.
         return policy == null || policy.mUserSetupComplete;
+    }
+
+    @Override
+    public boolean setUserEnabled(ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            int userId = UserHandle.getCallingUserId();
+
+            ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isDeviceInitializer(activeAdmin.info.getPackageName())) {
+                throw new SecurityException(
+                        "This method can only be called by device initializers");
+            }
+
+            long id = Binder.clearCallingIdentity();
+            try {
+                if (!isDeviceOwner(activeAdmin.info.getPackageName())) {
+                    IPackageManager ipm = AppGlobals.getPackageManager();
+                    ipm.setComponentEnabledSetting(who,
+                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                            PackageManager.DONT_KILL_APP, userId);
+
+                    removeActiveAdmin(who, userId);
+                }
+
+                if (userId == UserHandle.USER_OWNER) {
+                    Settings.Global.putInt(mContext.getContentResolver(),
+                            Settings.Global.DEVICE_PROVISIONED, 1);
+                }
+                Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                        Settings.Secure.USER_SETUP_COMPLETE, 1, userId);
+            } catch (RemoteException e) {
+                Log.i(LOG_TAG, "Can't talk to package manager", e);
+                return false;
+            } finally {
+                restoreCallingIdentity(id);
+            }
+            return true;
+        }
     }
 
     @Override

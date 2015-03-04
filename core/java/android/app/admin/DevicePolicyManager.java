@@ -357,6 +357,52 @@ public class DevicePolicyManager {
              "android.app.extra.PROVISIONING_SKIP_ENCRYPTION";
 
     /**
+     * On devices managed by a device owner app, a String representation of a Component name extra
+     * indicating the component of the application that is temporarily granted device owner
+     * privileges during device initialization and profile owner privileges during secondary user
+     * initialization.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     * @see ComponentName#unflattenFromString()
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME
+        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_COMPONENT_NAME";
+
+    /**
+     * A String extra holding an http url that specifies the download location of the device
+     * initializer package. When not provided it is assumed that the device initializer package is
+     * already installed.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION
+        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION";
+
+    /**
+     * A String extra holding a http cookie header which should be used in the http request to the
+     * url specified in {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER
+        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
+
+    /**
+     * A String extra holding the SHA-1 checksum of the file at download location specified in
+     * {@link #EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_DOWNLOAD_LOCATION}. If this doesn't
+     * match the file at the download location an error will be shown to the user and the user will
+     * be asked to factory reset the device.
+     *
+     * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     */
+    public static final String EXTRA_PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM
+        = "android.app.extra.PROVISIONING_DEVICE_INITIALIZER_PACKAGE_CHECKSUM";
+
+    /**
      * This MIME type is used for starting the Device Owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
@@ -2382,6 +2428,112 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Sets the given component as the device initializer. The package must already be installed and
+     * set as an active device administrator, and there must not be an existing device initializer,
+     * for this call to succeed. This method can only be called by an app holding the
+     * MANAGE_DEVICE_ADMINS permission before the device is provisioned or by a device owner app. A
+     * device initializer app is granted device owner privileges during device initialization and
+     * profile owner privileges during secondary user initialization.
+     * @param who Which {@link DeviceAdminReceiver} this request is associated with, or null if not
+     *        called by the device owner.
+     * @param initializer Which {@link DeviceAdminReceiver} to make device initializer.
+     * @param initializerName The user-visible name of the device initializer.
+     * @return whether the package was successfully registered as the device initializer.
+     * @throws IllegalArgumentException if the package name is null or invalid
+     * @throws IllegalStateException if the caller is not device owner or the device has
+     *         already been provisioned or a device initializer already exists.
+     */
+    public boolean setDeviceInitializer(ComponentName who, ComponentName initializer,
+            String initializerName) throws IllegalArgumentException, IllegalStateException {
+        if (mService != null) {
+            try {
+                return mService.setDeviceInitializer(who, initializer, initializerName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to set device initializer");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Used to determine if a particular package has been registered as the device initializer.
+     *
+     * @param packageName the package name of the app, to compare with the registered device
+     *        initializer app, if any.
+     * @return whether or not the caller is registered as the device initializer app.
+     */
+    public boolean isDeviceInitializerApp(String packageName) {
+        if (mService != null) {
+            try {
+                return mService.isDeviceInitializer(packageName);
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to check device initializer");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Clears the current device initializer.  The caller must be the device initializer.
+     *
+     * This function should be used cautiously as once it is called it cannot
+     * be undone.
+     */
+    public void clearDeviceInitializerApp() {
+        if (mService != null) {
+            try {
+                mService.clearDeviceInitializer(mContext.getPackageName());
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to clear device initializer");
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the device initializer of the system.
+     *
+     * @return the package name of the device initializer.
+     */
+    @SystemApi
+    public String getDeviceInitializerApp() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceInitializer();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get device initializer");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets the enabled state of the user. A user should be enabled only once it is ready to
+     * be used.
+     *
+     * <p>Device initializer must call this method to mark the user as functional.
+     * Only the device initializer agent can call this.
+     *
+     * <p>When the user is enabled, if the device initializer is not also the device owner, the
+     * device initializer will no longer have elevated permissions to call methods in this class.
+     * Additionally, it will be removed as an active administrator and its
+     * {@link DeviceAdminReceiver} will be disabled.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return whether the user is now enabled.
+     */
+    public boolean setUserEnabled(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.setUserEnabled(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * @hide
      * @deprecated Use #ACTION_SET_PROFILE_OWNER
      * Sets the given component as an active admin and registers the package as the profile
@@ -2434,7 +2586,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
      * Checks if the user was already setup.
      */
     public boolean hasUserSetupCompleted() {
@@ -3119,8 +3270,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to set a user restriction specified
-     * by the key.
+     * Called by a profile or device owner to set a user restriction specified by the key.
      * <p>
      * The calling device admin must be a profile or device owner; if it is not,
      * a security exception will be thrown.
@@ -3141,8 +3291,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile or device owner to clear a user restriction specified
-     * by the key.
+     * Called by a profile or device owner to clear a user restriction specified by the key.
      * <p>
      * The calling device admin must be a profile or device owner; if it is not,
      * a security exception will be thrown.
@@ -3163,7 +3312,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owner to hide or unhide packages. When a package is hidden it
+     * Called by profile or device owners to hide or unhide packages. When a package is hidden it
      * is unavailable for use, but the data and actual package file remain.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -3185,7 +3334,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device or profile owner to determine if a package is hidden.
+     * Called by profile or device owners to determine if a package is hidden.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package to retrieve the hidden status of.
@@ -3203,7 +3352,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owner to re-enable a system app that was disabled by default
+     * Called by profile or device owners to re-enable a system app that was disabled by default
      * when the user was initialized.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -3220,7 +3369,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owner to re-enable system apps by intent that were disabled
+     * Called by profile or device owners to re-enable system apps by intent that were disabled
      * by default when the user was initialized.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
