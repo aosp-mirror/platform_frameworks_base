@@ -5032,8 +5032,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean sb = mStatusBarController.checkShowTransientBarLw();
             boolean nb = mNavigationBarController.checkShowTransientBarLw();
             if (sb || nb) {
-                WindowState barTarget = sb ? mStatusBar : mNavigationBar;
-                if (sb ^ nb && barTarget != swipeTarget) {
+                // Don't show status bar when swiping on already visible navigation bar
+                if (!nb && swipeTarget == mNavigationBar) {
                     if (DEBUG) Slog.d(TAG, "Not showing transient bar, wrong swipe target");
                     return;
                 }

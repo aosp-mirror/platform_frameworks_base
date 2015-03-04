@@ -13,55 +13,80 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp"
-    >
-    <LinearLayout
-        android:id="@+id/text"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="4dp"
-        android:padding="1dp"
-        >
+        android:background="#ff009688"
+        android:gravity="center_vertical"
+        android:paddingBottom="24dp">
+
+    <FrameLayout
+            android:id="@+id/immersive_cling_chevron"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:layout_marginTop="-24dp"
+            android:layout_centerHorizontal="true">
+
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/cling_arrow_up"
-            />
-        <FrameLayout
+                android:id="@+id/immersive_cling_back_bg_light"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="center"
+                android:src="@drawable/immersive_cling_light_bg_circ" />
+
+        <ImageView
+                android:id="@+id/immersive_cling_back_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="center"
+                android:src="@drawable/immersive_cling_bg_circ" />
+
+        <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="8dp"
+                android:scaleType="center"
+                android:src="@drawable/ic_expand_more_48dp"
+                android:tint="#ff009688"/>
+    </FrameLayout>
+
+    <TextView
+            android:id="@+id/immersive_cling_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/cling_bg"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="24dp">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/immersive_mode_confirmation"
-                android:textColor="#80000000"
-                android:textSize="16sp"
-                />
-        </FrameLayout>
-    </LinearLayout>
+            android:layout_below="@id/immersive_cling_chevron"
+            android:paddingEnd="48dp"
+            android:paddingStart="48dp"
+            android:paddingTop="40dp"
+            android:text="@string/immersive_cling_title"
+            android:textColor="@color/primary_text_default_material_light"
+            android:textSize="24sp" />
+
+    <TextView
+            android:id="@+id/immersive_cling_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/immersive_cling_title"
+            android:paddingEnd="48dp"
+            android:paddingStart="48dp"
+            android:paddingTop="12.6dp"
+            android:text="@string/immersive_cling_description"
+            android:textColor="@color/primary_text_default_material_light"
+            android:textSize="16sp" />
 
     <Button
-        android:id="@+id/ok"
-        android:layout_width="160sp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginTop="18dp"
-        android:gravity="center"
-        android:text="@string/ok"
-        android:background="@drawable/cling_button"
-        />
+            android:id="@+id/ok"
+            style="@style/Widget.Material.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/immersive_cling_description"
+            android:layout_marginEnd="40dp"
+            android:layout_marginTop="18dp"
+            android:paddingEnd="8dp"
+            android:paddingStart="8dp"
+            android:text="@string/immersive_cling_positive"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
 
-</LinearLayout>
-
-
+</RelativeLayout>
