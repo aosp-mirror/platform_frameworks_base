@@ -435,8 +435,7 @@ public interface IActivityManager extends IInterface {
 
     public void deleteActivityContainer(IActivityContainer container) throws RemoteException;
 
-    public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
-            throws RemoteException;
+    public int getActivityDisplayId(IBinder activityToken) throws RemoteException;
 
     public IBinder getHomeActivityToken() throws RemoteException;
 
@@ -746,7 +745,7 @@ public interface IActivityManager extends IInterface {
     int GET_PERSISTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+181;
     int APP_NOT_RESPONDING_VIA_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+182;
     int GET_HOME_ACTIVITY_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+183;
-    int GET_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
+    int GET_ACTIVITY_DISPLAY_ID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+184;
     int DELETE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+185;
 
 
