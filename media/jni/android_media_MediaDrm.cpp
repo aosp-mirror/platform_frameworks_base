@@ -92,6 +92,7 @@ struct EventTypes {
     jint kEventKeyRequired;
     jint kEventKeyExpired;
     jint kEventVendorDefined;
+    jint kEventSessionReclaimed;
 } gEventTypes;
 
 struct KeyTypes {
@@ -193,6 +194,9 @@ void JNIDrmListener::notify(DrmPlugin::EventType eventType, int extra,
             break;
         case DrmPlugin::kDrmPluginEventVendorDefined:
             jeventType = gEventTypes.kEventVendorDefined;
+            break;
+        case DrmPlugin::kDrmPluginEventSessionReclaimed:
+            jeventType = gEventTypes.kEventSessionReclaimed;
             break;
         default:
             ALOGE("Invalid event DrmPlugin::EventType %d, ignored", (int)eventType);
@@ -565,6 +569,8 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gEventTypes.kEventKeyExpired = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "EVENT_VENDOR_DEFINED", "I");
     gEventTypes.kEventVendorDefined = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "EVENT_SESSION_RECLAIMED", "I");
+    gEventTypes.kEventSessionReclaimed = env->GetStaticIntField(clazz, field);
 
     GET_STATIC_FIELD_ID(field, clazz, "KEY_TYPE_STREAMING", "I");
     gKeyTypes.kKeyTypeStreaming = env->GetStaticIntField(clazz, field);

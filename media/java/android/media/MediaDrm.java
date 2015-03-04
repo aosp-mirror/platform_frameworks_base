@@ -277,6 +277,12 @@ public final class MediaDrm {
      */
     public static final int EVENT_VENDOR_DEFINED = 4;
 
+    /**
+     * This event indicates that a session opened by the app has been reclaimed by the resource
+     * manager.
+     */
+    public static final int EVENT_SESSION_RECLAIMED = 5;
+
     private static final int DRM_EVENT = 200;
 
     private class EventHandler extends Handler
