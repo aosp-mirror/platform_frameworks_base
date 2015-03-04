@@ -31,6 +31,7 @@ import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.statusbar.CommandQueue;
 
 import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
@@ -438,5 +439,9 @@ public class StatusBarKeyguardViewManager {
 
     public void keyguardGoingAway() {
         mPhoneStatusBar.keyguardGoingAway();
+    }
+
+    public void animateCollapsePanels() {
+        mPhoneStatusBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
     }
 }
