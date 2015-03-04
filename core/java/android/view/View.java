@@ -9941,7 +9941,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Like {@link #getMeasuredHeightAndState()}, but only returns the
-     * raw width component (that is the result is masked by
+     * raw height component (that is the result is masked by
      * {@link #MEASURED_SIZE_MASK}).
      *
      * @return The raw measured height of this view.
