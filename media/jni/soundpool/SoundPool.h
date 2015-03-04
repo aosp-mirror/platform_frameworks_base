@@ -136,6 +136,7 @@ public:
     void nextEvent();
     int nextChannelID() { return mNextEvent.channelID(); }
     void dump();
+    int getPrevSampleID(void) { return mPrevSampleID; }
 
 private:
     static void callback(int event, void* user, void *info);
@@ -152,6 +153,7 @@ private:
     int                 mAudioBufferSize;
     unsigned long       mToggle;
     bool                mAutoPaused;
+    int                 mPrevSampleID;
 };
 
 // application object for managing a pool of sounds
@@ -193,7 +195,7 @@ private:
     sp<Sample> findSample(int sampleID) { return mSamples.valueFor(sampleID); }
     SoundChannel* findChannel (int channelID);
     SoundChannel* findNextChannel (int channelID);
-    SoundChannel* allocateChannel_l(int priority);
+    SoundChannel* allocateChannel_l(int priority, int sampleID);
     void moveToFront_l(SoundChannel* channel);
     void notify(SoundPoolEvent event);
     void dump();
