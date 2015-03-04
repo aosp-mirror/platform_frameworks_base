@@ -1802,7 +1802,7 @@ status_t ResourceTable::addIncludedResources(Bundle* bundle, const sp<AaptAssets
         }
 
         const ResTable& featureTable = featureAssetManager.getResources(false);
-        mTypeIdOffset = max(mTypeIdOffset,
+        mTypeIdOffset = std::max(mTypeIdOffset,
                 findLargestTypeIdForPackage(featureTable, mAssetsPackage)); 
     }
 
@@ -2667,20 +2667,16 @@ ResourceTable::validateLocalizations(void)
     const String8 defaultLocale;
 
     // For all strings...
-    for (map<String16, map<String8, SourcePos> >::iterator nameIter = mLocalizations.begin();
-         nameIter != mLocalizations.end();
-         nameIter++) {
-        const map<String8, SourcePos>& configSrcMap = nameIter->second;
+    for (const auto& nameIter : mLocalizations) {
+        const std::map<String8, SourcePos>& configSrcMap = nameIter.second;
 
         // Look for strings with no default localization
         if (configSrcMap.count(defaultLocale) == 0) {
             SourcePos().warning("string '%s' has no default translation.",
-                    String8(nameIter->first).string());
+                    String8(nameIter.first).string());
             if (mBundle->getVerbose()) {
-                for (map<String8, SourcePos>::const_iterator locales = configSrcMap.begin();
-                    locales != configSrcMap.end();
-                    locales++) {
-                    locales->second.printf("locale %s found", locales->first.string());
+                for (const auto& locale : configSrcMap) {
+                    locale.second.printf("locale %s found", locale.first.string());
                 }
             }
             // !!! TODO: throw an error here in some circumstances
@@ -2691,8 +2687,8 @@ ResourceTable::validateLocalizations(void)
             const char* allConfigs = mBundle->getConfigurations().string();
             const char* start = allConfigs;
             const char* comma;
-            
-            set<String8> missingConfigs;
+
+            std::set<String8> missingConfigs;
             AaptLocaleValue locale;
             do {
                 String8 config;
@@ -2726,13 +2722,11 @@ ResourceTable::validateLocalizations(void)
 
             if (!missingConfigs.empty()) {
                 String8 configStr;
-                for (set<String8>::iterator iter = missingConfigs.begin();
-                     iter != missingConfigs.end();
-                     iter++) {
-                    configStr.appendFormat(" %s", iter->string());
+                for (const auto& iter : missingConfigs) {
+                    configStr.appendFormat(" %s", iter.string());
                 }
                 SourcePos().warning("string '%s' is missing %u required localizations:%s",
-                        String8(nameIter->first).string(),
+                        String8(nameIter.first).string(),
                         (unsigned int)missingConfigs.size(),
                         configStr.string());
             }

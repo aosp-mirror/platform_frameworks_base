@@ -16,8 +16,6 @@
 #include <queue>
 #include <set>
 
-using namespace std;
-
 class XMLNode;
 class ResourceTable;
 
@@ -28,7 +26,7 @@ enum {
     XML_COMPILE_STRIP_WHITESPACE = 1<<3,
     XML_COMPILE_STRIP_RAW_VALUES = 1<<4,
     XML_COMPILE_UTF8 = 1<<5,
-    
+
     XML_COMPILE_STANDARD_RESOURCE =
             XML_COMPILE_STRIP_COMMENTS | XML_COMPILE_ASSIGN_ATTRIBUTE_IDS
             | XML_COMPILE_STRIP_WHITESPACE | XML_COMPILE_STRIP_RAW_VALUES
@@ -115,7 +113,7 @@ public:
      * and would mess up iteration order for the existing
      * resources.
      */
-    queue<CompileResourceWorkItem>& getWorkQueue() {
+    std::queue<CompileResourceWorkItem>& getWorkQueue() {
         return mWorkQueue;
     }
 
@@ -577,10 +575,10 @@ private:
     size_t mNumLocal;
     SourcePos mCurrentXmlPos;
     Bundle* mBundle;
-    
+
     // key = string resource name, value = set of locales in which that name is defined
-    map<String16, map<String8, SourcePos> > mLocalizations;
-    queue<CompileResourceWorkItem> mWorkQueue;
+    std::map<String16, std::map<String8, SourcePos>> mLocalizations;
+    std::queue<CompileResourceWorkItem> mWorkQueue;
 };
 
 #endif
