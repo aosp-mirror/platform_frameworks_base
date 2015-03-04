@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"অ্যাপ্লিকেশানকে নিয়ার ফিল্ড কমিউনিকেশন (NFC) ট্যাগ, কার্ড এবং রিডারগুলির সাথে যোগাযোগ করতে দেয়৷"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"আপনার স্ক্রীন লক অক্ষম করুন"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"কী-লক এবং যেকোনো সংশ্লিষ্ট পাসওয়ার্ড সুরক্ষা অক্ষম করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ উদাহরণস্বরূপ, একটি ইনকামিং ফোন কল গ্রহণ করার সময়ে ফোনটি কী-লক অক্ষম করে, তারপরে কল শেষ হয়ে গেলে কী-লকটিকে পুনরায় সক্ষম করে৷"</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার পরিচালনা করুন"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ব্যবহার করার জন্য আঙ্গুলের ছাপের টেম্প্লেটগুলি যোগ করা এবং মোছার পদ্ধতিগুলি গ্রহন করতে অ্যাপ্লিকেশানটিতে অমুমতি দেয়৷"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার ব্যবহার করুন"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"অনুমোদনের জন্য আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার ব্যবহার করতে অ্যাপ্লিকেশানটিতে অনুমতি দেয়"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"সিঙ্ক সেটিংস পড়ে"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"অ্যাপ্লিকেশানটিকে একটি অ্যাকাউন্টের জন্য সিঙ্ক সেটিংস পড়ার অনুমতি দেয়৷ উদাহরণস্বরূপ, \'পিপল\' অ্যাপ্লিকেশানটি কোনো অ্যাকাউন্টের সাথে সিঙ্ক করা আছে কিনা তা নির্ধারণ করতে পারে৷"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"সমন্বয় চালু এবং বন্ধ করা টগল করুন"</string>
@@ -843,7 +839,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"সতর্কীকরণ ছাড়াই এই ফোনে থাকা ব্যাবহারকার্রী ডেটা মুছে ফেলে৷"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ডিভাইসের বৈশ্বিক প্রক্সী সেট করে"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"নীতিযখন নীতি সক্ষম করা হয় তখন ডিভাইসের বৈশ্বিক প্রক্সী ব্যবহার করা হবে সেই হিসাবে সেট করে৷ শুধুমাত্র ডিভাইসের মালিক বৈশ্বিক প্রক্সী সেট করতে পারেন৷"</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"স্ক্রীন লকের পাসওয়ার্ডের মেয়াদ শেষ হওয়ার সময়কাল সেট করে"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"স্ক্রীন লক করার জন্য পাসওয়ার্ডের মেয়াদ শেষ হওয়ার সময় সেট করে"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"স্ক্রীন লক করার পাসওয়ার্ড কত ঘন ঘন পরিবর্তন করা আবশ্যক তা পরিবর্তন করুন৷"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"সঞ্চয়স্থানের এনক্রিপশান সেট করে"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"এই সঞ্চিত অ্যাপ্লিকেশান ডেটা এনক্রিপ্ট করা দরকার৷"</string>

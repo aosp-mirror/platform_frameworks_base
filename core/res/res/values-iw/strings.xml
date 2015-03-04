@@ -740,14 +740,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"מאפשר לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\'."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ביטול נעילת המסך שלך"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"מאפשר לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון משבית את נעילת המקשים בעת קבלה של שיחת טלפון נכנסת, ולאחר מכן מפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ניהול חומרה של טביעות אצבעות"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"מאפשר לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות טביעות אצבעות שבהן ייעשה שימוש."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"שימוש בחומרה של טביעות אצבעות"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"מאפשר לאפליקציה להשתמש בחומרה של טביעות אצבעות לצורך אימות"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"קרא את הגדרות הסינכרון"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"מאפשר לאפליקציה לקרוא את הגדרות הסנכרון של חשבון. לדוגמה, ניתן לגלות כך האם האפליקציה \'אנשים\' מסונכרן עם חשבון כלשהו."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"הפעלת וכיבוי סנכרון"</string>

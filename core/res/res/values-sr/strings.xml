@@ -739,14 +739,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дозвољава апликацији да комуницира са ознакама, картицама и читачима комуникације кратког домета (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управљај хардвером за отиске прстију"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Дозвољава апликацији да активира методе за додавање и брисање шаблона отисака прстију који ће се користити."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"користи хардвер за отиске прстију"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозвољава апликацији да користи хардвер за отиске прстију ради потврде аутентичности"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читање подешавања синхронизације"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Дозвољава апликацији да чита подешавања синхронизације за налог. На пример, овако може да се утврди да ли је апликација Људи синхронизована са налогом."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"укључивање и искључивање синхронизације"</string>

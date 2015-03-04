@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ከቅርብ ግኑኙነት መስክ (NFC) መለያዎች፣ ካርዶች እና አንባቢ ጋር ለማገናኘት ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"የማያ ገጽዎን መቆለፊያ ያሰናክሉ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"መተግበሪያው መቆለፊያውና ማንኛውም የተጎዳኘ የይለፍ ቃል ደህንነት እንዲያሰናክል ይፈቅድለታል። ለምሳሌ ስልኩ ገቢ የስልክ ጥሪ በሚቀበልበት ጊዜ መቆለፊያውን ያሰናክልና ከዚያም ጥሪው ሲጠናቀቅ መቆለፊያውን በድጋሚ ያነቃዋል።"</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"የጣት አሻራ ሃርድዌርን አስተዳድር"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"መተግበሪያው ጥቅም ላይ እንዲውሉ የጣት አሻራ ቅንብር ደንቦችን ለማከል እና ለመሰረዝ የሚያስችሉ ስልቶችን እንዲያስጀምር ያስችለዋል።"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"የጣት አሻራ ሃርድዌርን ተጠቀም"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"መተግበሪያው የጣት አሻራ ሃርድዌር ለማረጋገጥ ስራ እንዲጠቀም ያስችለዋል"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"የሥምሪያ ቅንብሮች አንብብ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"መተግበሪያው የአንድ መለያ የማመሳሰል ቅንብሮችን እንዲያነብ ይፈቅድለታል። ለምሳሌ ይህ የሰዎች መተግበሪያ ከመለያ ጋር መመሳሰሉን አለመመሳሰሉን ሊወስን ይችላል።"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ማመሳሰያ በማብራትና በማጥፋት መካከል ቀያይር"</string>
@@ -827,7 +823,7 @@
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ቴሌዚዥኑን ቆልፍ ወይም ሁሉንም የቴሌቪዥን ውሂብ ደምስስ።"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"የተተየቡ ልክ ያልሆኑ የይለፍ ቃሎችን ቁጥር ተቆጣጠር፡፡ማሳያውን በምትከፍትበት ጊዜ፤ እና በጣም ብዙ ልክ ያልሆኑ የይለፍ ቃሎች ከተተየቡ ስልኩን ቆልፈው ወይም ሁሉንም የስልኩን ውሂብ ደምስሰው፡፡"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ጡባዊውን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ቴሌዚዥኑን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ቴሌቪዥኑን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"ማያ ገጹን ሲያስከፍቱ በትክክል ያልተተየቡ የይለፍ ቃላት ብዛት ተከታተል፣ እና በጣም ብዙ ትክክል ያልሆኑ የይለፍ ቃላት ከተተየቡ ስልኩን ቆልፍ ወይም ሁሉንም የዚህን ተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"የማያ ገጹን መቆለፊያ ለውጥ"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"የማያ ገጽ መቆለፊያውን ለውጥ።"</string>
@@ -839,10 +835,10 @@
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"የፋብሪካ ውሂብ ድጋሚ አስጀምር በማከናወን ያለ ማሰጠንቀቂያ የስልኩን ውሂብ ደምስስ።"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"የተጠቃሚ ውሂብ ደምስስ"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"ያለምንም ማስጠንቀቂያ የዚህን ጡባዊ የተጠቃሚ ውሂብ ደምስስ።"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ያለምንም ማስጠንቀቂያ የዚህን ቲቪ የተጠቃሚ ውሂብ ደምስስ።"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"ያለምንም ማስጠንቀቂያ የዚህን ቴቪ የተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"ያለምንም ማስጠንቀቂያ የዚህን ስልክ የተጠቃሚ ውሂብ ደምስስ።"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"የመሣሪያውን ሁሉንም ፕሮክሲ አዘጋጅ"</string>
-    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"መመሪያ እስኪነቃ ድረስ ለመጠቀም የመሣሪያውን ሁሉንተናዊ ተኪ አዘጋጅ። የመጀመሪያው የመሣሪያ ባለቤት ብቻ የሁሉንተናዊ ተኪውን ማዘጋጀት ይችላል።"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"መመሪያ ነቅቶ እያለ ጥቅም ላይ ሊውል የሚችለውን የመሣሪያውን ሁሉንተናዊ ተኪ አዘጋጅ። የመሣሪያ ባለቤት ብቻ የሁሉንተናዊ ተኪውን ማዘጋጀት ይችላል።"</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"የማያ ገጽ መቆለፊያ የአገልግሎት ማብቂያ ጊዜን አዘጋጅ"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"የማያ ገጽ መቆለፊያ የይለፍ ቃል፣ ፒን፣ ወይም ስርዓተ ጥለት በምን ያህል ጊዜ ተደጋግሞ መለወጥ እንዳለበት ለውጥ።"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ማከማቻ ማመስጠር አዘጋጅ"</string>
@@ -850,7 +846,7 @@
     <string name="policylab_disableCamera" msgid="6395301023152297826">"ካሜራዎችን አቦዝን"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"የሁሉንም መሣሪያ ካሜራዎች መጠቀም ከልክል።"</string>
     <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"የማያ ገጽ መቆለፊያ የተሰናከሉ ባህሪዎች"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"የማያ ገጽ መቆለፊያ ላይ ያሉ አንዳንድ ባህሪዎችን አጠቃቀም ተከላከል።"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"የማያ ገጽ መቆለፊያ ላይ ያሉ አንዳንድ ባህሪዎችን መጠቀምን ተከላከል።"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"መነሻ"</item>
     <item msgid="869923650527136615">"ተንቀሳቃሽ"</item>

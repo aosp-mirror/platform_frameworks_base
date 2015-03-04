@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕໍ່ສື່ສານກັບປ້າຍກຳກັບ, ບັດ ແລະໂຕອ່ານຂອງການສື່ສານໄລຍະສັ້ນ (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ປິດການລັອກໜ້າຈໍ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງປຸ່ມລັອກ ແລະລະບົບຄວາມປອດໄພຂອງລະຫັດຜ່ານທີ່ເຊື່ອມໂຍງກັນ. ໂຕຢ່າງ: ໂທລະສັບຈະປິດການເຮັດວຽກຂອງປຸ່ມລັອກເມື່ອມີສາຍໂທເຂົ້າ ຈາກນັ້ນຈຶ່ງເປີດໃຊ້ໄດ້ອີກເມື່ອວາງສາຍແລ້ວ."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ຈັດ​ການ​ຮາດ​ແວ​ລາຍ​ນີ້ວ​ມື"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ເຮັດ​ໃຫ້​ວິ​ທີ​ການ​ຕ່າງໆ​ເພີ່ມ ແລະ​ລຶບ​ແມ່​ແບບ​ລາຍ​ນີ້ວ​ມື​ສຳ​ລັບ​ການ​ໃຊ້."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ໃຊ້​ຮາດ​ແວ​ລາຍ​ນີ້ວ​ມື"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ນຳ​ໃຊ້​ຮາດ​ແວ​ລາຍ​ນີ້ວ​ມື​ສຳ​ລັບ​ການ​ຮັບ​ຮອງ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ອ່ານການຕັ້ງຄ່າຊິ້ງຂໍ້ມູນ"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານການຕັ້ງຄ່າການຊິ້ງຂໍ້ມູນຂອງບັນຊີໄດ້. ຕົວຢ່າງເຊັ່ນ: ມັນຈະສາມາດກວດສອບໄດ້ແອັບຯ People ຖືກຊິ້ງຂໍ້ມູນກັບບັນຊີໃດນຶ່ງແລ້ວຫຼືຍັງ."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ສະລັບການເປີດ ແລະປິດການຊິ້ງຂໍ້ມູນ"</string>

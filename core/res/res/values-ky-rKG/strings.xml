@@ -940,14 +940,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Колдонмого Жакынкы аралыкта байланышуу (NFC) белгилери, карталары жана окугучтары менен байланышуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экранды бөгөттөөнү өчүрүү"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Колдонмого экрандын бөгөттөөчү жана ага байланыштуу сырсөз коргоосун өчүрүү уруксатын берет. Мисалы, чалуу келгенде экрандын бөгөтүн алып салат, чалуу бүткөндө кайрадан орнотот."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"манжа изинин аппараттык камсыздоосун башкаруу"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Колдонмого пайдалануу үчүн манжа изинин үлгүлөрүн кошуу жана жок кылуу мүмкүндүгүн берет."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"манжа изинин аппараттык камсыздоосун колдонуу"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Колдонмого аныктыгын текшерүү үчүн манжа изинин аппараттык камсыздоосун пайдалануу мүмкүндүгүн берет"</string>
     <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
     <skip />
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Колдонмого эсеп менен синхрондошуу тууралоолорун окуганга уруксат берет. Мисалы, Кишилер колдонмосу эсеп менен синхрондошкондугун аныктай алат."</string>

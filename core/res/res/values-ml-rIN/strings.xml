@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"വിരലടയാള ഹാർഡ്‌വെയർ നിയന്ത്രിക്കുക"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ഉപയോഗിക്കാനായി വിരലടയാള ടെംപ്ലേറ്റുകൾ ചേർക്കാനും ഇല്ലാതാക്കാനുമുള്ള രീതികൾ അഭ്യർത്ഥിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"വിരലടയാള ഹാർഡ്‌വെയർ ഉപയോഗിക്കുക"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"പ്രാമാണീകരണത്തിനായി വിരലടയാളം ഉപയോഗിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യുക"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ഒരു അക്കൗണ്ടിനായി സമന്വയ ക്രമീകരണങ്ങൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ആളുകൾ അപ്ലിക്കേഷൻ ഒരു അക്കൗണ്ടിൽ സമന്വയിപ്പിച്ചിട്ടുണ്ടോയെന്നത് നിർണ്ണയിക്കാൻ ഇതിനാകും."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"സമന്വയം ഓണാക്കുക, ഓഫാക്കുക ടോഗിൾചെയ്യുക"</string>

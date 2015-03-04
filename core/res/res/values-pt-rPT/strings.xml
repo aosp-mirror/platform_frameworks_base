@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que a aplicação comunique com etiquetas, cartões e leitores Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"desativar o bloqueio do ecrã"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Permite que a aplicação desative o bloqueio de teclas e qualquer segurança por palavra-passe associada. Por exemplo, o telemóvel desativa o bloqueio de teclas quando recebe uma chamada e reativa o bloqueio de teclas ao terminar a chamada."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"gerir o hardware de impressão digital"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Permite que a aplicação invoque métodos para adicionar e eliminar modelos de impressão digital para utilização."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"utilizar o hardware de impressão digital"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Permite que a aplicação utilize o hardware de impressão digital para autenticação"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ler definições de sincronização"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Permite que a aplicação leia as definições de sincronização de uma conta. Por exemplo, pode determinar se a aplicação Pessoas está sincronizada com uma conta."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ativar e desativar a sincronização"</string>

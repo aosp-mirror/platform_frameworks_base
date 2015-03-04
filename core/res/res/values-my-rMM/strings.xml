@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"appအား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ဖန်သားပြင် သော့ချခြင်းအား မလုပ်နိုင်အောင် ပိတ်ရန်"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"အပလီကေးရှင်းအား သော့ချခြင်းနှင့် သက်ဆိုင်ရာ စကားဝှက်သတ်မှတ်ခြင်းများအား မသုံးနိုင်အောင် ပိတ်ခြင်းကို ခွင့်ပြုရန်။ ဥပမာ ဖုန်းလာလျှင် သော့ပိတ်ခြင်း ပယ်ဖျက်ခြင်း၊ ဖုန်းပြောပြီးလျှင် သော့ကို အလိုအလျောက် ပြန်ပိတ်ခြင်း"</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"လက်ဗွေရာပစ္စည်းကို စီမံမည်"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"အသုံးပြုရန်အတွက် လက်ဗွေရာပုံစံများကို ပေါင်းထည့်ရန် သို့မဟုတ် ဖျက်ရန်နည်းလမ်းများကို အပ်ဖ်အား အသုံးပြုခွင့်ပြုသည်။"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"လက်ဗွေရာပစ္စည်းကို အသုံးပြုမည်"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"စစ်မှန်ကြောင်းအထောက်အထားပြသခြင်းအတွက် လက်ဗွေရာပစ္စည်းကို အသုံးပြုရန် အပ်ဖ်အားခွင့်ပြုသည်။"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ထပ်တူပြုအဆင်အပြင်အားဖတ်ခြင်း"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"အပလီကေးရှင်းအား အကောင့်တစ်ခုအတွက် ထပ်တူညီအောင် လုပ်ဆောင်မှု ဆက်တင်အား ကြည့်ခွင့် ပြုပါ။ ဥပမာ People app က အကောင့်တစ်ခုနဲ့ ထပ်တူညီအောင် လုပ်ရန် ဆက်သွယ်ထားမှု ရှိမရှိ သိရှိနိုင်ခြင်း"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ထပ်တူညီအောင် လုပ်ခြင်းအား ပြုနိုင်၊ မပြုနိုင် အပြောင်းအလဲလုပ်ခြင်း"</string>

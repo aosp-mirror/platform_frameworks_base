@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Tillåter att appen kommunicerar med etiketter, kort och läsare för närfältskommunikation (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"inaktivera skärmlåset"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Tillåter att appen inaktiverar tangentlåset och tillhörande lösenordsskydd. Ett exempel kan vara att tangentlåset inaktiveras vid inkommande samtal och aktiveras igen när samtalet är avslutat."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"hantera maskinvara för fingeravtryck"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Tillåter att appen anropar metoder för att lägga till och radera fingeravtrycksmallar."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"använda maskinvara för fingeravtryck"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Tillåter att appen använder maskinvara för fingeravtryck vid autentisering"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"läsa synkroniseringsinställningar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Tillåter att appen läser synkroniseringsinställningarna för ett konto. Detta kan användas till exempel för att avgöra om appen Personer är synkroniserad med ett konto."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"aktivera/inaktivera synkronisering"</string>

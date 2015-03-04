@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Επιτρέπει στην εφαρμογή την επικοινωνία με ετικέτες, κάρτες και αναγνώστες της Επικοινωνίας κοντινού πεδίου (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"απενεργοποίηση κλειδώματος οθόνης"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Επιτρέπει στην εφαρμογή την απενεργοποίηση του κλειδώματος πληκτρολογίου και άλλης σχετικής ασφάλειας με κωδικό πρόσβασης. Για παράδειγμα, το κλείδωμα πληκτρολογίου στο τηλέφωνο απενεργοποιείται όταν λαμβάνεται εισερχόμενη τηλεφωνική κλήση και ενεργοποιείται ξανά όταν η κλήση τερματιστεί."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"διαχείριση εξοπλισμού μοναδικού χαρακτηριστικού"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Επιτρέπει στην εφαρμογή να επικαλείται μεθόδους για την προσθήκη και τη διαγραφή προτύπων μοναδικού χαρακτηριστικού για χρήση."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"χρήση εξοπλισμού μοναδικού χαρακτηριστικού"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Επιτρέπει στην εφαρμογή να χρησιμοποιεί εξοπλισμό μοναδικού χαρακτηριστικού για έλεγχο ταυτότητας"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ανάγνωση ρυθμίσεων συγχρονισμού"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Επιτρέπει στην εφαρμογή την ανάγνωση των ρυθμίσεων συγχρονισμού για έναν λογαριασμό. Για παράδειγμα, αυτό μπορεί να καθορίσει εάν η εφαρμογή \"Άτομα\" είναι συγχρονισμένη με έναν λογαριασμό."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"εναλλαγή ενεργοποίησης και απενεργοποίησης συγχρονισμού"</string>

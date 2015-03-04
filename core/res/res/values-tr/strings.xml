@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Uygulamaya, Near Field Communication (NFC) etiketleri, kartlar ve okuyucular ile iletişim kurma izni verir."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran kilidimi devre dışı bırak"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Uygulamaya, tuş kilidini ve ilişkili tüm şifreli güvenlik önlemlerini devre dışı bırakma izni verir. Örneğin, telefon, çağrı alındığında tuş kilidinin devre dışı bırakır ve sonra, görüşme bittiğinde kilidi yeniden etkinleştirir."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"parmak izi donanımını yönetme"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Uygulamanın, kullanılacak parmak izi şablonlarını ekleme ve silme yöntemlerini başlatmasına izin verir."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"parmak izi donanımını kullanma"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Uygulamanın kimlik doğrulama için parmak izi donanımını kullanmasına izin verir."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"senk. ayarlarını okuma"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Uygulamaya bir hesaba ait senkronizasyon ayarlarını okuma izni verir. Örneğin, bu izne sahip bir uygulama Kişiler uygulamasının bir hesapla senkronize olup olmadığını belirleyebilir."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"senkronizasyonu açma/kapatma"</string>

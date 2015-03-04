@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ආසන්න ක්ෂේත්‍ර සන්නිවේදන (NFC) ටැග්, පත්, සහ කියවන්නන් සමඟ සන්නිවේදනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ඔබගේ තිරයේ අගුල අබල කරන්න"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"යතුරු අගුල සහ ඕනෑම සම්බන්ධිත මුරපද ආරක්ෂාවක් අබල කිරීමට යෙදුමට අවසර දෙන්න. මෙහි උදාහරණයක් වන්නේ පැමිණෙන ඇමතුමක් ලැබෙද්දී, දුරකථනය අක්‍රිය වන අතර ඇමතුම අවසාන වන විට යතුරු අගුල නැවත සක්‍රිය වෙයි."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ඇඟිලි සලකුණු දෘඩාංග කළමනාකරණය කිරීම."</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ඇඟිලි සලකුණු සැකිලි එක් කිරීමට සහ ඉවත් කිරීමට අදාළ විධික්‍රම භාවිතය සඳහා මෙම යෙදුමට අවසර දෙයි."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ඇඟිලි සලකුණු දෘඩාංග භාවිතා කරන්න."</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"අනන්‍යතාවය තහවුරු කරගැනීමට ඇඟිලි සලකුණු දෘඩාංග භාවිතා කිරීමට මෙම යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"සමමුහුර්ත සැකසීම් කියවන්න"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ගිණුම සඳහා සමමුහුර්ත සැකසීම් කියවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස, ගිණුමක් සමඟ පුද්ගල යෙදුම සමමුහුර්ත දැයි මෙයට හඳුනා ගත හැක."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"සමමුහුර්ත කිරීම සක්‍රිය කරන්න සහ අක්‍රිය කරන්න"</string>
@@ -826,7 +822,7 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ ටැබ්ලටය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් ටැබ්ලටයේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"තීරය අගුළු අරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිර්ක්ෂණය කරන්න, සහ බොහෝ විටක් වැරදි මුරපද ටයිප් කළේ නම් රුපවාහිනීය අගුළු දමන්න හෝ සියළුම රුපවාහිනී දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"තිරය අගුළු හැරීමේදී වැරදියට ටයිප් කළ මුරපද ගණන නිරීක්ෂණය කරන්න සහ දුරකථනය අගුළු දමන්න හෝ වැරදි මුරපද බොහෝ ගණනක් ටයිප් කර ඇති නම් දුරකථනයේ සියලු දත්ත මකන්න."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් තල පරිගණකය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් ටැබ්ලටය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් TV අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"තිරය අගුලු හරින විට වැරදියට මුරපදය ටයිප් කළ වාර ගණන නිරීක්ෂණය කර, ඉතා වැඩි වාර ගණනක් වැරදි මුරපද ටයිප් කළේ නම් දුරකථනය අගුලු දමන්න නැතහොත් මෙම පරිශීලකයාගේ සියලු දත්ත මකන්න."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"තිර අගුල වෙනස් කරන්න"</string>
@@ -838,7 +834,7 @@
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"අනතුරු ඇඟවීමකින් තොරව කර්මාන්ත ශාලා දත්ත නැවත සැකසීමක් කිරීමෙන් රූපවාහිනියේ දත්ත මකා දමයි."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"කර්මාන්ත ශාලා දත්ත යළි පිහිටුවීමෙන් පසුව අනතුරු ඇඟවිමකින් තොරවම දුරකථන දත්ත මකා දමයි."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"පරිශීලක දත්ත මකන්න"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"අනතුරු ඇඟවීමකින් තොරව මෙම තල පරිගණකයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"අනතුරු ඇඟවීමකින් තොරව මෙම ටැබ්ලටයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"අනතුරු ඇඟවීමකින් තොරව මෙම TV හි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"අනතුරු ඇඟවීමකින් තොරව මෙම දුරකථනයෙහි මෙම පරිශීලකයාගේ දත්ත මැකීම."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"උපාංග ගෝලීය නියුතුව සකස් කිරීම"</string>

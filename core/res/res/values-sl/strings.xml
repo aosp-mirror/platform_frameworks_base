@@ -740,14 +740,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"onemogočanje zaklepanja zaslona"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Aplikaciji dovoljuje, da onemogoči zaklep tipkovnice in morebitno povezano varnostno geslo. Telefon na primer onemogoči zaklep tipkovnice pri dohodnem klicu ter vnovič omogoči zaklep, ko je klic končan."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje strojne opreme za prstne odtise"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Aplikaciji omogoča sprožanje načinov za dodajanje in brisanje predlog s prstnimi odtisi za uporabo."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"uporaba strojne opreme za prstne odtise"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Aplikaciji omogoča uporabo strojne opreme za prstne odtise za preverjanje pristnosti"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Aplikaciji omogoča branje nastavitev sinhronizacije za račun. S tem lahko aplikacija na primer ugotovi, ali je aplikacija Ljudje sinhronizirana z računom."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"vklop in izklop sinhronizacije"</string>

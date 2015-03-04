@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Cho phép ứng dụng giao tiếp với thẻ Giao tiếp trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"vô hiệu hóa khóa màn hình của bạn"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Cho phép ứng dụng tắt khóa phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ: điện thoại tắt khóa phím khi nhận được cuộc gọi đến, sau đó bật lại khóa phím khi cuộc gọi kết thúc."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"quản lý phần cứng vân tay"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Cho phép ứng dụng gọi các phương pháp để thêm và xóa các mẫu vân tay để sử dụng."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"sử dụng phần cứng vân tay"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Cho phép ứng dụng sử dụng phần cứng vân tay để xác thực"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"đọc cài đặt đồng bộ hóa"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Cho phép ứng dụng đọc cài đặt đồng bộ hóa cho tài khoản. Ví dụ: việc này có thể xác định liệu ứng dụng Mọi người đã được đồng bộ hóa với tài khoản chưa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"chuyển đổi bật và tắt đồng bộ hóa"</string>
@@ -826,9 +822,9 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của máy tính bảng nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Giám sát số lượng mật khẩu đã nhập sai khi mở khóa màn hình và khóa TV hoặc xóa tất cả dữ liệu của TV nếu có quá nhiều mật khẩu sai được nhập vào."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Theo dõi số lần nhập mật khẩu không chính xác khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của điện thoại nếu có quá nhiều lần nhập mật khẩu không chính xác."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Giám sát số lượng mật khẩu đã nhập sai khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của người dùng này nếu có quá nhiều mật khẩu sai được nhập vào."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Giám sát số lượng mật khẩu đã nhập sai khi mở khóa màn hình và khóa TV hoặc xóa tất cả dữ liệu của người dùng này nếu có quá nhiều mật khẩu sai được nhập vào."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Giám sát số lượng mật khẩu đã nhập sai khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của người dùng này nếu có quá nhiều mật khẩu sai được nhập vào."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa máy tính bảng hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa TV hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Giám sát số lần nhập sai mật khẩu khi mở khóa màn hình và khóa điện thoại hoặc xóa tất cả dữ liệu của người dùng này nếu nhập sai mật khẩu quá nhiều lần."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Thay đổi khóa màn hình"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Thay đổi khóa màn hình."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Khóa màn hình"</string>
@@ -842,7 +838,7 @@
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Xóa dữ liệu của người dùng trên TV này mà không cảnh báo."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Xóa dữ liệu của người dùng trên điện thoại này mà không cảnh báo."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Đặt proxy chung của điện thoại"</string>
-    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Đặt proxy chung của thiết bị được sử dụng trong khi chính sách được bật. Chỉ chủ sở hữu thiết bị mới có thể đặt proxy chung."</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Đặt proxy chung của thiết bị được sử dụng trong khi chính sách bật. Chỉ chủ sở hữu thiết bị mới có thể đặt proxy chung."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Đặt thời hạn MK khóa màn hình"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Thay đổi tần suất phải thay đổi mật khẩu khóa màn hình, mã PIN hoặc mẫu."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Đặt mã hóa dung lượng lưu trữ"</string>

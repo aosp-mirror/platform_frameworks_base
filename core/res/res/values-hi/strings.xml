@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ऐप्स  को नियर फ़ील्ड कम्यूनिकेशन (NFC) टैग, कार्ड, और रीडर के साथ संचार करने देता है."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"अपना स्‍क्रीन लॉक अक्षम करें"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ऐप्स को कीलॉक और कोई भी संबद्ध पासवर्ड सुरक्षा अक्षम करने देता है. उदाहरण के लिए, इनकमिंग फ़ोन कॉल प्राप्त करते समय फ़ोन, कीलॉक को अक्षम कर देता है, फिर कॉल समाप्त होने पर कीलॉक को पुन: सक्षम कर देता है."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फ़िंगरप्रिंट हार्डवेयर को प्रबंधित करें"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"फ़िंगरप्रिंट टेम्पलेट का उपयोग करने के लिए जोड़ने और हटाने हेतु ऐप को विधियां प्रारंभ करने देती है."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"फ़िंगरप्रिंट हार्डवेयर का उपयोग करें"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ऐप के प्रमाणीकरण के लिए फ़िंगरप्रिंट हार्डवेयर का उपयोग करने देती है"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"समन्वयन सेटिंग पढ़ें"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ऐप्स  को किसी खाते की समन्वयन सेटिंग पढ़ने देता है. उदाहरण के लिए, इससे यह निर्धारित किया जा सकता है कि लोग ऐप्स  किसी खाते के साथ समन्‍वयित है या नहीं."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"समन्‍वयन बंद या चालू टॉगल करें"</string>
@@ -826,9 +822,9 @@
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"स्‍क्रीन को अनलॉक करते समय गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें, और बहुत अधिक बार गलत पासवर्ड लिखे जाने पर टेबलेट लॉक करें या टेबलेट का संपूर्ण डेटा मिटाएं."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या टीवी का सभी डेटा मिटा दें."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"गलत लिखे गए पासवर्ड की संख्‍या पर निगरानी करें. स्क्रीन अनलॉक करते समय, बहुत अधिक बार गलत पासवर्ड लिखे जाने पर फ़ोन लॉक करें या फ़ोन का संपूर्ण डेटा मिटाएं."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो टीवी को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बहुत अधिक गलत पासवर्ड लिखे जाते हैं तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बार बार अधिक पासवर्ड लिखे जाते हैं तो टैबलेट को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें यदि बार बार गलत पासवर्ड लिखे जाने पर टीवी को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"स्‍क्रीन को अनलॉक करते समय गलत तरीके से लिखे गए पासवर्ड पर नज़र रखें और यदि बार बार गलत पासवर्ड लिखे जाते हैं तो फ़ोन को लॉक करें या इस उपयोगकर्ता का सभी डेटा मिटा दें."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"स्‍क्रीन लॉक बदलें"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"स्‍क्रीन लॉक को बदलें."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"स्‍क्रीन लॉक करें"</string>

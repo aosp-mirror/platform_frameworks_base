@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"экран бекітпесін істен шығару"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Қолданбаларға кілтперне және басқа кілтсөзге қатысты қауіпсіздік шараларын өшіру мүмкіндігін береді. Мысалы, телефон кіріс қоңырауларын алғанда кілтпернені өшіреді және қоңырау аяқталғанда қайта қосады."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"саусақ ізі жабдығын басқару"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Қолданбаға пайдаланатын саусақ ізі үлгілерін қосу және жою әдістерін шақыруға мүмкіндік береді."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"саусақ ізі жабдығын пайдалану"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Қолданбаға аутентификацияалу үшін саусақ ізі жабдығын пайдалануға мүмкіндік береді"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"синх параметрлерін оқу"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Қолданбаға есептік жазба синхрондау параметрлерін оқу мүмкіндігін береді. Мысалы, бұл арқылы People қолданбасының есептік жазбамен сихрондалғаны анықталуы мүмкін."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"синх қосу және өшіру арасында ауысу"</string>
