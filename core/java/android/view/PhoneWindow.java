@@ -937,7 +937,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             final PanelFeatureState st = getPanelState(featureId, false);
 
-            if (event.isCanceled() || (mDecor != null && mDecor.mActionMode != null) ||
+            if (event.isCanceled() || (mDecor != null && mDecor.mPrimaryActionMode != null) ||
                     (st == null)) {
                 return;
             }
@@ -2171,10 +2171,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private boolean mWatchingForMenu;
         private int mDownY;
 
-        private ActionMode mActionMode;
-        private ActionBarContextView mActionModeView;
-        private PopupWindow mActionModePopup;
-        private Runnable mShowActionModePopup;
+        private ActionMode mPrimaryActionMode;
+        private ActionMode mFloatingActionMode;
+        private ActionBarContextView mPrimaryActionModeView;
+        private PopupWindow mPrimaryActionModePopup;
+        private Runnable mShowPrimaryActionModePopup;
 
         // View added at runtime to draw under the status bar area
         private View mStatusGuard;
@@ -2337,9 +2338,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
                 final int action = event.getAction();
                 // Back cancels action modes first.
-                if (mActionMode != null) {
+                if (mPrimaryActionMode != null) {
                     if (action == KeyEvent.ACTION_UP) {
-                        mActionMode.finish();
+                        mPrimaryActionMode.finish();
                     }
                     return true;
                 }
@@ -2688,10 +2689,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public ActionMode startActionMode(ActionMode.Callback callback, int type) {
-            if (mActionMode != null) {
-                mActionMode.finish();
-                mActionMode = null;
-            }
             ActionMode.Callback wrappedCallback = new ActionModeCallbackWrapper(callback);
             ActionMode mode = null;
             if (getCallback() != null && !isDestroyed()) {
@@ -2702,29 +2699,41 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
             if (mode != null) {
-                mActionMode = mode;
+                if (mode.getType() == ActionMode.TYPE_PRIMARY) {
+                    cleanupPrimaryActionMode();
+                    mPrimaryActionMode = mode;
+                } else {
+                    mFloatingActionMode = mode;
+                }
             } else {
                 if (type == ActionMode.TYPE_PRIMARY) {
-                    if (mActionModeView != null) {
-                        mActionModeView.killMode();
-                    }
+                    cleanupPrimaryActionMode();
                     mode = createStandaloneActionMode(wrappedCallback);
                     if (mode != null && callback.onCreateActionMode(mode, mode.getMenu())) {
-                        mActionMode = mode;
-                        mActionMode.invalidate();
+                        setHandledPrimaryActionMode(mode);
                     } else {
-                        mActionMode = null;
+                        mode = null;
                     }
                 }
             }
-            if (mActionMode != null && getCallback() != null && !isDestroyed()) {
+            if (mode != null && getCallback() != null && !isDestroyed()) {
                 try {
-                    getCallback().onActionModeStarted(mActionMode);
+                    getCallback().onActionModeStarted(mode);
                 } catch (AbstractMethodError ame) {
                     // Older apps might not implement this callback method.
                 }
             }
-            return mActionMode;
+            return mode;
+        }
+
+        private void cleanupPrimaryActionMode() {
+            if (mPrimaryActionMode != null) {
+                mPrimaryActionMode.finish();
+                mPrimaryActionMode = null;
+            }
+            if (mPrimaryActionModeView != null) {
+                mPrimaryActionModeView.killMode();
+            }
         }
 
         public void startChanging() {
@@ -2948,13 +2957,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         private WindowInsets updateStatusGuard(WindowInsets insets) {
             boolean showStatusGuard = false;
             // Show the status guard when the non-overlay contextual action bar is showing
-            if (mActionModeView != null) {
-                if (mActionModeView.getLayoutParams() instanceof MarginLayoutParams) {
+            if (mPrimaryActionModeView != null) {
+                if (mPrimaryActionModeView.getLayoutParams() instanceof MarginLayoutParams) {
                     // Insets are magic!
                     final MarginLayoutParams mlp = (MarginLayoutParams)
-                            mActionModeView.getLayoutParams();
+                            mPrimaryActionModeView.getLayoutParams();
                     boolean mlpChanged = false;
-                    if (mActionModeView.isShown()) {
+                    if (mPrimaryActionModeView.isShown()) {
                         if (mTempRect == null) {
                             mTempRect = new Rect();
                         }
@@ -3005,7 +3014,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         }
                     }
                     if (mlpChanged) {
-                        mActionModeView.setLayoutParams(mlp);
+                        mPrimaryActionModeView.setLayoutParams(mlp);
                     }
                 }
             }
@@ -3162,12 +3171,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mDecorContentParent.dismissPopups();
             }
 
-            if (mActionModePopup != null) {
-                removeCallbacks(mShowActionModePopup);
-                if (mActionModePopup.isShowing()) {
-                    mActionModePopup.dismiss();
+            if (mPrimaryActionModePopup != null) {
+                removeCallbacks(mShowPrimaryActionModePopup);
+                if (mPrimaryActionModePopup.isShowing()) {
+                    mPrimaryActionModePopup.dismiss();
                 }
-                mActionModePopup = null;
+                mPrimaryActionModePopup = null;
             }
 
             PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
@@ -3211,7 +3220,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         private ActionMode createStandaloneActionMode(ActionMode.Callback callback) {
-            if (mActionModeView == null) {
+            if (mPrimaryActionModeView == null) {
                 if (isFloating()) {
                     // Use the action bar theme.
                     final TypedValue outValue = new TypedValue();
@@ -3230,24 +3239,24 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         actionBarContext = mContext;
                     }
 
-                    mActionModeView = new ActionBarContextView(actionBarContext);
-                    mActionModePopup = new PopupWindow(actionBarContext, null,
+                    mPrimaryActionModeView = new ActionBarContextView(actionBarContext);
+                    mPrimaryActionModePopup = new PopupWindow(actionBarContext, null,
                             R.attr.actionModePopupWindowStyle);
-                    mActionModePopup.setWindowLayoutType(
+                    mPrimaryActionModePopup.setWindowLayoutType(
                             WindowManager.LayoutParams.TYPE_APPLICATION);
-                    mActionModePopup.setContentView(mActionModeView);
-                    mActionModePopup.setWidth(MATCH_PARENT);
+                    mPrimaryActionModePopup.setContentView(mPrimaryActionModeView);
+                    mPrimaryActionModePopup.setWidth(MATCH_PARENT);
 
                     actionBarContext.getTheme().resolveAttribute(
                             R.attr.actionBarSize, outValue, true);
                     final int height = TypedValue.complexToDimensionPixelSize(outValue.data,
                             actionBarContext.getResources().getDisplayMetrics());
-                    mActionModeView.setContentHeight(height);
-                    mActionModePopup.setHeight(WRAP_CONTENT);
-                    mShowActionModePopup = new Runnable() {
+                    mPrimaryActionModeView.setContentHeight(height);
+                    mPrimaryActionModePopup.setHeight(WRAP_CONTENT);
+                    mShowPrimaryActionModePopup = new Runnable() {
                         public void run() {
-                            mActionModePopup.showAtLocation(
-                                    mActionModeView.getApplicationWindowToken(),
+                            mPrimaryActionModePopup.showAtLocation(
+                                    mPrimaryActionModeView.getApplicationWindowToken(),
                                     Gravity.TOP | Gravity.FILL_HORIZONTAL, 0, 0);
                         }
                     };
@@ -3255,25 +3264,30 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     ViewStub stub = (ViewStub) findViewById(
                             R.id.action_mode_bar_stub);
                     if (stub != null) {
-                        mActionModeView = (ActionBarContextView) stub.inflate();
+                        mPrimaryActionModeView = (ActionBarContextView) stub.inflate();
                     }
                 }
             }
-            if (mActionModeView != null) {
+            if (mPrimaryActionModeView != null) {
+                mPrimaryActionModeView.killMode();
                 ActionMode mode = new StandaloneActionMode(
-                        mActionModeView.getContext(), mActionModeView,
-                        callback, mActionModePopup == null);
-                mActionModeView.killMode();
-                mActionModeView.initForMode(mode);
-                mActionModeView.setVisibility(View.VISIBLE);
-                if (mActionModePopup != null) {
-                    post(mShowActionModePopup);
-                }
-                mActionModeView.sendAccessibilityEvent(
-                        AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+                        mPrimaryActionModeView.getContext(), mPrimaryActionModeView,
+                        callback, mPrimaryActionModePopup == null);
                 return mode;
             }
             return null;
+        }
+
+        private void setHandledPrimaryActionMode(ActionMode mode) {
+            mPrimaryActionMode = mode;
+            mPrimaryActionMode.invalidate();
+            mPrimaryActionModeView.initForMode(mPrimaryActionMode);
+            mPrimaryActionModeView.setVisibility(View.VISIBLE);
+            if (mPrimaryActionModePopup != null) {
+                post(mShowPrimaryActionModePopup);
+            }
+            mPrimaryActionModeView.sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         }
 
         /**
@@ -3301,14 +3315,19 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             public void onDestroyActionMode(ActionMode mode) {
                 mWrapped.onDestroyActionMode(mode);
-                if (mActionModePopup != null) {
-                    removeCallbacks(mShowActionModePopup);
-                    mActionModePopup.dismiss();
-                } else if (mActionModeView != null) {
-                    mActionModeView.setVisibility(GONE);
-                }
-                if (mActionModeView != null) {
-                    mActionModeView.removeAllViews();
+                if (mode == mPrimaryActionMode) {
+                    if (mPrimaryActionModePopup != null) {
+                        removeCallbacks(mShowPrimaryActionModePopup);
+                        mPrimaryActionModePopup.dismiss();
+                    } else if (mPrimaryActionModeView != null) {
+                        mPrimaryActionModeView.setVisibility(GONE);
+                    }
+                    if (mPrimaryActionModeView != null) {
+                        mPrimaryActionModeView.removeAllViews();
+                    }
+                    mPrimaryActionMode = null;
+                } else if (mode == mFloatingActionMode) {
+                    mFloatingActionMode = null;
                 }
                 if (getCallback() != null && !isDestroyed()) {
                     try {
@@ -3317,7 +3336,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         // Older apps might not implement this callback method.
                     }
                 }
-                mActionMode = null;
                 requestFitSystemWindows();
             }
         }
