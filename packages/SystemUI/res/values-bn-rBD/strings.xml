@@ -231,7 +231,7 @@
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"বিমান মোড"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"বিরক্ত করবেন না"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"শুধুমাত্র অগ্রাধিকার"</string>
-    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"কোন বাধা নয়"</string>
+    <string name="quick_settings_dnd_none_label" msgid="7309935569360609114">"কোনো বাধা নয়"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> টি ডিভাইস)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth বন্ধ"</string>
