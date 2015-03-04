@@ -1322,7 +1322,10 @@ public class Instrumentation {
     
     /*
      * Starts allocation counting. This triggers a gc and resets the counts.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public void startAllocCounting() {
         // Before we start trigger a GC and reset the debug counts. Run the 
         // finalizers and another GC before starting and stopping the alloc
@@ -1340,7 +1343,10 @@ public class Instrumentation {
     
     /*
      * Stops allocation counting.
+     *
+     * @deprecated Accurate counting is a burden on the runtime and may be removed.
      */
+    @Deprecated
     public void stopAllocCounting() {
         Runtime.getRuntime().gc();
         Runtime.getRuntime().runFinalization();
