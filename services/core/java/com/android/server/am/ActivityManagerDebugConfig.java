@@ -73,6 +73,7 @@ class ActivityManagerDebugConfig {
     static final boolean DEBUG_URI_PERMISSION = DEBUG_ALL || false;
     static final boolean DEBUG_USER_LEAVING = DEBUG_ALL || false;
     static final boolean DEBUG_VISIBILITY = DEBUG_ALL || false;
+    static final boolean DEBUG_USAGE_STATS = DEBUG_ALL || true;
 
     static final String POSTFIX_BACKUP = (APPEND_CATEGORY_NAME) ? "_Backup" : "";
     static final String POSTFIX_BROADCAST = (APPEND_CATEGORY_NAME) ? "_Broadcast" : "";

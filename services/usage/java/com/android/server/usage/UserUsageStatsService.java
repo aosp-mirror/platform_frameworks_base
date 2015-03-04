@@ -65,7 +65,8 @@ class UserUsageStatsService {
         void onStatsUpdated();
     }
 
-    UserUsageStatsService(Context context, int userId, File usageStatsDir, StatsUpdatedListener listener) {
+    UserUsageStatsService(Context context, int userId, File usageStatsDir,
+            StatsUpdatedListener listener) {
         mContext = context;
         mDailyExpiryDate = new UnixCalendar(0);
         mDatabase = new UsageStatsDatabase(usageStatsDir);
@@ -161,7 +162,9 @@ class UserUsageStatsService {
         if (currentDailyStats.events == null) {
             currentDailyStats.events = new TimeSparseArray<>();
         }
-        currentDailyStats.events.put(event.mTimeStamp, event);
+        if (event.mEventType != UsageEvents.Event.INTERACTION) {
+            currentDailyStats.events.put(event.mTimeStamp, event);
+        }
 
         for (IntervalStats stats : mCurrentStats) {
             if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
@@ -326,6 +329,16 @@ class UserUsageStatsService {
         String[] table = names.toArray(new String[names.size()]);
         Arrays.sort(table);
         return new UsageEvents(results, table);
+    }
+
+    long getLastPackageAccessTime(String packageName) {
+        final IntervalStats yearly = mCurrentStats[UsageStatsManager.INTERVAL_YEARLY];
+        UsageStats packageUsage;
+        if ((packageUsage = yearly.packageStats.get(packageName)) == null) {
+            return -1;
+        } else {
+            return packageUsage.getLastTimeUsed();
+        }
     }
 
     void persistActiveStats() {

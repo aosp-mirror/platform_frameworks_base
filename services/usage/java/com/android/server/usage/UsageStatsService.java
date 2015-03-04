@@ -21,8 +21,10 @@ import android.app.AppOpsManager;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
+import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,6 +34,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -42,6 +46,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -53,6 +58,7 @@ import com.android.server.SystemService;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -74,6 +80,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_REPORT_EVENT = 0;
     static final int MSG_FLUSH_TO_DISK = 1;
     static final int MSG_REMOVE_USER = 2;
+    static final int MSG_INFORM_LISTENERS = 3;
 
     private final Object mLock = new Object();
     Handler mHandler;
@@ -84,6 +91,12 @@ public class UsageStatsService extends SystemService implements
     private File mUsageStatsDir;
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
+
+    private static final long DEFAULT_APP_IDLE_THRESHOLD_MILLIS = 3L * 24 * 60 * 60 * 1000; //3 days
+    private long mAppIdleDurationMillis;
+
+    private ArrayList<UsageStatsManagerInternal.AppIdleStateChangeListener>
+            mPackageAccessListeners = new ArrayList<>();
 
     public UsageStatsService(Context context) {
         super(context);
@@ -112,9 +125,22 @@ public class UsageStatsService extends SystemService implements
 
         mRealTimeSnapshot = SystemClock.elapsedRealtime();
         mSystemTimeSnapshot = System.currentTimeMillis();
+        // Look at primary user's secure setting for this. TODO: Maybe apply different
+        // thresholds for different users.
+        mAppIdleDurationMillis = Settings.Secure.getLongForUser(getContext().getContentResolver(),
+                Settings.Secure.APP_IDLE_DURATION, DEFAULT_APP_IDLE_THRESHOLD_MILLIS,
+                UserHandle.USER_OWNER);
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            // Observe changes to the threshold
+            new SettingsObserver(mHandler).registerObserver();
+        }
     }
 
     private class UserRemovedReceiver extends BroadcastReceiver {
@@ -235,7 +261,19 @@ public class UsageStatsService extends SystemService implements
 
             final UserUsageStatsService service =
                     getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            final long lastUsed = service.getLastPackageAccessTime(event.mPackage);
+            final boolean previouslyIdle = hasPassedIdleDuration(lastUsed);
             service.reportEvent(event);
+            // Inform listeners if necessary
+            if ((event.mEventType == Event.MOVE_TO_FOREGROUND
+                    || event.mEventType == Event.MOVE_TO_BACKGROUND
+                    || event.mEventType == Event.INTERACTION)) {
+                if (previouslyIdle) {
+                    // Slog.d(TAG, "Informing listeners of out-of-idle " + event.mPackage);
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS, userId,
+                            /* idle = */ 0, event.mPackage));
+                }
+            }
         }
     }
 
@@ -308,6 +346,53 @@ public class UsageStatsService extends SystemService implements
         }
     }
 
+    /**
+     * Called by LocalService stub.
+     */
+    long getLastPackageAccessTime(String packageName, int userId) {
+        synchronized (mLock) {
+            final long timeNow = checkAndGetTimeLocked();
+            // android package is always considered non-idle.
+            // TODO: Add a generic whitelisting mechanism
+            if (packageName.equals("android")) {
+                return timeNow;
+            }
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            return service.getLastPackageAccessTime(packageName);
+        }
+    }
+
+    void addListener(AppIdleStateChangeListener listener) {
+        synchronized (mLock) {
+            if (!mPackageAccessListeners.contains(listener)) {
+                mPackageAccessListeners.add(listener);
+            }
+        }
+    }
+
+    void removeListener(AppIdleStateChangeListener listener) {
+        synchronized (mLock) {
+            mPackageAccessListeners.remove(listener);
+        }
+    }
+
+    private boolean hasPassedIdleDuration(long lastUsed) {
+        final long now = System.currentTimeMillis();
+        return lastUsed < now - mAppIdleDurationMillis;
+    }
+
+    boolean isAppIdle(String packageName, int userId) {
+        final long lastUsed = getLastPackageAccessTime(packageName, userId);
+        return hasPassedIdleDuration(lastUsed);
+    }
+
+    void informListeners(String packageName, int userId, boolean isIdle) {
+        for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+            listener.onAppIdleStateChanged(packageName, userId, isIdle);
+        }
+    }
+
     private static boolean validRange(long currentTime, long beginTime, long endTime) {
         return beginTime <= currentTime && beginTime < endTime;
     }
@@ -366,10 +451,37 @@ public class UsageStatsService extends SystemService implements
                     removeUser(msg.arg1);
                     break;
 
+                case MSG_INFORM_LISTENERS:
+                    informListeners((String) msg.obj, msg.arg1, msg.arg2 == 1);
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
             }
+        }
+    }
+
+    /**
+     * Observe settings changes for Settings.Secure.APP_IDLE_DURATION.
+     */
+    private class SettingsObserver extends ContentObserver {
+
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void registerObserver() {
+            getContext().getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.APP_IDLE_DURATION), false, this, UserHandle.USER_OWNER);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, int userId) {
+            mAppIdleDurationMillis = Settings.Secure.getLongForUser(getContext().getContentResolver(),
+                    Settings.Secure.APP_IDLE_DURATION, DEFAULT_APP_IDLE_THRESHOLD_MILLIS,
+                    UserHandle.USER_OWNER);
+            // TODO: Check if we need to update idle states of all the apps
         }
     }
 
@@ -523,11 +635,32 @@ public class UsageStatsService extends SystemService implements
         }
 
         @Override
+        public boolean isAppIdle(String packageName, int userId) {
+            return UsageStatsService.this.isAppIdle(packageName, userId);
+        }
+
+        @Override
+        public long getLastPackageAccessTime(String packageName, int userId) {
+            return UsageStatsService.this.getLastPackageAccessTime(packageName, userId);
+        }
+
+        @Override
         public void prepareShutdown() {
             // This method *WILL* do IO work, but we must block until it is finished or else
             // we might not shutdown cleanly. This is ok to do with the 'am' lock held, because
             // we are shutting down.
             shutdown();
+        }
+
+        @Override
+        public void addAppIdleStateChangeListener(AppIdleStateChangeListener listener) {
+            UsageStatsService.this.addListener(listener);
+        }
+
+        @Override
+        public void removeAppIdleStateChangeListener(
+                AppIdleStateChangeListener listener) {
+            UsageStatsService.this.removeListener(listener);
         }
     }
 }

@@ -3026,7 +3026,7 @@ public final class Settings {
         };
 
         /**
-         * These are all pulbic system settings
+         * These are all public system settings
          *
          * @hide
          */
@@ -3126,7 +3126,7 @@ public final class Settings {
         }
 
         /**
-         * These are all pulbic system settings
+         * These are all public system settings
          *
          * @hide
          */
@@ -5363,6 +5363,13 @@ public final class Settings {
         public static final String SLEEP_TIMEOUT = "sleep_timeout";
 
         /**
+         * Duration in milliseconds that an app should be inactive before it is considered idle.
+         * <p/>Type: Long
+         * @hide
+         */
+        public static final String APP_IDLE_DURATION = "app_idle_duration";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -5425,6 +5432,7 @@ public final class Settings {
          * since the managed profile doesn't get to change them.
          */
         private static final Set<String> CLONE_TO_MANAGED_PROFILE = new ArraySet<>();
+
         static {
             CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_ENABLED);
             CLONE_TO_MANAGED_PROFILE.add(ALLOW_MOCK_LOCATION);
