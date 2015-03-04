@@ -24,6 +24,7 @@ import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -897,17 +898,17 @@ public final class ProcessStats implements Parcelable {
                         pw.print(STATE_NAMES[procStates[ip]]); pw.print(": ");
                         pw.print(count);
                         pw.print(" samples ");
-                        printSizeValue(pw, proc.getPssMinimum(bucket) * 1024);
+                        DebugUtils.printSizeValue(pw, proc.getPssMinimum(bucket) * 1024);
                         pw.print(" ");
-                        printSizeValue(pw, proc.getPssAverage(bucket) * 1024);
+                        DebugUtils.printSizeValue(pw, proc.getPssAverage(bucket) * 1024);
                         pw.print(" ");
-                        printSizeValue(pw, proc.getPssMaximum(bucket) * 1024);
+                        DebugUtils.printSizeValue(pw, proc.getPssMaximum(bucket) * 1024);
                         pw.print(" / ");
-                        printSizeValue(pw, proc.getPssUssMinimum(bucket) * 1024);
+                        DebugUtils.printSizeValue(pw, proc.getPssUssMinimum(bucket) * 1024);
                         pw.print(" ");
-                        printSizeValue(pw, proc.getPssUssAverage(bucket) * 1024);
+                        DebugUtils.printSizeValue(pw, proc.getPssUssAverage(bucket) * 1024);
                         pw.print(" ");
-                        printSizeValue(pw, proc.getPssUssMaximum(bucket) * 1024);
+                        DebugUtils.printSizeValue(pw, proc.getPssUssMaximum(bucket) * 1024);
                         pw.println();
                     }
                 }
@@ -924,9 +925,9 @@ public final class ProcessStats implements Parcelable {
         if (proc.mNumCachedKill != 0) {
             pw.print(prefix); pw.print("Killed from cached state: ");
                     pw.print(proc.mNumCachedKill); pw.print(" times from pss ");
-                    printSizeValue(pw, proc.mMinCachedKillPss * 1024); pw.print("-");
-                    printSizeValue(pw, proc.mAvgCachedKillPss * 1024); pw.print("-");
-                    printSizeValue(pw, proc.mMaxCachedKillPss * 1024); pw.println();
+                    DebugUtils.printSizeValue(pw, proc.mMinCachedKillPss * 1024); pw.print("-");
+                    DebugUtils.printSizeValue(pw, proc.mAvgCachedKillPss * 1024); pw.print("-");
+                    DebugUtils.printSizeValue(pw, proc.mMaxCachedKillPss * 1024); pw.println();
         }
     }
 
@@ -939,11 +940,11 @@ public final class ProcessStats implements Parcelable {
             int bucket, int index) {
         pw.print(prefix); pw.print(label);
         pw.print(": ");
-        printSizeValue(pw, getSysMemUsageValue(bucket, index) * 1024);
+        DebugUtils.printSizeValue(pw, getSysMemUsageValue(bucket, index) * 1024);
         pw.print(" min, ");
-        printSizeValue(pw, getSysMemUsageValue(bucket, index + 1) * 1024);
+        DebugUtils.printSizeValue(pw, getSysMemUsageValue(bucket, index + 1) * 1024);
         pw.print(" avg, ");
-        printSizeValue(pw, getSysMemUsageValue(bucket, index+2) * 1024);
+        DebugUtils.printSizeValue(pw, getSysMemUsageValue(bucket, index+2) * 1024);
         pw.println(" max");
     }
 
@@ -1148,43 +1149,6 @@ public final class ProcessStats implements Parcelable {
             pw.print(String.format("%.0f", fraction));
         }
         pw.print("%");
-    }
-
-    static void printSizeValue(PrintWriter pw, long number) {
-        float result = number;
-        String suffix = "";
-        if (result > 900) {
-            suffix = "KB";
-            result = result / 1024;
-        }
-        if (result > 900) {
-            suffix = "MB";
-            result = result / 1024;
-        }
-        if (result > 900) {
-            suffix = "GB";
-            result = result / 1024;
-        }
-        if (result > 900) {
-            suffix = "TB";
-            result = result / 1024;
-        }
-        if (result > 900) {
-            suffix = "PB";
-            result = result / 1024;
-        }
-        String value;
-        if (result < 1) {
-            value = String.format("%.2f", result);
-        } else if (result < 10) {
-            value = String.format("%.1f", result);
-        } else if (result < 100) {
-            value = String.format("%.0f", result);
-        } else {
-            value = String.format("%.0f", result);
-        }
-        pw.print(value);
-        pw.print(suffix);
     }
 
     public static void dumpProcessListCsv(PrintWriter pw, ArrayList<ProcessState> procs,
@@ -2437,7 +2401,7 @@ public final class ProcessStats implements Parcelable {
             pw.print(prefix);
             pw.print(label);
             pw.print(": ");
-            printSizeValue(pw, mem);
+            DebugUtils.printSizeValue(pw, mem);
             pw.print(" (");
             pw.print(samples);
             pw.print(" samples)");
@@ -2475,7 +2439,7 @@ public final class ProcessStats implements Parcelable {
         totalPss = printMemoryCategory(pw, "  ", "Z-Ram  ", totalMem.sysMemZRamWeight,
                 totalMem.totalTime, totalPss, totalMem.sysMemSamples);
         pw.print("  TOTAL  : ");
-        printSizeValue(pw, totalPss);
+        DebugUtils.printSizeValue(pw, totalPss);
         pw.println();
         printMemoryCategory(pw, "  ", STATE_NAMES[STATE_SERVICE_RESTARTING],
                 totalMem.processStateWeight[STATE_SERVICE_RESTARTING], totalMem.totalTime, totalPss,
@@ -3781,17 +3745,17 @@ public final class ProcessStats implements Parcelable {
             printPercent(pw, (double) totalTime / (double) overallTime);
             if (numPss > 0) {
                 pw.print(" (");
-                printSizeValue(pw, minPss * 1024);
+                DebugUtils.printSizeValue(pw, minPss * 1024);
                 pw.print("-");
-                printSizeValue(pw, avgPss * 1024);
+                DebugUtils.printSizeValue(pw, avgPss * 1024);
                 pw.print("-");
-                printSizeValue(pw, maxPss * 1024);
+                DebugUtils.printSizeValue(pw, maxPss * 1024);
                 pw.print("/");
-                printSizeValue(pw, minUss * 1024);
+                DebugUtils.printSizeValue(pw, minUss * 1024);
                 pw.print("-");
-                printSizeValue(pw, avgUss * 1024);
+                DebugUtils.printSizeValue(pw, avgUss * 1024);
                 pw.print("-");
-                printSizeValue(pw, maxUss * 1024);
+                DebugUtils.printSizeValue(pw, maxUss * 1024);
                 if (full) {
                     pw.print(" over ");
                     pw.print(numPss);

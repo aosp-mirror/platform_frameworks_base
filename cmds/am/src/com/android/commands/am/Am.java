@@ -117,6 +117,8 @@ public class Am extends BaseCommand {
                 "       am dumpheap [--user <USER_ID> current] [-n] <PROCESS> <FILE>\n" +
                 "       am set-debug-app [-w] [--persistent] <PACKAGE>\n" +
                 "       am clear-debug-app\n" +
+                "       am set-watch-heap <PROCESS> <MEM-LIMIT>\n" +
+                "       am clear-watch-heap\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
                 "       am restart\n" +
@@ -210,6 +212,11 @@ public class Am extends BaseCommand {
                 "    --persistent: retain this value\n" +
                 "\n" +
                 "am clear-debug-app: clear the previously set-debug-app.\n" +
+                "\n" +
+                "am set-watch-heap: start monitoring pss size of <PROCESS>, if it is at or\n" +
+                "    above <HEAP-LIMIT> then a heap dump is collected for the user to report\n" +
+                "\n" +
+                "am clear-watch-heap: clear the previously set-watch-heap.\n" +
                 "\n" +
                 "am bug-report: request bug report generation; will launch UI\n" +
                 "    when done to select where it should be delivered.\n" +
@@ -342,6 +349,10 @@ public class Am extends BaseCommand {
             runSetDebugApp();
         } else if (op.equals("clear-debug-app")) {
             runClearDebugApp();
+        } else if (op.equals("set-watch-heap")) {
+            runSetWatchHeap();
+        } else if (op.equals("clear-watch-heap")) {
+            runClearWatchHeap();
         } else if (op.equals("bug-report")) {
             runBugReport();
         } else if (op.equals("monitor")) {
@@ -1170,6 +1181,17 @@ public class Am extends BaseCommand {
 
     private void runClearDebugApp() throws Exception {
         mAm.setDebugApp(null, false, true);
+    }
+
+    private void runSetWatchHeap() throws Exception {
+        String proc = nextArgRequired();
+        String limit = nextArgRequired();
+        mAm.setDumpHeapDebugLimit(proc, Long.parseLong(limit));
+    }
+
+    private void runClearWatchHeap() throws Exception {
+        String proc = nextArgRequired();
+        mAm.setDumpHeapDebugLimit(proc, -1);
     }
 
     private void runBugReport() throws Exception {

@@ -2423,6 +2423,23 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+
+        case SET_DUMP_HEAP_DEBUG_LIMIT_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String procName = data.readString();
+            long maxMemSize = data.readLong();
+            setDumpHeapDebugLimit(procName, maxMemSize);
+            reply.writeNoException();
+            return true;
+        }
+
+        case DUMP_HEAP_FINISHED_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String path = data.readString();
+            dumpHeapFinished(path);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -5611,6 +5628,31 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(uid);
         data.writeByteArray(firstPacket);
         mRemote.transact(NOTIFY_CLEARTEXT_NETWORK_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void setDumpHeapDebugLimit(String processName, long maxMemSize) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(processName);
+        data.writeLong(maxMemSize);
+        mRemote.transact(SET_DUMP_HEAP_DEBUG_LIMIT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    @Override
+    public void dumpHeapFinished(String path) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(path);
+        mRemote.transact(DUMP_HEAP_FINISHED_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

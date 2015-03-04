@@ -4247,6 +4247,10 @@ public final class ActivityThread {
         } else {
             Debug.dumpNativeHeap(dhd.fd.getFileDescriptor());
         }
+        try {
+            ActivityManagerNative.getDefault().dumpHeapFinished(dhd.path);
+        } catch (RemoteException e) {
+        }
     }
 
     final void handleDispatchPackageBroadcast(int cmd, String[] packages) {

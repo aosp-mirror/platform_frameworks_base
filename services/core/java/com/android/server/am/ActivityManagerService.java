@@ -56,11 +56,13 @@ import android.os.storage.StorageManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.SparseIntArray;
 
 import android.view.Display;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.DumpHeapActivity;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
@@ -1126,6 +1128,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mAutoStopProfiler = false;
     int mProfileType = 0;
     String mOpenGlTraceApp = null;
+    final ArrayMap<String, Long> mMemWatchProcesses = new ArrayMap<>();
+    String mMemWatchDumpProcName;
+    String mMemWatchDumpFile;
+    int mMemWatchDumpPid;
+    int mMemWatchDumpUid;
 
     final long[] mTmpLong = new long[1];
 
@@ -1268,6 +1275,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int DISMISS_DIALOG_MSG = 48;
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 49;
     static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 50;
+    static final int POST_DUMP_HEAP_NOTIFICATION_MSG = 51;
+    static final int DELETE_DUMPHEAP_MSG = 52;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1822,6 +1831,78 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
+            case POST_DUMP_HEAP_NOTIFICATION_MSG: {
+                final String procName;
+                final int uid;
+                final long memLimit;
+                synchronized (ActivityManagerService.this) {
+                    procName = mMemWatchDumpProcName;
+                    uid = mMemWatchDumpUid;
+                    Long limit = mMemWatchProcesses.get(procName);
+                    memLimit = limit != null ? limit : 0;
+                }
+                if (procName == null) {
+                    return;
+                }
+
+                if (DEBUG_PSS) Slog.d(TAG, "Showing dump heap notification from "
+                        + procName + "/" + uid);
+
+                INotificationManager inm = NotificationManager.getService();
+                if (inm == null) {
+                    return;
+                }
+
+                String text = mContext.getString(R.string.dump_heap_notification, procName);
+                Notification notification = new Notification();
+                notification.icon = com.android.internal.R.drawable.stat_sys_adb;
+                notification.when = 0;
+                notification.flags = Notification.FLAG_ONGOING_EVENT|Notification.FLAG_AUTO_CANCEL;
+                notification.tickerText = text;
+                notification.defaults = 0; // please be quiet
+                notification.sound = null;
+                notification.vibrate = null;
+                notification.color = mContext.getResources().getColor(
+                        com.android.internal.R.color.system_notification_accent_color);
+                Intent deleteIntent = new Intent();
+                deleteIntent.setAction(DumpHeapActivity.ACTION_DELETE_DUMPHEAP);
+                notification.deleteIntent = PendingIntent.getBroadcastAsUser(mContext, 0,
+                        deleteIntent, 0, UserHandle.OWNER);
+                Intent intent = new Intent();
+                intent.setClassName("android", DumpHeapActivity.class.getName());
+                intent.putExtra(DumpHeapActivity.KEY_PROCESS, procName);
+                intent.putExtra(DumpHeapActivity.KEY_SIZE, memLimit);
+                int userId = UserHandle.getUserId(uid);
+                notification.setLatestEventInfo(mContext, text,
+                        mContext.getText(R.string.dump_heap_notification_detail),
+                        PendingIntent.getActivityAsUser(mContext, 0, intent,
+                                PendingIntent.FLAG_CANCEL_CURRENT, null,
+                                new UserHandle(userId)));
+
+                try {
+                    int[] outId = new int[1];
+                    inm.enqueueNotificationWithTag("android", "android", null,
+                            R.string.dump_heap_notification,
+                            notification, outId, userId);
+                } catch (RuntimeException e) {
+                    Slog.w(ActivityManagerService.TAG,
+                            "Error showing notification for dump heap", e);
+                } catch (RemoteException e) {
+                }
+            } break;
+            case DELETE_DUMPHEAP_MSG: {
+                revokeUriPermission(ActivityThread.currentActivityThread().getApplicationThread(),
+                        DumpHeapActivity.JAVA_URI,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        UserHandle.myUserId());
+                synchronized (ActivityManagerService.this) {
+                    mMemWatchDumpFile = null;
+                    mMemWatchDumpProcName = null;
+                    mMemWatchDumpPid = -1;
+                    mMemWatchDumpUid = -1;
+                }
+            } break;
             }
         }
     };
@@ -1908,7 +1989,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (pss != 0 && proc.thread != null && proc.setProcState == procState
                                     && proc.pid == pid && proc.lastPssTime == lastPssTime) {
                                 num++;
-                                recordPssSample(proc, procState, pss, tmp[0],
+                                recordPssSampleLocked(proc, procState, pss, tmp[0],
                                         SystemClock.uptimeMillis());
                             }
                         }
@@ -5706,7 +5787,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     for (String pkg : pkgs) {
                         synchronized (ActivityManagerService.this) {
                             if (forceStopPackageLocked(pkg, -1, false, false, false, false, false,
-                                    0, "finished booting")) {
+                                    0, "query restart")) {
                                 setResultCode(Activity.RESULT_OK);
                                 return;
                             }
@@ -5715,6 +5796,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }, pkgFilter);
+
+        IntentFilter dumpheapFilter = new IntentFilter();
+        dumpheapFilter.addAction(DumpHeapActivity.ACTION_DELETE_DUMPHEAP);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getBooleanExtra(DumpHeapActivity.EXTRA_DELAY_DELETE, false)) {
+                    mHandler.sendEmptyMessageDelayed(POST_DUMP_HEAP_NOTIFICATION_MSG, 5*60*1000);
+                } else {
+                    mHandler.sendEmptyMessage(POST_DUMP_HEAP_NOTIFICATION_MSG);
+                }
+            }
+        }, dumpheapFilter);
 
         // Let system services know.
         mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -12741,6 +12835,22 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
             }
         }
+        if (mMemWatchProcesses.size() > 0) {
+            pw.println("  Mem watch processes:");
+            for (int i=0; i<mMemWatchProcesses.size(); i++) {
+                if (needSep) {
+                    pw.println();
+                    needSep = false;
+                }
+                pw.print("    "); pw.print(mMemWatchProcesses.keyAt(i));
+                pw.print(": "); DebugUtils.printSizeValue(pw, mMemWatchProcesses.valueAt(i));
+                pw.println();
+            }
+            pw.print("  mMemWatchDumpProcName="); pw.println(mMemWatchDumpProcName);
+            pw.print("  mMemWatchDumpFile="); pw.println(mMemWatchDumpFile);
+            pw.print("  mMemWatchDumpPid="); pw.print(mMemWatchDumpPid);
+                    pw.print(" mMemWatchDumpUid="); pw.println(mMemWatchDumpUid);
+        }
         if (mOpenGlTraceApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mOpenGlTraceApp)) {
                 if (needSep) {
@@ -13423,8 +13533,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print("    ");
                 pw.print("state: cur="); pw.print(ProcessList.makeProcStateString(r.curProcState));
                 pw.print(" set="); pw.print(ProcessList.makeProcStateString(r.setProcState));
-                pw.print(" lastPss="); pw.print(r.lastPss);
-                pw.print(" lastCachedPss="); pw.println(r.lastCachedPss);
+                pw.print(" lastPss="); DebugUtils.printSizeValue(pw, r.lastPss*1024);
+                pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, r.lastCachedPss*1024);
+                pw.println();
                 pw.print(prefix);
                 pw.print("    ");
                 pw.print("cached="); pw.print(r.cached);
@@ -17232,7 +17343,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Record new PSS sample for a process.
      */
-    void recordPssSample(ProcessRecord proc, int procState, long pss, long uss, long now) {
+    void recordPssSampleLocked(ProcessRecord proc, int procState, long pss, long uss, long now) {
         EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss*1024, uss*1024);
         proc.lastPssTime = now;
         proc.baseProcessTracker.addPss(pss, uss, true, proc.pkgList);
@@ -17245,6 +17356,67 @@ public final class ActivityManagerService extends ActivityManagerNative
         proc.lastPss = pss;
         if (procState >= ActivityManager.PROCESS_STATE_HOME) {
             proc.lastCachedPss = pss;
+        }
+
+        Long check = mMemWatchProcesses.get(proc.processName);
+        if (check != null) {
+            if ((pss*1024) >= check && proc.thread != null && mMemWatchDumpProcName == null) {
+                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+                if (!isDebuggable) {
+                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                        isDebuggable = true;
+                    }
+                }
+                if (isDebuggable) {
+                    Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check + "; reporting");
+                    final ProcessRecord myProc = proc;
+                    final File heapdumpFile = DumpHeapProvider.getJavaFile();
+                    mMemWatchDumpProcName = proc.processName;
+                    mMemWatchDumpFile = heapdumpFile.toString();
+                    mMemWatchDumpPid = proc.pid;
+                    mMemWatchDumpUid = proc.uid;
+                    BackgroundThread.getHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            revokeUriPermission(ActivityThread.currentActivityThread()
+                                            .getApplicationThread(),
+                                    DumpHeapActivity.JAVA_URI,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                                    UserHandle.myUserId());
+                            ParcelFileDescriptor fd = null;
+                            try {
+                                heapdumpFile.delete();
+                                fd = ParcelFileDescriptor.open(heapdumpFile,
+                                        ParcelFileDescriptor.MODE_CREATE |
+                                                ParcelFileDescriptor.MODE_TRUNCATE |
+                                                ParcelFileDescriptor.MODE_READ_WRITE);
+                                IApplicationThread thread = myProc.thread;
+                                if (thread != null) {
+                                    try {
+                                        if (DEBUG_PSS) Slog.d(TAG, "Requesting dump heap from "
+                                                + myProc + " to " + heapdumpFile);
+                                        thread.dumpHeap(true, heapdumpFile.toString(), fd);
+                                    } catch (RemoteException e) {
+                                    }
+                                }
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (fd != null) {
+                                    try {
+                                        fd.close();
+                                    } catch (IOException e) {
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check
+                            + ", but debugging not enabled");
+                }
+            }
         }
     }
 
@@ -17604,7 +17776,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // states, which well tend to give noisy data.
                 long start = SystemClock.uptimeMillis();
                 long pss = Debug.getPss(app.pid, mTmpLong, null);
-                recordPssSample(app, app.curProcState, pss, mTmpLong[0], now);
+                recordPssSampleLocked(app, app.curProcState, pss, mTmpLong[0], now);
                 mPendingPssProcesses.remove(app);
                 Slog.i(TAG, "Recorded pss for " + app + " state " + app.setProcState
                         + " to " + app.curProcState + ": "
@@ -18421,6 +18593,38 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } catch (IOException e) {
                 }
             }
+        }
+    }
+
+    @Override
+    public void setDumpHeapDebugLimit(String processName, long maxMemSize) {
+        enforceCallingPermission(android.Manifest.permission.SET_DEBUG_APP,
+                "setDumpHeapDebugLimit()");
+        synchronized (this) {
+            if (maxMemSize > 0) {
+                mMemWatchProcesses.put(processName, maxMemSize);
+                mHandler.sendEmptyMessage(POST_DUMP_HEAP_NOTIFICATION_MSG);
+            } else {
+                mMemWatchProcesses.remove(processName);
+            }
+        }
+    }
+
+    @Override
+    public void dumpHeapFinished(String path) {
+        synchronized (this) {
+            if (Binder.getCallingPid() != mMemWatchDumpPid) {
+                Slog.w(TAG, "dumpHeapFinished: Calling pid " + Binder.getCallingPid()
+                        + " does not match last pid " + mMemWatchDumpPid);
+                return;
+            }
+            if (mMemWatchDumpFile == null || !mMemWatchDumpFile.equals(path)) {
+                Slog.w(TAG, "dumpHeapFinished: Calling path " + path
+                        + " does not match last path " + mMemWatchDumpFile);
+                return;
+            }
+            if (DEBUG_PSS) Slog.d(TAG, "Dump heap finished for " + path);
+            mHandler.sendEmptyMessage(POST_DUMP_HEAP_NOTIFICATION_MSG);
         }
     }
 
