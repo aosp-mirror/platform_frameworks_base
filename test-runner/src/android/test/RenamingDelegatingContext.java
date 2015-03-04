@@ -107,7 +107,7 @@ public class RenamingDelegatingContext extends ContextWrapper {
     }
 
     /**
-     * @param context : the context that will be delagated.
+     * @param context : the context that will be delegated.
      * @param filePrefix : a prefix with which database and file names will be
      * prefixed.
      */
@@ -118,8 +118,8 @@ public class RenamingDelegatingContext extends ContextWrapper {
     }
 
     /**
-     * @param context : the context that will be delagated.
-     * @param fileContext : the context that file and db methods will be delgated to
+     * @param context : the context that will be delegated.
+     * @param fileContext : the context that file and db methods will be delegated to
      * @param filePrefix : a prefix with which database and file names will be
      * prefixed.
      */
