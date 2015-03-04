@@ -256,7 +256,7 @@ int SoundPool::play(int sampleID, float leftVolume, float rightVolume,
     dump();
 
     // allocate a channel
-    channel = allocateChannel_l(priority);
+    channel = allocateChannel_l(priority, sampleID);
 
     // no channel allocated - return 0
     if (!channel) {
@@ -271,13 +271,25 @@ int SoundPool::play(int sampleID, float leftVolume, float rightVolume,
     return channelID;
 }
 
-SoundChannel* SoundPool::allocateChannel_l(int priority)
+SoundChannel* SoundPool::allocateChannel_l(int priority, int sampleID)
 {
     List<SoundChannel*>::iterator iter;
     SoundChannel* channel = NULL;
 
-    // allocate a channel
+    // check if channel for given sampleID still available
     if (!mChannels.empty()) {
+        for (iter = mChannels.begin(); iter != mChannels.end(); ++iter) {
+            if (sampleID == (*iter)->getPrevSampleID() && (*iter)->state() == SoundChannel::IDLE) {
+                channel = *iter;
+                mChannels.erase(iter);
+                ALOGV("Allocated recycled channel for same sampleID");
+                break;
+            }
+        }
+    }
+
+    // allocate any channel
+    if (!channel && !mChannels.empty()) {
         iter = mChannels.begin();
         if (priority >= (*iter)->priority()) {
             channel = *iter;
@@ -648,6 +660,7 @@ error:
 void SoundChannel::init(SoundPool* soundPool)
 {
     mSoundPool = soundPool;
+    mPrevSampleID = -1;
 }
 
 // call with sound pool lock held
@@ -656,7 +669,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
 {
     sp<AudioTrack> oldTrack;
     sp<AudioTrack> newTrack;
-    status_t status;
+    status_t status = NO_ERROR;
 
     { // scope for the lock
         Mutex::Autolock lock(&mLock);
@@ -701,38 +714,43 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         }
 #endif
 
-        // mToggle toggles each time a track is started on a given channel.
-        // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
-        // as callback user data. This enables the detection of callbacks received from the old
-        // audio track while the new one is being started and avoids processing them with
-        // wrong audio audio buffer size  (mAudioBufferSize)
-        unsigned long toggle = mToggle ^ 1;
-        void *userData = (void *)((unsigned long)this | toggle);
-        audio_channel_mask_t channelMask = audio_channel_out_mask_from_count(numChannels);
+        if (!mAudioTrack.get() || mPrevSampleID != sample->sampleID()) {
+            // mToggle toggles each time a track is started on a given channel.
+            // The toggle is concatenated with the SoundChannel address and passed to AudioTrack
+            // as callback user data. This enables the detection of callbacks received from the old
+            // audio track while the new one is being started and avoids processing them with
+            // wrong audio audio buffer size  (mAudioBufferSize)
+            unsigned long toggle = mToggle ^ 1;
+            void *userData = (void *)((unsigned long)this | toggle);
+            audio_channel_mask_t channelMask = audio_channel_out_mask_from_count(numChannels);
 
-        // do not create a new audio track if current track is compatible with sample parameters
-#ifdef USE_SHARED_MEM_BUFFER
-        newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-                channelMask, sample->getIMemory(), AUDIO_OUTPUT_FLAG_FAST, callback, userData);
-#else
-        uint32_t bufferFrames = (totalFrames + (kDefaultBufferCount - 1)) / kDefaultBufferCount;
-        newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
-                channelMask, frameCount, AUDIO_OUTPUT_FLAG_FAST, callback, userData,
-                bufferFrames);
-#endif
-        oldTrack = mAudioTrack;
-        status = newTrack->initCheck();
-        if (status != NO_ERROR) {
-            ALOGE("Error creating AudioTrack");
-            goto exit;
+            // do not create a new audio track if current track is compatible with sample parameters
+    #ifdef USE_SHARED_MEM_BUFFER
+            newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
+                    channelMask, sample->getIMemory(), AUDIO_OUTPUT_FLAG_FAST, callback, userData);
+    #else
+            uint32_t bufferFrames = (totalFrames + (kDefaultBufferCount - 1)) / kDefaultBufferCount;
+            newTrack = new AudioTrack(streamType, sampleRate, sample->format(),
+                    channelMask, frameCount, AUDIO_OUTPUT_FLAG_FAST, callback, userData,
+                    bufferFrames);
+    #endif
+            oldTrack = mAudioTrack;
+            status = newTrack->initCheck();
+            if (status != NO_ERROR) {
+                ALOGE("Error creating AudioTrack");
+                goto exit;
+            }
+            // From now on, AudioTrack callbacks received with previous toggle value will be ignored.
+            mToggle = toggle;
+            mAudioTrack = newTrack;
+            ALOGV("using new track %p for sample %d", newTrack.get(), sample->sampleID());
+        } else {
+            newTrack = mAudioTrack;
+            newTrack->setSampleRate(sampleRate);
+            ALOGV("reusing track %p for sample %d", mAudioTrack.get(), sample->sampleID());
         }
-        ALOGV("setVolume %p", newTrack.get());
         newTrack->setVolume(leftVolume, rightVolume);
         newTrack->setLoop(0, frameCount, loop);
-
-        // From now on, AudioTrack callbacks received with previous toggle value will be ignored.
-        mToggle = toggle;
-        mAudioTrack = newTrack;
         mPos = 0;
         mSample = sample;
         mChannelID = nextChannelID;
@@ -875,6 +893,7 @@ bool SoundChannel::doStop_l()
         setVolume_l(0, 0);
         ALOGV("stop");
         mAudioTrack->stop();
+        mPrevSampleID = mSample->sampleID();
         mSample.clear();
         mState = IDLE;
         mPriority = IDLE_PRIORITY;
