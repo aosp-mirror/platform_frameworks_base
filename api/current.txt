@@ -12486,6 +12486,25 @@ package android.graphics.drawable {
     enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation TR_BL;
   }
 
+  public final class Icon implements android.os.Parcelable {
+    method public static android.graphics.drawable.Icon createWithBitmap(android.graphics.Bitmap);
+    method public static android.graphics.drawable.Icon createWithContentUri(java.lang.String);
+    method public static android.graphics.drawable.Icon createWithContentUri(android.net.Uri);
+    method public static android.graphics.drawable.Icon createWithData(byte[], int, int);
+    method public static android.graphics.drawable.Icon createWithFilePath(java.lang.String);
+    method public static android.graphics.drawable.Icon createWithResource(android.content.res.Resources, int);
+    method public int describeContents();
+    method public android.graphics.drawable.Drawable loadDrawable(android.content.Context);
+    method public void loadDrawableAsync(android.content.Context, android.os.Message);
+    method public void loadDrawableAsync(android.content.Context, android.os.Handler, android.graphics.drawable.Icon.OnDrawableLoadedListener);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.graphics.drawable.Icon> CREATOR;
+  }
+
+  public static abstract interface Icon.OnDrawableLoadedListener {
+    method public abstract void onDrawableLoaded(android.graphics.drawable.Drawable);
+  }
+
   public class InsetDrawable extends android.graphics.drawable.DrawableWrapper {
     ctor public InsetDrawable(android.graphics.drawable.Drawable, int);
     ctor public InsetDrawable(android.graphics.drawable.Drawable, int, int, int, int);
