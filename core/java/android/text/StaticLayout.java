@@ -43,6 +43,153 @@ public class StaticLayout extends Layout {
 
     static final String TAG = "StaticLayout";
 
+    /**
+     * Builder for static layouts. It would be better if this were a public
+     * API (as it would offer much greater flexibility for adding new options)
+     * but for the time being it's just internal.
+     *
+     * @hide
+     */
+    public final static class Builder {
+        static Builder obtain() {
+            Builder b = null;
+            synchronized (sLock) {
+                for (int i = 0; i < sCached.length; i++) {
+                    if (sCached[i] != null) {
+                        b = sCached[i];
+                        sCached[i] = null;
+                        break;
+                    }
+                }
+            }
+            if (b == null) {
+                b = new Builder();
+            }
+
+            // set default initial values
+            b.mWidth = 0;
+            b.mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
+            b.mSpacingMult = 1.0f;
+            b.mSpacingAdd = 0.0f;
+            b.mIncludePad = true;
+            b.mEllipsizedWidth = 0;
+            b.mEllipsize = null;
+            b.mMaxLines = Integer.MAX_VALUE;
+
+            b.mMeasuredText = MeasuredText.obtain();
+            return b;
+        }
+
+        static void recycle(Builder b) {
+            b.mPaint = null;
+            b.mText = null;
+            MeasuredText.recycle(b.mMeasuredText);
+            synchronized (sLock) {
+                for (int i = 0; i < sCached.length; i++) {
+                    if (sCached[i] == null) {
+                        sCached[i] = b;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // release any expensive state
+        /* package */ void finish() {
+            mMeasuredText.finish();
+        }
+
+        public Builder setText(CharSequence source) {
+            return setText(source, 0, source.length());
+        }
+
+        public Builder setText(CharSequence source, int start, int end) {
+            mText = source;
+            mStart = start;
+            mEnd = end;
+            return this;
+        }
+
+        public Builder setPaint(TextPaint paint) {
+            mPaint = paint;
+            return this;
+        }
+
+        public Builder setWidth(int width) {
+            mWidth = width;
+            if (mEllipsize == null) {
+                mEllipsizedWidth = width;
+            }
+            return this;
+        }
+
+        public Builder setTextDir(TextDirectionHeuristic textDir) {
+            mTextDir = textDir;
+            return this;
+        }
+
+        // TODO: combine the following, as they're almost always set together?
+        public Builder setSpacingMult(float spacingMult) {
+            mSpacingMult = spacingMult;
+            return this;
+        }
+
+        public Builder setSpacingAdd(float spacingAdd) {
+            mSpacingAdd = spacingAdd;
+            return this;
+        }
+
+        public Builder setIncludePad(boolean includePad) {
+            mIncludePad = includePad;
+            return this;
+        }
+
+        // TODO: combine the following?
+        public Builder setEllipsizedWidth(int ellipsizedWidth) {
+            mEllipsizedWidth = ellipsizedWidth;
+            return this;
+        }
+
+        public Builder setEllipsize(TextUtils.TruncateAt ellipsize) {
+            mEllipsize = ellipsize;
+            return this;
+        }
+
+        public Builder setMaxLines(int maxLines) {
+            mMaxLines = maxLines;
+            return this;
+        }
+
+        public StaticLayout build() {
+            // TODO: can optimize based on whether ellipsis is needed
+            StaticLayout result = new StaticLayout(mText);
+            result.initFromBuilder(this);
+            recycle(this);
+            return result;
+        }
+
+        CharSequence mText;
+        int mStart;
+        int mEnd;
+        TextPaint mPaint;
+        int mWidth;
+        TextDirectionHeuristic mTextDir;
+        float mSpacingMult;
+        float mSpacingAdd;
+        boolean mIncludePad;
+        int mEllipsizedWidth;
+        TextUtils.TruncateAt mEllipsize;
+        int mMaxLines;
+
+        Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
+
+        // This will go away and be subsumed by native builder code
+        MeasuredText mMeasuredText;
+
+        private static final Object sLock = new Object();
+        private static final Builder[] sCached = new Builder[3];
+    }
+
     public StaticLayout(CharSequence source, TextPaint paint,
                         int width,
                         Alignment align, float spacingmult, float spacingadd,
@@ -110,6 +257,17 @@ public class StaticLayout extends Layout {
                     : new Ellipsizer(source),
               paint, outerwidth, align, textDir, spacingmult, spacingadd);
 
+        Builder b = Builder.obtain();
+        b.setText(source, bufstart, bufend)
+            .setPaint(paint)
+            .setWidth(outerwidth)
+            .setTextDir(textDir)
+            .setSpacingMult(spacingmult)
+            .setSpacingAdd(spacingadd)
+            .setIncludePad(includepad)
+            .setEllipsizedWidth(ellipsizedWidth)
+            .setEllipsize(ellipsize)
+            .setMaxLines(maxLines);
         /*
          * This is annoying, but we can't refer to the layout until
          * superclass construction is finished, and the superclass
@@ -136,14 +294,9 @@ public class StaticLayout extends Layout {
         mLines = new int[mLineDirections.length];
         mMaximumVisibleLineCount = maxLines;
 
-        mMeasured = MeasuredText.obtain();
+        initFromBuilder(b);
 
-        generate(source, bufstart, bufend, paint, outerwidth, textDir, spacingmult,
-                 spacingadd, includepad, includepad, ellipsizedWidth,
-                 ellipsize);
-
-        mMeasured = MeasuredText.recycle(mMeasured);
-        mFontMetricsInt = null;
+        Builder.recycle(b);
     }
 
     /* package */ StaticLayout(CharSequence text) {
@@ -152,16 +305,23 @@ public class StaticLayout extends Layout {
         mColumns = COLUMNS_ELLIPSIZE;
         mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
         mLines = new int[mLineDirections.length];
-        // FIXME This is never recycled
-        mMeasured = MeasuredText.obtain();
     }
 
-    /* package */ void generate(CharSequence source, int bufStart, int bufEnd,
-                        TextPaint paint, int outerWidth,
-                        TextDirectionHeuristic textDir, float spacingmult,
-                        float spacingadd, boolean includepad,
-                        boolean trackpad, float ellipsizedWidth,
-                        TextUtils.TruncateAt ellipsize) {
+    private void initFromBuilder(Builder b) {
+        generate(b, b.mIncludePad, b.mIncludePad);
+    }
+
+    /* package */ void generate(Builder b, boolean includepad, boolean trackpad) {
+        CharSequence source = b.mText;
+        int bufStart = b.mStart;
+        int bufEnd = b.mEnd;
+        TextPaint paint = b.mPaint;
+        int outerWidth = b.mWidth;
+        TextDirectionHeuristic textDir = b.mTextDir;
+        float spacingmult = b.mSpacingMult;
+        float spacingadd = b.mSpacingAdd;
+        float ellipsizedWidth = b.mEllipsizedWidth;
+        TextUtils.TruncateAt ellipsize = b.mEllipsize;
         LineBreaks lineBreaks = new LineBreaks();
         // store span end locations
         int[] spanEndCache = new int[4];
@@ -175,10 +335,10 @@ public class StaticLayout extends Layout {
         int v = 0;
         boolean needMultiply = (spacingmult != 1 || spacingadd != 0);
 
-        Paint.FontMetricsInt fm = mFontMetricsInt;
+        Paint.FontMetricsInt fm = b.mFontMetricsInt;
         int[] chooseHtv = null;
 
-        MeasuredText measured = mMeasured;
+        MeasuredText measured = b.mMeasuredText;
 
         Spanned spanned = null;
         if (source instanceof Spanned)
@@ -746,14 +906,6 @@ public class StaticLayout extends Layout {
         return mEllipsizedWidth;
     }
 
-    void prepare() {
-        mMeasured = MeasuredText.obtain();
-    }
-    
-    void finish() {
-        mMeasured = MeasuredText.recycle(mMeasured);
-    }
-
     // populates LineBreaks and returns the number of breaks found
     //
     // the arrays inside the LineBreaks objects are passed in as well
@@ -792,12 +944,6 @@ public class StaticLayout extends Layout {
     private static final char CHAR_NEW_LINE = '\n';
 
     private static final double EXTRA_ROUNDING = 0.5;
-
-    /*
-     * This is reused across calls to generate()
-     */
-    private MeasuredText mMeasured;
-    private Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
     // This is used to return three arrays from a single JNI call when
     // performing line breaking
