@@ -601,7 +601,7 @@ public class BackupManagerService {
         return token;
     }
 
-    // High level policy: apps are ineligible for backup if certain conditions apply
+    // High level policy: apps are generally ineligible for backup if certain conditions apply
     public static boolean appIsEligibleForBackup(ApplicationInfo app) {
         // 1. their manifest states android:allowBackup="false"
         if ((app.flags&ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
@@ -628,7 +628,7 @@ public class BackupManagerService {
             return (pkg.applicationInfo.flags & ApplicationInfo.FLAG_FULL_BACKUP_ONLY) != 0;
         }
 
-        // No agent means we do full backups for it
+        // No agent or fullBackupOnly="true" means we do indeed perform full-data backups for it
         return true;
     }
 
@@ -1266,7 +1266,23 @@ public class BackupManagerService {
                     for (int i = 0; i < N; i++) {
                         String pkgName = in.readUTF();
                         long lastBackup = in.readLong();
-                        schedule.add(new FullBackupEntry(pkgName, lastBackup));
+                        try {
+                            PackageInfo pkg = mPackageManager.getPackageInfo(pkgName, 0);
+                            if (appGetsFullBackup(pkg)
+                                    && appIsEligibleForBackup(pkg.applicationInfo)) {
+                                schedule.add(new FullBackupEntry(pkgName, lastBackup));
+                            } else {
+                                if (DEBUG) {
+                                    Slog.i(TAG, "Package " + pkgName
+                                            + " no longer eligible for full backup");
+                                }
+                            }
+                        } catch (NameNotFoundException e) {
+                            if (DEBUG) {
+                                Slog.i(TAG, "Package " + pkgName
+                                        + " not installed; dropping from full backup");
+                            }
+                        }
                     }
                     Collections.sort(schedule);
                 } catch (Exception e) {
@@ -1289,7 +1305,7 @@ public class BackupManagerService {
                 schedule = new ArrayList<FullBackupEntry>(N);
                 for (int i = 0; i < N; i++) {
                     PackageInfo info = apps.get(i);
-                    if (appGetsFullBackup(info)) {
+                    if (appGetsFullBackup(info) && appIsEligibleForBackup(info.applicationInfo)) {
                         schedule.add(new FullBackupEntry(info.packageName, 0));
                     }
                 }
@@ -1761,11 +1777,11 @@ public class BackupManagerService {
                     addPackageParticipantsLocked(pkgList);
                 }
                 // If they're full-backup candidates, add them there instead
+                final long now = System.currentTimeMillis();
                 for (String packageName : pkgList) {
                     try {
                         PackageInfo app = mPackageManager.getPackageInfo(packageName, 0);
-                        long now = System.currentTimeMillis();
-                        if (appGetsFullBackup(app)) {
+                        if (appGetsFullBackup(app) && appIsEligibleForBackup(app.applicationInfo)) {
                             enqueueFullBackup(packageName, now);
                             scheduleNextFullBackupJob();
                         }
@@ -2462,7 +2478,7 @@ public class BackupManagerService {
             BackupRequest request = mQueue.get(0);
             mQueue.remove(0);
 
-            Slog.d(TAG, "starting agent for backup of " + request);
+            Slog.d(TAG, "starting key/value backup of " + request);
             addBackupTrace("launch agent for " + request.packageName);
 
             // Verify that the requested app exists; it might be something that
@@ -2473,13 +2489,24 @@ public class BackupManagerService {
             try {
                 mCurrentPackage = mPackageManager.getPackageInfo(request.packageName,
                         PackageManager.GET_SIGNATURES);
-                if (mCurrentPackage.applicationInfo.backupAgentName == null) {
+                if (!appIsEligibleForBackup(mCurrentPackage.applicationInfo)) {
                     // The manifest has changed but we had a stale backup request pending.
                     // This won't happen again because the app won't be requesting further
                     // backups.
                     Slog.i(TAG, "Package " + request.packageName
                             + " no longer supports backup; skipping");
-                    addBackupTrace("skipping - no agent, completion is noop");
+                    addBackupTrace("skipping - not eligible, completion is noop");
+                    executeNextState(BackupState.RUNNING_QUEUE);
+                    return;
+                }
+
+                if (appGetsFullBackup(mCurrentPackage)) {
+                    // It's possible that this app *formerly* was enqueued for key/value backup,
+                    // but has since been updated and now only supports the full-data path.
+                    // Don't proceed with a key/value backup for it in this case.
+                    Slog.i(TAG, "Package " + request.packageName
+                            + " requests full-data rather than key/value; skipping");
+                    addBackupTrace("skipping - fullBackupOnly, completion is noop");
                     executeNextState(BackupState.RUNNING_QUEUE);
                     return;
                 }
@@ -9161,6 +9188,8 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
             // check whether there is data for it in the current dataset, falling back
             // to the ancestral dataset if not.
             long token = getAvailableRestoreToken(packageName);
+            if (DEBUG) Slog.v(TAG, "restorePackage pkg=" + packageName
+                    + " token=" + Long.toHexString(token));
 
             // If we didn't come up with a place to look -- no ancestral dataset and
             // the app has never been backed up from this device -- there's nothing
