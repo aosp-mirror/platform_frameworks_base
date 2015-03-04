@@ -3947,18 +3947,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (packageName == null) {
             throw new NullPointerException("packageName is null");
         }
-        try {
-            int uid = mContext.getPackageManager().getPackageUid(packageName, 0);
-            if (uid != Binder.getCallingUid()) {
-                throw new SecurityException(
-                        "clearDeviceInitializer can only be called by the device initializer");
-            }
-        } catch (NameNotFoundException e) {
-            throw new SecurityException(e);
-        }
-        if (!isDeviceInitializer(packageName)) {
+
+        if (!isDeviceInitializer(packageName) && !isDeviceOwner(packageName)) {
             throw new SecurityException(
-                    "clearDeviceInitializer can only be called by the device initializer");
+                    "clearDeviceInitializer can only be called by the device initializer/owner");
         }
         synchronized (this) {
             long ident = Binder.clearCallingIdentity();
