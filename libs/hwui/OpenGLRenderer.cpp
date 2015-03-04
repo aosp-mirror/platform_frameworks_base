@@ -2329,7 +2329,7 @@ void OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Patch* mesh,
     Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return;
 
-    if (USE_GLOPS) {
+    if (false) {
         // 9 patches are built for stretching - always filter
         int textureFillFlags = static_cast<int>(TextureFillFlags::kForceFilter);
         if (bitmap->colorType() == kAlpha_8_SkColorType) {
