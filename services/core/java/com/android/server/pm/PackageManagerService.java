@@ -11224,7 +11224,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
                         removeUser = user.getIdentifier();
                         appId = ps.appId;
-                        mSettings.writePackageRestrictionsLPr(removeUser);
+                        scheduleWritePackageRestrictionsLocked(removeUser);
                     } else {
                         // We need to set it back to 'installed' so the uninstall
                         // broadcasts will be sent correctly.
@@ -11239,7 +11239,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
                     removeUser = user.getIdentifier();
                     appId = ps.appId;
-                    mSettings.writePackageRestrictionsLPr(removeUser);
+                    scheduleWritePackageRestrictionsLocked(removeUser);
                 }
             }
         }
@@ -11256,6 +11256,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             mInstaller.clearUserData(packageName, removeUser);
             removeKeystoreDataIfNeeded(removeUser, appId);
             schedulePackageCleaning(packageName, removeUser, false);
+            synchronized (mPackages) {
+                if (clearPackagePreferredActivitiesLPw(packageName, removeUser)) {
+                    scheduleWritePackageRestrictionsLocked(removeUser);
+                }
+            }
             return true;
         }
 
