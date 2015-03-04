@@ -635,24 +635,34 @@ public abstract class BatteryStats implements Parcelable {
             while (i < N && (c=value.charAt(i)) != '-') {
                 i++;
                 switch (c) {
-                    case 'f': out |= ((Display.STATE_OFF-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT); break;
-                    case 'o': out |= ((Display.STATE_ON-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT); break;
-                    case 'd': out |= ((Display.STATE_DOZE-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT); break;
-                    case 'z': out |= ((Display.STATE_DOZE_SUSPEND-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT);
+                    case 'f': out |= (((long)Display.STATE_OFF-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT);
                         break;
-                    case 'p': out |= (STEP_LEVEL_MODE_POWER_SAVE<<STEP_LEVEL_INITIAL_MODE_SHIFT);
+                    case 'o': out |= (((long)Display.STATE_ON-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT);
                         break;
-                    case 'F': out |= ((Display.STATE_OFF-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT); break;
-                    case 'O': out |= ((Display.STATE_ON-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT); break;
-                    case 'D': out |= ((Display.STATE_DOZE-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT); break;
-                    case 'Z': out |= ((Display.STATE_DOZE_SUSPEND-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                    case 'd': out |= (((long)Display.STATE_DOZE-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT);
                         break;
-                    case 'P': out |= (STEP_LEVEL_MODE_POWER_SAVE<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                    case 'z': out |= (((long)Display.STATE_DOZE_SUSPEND-1)
+                            << STEP_LEVEL_INITIAL_MODE_SHIFT);
+                        break;
+                    case 'p': out |= (((long)STEP_LEVEL_MODE_POWER_SAVE)
+                            << STEP_LEVEL_INITIAL_MODE_SHIFT);
+                        break;
+                    case 'F': out |= (((long)Display.STATE_OFF-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                    case 'O': out |= (((long)Display.STATE_ON-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                    case 'D': out |= (((long)Display.STATE_DOZE-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                    case 'Z': out |= (((long)Display.STATE_DOZE_SUSPEND-1)
+                            << STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                    case 'P': out |= (((long)STEP_LEVEL_MODE_POWER_SAVE)
+                            << STEP_LEVEL_MODIFIED_MODE_SHIFT);
                         break;
                 }
             }
             i++;
-            int level = 0;
+            long level = 0;
             while (i < N && (c=value.charAt(i)) != '-') {
                 i++;
                 level <<= 4;
@@ -664,6 +674,7 @@ public abstract class BatteryStats implements Parcelable {
                     level += c - 'A' + 10;
                 }
             }
+            i++;
             out |= (level << STEP_LEVEL_LEVEL_SHIFT) & STEP_LEVEL_LEVEL_MASK;
             long duration = 0;
             while (i < N && (c=value.charAt(i)) != '-') {
