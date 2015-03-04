@@ -31,7 +31,7 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiOutputPort implements MidiSender, Closeable {
+public class MidiOutputPort extends MidiSender implements Closeable {
     private static final String TAG = "MidiOutputPort";
 
     private final int mPortNumber;
@@ -59,7 +59,7 @@ public class MidiOutputPort implements MidiSender, Closeable {
                     long timestamp = MidiPortImpl.getMessageTimeStamp(buffer, count);
 
                     // dispatch to all our receivers
-                    mDispatcher.post(buffer, offset, size, timestamp);
+                    mDispatcher.receive(buffer, offset, size, timestamp);
                 }
             } catch (IOException e) {
                 // FIXME report I/O failure?

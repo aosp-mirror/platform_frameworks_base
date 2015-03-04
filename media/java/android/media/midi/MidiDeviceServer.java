@@ -85,10 +85,10 @@ public final class MidiDeviceServer implements Closeable {
 
                     outputPort.connect(new MidiReceiver() {
                         @Override
-                        public void post(byte[] msg, int offset, int count, long timestamp)
+                        public void receive(byte[] msg, int offset, int count, long timestamp)
                                 throws IOException {
                             try {
-                                inputPortReceviver.post(msg, offset, count, timestamp);
+                                inputPortReceviver.receive(msg, offset, count, timestamp);
                             } catch (IOException e) {
                                 IoUtils.closeQuietly(mInputPortOutputPorts[portNumberF]);
                                 mInputPortOutputPorts[portNumberF] = null;
@@ -125,10 +125,10 @@ public final class MidiDeviceServer implements Closeable {
                 final MidiSender sender = mOutputPortDispatchers[portNumber].getSender();
                 sender.connect(new MidiReceiver() {
                         @Override
-                        public void post(byte[] msg, int offset, int count, long timestamp)
+                        public void receive(byte[] msg, int offset, int count, long timestamp)
                                 throws IOException {
                             try {
-                                inputPort.post(msg, offset, count, timestamp);
+                                inputPort.receive(msg, offset, count, timestamp);
                             } catch (IOException e) {
                                 IoUtils.closeQuietly(inputPort);
                                 sender.disconnect(this);

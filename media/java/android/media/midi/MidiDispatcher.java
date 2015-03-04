@@ -24,12 +24,12 @@ import java.util.ArrayList;
  * This class subclasses {@link MidiReceiver} and dispatches any data it receives
  * to its receiver list. Any receivers that throw an exception upon receiving data will
  * be automatically removed from the receiver list, but no IOException will be returned
- * from the dispatcher's {@link #post} in that case.
+ * from the dispatcher's {@link #receive} in that case.
  *
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiDispatcher implements MidiReceiver {
+public class MidiDispatcher extends MidiReceiver {
 
     private final ArrayList<MidiReceiver> mReceivers = new ArrayList<MidiReceiver>();
 
@@ -71,12 +71,12 @@ public class MidiDispatcher implements MidiReceiver {
     }
 
     @Override
-    public void post(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
         synchronized (mReceivers) {
            for (int i = 0; i < mReceivers.size(); ) {
                 MidiReceiver receiver = mReceivers.get(i);
                 try {
-                    receiver.post(msg, offset, count, timestamp);
+                    receiver.receive(msg, offset, count, timestamp);
                     i++;    // increment only on success. on failure we remove the receiver
                             // so i should not be incremented
                 } catch (IOException e) {

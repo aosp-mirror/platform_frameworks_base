@@ -30,12 +30,12 @@ import java.io.IOException;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public class MidiInputPort implements MidiReceiver, Closeable {
+public class MidiInputPort extends MidiReceiver implements Closeable {
 
     private final int mPortNumber;
     private final FileOutputStream mOutputStream;
 
-    // buffer to use for sending messages out our output stream
+    // buffer to use for sending data out our output stream
     private final byte[] mBuffer = new byte[MidiPortImpl.MAX_PACKET_SIZE];
 
   /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
@@ -52,38 +52,27 @@ public class MidiInputPort implements MidiReceiver, Closeable {
         return mPortNumber;
     }
 
-    //FIXME
-    public void onIOException() {
-    }
-
     /**
-     * Writes a MIDI message to the input port
+     * Writes MIDI data to the input port
      *
-     * @param msg byte array containing the message
-     * @param offset offset of first byte of the message in msg byte array
-     * @param count size of the message in bytes
-     * @param timestamp future time to post the message (based on
+     * @param msg byte array containing the data
+     * @param offset offset of first byte of the data in msg byte array
+     * @param count size of the data in bytes
+     * @param timestamp future time to post the data (based on
      *                  {@link java.lang.System#nanoTime}
      */
-    public void post(byte[] msg, int offset, int count, long timestamp) throws IOException {
+    public void receive(byte[] msg, int offset, int count, long timestamp) throws IOException {
         assert(offset >= 0 && count >= 0 && offset + count <= msg.length);
 
         synchronized (mBuffer) {
-            try {
-                while (count > 0) {
-                    int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
-                    mOutputStream.write(mBuffer, 0, length);
-                    int sent = MidiPortImpl.getMessageSize(mBuffer, length);
-                    assert(sent >= 0 && sent <= length);
+            while (count > 0) {
+                int length = MidiPortImpl.packMessage(msg, offset, count, timestamp, mBuffer);
+                mOutputStream.write(mBuffer, 0, length);
+                int sent = MidiPortImpl.getMessageSize(mBuffer, length);
+                assert(sent >= 0 && sent <= length);
 
-                    offset += sent;
-                    count -= sent;
-                }
-            } catch (IOException e) {
-                IoUtils.closeQuietly(mOutputStream);
-                // report I/O failure
-                onIOException();
-                throw e;
+                offset += sent;
+                count -= sent;
             }
         }
     }
