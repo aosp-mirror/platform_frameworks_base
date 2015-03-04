@@ -16,20 +16,20 @@
 
 package com.android.layoutlib.bridge.impl;
 
-import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
-
 import com.android.ide.common.rendering.api.DrawableParams;
 import com.android.ide.common.rendering.api.HardwareConfig;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.resources.ResourceType;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
 import android.view.AttachInfo_Accessor;
 import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
@@ -38,7 +38,9 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Action to render a given Drawable provided through {@link DrawableParams#getDrawable()}.
@@ -71,11 +73,37 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
             return Status.ERROR_NOT_A_DRAWABLE.createResult();
         }
 
+        Drawable d = ResourceHelper.getDrawable(drawableResource, context);
+
+        final Boolean allStates =
+                params.getFlag(RenderParamsFlags.FLAG_KEY_RENDER_ALL_DRAWABLE_STATES);
+        if (allStates == Boolean.TRUE) {
+            final List<BufferedImage> result;
+
+            if (d instanceof StateListDrawable) {
+                result = new ArrayList<BufferedImage>();
+                final StateListDrawable stateList = (StateListDrawable) d;
+                for (int i = 0; i < stateList.getStateCount(); i++) {
+                    final Drawable stateDrawable = stateList.getStateDrawable(i);
+                    result.add(renderImage(hardwareConfig, stateDrawable, context));
+                }
+            } else {
+                result = Collections.singletonList(renderImage(hardwareConfig, d, context));
+            }
+
+            return Status.SUCCESS.createResult(result);
+        } else {
+            BufferedImage image = renderImage(hardwareConfig, d, context);
+            return Status.SUCCESS.createResult(image);
+        }
+    }
+
+    private BufferedImage renderImage(HardwareConfig hardwareConfig, Drawable d,
+            BridgeContext context) {
         // create a simple FrameLayout
         FrameLayout content = new FrameLayout(context);
 
         // get the actual Drawable object to draw
-        Drawable d = ResourceHelper.getDrawable(drawableResource, context);
         content.setBackground(d);
 
         // set the AttachInfo on the root view.
@@ -83,8 +111,27 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
 
 
         // measure
-        int w = hardwareConfig.getScreenWidth();
-        int h = hardwareConfig.getScreenHeight();
+        int w = d.getIntrinsicWidth();
+        int h = d.getIntrinsicHeight();
+
+        final int screenWidth = hardwareConfig.getScreenWidth();
+        final int screenHeight = hardwareConfig.getScreenHeight();
+
+        if (w == -1 || h == -1) {
+            // Use screen size when either intrinsic width or height isn't available
+            w = screenWidth;
+            h = screenHeight;
+        } else if (w > screenWidth || h > screenHeight) {
+            // If image wouldn't fit to the screen, resize it to avoid cropping.
+
+            // We need to find scale such that scale * w <= screenWidth, scale * h <= screenHeight
+            double scale = Math.min((double) screenWidth / w, (double) screenHeight / h);
+
+            // scale * w / scale * h = w / h, so, proportions are preserved.
+            w = (int) Math.floor(scale * w);
+            h = (int) Math.floor(scale * h);
+        }
+
         int w_spec = MeasureSpec.makeMeasureSpec(w, MeasureSpec.EXACTLY);
         int h_spec = MeasureSpec.makeMeasureSpec(h, MeasureSpec.EXACTLY);
         content.measure(w_spec, h_spec);
@@ -108,8 +155,7 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
 
         // and draw
         content.draw(canvas);
-
-        return Status.SUCCESS.createResult(image);
+        return image;
     }
 
     protected BufferedImage getImage(int w, int h) {

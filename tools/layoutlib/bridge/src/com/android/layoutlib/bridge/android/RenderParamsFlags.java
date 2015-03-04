@@ -16,22 +16,24 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.ide.common.rendering.api.SessionParams;
+import com.android.ide.common.rendering.api.SessionParams.Key;
 
 /**
- * This contains all known keys for the {@link SessionParams#getFlag(SessionParams.Key)}.
+ * This contains all known keys for the {@link RenderParams#getFlag(Key)}.
  * <p/>
  * The IDE has its own copy of this class which may be newer or older than this one.
  * <p/>
  * Constants should never be modified or removed from this class.
  */
-public final class SessionParamsFlags {
+public final class RenderParamsFlags {
 
-    public static final SessionParams.Key<String> FLAG_KEY_ROOT_TAG =
-            new SessionParams.Key<String>("rootTag", String.class);
-    public static final SessionParams.Key<Boolean> FLAG_KEY_DISABLE_BITMAP_CACHING =
-            new SessionParams.Key<Boolean>("disableBitmapCaching", Boolean.class);
+    public static final Key<String> FLAG_KEY_ROOT_TAG =
+            new Key<String>("rootTag", String.class);
+    public static final Key<Boolean> FLAG_KEY_DISABLE_BITMAP_CACHING =
+            new Key<Boolean>("disableBitmapCaching", Boolean.class);
+    public static final Key<Boolean> FLAG_KEY_RENDER_ALL_DRAWABLE_STATES =
+            new Key<Boolean>("renderAllDrawableStates", Boolean.class);
 
     // Disallow instances.
-    private SessionParamsFlags() {}
+    private RenderParamsFlags() {}
 }
