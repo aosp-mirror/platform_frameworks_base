@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.graphics.drawable.Drawable;
 
@@ -101,7 +102,7 @@ public final class Outline {
      * assumed by the drawing system to fully cover content beneath it,
      * meaning content beneath may be optimized away.
      */
-    public void setAlpha(float alpha) {
+    public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         mAlpha = alpha;
     }
 

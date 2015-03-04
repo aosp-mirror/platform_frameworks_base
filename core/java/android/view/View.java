@@ -21,10 +21,12 @@ import android.animation.StateListAnimator;
 import android.annotation.CallSuper;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FloatRange;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -10580,7 +10582,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @attr ref android.R.styleable#View_alpha
      */
-    public void setAlpha(float alpha) {
+    public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
             mTransformationInfo.mAlpha = alpha;
@@ -17028,7 +17030,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param location an array of two integers in which to hold the coordinates
      */
-    public void getLocationOnScreen(int[] location) {
+    public void getLocationOnScreen(@Size(2) int[] location) {
         getLocationInWindow(location);
 
         final AttachInfo info = mAttachInfo;
@@ -17045,7 +17047,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param location an array of two integers in which to hold the coordinates
      */
-    public void getLocationInWindow(int[] location) {
+    public void getLocationInWindow(@Size(2) int[] location) {
         if (location == null || location.length < 2) {
             throw new IllegalArgumentException("location must be an array of two integers");
         }
@@ -18889,7 +18891,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #dispatchNestedPreScroll(int, int, int[], int[])
      */
     public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed,
-            int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow) {
+            int dxUnconsumed, int dyUnconsumed, @Nullable @Size(2) int[] offsetInWindow) {
         if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
             if (dxConsumed != 0 || dyConsumed != 0 || dxUnconsumed != 0 || dyUnconsumed != 0) {
                 int startX = 0;
@@ -18937,7 +18939,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return true if the parent consumed some or all of the scroll delta
      * @see #dispatchNestedScroll(int, int, int, int, int[])
      */
-    public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) {
+    public boolean dispatchNestedPreScroll(int dx, int dy,
+            @Nullable @Size(2) int[] consumed, @Nullable @Size(2) int[] offsetInWindow) {
         if (isNestedScrollingEnabled() && mNestedScrollingParent != null) {
             if (dx != 0 || dy != 0) {
                 int startX = 0;

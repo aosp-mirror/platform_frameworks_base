@@ -20,6 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Size;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
@@ -1055,14 +1056,15 @@ public class Canvas {
      *                 "points" that are drawn is really (count >> 1).
      * @param paint    The paint used to draw the points
      */
-    public void drawPoints(float[] pts, int offset, int count, @NonNull Paint paint) {
+    public void drawPoints(@Size(multiple=2) float[] pts, int offset, int count,
+            @NonNull Paint paint) {
         native_drawPoints(mNativeCanvasWrapper, pts, offset, count, paint.getNativeInstance());
     }
 
     /**
      * Helper for drawPoints() that assumes you want to draw the entire array
      */
-    public void drawPoints(@NonNull float[] pts, @NonNull Paint paint) {
+    public void drawPoints(@Size(multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
         drawPoints(pts, 0, pts.length, paint);
     }
 
@@ -1105,11 +1107,11 @@ public class Canvas {
      *                 (count >> 2).
      * @param paint    The paint used to draw the points
      */
-    public void drawLines(float[] pts, int offset, int count, Paint paint) {
+    public void drawLines(@Size(min=4,multiple=2) float[] pts, int offset, int count, Paint paint) {
         native_drawLines(mNativeCanvasWrapper, pts, offset, count, paint.getNativeInstance());
     }
 
-    public void drawLines(@NonNull float[] pts, @NonNull Paint paint) {
+    public void drawLines(@Size(min=4,multiple=2) @NonNull float[] pts, @NonNull Paint paint) {
         drawLines(pts, 0, pts.length, paint);
     }
 
@@ -1829,7 +1831,8 @@ public class Canvas {
      * @param paint    The paint used for the text (e.g. color, size, style)
      */
     @Deprecated
-    public void drawPosText(@NonNull char[] text, int index, int count, @NonNull float[] pos,
+    public void drawPosText(@NonNull char[] text, int index, int count,
+            @NonNull @Size(multiple=2) float[] pos,
             @NonNull Paint paint) {
         if (index < 0 || index + count > text.length || count*2 > pos.length) {
             throw new IndexOutOfBoundsException();
@@ -1852,7 +1855,8 @@ public class Canvas {
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     @Deprecated
-    public void drawPosText(@NonNull String text, @NonNull float[] pos, @NonNull Paint paint) {
+    public void drawPosText(@NonNull String text, @NonNull @Size(multiple=2) float[] pos,
+            @NonNull Paint paint) {
         drawPosText(text.toCharArray(), 0, text.length(), pos, paint);
     }
 
