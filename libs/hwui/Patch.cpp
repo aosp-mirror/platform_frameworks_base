@@ -24,6 +24,7 @@
 #include "Patch.h"
 #include "Properties.h"
 #include "UvMapper.h"
+#include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -36,19 +37,11 @@ uint32_t Patch::getSize() const {
     return verticesCount * sizeof(TextureVertex);
 }
 
-TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
-        float width, float height, const Res_png_9patch* patch) {
-    UvMapper mapper;
-    return createMesh(bitmapWidth, bitmapHeight, width, height, mapper, patch);
-}
-
-TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
-        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch) {
-    if (vertices) return vertices.get();
+Patch::Patch(const float bitmapWidth, const float bitmapHeight,
+        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch)
+        : mColors(patch->getColors()) {
 
     int8_t emptyQuads = 0;
-    mColors = patch->getColors();
-
     const int8_t numColors = patch->numColors;
     if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
         for (int8_t i = 0; i < numColors; i++) {
@@ -64,7 +57,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     uint32_t yCount = patch->numYDivs;
 
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
-    if (maxVertices == 0) return nullptr;
+    if (maxVertices == 0) return;
 
     vertices.reset(new TextureVertex[maxVertices]);
     TextureVertex* vertex = vertices.get();
@@ -151,8 +144,6 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         memcpy(reducedVertices.get(), vertices.get(), verticesCount * sizeof(TextureVertex));
         vertices = std::move(reducedVertices);
     }
-
-    return vertices.get();
 }
 
 void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,
@@ -200,10 +191,10 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     const uint32_t oldQuadCount = quadCount;
     quadCount++;
 
-    if (x1 < 0.0f) x1 = 0.0f;
-    if (x2 < 0.0f) x2 = 0.0f;
-    if (y1 < 0.0f) y1 = 0.0f;
-    if (y2 < 0.0f) y2 = 0.0f;
+    x1 = MathUtils::max(x1, 0.0f);
+    x2 = MathUtils::max(x2, 0.0f);
+    y1 = MathUtils::max(y1, 0.0f);
+    y2 = MathUtils::max(y2, 0.0f);
 
     // Skip degenerate and transparent (empty) quads
     if ((mColors[oldQuadCount] == 0) || x1 >= x2 || y1 >= y2) {
