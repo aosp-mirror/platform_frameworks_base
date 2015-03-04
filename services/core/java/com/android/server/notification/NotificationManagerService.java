@@ -2584,8 +2584,8 @@ public class NotificationManagerService extends SystemService {
             @Override
             public void run() {
                 String listenerName = listener == null ? null : listener.component.toShortString();
-                EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, id, tag, userId,
-                        mustHaveFlags, mustNotHaveFlags, reason, listenerName);
+                if (DBG) EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, id, tag,
+                        userId, mustHaveFlags, mustNotHaveFlags, reason, listenerName);
 
                 synchronized (mNotificationList) {
                     int index = indexOfNotificationLocked(pkg, tag, id, userId);
