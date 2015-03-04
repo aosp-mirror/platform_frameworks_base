@@ -21,6 +21,7 @@ import com.android.databinding.expr.ExprModel;
 import com.android.databinding.reflection.ModelAnalyzer;
 import com.android.databinding.reflection.ModelClass;
 import com.android.databinding.store.ResourceBundle;
+import com.android.databinding.store.SetterStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,14 @@ public class BindingTarget {
         return mBundle.getId();
     }
 
+    public String getTag() {
+        return mBundle.getTag();
+    }
+
+    public String getOriginalTag() {
+        return mBundle.getOriginalTag();
+    }
+
     public String getViewClass() {
         return mBundle.getFullClassName();
     }
@@ -72,6 +81,11 @@ public class BindingTarget {
 
     public boolean isBinder() {
         return getIncludedLayout() != null;
+    }
+
+    public boolean supportsTag() {
+        return !SetterStore.get(ModelAnalyzer.getInstance())
+                .isUntaggable(mBundle.getFullClassName());
     }
 
     public List<Binding> getBindings() {

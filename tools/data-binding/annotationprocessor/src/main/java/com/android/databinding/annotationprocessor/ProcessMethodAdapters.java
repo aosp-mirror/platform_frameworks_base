@@ -19,6 +19,8 @@ import android.binding.BindingAdapter;
 import android.binding.BindingConversion;
 import android.binding.BindingMethod;
 import android.binding.BindingMethods;
+import android.binding.Untaggable;
+
 import com.android.databinding.store.SetterStore;
 
 import java.io.IOException;
@@ -42,6 +44,7 @@ import javax.tools.Diagnostic;
 
 @SupportedAnnotationTypes({
         "android.binding.BindingAdapter",
+        "android.binding.Untaggable",
         "android.binding.BindingMethods",
         "android.binding.BindingConversion"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -63,6 +66,8 @@ public class ProcessMethodAdapters extends AbstractProcessor {
         addBindingAdapters(roundEnv, store);
         addRenamed(roundEnv, store);
         addConversions(roundEnv, store);
+        addUntaggable(roundEnv, store);
+
         try {
             store.write(processingEnv);
         } catch (IOException e) {
@@ -140,6 +145,13 @@ public class ProcessMethodAdapters extends AbstractProcessor {
         }
     }
 
+    private void addUntaggable(RoundEnvironment roundEnv, SetterStore store) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(Untaggable.class)) {
+            Untaggable untaggable = element.getAnnotation(Untaggable.class);
+            store.addUntaggableTypes(untaggable.value(), (TypeElement) element);
+        }
+    }
+
     private void clearIncrementalClasses(RoundEnvironment roundEnv, SetterStore store) {
         HashSet<String> classes = new HashSet<>();
 
@@ -152,6 +164,9 @@ public class ProcessMethodAdapters extends AbstractProcessor {
         }
         for (Element element : roundEnv.getElementsAnnotatedWith(BindingConversion.class)) {
             classes.add(((TypeElement) element.getEnclosingElement()).getQualifiedName().toString());
+        }
+        for (Element element : roundEnv.getElementsAnnotatedWith(Untaggable.class)) {
+            classes.add(((TypeElement) element).getQualifiedName().toString());
         }
         store.clear(classes);
     }

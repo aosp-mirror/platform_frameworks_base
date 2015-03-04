@@ -39,12 +39,15 @@ public class ProcessExpressions extends AbstractProcessor {
         ResourceBundle resourceBundle = null;
 
         for (Element element : roundEnv.getElementsAnnotatedWith(BindingAppInfo.class)) {
+            final BindingAppInfo appInfo = element.getAnnotation(BindingAppInfo.class);
+            if (appInfo == null) {
+                continue; // It gets confused between BindingAppInfo and BinderBundle
+            }
             if (element.getKind() != ElementKind.CLASS) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                         "BindingAppInfo associated with wrong type. Should be a class.", element);
                 continue;
             }
-            BindingAppInfo appInfo = element.getAnnotation(BindingAppInfo.class);
             if (resourceBundle == null) {
                 resourceBundle = new ResourceBundle(appInfo.applicationPackage());
                 processLayouts(resourceBundle, roundEnv);
@@ -60,6 +63,10 @@ public class ProcessExpressions extends AbstractProcessor {
     private void processLayouts(ResourceBundle resourceBundle, RoundEnvironment roundEnv) {
         Unmarshaller unmarshaller = null;
         for (Element element : roundEnv.getElementsAnnotatedWith(BinderBundle.class)) {
+            final BinderBundle binderBundle = element.getAnnotation(BinderBundle.class);
+            if (binderBundle == null) {
+                continue;
+            }
             if (element.getKind() != ElementKind.CLASS) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                         "BinderBundle associated with wrong type. Should be a class.", element);
@@ -72,7 +79,6 @@ public class ProcessExpressions extends AbstractProcessor {
                             JAXBContext.newInstance(ResourceBundle.LayoutFileBundle.class);
                     unmarshaller = context.createUnmarshaller();
                 }
-                BinderBundle binderBundle = element.getAnnotation(BinderBundle.class);
                 String binderBundle64 = binderBundle.value();
                 byte[] buf = Base64.decodeBase64(binderBundle64);
                 in = new ByteArrayInputStream(buf);
@@ -98,8 +104,10 @@ public class ProcessExpressions extends AbstractProcessor {
 
         CompilerChef compilerChef = CompilerChef.createChef(resourceBundle,
                 new AnnotationJavaFileWriter(processingEnv));
-        compilerChef.writeDbrFile();
-        compilerChef.writeViewBinderInterfaces();
-        compilerChef.writeViewBinders();
+        if (compilerChef.hasAnythingToGenerate()) {
+            compilerChef.writeDbrFile();
+            compilerChef.writeViewBinderInterfaces();
+            compilerChef.writeViewBinders();
+        }
     }
 }

@@ -73,8 +73,13 @@ fun ExprModel.getUniqueFieldName(base : String) : String = ext.getUniqueFieldNam
 fun ExprModel.localizeFlag(set : FlagSet, base : String) : FlagSet = ext.localizeFlag(set, base)
 
 val BindingTarget.readableUniqueName by Delegates.lazy {(target: BindingTarget) ->
-    val stripped = target.getId().androidId().stripNonJava()
-    target.getModel().ext.getUniqueFieldName(stripped)
+    val variableName : String
+    if (target.getId() == null) {
+        variableName = "boundView" + target.getTag()
+    } else {
+        variableName = target.getId().androidId().stripNonJava()
+    }
+    target.getModel().ext.getUniqueFieldName(variableName)
 }
 
 val BindingTarget.fieldName by Delegates.lazy { (target : BindingTarget) ->
@@ -350,11 +355,52 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
     fun declareConstructor() = kcode("") {
         nl("public ${className}(View root) {") {
             tab("super(root, ${model.getObservables().size()});")
+            val taggedViewCount = layoutBinder.getBindingTargets().filter{
+                it.isUsed() && !it.isBinder() && it.getTag() != null
+            }.count()
+            val hasViews = layoutBinder.getBindingTargets().firstOrNull{!it.isBinder() && it.supportsTag()} != null
+            val viewsParam : String;
+            if (hasViews) {
+                tab("View[] views = new View[${taggedViewCount}];")
+                viewsParam = "views"
+            } else {
+                viewsParam = "null"
+            }
+            val hasBinders = layoutBinder.getBindingTargets().firstOrNull{ it.isBinder() || !it.supportsTag()} != null
+            val binderParam : String
+            if (hasBinders) {
+                tab("android.util.SparseArray<View> idViews = new android.util.SparseArray<View>();")
+                binderParam = "idViews";
+            } else {
+                binderParam = "null";
+            }
+            tab("mapTaggedChildViews(root, ${viewsParam}, ${binderParam});");
             layoutBinder.getBindingTargets().filter{it.isUsed()}.forEach {
                 if (it.isBinder()) {
-                    tab("this.${it.fieldName} = com.android.databinding.library.DataBinder.createBinder(root.findViewById(${it.androidId}), R.layout.${it.getIncludedLayout()});")
+                    tab("this.${it.fieldName} = com.android.databinding.library.DataBinder.createBinder(idViews.get(${it.androidId}), R.layout.${it.getIncludedLayout()});")
+                } else if (it.getTag() == null) {
+                    tab("this.${it.fieldName} = (${it.getViewClass()}) root;")
                 } else {
-                    tab("this.${it.fieldName} = (${it.getViewClass()}) root.findViewById(${it.androidId});")
+                    if (it.supportsTag()) {
+                        tab("this.${it.fieldName} = (${it.getViewClass()}) views[${it.getTag()}];")
+                        val originalTag = it.getOriginalTag();
+                        var tagValue = "null"
+                        if (originalTag != null) {
+                            tagValue = "\"${originalTag}\""
+                            if (originalTag.startsWith("@")) {
+                                var packageName = layoutBinder.getProjectPackage()
+                                if (originalTag.startsWith("@android:")) {
+                                    packageName = "android"
+                                }
+                                val slashIndex = originalTag.indexOf('/')
+                                val resourceId = originalTag.substring(slashIndex + 1)
+                                tagValue = "root.getResources().getString(${packageName}.R.string.${resourceId})"
+                            }
+                        }
+                        tab("this.${it.fieldName}.setTag(${tagValue});")
+                    } else {
+                        tab("this.${it.fieldName} = (${it.getViewClass()}) idViews.get(${it.androidId});")
+                    }
                 }
             }
             tab("invalidateAll();");
@@ -486,12 +532,12 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
 
     fun declareViews() = kcode("// views") {
         layoutBinder.getBindingTargets().filter{it.isUsed()}.forEach {
-            nl("private ${it.getViewClass()} ${it.fieldName};")
+            nl("private final ${it.getViewClass()} ${it.fieldName};")
         }
     }
 
     fun viewGetters() = kcode("// view getters") {
-        layoutBinder.getBindingTargets().forEach {
+        layoutBinder.getBindingTargets().filter{it.getId() != null}.forEach {
             nl("@Override")
             nl("public ${it.getInterfaceType()} ${it.getterName}() {") {
                 if (it.isUsed()) {
@@ -666,7 +712,7 @@ class LayoutBinderWriter(val layoutBinder : LayoutBinder) {
                     tab("public void ${it.setterName}(${type} ${it.readableUniqueName});")
                 }
             }
-            layoutBinder.getBindingTargets().forEach {
+            layoutBinder.getBindingTargets().filter{ it.getId() != null }.forEach {
                 tab("public ${it.getInterfaceType()} ${it.getterName}();")
             }
             nl("}")

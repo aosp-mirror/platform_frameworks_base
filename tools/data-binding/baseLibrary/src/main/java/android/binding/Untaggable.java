@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.binding.adapters;
+package android.binding;
 
-import android.binding.BindingMethod;
-import android.binding.BindingMethods;
-import android.binding.Untaggable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 
-@Untaggable({"android.view.ViewStub"})
-@BindingMethods({
-        @BindingMethod(type = "android.view.ViewStub", attribute = "android:layout", method = "setLayoutResource")
-})
-public class ViewStubBindingAdapter {
-
+@Target({ElementType.TYPE})
+public @interface Untaggable {
+    String[] value();
 }

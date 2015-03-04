@@ -358,6 +358,14 @@ public class ResourceBundle implements Serializable {
             return mId;
         }
 
+        public String getTag() {
+            return mTag;
+        }
+
+        public String getOriginalTag() {
+            return mOriginalTag;
+        }
+
         public String getFullClassName() {
             return mFullClassName;
         }

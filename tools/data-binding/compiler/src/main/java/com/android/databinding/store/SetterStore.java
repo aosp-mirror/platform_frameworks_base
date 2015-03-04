@@ -160,6 +160,13 @@ public class SetterStore {
         adapters.put(key, new MethodDescription(bindingMethod));
     }
 
+    public void addUntaggableTypes(String[] typeNames, TypeElement declaredOn) {
+        String declaredType = declaredOn.getQualifiedName().toString();
+        for (String type : typeNames) {
+            mStore.untaggableTypes.put(type, declaredType);
+        }
+    }
+
     private static String getQualifiedName(TypeMirror type) {
         switch (type.getKind()) {
             case BOOLEAN:
@@ -204,10 +211,7 @@ public class SetterStore {
                     removedAccessorKeys.add(key);
                 }
             }
-            for (AccessorKey key : removedAccessorKeys) {
-                adapters.remove(key);
-            }
-            removedAccessorKeys.clear();
+            removeFromMap(adapters, removedAccessorKeys);
         }
 
         ArrayList<String> removedRenamed = new ArrayList<>();
@@ -217,10 +221,7 @@ public class SetterStore {
                     removedRenamed.add(key);
                 }
             }
-            for (String key : removedRenamed) {
-                renamed.remove(key);
-            }
-            removedRenamed.clear();
+            removeFromMap(renamed, removedRenamed);
         }
 
         ArrayList<String> removedConversions = new ArrayList<>();
@@ -231,11 +232,23 @@ public class SetterStore {
                     removedConversions.add(toType);
                 }
             }
-            for (String key : removedConversions) {
-                convertTos.remove(key);
-            }
-            removedConversions.clear();
+            removeFromMap(convertTos, removedConversions);
         }
+
+        ArrayList<String> removedUntaggable = new ArrayList<>();
+        for (String typeName : mStore.untaggableTypes.keySet()) {
+            if (classes.contains(mStore.untaggableTypes.get(typeName))) {
+                removedUntaggable.add(typeName);
+            }
+        }
+        removeFromMap(mStore.untaggableTypes, removedUntaggable);
+    }
+
+    private static <K, V> void removeFromMap(Map<K, V> map, List<K> keys) {
+        for (K key : keys) {
+            map.remove(key);
+        }
+        keys.clear();
     }
 
     public void write(ProcessingEnvironment processingEnvironment) throws IOException {
@@ -324,6 +337,10 @@ public class SetterStore {
             return adapter.type + "." + adapter.method + "(" + viewExpression + ", " +
                     valueExpression + ")";
         }
+    }
+
+    public boolean isUntaggable(String viewType) {
+        return mStore.untaggableTypes.containsKey(viewType);
     }
 
     private ModelMethod getBestSetter(ModelClass viewType, ModelClass argumentType,
@@ -504,6 +521,7 @@ public class SetterStore {
             merge(store.adapterMethods, intermediateV1.adapterMethods);
             merge(store.renamedMethods, intermediateV1.renamedMethods);
             merge(store.conversionMethods, intermediateV1.conversionMethods);
+            store.untaggableTypes.putAll(intermediateV1.untaggableTypes);
         } finally {
             if (inputStream != null) {
                 inputStream.close();
@@ -626,6 +644,7 @@ public class SetterStore {
                 new HashMap<>();
         public final HashMap<String, HashMap<String, MethodDescription>> conversionMethods =
                 new HashMap<>();
+        public final HashMap<String, String> untaggableTypes = new HashMap<>();
 
         public IntermediateV1() {
         }

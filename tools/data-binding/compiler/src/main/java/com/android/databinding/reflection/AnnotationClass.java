@@ -15,6 +15,8 @@
  */
 package com.android.databinding.reflection;
 
+import com.android.databinding.store.SetterStore;
+
 import java.util.ArrayList;
 import java.util.List;
 

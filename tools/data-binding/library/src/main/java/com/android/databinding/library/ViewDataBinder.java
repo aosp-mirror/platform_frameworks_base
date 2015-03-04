@@ -22,13 +22,18 @@ import android.binding.ObservableMap;
 import android.binding.OnListChangedListener;
 import android.binding.OnMapChangedListener;
 import android.binding.OnPropertyChangedListener;
+import android.util.SparseArray;
 import android.view.View;
+import android.view.ViewGroup;
 
 import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 
 abstract public class ViewDataBinder {
+    public static final String BINDING_TAG_PREFIX = "bindingTag";
+    private static final int BINDING_NUMBER_START = BINDING_TAG_PREFIX.length();
+
     private static final CreateWeakListener CREATE_PROPERTY_LISTENER = new CreateWeakListener() {
         @Override
         public WeakListener create(ViewDataBinder viewDataBinder, int localFieldId) {
@@ -156,6 +161,46 @@ abstract public class ViewDataBinder {
             mLocalFieldObservers[localFieldId] = listener;
         }
         listener.setTarget(observable);
+    }
+
+    protected static void mapTaggedChildViews(View root, View[] views,
+            SparseArray<View> binders) {
+        if (root instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) root;
+            for (int i = viewGroup.getChildCount() - 1; i >= 0; i--) {
+                mapTaggedViews(viewGroup.getChildAt(i), views, binders);
+            }
+        }
+    }
+
+    private static void mapTaggedViews(View view, View[] views, SparseArray<View> binders) {
+        String tag = (String) view.getTag();
+        System.out.println("tagged with " + tag + " is " + view);
+        if (tag != null && tag.startsWith(BINDING_TAG_PREFIX)) {
+            int tagIndex = parseTagInt(tag);
+            System.out.println("tag id is " + tagIndex);
+            views[tagIndex] = view;
+        } else if (view.getId() > 0 && binders != null) {
+            binders.put(view.getId(), view);
+        }
+        mapTaggedChildViews(view, views, binders);
+    }
+
+    /**
+     * Parse the tag without creating a new String object. This is fast and assumes the
+     * tag is in the correct format.
+     * @param str The tag string.
+     * @return The binding tag number parsed from the tag string.
+     */
+    private static int parseTagInt(String str) {
+        final int end = str.length();
+        int val = 0;
+        for (int i = BINDING_NUMBER_START; i < end; i++) {
+            val *= 10;
+            char c = str.charAt(i);
+            val += (c - '0');
+        }
+        return val;
     }
 
     protected static abstract class WeakListener<T> {

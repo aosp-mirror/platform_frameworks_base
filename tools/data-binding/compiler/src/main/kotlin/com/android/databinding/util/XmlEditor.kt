@@ -40,6 +40,7 @@ object XmlEditor {
     var rootNodeContext: XMLParser.ElementContext? = null
     var rootNodeHasTag = false
     data class LayoutXmlElements(val start: Position, val end: Position,
+                                 val insertionPoint: Position,
                                  val isTag: kotlin.Boolean, val isReserved: kotlin.Boolean,
                                  val attributes: MutableList<LayoutXmlElements>?)
 
@@ -53,7 +54,7 @@ object XmlEditor {
             if (isTag || ctx.attrName.getText().startsWith("bind:") ||
                     (ctx.attrValue.getText().startsWith("\"@{") && ctx.attrValue.getText().endsWith("}\""))) {
                 return arrayListOf(LayoutXmlElements(ctx.getStart().toPosition(),
-                    ctx.getStop().toEndPosition(), isTag, false, null))
+                    ctx.getStop().toEndPosition(), ctx.getStart().toPosition(), isTag, false, null))
             }
 
             //log{"visiting attr: ${ctx.getText()} at location ${ctx.getStart().toS()} ${ctx.getStop().toS()}"}
@@ -65,9 +66,17 @@ object XmlEditor {
             if (rootNodeContext == null) {
                 rootNodeContext = ctx
             }
+            val insertionPoint : Position
+            if (ctx.content() == null) {
+                insertionPoint = ctx.getStop().toPosition()
+                insertionPoint.charIndex;
+            } else {
+                insertionPoint = ctx.content().getStart().toPosition()
+                insertionPoint.charIndex -= 2;
+            }
             if (reservedElementNames.contains(ctx.elmName?.getText()) || ctx.elmName.getText().startsWith("bind:")) {
                 return arrayListOf(LayoutXmlElements(ctx.getStart().toPosition(),
-                        ctx.getStop().toEndPosition(), false, true, arrayListOf()));
+                        ctx.getStop().toEndPosition(), insertionPoint, false, true, arrayListOf()));
             }
             val elements = super<XMLParserBaseVisitor>.visitElement(ctx);
             if (elements != null && !elements.isEmpty()) {
@@ -84,7 +93,7 @@ object XmlEditor {
                     return elements;
                 } else {
                     val element = LayoutXmlElements(ctx.getStart().toPosition(),
-                            ctx.getStop().toEndPosition(), false, false, attributes)
+                            ctx.getStop().toEndPosition(), insertionPoint, false, false, attributes)
                     others.add(0, element);
                     return others;
                 }
@@ -148,8 +157,8 @@ object XmlEditor {
 
         val separator = System.lineSeparator().charAt(0)
         val noTag : ArrayList<Pair<String, LayoutXmlElements>> = ArrayList()
-        var bindingIndex = 1
-        val rootNodeEnd = toIndex(lineStarts, rootNodeContext!!.getStop().toPosition())
+        var bindingIndex = 0
+        val rootNodeEnd = toIndex(lineStarts, rootNodeContext!!.content().getStart().toPosition())
         sorted.forEach {
             if (it.isReserved) {
                 log {"Replacing reserved tag at ${it.start} to ${it.end}"}
@@ -166,7 +175,7 @@ object XmlEditor {
                         tag = ""
                     } else {
                         val index = bindingIndex++;
-                        tag = "android:tag=\"${index}\"";
+                        tag = "android:tag=\"bindingTag${index}\"";
                     }
                     it.attributes.forEach {
                         if (!replaced && tagWillFit(it.start, it.end, tag)) {
@@ -176,7 +185,8 @@ object XmlEditor {
                             replace(out, lineStarts, it, "", separator)
                         }
                     }
-                    if (!replaced) {
+                    if (!replaced && !tag.isEmpty()) {
+                        log {"Could not find place for ${tag}"}
                         noTag.add(0, Pair(tag, it))
                     }
                 }
@@ -187,8 +197,8 @@ object XmlEditor {
             val element = it.second
             val tag = it.first;
 
-            val end = toIndex(lineStarts, element.end)
-            out.insert(end, " ${tag}")
+            val insertionPoint = toIndex(lineStarts, element.insertionPoint)
+            out.insert(insertionPoint, " ${tag}")
         }
 
         Log.d{"new tag to set: $newTag"}

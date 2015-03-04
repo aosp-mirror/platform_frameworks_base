@@ -104,7 +104,7 @@ public class LayoutFileParser {
 
         final List<Node> bindingNodes = getBindingNodes(doc, xPath);
         L.d("number of binding nodes %d", bindingNodes.size());
-        int tagNumber = 1;
+        int tagNumber = 0;
         for (Node parent : bindingNodes) {
             NamedNodeMap attributes = parent.getAttributes();
             String nodeName = parent.getNodeName();
@@ -132,7 +132,12 @@ public class LayoutFileParser {
                 className = getFullViewClassName(nodeName);
             }
             final Node originalTag = attributes.getNamedItem("android:tag");
-            final String tag = String.valueOf(tagNumber++);
+            final String tag;
+            if (doc.getDocumentElement() == parent) {
+                tag = null;
+            } else {
+                tag = String.valueOf(tagNumber++);
+            }
             final ResourceBundle.BindingTargetBundle bindingTargetBundle =
                     bundle.createBindingTarget(id == null ? null : id.getNodeValue(),
                             className, true, tag, originalTag == null ? null : originalTag.getNodeValue());
