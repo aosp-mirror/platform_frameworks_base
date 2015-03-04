@@ -78,9 +78,6 @@ class DataBinderPlugin : Plugin<Project> {
 
     var viewBinderSource : File by Delegates.notNull()
 
-    val serializedBinderBundlePath by Delegates.lazy {
-        "${codeGenTargetFolder.getAbsolutePath()}/${CompilerChef.RESOURCE_BUNDLE_FILE_NAME}"
-    }
     val viewBinderSourceRoot by Delegates.lazy {
         File(project.getBuildDir(), "databinder")
     }
