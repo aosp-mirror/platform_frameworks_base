@@ -201,13 +201,8 @@ public class VolumeUI extends SystemUI {
         }
 
         @Override
-        public void masterVolumeChanged(int flags) throws RemoteException {
-            mPanel.postMasterVolumeChanged(flags);
-        }
-
-        @Override
         public void masterMuteChanged(int flags) throws RemoteException {
-            mPanel.postMasterMuteChanged(flags);
+            // no-op
         }
 
         @Override

@@ -44,13 +44,9 @@ interface IAudioService {
 
     void adjustStreamVolume(int streamType, int direction, int flags, String callingPackage);
 
-    void adjustMasterVolume(int direction, int flags, String callingPackage);
-
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
     oneway void setRemoteStreamVolume(int index);
-
-    void setMasterVolume(int index, int flags, String callingPackage);
 
     boolean isStreamMute(int streamType);
 
@@ -58,17 +54,13 @@ interface IAudioService {
 
     boolean isMasterMute();
 
-    int getStreamVolume(int streamType);
+    void setMasterMute(boolean mute, int flags, String callingPackage);
 
-    int getMasterVolume();
+    int getStreamVolume(int streamType);
 
     int getStreamMaxVolume(int streamType);
 
-    int getMasterMaxVolume();
-
     int getLastAudibleStreamVolume(int streamType);
-
-    int getLastAudibleMasterVolume();
 
     void setMicrophoneMute(boolean on, String callingPackage);
 
@@ -187,7 +179,7 @@ interface IAudioService {
 
     void setRingtonePlayer(IRingtonePlayer player);
     IRingtonePlayer getRingtonePlayer();
-    int getMasterStreamType();
+    int getUiSoundsStreamType();
 
     void setWiredDeviceConnectionState(int type, int state, String address, String name);
     int setBluetoothA2dpDeviceConnectionState(in BluetoothDevice device, int state, int profile);

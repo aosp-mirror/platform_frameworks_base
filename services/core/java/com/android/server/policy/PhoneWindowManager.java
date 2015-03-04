@@ -380,7 +380,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHasSoftInput = false;
     boolean mTranslucentDecorEnabled = true;
     boolean mUseTvRouting;
-    boolean mUseMasterVolume;
 
     int mPointerLocationMode = 0; // guarded by mLock
 
@@ -1270,8 +1269,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_triplePressOnPowerBehavior);
 
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
-        mUseMasterVolume = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_useMasterVolume);
 
         readConfigurationDependentBehaviors();
 
@@ -4859,26 +4856,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 try {
-                    if (mUseMasterVolume) {
-                        getAudioService().adjustMasterVolume(AudioManager.ADJUST_RAISE, flags,
-                                pkgName);
-                    } else {
-                        getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,
-                                AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
-                    }
+                    getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,
+                            AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error dispatching volume up in dispatchTvAudioEvent.", e);
                 }
                 break;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 try {
-                    if (mUseMasterVolume) {
-                        getAudioService().adjustMasterVolume(AudioManager.ADJUST_LOWER, flags,
-                                pkgName);
-                    } else {
-                        getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,
-                                AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
-                    }
+                    getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,
+                            AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error dispatching volume down in dispatchTvAudioEvent.", e);
                 }
@@ -4886,14 +4873,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 try {
                     if (event.getRepeatCount() == 0) {
-                        if (mUseMasterVolume) {
-                            getAudioService().adjustMasterVolume(AudioManager.ADJUST_TOGGLE_MUTE,
-                                    flags, pkgName);
-                        } else {
-                            getAudioService().adjustSuggestedStreamVolume(
-                                    AudioManager.ADJUST_TOGGLE_MUTE,
-                                    AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
-                        }
+                        getAudioService().adjustSuggestedStreamVolume(
+                                AudioManager.ADJUST_TOGGLE_MUTE,
+                                AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName);
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error dispatching mute in dispatchTvAudioEvent.", e);

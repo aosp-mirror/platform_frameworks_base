@@ -172,7 +172,7 @@ public class KeyguardViewMediator extends SystemUI {
     private static final String KEYGUARD_ANALYTICS_SETTING = "keyguard_analytics";
 
     /** The stream type that the lock sounds are tied to. */
-    private int mMasterStreamType;
+    private int mUiSoundsStreamType;
 
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
@@ -1244,10 +1244,10 @@ public class KeyguardViewMediator extends SystemUI {
             if (mAudioManager == null) {
                 mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
                 if (mAudioManager == null) return;
-                mMasterStreamType = mAudioManager.getMasterStreamType();
+                mUiSoundsStreamType = mAudioManager.getUiSoundsStreamType();
             }
             // If the stream is muted, don't play the sound
-            if (mAudioManager.isStreamMute(mMasterStreamType)) return;
+            if (mAudioManager.isStreamMute(mUiSoundsStreamType)) return;
 
             mLockSoundStreamId = mLockSounds.play(soundId,
                     mLockSoundVolume, mLockSoundVolume, 1/*priortiy*/, 0/*loop*/, 1.0f/*rate*/);
