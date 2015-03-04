@@ -166,18 +166,48 @@ public class StaticLayout extends Layout {
             return this;
         }
 
-        /* @hide */
-        public void setLocale(Locale locale) {
+        /**
+         * Measurement and break iteration is done in native code. The protocol for using
+         * the native code is as follows.
+         *
+         * For each paragraph, do a nSetText of the paragraph text. Then, for each run within the
+         * paragraph:
+         *  - setLocale (this must be done at least for the first run, optional afterwards)
+         *  - one of the following, depending on the type of run:
+         *    + addStyleRun (a text run, to be measured in native code)
+         *    + addMeasuredRun (a run already measured in Java, passed into native code)
+         *    + addReplacementRun (a replacement run, width is given)
+         *
+         * After measurement, nGetWidths() is valid if the widths are needed (eg for ellipsis).
+         * Run nComputeLineBreaks() to obtain line breaks for the paragraph.
+         *
+         * After all paragraphs, call finish() to release expensive buffers.
+         */
+
+        private void setLocale(Locale locale) {
             if (!locale.equals(mLocale)) {
-                nBuilderSetLocale(mNativePtr, locale.toLanguageTag());
+                nSetLocale(mNativePtr, locale.toLanguageTag());
                 mLocale = locale;
             }
+        }
+
+        /* package */ float addStyleRun(TextPaint paint, int start, int end, boolean isRtl) {
+            return nAddStyleRun(mNativePtr, paint.getNativeInstance(), paint.mNativeTypeface,
+                    start, end, isRtl);
+        }
+
+        /* package */ void addMeasuredRun(int start, int end, float[] widths) {
+            nAddMeasuredRun(mNativePtr, start, end, widths);
+        }
+
+        /* package */ void addReplacementRun(int start, int end, float width) {
+            nAddReplacementRun(mNativePtr, start, end, width);
         }
 
         public StaticLayout build() {
             // TODO: can optimize based on whether ellipsis is needed
             StaticLayout result = new StaticLayout(mText);
-            result.initFromBuilder(this);
+            result.generate(this, this.mIncludePad, this.mIncludePad);
             recycle(this);
             return result;
         }
@@ -321,7 +351,7 @@ public class StaticLayout extends Layout {
         mLines = new int[mLineDirections.length];
         mMaximumVisibleLineCount = maxLines;
 
-        initFromBuilder(b);
+        generate(b, b.mIncludePad, b.mIncludePad);
 
         Builder.recycle(b);
     }
@@ -332,10 +362,6 @@ public class StaticLayout extends Layout {
         mColumns = COLUMNS_ELLIPSIZE;
         mLineDirections = ArrayUtils.newUnpaddedArray(Directions.class, 2 * mColumns);
         mLines = new int[mLineDirections.length];
-    }
-
-    private void initFromBuilder(Builder b) {
-        generate(b, b.mIncludePad, b.mIncludePad);
     }
 
     /* package */ void generate(Builder b, boolean includepad, boolean trackpad) {
@@ -427,12 +453,13 @@ public class StaticLayout extends Layout {
                 }
             }
 
-            measured.setPara(source, paraStart, paraEnd, textDir);
+            measured.setPara(source, paraStart, paraEnd, textDir, b);
             char[] chs = measured.mChars;
             float[] widths = measured.mWidths;
             byte[] chdirs = measured.mLevels;
             int dir = measured.mDir;
             boolean easy = measured.mEasy;
+            nSetText(b.mNativePtr, chs, paraEnd - paraStart);
 
             // measurement has to be done before performing line breaking
             // but we don't want to recompute fontmetrics or span ranges the
@@ -493,7 +520,8 @@ public class StaticLayout extends Layout {
                 }
             }
 
-            int breakCount = nComputeLineBreaks(b.mNativePtr, chs, widths, paraEnd - paraStart, firstWidth,
+            nGetWidths(b.mNativePtr, widths);
+            int breakCount = nComputeLineBreaks(b.mNativePtr, paraEnd - paraStart, firstWidth,
                     firstWidthLineCount, restWidth, variableTabStops, TAB_INCREMENT, false, lineBreaks,
                     lineBreaks.breaks, lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
 
@@ -576,7 +604,7 @@ public class StaticLayout extends Layout {
                 mLineCount < mMaximumVisibleLineCount) {
             // Log.e("text", "output last " + bufEnd);
 
-            measured.setPara(source, bufEnd, bufEnd, textDir);
+            measured.setPara(source, bufEnd, bufEnd, textDir, b);
 
             paint.getFontMetricsInt(fm);
 
@@ -933,20 +961,32 @@ public class StaticLayout extends Layout {
         return mEllipsizedWidth;
     }
 
+    private static native long nNewBuilder();
+    private static native void nFreeBuilder(long nativePtr);
+    private static native void nFinishBuilder(long nativePtr);
+    private static native void nSetLocale(long nativePtr, String locale);
+
+    private static native void nSetText(long nativePtr, char[] text, int length);
+
+    private static native float nAddStyleRun(long nativePtr, long nativePaint,
+            long nativeTypeface, int start, int end, boolean isRtl);
+
+    private static native void nAddMeasuredRun(long nativePtr,
+            int start, int end, float[] widths);
+
+    private static native void nAddReplacementRun(long nativePtr, int start, int end, float width);
+
+    private static native void nGetWidths(long nativePtr, float[] widths);
+
     // populates LineBreaks and returns the number of breaks found
     //
     // the arrays inside the LineBreaks objects are passed in as well
     // to reduce the number of JNI calls in the common case where the
     // arrays do not have to be resized
-    private static native int nComputeLineBreaks(long nativePtr, char[] text, float[] widths,
+    private static native int nComputeLineBreaks(long nativePtr,
             int length, float firstWidth, int firstWidthLineCount, float restWidth,
             int[] variableTabStops, int defaultTabStop, boolean optimize, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength);
-
-    private static native long nNewBuilder();
-    private static native void nFreeBuilder(long nativePtr);
-    private static native void nFinishBuilder(long nativePtr);
-    private static native void nBuilderSetLocale(long nativePtr, String locale);
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;

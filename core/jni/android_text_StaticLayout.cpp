@@ -29,6 +29,11 @@
 #include <list>
 #include <algorithm>
 
+#include "SkPaint.h"
+#include "SkTypeface.h"
+#include "MinikinSkia.h"
+#include "MinikinUtils.h"
+#include "Paint.h"
 
 namespace android {
 
@@ -57,10 +62,19 @@ class Builder {
 
         void resize(size_t size) {
             mTextBuf.resize(size);
+            mWidthBuf.resize(size);
+        }
+
+        size_t size() const {
+            return mTextBuf.size();
         }
 
         uint16_t* buffer() {
             return mTextBuf.data();
+        }
+
+        float* widths() {
+            return mWidthBuf.data();
         }
 
         // set text to current contents of buffer
@@ -74,6 +88,8 @@ class Builder {
             if (mTextBuf.size() > MAX_TEXT_BUF_RETAIN) {
                 mTextBuf.clear();
                 mTextBuf.shrink_to_fit();
+                mWidthBuf.clear();
+                mWidthBuf.shrink_to_fit();
             }
         }
 
@@ -81,11 +97,17 @@ class Builder {
             return mBreakIterator;
         }
 
+        float measureStyleRun(Paint* paint, TypefaceImpl* typeface, size_t start, size_t end,
+                bool isRtl);
+
+        void addReplacement(size_t start, size_t end, float width);
+
     private:
         const size_t MAX_TEXT_BUF_RETAIN = 32678;
         icu::BreakIterator* mBreakIterator = nullptr;
         UText mUText = UTEXT_INITIALIZER;
         std::vector<uint16_t>mTextBuf;
+        std::vector<float>mWidthBuf;
 };
 
 static const int CHAR_SPACE = 0x20;
@@ -543,22 +565,24 @@ void computePrimitives(const jchar* textArr, const jfloat* widthsArr, jint lengt
     primitives->push_back(p);
 }
 
+// sets the text on the builder
+static void nSetText(JNIEnv* env, jclass, jlong nativePtr, jcharArray text, int length) {
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    b->resize(length);
+    env->GetCharArrayRegion(text, 0, length, b->buffer());
+    b->setText();
+}
+
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
-                               jcharArray inputText, jfloatArray widths, jint length,
+                               jint length,
                                jfloat firstWidth, jint firstWidthLineLimit, jfloat restWidth,
                                jintArray variableTabStops, jint defaultTabStop, jboolean optimize,
                                jobject recycle, jintArray recycleBreaks,
                                jfloatArray recycleWidths, jbooleanArray recycleFlags,
                                jint recycleLength) {
-    std::vector<int> breaks;
-
     Builder* b = reinterpret_cast<Builder*>(nativePtr);
-    b->resize(length);
-    env->GetCharArrayRegion(inputText, 0, length, b->buffer());
-    b->setText();
 
-    // TODO: this array access is pretty inefficient, but we'll replace it anyway
-    ScopedFloatArrayRO widthsScopedArr(env, widths);
+    std::vector<int> breaks;
 
     icu::BreakIterator* breakIterator = b->breakIterator();
     int loc = breakIterator->first();
@@ -569,7 +593,7 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     // TODO: all these allocations can be moved into the builder
     std::vector<Primitive> primitives;
     TabStops tabStops(env, variableTabStops, defaultTabStop);
-    computePrimitives(b->buffer(), widthsScopedArr.get(), length, breaks, tabStops, &primitives);
+    computePrimitives(b->buffer(), b->widths(), length, breaks, tabStops, &primitives);
 
     LineWidth lineWidth(firstWidth, firstWidthLineLimit, restWidth);
     std::vector<int> computedBreaks;
@@ -602,7 +626,7 @@ static void nFinishBuilder(JNIEnv*, jclass, jlong nativePtr) {
     b->finish();
 }
 
-static void nBuilderSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName) {
+static void nSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring javaLocaleName) {
     ScopedIcuLocale icuLocale(env, javaLocaleName);
     Builder* b = reinterpret_cast<Builder*>(nativePtr);
 
@@ -611,12 +635,61 @@ static void nBuilderSetLocale(JNIEnv* env, jclass, jlong nativePtr, jstring java
     }
 }
 
+float Builder::measureStyleRun(Paint* paint, TypefaceImpl* typeface, size_t start, size_t end,
+        bool isRtl) {
+    Layout layout;
+    int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
+    // TODO: should we provide more context?
+    MinikinUtils::doLayout(&layout, paint, bidiFlags, typeface, mTextBuf.data() + start, 0,
+            end - start, end - start);
+    layout.getAdvances(mWidthBuf.data() + start);
+    return layout.getAdvance();
+}
+
+void Builder::addReplacement(size_t start, size_t end, float width) {
+    mWidthBuf[start] = width;
+    std::fill(&mWidthBuf[start + 1], &mWidthBuf[end], 0.0f);
+}
+
+// Basically similar to Paint.getTextRunAdvances but with C++ interface
+static jfloat nAddStyleRun(JNIEnv* env, jclass, jlong nativePtr,
+        jlong nativePaint, jlong nativeTypeface, jint start, jint end, jboolean isRtl) {
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    Paint* paint = reinterpret_cast<Paint*>(nativePaint);
+    TypefaceImpl* typeface = reinterpret_cast<TypefaceImpl*>(nativeTypeface);
+    return b->measureStyleRun(paint, typeface, start, end, isRtl);
+}
+
+// Accept width measurements for the run, passed in from Java
+static void nAddMeasuredRun(JNIEnv* env, jclass, jlong nativePtr,
+        jint start, jint end, jfloatArray widths) {
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    env->GetFloatArrayRegion(widths, start, end - start, b->widths() + start);
+}
+
+static void nAddReplacementRun(JNIEnv* env, jclass, jlong nativePtr,
+        jint start, jint end, jfloat width) {
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    b->addReplacement(start, end, width);
+}
+
+static void nGetWidths(JNIEnv* env, jclass, jlong nativePtr, jfloatArray widths) {
+    Builder* b = reinterpret_cast<Builder*>(nativePtr);
+    env->SetFloatArrayRegion(widths, 0, b->size(), b->widths());
+}
+
 static JNINativeMethod gMethods[] = {
+    // TODO performance: many of these are candidates for fast jni, awaiting guidance
     {"nNewBuilder", "()J", (void*) nNewBuilder},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
     {"nFinishBuilder", "(J)V", (void*) nFinishBuilder},
-    {"nBuilderSetLocale", "(JLjava/lang/String;)V", (void*) nBuilderSetLocale},
-    {"nComputeLineBreaks", "(J[C[FIFIF[IIZLandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I",
+    {"nSetLocale", "(JLjava/lang/String;)V", (void*) nSetLocale},
+    {"nSetText", "(J[CI)V", (void*) nSetText},
+    {"nAddStyleRun", "(JJJIIZ)F", (void*) nAddStyleRun},
+    {"nAddMeasuredRun", "(JII[F)V", (void*) nAddMeasuredRun},
+    {"nAddReplacementRun", "(JIIF)V", (void*) nAddReplacementRun},
+    {"nGetWidths", "(J[F)V", (void*) nGetWidths},
+    {"nComputeLineBreaks", "(JIFIF[IIZLandroid/text/StaticLayout$LineBreaks;[I[F[ZI)I",
         (void*) nComputeLineBreaks}
 };
 

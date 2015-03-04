@@ -1564,7 +1564,7 @@ public abstract class Layout {
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
         try {
-            mt.setPara(text, start, end, TextDirectionHeuristics.LTR);
+            mt.setPara(text, start, end, TextDirectionHeuristics.LTR, null);
             Directions directions;
             int dir;
             if (mt.mEasy) {
