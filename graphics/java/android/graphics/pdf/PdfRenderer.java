@@ -380,7 +380,7 @@ public final class PdfRenderer implements AutoCloseable {
 
             final long transformPtr = (transform != null) ? transform.native_instance : 0;
 
-            nativeRenderPage(mNativeDocument, mNativePage, destination.mNativeBitmap, contentLeft,
+            nativeRenderPage(mNativeDocument, mNativePage, destination.getSkBitmap(), contentLeft,
                     contentTop, contentRight, contentBottom, transformPtr, renderMode);
         }
 
