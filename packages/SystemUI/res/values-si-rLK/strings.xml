@@ -179,8 +179,8 @@
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"බාධා නොකරන්න ක්‍රියාත්මකයි, ප්‍රමුඛතා පමණි."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="5910777408232088752">"බාධා නොකරන්න ක්‍රියාත්මකයි, බාධා කිරීම් නැත."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"බාධා නොකරන්න ක්‍රියා විරහිතයි."</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"බාධා නොකරන්න ක්‍රියා විරහිත කරන ලදී."</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"බාධා නොකරන්න ක්‍රියාත්මක කරන ලදී"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"බාධා නොකරන්න ක්‍රියා විරහිත කරන ලදි."</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"බාධා නොකරන්න ක්‍රියාත්මක කරන ලදි"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"බ්ලූටූත් අක්‍රියයි."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"බ්ලූටූත් සක්‍රියයි."</string>
     <string name="accessibility_quick_settings_bluetooth_connecting" msgid="6953242966685343855">"බ්ලූටූත් සම්බන්ධවෙමින්."</string>
