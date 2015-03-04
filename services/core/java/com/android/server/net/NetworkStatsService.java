@@ -111,6 +111,7 @@ import android.util.SparseIntArray;
 import android.util.TrustedTime;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
@@ -855,6 +856,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return ident;
     }
 
+    private void recordSnapshotLocked(long currentTime) throws RemoteException {
+        // snapshot and record current counters; read UID stats first to
+        // avoid overcounting dev stats.
+        final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
+        final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
+        final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
+
+        VpnInfo[] vpnArray = mConnManager.getAllVpnInfo();
+        mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, null, currentTime);
+        mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, null, currentTime);
+        mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+        mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, vpnArray, currentTime);
+    }
+
     /**
      * Bootstrap initial stats snapshot, usually during {@link #systemReady()}
      * so we have baseline values without double-counting.
@@ -864,17 +879,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 : System.currentTimeMillis();
 
         try {
-            // snapshot and record current counters; read UID stats first to
-            // avoid overcounting dev stats.
-            final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
-            final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
-            final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
-
-            mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
-            mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
-            mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
-            mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
-
+            recordSnapshotLocked(currentTime);
         } catch (IllegalStateException e) {
             Slog.w(TAG, "problem reading network stats: " + e);
         } catch (RemoteException e) {
@@ -918,17 +923,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 : System.currentTimeMillis();
 
         try {
-            // snapshot and record current counters; read UID stats first to
-            // avoid overcounting dev stats.
-            final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
-            final NetworkStats xtSnapshot = mNetworkManager.getNetworkStatsSummaryXt();
-            final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
-
-            mDevRecorder.recordSnapshotLocked(devSnapshot, mActiveIfaces, currentTime);
-            mXtRecorder.recordSnapshotLocked(xtSnapshot, mActiveIfaces, currentTime);
-            mUidRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
-            mUidTagRecorder.recordSnapshotLocked(uidSnapshot, mActiveUidIfaces, currentTime);
-
+            recordSnapshotLocked(currentTime);
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
             return;
