@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"uw schermvergrendeling uitschakelen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Hiermee kan de app de toetsenblokkering en bijbehorende wachtwoordbeveiliging uitschakelen. Zo kan de telefoon de toetsenblokkering uitschakelen wanneer er een oproep binnenkomt en de toetsenblokkering weer inschakelen als de oproep is beëindigd."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"vingerafdrukhardware beheren"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Hiermee kan de app methoden aanroepen om vingerafdruksjablonen toe te voegen en te verwijderen voor gebruik."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"vingerafdrukhardware gebruiken"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Hiermee kan de app vingerafdrukhardware gebruiken voor verificatie"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"synchronisatie-instellingen lezen"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Hiermee kan de app de synchronisatie-instellingen voor een account lezen. Dit kan bijvoorbeeld bepalen of de app Personen wordt gesynchroniseerd met een account."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"synchronisatie in- en uitschakelen"</string>

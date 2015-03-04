@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"აპს შეეძლება ახლო მოქმედების რადიოკავშირის (NFC) მეშვეობით ტეგების, ბარათებისა და წამკითხველების შემცველი მონაცემების მიმოცვლა."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"თქვენი ეკრანის ბლოკის გათიშვა"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"შეეძლება კლავიატურის დაბლოკვისა და პაროლით უზრუნველყოფილი ნებისმიერი უსაფრთხოების ფუნქციის დეაქტივაცია. მაგალითად, ტელეფონი შემომავალი ზარის დროს აუქმებს კლავიატურის დაბლოკვას და კვლავ ააქტიურებს მას, როგორც კი ზარი დასრულდება."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"თითის ანაბეჭდის აპარატის მართვა"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"საშუალებას აძლევს აპლიკაციას დაამატოს ან ამოშალოს გამოსაყენებელი თითის ანაბეჭდის ნიმუშები,"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"თითის ანაბეჭდის აპარატის გამოყენება"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"საშუალებას აძლევს აპლიკაციას გამოიყენოს ავტენთიფიკაციისათვის თითის ანაბეჭდის აპარატი"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"სინქრონიზაციის პარამეტრების წაკითხვა"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"აპს შეეძლება, წაიკითხოს ანგარიშის სინქრონიზაციის პარამეტრები. მაგალითად, მას შეეძლება განსაზღვროს, არის თუ არა People აპი სინქრონიზებული ანგარიშთან."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"სინქრონიზაციის ჩართვა და გამორთვა"</string>

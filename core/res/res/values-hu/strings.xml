@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lehetővé teszi az alkalmazás számára, hogy NFC (Near Field Communication - kis hatósugarú vezeték nélküli kommunikáció) technológiát használó címkékkel, kártyákkal és leolvasókkal kommunikáljon."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"képernyőzár kikapcsolása"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lehetővé teszi az alkalmazás számára a billentyűzár és bármely kapcsolódó jelszavas védelem kikapcsolását. Például a telefon feloldja a billentyűzárat bejövő hívás esetén, majd újra bekapcsolja azt a hívás végeztével."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ujjlenyomat-olvasó hardver kezelése"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Lehetővé teszi az alkalmazás számára a használni kívánt ujjlenyomatsablonok hozzáadására és törlésére szolgáló metódusok indítását."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ujjlenyomat-olvasó hardver használata"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Lehetővé teszi az alkalmazás számára az ujjlenyomat-olvasó hardver hitelesítésre való használatát"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Lehetővé teszi az alkalmazás számára egy fiók szinkronizálási beállításainak beolvasását. Például ellenőrizheti, hogy a Személyek alkalmazás szinkronizálva van-e egy fiókkal."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"szinkronizálás be-és kikapcsolása"</string>

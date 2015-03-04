@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील संप्रेषण (NFC) टॅग, कार्ड आणि वाचक यांच्यासह संप्रेषण करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"आपले स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कीलॉक आणि कोणतीही संबद्ध संकेतशब्द सुरक्षितता अक्षम करण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फिंगरप्रिंट हार्डवेअर व्यवस्थापित करा"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"वापर करण्याकरिता फिंगरप्रिंट टेम्पलेट जोडण्यासाठी आणि हटविण्यासाठी पद्धती रद्द करण्यास अॅपला अनुमती देते."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"फिंगरप्रिंट हार्डवेअर वापरा"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"प्रमाणीकरणाकरिता फिंगरप्रिंट हार्डवेअरचा वापर करण्यासाठी अॅपला अनुमती देते"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"संकालन सेटिंग्‍ज वाचा"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"खात्याच्या संकालन सेटिंग्ज वाचण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, हे खात्यासह लोकांचा अॅप संकालित केला आहे किंवा नाही हे निर्धारित करू शकते."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"संकालन चालू आणि बंद करा टॉगल करा"</string>
@@ -821,7 +817,7 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"एका वाहक संदेशन सेवेसाठी प्रतिबद्ध"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"वाहक संदेशन सेवेचा शीर्ष-स्तर इंटरफेस प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"संकेतशब्द नियम सेट करा"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक संकेतशब्द आणि PIN मध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक संकेतशब्द आणि पिन मध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्क्रीन-अनलॉक प्रयत्नांचे परीक्षण करा"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅब्लेट लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास टॅब्लेटचा सर्व डेटा मिटवा."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या संकेतशब्दांच्या संख्येचे परीक्षण करा आणि टीव्ही लॉक करा किंवा अनेक चुकीचे संकेतशब्द टाइप केले असल्यास टीव्हीचा सर्व डेटा मिटवा."</string>

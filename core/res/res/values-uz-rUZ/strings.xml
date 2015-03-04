@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ilova qisqa masofali aloqa (NFC) texnologiyasi yordamida NFC yorliqlari, kartalar va o‘qish moslamalari bilan ma’lumot almashishi mumkin."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ekran qulfini o‘chirib qo‘yish"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ilovaga ekran qulfini va har qanday parol  yordamidagi xavfsizlik himoyalarini o‘chirishga ruxsat beradi. Masalan, kirish qo‘ng‘irog‘ida telefon ekran qulfini o‘chiradi va qo‘ng‘iroq tugashi bilan qulfni yoqadi."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"barmoq izi sensorini boshqarish"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Ilova foydalanish uchun barmoq izi namunalarini qo‘shish va o‘chirish usullarini qo‘llashi mumkin."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"barmoq izi sensoridan foydalanish"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Ilova haqiqiylikni tekshirish uchun barmoq izi sensoridan foydalanishi mumkin"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"sinx-sh sozlamalarini o‘qish"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Ilovaga hisobning sinxronlash sozlamalarini o‘qish uchun ruxsat beradi. Masalan, bu \"Odamlar\" ilovasi hisob bilan sinxronlangan yoki aksini aniqlay oladi."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinx.ni yoqish/o‘chirish"</string>

@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"nonaktifkan kunci layar Anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Memungkinkan aplikasi menonaktifkan kunci tombol dan keamanan sandi apa pun yang terkait. Misalnya, ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kelola perangkat keras sidik jari"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Mengizinkan aplikasi memanggil metode untuk menambahkan dan menghapus template sidik jari untuk digunakan."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan perangkat keras sidik jari"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Mengizinkan aplikasi untuk menggunakan perangkat keras sidik jari untuk otentikasi"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"baca setelan sinkron"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Memungkinkan aplikasi membaca setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat menentukan apakah aplikasi Orang disinkronkan dengan sebuah akun."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"nyalakan dan matikan sinkronisasi"</string>

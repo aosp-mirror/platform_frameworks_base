@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Թույլ է տալիս հավելվածին հաղորդակցվել Մոտ տարածությամբ հաղորդակցման (NFC) պիտակների, քարտերի և ընթերցիչների հետ:"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"անջատել ձեր էկրանի կողպեքը"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Թույլ է տալիս հավելվածին անջատել ստեղնաշարի կողպումը և ցանկացած համակցված գաղտնաբառի պաշտպանվածությունը: Սրա ճիշտ օրինակն է, երբ հեռախոսը անջատում է ստեղնաշարի կողպումը մուտքային զանգ ստանալիս, հետո այն կրկին միացնում է, երբ զանգը ավարտվում է:"</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"կառավարել մատնահետքերի գրանցման սարքը"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Հավելվածին թույլ է տալիս կատարել այնպիսի գործառույթներ, որոնց միջոցով կարելի է օգտագործման համար ավելացնել և հեռացնել մատնահետքերի նմուշներ:"</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"օգտագործել մատնահետքերի գրանցման սարքը"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Հավելվածին թույլ է տալիս նույնականացման համար օգտագործել մատնահետքերի գրանցման սարքը"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"կարդալ համաժամեցման կարգավորումները"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Թույլ է տալիս հավելվածին կարդալ համաժամեցման կարգավորումները հաշվի համար: Օրինակ` այն կարող է որոշել, արդյոք Մարդիկ հավելվածը համաժամեցված է հաշվի հետ:"</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"համաժամեցումը փոխարկել միացվածի և անջատվածի"</string>

@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"మీ స్క్రీన్ లాక్‌ను నిలిపివేయడం"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"కీలాక్ మరియు ఏదైనా అనుబంధించబడిన పాస్‌వర్డ్ భద్రతను నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఉదాహరణకు, ఇన్‌కమింగ్ ఫోన్ కాల్ వస్తున్నప్పుడు ఫోన్ కీలాక్‌ను నిలిపివేస్తుంది, ఆపై కాల్ ముగిసిన తర్వాత కీలాక్‌ను మళ్లీ ప్రారంభిస్తుంది."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"వేలిముద్ర హార్డ్‌వేర్‌ని నిర్వహించడానికి అనుమతి"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"వినియోగం కోసం వేలిముద్ర టెంప్లేట్‌లను జోడించే మరియు తొలగించే పద్ధతులను అమలు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"వేలిముద్ర హార్డ్‌వేర్‌ని ఉపయోగించడానికి అనుమతి"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ప్రామాణీకరణ కోసం వేలిముద్ర హార్డ్‌వేర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"సమకాలీకరణ సెట్టింగ్‌లను చదవడం"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ఖాతా యొక్క సమకాలీకరణ సెట్టింగ్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఉదాహరణకు, వ్యక్తుల అనువర్తనం ఖాతాతో సమకాలీకరించబడాలా లేదా అనే విషయాన్ని ఇది నిశ్చయించవచ్చు."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"సమకాలీకరణను ఆన్ మరియు ఆఫ్‌కు టోగుల్ చేయడం"</string>

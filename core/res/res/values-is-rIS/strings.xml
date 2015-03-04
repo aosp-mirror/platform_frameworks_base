@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Leyfir forriti að eiga samskipti við NFC-merki, -spjöld og -lesara (nándarsamskipti)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"slökkva á skjálásnum"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Leyfir forriti að slökkva á símalásnum og öðrum öryggisaðgerðum tengdum aðgangsorði. Til dæmis gerir síminn lásinn óvirkan þegar símtal berst og læsist svo aftur að símtali loknu."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"stjórna fingrafarabúnaði"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Gerir forritinu kleift að beita aðferðum til að bæta við og eyða fingrafarasniðmátum til notkunar."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"nota fingrafarabúnað"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Leyfir forritinu að nota fingrafarabúnað til auðkenningar"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lesa samstillingar"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Leyfir forriti að lesa kosti samstillingar fyrir reikning. Þetta er til dæmis hægt að nota til að komast að því hvort forritið Fólk er samstillt við reikning."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"kveikja og slökkva á samstillingu"</string>

@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"деактивиране на заключването на екрана ви"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление на хардуера за отпечатъци"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Разрешава на приложението да извиква начини за добавяне и изтриване на шаблони за отпечатъци, които да се използват."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"използване на хардуера за отпечатъци"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Разрешава на приложението да използва хардуера за отпечатъци с цел удостоверяване"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Разрешава на приложението да чете настройките за синхронизиране на профил. Например това може да определи дали приложението Хора е синхронизирано с даден профил."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"включване и изключване на синхронизирането"</string>

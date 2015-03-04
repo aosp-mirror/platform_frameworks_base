@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"கைரேகை வன்பொருளை நிர்வகி"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"பயன்படுத்துவதற்காக, கைரேகை டெம்ப்ளேட்களைச் சேர்க்க மற்றும் நீக்குவதற்கான செயல்முறைகளை இயக்குவதற்குப் பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"கைரேகை வன்பொருளைப் பயன்படுத்து"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"அங்கீகரிப்பதற்கு, கைரேகை வன்பொருளைப் பயன்படுத்த, பயன்பாட்டை அனுமதிக்கும்"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ஒத்திசைவு அமைப்புகளைப் படித்தல்"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"கணக்கிற்கான ஒத்திசைவு அமைப்புகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, பீப்பிள் பயன்பாடு கணக்குடன் ஒத்திசைக்கப்பட்டுள்ளதா என்பதை இது தீர்மானிக்கலாம்."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ஒத்திசைவை இயக்குவதையும், முடக்குவதையும் மாற்றுதல்"</string>

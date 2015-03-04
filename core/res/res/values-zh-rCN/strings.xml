@@ -821,51 +821,36 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"绑定到运营商消息传递服务"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
-    <!-- no translation found for policydesc_limitPassword (2502021457917874968) -->
-    <skip />
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"控制锁屏密码和 PIN 码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定平板电脑或清除其所有数据。"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定电视或清除电视上的所有数据。"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"监视在解锁屏幕时输错密码的次数，如果输错次数过多，则锁定手机或清除其所有数据。"</string>
-    <!-- no translation found for policydesc_watchLogin_secondaryUser (4280246270601044505) -->
-    <skip />
-    <!-- no translation found for policydesc_watchLogin_secondaryUser (3484832653564483250) -->
-    <skip />
-    <!-- no translation found for policydesc_watchLogin_secondaryUser (2185480427217127147) -->
-    <skip />
-    <!-- no translation found for policylab_resetPassword (4934707632423915395) -->
-    <skip />
-    <!-- no translation found for policydesc_resetPassword (1278323891710619128) -->
-    <skip />
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定平板电脑或清空此用户的所有数据。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定电视或清空此用户的所有数据。"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"监控在解锁屏幕时输错密码的次数，并在输错次数过多时锁定手机或清空此用户的所有数据。"</string>
+    <string name="policylab_resetPassword" msgid="4934707632423915395">"更改锁屏密码"</string>
+    <string name="policydesc_resetPassword" msgid="1278323891710619128">"更改锁屏密码。"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"锁定屏幕"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"控制屏幕锁定的方式和时间。"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"清除所有数据"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"恢复出厂设置时，系统会在不发出警告的情况下清除平板电脑上的数据。"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"恢复出厂设置时，不发出警告就直接清除电视上的数据。"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"恢复出厂设置时，系统会在不发出警告的情况下清除手机上的数据。"</string>
-    <!-- no translation found for policylab_wipeData_secondaryUser (8362863289455531813) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData_secondaryUser (6336255514635308054) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData_secondaryUser (2086473496848351810) -->
-    <skip />
-    <!-- no translation found for policydesc_wipeData_secondaryUser (6787904546711590238) -->
-    <skip />
+    <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"清空用户数据"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"清空此用户在这台平板电脑上的数据，而不事先发出警告。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"清空此用户在这台电视上的数据，而不事先发出警告。"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"清空此用户在这部手机上的数据，而不事先发出警告。"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"设置设备全局代理"</string>
-    <!-- no translation found for policydesc_setGlobalProxy (8459859731153370499) -->
-    <skip />
-    <!-- no translation found for policylab_expirePassword (5610055012328825874) -->
-    <skip />
-    <!-- no translation found for policydesc_expirePassword (5367525762204416046) -->
-    <skip />
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"设置在规范启用时要使用的设备全局代理。只有设备所有者才能设置全局代理。"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"设置锁屏密码的有效期"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"调整系统强制用户更改锁屏密码、PIN 码或解锁图案的频率。"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"设置存储设备加密"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"要求对存储的应用数据进行加密。"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相机"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"禁止使用所有设备摄像头。"</string>
-    <!-- no translation found for policylab_disableKeyguardFeatures (3565888260412415862) -->
-    <skip />
-    <!-- no translation found for policydesc_disableKeyguardFeatures (3980868516629887575) -->
-    <skip />
+    <string name="policylab_disableKeyguardFeatures" msgid="3565888260412415862">"停用锁屏功能"</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="3980868516629887575">"禁止使用锁屏的部分功能。"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>

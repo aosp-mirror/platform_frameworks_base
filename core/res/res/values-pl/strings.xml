@@ -740,14 +740,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Pozwala aplikacji na komunikowanie się z tagami, kartami i czytnikami NFC (Near Field Communication)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"wyłączanie blokady ekranu"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Pozwala aplikacji na wyłączenie blokady klawiatury i wszystkich związanych z tym haseł zabezpieczających. Na przykład telefon wyłącza blokadę klawiatury, gdy odbiera połączenie przychodzące, a następnie włącza ją ponownie po zakończeniu połączenia."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"zarządzanie czytnikiem linii papilarnych"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Zezwala aplikacji aktywować metody dodawania i usuwania szablonów odcisków palców."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"używanie czytnika linii papilarnych"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Zezwala aplikacji na używanie czytnika linii papilarnych na potrzeby autoryzacji"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"czytanie ustawień synchronizacji"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Zezwala aplikacji na odczyt ustawień synchronizacji konta. Pozwala to na przykład określić, czy aplikacja Ludzie jest zsynchronizowana z kontem."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"włączanie i wyłączanie synchronizacji"</string>
@@ -904,7 +900,7 @@
     <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Faks domowy"</string>
     <string name="phoneTypePager" msgid="7582359955394921732">"Pager"</string>
     <string name="phoneTypeOther" msgid="1544425847868765990">"Inny"</string>
-    <string name="phoneTypeCallback" msgid="2712175203065678206">"Połączenie zwrotne"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Oddzwanianie"</string>
     <string name="phoneTypeCar" msgid="8738360689616716982">"Samochód"</string>
     <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Firmowy główny"</string>
     <string name="phoneTypeIsdn" msgid="8022453193171370337">"ISDN"</string>
@@ -1232,7 +1228,7 @@
     <string name="whichViewApplicationNamed" msgid="2286418824011249620">"Otwórz w aplikacji %1$s"</string>
     <string name="whichEditApplication" msgid="144727838241402655">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Edytuj w aplikacji %1$s"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Udostępnij przez"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Udostępnij przez:"</string>
     <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Udostępnij przez %1$s"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"Wybierz aplikację ekranu głównego"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"Użyj %1$s jako ekranu głównego"</string>
@@ -1670,7 +1666,7 @@
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Sprawdzam konto"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowy PIN. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> wpisałeś nieprawidłowe hasło. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> narysowałeś nieprawidłowy wzór odblokowania. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> razy narysowałeś nieprawidłowy wzór odblokowania. \n\nSpróbuj ponownie za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> próbowałeś nieprawidłowo odblokować tablet. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach tablet zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Podałeś nieprawidłowe dane odblokowania telewizora <xliff:g id="NUMBER_0">%d</xliff:g> razy. Po jeszcze <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telewizor zostanie zresetowany do stanu fabrycznego, a wszystkie dane użytkownika zostaną skasowane."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Po raz <xliff:g id="NUMBER_0">%d</xliff:g> próbowałeś nieprawidłowo odblokować telefon. Po kolejnych <xliff:g id="NUMBER_1">%d</xliff:g> nieudanych próbach telefon zostanie zresetowany do ustawień fabrycznych, a wszystkie dane użytkownika zostaną utracone."</string>

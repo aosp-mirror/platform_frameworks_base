@@ -817,14 +817,14 @@
     <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"वाहक मेसेजिङ सेवामा आबद्ध हुनुहोस्"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाई र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रिन लक पासवर्ड र PIN हरूमा अनुमति दिइएको लम्बाइ र वर्णहरूको नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"मोनिटर स्क्रिन-अनलक प्रयत्नहरू"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने ट्याब्लेट लक गर्नुहोस् वा ट्याब्लेटका सबै डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्क्रिन अनलक गर्दा गलत पासवर्डका संख्या अनुगमन गर्नुहोस् र TV लक गर्नुहोस् वा TV को सबै डेटा मेट्नुहोस् यदि ज्यादै धेरै गलत पासवर्ड टाइप गरिएका छन् भने।"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"स्क्रिनअनलक गर्दा गलत पासवर्ड टाइप भएको संख्या निरीक्षण गर्नुहोस् र यदि निकै धेरै गलत पासवर्डहरू टाइप भएका छन भने फोन लक गर्नुहोस् वा फोनका सबै डेटा मेट्नुहोस्।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरेमा ट्याब्लेट लक हुने वा प्रयोगकर्ताको डेटा मेटाउने निरीक्षण गर्नुहोस्।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरेमा टिभी लक हुने वा प्रयोगकर्ताको डेटा मेटाउने निरीक्षण गर्नुहोस्।"</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरेमा फोन लक हुने वा प्रयोगकर्ताको डेटा मेटाउने निरीक्षण गर्नुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा ट्याब्लेट लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा TV लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"स्क्रिन अनलक गर्दा गलत पासवर्ड टाइप संख्या अनुगमन गर्नुहोस्, र यदि निकै धेरै गलत पासवर्डहरू टाइप गरिएमा फोन लक गर्नुहोस् वा प्रयोगकर्ताको डेटा मेटाउनुहोस्।"</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"स्क्रिन लक परिवर्तन गर्नुहोस्"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"स्क्रिन लक परिवर्तन गर्नुहोस्।"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"स्क्रिन लक गर्नुहोस्।"</string>
@@ -835,12 +835,12 @@
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"एउटा फ्याक्ट्रि डेटा पुनःसेट गरेर चेतावनी नआउँदै फोनको डेटा मेट्नुहोस्।"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"प्रयोगकर्ता डेटा मेट्नुहोस्"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"चेतावनी बिना यो ट्याब्लेटमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"चेतावनी बिना यो टिभीमा यो प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"चेतावनी बिना यो TV मा यो प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"चेतावनी बिना यो फोनमा यस प्रयोगकर्ताको डेटा मेट्नुहोस्।"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"उपकरण विश्वव्यापी प्रोक्सी मिलाउनुहोस्"</string>
-    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"नीति सक्षम हुँदा प्रयोग हुनको लागि यन्त्र ग्लोवल प्रोक्सी सेट गर्नुहोस्। केवल यन्त्र मालिकले ग्लोवल प्रोक्सी सेट गर्न सक्नुहुन्छ।"</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"स्क्रिन लक पासवर्ड समाप्ति सेट गर्नुहोस्"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"स्क्रिन लक पासवर्ड, PIN, वा प्याटर्न परिवर्तन कसरी बारम्बार परिवर्तन हुनुपर्छ परिवर्तन गर्नुहोस्।"</string>
+    <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"नीति सक्षम हुँदा प्रयोग गरिनको लागि यन्त्र ग्लोवल प्रोक्सी सेट गर्नुहोस्। केवल यन्त्र मालिकले ग्लोवल प्रोक्सी सेट गर्न सक्नुहुन्छ।"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"स्क्रिन लक पासवर्ड म्याद समाप्ति सेट गर्नुहोस्"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"स्क्रिन लक पासवर्ड, PIN, वा ढाँचा परिवर्तन कसरी बारम्बार परिवर्तन हुनुपर्छ परिवर्तन गर्नुहोस्।"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"भण्डारण इन्क्रिप्सन मिलाउनुहोस्"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"भण्डार गरिएको डेटा इन्क्रिप्ट हुनु आवश्यक छ।"</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"क्यामेरालाई असक्षम गराउनुहोस्"</string>

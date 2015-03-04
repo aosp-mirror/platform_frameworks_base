@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ಸಮೀಪದ ಕ್ಷೇತ್ರ ಸಂವಹನ (NFC) ಟ್ಯಾಗ್‌ಗಳು, ಕಾರ್ಡ್‌ಗಳು, ಮತ್ತು ಓದುಗರನ್ನು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ನಿಮ್ಮ ಪರದೆ ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ಕೀಲಾಕ್ ಮತ್ತು ಯಾವುದೇ ಸಂಬಂಧಿತ ಭದ್ರತಾ ಪಾಸ್‍‍ವರ್ಡ್ ಭದ್ರತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ವೀಕರಿಸುವಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಕರೆಯು ಅಂತ್ಯಗೊಂಡಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ರೀಡ್‌ ಮಾಡು"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"ಒಂದು ಖಾತೆಯ ಸಿಂಕ್ ಸೆಟ್ಟಿಂಗ್‍‍ಗಳನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಖಾತೆಯೊಂದಿಗೆ ಜನರ ಅಪ್ಲಿಕೇಶನ್ ಸಿಂಕ್ ಮಾಡಲಾಗಿದೆಯೇ ಎಂಬುದನ್ನು ಇದು ನಿರ್ಧರಿಸಬಹುದು."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ಸಿಂಕ್ ಆನ್ ಮತ್ತು ಸಿಂಕ್ ಆಫ್ ಟಾಗಲ್ ಮಾಡಿ"</string>

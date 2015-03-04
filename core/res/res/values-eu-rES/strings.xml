@@ -738,14 +738,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzea baimentzen die aplikazioei."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"pantailaren blokeoa desgaitzea"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
-    <!-- no translation found for permlab_manageFingerprint (5640858826254575638) -->
-    <skip />
-    <!-- no translation found for permdesc_manageFingerprint (178208705828055464) -->
-    <skip />
-    <!-- no translation found for permlab_useFingerprint (3150478619915124905) -->
-    <skip />
-    <!-- no translation found for permdesc_useFingerprint (9165097460730684114) -->
-    <skip />
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Kudeatu hatz-marka digitalen hardwarea"</string>
+    <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Hatz-marka digitalen txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"Erabili hatz-marka digitalen hardwarea"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Autentifikatzeko hatz-marka digitalen hardwarea erabiltzea baimentzen die aplikazioei."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen die aplikazioei. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"sinkronizazioa aktibatzea eta desaktibatzea"</string>
