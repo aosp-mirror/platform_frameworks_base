@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -541,6 +542,286 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
     }
+
+    public static final class LevelStepTracker {
+        public long mLastStepTime = -1;
+        public int mNumStepDurations;
+        public final long[] mStepDurations;
+
+        public LevelStepTracker(int maxLevelSteps) {
+            mStepDurations = new long[maxLevelSteps];
+        }
+
+        public LevelStepTracker(int numSteps, long[] steps) {
+            mNumStepDurations = numSteps;
+            mStepDurations = new long[numSteps];
+            System.arraycopy(steps, 0, mStepDurations, 0, numSteps);
+        }
+
+        public long getDurationAt(int index) {
+            return mStepDurations[index] & STEP_LEVEL_TIME_MASK;
+        }
+
+        public int getLevelAt(int index) {
+            return (int)((mStepDurations[index] & STEP_LEVEL_LEVEL_MASK)
+                    >> STEP_LEVEL_LEVEL_SHIFT);
+        }
+
+        public int getInitModeAt(int index) {
+            return (int)((mStepDurations[index] & STEP_LEVEL_INITIAL_MODE_MASK)
+                    >> STEP_LEVEL_INITIAL_MODE_SHIFT);
+        }
+
+        public int getModModeAt(int index) {
+            return (int)((mStepDurations[index] & STEP_LEVEL_MODIFIED_MODE_MASK)
+                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT);
+        }
+
+        private void appendHex(long val, int topOffset, StringBuilder out) {
+            boolean hasData = false;
+            while (topOffset >= 0) {
+                int digit = (int)( (val>>topOffset) & 0xf );
+                topOffset -= 4;
+                if (!hasData && digit == 0) {
+                    continue;
+                }
+                hasData = true;
+                if (digit >= 0 && digit <= 9) {
+                    out.append((char)('0' + digit));
+                } else {
+                    out.append((char)('a' + digit - 10));
+                }
+            }
+        }
+
+        public void encodeEntryAt(int index, StringBuilder out) {
+            long item = mStepDurations[index];
+            long duration = item & STEP_LEVEL_TIME_MASK;
+            int level = (int)((item & STEP_LEVEL_LEVEL_MASK)
+                    >> STEP_LEVEL_LEVEL_SHIFT);
+            int initMode = (int)((item & STEP_LEVEL_INITIAL_MODE_MASK)
+                    >> STEP_LEVEL_INITIAL_MODE_SHIFT);
+            int modMode = (int)((item & STEP_LEVEL_MODIFIED_MODE_MASK)
+                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT);
+            switch ((initMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
+                case Display.STATE_OFF: out.append('f'); break;
+                case Display.STATE_ON: out.append('o'); break;
+                case Display.STATE_DOZE: out.append('d'); break;
+                case Display.STATE_DOZE_SUSPEND: out.append('z'); break;
+            }
+            if ((initMode&STEP_LEVEL_MODE_POWER_SAVE) != 0) {
+                out.append('p');
+            }
+            switch ((modMode&STEP_LEVEL_MODE_SCREEN_STATE) + 1) {
+                case Display.STATE_OFF: out.append('F'); break;
+                case Display.STATE_ON: out.append('O'); break;
+                case Display.STATE_DOZE: out.append('D'); break;
+                case Display.STATE_DOZE_SUSPEND: out.append('Z'); break;
+            }
+            if ((modMode&STEP_LEVEL_MODE_POWER_SAVE) != 0) {
+                out.append('P');
+            }
+            out.append('-');
+            appendHex(level, 4, out);
+            out.append('-');
+            appendHex(duration, STEP_LEVEL_LEVEL_SHIFT-4, out);
+        }
+
+        public void decodeEntryAt(int index, String value) {
+            final int N = value.length();
+            int i = 0;
+            char c;
+            long out = 0;
+            while (i < N && (c=value.charAt(i)) != '-') {
+                i++;
+                switch (c) {
+                    case 'f': out |= ((Display.STATE_OFF-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT); break;
+                    case 'o': out |= ((Display.STATE_ON-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT); break;
+                    case 'd': out |= ((Display.STATE_DOZE-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT); break;
+                    case 'z': out |= ((Display.STATE_DOZE_SUSPEND-1)<<STEP_LEVEL_INITIAL_MODE_SHIFT);
+                        break;
+                    case 'p': out |= (STEP_LEVEL_MODE_POWER_SAVE<<STEP_LEVEL_INITIAL_MODE_SHIFT);
+                        break;
+                    case 'F': out |= ((Display.STATE_OFF-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT); break;
+                    case 'O': out |= ((Display.STATE_ON-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT); break;
+                    case 'D': out |= ((Display.STATE_DOZE-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT); break;
+                    case 'Z': out |= ((Display.STATE_DOZE_SUSPEND-1)<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                    case 'P': out |= (STEP_LEVEL_MODE_POWER_SAVE<<STEP_LEVEL_MODIFIED_MODE_SHIFT);
+                        break;
+                }
+            }
+            i++;
+            int level = 0;
+            while (i < N && (c=value.charAt(i)) != '-') {
+                i++;
+                level <<= 4;
+                if (c >= '0' && c <= '9') {
+                    level += c - '0';
+                } else if (c >= 'a' && c <= 'f') {
+                    level += c - 'a' + 10;
+                } else if (c >= 'A' && c <= 'F') {
+                    level += c - 'A' + 10;
+                }
+            }
+            out |= (level << STEP_LEVEL_LEVEL_SHIFT) & STEP_LEVEL_LEVEL_MASK;
+            long duration = 0;
+            while (i < N && (c=value.charAt(i)) != '-') {
+                i++;
+                duration <<= 4;
+                if (c >= '0' && c <= '9') {
+                    duration += c - '0';
+                } else if (c >= 'a' && c <= 'f') {
+                    duration += c - 'a' + 10;
+                } else if (c >= 'A' && c <= 'F') {
+                    duration += c - 'A' + 10;
+                }
+            }
+            mStepDurations[index] = out | (duration & STEP_LEVEL_TIME_MASK);
+        }
+
+        public void init() {
+            mLastStepTime = -1;
+            mNumStepDurations = 0;
+        }
+
+        public void clearTime() {
+            mLastStepTime = -1;
+        }
+
+        public long computeTimePerLevel() {
+            final long[] steps = mStepDurations;
+            final int numSteps = mNumStepDurations;
+
+            // For now we'll do a simple average across all steps.
+            if (numSteps <= 0) {
+                return -1;
+            }
+            long total = 0;
+            for (int i=0; i<numSteps; i++) {
+                total += steps[i] & STEP_LEVEL_TIME_MASK;
+            }
+            return total / numSteps;
+            /*
+            long[] buckets = new long[numSteps];
+            int numBuckets = 0;
+            int numToAverage = 4;
+            int i = 0;
+            while (i < numSteps) {
+                long totalTime = 0;
+                int num = 0;
+                for (int j=0; j<numToAverage && (i+j)<numSteps; j++) {
+                    totalTime += steps[i+j] & STEP_LEVEL_TIME_MASK;
+                    num++;
+                }
+                buckets[numBuckets] = totalTime / num;
+                numBuckets++;
+                numToAverage *= 2;
+                i += num;
+            }
+            if (numBuckets < 1) {
+                return -1;
+            }
+            long averageTime = buckets[numBuckets-1];
+            for (i=numBuckets-2; i>=0; i--) {
+                averageTime = (averageTime + buckets[i]) / 2;
+            }
+            return averageTime;
+            */
+        }
+
+        public long computeTimeEstimate(long modesOfInterest, long modeValues,
+                int[] outNumOfInterest) {
+            final long[] steps = mStepDurations;
+            final int count = mNumStepDurations;
+            if (count <= 0) {
+                return -1;
+            }
+            long total = 0;
+            int numOfInterest = 0;
+            for (int i=0; i<count; i++) {
+                long initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
+                        >> STEP_LEVEL_INITIAL_MODE_SHIFT;
+                long modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
+                        >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
+                // If the modes of interest didn't change during this step period...
+                if ((modMode&modesOfInterest) == 0) {
+                    // And the mode values during this period match those we are measuring...
+                    if ((initMode&modesOfInterest) == modeValues) {
+                        // Then this can be used to estimate the total time!
+                        numOfInterest++;
+                        total += steps[i] & STEP_LEVEL_TIME_MASK;
+                    }
+                }
+            }
+            if (numOfInterest <= 0) {
+                return -1;
+            }
+
+            if (outNumOfInterest != null) {
+                outNumOfInterest[0] = numOfInterest;
+            }
+
+            // The estimated time is the average time we spend in each level, multipled
+            // by 100 -- the total number of battery levels
+            return (total / numOfInterest) * 100;
+        }
+
+        public void addLevelSteps(int numStepLevels, long modeBits, long elapsedRealtime) {
+            int stepCount = mNumStepDurations;
+            final long lastStepTime = mLastStepTime;
+            if (lastStepTime >= 0 && numStepLevels > 0) {
+                final long[] steps = mStepDurations;
+                long duration = elapsedRealtime - lastStepTime;
+                for (int i=0; i<numStepLevels; i++) {
+                    System.arraycopy(steps, 0, steps, 1, steps.length-1);
+                    long thisDuration = duration / (numStepLevels-i);
+                    duration -= thisDuration;
+                    if (thisDuration > STEP_LEVEL_TIME_MASK) {
+                        thisDuration = STEP_LEVEL_TIME_MASK;
+                    }
+                    steps[0] = thisDuration | modeBits;
+                }
+                stepCount += numStepLevels;
+                if (stepCount > steps.length) {
+                    stepCount = steps.length;
+                }
+            }
+            mNumStepDurations = stepCount;
+            mLastStepTime = elapsedRealtime;
+        }
+
+        public void readFromParcel(Parcel in) {
+            final int N = in.readInt();
+            mNumStepDurations = N;
+            for (int i=0; i<N; i++) {
+                mStepDurations[i] = in.readLong();
+            }
+        }
+
+        public void writeToParcel(Parcel out) {
+            final int N = mNumStepDurations;
+            out.writeInt(N);
+            for (int i=0; i<N; i++) {
+                out.writeLong(mStepDurations[i]);
+            }
+        }
+    }
+
+    public static final class DailyItem {
+        public long mStartTime;
+        public long mEndTime;
+        public LevelStepTracker mDischargeSteps;
+        public LevelStepTracker mChargeSteps;
+    }
+
+    public abstract DailyItem getDailyItemLocked(int daysAgo);
+
+    public abstract long getCurrentDailyStartTime();
+
+    public abstract long getNextMinDailyDeadline();
+
+    public abstract long getNextMaxDailyDeadline();
 
     public final static class HistoryTag {
         public String string;
@@ -1724,15 +2005,15 @@ public abstract class BatteryStats implements Parcelable {
 
     // Bits in a step duration that are the new battery level we are at.
     public static final long STEP_LEVEL_LEVEL_MASK = 0x0000ff0000000000L;
-    public static final long STEP_LEVEL_LEVEL_SHIFT = 40;
+    public static final int STEP_LEVEL_LEVEL_SHIFT = 40;
 
     // Bits in a step duration that are the initial mode we were in at that step.
     public static final long STEP_LEVEL_INITIAL_MODE_MASK = 0x00ff000000000000L;
-    public static final long STEP_LEVEL_INITIAL_MODE_SHIFT = 48;
+    public static final int STEP_LEVEL_INITIAL_MODE_SHIFT = 48;
 
     // Bits in a step duration that indicate which modes changed during that step.
     public static final long STEP_LEVEL_MODIFIED_MODE_MASK = 0xff00000000000000L;
-    public static final long STEP_LEVEL_MODIFIED_MODE_SHIFT = 56;
+    public static final int STEP_LEVEL_MODIFIED_MODE_SHIFT = 56;
 
     // Step duration mode: the screen is on, off, dozed, etc; value is Display.STATE_* - 1.
     public static final int STEP_LEVEL_MODE_SCREEN_STATE = 0x03;
@@ -1740,17 +2021,56 @@ public abstract class BatteryStats implements Parcelable {
     // Step duration mode: power save is on.
     public static final int STEP_LEVEL_MODE_POWER_SAVE = 0x04;
 
-    /**
-     * Return the historical number of discharge steps we currently have.
-     */
-    public abstract int getNumDischargeStepDurations();
+    public static final int[] STEP_LEVEL_MODES_OF_INTEREST = new int[] {
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+            STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+    };
+    public static final int[] STEP_LEVEL_MODE_VALUES = new int[] {
+            (Display.STATE_OFF-1),
+            (Display.STATE_OFF-1)|STEP_LEVEL_MODE_POWER_SAVE,
+            (Display.STATE_ON-1),
+            (Display.STATE_ON-1)|STEP_LEVEL_MODE_POWER_SAVE,
+            (Display.STATE_DOZE-1),
+            (Display.STATE_DOZE-1)|STEP_LEVEL_MODE_POWER_SAVE,
+            (Display.STATE_DOZE_SUSPEND-1),
+            (Display.STATE_DOZE_SUSPEND-1)|STEP_LEVEL_MODE_POWER_SAVE,
+    };
+    public static final String[] STEP_LEVEL_MODE_LABELS = new String[] {
+            "screen off",
+            "screen off power save",
+            "screen on",
+            "screen on power save",
+            "screen doze",
+            "screen doze power save",
+            "screen doze-suspend",
+            "screen doze-suspend power save",
+    };
+    public static final String[] STEP_LEVEL_MODE_TAGS = new String[] {
+            "off",
+            "off-save",
+            "on",
+            "on-save",
+            "doze",
+            "doze-save",
+            "susp",
+            "susp-save",
+    };
 
     /**
-     * Return the array of discharge step durations; the number of valid
-     * items in it is returned by {@link #getNumDischargeStepDurations()}.
-     * These values are in milliseconds.
+     * Return the array of discharge step durations.
      */
-    public abstract long[] getDischargeStepDurationsArray();
+    public abstract LevelStepTracker getDischargeLevelStepTracker();
+
+    /**
+     * Return the array of daily discharge step durations.
+     */
+    public abstract LevelStepTracker getDailyDischargeLevelStepTracker();
 
     /**
      * Compute an approximation for how much time (in microseconds) remains until the battery
@@ -1763,16 +2083,14 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long computeChargeTimeRemaining(long curTime);
 
     /**
-     * Return the historical number of charge steps we currently have.
+     * Return the array of charge step durations.
      */
-    public abstract int getNumChargeStepDurations();
+    public abstract LevelStepTracker getChargeLevelStepTracker();
 
     /**
-     * Return the array of charge step durations; the number of valid
-     * items in it is returned by {@link #getNumChargeStepDurations()}.
-     * These values are in milliseconds.
+     * Return the array of daily charge step durations.
      */
-    public abstract long[] getChargeStepDurationsArray();
+    public abstract LevelStepTracker getDailyChargeLevelStepTracker();
 
     public abstract Map<String, ? extends Timer> getWakeupReasonStats();
 
@@ -3913,47 +4231,27 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(suffix);
     }
 
-    private static boolean dumpTimeEstimate(PrintWriter pw, String label, long[] steps,
-            int count, long modesOfInterest, long modeValues) {
-        if (count <= 0) {
+    private static boolean dumpTimeEstimate(PrintWriter pw, String label1, String label2,
+            String label3, long estimatedTime) {
+        if (estimatedTime < 0) {
             return false;
         }
-        long total = 0;
-        int numOfInterest = 0;
-        for (int i=0; i<count; i++) {
-            long initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
-                    >> STEP_LEVEL_INITIAL_MODE_SHIFT;
-            long modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
-                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
-            // If the modes of interest didn't change during this step period...
-            if ((modMode&modesOfInterest) == 0) {
-                // And the mode values during this period match those we are measuring...
-                if ((initMode&modesOfInterest) == modeValues) {
-                    // Then this can be used to estimate the total time!
-                    numOfInterest++;
-                    total += steps[i] & STEP_LEVEL_TIME_MASK;
-                }
-            }
-        }
-        if (numOfInterest <= 0) {
-            return false;
-        }
-
-        // The estimated time is the average time we spend in each level, multipled
-        // by 100 -- the total number of battery levels
-        long estimatedTime = (total / numOfInterest) * 100;
-
-        pw.print(label);
+        pw.print(label1);
+        pw.print(label2);
+        pw.print(label3);
         StringBuilder sb = new StringBuilder(64);
         formatTimeMs(sb, estimatedTime);
         pw.print(sb);
         pw.println();
-
         return true;
     }
 
-    private static boolean dumpDurationSteps(PrintWriter pw, String header, long[] steps,
-            int count, boolean checkin) {
+    private static boolean dumpDurationSteps(PrintWriter pw, String prefix, String header,
+            LevelStepTracker steps, boolean checkin) {
+        if (steps == null) {
+            return false;
+        }
+        int count = steps.mNumStepDurations;
         if (count <= 0) {
             return false;
         }
@@ -3962,13 +4260,10 @@ public abstract class BatteryStats implements Parcelable {
         }
         String[] lineArgs = new String[4];
         for (int i=0; i<count; i++) {
-            long duration = steps[i] & STEP_LEVEL_TIME_MASK;
-            int level = (int)((steps[i] & STEP_LEVEL_LEVEL_MASK)
-                    >> STEP_LEVEL_LEVEL_SHIFT);
-            long initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
-                    >> STEP_LEVEL_INITIAL_MODE_SHIFT;
-            long modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
-                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
+            long duration = steps.getDurationAt(i);
+            int level = steps.getLevelAt(i);
+            long initMode = steps.getInitModeAt(i);
+            long modMode = steps.getModModeAt(i);
             if (checkin) {
                 lineArgs[0] = Long.toString(duration);
                 lineArgs[1] = Integer.toString(level);
@@ -3990,7 +4285,8 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 dumpLine(pw, 0 /* uid */, "i" /* category */, header, (Object[])lineArgs);
             } else {
-                pw.print("  #"); pw.print(i); pw.print(": ");
+                pw.print(prefix);
+                pw.print("#"); pw.print(i); pw.print(": ");
                 TimeUtils.formatDuration(duration, pw);
                 pw.print(" to "); pw.print(level);
                 boolean haveModes = false;
@@ -4022,10 +4318,11 @@ public abstract class BatteryStats implements Parcelable {
 
     public static final int DUMP_UNPLUGGED_ONLY = 1<<0;
     public static final int DUMP_CHARGED_ONLY = 1<<1;
-    public static final int DUMP_HISTORY_ONLY = 1<<2;
-    public static final int DUMP_INCLUDE_HISTORY = 1<<3;
-    public static final int DUMP_VERBOSE = 1<<4;
-    public static final int DUMP_DEVICE_WIFI_ONLY = 1<<5;
+    public static final int DUMP_DAILY_ONLY = 1<<2;
+    public static final int DUMP_HISTORY_ONLY = 1<<3;
+    public static final int DUMP_INCLUDE_HISTORY = 1<<4;
+    public static final int DUMP_VERBOSE = 1<<5;
+    public static final int DUMP_DEVICE_WIFI_ONLY = 1<<6;
 
     private void dumpHistoryLocked(PrintWriter pw, int flags, long histStart, boolean checkin) {
         final HistoryPrinter hprinter = new HistoryPrinter();
@@ -4111,6 +4408,36 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    private void dumpDailyLevelStepSummary(PrintWriter pw, String prefix, String label,
+            LevelStepTracker steps, StringBuilder tmpSb, int[] tmpOutInt) {
+        if (steps == null) {
+            return;
+        }
+        long timeRemaining = steps.computeTimeEstimate(0, 0, tmpOutInt);
+        if (timeRemaining >= 0) {
+            pw.print(prefix); pw.print(label); pw.print(" total time: ");
+            tmpSb.setLength(0);
+            formatTimeMs(tmpSb, timeRemaining);
+            pw.print(tmpSb);
+            pw.print(" (from "); pw.print(tmpOutInt[0]);
+            pw.println(" steps)");
+        }
+        for (int i=0; i< STEP_LEVEL_MODES_OF_INTEREST.length; i++) {
+            long estimatedTime = steps.computeTimeEstimate(STEP_LEVEL_MODES_OF_INTEREST[i],
+                    STEP_LEVEL_MODE_VALUES[i], tmpOutInt);
+            if (estimatedTime > 0) {
+                pw.print(prefix); pw.print(label); pw.print(" ");
+                pw.print(STEP_LEVEL_MODE_LABELS[i]);
+                pw.print(" time: ");
+                tmpSb.setLength(0);
+                formatTimeMs(tmpSb, estimatedTime);
+                pw.print(tmpSb);
+                pw.print(" (from "); pw.print(tmpOutInt[0]);
+                pw.println(" steps)");
+            }
+        }
+    }
+
     /**
      * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
      *
@@ -4120,8 +4447,8 @@ public abstract class BatteryStats implements Parcelable {
     public void dumpLocked(Context context, PrintWriter pw, int flags, int reqUid, long histStart) {
         prepareForDumpLocked();
 
-        final boolean filtering =
-                (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
+        final boolean filtering = (flags
+                & (DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0;
 
         if ((flags&DUMP_HISTORY_ONLY) != 0 || !filtering) {
             final long historyTotalSize = getHistoryTotalSize();
@@ -4165,7 +4492,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
+        if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) == 0) {
             return;
         }
 
@@ -4199,50 +4526,24 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
-            if (dumpDurationSteps(pw, "Discharge step durations:", getDischargeStepDurationsArray(),
-                    getNumDischargeStepDurations(), false)) {
+            if (dumpDurationSteps(pw, "  ", "Discharge step durations:",
+                    getDischargeLevelStepTracker(), false)) {
                 long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
                 if (timeRemaining >= 0) {
                     pw.print("  Estimated discharge time remaining: ");
                     TimeUtils.formatDuration(timeRemaining / 1000, pw);
                     pw.println();
                 }
-                dumpTimeEstimate(pw, "  Estimated screen off time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_OFF-1));
-                dumpTimeEstimate(pw, "  Estimated screen off power save time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_OFF-1)|STEP_LEVEL_MODE_POWER_SAVE);
-                dumpTimeEstimate(pw, "  Estimated screen on time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_ON-1));
-                dumpTimeEstimate(pw, "  Estimated screen on power save time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_ON-1)|STEP_LEVEL_MODE_POWER_SAVE);
-                dumpTimeEstimate(pw, "  Estimated screen doze time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_DOZE-1));
-                dumpTimeEstimate(pw, "  Estimated screen doze power save time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_DOZE-1)|STEP_LEVEL_MODE_POWER_SAVE);
-                dumpTimeEstimate(pw, "  Estimated screen doze suspend time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_DOZE_SUSPEND-1));
-                dumpTimeEstimate(pw, "  Estimated screen doze suspend power save time: ",
-                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
-                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
-                        (Display.STATE_DOZE_SUSPEND-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                final LevelStepTracker steps = getDischargeLevelStepTracker();
+                for (int i=0; i< STEP_LEVEL_MODES_OF_INTEREST.length; i++) {
+                    dumpTimeEstimate(pw, "  Estimated ", STEP_LEVEL_MODE_LABELS[i], " time: ",
+                            steps.computeTimeEstimate(STEP_LEVEL_MODES_OF_INTEREST[i],
+                                    STEP_LEVEL_MODE_VALUES[i], null));
+                }
                 pw.println();
             }
-            if (dumpDurationSteps(pw, "Charge step durations:", getChargeStepDurationsArray(),
-                    getNumChargeStepDurations(), false)) {
+            if (dumpDurationSteps(pw, "  ", "Charge step durations:",
+                    getChargeLevelStepTracker(), false)) {
                 long timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime());
                 if (timeRemaining >= 0) {
                     pw.print("  Estimated charge time remaining: ");
@@ -4251,6 +4552,75 @@ public abstract class BatteryStats implements Parcelable {
                 }
                 pw.println();
             }
+        }
+        if (!filtering || (flags&(DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0) {
+            pw.println("Daily stats:");
+            pw.print("  Current start time: ");
+            pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
+                    getCurrentDailyStartTime()).toString());
+            pw.print("  Next min deadline: ");
+            pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
+                    getNextMinDailyDeadline()).toString());
+            pw.print("  Next max deadline: ");
+            pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
+                    getNextMaxDailyDeadline()).toString());
+            StringBuilder sb = new StringBuilder(64);
+            int[] outInt = new int[1];
+            LevelStepTracker dsteps = getDailyDischargeLevelStepTracker();
+            LevelStepTracker csteps = getDailyChargeLevelStepTracker();
+            if (dsteps.mNumStepDurations > 0 || csteps.mNumStepDurations > 0) {
+                if ((flags&DUMP_DAILY_ONLY) != 0) {
+                    if (dumpDurationSteps(pw, "    ", "  Current daily discharge step durations:",
+                            dsteps, false)) {
+                        dumpDailyLevelStepSummary(pw, "      ", "Discharge", dsteps,
+                                sb, outInt);
+                    }
+                    if (dumpDurationSteps(pw, "    ", "  Current daily charge step durations:",
+                            csteps, false)) {
+                        dumpDailyLevelStepSummary(pw, "      ", "Charge", csteps,
+                                sb, outInt);
+                    }
+                } else {
+                    pw.println("  Current daily steps:");
+                    dumpDailyLevelStepSummary(pw, "    ", "Discharge", dsteps,
+                            sb, outInt);
+                    dumpDailyLevelStepSummary(pw, "    ", "Charge", csteps,
+                            sb, outInt);
+                }
+            }
+            DailyItem dit;
+            int curIndex = 0;
+            while ((dit=getDailyItemLocked(curIndex)) != null) {
+                curIndex++;
+                if ((flags&DUMP_DAILY_ONLY) != 0) {
+                    pw.println();
+                }
+                pw.print("  Daily from ");
+                pw.print(DateFormat.format("yyyy-MM-dd-HH-mm-ss", dit.mStartTime).toString());
+                pw.print(" to ");
+                pw.print(DateFormat.format("yyyy-MM-dd-HH-mm-ss", dit.mEndTime).toString());
+                pw.println(":");
+                if ((flags&DUMP_DAILY_ONLY) != 0) {
+                    if (dumpDurationSteps(pw, "      ",
+                            "    Discharge step durations:", dit.mDischargeSteps, false)) {
+                        dumpDailyLevelStepSummary(pw, "        ", "Discharge", dit.mDischargeSteps,
+                                sb, outInt);
+                    }
+                    if (dumpDurationSteps(pw, "      ",
+                            "    Charge step durations:", dit.mChargeSteps, false)) {
+                        dumpDailyLevelStepSummary(pw, "        ", "Charge", dit.mChargeSteps,
+                                sb, outInt);
+                    }
+                } else {
+                    dumpDailyLevelStepSummary(pw, "    ", "Discharge", dit.mDischargeSteps,
+                            sb, outInt);
+                    dumpDailyLevelStepSummary(pw, "    ", "Charge", dit.mChargeSteps,
+                            sb, outInt);
+                }
+            }
+            pw.println();
+        }
+        if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
             pw.println("Statistics since last charge:");
             pw.println("  System starts: " + getStartCount()
                     + ", currently on battery: " + getIsOnBattery());
@@ -4275,8 +4645,8 @@ public abstract class BatteryStats implements Parcelable {
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
-        final boolean filtering =
-                (flags&(DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) != 0;
+        final boolean filtering = (flags &
+                (DUMP_HISTORY_ONLY|DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) != 0;
 
         if ((flags&DUMP_INCLUDE_HISTORY) != 0 || (flags&DUMP_HISTORY_ONLY) != 0) {
             if (startIteratingHistoryLocked()) {
@@ -4302,7 +4672,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY)) == 0) {
+        if (filtering && (flags&(DUMP_UNPLUGGED_ONLY|DUMP_CHARGED_ONLY|DUMP_DAILY_ONLY)) == 0) {
             return;
         }
 
@@ -4334,8 +4704,7 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
         if (!filtering || (flags&DUMP_CHARGED_ONLY) != 0) {
-            dumpDurationSteps(pw, DISCHARGE_STEP_DATA, getDischargeStepDurationsArray(),
-                    getNumDischargeStepDurations(), true);
+            dumpDurationSteps(pw, "", DISCHARGE_STEP_DATA, getDischargeLevelStepTracker(), true);
             String[] lineArgs = new String[1];
             long timeRemaining = computeBatteryTimeRemaining(SystemClock.elapsedRealtime());
             if (timeRemaining >= 0) {
@@ -4343,8 +4712,7 @@ public abstract class BatteryStats implements Parcelable {
                 dumpLine(pw, 0 /* uid */, "i" /* category */, DISCHARGE_TIME_REMAIN_DATA,
                         (Object[])lineArgs);
             }
-            dumpDurationSteps(pw, CHARGE_STEP_DATA, getChargeStepDurationsArray(),
-                    getNumChargeStepDurations(), true);
+            dumpDurationSteps(pw, "", CHARGE_STEP_DATA, getChargeLevelStepTracker(), true);
             timeRemaining = computeChargeTimeRemaining(SystemClock.elapsedRealtime());
             if (timeRemaining >= 0) {
                 lineArgs[0] = Long.toString(timeRemaining);

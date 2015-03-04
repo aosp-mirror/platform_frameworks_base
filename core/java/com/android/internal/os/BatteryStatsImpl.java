@@ -56,20 +56,29 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.Xml;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
+import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -94,7 +103,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 118 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 119 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -111,6 +120,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     private final JournaledFile mFile;
     public final AtomicFile mCheckinFile;
+    public final AtomicFile mDailyFile;
 
     static final int MSG_UPDATE_WAKELOCKS = 1;
     static final int MSG_REPORT_POWER_CHANGE = 2;
@@ -386,16 +396,22 @@ public final class BatteryStatsImpl extends BatteryStats {
     int mModStepMode = 0;
 
     int mLastDischargeStepLevel;
-    long mLastDischargeStepTime;
     int mMinDischargeStepLevel;
-    int mNumDischargeStepDurations;
-    final long[] mDischargeStepDurations = new long[MAX_LEVEL_STEPS];
+    final LevelStepTracker mDischargeStepTracker = new LevelStepTracker(MAX_LEVEL_STEPS);
+    final LevelStepTracker mDailyDischargeStepTracker = new LevelStepTracker(MAX_LEVEL_STEPS*2);
 
     int mLastChargeStepLevel;
-    long mLastChargeStepTime;
     int mMaxChargeStepLevel;
-    int mNumChargeStepDurations;
-    final long[] mChargeStepDurations = new long[MAX_LEVEL_STEPS];
+    final LevelStepTracker mChargeStepTracker = new LevelStepTracker(MAX_LEVEL_STEPS);
+    final LevelStepTracker mDailyChargeStepTracker = new LevelStepTracker(MAX_LEVEL_STEPS*2);
+
+    static final int MAX_DAILY_ITEMS = 10;
+
+    long mDailyStartTime = 0;
+    long mNextMinDailyDeadline = 0;
+    long mNextMaxDailyDeadline = 0;
+
+    final ArrayList<DailyItem> mDailyItems = new ArrayList<>();
 
     long mLastWriteTime = 0; // Milliseconds
 
@@ -478,6 +494,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     public BatteryStatsImpl() {
         mFile = null;
         mCheckinFile = null;
+        mDailyFile = null;
         mHandler = null;
         clearHistoryLocked();
     }
@@ -3199,6 +3216,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     public void noteScreenStateLocked(int state) {
         if (mScreenState != state) {
+            recordDailyStatsIfNeededLocked(true);
             final int oldState = mScreenState;
             mScreenState = state;
             if (DEBUG) Slog.v(TAG, "Screen state: oldState=" + Display.stateToString(oldState)
@@ -6594,6 +6612,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mFile = null;
         }
         mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
+        mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
         mHandler = new MyHandler(handler.getLooper());
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(null, -1, null, mOnBatteryTimeBase);
@@ -6652,11 +6671,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         mCurrentBatteryLevel = 0;
         initDischarge();
         clearHistoryLocked();
+        updateDailyDeadlineLocked();
     }
 
     public BatteryStatsImpl(Parcel p) {
         mFile = null;
         mCheckinFile = null;
+        mDailyFile = null;
         mHandler = null;
         clearHistoryLocked();
         readFromParcel(p);
@@ -6674,6 +6695,286 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (mPhoneSignalScanningTimer != null) {
             mPhoneSignalScanningTimer.setTimeout(timeout);
         }
+    }
+
+    public void updateDailyDeadlineLocked() {
+        // Get the current time.
+        long currentTime = mDailyStartTime = System.currentTimeMillis();
+        Calendar calDeadline = Calendar.getInstance();
+        calDeadline.setTimeInMillis(currentTime);
+
+        // Move time up to the next day, ranging from 1am to 3pm.
+        calDeadline.set(Calendar.DAY_OF_YEAR, calDeadline.get(Calendar.DAY_OF_YEAR) + 1);
+        calDeadline.set(Calendar.MILLISECOND, 0);
+        calDeadline.set(Calendar.SECOND, 0);
+        calDeadline.set(Calendar.MINUTE, 0);
+        calDeadline.set(Calendar.HOUR_OF_DAY, 1);
+        mNextMinDailyDeadline = calDeadline.getTimeInMillis();
+        calDeadline.set(Calendar.HOUR_OF_DAY, 3);
+        mNextMaxDailyDeadline = calDeadline.getTimeInMillis();
+    }
+
+    public void recordDailyStatsIfNeededLocked(boolean settled) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime >= mNextMaxDailyDeadline) {
+            recordDailyStatsLocked();
+        } else if (settled && currentTime >= mNextMinDailyDeadline) {
+            recordDailyStatsLocked();
+        } else if (currentTime < (mDailyStartTime-(1000*60*60*24))) {
+            recordDailyStatsLocked();
+        }
+    }
+
+    public void recordDailyStatsLocked() {
+        DailyItem item = new DailyItem();
+        item.mStartTime = mDailyStartTime;
+        item.mEndTime = System.currentTimeMillis();
+        boolean hasData = false;
+        if (mDailyDischargeStepTracker.mNumStepDurations > 0) {
+            hasData = true;
+            item.mDischargeSteps = new LevelStepTracker(
+                    mDailyDischargeStepTracker.mNumStepDurations,
+                    mDailyDischargeStepTracker.mStepDurations);
+        }
+        if (mDailyChargeStepTracker.mNumStepDurations > 0) {
+            hasData = true;
+            item.mChargeSteps = new LevelStepTracker(
+                    mDailyChargeStepTracker.mNumStepDurations,
+                    mDailyChargeStepTracker.mStepDurations);
+        }
+        mDailyDischargeStepTracker.init();
+        mDailyChargeStepTracker.init();
+        updateDailyDeadlineLocked();
+
+        if (hasData) {
+            mDailyItems.add(item);
+            while (mDailyItems.size() > MAX_DAILY_ITEMS) {
+                mDailyItems.remove(0);
+            }
+            final ByteArrayOutputStream memStream = new ByteArrayOutputStream();
+            try {
+                XmlSerializer out = new FastXmlSerializer();
+                out.setOutput(memStream, "utf-8");
+                writeDailyItemsLocked(out);
+                BackgroundThread.getHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mCheckinFile) {
+                            FileOutputStream stream = null;
+                            try {
+                                stream = mDailyFile.startWrite();
+                                memStream.writeTo(stream);
+                                stream.flush();
+                                FileUtils.sync(stream);
+                                stream.close();
+                                mDailyFile.finishWrite(stream);
+                            } catch (IOException e) {
+                                Slog.w("BatteryStats",
+                                        "Error writing battery daily items", e);
+                                mDailyFile.failWrite(stream);
+                            }
+                        }
+                    }
+                });
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    private void writeDailyItemsLocked(XmlSerializer out) throws IOException {
+        StringBuilder sb = new StringBuilder(64);
+        out.startDocument(null, true);
+        out.startTag(null, "daily-items");
+        for (int i=0; i<mDailyItems.size(); i++) {
+            final DailyItem dit = mDailyItems.get(i);
+            out.startTag(null, "item");
+            out.attribute(null, "start", Long.toString(dit.mStartTime));
+            out.attribute(null, "end", Long.toString(dit.mEndTime));
+            writeDailyLevelSteps(out, "dis", dit.mDischargeSteps, sb);
+            writeDailyLevelSteps(out, "chg", dit.mChargeSteps, sb);
+            out.endTag(null, "item");
+        }
+        out.endTag(null, "daily-items");
+        out.endDocument();
+    }
+
+    private void writeDailyLevelSteps(XmlSerializer out, String tag, LevelStepTracker steps,
+            StringBuilder tmpBuilder) throws IOException {
+        if (steps != null) {
+            out.startTag(null, tag);
+            out.attribute(null, "n", Integer.toString(steps.mNumStepDurations));
+            for (int i=0; i<steps.mNumStepDurations; i++) {
+                out.startTag(null, "s");
+                tmpBuilder.setLength(0);
+                steps.encodeEntryAt(i, tmpBuilder);
+                out.attribute(null, "v", tmpBuilder.toString());
+                out.endTag(null, "s");
+            }
+            out.endTag(null, tag);
+        }
+    }
+
+    public void readDailyStatsLocked() {
+        Slog.d(TAG, "Reading daily items from " + mDailyFile.getBaseFile());
+        mDailyItems.clear();
+        FileInputStream stream;
+        try {
+            stream = mDailyFile.openRead();
+        } catch (FileNotFoundException e) {
+            return;
+        }
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(stream, null);
+            readDailyItemsLocked(parser);
+        } catch (XmlPullParserException e) {
+        } finally {
+            try {
+                stream.close();
+            } catch (IOException e) {
+            }
+        }
+    }
+
+    private void readDailyItemsLocked(XmlPullParser parser) {
+        try {
+            int type;
+            while ((type = parser.next()) != XmlPullParser.START_TAG
+                    && type != XmlPullParser.END_DOCUMENT) {
+                ;
+            }
+
+            if (type != XmlPullParser.START_TAG) {
+                throw new IllegalStateException("no start tag found");
+            }
+
+            int outerDepth = parser.getDepth();
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+                if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                    continue;
+                }
+
+                String tagName = parser.getName();
+                if (tagName.equals("item")) {
+                    readDailyItemTagLocked(parser);
+                } else {
+                    Slog.w(TAG, "Unknown element under <daily-items>: "
+                            + parser.getName());
+                    XmlUtils.skipCurrentTag(parser);
+                }
+            }
+
+        } catch (IllegalStateException e) {
+            Slog.w(TAG, "Failed parsing daily " + e);
+        } catch (NullPointerException e) {
+            Slog.w(TAG, "Failed parsing daily " + e);
+        } catch (NumberFormatException e) {
+            Slog.w(TAG, "Failed parsing daily " + e);
+        } catch (XmlPullParserException e) {
+            Slog.w(TAG, "Failed parsing daily " + e);
+        } catch (IOException e) {
+            Slog.w(TAG, "Failed parsing daily " + e);
+        } catch (IndexOutOfBoundsException e) {
+            Slog.w(TAG, "Failed parsing daily " + e);
+        }
+    }
+
+    void readDailyItemTagLocked(XmlPullParser parser) throws NumberFormatException,
+            XmlPullParserException, IOException {
+        DailyItem dit = new DailyItem();
+        String attr = parser.getAttributeValue(null, "start");
+        if (attr != null) {
+            dit.mStartTime = Long.parseLong(attr);
+        }
+        attr = parser.getAttributeValue(null, "end");
+        if (attr != null) {
+            dit.mEndTime = Long.parseLong(attr);
+        }
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if (tagName.equals("dis")) {
+                readDailyItemTagDetailsLocked(parser, dit, false, "dis");
+            } else if (tagName.equals("chg")) {
+                readDailyItemTagDetailsLocked(parser, dit, true, "chg");
+            } else {
+                Slog.w(TAG, "Unknown element under <item>: "
+                        + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+        mDailyItems.add(dit);
+    }
+
+    void readDailyItemTagDetailsLocked(XmlPullParser parser, DailyItem dit, boolean isCharge,
+            String tag)
+            throws NumberFormatException, XmlPullParserException, IOException {
+        final String numAttr = parser.getAttributeValue(null, "n");
+        if (numAttr == null) {
+            Slog.w(TAG, "Missing 'n' attribute at " + parser.getPositionDescription());
+            XmlUtils.skipCurrentTag(parser);
+            return;
+        }
+        final int num = Integer.parseInt(numAttr);
+        LevelStepTracker steps = new LevelStepTracker(num);
+        if (isCharge) {
+            dit.mChargeSteps = steps;
+        } else {
+            dit.mDischargeSteps = steps;
+        }
+        int i = 0;
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            String tagName = parser.getName();
+            if ("s".equals(tagName)) {
+                if (i < num) {
+                    String valueAttr = parser.getAttributeValue(null, "v");
+                    if (valueAttr != null) {
+                        steps.decodeEntryAt(i, valueAttr);
+                        i++;
+                    }
+                }
+            } else {
+                Slog.w(TAG, "Unknown element under <" + tag + ">: "
+                        + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+        steps.mNumStepDurations = i;
+    }
+
+    @Override
+    public DailyItem getDailyItemLocked(int daysAgo) {
+        int index = mDailyItems.size()-1-daysAgo;
+        return index >= 0 ? mDailyItems.get(index) : null;
+    }
+
+    @Override
+    public long getCurrentDailyStartTime() {
+        return mDailyStartTime;
+    }
+
+    @Override
+    public long getNextMinDailyDeadline() {
+        return mNextMinDailyDeadline;
+    }
+
+    @Override
+    public long getNextMaxDailyDeadline() {
+        return mNextMaxDailyDeadline;
     }
 
     @Override
@@ -6846,10 +7147,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOnSinceCharge = 0;
         mDischargeAmountScreenOff = 0;
         mDischargeAmountScreenOffSinceCharge = 0;
-        mLastDischargeStepTime = -1;
-        mNumDischargeStepDurations = 0;
-        mLastChargeStepTime = -1;
-        mNumChargeStepDurations = 0;
+        mDischargeStepTracker.init();
+        mChargeStepTracker.init();
     }
 
     public void resetAllStatsCmdLocked() {
@@ -7072,12 +7371,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 resetAllStatsLocked();
                 mDischargeStartLevel = level;
                 reset = true;
-                mNumDischargeStepDurations = 0;
+                mDischargeStepTracker.init();
             }
             mOnBattery = mOnBatteryInternal = true;
             mLastDischargeStepLevel = level;
             mMinDischargeStepLevel = level;
-            mLastDischargeStepTime = -1;
+            mDischargeStepTracker.clearTime();
+            mDailyDischargeStepTracker.clearTime();
             mInitStepMode = mCurStepMode;
             mModStepMode = 0;
             pullPendingStateUpdatesLocked();
@@ -7116,10 +7416,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             updateDischargeScreenLevelsLocked(screenOn, screenOn);
             updateTimeBasesLocked(false, !screenOn, uptime, realtime);
-            mNumChargeStepDurations = 0;
+            mChargeStepTracker.init();
             mLastChargeStepLevel = level;
             mMaxChargeStepLevel = level;
-            mLastChargeStepTime = -1;
             mInitStepMode = mCurStepMode;
             mModStepMode = 0;
         }
@@ -7171,34 +7470,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
 
-    private static int addLevelSteps(long[] steps, int stepCount, long lastStepTime,
-            int numStepLevels, long modeBits, long elapsedRealtime) {
-        if (lastStepTime >= 0 && numStepLevels > 0) {
-            long duration = elapsedRealtime - lastStepTime;
-            for (int i=0; i<numStepLevels; i++) {
-                System.arraycopy(steps, 0, steps, 1, steps.length-1);
-                long thisDuration = duration / (numStepLevels-i);
-                duration -= thisDuration;
-                if (thisDuration > STEP_LEVEL_TIME_MASK) {
-                    thisDuration = STEP_LEVEL_TIME_MASK;
-                }
-                steps[0] = thisDuration | modeBits;
-            }
-            stepCount += numStepLevels;
-            if (stepCount > steps.length) {
-                stepCount = steps.length;
-            }
-        }
-        return stepCount;
-    }
-
     public void setBatteryState(int status, int health, int plugType, int level,
             int temp, int volt) {
         synchronized(this) {
             final boolean onBattery = plugType == BATTERY_PLUGGED_NONE;
             final long uptime = SystemClock.uptimeMillis();
             final long elapsedRealtime = SystemClock.elapsedRealtime();
-            int oldStatus = mHistoryCur.batteryStatus;
             if (!mHaveBatteryLevel) {
                 mHaveBatteryLevel = true;
                 // We start out assuming that the device is plugged in (not
@@ -7212,8 +7489,14 @@ public final class BatteryStatsImpl extends BatteryStats {
                         mHistoryCur.states |= HistoryItem.STATE_BATTERY_PLUGGED_FLAG;
                     }
                 }
-                oldStatus = status;
+                mHistoryCur.batteryStatus = (byte)status;
+                mHistoryCur.batteryLevel = (byte)level;
+                mMaxChargeStepLevel = mMinDischargeStepLevel =
+                        mLastChargeStepLevel = mLastDischargeStepLevel = level;
+            } else if (mCurrentBatteryLevel != level || mOnBattery != onBattery) {
+                recordDailyStatsIfNeededLocked(level >= 100 && onBattery);
             }
+            int oldStatus = mHistoryCur.batteryStatus;
             if (onBattery) {
                 mDischargeCurrentLevel = level;
                 if (!mRecordingHistory) {
@@ -7274,23 +7557,23 @@ public final class BatteryStatsImpl extends BatteryStats {
                         | (((long)(level&0xff)) << STEP_LEVEL_LEVEL_SHIFT);
                 if (onBattery) {
                     if (mLastDischargeStepLevel != level && mMinDischargeStepLevel > level) {
-                        mNumDischargeStepDurations = addLevelSteps(mDischargeStepDurations,
-                                mNumDischargeStepDurations, mLastDischargeStepTime,
-                                mLastDischargeStepLevel - level, modeBits, elapsedRealtime);
+                        mDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
+                                modeBits, elapsedRealtime);
+                        mDailyDischargeStepTracker.addLevelSteps(mLastDischargeStepLevel - level,
+                                modeBits, elapsedRealtime);
                         mLastDischargeStepLevel = level;
                         mMinDischargeStepLevel = level;
-                        mLastDischargeStepTime = elapsedRealtime;
                         mInitStepMode = mCurStepMode;
                         mModStepMode = 0;
                     }
                 } else {
                     if (mLastChargeStepLevel != level && mMaxChargeStepLevel < level) {
-                        mNumChargeStepDurations = addLevelSteps(mChargeStepDurations,
-                                mNumChargeStepDurations, mLastChargeStepTime,
-                                level - mLastChargeStepLevel, modeBits, elapsedRealtime);
+                        mChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
+                                modeBits, elapsedRealtime);
+                        mDailyChargeStepTracker.addLevelSteps(level - mLastChargeStepLevel,
+                                modeBits, elapsedRealtime);
                         mLastChargeStepLevel = level;
                         mMaxChargeStepLevel = level;
-                        mLastChargeStepTime = elapsedRealtime;
                         mInitStepMode = mCurStepMode;
                         mModStepMode = 0;
                     }
@@ -7565,22 +7848,24 @@ public final class BatteryStatsImpl extends BatteryStats {
         long usPerLevel = duration/discharge;
         return usPerLevel * mCurrentBatteryLevel;
         */
-        if (mNumDischargeStepDurations < 1) {
+        if (mDischargeStepTracker.mNumStepDurations < 1) {
             return -1;
         }
-        long msPerLevel = computeTimePerLevel(mDischargeStepDurations, mNumDischargeStepDurations);
+        long msPerLevel = mDischargeStepTracker.computeTimePerLevel();
         if (msPerLevel <= 0) {
             return -1;
         }
         return (msPerLevel * mCurrentBatteryLevel) * 1000;
     }
 
-    public int getNumDischargeStepDurations() {
-        return mNumDischargeStepDurations;
+    @Override
+    public LevelStepTracker getDischargeLevelStepTracker() {
+        return mDischargeStepTracker;
     }
 
-    public long[] getDischargeStepDurationsArray() {
-        return mDischargeStepDurations;
+    @Override
+    public LevelStepTracker getDailyDischargeLevelStepTracker() {
+        return mDailyDischargeStepTracker;
     }
 
     @Override
@@ -7602,22 +7887,24 @@ public final class BatteryStatsImpl extends BatteryStats {
         long usPerLevel = duration/(curLevel-plugLevel);
         return usPerLevel * (100-curLevel);
         */
-        if (mNumChargeStepDurations < 1) {
+        if (mChargeStepTracker.mNumStepDurations < 1) {
             return -1;
         }
-        long msPerLevel = computeTimePerLevel(mChargeStepDurations, mNumChargeStepDurations);
+        long msPerLevel = mChargeStepTracker.computeTimePerLevel();
         if (msPerLevel <= 0) {
             return -1;
         }
         return (msPerLevel * (100-mCurrentBatteryLevel)) * 1000;
     }
 
-    public int getNumChargeStepDurations() {
-        return mNumChargeStepDurations;
+    @Override
+    public LevelStepTracker getChargeLevelStepTracker() {
+        return mChargeStepTracker;
     }
 
-    public long[] getChargeStepDurationsArray() {
-        return mChargeStepDurations;
+    @Override
+    public LevelStepTracker getDailyChargeLevelStepTracker() {
+        return mDailyChargeStepTracker;
     }
 
     long getBatteryUptimeLocked() {
@@ -7915,6 +8202,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void readLocked() {
+        if (mDailyFile != null) {
+            readDailyStatsLocked();
+        }
+
         if (mFile == null) {
             Slog.w("BatteryStats", "readLocked: no file associated with this instance");
             return;
@@ -7952,6 +8243,8 @@ public final class BatteryStatsImpl extends BatteryStats {
             addHistoryBufferLocked(elapsedRealtime, uptime, HistoryItem.CMD_START, mHistoryCur);
             startRecordingHistory(elapsedRealtime, uptime, false);
         }
+
+        recordDailyStatsIfNeededLocked(false);
     }
 
     public int describeContents() {
@@ -8110,10 +8403,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHighDischargeAmountSinceCharge = in.readInt();
         mDischargeAmountScreenOnSinceCharge = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
-        mNumDischargeStepDurations = in.readInt();
-        in.readLongArray(mDischargeStepDurations);
-        mNumChargeStepDurations = in.readInt();
-        in.readLongArray(mChargeStepDurations);
+        mDischargeStepTracker.readFromParcel(in);
+        mChargeStepTracker.readFromParcel(in);
+        mDailyDischargeStepTracker.readFromParcel(in);
+        mDailyChargeStepTracker.readFromParcel(in);
+        mDailyStartTime = in.readLong();
+        mNextMinDailyDeadline = in.readLong();
+        mNextMaxDailyDeadline = in.readLong();
 
         mStartCount++;
 
@@ -8404,10 +8700,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(getHighDischargeAmountSinceCharge());
         out.writeInt(getDischargeAmountScreenOnSinceCharge());
         out.writeInt(getDischargeAmountScreenOffSinceCharge());
-        out.writeInt(mNumDischargeStepDurations);
-        out.writeLongArray(mDischargeStepDurations);
-        out.writeInt(mNumChargeStepDurations);
-        out.writeLongArray(mChargeStepDurations);
+        mDischargeStepTracker.writeToParcel(out);
+        mChargeStepTracker.writeToParcel(out);
+        mDailyDischargeStepTracker.writeToParcel(out);
+        mDailyChargeStepTracker.writeToParcel(out);
+        out.writeLong(mDailyStartTime);
+        out.writeLong(mNextMinDailyDeadline);
+        out.writeLong(mNextMaxDailyDeadline);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -8770,10 +9069,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeAmountScreenOnSinceCharge = in.readInt();
         mDischargeAmountScreenOff = in.readInt();
         mDischargeAmountScreenOffSinceCharge = in.readInt();
-        mNumDischargeStepDurations = in.readInt();
-        in.readLongArray(mDischargeStepDurations);
-        mNumChargeStepDurations = in.readInt();
-        in.readLongArray(mChargeStepDurations);
+        mDischargeStepTracker.readFromParcel(in);
+        mChargeStepTracker.readFromParcel(in);
         mLastWriteTime = in.readLong();
 
         mBluetoothPingCount = in.readInt();
@@ -8912,10 +9209,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(mDischargeAmountScreenOnSinceCharge);
         out.writeInt(mDischargeAmountScreenOff);
         out.writeInt(mDischargeAmountScreenOffSinceCharge);
-        out.writeInt(mNumDischargeStepDurations);
-        out.writeLongArray(mDischargeStepDurations);
-        out.writeInt(mNumChargeStepDurations);
-        out.writeLongArray(mChargeStepDurations);
+        mDischargeStepTracker.writeToParcel(out);
+        mChargeStepTracker.writeToParcel(out);
         out.writeLong(mLastWriteTime);
 
         out.writeInt(getBluetoothPingCount());
