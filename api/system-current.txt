@@ -26514,6 +26514,7 @@ package android.provider {
     field public static final int ORGANIZATION = 30; // 0x1e
     field public static final int PHONE = 20; // 0x14
     field public static final int STRUCTURED_NAME = 40; // 0x28
+    field public static final int STRUCTURED_PHONETIC_NAME = 37; // 0x25
     field public static final int UNDEFINED = 0; // 0x0
   }
 
