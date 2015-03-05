@@ -534,8 +534,9 @@ public class Paint {
      * @hide
      */
     public long getNativeInstance() {
-        if (mShader != null && mShader.getNativeInstance() != mNativeShader) {
-            mNativeShader = mShader.getNativeInstance();
+        long newNativeShader = mShader == null ? 0 : mShader.getNativeInstance();
+        if (newNativeShader != mNativeShader) {
+            mNativeShader = newNativeShader;
             native_setShader(mNativePaint, mNativeShader);
         }
         return mNativePaint;
