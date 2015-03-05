@@ -20,6 +20,7 @@ package android.app.admin;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -205,4 +206,6 @@ interface IDevicePolicyManager {
     void clearDeviceInitializer(in ComponentName who);
     boolean setDeviceInitializer(in ComponentName who, in ComponentName initializer, String initializerName);
     String getDeviceInitializer();
+
+    void setUserIcon(in ComponentName admin, in Bitmap icon);
 }
