@@ -23906,7 +23906,9 @@ package android.os {
   public final class Looper {
     method public void dump(android.util.Printer, java.lang.String);
     method public static android.os.Looper getMainLooper();
+    method public android.os.MessageQueue getQueue();
     method public java.lang.Thread getThread();
+    method public boolean isCurrentThread();
     method public static void loop();
     method public static android.os.Looper myLooper();
     method public static android.os.MessageQueue myQueue();
