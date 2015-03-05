@@ -204,7 +204,7 @@ class GLES20Canvas extends HardwareCanvas {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawPatch(mNativeCanvasWrapper, bitmap.mNativeBitmap, patch.mNativeChunk,
+        nDrawPatch(mNativeCanvasWrapper, bitmap.getSkBitmap(), patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
@@ -214,7 +214,7 @@ class GLES20Canvas extends HardwareCanvas {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawPatch(mNativeCanvasWrapper, bitmap.mNativeBitmap, patch.mNativeChunk,
+        nDrawPatch(mNativeCanvasWrapper, bitmap.getSkBitmap(), patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 

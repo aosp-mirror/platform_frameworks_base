@@ -40,7 +40,6 @@ using namespace android;
 struct fields_t {
     jfieldID context;
     jclass bitmapClazz;  // Must be a global ref
-    jfieldID nativeBitmap;
     jmethodID createBitmapMethod;
     jmethodID createScaledBitmapMethod;
     jclass configClazz;  // Must be a global ref
@@ -282,8 +281,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, 
         return NULL;
     }
 
-    SkBitmap *bitmap =
-            (SkBitmap *) env->GetLongField(jBitmap, fields.nativeBitmap);
+    SkBitmap *bitmap = GraphicsJNI::getSkBitmap(env, jBitmap);
 
     bitmap->lockPixels();
     rotate((uint16_t*)bitmap->getPixels(),
@@ -419,10 +417,6 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
                     "(Landroid/graphics/Bitmap;IIZ)"
                     "Landroid/graphics/Bitmap;");
     if (fields.createScaledBitmapMethod == NULL) {
-        return;
-    }
-    fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "J");
-    if (fields.nativeBitmap == NULL) {
         return;
     }
 

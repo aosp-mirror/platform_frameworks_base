@@ -154,7 +154,7 @@ static jfieldID gPointF_xFieldID;
 static jfieldID gPointF_yFieldID;
 
 static jclass   gBitmap_class;
-static jfieldID gBitmap_nativeInstanceID;
+static jfieldID gBitmap_skBitmapPtr;
 static jmethodID gBitmap_constructorMethodID;
 static jmethodID gBitmap_reinitMethodID;
 static jmethodID gBitmap_getAllocationByteCountMethodID;
@@ -338,11 +338,11 @@ SkColorType GraphicsJNI::legacyBitmapConfigToColorType(jint legacyConfig) {
     return static_cast<SkColorType>(gConfig2ColorType[legacyConfig]);
 }
 
-SkBitmap* GraphicsJNI::getNativeBitmap(JNIEnv* env, jobject bitmap) {
+SkBitmap* GraphicsJNI::getSkBitmap(JNIEnv* env, jobject bitmap) {
     SkASSERT(env);
     SkASSERT(bitmap);
     SkASSERT(env->IsInstanceOf(bitmap, gBitmap_class));
-    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_nativeInstanceID);
+    jlong bitmapHandle = env->GetLongField(bitmap, gBitmap_skBitmapPtr);
     SkBitmap* b = reinterpret_cast<SkBitmap*>(bitmapHandle);
     SkASSERT(b);
     return b;
@@ -676,7 +676,7 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gPointF_yFieldID = getFieldIDCheck(env, gPointF_class, "y", "F");
 
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
-    gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "J");
+    gBitmap_skBitmapPtr = getFieldIDCheck(env, gBitmap_class, "mSkBitmapPtr", "J");
     gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(J[BIIIZZ[BLandroid/graphics/NinePatch$InsetStruct;)V");
     gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
     gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");

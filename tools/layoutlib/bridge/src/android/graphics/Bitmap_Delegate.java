@@ -76,13 +76,6 @@ public final class Bitmap_Delegate {
     // ---- Public Helper methods ----
 
     /**
-     * Returns the native delegate associated to a given {@link Bitmap_Delegate} object.
-     */
-    public static Bitmap_Delegate getDelegate(Bitmap bitmap) {
-        return sManager.getDelegate(bitmap.mNativeBitmap);
-    }
-
-    /**
      * Returns the native delegate associated to a given an int referencing a {@link Bitmap} object.
      */
     public static Bitmap_Delegate getDelegate(long native_bitmap) {
@@ -185,19 +178,6 @@ public final class Bitmap_Delegate {
         Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.ARGB_8888);
 
         return createBitmap(delegate, createFlags, density.getDpiValue());
-    }
-
-    /**
-     * Returns the {@link BufferedImage} used by the delegate of the given {@link Bitmap}.
-     */
-    public static BufferedImage getImage(Bitmap bitmap) {
-        // get the delegate from the native int.
-        Bitmap_Delegate delegate = sManager.getDelegate(bitmap.mNativeBitmap);
-        if (delegate == null) {
-            return null;
-        }
-
-        return delegate.mImage;
     }
 
     public static int getBufferedImageType(int nativeBitmapConfig) {
