@@ -3,7 +3,6 @@
 
 #include "SkShader.h"
 #include "SkGradientShader.h"
-#include "SkPorterDuff.h"
 #include "SkComposeShader.h"
 #include "SkTemplates.h"
 #include "SkXfermode.h"
@@ -227,14 +226,13 @@ static jlong ComposeShader_create1(JNIEnv* env, jobject o,
 }
 
 static jlong ComposeShader_create2(JNIEnv* env, jobject o,
-        jlong shaderAHandle, jlong shaderBHandle, jint porterDuffModeHandle)
+        jlong shaderAHandle, jlong shaderBHandle, jint xfermodeHandle)
 {
     SkShader* shaderA = reinterpret_cast<SkShader *>(shaderAHandle);
     SkShader* shaderB = reinterpret_cast<SkShader *>(shaderBHandle);
-    SkPorterDuff::Mode porterDuffMode = static_cast<SkPorterDuff::Mode>(porterDuffModeHandle);
-    SkAutoUnref au(SkPorterDuff::CreateXfermode(porterDuffMode));
-    SkXfermode* mode = (SkXfermode*) au.get();
-    SkShader* shader = new SkComposeShader(shaderA, shaderB, mode);
+    SkXfermode::Mode mode = static_cast<SkXfermode::Mode>(xfermodeHandle);
+    SkAutoTUnref<SkXfermode> xfermode(SkXfermode::Create(mode));
+    SkShader* shader = new SkComposeShader(shaderA, shaderB, xfermode.get());
     return reinterpret_cast<jlong>(shader);
 }
 
