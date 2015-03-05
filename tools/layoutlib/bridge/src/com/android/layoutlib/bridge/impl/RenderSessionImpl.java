@@ -50,7 +50,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
-import com.android.layoutlib.bridge.android.SessionParamsFlags;
+import com.android.layoutlib.bridge.android.RenderParamsFlags;
 import com.android.layoutlib.bridge.bars.BridgeActionBar;
 import com.android.layoutlib.bridge.bars.AppCompatActionBar;
 import com.android.layoutlib.bridge.bars.Config;
@@ -400,7 +400,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             // it can instantiate the custom Fragment.
             Fragment_Delegate.setProjectCallback(params.getProjectCallback());
 
-            String rootTag = params.getFlag(SessionParamsFlags.FLAG_KEY_ROOT_TAG);
+            String rootTag = params.getFlag(RenderParamsFlags.FLAG_KEY_ROOT_TAG);
             boolean isPreference = "PreferenceScreen".equals(rootTag);
             View view;
             if (isPreference) {
@@ -557,7 +557,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 // This is useful when mImage is just a wrapper of Graphics2D so
                 // it doesn't get cached.
                 boolean disableBitmapCaching = Boolean.TRUE.equals(params.getFlag(
-                    SessionParamsFlags.FLAG_KEY_DISABLE_BITMAP_CACHING));
+                    RenderParamsFlags.FLAG_KEY_DISABLE_BITMAP_CACHING));
                 if (newRenderSize || mCanvas == null || disableBitmapCaching) {
                     if (params.getImageFactory() != null) {
                         mImage = params.getImageFactory().getImage(
