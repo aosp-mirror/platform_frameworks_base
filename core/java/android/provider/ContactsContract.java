@@ -1010,7 +1010,8 @@ public final class ContactsContract {
     /**
      * Types of data used to produce the display name for a contact. In the order
      * of increasing priority: {@link #EMAIL}, {@link #PHONE},
-     * {@link #ORGANIZATION}, {@link #NICKNAME}, {@link #STRUCTURED_NAME}.
+     * {@link #ORGANIZATION}, {@link #NICKNAME}, {@link #STRUCTURED_PHONETIC_NAME},
+     * {@link #STRUCTURED_NAME}.
      */
     public interface DisplayNameSources {
         public static final int UNDEFINED = 0;
@@ -1018,6 +1019,8 @@ public final class ContactsContract {
         public static final int PHONE = 20;
         public static final int ORGANIZATION = 30;
         public static final int NICKNAME = 35;
+        /** Display name comes from a structured name that only has phonetic components. */
+        public static final int STRUCTURED_PHONETIC_NAME = 37;
         public static final int STRUCTURED_NAME = 40;
     }
 
