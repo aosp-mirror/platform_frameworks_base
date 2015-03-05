@@ -19,6 +19,7 @@ package com.android.server.usb;
 import android.content.Context;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceServer;
+import android.media.midi.MidiDispatcher;
 import android.media.midi.MidiManager;
 import android.media.midi.MidiPort;
 import android.media.midi.MidiReceiver;
@@ -30,6 +31,8 @@ import android.system.OsConstants;
 import android.system.StructPollfd;
 import android.util.Log;
 
+import libcore.io.IoUtils;
+
 import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -39,8 +42,9 @@ import java.io.IOException;
 public final class UsbMidiDevice implements Closeable {
     private static final String TAG = "UsbMidiDevice";
 
-    private final MidiDeviceServer mServer;
-    private final MidiReceiver[] mOutputPortReceivers;
+    private MidiDeviceServer mServer;
+
+    private final MidiReceiver[] mInputPortReceivers;
 
     // for polling multiple FileDescriptors for MIDI events
     private final StructPollfd[] mPollFDs;
@@ -50,12 +54,6 @@ public final class UsbMidiDevice implements Closeable {
     private final FileOutputStream[] mOutputStreams;
 
     public static UsbMidiDevice create(Context context, Bundle properties, int card, int device) {
-        MidiManager midiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
-        if (midiManager == null) {
-            Log.e(TAG, "No MidiManager in UsbMidiDevice.create()");
-            return null;
-        }
-
         // FIXME - support devices with different number of input and output ports
         int subDevices = nativeGetSubdeviceCount(card, device);
         if (subDevices <= 0) {
@@ -70,19 +68,16 @@ public final class UsbMidiDevice implements Closeable {
             return null;
         }
 
-        MidiDeviceServer server = midiManager.createDeviceServer(subDevices, subDevices, properties,
-                false, MidiDeviceInfo.TYPE_USB);
-        if (server == null) {
+        UsbMidiDevice midiDevice = new UsbMidiDevice(fileDescriptors, fileDescriptors);
+        if (!midiDevice.register(context, properties)) {
+            IoUtils.closeQuietly(midiDevice);
             Log.e(TAG, "createDeviceServer failed");
             return null;
         }
-
-        return new UsbMidiDevice(server, fileDescriptors, fileDescriptors);
+        return midiDevice;
     }
 
-    private UsbMidiDevice(MidiDeviceServer server, FileDescriptor[] inputFiles,
-            FileDescriptor[] outputFiles) {
-        mServer = server;
+    private UsbMidiDevice(FileDescriptor[] inputFiles, FileDescriptor[] outputFiles) {
         int inputCount = inputFiles.length;
         int outputCount = outputFiles.length;
 
@@ -102,26 +97,36 @@ public final class UsbMidiDevice implements Closeable {
             mOutputStreams[i] = new FileOutputStream(outputFiles[i]);
         }
 
-        mOutputPortReceivers = new MidiReceiver[outputCount];
-        for (int port = 0; port < outputCount; port++) {
-            mOutputPortReceivers[port] = server.openOutputPortReceiver(port);
-        }
-
+        mInputPortReceivers = new MidiReceiver[inputCount];
         for (int port = 0; port < inputCount; port++) {
-            final int portNumberF = port;
-            MidiReceiver receiver = new MidiReceiver() {
-
+            final int portF = port;
+            mInputPortReceivers[port] = new MidiReceiver() {
                 @Override
                 public void post(byte[] data, int offset, int count, long timestamp)
                         throws IOException {
                     // FIXME - timestamps are ignored, future posting not supported yet.
-                    mOutputStreams[portNumberF].write(data, offset, count);
+                    mOutputStreams[portF].write(data, offset, count);
                 }
             };
-            MidiSender sender = server.openInputPortSender(port);
-            sender.connect(receiver);
+        }
+    }
+
+    private boolean register(Context context, Bundle properties) {
+        MidiManager midiManager = (MidiManager)context.getSystemService(Context.MIDI_SERVICE);
+        if (midiManager == null) {
+            Log.e(TAG, "No MidiManager in UsbMidiDevice.create()");
+            return false;
         }
 
+        int outputCount = mOutputStreams.length;
+        mServer = midiManager.createDeviceServer(mInputPortReceivers, outputCount,
+                properties, MidiDeviceInfo.TYPE_USB);
+        if (mServer == null) {
+            return false;
+        }
+        final MidiReceiver[] outputReceivers = mServer.getOutputPortReceivers();
+
+        // FIXME can we only run this when we have a dispatcher that has listeners?
         new Thread() {
             @Override
             public void run() {
@@ -137,8 +142,8 @@ public final class UsbMidiDevice implements Closeable {
                                 pfd.revents = 0;
 
                                 int count = mInputStreams[index].read(buffer);
-                                mOutputPortReceivers[index].post(buffer, 0, count,
-                                        System.nanoTime());
+                                long timestamp = System.nanoTime();
+                                outputReceivers[index].post(buffer, 0, count, timestamp);
                             } else if ((pfd.revents & (OsConstants.POLLERR
                                                         | OsConstants.POLLHUP)) != 0) {
                                 done = true;
@@ -155,11 +160,15 @@ public final class UsbMidiDevice implements Closeable {
                 }
             }
         }.start();
+
+        return true;
     }
 
     @Override
     public void close() throws IOException {
-        mServer.close();
+        if (mServer != null) {
+            mServer.close();
+        }
 
         for (int i = 0; i < mInputStreams.length; i++) {
             mInputStreams[i].close();

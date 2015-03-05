@@ -50,6 +50,7 @@ public class MidiDeviceInfo implements Parcelable {
     private final int mInputPortCount;
     private final int mOutputPortCount;
     private final Bundle mProperties;
+    private final boolean mIsPrivate;
 
     /**
      * Bundle key for the device's manufacturer name property.
@@ -83,6 +84,8 @@ public class MidiDeviceInfo implements Parcelable {
      * Bundle key for the device's ALSA card number.
      * Only set for USB MIDI devices.
      * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     *
+     * @hide
      */
     public static final String PROPERTY_ALSA_CARD = "alsa_card";
 
@@ -90,20 +93,32 @@ public class MidiDeviceInfo implements Parcelable {
      * Bundle key for the device's ALSA device number.
      * Only set for USB MIDI devices.
      * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     *
+     * @hide
      */
     public static final String PROPERTY_ALSA_DEVICE = "alsa_device";
+
+    /**
+     * {@link android.content.pm.ServiceInfo} for the service hosting the device implementation.
+     * Only set for Virtual MIDI devices.
+     * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     *
+     * @hide
+     */
+    public static final String PROPERTY_SERVICE_INFO = "service_info";
 
     /**
      * MidiDeviceInfo should only be instantiated by MidiService implementation
      * @hide
      */
     public MidiDeviceInfo(int type, int id, int numInputPorts, int numOutputPorts,
-            Bundle properties) {
+            Bundle properties, boolean isPrivate) {
         mType = type;
         mId = id;
         mInputPortCount = numInputPorts;
         mOutputPortCount = numOutputPorts;
         mProperties = properties;
+        mIsPrivate = isPrivate;
     }
 
     /**
@@ -152,6 +167,16 @@ public class MidiDeviceInfo implements Parcelable {
         return mProperties;
     }
 
+    /**
+     * Returns true if the device is private.  Private devices are only visible and accessible
+     * to clients with the same UID as the application that is hosting the device.
+     *
+     * @return true if the device is private
+     */
+    public boolean isPrivate() {
+        return mIsPrivate;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof MidiDeviceInfo) {
@@ -171,7 +196,8 @@ public class MidiDeviceInfo implements Parcelable {
         return ("MidiDeviceInfo[mType=" + mType +
                 ",mInputPortCount=" + mInputPortCount +
                 ",mOutputPortCount=" + mOutputPortCount +
-                ",mProperties=" + mProperties);
+                ",mProperties=" + mProperties +
+                ",mIsPrivate=" + mIsPrivate);
     }
 
     public static final Parcelable.Creator<MidiDeviceInfo> CREATOR =
@@ -182,7 +208,8 @@ public class MidiDeviceInfo implements Parcelable {
             int inputPorts = in.readInt();
             int outputPorts = in.readInt();
             Bundle properties = in.readBundle();
-            return new MidiDeviceInfo(type, id, inputPorts, outputPorts, properties);
+            boolean isPrivate = (in.readInt() == 1);
+            return new MidiDeviceInfo(type, id, inputPorts, outputPorts, properties, isPrivate);
         }
 
         public MidiDeviceInfo[] newArray(int size) {
@@ -200,5 +227,6 @@ public class MidiDeviceInfo implements Parcelable {
         parcel.writeInt(mInputPortCount);
         parcel.writeInt(mOutputPortCount);
         parcel.writeBundle(mProperties);
+        parcel.writeInt(mIsPrivate ? 1 : 0);
    }
 }

@@ -16,8 +16,8 @@
 
 package android.media.midi;
 
+import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceServer;
-import android.media.midi.IMidiListener;
 import android.media.midi.MidiDeviceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -28,14 +28,20 @@ interface IMidiManager
     MidiDeviceInfo[] getDeviceList();
 
     // for device creation & removal notifications
-    void registerListener(IBinder token, in IMidiListener listener);
-    void unregisterListener(IBinder token, in IMidiListener listener);
+    void registerListener(IBinder token, in IMidiDeviceListener listener);
+    void unregisterListener(IBinder token, in IMidiDeviceListener listener);
 
-    // for communicating with MIDI devices
+    // for opening built-in MIDI devices
     IMidiDeviceServer openDevice(IBinder token, in MidiDeviceInfo device);
 
-    // for implementing virtual MIDI devices
+    // for registering built-in MIDI devices
     MidiDeviceInfo registerDeviceServer(in IMidiDeviceServer server, int numInputPorts,
-            int numOutputPorts, in Bundle properties, boolean isPrivate, int type);
+            int numOutputPorts, in Bundle properties, int type);
+
+    // for unregistering built-in MIDI devices
     void unregisterDeviceServer(in IMidiDeviceServer server);
+
+    // used by MidiDeviceService to access the MidiDeviceInfo that was created based on its
+    // manifest's meta-data
+    MidiDeviceInfo getServiceDeviceInfo(String packageName, String className);
 }
