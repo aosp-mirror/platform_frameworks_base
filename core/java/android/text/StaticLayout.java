@@ -28,6 +28,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -51,6 +52,10 @@ public class StaticLayout extends Layout {
      * @hide
      */
     public final static class Builder {
+        private Builder() {
+            mNativePtr = nNewBuilder();
+        }
+
         static Builder obtain() {
             Builder b = null;
             synchronized (sLock) {
@@ -96,6 +101,7 @@ public class StaticLayout extends Layout {
 
         // release any expensive state
         /* package */ void finish() {
+            nFinishBuilder(mNativePtr);
             mMeasuredText.finish();
         }
 
@@ -160,6 +166,14 @@ public class StaticLayout extends Layout {
             return this;
         }
 
+        /* @hide */
+        public void setLocale(Locale locale) {
+            if (!locale.equals(mLocale)) {
+                nBuilderSetLocale(mNativePtr, locale.toLanguageTag());
+                mLocale = locale;
+            }
+        }
+
         public StaticLayout build() {
             // TODO: can optimize based on whether ellipsis is needed
             StaticLayout result = new StaticLayout(mText);
@@ -167,6 +181,17 @@ public class StaticLayout extends Layout {
             recycle(this);
             return result;
         }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                nFreeBuilder(mNativePtr);
+            } finally {
+                super.finalize();
+            }
+        }
+
+        /* package */ long mNativePtr;
 
         CharSequence mText;
         int mStart;
@@ -185,6 +210,8 @@ public class StaticLayout extends Layout {
 
         // This will go away and be subsumed by native builder code
         MeasuredText mMeasuredText;
+
+        Locale mLocale;
 
         private static final Object sLock = new Object();
         private static final Builder[] sCached = new Builder[3];
@@ -322,13 +349,13 @@ public class StaticLayout extends Layout {
         float spacingadd = b.mSpacingAdd;
         float ellipsizedWidth = b.mEllipsizedWidth;
         TextUtils.TruncateAt ellipsize = b.mEllipsize;
-        LineBreaks lineBreaks = new LineBreaks();
+        LineBreaks lineBreaks = new LineBreaks();  // TODO: move to builder to avoid allocation costs
         // store span end locations
         int[] spanEndCache = new int[4];
         // store fontMetrics per span range
         // must be a multiple of 4 (and > 0) (store top, bottom, ascent, and descent per range)
         int[] fmCache = new int[4 * 4];
-        final String localeLanguageTag = paint.getTextLocale().toLanguageTag();
+        b.setLocale(paint.getTextLocale());  // TODO: also respect LocaleSpan within the text
 
         mLineCount = 0;
 
@@ -466,7 +493,7 @@ public class StaticLayout extends Layout {
                 }
             }
 
-            int breakCount = nComputeLineBreaks(localeLanguageTag, chs, widths, paraEnd - paraStart, firstWidth,
+            int breakCount = nComputeLineBreaks(b.mNativePtr, chs, widths, paraEnd - paraStart, firstWidth,
                     firstWidthLineCount, restWidth, variableTabStops, TAB_INCREMENT, false, lineBreaks,
                     lineBreaks.breaks, lineBreaks.widths, lineBreaks.flags, lineBreaks.breaks.length);
 
@@ -911,10 +938,15 @@ public class StaticLayout extends Layout {
     // the arrays inside the LineBreaks objects are passed in as well
     // to reduce the number of JNI calls in the common case where the
     // arrays do not have to be resized
-    private static native int nComputeLineBreaks(String locale, char[] text, float[] widths,
+    private static native int nComputeLineBreaks(long nativePtr, char[] text, float[] widths,
             int length, float firstWidth, int firstWidthLineCount, float restWidth,
             int[] variableTabStops, int defaultTabStop, boolean optimize, LineBreaks recycle,
             int[] recycleBreaks, float[] recycleWidths, boolean[] recycleFlags, int recycleLength);
+
+    private static native long nNewBuilder();
+    private static native void nFreeBuilder(long nativePtr);
+    private static native void nFinishBuilder(long nativePtr);
+    private static native void nBuilderSetLocale(long nativePtr, String locale);
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
