@@ -20,6 +20,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.IActivityManager.ContentProviderHolder;
 import android.content.IContentProvider;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -29,13 +30,18 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public final class SettingsCmd {
 
     enum CommandVerb {
         UNSPECIFIED,
         GET,
         PUT,
-        DELETE
+        DELETE,
+        LIST,
     }
 
     static String[] mArgs;
@@ -47,7 +53,7 @@ public final class SettingsCmd {
     String mValue = null;
 
     public static void main(String[] args) {
-        if (args == null || args.length < 3) {
+        if (args == null || args.length < 2) {
             printUsage();
             return;
         }
@@ -78,6 +84,8 @@ public final class SettingsCmd {
                         mVerb = CommandVerb.PUT;
                     } else if ("delete".equalsIgnoreCase(arg)) {
                         mVerb = CommandVerb.DELETE;
+                    } else if ("list".equalsIgnoreCase(arg)) {
+                        mVerb = CommandVerb.LIST;
                     } else {
                         // invalid
                         System.err.println("Invalid command: " + arg);
@@ -91,6 +99,10 @@ public final class SettingsCmd {
                         break;  // invalid
                     }
                     mTable = arg.toLowerCase();
+                    if (mVerb == CommandVerb.LIST) {
+                        valid = true;
+                        break;
+                    }
                 } else if (mVerb == CommandVerb.GET || mVerb == CommandVerb.DELETE) {
                     mKey = arg;
                     if (mNextArg >= mArgs.length) {
@@ -144,6 +156,11 @@ public final class SettingsCmd {
                             System.out.println("Deleted "
                                     + deleteForUser(provider, mUser, mTable, mKey) + " rows");
                             break;
+                        case LIST:
+                            for (String line : listForUser(provider, mUser, mTable)) {
+                                System.out.println(line);
+                            }
+                            break;
                         default:
                             System.err.println("Unspecified command");
                             break;
@@ -162,6 +179,34 @@ public final class SettingsCmd {
         } else {
             printUsage();
         }
+    }
+
+    private List<String> listForUser(IContentProvider provider, int userHandle, String table) {
+        final Uri uri = "system".equals(table) ? Settings.System.CONTENT_URI
+                : "secure".equals(table) ? Settings.Secure.CONTENT_URI
+                : "global".equals(table) ? Settings.Global.CONTENT_URI
+                : null;
+        final ArrayList<String> lines = new ArrayList<String>();
+        if (uri == null) {
+            return lines;
+        }
+        try {
+            final Cursor cursor = provider.query(resolveCallingPackage(), uri, null, null, null,
+                    null, null);
+            try {
+                while (cursor != null && cursor.moveToNext()) {
+                    lines.add(cursor.getString(1) + "=" + cursor.getString(2));
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            Collections.sort(lines);
+        } catch (RemoteException e) {
+            System.err.println("List failed in " + table + " for user " + userHandle);
+        }
+        return lines;
     }
 
     private String nextArg() {
@@ -244,6 +289,7 @@ public final class SettingsCmd {
         System.err.println("usage:  settings [--user NUM] get namespace key");
         System.err.println("        settings [--user NUM] put namespace key value");
         System.err.println("        settings [--user NUM] delete namespace key");
+        System.err.println("        settings [--user NUM] list namespace");
         System.err.println("\n'namespace' is one of {system, secure, global}, case-insensitive");
         System.err.println("If '--user NUM' is not given, the operations are performed on the owner user.");
     }
