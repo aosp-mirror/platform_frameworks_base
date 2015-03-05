@@ -21,7 +21,6 @@
 #include <Canvas.h>
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
-#include "SkPorterDuff.h"
 #include "Paint.h"
 #include "TypefaceImpl.h"
 
