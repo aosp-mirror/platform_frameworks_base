@@ -65,6 +65,9 @@ public class ShadowPainter {
     @SuppressWarnings({"SuspiciousNameCombination", "UnnecessaryLocalVariable"})  // Imported code
     public static BufferedImage createDropShadow(BufferedImage source, int shadowSize,
             float shadowOpacity, int shadowRgb) {
+        if (shadowSize == 0) {
+            return source;
+        }
 
         // This code is based on
         //      http://www.jroller.com/gfx/entry/non_rectangular_shadow
