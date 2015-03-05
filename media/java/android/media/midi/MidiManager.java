@@ -223,7 +223,7 @@ public class MidiManager {
                             public void onServiceConnected(ComponentName name, IBinder binder) {
                                 IMidiDeviceServer server =
                                         IMidiDeviceServer.Stub.asInterface(binder);
-                                MidiDevice device = new MidiDevice(deviceInfoF, server);
+                                MidiDevice device = new MidiDevice(deviceInfoF, server, mContext, this);
                                 sendOpenDeviceResponse(deviceInfoF, device, callbackF, handlerF);
                             }
 

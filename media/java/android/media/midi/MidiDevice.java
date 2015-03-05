@@ -16,9 +16,14 @@
 
 package android.media.midi;
 
+import android.content.Context;
+import android.content.ServiceConnection;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * This class is used for sending and receiving data to and from an MIDI device
@@ -27,19 +32,27 @@ import android.util.Log;
  * CANDIDATE FOR PUBLIC API
  * @hide
  */
-public final class MidiDevice {
+public final class MidiDevice implements Closeable {
     private static final String TAG = "MidiDevice";
 
     private final MidiDeviceInfo mDeviceInfo;
     private final IMidiDeviceServer mServer;
+    private Context mContext;
+    private ServiceConnection mServiceConnection;
 
-   /**
-     * MidiDevice should only be instantiated by MidiManager
-     * @hide
-     */
-    public MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
+    /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server) {
         mDeviceInfo = deviceInfo;
         mServer = server;
+        mContext = null;
+        mServiceConnection = null;
+    }
+
+    /* package */ MidiDevice(MidiDeviceInfo deviceInfo, IMidiDeviceServer server,
+            Context context, ServiceConnection serviceConnection) {
+        mDeviceInfo = deviceInfo;
+        mServer = server;
+        mContext = context;
+        mServiceConnection = serviceConnection;
     }
 
     /**
@@ -86,6 +99,15 @@ public final class MidiDevice {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openOutputPort");
             return null;
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (mContext != null && mServiceConnection != null) {
+            mContext.unbindService(mServiceConnection);
+            mContext = null;
+            mServiceConnection = null;
         }
     }
 
