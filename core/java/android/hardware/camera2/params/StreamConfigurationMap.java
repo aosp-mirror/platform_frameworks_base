@@ -90,11 +90,28 @@ public final class StreamConfigurationMap {
             StreamConfiguration[] configurations,
             StreamConfigurationDuration[] minFrameDurations,
             StreamConfigurationDuration[] stallDurations,
+            StreamConfiguration[] depthConfigurations,
+            StreamConfigurationDuration[] depthMinFrameDurations,
+            StreamConfigurationDuration[] depthStallDurations,
             HighSpeedVideoConfiguration[] highSpeedVideoConfigurations) {
 
         mConfigurations = checkArrayElementsNotNull(configurations, "configurations");
         mMinFrameDurations = checkArrayElementsNotNull(minFrameDurations, "minFrameDurations");
         mStallDurations = checkArrayElementsNotNull(stallDurations, "stallDurations");
+
+        if (depthConfigurations == null) {
+            mDepthConfigurations = new StreamConfiguration[0];
+            mDepthMinFrameDurations = new StreamConfigurationDuration[0];
+            mDepthStallDurations = new StreamConfigurationDuration[0];
+        } else {
+            mDepthConfigurations = checkArrayElementsNotNull(depthConfigurations,
+                    "depthConfigurations");
+            mDepthMinFrameDurations = checkArrayElementsNotNull(depthMinFrameDurations,
+                    "depthMinFrameDurations");
+            mDepthStallDurations = checkArrayElementsNotNull(depthStallDurations,
+                    "depthStallDurations");
+        }
+
         if (highSpeedVideoConfigurations == null) {
             mHighSpeedVideoConfigurations = new HighSpeedVideoConfiguration[0];
         } else {
@@ -111,9 +128,24 @@ public final class StreamConfigurationMap {
             if (count == null) {
                 count = 0;
             }
-            count = count + 1;
 
-            map.put(config.getFormat(), count);
+            map.put(config.getFormat(), count + 1);
+        }
+
+        // For each depth format, track how many sizes there are available to configure
+        for (StreamConfiguration config : mDepthConfigurations) {
+            if (!config.isOutput()) {
+                // Ignoring input depth configs
+                continue;
+            }
+
+            Integer count = mDepthOutputFormats.get(config.getFormat());
+
+            if (count == null) {
+                count = 0;
+            }
+
+            mDepthOutputFormats.put(config.getFormat(), count + 1);
         }
 
         if (!mOutputFormats.containsKey(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED)) {
@@ -215,8 +247,13 @@ public final class StreamConfigurationMap {
     public boolean isOutputSupportedFor(int format) {
         checkArgumentFormat(format);
 
-        format = imageFormatToInternal(format);
-        return getFormatsMap(/*output*/true).containsKey(format);
+        int internalFormat = imageFormatToInternal(format);
+        int dataspace = imageFormatToDataspace(format);
+        if (dataspace == HAL_DATASPACE_DEPTH) {
+            return mDepthOutputFormats.containsKey(internalFormat);
+        } else {
+            return getFormatsMap(/*output*/true).containsKey(internalFormat);
+        }
     }
 
     /**
@@ -387,7 +424,8 @@ public final class StreamConfigurationMap {
             return null;
         }
 
-        return getInternalFormatSizes(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED, /*output*/true);
+        return getInternalFormatSizes(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED,
+                HAL_DATASPACE_UNKNOWN,/*output*/true);
     }
 
     /**
@@ -600,7 +638,10 @@ public final class StreamConfigurationMap {
         checkNotNull(size, "size must not be null");
         checkArgumentFormatSupported(format, /*output*/true);
 
-        return getInternalFormatDuration(imageFormatToInternal(format), size, DURATION_MIN_FRAME);
+        return getInternalFormatDuration(imageFormatToInternal(format),
+                imageFormatToDataspace(format),
+                size,
+                DURATION_MIN_FRAME);
     }
 
     /**
@@ -653,6 +694,7 @@ public final class StreamConfigurationMap {
         }
 
         return getInternalFormatDuration(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED,
+                HAL_DATASPACE_UNKNOWN,
                 size, DURATION_MIN_FRAME);
     }
 
@@ -742,7 +784,9 @@ public final class StreamConfigurationMap {
         checkArgumentFormatSupported(format, /*output*/true);
 
         return getInternalFormatDuration(imageFormatToInternal(format),
-                size, DURATION_STALL);
+                imageFormatToDataspace(format),
+                size,
+                DURATION_STALL);
     }
 
     /**
@@ -779,7 +823,7 @@ public final class StreamConfigurationMap {
         }
 
         return getInternalFormatDuration(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED,
-                size, DURATION_STALL);
+                HAL_DATASPACE_UNKNOWN, size, DURATION_STALL);
     }
 
     /**
@@ -858,6 +902,7 @@ public final class StreamConfigurationMap {
             case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
             case HAL_PIXEL_FORMAT_BLOB:
             case HAL_PIXEL_FORMAT_RAW_OPAQUE:
+            case HAL_PIXEL_FORMAT_Y16:
                 return format;
             case ImageFormat.JPEG:
                 throw new IllegalArgumentException(
@@ -897,8 +942,8 @@ public final class StreamConfigurationMap {
     }
 
     /**
-     * Convert a public-visible {@code ImageFormat} into an internal format
-     * compatible with {@code graphics.h}.
+     * Convert an internal format compatible with {@code graphics.h} into public-visible
+     * {@code ImageFormat}. This assumes the dataspace of the format is not HAL_DATASPACE_DEPTH.
      *
      * <p>In particular these formats are converted:
      * <ul>
@@ -912,7 +957,8 @@ public final class StreamConfigurationMap {
      *
      * <p>All other formats are returned as-is, no further invalid check is performed.</p>
      *
-     * <p>This function is the dual of {@link #imageFormatToInternal}.</p>
+     * <p>This function is the dual of {@link #imageFormatToInternal} for dataspaces other than
+     * HAL_DATASPACE_DEPTH.</p>
      *
      * @param format image format from {@link ImageFormat} or {@link PixelFormat}
      * @return the converted image formats
@@ -937,6 +983,55 @@ public final class StreamConfigurationMap {
                         "IMPLEMENTATION_DEFINED must not leak to public API");
             default:
                 return format;
+        }
+    }
+
+    /**
+     * Convert an internal format compatible with {@code graphics.h} into public-visible
+     * {@code ImageFormat}. This assumes the dataspace of the format is HAL_DATASPACE_DEPTH.
+     *
+     * <p>In particular these formats are converted:
+     * <ul>
+     * <li>HAL_PIXEL_FORMAT_BLOB => ImageFormat.DEPTH_POINT_CLOUD
+     * <li>HAL_PIXEL_FORMAT_Y16 => ImageFormat.DEPTH16
+     * </ul>
+     * </p>
+     *
+     * <p>Passing in an implementation-defined format which has no public equivalent will fail;
+     * as will passing in a public format which has a different internal format equivalent.
+     * See {@link #checkArgumentFormat} for more details about a legal public format.</p>
+     *
+     * <p>All other formats are returned as-is, no further invalid check is performed.</p>
+     *
+     * <p>This function is the dual of {@link #imageFormatToInternal} for formats associated with
+     * HAL_DATASPACE_DEPTH.</p>
+     *
+     * @param format image format from {@link ImageFormat} or {@link PixelFormat}
+     * @return the converted image formats
+     *
+     * @throws IllegalArgumentException
+     *          if {@code format} is {@code HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED} or
+     *          {@link ImageFormat#JPEG}
+     *
+     * @see ImageFormat
+     * @see PixelFormat
+     * @see #checkArgumentFormat
+     */
+    static int depthFormatToPublic(int format) {
+        switch (format) {
+            case HAL_PIXEL_FORMAT_BLOB:
+                return ImageFormat.DEPTH_POINT_CLOUD;
+            case HAL_PIXEL_FORMAT_Y16:
+                return ImageFormat.DEPTH16;
+            case ImageFormat.JPEG:
+                throw new IllegalArgumentException(
+                        "ImageFormat.JPEG is an unknown internal format");
+            case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+                throw new IllegalArgumentException(
+                        "IMPLEMENTATION_DEFINED must not leak to public API");
+            default:
+                throw new IllegalArgumentException(
+                        "Unknown DATASPACE_DEPTH format " + format);
         }
     }
 
@@ -967,6 +1062,8 @@ public final class StreamConfigurationMap {
      * <p>In particular these formats are converted:
      * <ul>
      * <li>ImageFormat.JPEG => HAL_PIXEL_FORMAT_BLOB
+     * <li>ImageFormat.DEPTH_POINT_CLOUD => HAL_PIXEL_FORMAT_BLOB
+     * <li>ImageFormat.DEPTH16 => HAL_PIXEL_FORMAT_Y16
      * </ul>
      * </p>
      *
@@ -990,12 +1087,57 @@ public final class StreamConfigurationMap {
     static int imageFormatToInternal(int format) {
         switch (format) {
             case ImageFormat.JPEG:
+            case ImageFormat.DEPTH_POINT_CLOUD:
                 return HAL_PIXEL_FORMAT_BLOB;
+            case ImageFormat.DEPTH16:
+                return HAL_PIXEL_FORMAT_Y16;
             case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
                 throw new IllegalArgumentException(
                         "IMPLEMENTATION_DEFINED is not allowed via public API");
             default:
                 return format;
+        }
+    }
+
+    /**
+     * Convert a public format compatible with {@code ImageFormat} to an internal dataspace
+     * from {@code graphics.h}.
+     *
+     * <p>In particular these formats are converted:
+     * <ul>
+     * <li>ImageFormat.JPEG => HAL_DATASPACE_JFIF
+     * <li>ImageFormat.DEPTH_POINT_CLOUD => HAL_DATASPACE_DEPTH
+     * <li>ImageFormat.DEPTH16 => HAL_DATASPACE_DEPTH
+     * <li>others => HAL_DATASPACE_UNKNOWN
+     * </ul>
+     * </p>
+     *
+     * <p>Passing in an implementation-defined format here will fail (it's not a public format);
+     * as will passing in an internal format which has a different public format equivalent.
+     * See {@link #checkArgumentFormat} for more details about a legal public format.</p>
+     *
+     * <p>All other formats are returned as-is, no invalid check is performed.</p>
+     *
+     * <p>This function is the dual of {@link #imageFormatToPublic}.</p>
+     *
+     * @param format public image format from {@link ImageFormat} or {@link PixelFormat}
+     * @return the converted image formats
+     *
+     * @see ImageFormat
+     * @see PixelFormat
+     *
+     * @throws IllegalArgumentException
+     *              if {@code format} was {@code HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED}
+     */
+    static int imageFormatToDataspace(int format) {
+        switch (format) {
+            case ImageFormat.JPEG:
+                return HAL_DATASPACE_JFIF;
+            case ImageFormat.DEPTH_POINT_CLOUD:
+            case ImageFormat.DEPTH16:
+                return HAL_DATASPACE_DEPTH;
+            default:
+                return HAL_DATASPACE_UNKNOWN;
         }
     }
 
@@ -1028,13 +1170,16 @@ public final class StreamConfigurationMap {
             return null;
         }
 
-        format = imageFormatToInternal(format);
+        int internalFormat = imageFormatToInternal(format);
+        int dataspace = imageFormatToDataspace(format);
 
-        return getInternalFormatSizes(format, output);
+        return getInternalFormatSizes(internalFormat, dataspace, output);
     }
 
-    private Size[] getInternalFormatSizes(int format, boolean output) {
-        HashMap<Integer, Integer> formatsMap = getFormatsMap(output);
+    private Size[] getInternalFormatSizes(int format, int dataspace, boolean output) {
+
+        HashMap<Integer, Integer> formatsMap =
+                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthOutputFormats : getFormatsMap(output);
 
         Integer sizesCount = formatsMap.get(format);
         if (sizesCount == null) {
@@ -1045,7 +1190,11 @@ public final class StreamConfigurationMap {
         Size[] sizes = new Size[len];
         int sizeIndex = 0;
 
-        for (StreamConfiguration config : mConfigurations) {
+        StreamConfiguration[] configurations =
+                (dataspace == HAL_DATASPACE_DEPTH) ? mDepthConfigurations : mConfigurations;
+
+
+        for (StreamConfiguration config : configurations) {
             if (config.getFormat() == format && config.isOutput() == output) {
                 sizes[sizeIndex++] = config.getSize();
             }
@@ -1068,15 +1217,19 @@ public final class StreamConfigurationMap {
         for (int format : getFormatsMap(output).keySet()) {
             if (format != HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED &&
                 format != HAL_PIXEL_FORMAT_RAW_OPAQUE) {
-                formats[i++] = format;
+                formats[i++] = imageFormatToPublic(format);
             }
         }
-
+        if (output) {
+            for (int format : mDepthOutputFormats.keySet()) {
+                formats[i++] = depthFormatToPublic(format);
+            }
+        }
         if (formats.length != i) {
             throw new AssertionError("Too few formats " + i + ", expected " + formats.length);
         }
 
-        return imageFormatToPublic(formats);
+        return formats;
     }
 
     /** Get the format -> size count map for either output or input formats */
@@ -1084,14 +1237,14 @@ public final class StreamConfigurationMap {
         return output ? mOutputFormats : mInputFormats;
     }
 
-    private long getInternalFormatDuration(int format, Size size, int duration) {
+    private long getInternalFormatDuration(int format, int dataspace, Size size, int duration) {
         // assume format is already checked, since its internal
 
-        if (!arrayContains(getInternalFormatSizes(format, /*output*/true), size)) {
+        if (!arrayContains(getInternalFormatSizes(format, dataspace, /*output*/true), size)) {
             throw new IllegalArgumentException("size was not supported");
         }
 
-        StreamConfigurationDuration[] durations = getDurations(duration);
+        StreamConfigurationDuration[] durations = getDurations(duration, dataspace);
 
         for (StreamConfigurationDuration configurationDuration : durations) {
             if (configurationDuration.getFormat() == format &&
@@ -1110,12 +1263,14 @@ public final class StreamConfigurationMap {
      * @see #DURATION_MIN_FRAME
      * @see #DURATION_STALL
      * */
-    private StreamConfigurationDuration[] getDurations(int duration) {
+    private StreamConfigurationDuration[] getDurations(int duration, int dataspace) {
         switch (duration) {
             case DURATION_MIN_FRAME:
-                return mMinFrameDurations;
+                return (dataspace == HAL_DATASPACE_DEPTH) ?
+                        mDepthMinFrameDurations : mMinFrameDurations;
             case DURATION_STALL:
-                return mStallDurations;
+                return (dataspace == HAL_DATASPACE_DEPTH) ?
+                        mDepthStallDurations : mStallDurations;
             default:
                 throw new IllegalArgumentException("duration was invalid");
         }
@@ -1131,6 +1286,9 @@ public final class StreamConfigurationMap {
         }
         if (formatsMap.containsKey(HAL_PIXEL_FORMAT_RAW_OPAQUE)) {
             size -= 1;
+        }
+        if (output) {
+            size += mDepthOutputFormats.size();
         }
 
         return size;
@@ -1154,10 +1312,14 @@ public final class StreamConfigurationMap {
     private static final int HAL_PIXEL_FORMAT_BLOB = 0x21;
     private static final int HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED = 0x22;
     private static final int HAL_PIXEL_FORMAT_RAW_OPAQUE = 0x24;
+    private static final int HAL_PIXEL_FORMAT_Y16 = 0x20363159;
+
+    private static final int HAL_DATASPACE_UNKNOWN = 0x0;
+    private static final int HAL_DATASPACE_JFIF = 0x101;
+    private static final int HAL_DATASPACE_DEPTH = 0x1000;
 
     /**
-     * @see #getDurations(int)
-     * @see #getDurationDefault(int)
+     * @see #getDurations(int, int)
      */
     private static final int DURATION_MIN_FRAME = 0;
     private static final int DURATION_STALL = 1;
@@ -1165,6 +1327,11 @@ public final class StreamConfigurationMap {
     private final StreamConfiguration[] mConfigurations;
     private final StreamConfigurationDuration[] mMinFrameDurations;
     private final StreamConfigurationDuration[] mStallDurations;
+
+    private final StreamConfiguration[] mDepthConfigurations;
+    private final StreamConfigurationDuration[] mDepthMinFrameDurations;
+    private final StreamConfigurationDuration[] mDepthStallDurations;
+
     private final HighSpeedVideoConfiguration[] mHighSpeedVideoConfigurations;
 
     /** ImageFormat -> num output sizes mapping */
@@ -1172,6 +1339,9 @@ public final class StreamConfigurationMap {
             new HashMap<Integer, Integer>();
     /** ImageFormat -> num input sizes mapping */
     private final HashMap</*ImageFormat*/Integer, /*Count*/Integer> mInputFormats =
+            new HashMap<Integer, Integer>();
+    /** ImageFormat -> num depth output sizes mapping */
+    private final HashMap</*ImageFormat*/Integer, /*Count*/Integer> mDepthOutputFormats =
             new HashMap<Integer, Integer>();
     /** High speed video Size -> FPS range count mapping*/
     private final HashMap</*HighSpeedVideoSize*/Size, /*Count*/Integer> mHighSpeedVideoSizeMap =

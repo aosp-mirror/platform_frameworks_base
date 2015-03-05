@@ -830,11 +830,19 @@ public class CameraMetadataNative implements Parcelable {
                 CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS);
         StreamConfigurationDuration[] stallDurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS);
+        StreamConfiguration[] depthConfigurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS);
+        StreamConfigurationDuration[] depthMinFrameDurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_MIN_FRAME_DURATIONS);
+        StreamConfigurationDuration[] depthStallDurations = getBase(
+                CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_STALL_DURATIONS);
         HighSpeedVideoConfiguration[] highSpeedVideoConfigurations = getBase(
                 CameraCharacteristics.CONTROL_AVAILABLE_HIGH_SPEED_VIDEO_CONFIGURATIONS);
 
         return new StreamConfigurationMap(
-                configurations, minFrameDurations, stallDurations, highSpeedVideoConfigurations);
+                configurations, minFrameDurations, stallDurations,
+                depthConfigurations, depthMinFrameDurations, depthStallDurations,
+                highSpeedVideoConfigurations);
     }
 
     private <T> Integer getMaxRegions(Key<T> key) {
