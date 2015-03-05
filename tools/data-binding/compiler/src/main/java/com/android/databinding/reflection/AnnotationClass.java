@@ -57,15 +57,20 @@ public class AnnotationClass implements ModelClass {
 
     @Override
     public AnnotationClass getComponentType() {
-        TypeMirror component;
+        TypeMirror component = null;
         if (isArray()) {
             component = ((ArrayType) mTypeMirror).getComponentType();
         } else if (isList()) {
-            DeclaredType listType = findInterface(getListType().mTypeMirror);
-            if (listType == null) {
-                return null;
+            for (ModelMethod method : getMethods("get", 1)) {
+                ModelClass parameter = method.getParameterTypes()[0];
+                if (parameter.isInt() || parameter.isLong()) {
+                    ArrayList<ModelClass> parameters = new ArrayList<>(1);
+                    parameters.add(parameter);
+                    return (AnnotationClass) method.getReturnType(parameters);
+                }
             }
-            component = listType.getTypeArguments().get(0);
+            // no "get" call found!
+            return null;
         } else {
             DeclaredType mapType = findInterface(getMapType().mTypeMirror);
             if (mapType == null) {
@@ -112,8 +117,14 @@ public class AnnotationClass implements ModelClass {
 
     @Override
     public boolean isList() {
-        Types typeUtil = getTypeUtils();
-        return typeUtil.isAssignable(typeUtil.erasure(mTypeMirror), getListType().mTypeMirror);
+        for (AnnotationClass listType : getListTypes()) {
+            if (listType != null) {
+                if (listType.isAssignableFrom(this)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -296,8 +307,8 @@ public class AnnotationClass implements ModelClass {
         return AnnotationAnalyzer.instance.processingEnv.getElementUtils();
     }
 
-    private static AnnotationClass getListType() {
-        return AnnotationAnalyzer.instance.getListType();
+    private static AnnotationClass[] getListTypes() {
+        return AnnotationAnalyzer.instance.getListTypes();
     }
 
     private static AnnotationClass getMapType() {

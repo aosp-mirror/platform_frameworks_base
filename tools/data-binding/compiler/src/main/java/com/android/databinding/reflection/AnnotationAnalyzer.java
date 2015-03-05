@@ -45,7 +45,15 @@ import javax.tools.Diagnostic;
 
 public class AnnotationAnalyzer extends ModelAnalyzer {
 
-    public static final String LIST_CLASS_NAME = "java.util.List";
+    public static final String[] LIST_CLASS_NAMES = {
+            "java.util.List",
+            "android.util.SparseArray",
+            "android.util.SparseBooleanArray",
+            "android.util.SparseIntArray",
+            "android.util.SparseLongArray",
+            "android.util.LongSparseArray",
+            "android.support.v4.util.LongSparseArray",
+    };
 
     public static final String MAP_CLASS_NAME = "java.util.Map";
 
@@ -83,7 +91,7 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
 
     public final ProcessingEnvironment processingEnv;
 
-    private AnnotationClass mListType;
+    private AnnotationClass[] mListTypes;
     private AnnotationClass mMapType;
     private AnnotationClass mStringType;
     private AnnotationClass mObjectType;
@@ -98,11 +106,18 @@ public class AnnotationAnalyzer extends ModelAnalyzer {
         instance = this;
     }
 
-    public AnnotationClass getListType() {
-        if (mListType == null) {
-            mListType = loadClassErasure(LIST_CLASS_NAME);
+    public AnnotationClass[] getListTypes() {
+        if (mListTypes == null) {
+            Types typeUtil = getTypeUtils();
+            mListTypes = new AnnotationClass[LIST_CLASS_NAMES.length];
+            for (int i = 0; i < mListTypes.length; i++) {
+                TypeElement typeElement = findType(LIST_CLASS_NAMES[i]);
+                if (typeElement != null) {
+                    mListTypes[i] = new AnnotationClass(typeUtil.erasure(typeElement.asType()));
+                }
+            }
         }
-        return mListType;
+        return mListTypes;
     }
 
     public AnnotationClass getMapType() {

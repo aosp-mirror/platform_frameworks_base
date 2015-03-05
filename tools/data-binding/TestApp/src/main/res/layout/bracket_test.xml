@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:orientation="vertical"
+        >
+    <variable name="array" type="String[]"/>
+    <variable name="sparseArray" type="android.util.SparseArray&lt;String>"/>
+    <variable name="sparseBooleanArray" type="android.util.SparseBooleanArray"/>
+    <variable name="sparseIntArray" type="android.util.SparseIntArray"/>
+    <variable name="sparseLongArray" type="android.util.SparseLongArray"/>
+    <variable name="longSparseArray" type="android.util.LongSparseArray&lt;String>"/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/arrayText"
+              android:text="@{array[0]}"/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/sparseArrayText"
+              android:text='@{sparseArray[0]}'/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/sparseBooleanArrayText"
+              android:text='@{"" + sparseBooleanArray[0]}'/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/sparseIntArrayText"
+              android:text='@{"" + sparseIntArray[0]}'/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/sparseLongArrayText"
+              android:text='@{"" + sparseLongArray[0]}'/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:id="@+id/longSparseArrayText"
+              android:text='@{longSparseArray[0]}'/>
+
+</LinearLayout>

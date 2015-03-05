@@ -52,7 +52,8 @@ object XmlEditor {
             }
             val isTag = ctx.attrName.getText().equals("android:tag")
             if (isTag || ctx.attrName.getText().startsWith("bind:") ||
-                    (ctx.attrValue.getText().startsWith("\"@{") && ctx.attrValue.getText().endsWith("}\""))) {
+                    (ctx.attrValue.getText().startsWith("\"@{") && ctx.attrValue.getText().endsWith("}\"")) ||
+                    (ctx.attrValue.getText().startsWith("'@{") && ctx.attrValue.getText().endsWith("}'"))) {
                 return arrayListOf(LayoutXmlElements(ctx.getStart().toPosition(),
                     ctx.getStop().toEndPosition(), ctx.getStart().toPosition(), isTag, false, null))
             }
