@@ -1,5 +1,5 @@
 page.title=Managing Device Awake State
-page.tags=
+page.tags=wakelock, AlarmManager, WakefulBroadcastReceiver
 
 trainingnavtop=true
 startpage=true
