@@ -24,7 +24,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>SDK Tools, Revision 24.1.2</a> <em>(February 2014)</em>
+      alt=""/>SDK Tools, Revision 24.1.2</a> <em>(February 2015)</em>
   </p>
 
   <div class="toggle-content-toggleme">
