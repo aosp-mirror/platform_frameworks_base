@@ -20,6 +20,7 @@ import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.DEBUG_FOCUS;
@@ -116,7 +117,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ActivityStackSupervisor implements DisplayListener {
-    static final boolean DEBUG = ActivityManagerService.DEBUG || false;
+    static final boolean DEBUG = DEBUG_ALL || false;
     static final boolean DEBUG_ADD_REMOVE = DEBUG || false;
     static final boolean DEBUG_APP = DEBUG || false;
     static final boolean DEBUG_CONTAINERS = DEBUG || false;

@@ -30,6 +30,7 @@ import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.Manifest;
@@ -245,10 +246,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     // File that stores last updated system version and called preboot receivers
     static final String CALLED_PRE_BOOTS_FILENAME = "called_pre_boots.dat";
 
-    static final String TAG = "ActivityManager";
-    static final String TAG_MU = "ActivityManagerServiceMU";
-    static final boolean DEBUG = false;
-    static final boolean localLOGV = DEBUG;
+    static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
+    private static final String TAG_MU = TAG + POSTFIX_MU;
+
+    // TODO(ogunwale): Migrate all the constants below to use ActivityManagerDebugConfig class.
+    static final boolean localLOGV = DEBUG_ALL || false;
     static final boolean DEBUG_BACKUP = localLOGV || false;
     static final boolean DEBUG_BROADCAST = localLOGV || false;
     static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;

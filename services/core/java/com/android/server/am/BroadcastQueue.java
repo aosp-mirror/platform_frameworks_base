@@ -41,6 +41,8 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.Slog;
 
+import static com.android.server.am.ActivityManagerDebugConfig.*;
+
 /**
  * BROADCASTS
  *
@@ -48,11 +50,9 @@ import android.util.Slog;
  * foreground priority, and one for normal (background-priority) broadcasts.
  */
 public final class BroadcastQueue {
-    static final String TAG = "BroadcastQueue";
-    static final String TAG_MU = ActivityManagerService.TAG_MU;
-    static final boolean DEBUG_BROADCAST = ActivityManagerService.DEBUG_BROADCAST;
-    static final boolean DEBUG_BROADCAST_LIGHT = ActivityManagerService.DEBUG_BROADCAST_LIGHT;
-    static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BroadcastQueue" : TAG_AM;
+    private static final String TAG_MU = TAG + POSTFIX_MU;
+    private static final String TAG_BROADCAST = TAG + POSTFIX_BROADCAST;
 
     static final int MAX_BROADCAST_HISTORY = ActivityManager.isLowRamDeviceStatic() ? 10 : 50;
     static final int MAX_BROADCAST_SUMMARY_HISTORY
@@ -143,7 +143,7 @@ public final class BroadcastQueue {
             switch (msg.what) {
                 case BROADCAST_INTENT_MSG: {
                     if (DEBUG_BROADCAST) Slog.v(
-                            TAG, "Received BROADCAST_INTENT_MSG");
+                            TAG_BROADCAST, "Received BROADCAST_INTENT_MSG");
                     processNextBroadcast(true);
                 } break;
                 case BROADCAST_TIMEOUT_MSG: {
@@ -196,7 +196,7 @@ public final class BroadcastQueue {
     public final boolean replaceParallelBroadcastLocked(BroadcastRecord r) {
         for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
             if (r.intent.filterEquals(mParallelBroadcasts.get(i).intent)) {
-                if (DEBUG_BROADCAST) Slog.v(TAG,
+                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "***** DROPPING PARALLEL ["
                 + mQueueName + "]: " + r.intent);
                 mParallelBroadcasts.set(i, r);
@@ -209,7 +209,7 @@ public final class BroadcastQueue {
     public final boolean replaceOrderedBroadcastLocked(BroadcastRecord r) {
         for (int i=mOrderedBroadcasts.size()-1; i>0; i--) {
             if (r.intent.filterEquals(mOrderedBroadcasts.get(i).intent)) {
-                if (DEBUG_BROADCAST) Slog.v(TAG,
+                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "***** DROPPING ORDERED ["
                         + mQueueName + "]: " + r.intent);
                 mOrderedBroadcasts.set(i, r);
@@ -221,7 +221,7 @@ public final class BroadcastQueue {
 
     private final void processCurBroadcastLocked(BroadcastRecord r,
             ProcessRecord app) throws RemoteException {
-        if (DEBUG_BROADCAST)  Slog.v(TAG,
+        if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                 "Process cur broadcast " + r + " for app " + app);
         if (app.thread == null) {
             throw new RemoteException();
@@ -238,7 +238,7 @@ public final class BroadcastQueue {
 
         boolean started = false;
         try {
-            if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG,
+            if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
                     "Delivering to component " + r.curComponent
                     + ": " + r);
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
@@ -246,12 +246,12 @@ public final class BroadcastQueue {
                     mService.compatibilityInfoForPackageLocked(r.curReceiver.applicationInfo),
                     r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
                     app.repProcState);
-            if (DEBUG_BROADCAST)  Slog.v(TAG,
+            if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
         } finally {
             if (!started) {
-                if (DEBUG_BROADCAST)  Slog.v(TAG,
+                if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Process cur broadcast " + r + ": NOT STARTED!");
                 r.receiver = null;
                 r.curApp = null;
@@ -308,7 +308,7 @@ public final class BroadcastQueue {
 
         r = mPendingBroadcast;
         if (r != null && r.curApp == app) {
-            if (DEBUG_BROADCAST) Slog.v(TAG,
+            if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                     "[" + mQueueName + "] skip & discard pending app " + r);
             logBroadcastReceiverDiscardLocked(r);
             finishReceiverLocked(r, r.resultCode, r.resultData,
@@ -321,7 +321,7 @@ public final class BroadcastQueue {
     }
 
     public void scheduleBroadcastsLocked() {
-        if (DEBUG_BROADCAST) Slog.v(TAG, "Schedule broadcasts ["
+        if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Schedule broadcasts ["
                 + mQueueName + "]: current="
                 + mBroadcastsScheduled);
 
@@ -391,8 +391,7 @@ public final class BroadcastQueue {
                 // on.  If there are background services currently starting, then we will go into a
                 // special state where we hold off on continuing this broadcast until they are done.
                 if (mService.mServices.hasBackgroundServices(r.userId)) {
-                    Slog.i(ActivityManagerService.TAG, "Delay finish: "
-                            + r.curComponent.flattenToShortString());
+                    Slog.i(TAG, "Delay finish: " + r.curComponent.flattenToShortString());
                     r.state = BroadcastRecord.WAITING_SERVICES;
                     return false;
                 }
@@ -412,7 +411,7 @@ public final class BroadcastQueue {
         if (mOrderedBroadcasts.size() > 0) {
             BroadcastRecord br = mOrderedBroadcasts.get(0);
             if (br.userId == userId && br.state == BroadcastRecord.WAITING_SERVICES) {
-                Slog.i(ActivityManagerService.TAG, "Resuming delayed broadcast");
+                Slog.i(TAG, "Resuming delayed broadcast");
                 br.curComponent = null;
                 br.state = BroadcastRecord.IDLE;
                 processNextBroadcast(false);
@@ -475,7 +474,7 @@ public final class BroadcastQueue {
             int mode = mService.mAppOpsService.noteOperation(r.appOp,
                     filter.receiverList.uid, filter.packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
-                if (DEBUG_BROADCAST)  Slog.v(TAG,
+                if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "App op " + r.appOp + " not allowed for broadcast to uid "
                         + filter.receiverList.uid + " pkg " + filter.packageName);
                 skip = true;
@@ -513,7 +512,7 @@ public final class BroadcastQueue {
                 }
             }
             try {
-                if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG, "Delivering to " + filter + " : " + r);
+                if (DEBUG_BROADCAST_LIGHT) Slog.i(TAG_BROADCAST, "Delivering to " + filter + " : " + r);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                     new Intent(r.intent), r.resultCode, r.resultData,
                     r.resultExtras, r.ordered, r.initialSticky, r.userId);
@@ -538,7 +537,7 @@ public final class BroadcastQueue {
         synchronized(mService) {
             BroadcastRecord r;
 
-            if (DEBUG_BROADCAST) Slog.v(TAG, "processNextBroadcast ["
+            if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "processNextBroadcast ["
                     + mQueueName + "]: "
                     + mParallelBroadcasts.size() + " broadcasts, "
                     + mOrderedBroadcasts.size() + " ordered broadcasts");
@@ -555,17 +554,17 @@ public final class BroadcastQueue {
                 r.dispatchTime = SystemClock.uptimeMillis();
                 r.dispatchClockTime = System.currentTimeMillis();
                 final int N = r.receivers.size();
-                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Processing parallel broadcast ["
+                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Processing parallel broadcast ["
                         + mQueueName + "] " + r);
                 for (int i=0; i<N; i++) {
                     Object target = r.receivers.get(i);
-                    if (DEBUG_BROADCAST)  Slog.v(TAG,
+                    if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                             "Delivering non-ordered on [" + mQueueName + "] to registered "
                             + target + ": " + r);
                     deliverToRegisteredReceiverLocked(r, (BroadcastFilter)target, false);
                 }
                 addBroadcastToHistoryLocked(r);
-                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Done with parallel broadcast ["
+                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Done with parallel broadcast ["
                         + mQueueName + "] " + r);
             }
 
@@ -576,7 +575,7 @@ public final class BroadcastQueue {
             // check that the process we're waiting for still exists.
             if (mPendingBroadcast != null) {
                 if (DEBUG_BROADCAST_LIGHT) {
-                    Slog.v(TAG, "processNextBroadcast ["
+                    Slog.v(TAG_BROADCAST, "processNextBroadcast ["
                             + mQueueName + "]: waiting for "
                             + mPendingBroadcast.curApp);
                 }
@@ -645,7 +644,7 @@ public final class BroadcastQueue {
                 }
 
                 if (r.state != BroadcastRecord.IDLE) {
-                    if (DEBUG_BROADCAST) Slog.d(TAG,
+                    if (DEBUG_BROADCAST) Slog.d(TAG_BROADCAST,
                             "processNextBroadcast("
                             + mQueueName + ") called when not idle (state="
                             + r.state + ")");
@@ -658,7 +657,7 @@ public final class BroadcastQueue {
                     // result if requested...
                     if (r.resultTo != null) {
                         try {
-                            if (DEBUG_BROADCAST) Slog.i(TAG,
+                            if (DEBUG_BROADCAST) Slog.i(TAG_BROADCAST,
                                     "Finishing broadcast [" + mQueueName + "] "
                                     + r.intent.getAction() + " app=" + r.callerApp);
                             performReceiveLocked(r.callerApp, r.resultTo,
@@ -675,10 +674,10 @@ public final class BroadcastQueue {
                         }
                     }
 
-                    if (DEBUG_BROADCAST) Slog.v(TAG, "Cancelling BROADCAST_TIMEOUT_MSG");
+                    if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Cancelling BROADCAST_TIMEOUT_MSG");
                     cancelBroadcastTimeoutLocked();
 
-                    if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Finished with ordered broadcast "
+                    if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Finished with ordered broadcast "
                             + r);
 
                     // ... and on to the next...
@@ -699,12 +698,12 @@ public final class BroadcastQueue {
             if (recIdx == 0) {
                 r.dispatchTime = r.receiverTime;
                 r.dispatchClockTime = System.currentTimeMillis();
-                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Processing ordered broadcast ["
+                if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST, "Processing ordered broadcast ["
                         + mQueueName + "] " + r);
             }
             if (! mPendingBroadcastTimeoutMessage) {
                 long timeoutTime = r.receiverTime + mTimeoutPeriod;
-                if (DEBUG_BROADCAST) Slog.v(TAG,
+                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "Submitting BROADCAST_TIMEOUT_MSG ["
                         + mQueueName + "] for " + r + " at " + timeoutTime);
                 setBroadcastTimeoutLocked(timeoutTime);
@@ -715,7 +714,7 @@ public final class BroadcastQueue {
                 // Simple case: this is a registered receiver who gets
                 // a direct call.
                 BroadcastFilter filter = (BroadcastFilter)nextReceiver;
-                if (DEBUG_BROADCAST)  Slog.v(TAG,
+                if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Delivering ordered ["
                         + mQueueName + "] to registered "
                         + filter + ": " + r);
@@ -723,7 +722,7 @@ public final class BroadcastQueue {
                 if (r.receiver == null || !r.ordered) {
                     // The receiver has already finished, so schedule to
                     // process the next one.
-                    if (DEBUG_BROADCAST) Slog.v(TAG, "Quick finishing ["
+                    if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Quick finishing ["
                             + mQueueName + "]: ordered="
                             + r.ordered + " receiver=" + r.receiver);
                     r.state = BroadcastRecord.IDLE;
@@ -786,7 +785,7 @@ public final class BroadcastQueue {
                 int mode = mService.mAppOpsService.noteOperation(r.appOp,
                         info.activityInfo.applicationInfo.uid, info.activityInfo.packageName);
                 if (mode != AppOpsManager.MODE_ALLOWED) {
-                    if (DEBUG_BROADCAST)  Slog.v(TAG,
+                    if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                             "App op " + r.appOp + " not allowed for broadcast to uid "
                             + info.activityInfo.applicationInfo.uid + " pkg "
                             + info.activityInfo.packageName);
@@ -836,7 +835,7 @@ public final class BroadcastQueue {
                 }
                 if (!isAvailable) {
                     if (DEBUG_BROADCAST) {
-                        Slog.v(TAG, "Skipping delivery to " + info.activityInfo.packageName
+                        Slog.v(TAG_BROADCAST, "Skipping delivery to " + info.activityInfo.packageName
                                 + " / " + info.activityInfo.applicationInfo.uid
                                 + " : package no longer available");
                     }
@@ -845,7 +844,7 @@ public final class BroadcastQueue {
             }
 
             if (skip) {
-                if (DEBUG_BROADCAST)  Slog.v(TAG,
+                if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                         "Skipping delivery of ordered ["
                         + mQueueName + "] " + r + " for whatever reason");
                 r.receiver = null;
@@ -915,7 +914,7 @@ public final class BroadcastQueue {
             }
 
             // Not running -- get it started, to be executed when the app comes up.
-            if (DEBUG_BROADCAST)  Slog.v(TAG,
+            if (DEBUG_BROADCAST)  Slog.v(TAG_BROADCAST,
                     "Need to start app ["
                     + mQueueName + "] " + targetProcess + " for broadcast " + r);
             if ((r.curApp=mService.startProcessLocked(targetProcess,
@@ -990,7 +989,7 @@ public final class BroadcastQueue {
                 // broadcast timeout message after each receiver finishes.  Instead, we set up
                 // an initial timeout then kick it down the road a little further as needed
                 // when it expires.
-                if (DEBUG_BROADCAST) Slog.v(TAG,
+                if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST,
                         "Premature timeout ["
                         + mQueueName + "] @ " + now + ": resetting BROADCAST_TIMEOUT_MSG for "
                         + timeoutTime);
@@ -1005,7 +1004,7 @@ public final class BroadcastQueue {
             // for started services to finish as well before going on.  So if we have actually
             // waited long enough time timeout the broadcast, let's give up on the whole thing
             // and just move on to the next.
-            Slog.i(ActivityManagerService.TAG, "Waited long enough for: " + (br.curComponent != null
+            Slog.i(TAG, "Waited long enough for: " + (br.curComponent != null
                     ? br.curComponent.flattenToShortString() : "(null)"));
             br.curComponent = null;
             br.state = BroadcastRecord.IDLE;
