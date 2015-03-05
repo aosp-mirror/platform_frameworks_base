@@ -400,6 +400,18 @@ public class UserManager {
     public static final String DISALLOW_WALLPAPER = "no_wallpaper";
 
     /**
+     * Specifies if the user is not allowed to reboot the device into safe boot mode.
+     * This can only be set by device owners and profile owners on the primary user.
+     * The default value is <code>false</code>.
+     *
+     * <p/>Key for user restrictions.
+     * <p/>Type: Boolean
+     * @see #setUserRestrictions(Bundle)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SAFE_BOOT = "no_safe_boot";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *

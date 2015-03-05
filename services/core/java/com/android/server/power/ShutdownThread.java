@@ -39,6 +39,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.Vibrator;
 import android.os.SystemVibrator;
 import android.os.storage.IMountService;
@@ -202,6 +203,11 @@ public final class ShutdownThread extends Thread {
      * @param confirm true if user confirmation is needed before shutting down.
      */
     public static void rebootSafeMode(final Context context, boolean confirm) {
+        UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        if (um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
+            return;
+        }
+
         mReboot = true;
         mRebootSafeMode = true;
         mRebootReason = null;
