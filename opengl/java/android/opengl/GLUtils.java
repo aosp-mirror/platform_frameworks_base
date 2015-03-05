@@ -29,6 +29,14 @@ import javax.microedition.khronos.egl.EGL11;
 
 public final class GLUtils {
 
+    /*
+     * We use a class initializer to allow the native code to cache some
+     * field offsets.
+     */
+    static {
+        nativeClassInit();
+    }
+
     private GLUtils() {
     }
 
@@ -266,6 +274,8 @@ public final class GLUtils {
      * @hide
      */
     native public static void setTracingLevel(int level);
+
+    native private static void nativeClassInit();
 
     native private static int native_getInternalFormat(Bitmap bitmap);
     native private static int native_getType(Bitmap bitmap);

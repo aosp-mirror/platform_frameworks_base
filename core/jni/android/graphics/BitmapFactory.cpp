@@ -41,6 +41,7 @@ jfieldID gOptions_mimeFieldID;
 jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
 
+jfieldID gBitmap_nativeBitmapFieldID;
 jfieldID gBitmap_ninePatchInsetsFieldID;
 
 jclass gInsetStruct_class;
@@ -261,7 +262,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkBitmap* outputBitmap = NULL;
     unsigned int existingBufferSize = 0;
     if (javaBitmap != NULL) {
-        outputBitmap = GraphicsJNI::getSkBitmap(env, javaBitmap);
+        outputBitmap = (SkBitmap*) env->GetLongField(javaBitmap, gBitmap_nativeBitmapFieldID);
         if (outputBitmap->isImmutable()) {
             ALOGW("Unable to reuse an immutable bitmap as an image decoder target.");
             javaBitmap = NULL;
@@ -600,6 +601,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_mCancelID = GetFieldIDOrDie(env, options_class, "mCancel", "Z");
 
     jclass bitmap_class = FindClassOrDie(env, "android/graphics/Bitmap");
+    gBitmap_nativeBitmapFieldID = GetFieldIDOrDie(env, bitmap_class, "mNativeBitmap", "J");
     gBitmap_ninePatchInsetsFieldID = GetFieldIDOrDie(env, bitmap_class, "mNinePatchInsets",
             "Landroid/graphics/NinePatch$InsetStruct;");
 
