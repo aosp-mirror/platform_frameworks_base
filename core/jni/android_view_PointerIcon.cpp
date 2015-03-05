@@ -80,7 +80,7 @@ status_t android_view_PointerIcon_load(JNIEnv* env, jobject pointerIconObj, jobj
 
     jobject bitmapObj = env->GetObjectField(loadedPointerIconObj, gPointerIconClassInfo.mBitmap);
     if (bitmapObj) {
-        SkBitmap* bitmap = GraphicsJNI::getSkBitmap(env, bitmapObj);
+        SkBitmap* bitmap = GraphicsJNI::getNativeBitmap(env, bitmapObj);
         if (bitmap) {
             outPointerIcon->bitmap = *bitmap; // use a shared pixel ref
         }

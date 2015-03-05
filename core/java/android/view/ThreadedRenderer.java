@@ -364,7 +364,7 @@ public class ThreadedRenderer extends HardwareRenderer {
     @Override
     boolean copyLayerInto(final HardwareLayer layer, final Bitmap bitmap) {
         return nCopyLayerInto(mNativeProxy,
-                layer.getDeferredLayerUpdater(), bitmap.getSkBitmap());
+                layer.getDeferredLayerUpdater(), bitmap.mNativeBitmap);
     }
 
     @Override
@@ -465,7 +465,7 @@ public class ThreadedRenderer extends HardwareRenderer {
             for (int i = 0; i < count; i++) {
                 drawables.valueAt(i).addAtlasableBitmaps(tmpList);
                 for (int j = 0; j < tmpList.size(); j++) {
-                    preloadedPointers.add(tmpList.get(j).getSkBitmap());
+                    preloadedPointers.add(tmpList.get(j).mNativeBitmap);
                 }
                 tmpList.clear();
             }

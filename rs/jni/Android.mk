@@ -14,8 +14,7 @@ LOCAL_SHARED_LIBRARIES := \
     libskia \
     libutils \
     libui \
-    libgui \
-    libjnigraphics
+    libgui
 
 LOCAL_STATIC_LIBRARIES :=
 
@@ -24,7 +23,6 @@ rs_generated_include_dir := $(call intermediates-dir-for,SHARED_LIBRARIES,libRS,
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/rs \
-    frameworks/base/core/jni \
     $(rs_generated_include_dir)
 
 LOCAL_CFLAGS += -Wno-unused-parameter -std=c++11
