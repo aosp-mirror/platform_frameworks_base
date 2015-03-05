@@ -22,6 +22,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
@@ -130,6 +131,20 @@ public abstract class WindowOrientationListener {
                 mSensorManager.unregisterListener(mSensorEventListener);
                 mEnabled = false;
             }
+        }
+    }
+
+    public void onTouchStart() {
+        synchronized (mLock) {
+            mSensorEventListener.onTouchStartLocked();
+        }
+    }
+
+    public void onTouchEnd() {
+        long whenElapsedNanos = SystemClock.elapsedRealtimeNanos();
+
+        synchronized (mLock) {
+            mSensorEventListener.onTouchEndLocked(whenElapsedNanos);
         }
     }
 
@@ -269,6 +284,11 @@ public abstract class WindowOrientationListener {
         private static final long PROPOSAL_MIN_TIME_SINCE_ACCELERATION_ENDED_NANOS =
                 500 * NANOS_PER_MS;
 
+        // The minimum amount of time that must have elapsed since the screen was last touched
+        // before the proposed rotation can change.
+        private static final long PROPOSAL_MIN_TIME_SINCE_TOUCH_END_NANOS =
+                500 * NANOS_PER_MS;
+
         // If the tilt angle remains greater than the specified angle for a minimum of
         // the specified time, then the device is deemed to be lying flat
         // (just chillin' on a table).
@@ -398,6 +418,10 @@ public abstract class WindowOrientationListener {
         private long mAccelerationTimestampNanos;
         private boolean mAccelerating;
 
+        // Timestamp when the last touch to the touch screen ended
+        private long mTouchEndedTimestampNanos = Long.MIN_VALUE;
+        private boolean mTouched;
+
         // Whether we are locked into an overhead usage mode.
         private boolean mOverhead;
 
@@ -422,6 +446,7 @@ public abstract class WindowOrientationListener {
             pw.println(prefix + "mSwinging=" + mSwinging);
             pw.println(prefix + "mAccelerating=" + mAccelerating);
             pw.println(prefix + "mOverhead=" + mOverhead);
+            pw.println(prefix + "mTouched=" + mTouched);
         }
 
         @Override
@@ -601,6 +626,7 @@ public abstract class WindowOrientationListener {
                             + ", isFlat=" + isFlat
                             + ", isSwinging=" + isSwinging
                             + ", isOverhead=" + mOverhead
+                            + ", isTouched=" + mTouched
                             + ", timeUntilSettledMS=" + remainingMS(now,
                                     mPredictedRotationTimestampNanos + PROPOSAL_SETTLE_TIME_NANOS)
                             + ", timeUntilAccelerationDelayExpiredMS=" + remainingMS(now,
@@ -608,7 +634,9 @@ public abstract class WindowOrientationListener {
                             + ", timeUntilFlatDelayExpiredMS=" + remainingMS(now,
                                     mFlatTimestampNanos + PROPOSAL_MIN_TIME_SINCE_FLAT_ENDED_NANOS)
                             + ", timeUntilSwingDelayExpiredMS=" + remainingMS(now,
-                                    mSwingTimestampNanos + PROPOSAL_MIN_TIME_SINCE_SWING_ENDED_NANOS));
+                                    mSwingTimestampNanos + PROPOSAL_MIN_TIME_SINCE_SWING_ENDED_NANOS)
+                            + ", timeUntilTouchDelayExpiredMS=" + remainingMS(now,
+                                    mTouchEndedTimestampNanos + PROPOSAL_MIN_TIME_SINCE_TOUCH_END_NANOS));
                 }
             }
 
@@ -710,6 +738,12 @@ public abstract class WindowOrientationListener {
                 return false;
             }
 
+            // The last touch must have ended sufficiently long ago.
+            if (mTouched || now < mTouchEndedTimestampNanos
+                    + PROPOSAL_MIN_TIME_SINCE_TOUCH_END_NANOS) {
+                return false;
+            }
+
             // Looks good!
             return true;
         }
@@ -795,6 +829,15 @@ public abstract class WindowOrientationListener {
 
         private float remainingMS(long now, long until) {
             return now >= until ? 0 : (until - now) * 0.000001f;
+        }
+
+        private void onTouchStartLocked() {
+            mTouched = true;
+        }
+
+        private void onTouchEndLocked(long whenElapsedNanos) {
+            mTouched = false;
+            mTouchEndedTimestampNanos = whenElapsedNanos;
         }
     }
 }

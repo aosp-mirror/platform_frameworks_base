@@ -1327,6 +1327,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     public void onDebug() {
                         // no-op
                     }
+                    @Override
+                    public void onDown() {
+                        mOrientationListener.onTouchStart();
+                    }
+                    @Override
+                    public void onUpOrCancel() {
+                        mOrientationListener.onTouchEnd();
+                    }
                 });
         mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext);
         mWindowManagerFuncs.registerPointerEventListener(mSystemGestures);
