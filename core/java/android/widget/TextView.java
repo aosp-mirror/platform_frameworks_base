@@ -8098,7 +8098,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
 
-        if (mEditor != null) mEditor.onTouchEvent(event);
+        if (mEditor != null) {
+            mEditor.onTouchEvent(event);
+
+            if (mEditor.mSelectionModifierCursorController != null &&
+                    mEditor.mSelectionModifierCursorController.isDragAcceleratorActive()) {
+                return true;
+            }
+        }
 
         final boolean superResult = super.onTouchEvent(event);
 
@@ -9104,7 +9111,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getLayout().getLineForVertical((int) y);
     }
 
-    private int getOffsetAtCoordinate(int line, float x) {
+    int getOffsetAtCoordinate(int line, float x) {
         x = convertToLocalHorizontalCoordinate(x);
         return getLayout().getOffsetForHorizontal(line, x);
     }
