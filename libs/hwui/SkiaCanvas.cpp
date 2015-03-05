@@ -22,7 +22,6 @@
 #include <SkDeque.h>
 #include <SkDrawFilter.h>
 #include <SkGraphics.h>
-#include <SkPorterDuff.h>
 #include <SkShader.h>
 #include <SkTArray.h>
 #include <SkTemplates.h>
