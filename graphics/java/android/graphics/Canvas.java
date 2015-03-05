@@ -154,7 +154,7 @@ public class Canvas {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
         throwIfCannotDraw(bitmap);
-        mNativeCanvasWrapper = initRaster(bitmap.ni());
+        mNativeCanvasWrapper = initRaster(bitmap.getSkBitmap());
         mFinalizer = new CanvasFinalizer(mNativeCanvasWrapper);
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
@@ -219,7 +219,7 @@ public class Canvas {
             }
             throwIfCannotDraw(bitmap);
 
-            native_setBitmap(mNativeCanvasWrapper, bitmap.ni(), true);
+            native_setBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), true);
             mDensity = bitmap.mDensity;
         }
 
@@ -1339,7 +1339,7 @@ public class Canvas {
      */
     public void drawBitmap(@NonNull Bitmap bitmap, float left, float top, @Nullable Paint paint) {
         throwIfCannotDraw(bitmap);
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), left, top,
                 paint != null ? paint.getNativeInstance() : 0, mDensity, mScreenDensity, bitmap.mDensity);
     }
 
@@ -1385,7 +1385,7 @@ public class Canvas {
           bottom = src.bottom;
       }
 
-      native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top, right, bottom,
+      native_drawBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), left, top, right, bottom,
               dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
               bitmap.mDensity);
   }
@@ -1432,7 +1432,7 @@ public class Canvas {
             bottom = src.bottom;
         }
 
-        native_drawBitmap(mNativeCanvasWrapper, bitmap.ni(), left, top, right, bottom,
+        native_drawBitmap(mNativeCanvasWrapper, bitmap.getSkBitmap(), left, top, right, bottom,
             dst.left, dst.top, dst.right, dst.bottom, nativePaint, mScreenDensity,
             bitmap.mDensity);
     }
@@ -1513,7 +1513,7 @@ public class Canvas {
      * @param paint  May be null. The paint used to draw the bitmap
      */
     public void drawBitmap(@NonNull Bitmap bitmap, @NonNull Matrix matrix, @Nullable Paint paint) {
-        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.ni(), matrix.ni(),
+        nativeDrawBitmapMatrix(mNativeCanvasWrapper, bitmap.getSkBitmap(), matrix.ni(),
                 paint != null ? paint.getNativeInstance() : 0);
     }
 
@@ -1568,7 +1568,7 @@ public class Canvas {
             // no mul by 2, since we need only 1 color per vertex
             checkRange(colors.length, colorOffset, count);
         }
-        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap.ni(), meshWidth, meshHeight,
+        nativeDrawBitmapMesh(mNativeCanvasWrapper, bitmap.getSkBitmap(), meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset,
                 paint != null ? paint.getNativeInstance() : 0);
     }

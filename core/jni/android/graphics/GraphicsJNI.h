@@ -48,7 +48,7 @@ public:
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
 
     static SkCanvas* getNativeCanvas(JNIEnv*, jobject canvas);
-    static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
+    static SkBitmap* getSkBitmap(JNIEnv*, jobject bitmap);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
 
     // Given the 'native' long held by the Rasterizer.java object, return a

@@ -30,6 +30,7 @@
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
 
+#include <GraphicsJNI.h>
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
 
@@ -46,7 +47,6 @@ static jfieldID gContext_EGLContextFieldID;
 static jfieldID gSurface_EGLSurfaceFieldID;
 static jfieldID gSurface_NativePixelRefFieldID;
 static jfieldID gConfig_EGLConfigFieldID;
-static jfieldID gBitmap_NativeBitmapFieldID;
 
 static inline EGLDisplay getDisplay(JNIEnv* env, jobject o) {
     if (!o) return EGL_NO_DISPLAY;
@@ -85,9 +85,6 @@ static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
     jclass surface_class = _env->FindClass("com/google/android/gles_jni/EGLSurfaceImpl");
     gSurface_EGLSurfaceFieldID = _env->GetFieldID(surface_class, "mEGLSurface", "J");
     gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "J");
-
-    jclass bitmap_class = _env->FindClass("android/graphics/Bitmap");
-    gBitmap_NativeBitmapFieldID = _env->GetFieldID(bitmap_class, "mNativeBitmap", "J");
 }
 
 static const jint gNull_attrib_base[] = {EGL_NONE};
@@ -280,9 +277,7 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
     EGLConfig  cnf = getConfig(_env, config);
     jint* base = 0;
 
-    SkBitmap const * nativeBitmap =
-            (SkBitmap const *)_env->GetLongField(native_pixmap,
-                    gBitmap_NativeBitmapFieldID);
+    SkBitmap const * nativeBitmap = GraphicsJNI::getSkBitmap(_env, native_pixmap);
     SkPixelRef* ref = nativeBitmap ? nativeBitmap->pixelRef() : 0;
     if (ref == NULL) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", "Bitmap has no PixelRef");

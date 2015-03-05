@@ -213,7 +213,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
 
     if (tileBitmap != NULL) {
         // Re-use bitmap.
-        bitmap = GraphicsJNI::getNativeBitmap(env, tileBitmap);
+        bitmap = GraphicsJNI::getSkBitmap(env, tileBitmap);
     }
     if (bitmap == NULL) {
         bitmap = new SkBitmap;
