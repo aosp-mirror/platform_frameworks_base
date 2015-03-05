@@ -3616,6 +3616,19 @@ public class AudioService extends IAudioService.Stub {
                 final int index = (mIndexMap.valueAt(i) + 5) / 10;
                 pw.print(index);
             }
+            pw.println();
+            pw.print("   Devices: ");
+            final int devices = AudioSystem.getDevicesForStream(mStreamType);
+            int device, i = 0, n = 0;
+            while ((device = 1 << i) <= AudioSystem.DEVICE_OUT_DEFAULT) {
+                if ((devices & device) != 0) {
+                    if (n++ > 0) {
+                        pw.print(", ");
+                    }
+                    pw.print(AudioSystem.getOutputDeviceName(device));
+                }
+                i++;
+            }
         }
     }
 
